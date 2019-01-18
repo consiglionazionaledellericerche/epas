@@ -16,8 +16,8 @@ public class OurImplicitNamingStrategy extends ImplicitNamingStrategyJpaComplian
 
   @Override
   public Identifier determineJoinTableName(ImplicitJoinTableNameSource source) {
-       String name = source.getOwningPhysicalTableName() + "_"
-               + source.getAssociationOwningAttributePath().getProperty();
-       return toIdentifier(name, source.getBuildingContext());
+    String name = source.getOwningPhysicalTableName() + "_"
+        + source.getAssociationOwningAttributePath().getProperty();
+    return toIdentifier(name, source.getBuildingContext());
   }
 }

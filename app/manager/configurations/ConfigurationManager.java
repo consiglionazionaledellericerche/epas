@@ -637,6 +637,18 @@ public class ConfigurationManager {
       }
     }
   }
+  
+  /**
+   * Aggiorna le configurazione di tutti gli uffici con tutti gli 
+   * eventuali nuovi parametri.
+   */
+  public void updateAllOfficesConfigurations() {
+    List<Office> offices = Office.findAll();
+    for (Office office : offices) {
+      log.debug("Fix parametri di configurazione della sede {}", office);
+      updateConfigurations(office);
+    }
+  }
 
   /**
    * Converte il formato stringa in formato oggetto per l'epasParam.

@@ -116,7 +116,7 @@ public class AbsenceService {
     }
     
     AbsenceForm form = buildAbsenceForm(person, date, null, null, null, 
-        groupAbsenceType, true, null, null, null, null, true);
+        groupAbsenceType, true, null, null, null, null, true, false);
     
     return form;
   }
@@ -141,7 +141,7 @@ public class AbsenceService {
       Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
       LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,  
       boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,         //reconf 
-      Integer hours, Integer minutes, boolean readOnly) {
+      Integer hours, Integer minutes, boolean readOnly, boolean fromWorkFlow) {
     
     //clean entities
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -158,7 +158,17 @@ public class AbsenceService {
       categoryTab = null;
     }
     
-    List<GroupAbsenceType> groupsPermitted = groupsPermitted(person, readOnly);
+    // TODO: in base al parametro passato al metodo verifico come popolare la lista dei 
+    // groupsPermitted
+    List<GroupAbsenceType> groupsPermitted = Lists.newArrayList();
+    if (fromWorkFlow) {
+      //provengo dal flusso di approvazione ferie/permessi
+      groupsPermitted = groupsPermittedFlow();
+    } else {
+      //iter normale di inserimento assenze
+      groupsPermitted = groupsPermitted(person, readOnly);
+    }
+    
     
     if (groupAbsenceType != null) {
       Verify.verify(groupsPermitted.contains(groupAbsenceType));
@@ -467,12 +477,27 @@ public class AbsenceService {
   }
   
   /**
+   * 
+   * @return la lista dei gruppi di assenza abilitati per il flusso di approvazione.
+   */
+  public List<GroupAbsenceType> groupsPermittedFlow() {
+    List<GroupAbsenceType> groupsPermitted = Lists.newArrayList();
+    final GroupAbsenceType vacation = 
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    final GroupAbsenceType compensatory = 
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
+    groupsPermitted.add(vacation);
+    groupsPermitted.add(compensatory);
+    return groupsPermitted;
+  }
+  
+  /**
    * I gruppi su cui l'utente collegato ha i diritti per la persona passata. 
    * A seconda che la richista avvenga in lettura.
    * o in scrittura.
    * @param person persona
    * @param readOnly sola lettura
-   * @return list
+   * @return list la lista dei gruppi di assenza abilitati per la persona.
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
@@ -510,6 +535,7 @@ public class AbsenceService {
     
     //Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
+      
       log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       //vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
@@ -528,6 +554,8 @@ public class AbsenceService {
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);  
       }
+      
+      
       log.info("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }

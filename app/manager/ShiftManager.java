@@ -11,9 +11,7 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
-import dao.RoleDao;
 import dao.ShiftDao;
-import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.CompetenceUtility;
@@ -26,8 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.services.PairStamping;
 import models.CertificatedData;
 import models.Competence;
@@ -56,7 +54,6 @@ import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-import play.db.jpa.JPA;
 import play.i18n.Messages;
 
 
@@ -85,7 +82,8 @@ public class ShiftManager {
   //nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
   public static String thNoStampings = Messages.get("PDFReport.thNoStampings");
 
-  // nome della colonna per la giornata lavorativa non valida (non è festa & non ci sono assenze & tempo di lavoro è insufficiente)
+  // nome della colonna per la giornata lavorativa non valida (non è festa & non ci sono 
+  // assenze & tempo di lavoro è insufficiente)
   public static String thBadWorkindDay = Messages.get("PDFReport.thBadWorkindDay");
 
   //nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
@@ -125,10 +123,6 @@ public class ShiftManager {
   private PersonMonthRecapDao personMonthRecapDao;
   @Inject
   private IWrapperFactory wrapperFactory;
-  @Inject
-  private UsersRolesOfficesDao uroDao;
-  @Inject
-  private RoleDao roleDao;
 
   private static String[] colors = {"#fcf8e3", "#1fa789", "#36b719", "#ca0b3d", "pink", "dark-blue",
       "cyano"};
@@ -143,8 +137,8 @@ public class ShiftManager {
    *
    * @param personShiftDays lista di giorni di turno (PersonShiftDay)
    * @param inconsistentAbsenceTable tabella di tipo Person, String, List di String che contiene le
-   * eventuali inconsistenze rilevate per ogni persona che ha effettuato almeno un turno nella
-   * lista: - String: è una label della tabella tra: - List di String
+   *        eventuali inconsistenze rilevate per ogni persona che ha effettuato almeno un turno
+   *        nella lista: - String: è una label della tabella tra: - List di String
    */
 
   public void getShiftInconsistencyTimestampTable(
@@ -219,7 +213,7 @@ public class ShiftManager {
             }
 
           } else if (personDay.get().hasError(
-              Troubles.NO_ABS_NO_STAMP)) {//else if (personDay.get().stampings.isEmpty()) {
+              Troubles.NO_ABS_NO_STAMP)) {
             // check no stampings
             //-----------------------------
             log.info("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel "
@@ -268,7 +262,8 @@ public class ShiftManager {
           // check consistent stampings
           //----------------------------
 
-          // get the working time parameters in the shift period (worked and missed time during the shift period )
+          // get the working time parameters in the shift period (worked and missed time 
+          // during the shift period )
 
           WorkedParameters wp = checkShiftWorkedMins(personDay, shiftType, startShift,
               startLunchTime, endLunchTime, endShift);
@@ -276,43 +271,8 @@ public class ShiftManager {
           if (!wp.stampingOk) {
             String lackOfTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.lackOfTime);
             String workedTime = competenceUtility.calcStringShiftHoursFromMinutes(wp.workedTime);
-            String label;
 
             log.debug("lackOfTime = {} workedTime = {}", lackOfTime, workedTime);
-            // get the global tollerance for this shift type
-            //int globalTollerancePerShift = shiftType.hourTolerance;
-
-            // check if the difference between the worked hours in the shift periods is more
-            // than the tollerance
-//            if (wp.lackOfTime > globalTollerancePerShift) {
-//
-//              log.info("lackOfTime > globalTollerancePerShift = {} > {}", wp.lackOfTime,
-//                  globalTollerancePerShift);
-//              log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
-//                      + "timbrature: {} ", person.name, person.surname, personDay.get().date,
-//                  wp.stampings);
-//
-//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thMissingTime,
-//                  personShiftDay.date.toString("dd MMM").concat(" -> ").concat(wp.stampings)
-//                      .concat("(").concat(workedTime).concat(" ore lavorate)"));
-//              log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}", person, thMissingTime,
-//                  inconsistentAbsenceTable.get(person, thMissingTime));
-//
-//            } else if (wp.lackOfTime != 0) {
-//
-//              log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di 2"
-//                      + " ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
-//                  person.name, person.surname, personDay.get().date, wp.lackOfTime,
-//                  lackOfTime, wp.stampings);
-//              log.info("Timbrature nella tolleranza dei 15 min. = {}", wp.inTolerance);
-//
-//              label = (wp.inTolerance) ? thIncompleteTime : thWarnStampings;
-//              String str = personShiftDay.date.toString("dd MMM").concat(" -> ")
-//                  .concat(wp.stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)");
-//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, label, str);
-//              updateCellOfTableOfInconsistency(inconsistentAbsenceTable, person, thLackTime,
-//                  Integer.toString(wp.lackOfTime));
-//            }
 
           } // fine if esistenza timbrature    
         } // fine check of working days
@@ -325,10 +285,10 @@ public class ShiftManager {
    * aggiorna il contenuto della cella di una tabella del tipo <Person, String, List<String>>
    * tipicamente utilizzata per contenere le inconsistenze tra i turni e le timbrature
    * 
-   * @param table 	tabella da aggiornare
-   * @param th		stringa identificativa della colonna
-   * @param tr		persona identificativa della riga
-   * @param element	stringa da aggiungere alla cella
+   * @param table tabella da aggiornare
+   * @param th stringa identificativa della colonna
+   * @param tr persona identificativa della riga
+   * @param element stringa da aggiungere alla cella
    */
   private static void updateCellOfTableOfInconsistency(Table<Person, String, List<String>> table,
       Person tr, String th, String element) {
@@ -407,7 +367,8 @@ public class ShiftManager {
       int diffEndShift = 0;
 
       log.info(
-          "Il turno di {} nel giorno {} non e' stato completato o c'e' stata una uscita fuori pausa pranzo - orario {}",
+          "Il turno di {} nel giorno {} non e' stato completato o c'e' stata una uscita "
+          + "fuori pausa pranzo - orario {}",
           person, personDay.get().date, strStamp);
 
       // per ogni coppia di timbrature
@@ -435,8 +396,8 @@ public class ShiftManager {
           // calcola gli scostamenti dall'ingresso tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // min di comporto se il turnista è entrato prima
-          //FIXME: anche qui, occorrerebbe testare prima che tipo di tolleranza è attribuita all'attività e, nel caso si tratti
-          // di tolleranza sull'entrata, applicarla.
+          // FIXME: anche qui, occorrerebbe testare prima che tipo di tolleranza è attribuita 
+          // all'attività e, nel caso si tratti di tolleranza sull'entrata, applicarla.
           if (pairStamping.first.date.toLocalTime().isBefore(startShift)) {
             if (pairStamping.first.date.toLocalTime()
                 .isBefore(startShift.minusMinutes(shiftType.entranceTolerance))) {
@@ -462,8 +423,8 @@ public class ShiftManager {
           // calcola gli scostamenti dell'ingresso in pausa pranzo tenendo conto della tolleranza
           //--------------------------------------------------------------------------------------
           // se il turnista è andato a  pranzo prima
-          //FIXME: anche qui occorre controllare che tipo di tolleranza è applicata all'attività e, se si tratta di tolleranza
-          // in entrata, applicarla
+          // FIXME: anche qui occorre controllare che tipo di tolleranza è applicata all'attività 
+          // e, se si tratta di tolleranza in entrata, applicarla
           if (pairStamping.second.date.toLocalTime().isBefore(startLunchTime)) {
             //log.debug("vedo uscita per pranzo prima");
 
@@ -550,13 +511,13 @@ public class ShiftManager {
             //    endLunchTime, newLimit, diffEndLunchTime);
           }
 
-          //FIXME: anche in questo caso occorre verificare quale sia la tolleranza applicata e, se si tratta di tolleranza in uscita,
-          // conteggiarla nei calcoli che vengono effettuati.
+          // FIXME: anche in questo caso occorre verificare quale sia la tolleranza applicata e, 
+          // se si tratta di tolleranza in uscita, conteggiarla nei calcoli che vengono effettuati.
           // se il turnista è uscito prima del turno
           if (pairStamping.second.date.toLocalTime().isBefore(endShift)) {
             //log.debug("vedo uscita prima della fine turno")
-            //TODO: verificare che qui l'exitTolerance sia valorizzato e, nel caso, controllare quello
-            // altrimenti non va fatto il controllo di tolleranza sull'uscita
+            //TODO: verificare che qui l'exitTolerance sia valorizzato e, nel caso, controllare
+            // quello altrimenti non va fatto il controllo di tolleranza sull'uscita
             if (endShift.minusMinutes(shiftType.exitTolerance)
                 .isAfter(pairStamping.second.date.toLocalTime())) {
               newLimit = endShift.minusMinutes(shiftType.exitTolerance);
@@ -594,7 +555,6 @@ public class ShiftManager {
 
         // ed è anche rientrato prima dalla PP => compensa
         if (diffEndLunchTime > 0) {
-          //log.debug("E rientrato prima dalla pausa pranzo! diffEndLunchTime={}", diffEndLunchTime);
           restoredMin += Math.min(Math.abs(diffStartLunchTime), Math.abs(diffEndLunchTime));
 
           if ((diffStartLunchTime + diffEndLunchTime) > 0) {
@@ -668,7 +628,6 @@ public class ShiftManager {
       // controlla eventuali compensazioni di ingresso e uscita
       // controlla se è uscito dopo
       if ((diffStartShift < 0) && (diffEndShift > 0)) {
-        //log.debug("e entrato dopo ed è uscito dopo! diffStartShift={} diffEndShift={}", diffStartShift, diffEndShift);
 
         restoredMin += Math.min(Math.abs(diffEndShift), Math.abs(diffStartShift));
 
@@ -683,8 +642,6 @@ public class ShiftManager {
         }
 
       } else if ((diffEndShift < 0) && (diffStartShift > 0)) {
-
-        //log.debug("e uscito prima ed è entrato dopo! diffStartShift=%s diffEndShift={}",diffStartShift, diffEndShift);
 
         restoredMin += Math.min(Math.abs(diffEndShift), Math.abs(diffStartShift));
 
@@ -709,7 +666,6 @@ public class ShiftManager {
     // calcola i minuti mancanti per completare l'otraio del turno
     int lackOfMinutes = teoreticShiftMinutes - workingMinutes;
 
-    //log.debug("teoreticShiftMinutes = {} workingMinutes = {} lackOfMinutes = {}", teoreticShiftMinutes, workingMinutes, lackOfMinutes);
     lackOfMinutes -= restoredMin;
     workingMinutes += restoredMin;
 
@@ -994,7 +950,7 @@ public class ShiftManager {
    * I minuti eccedenti sono memorizzati nella competenza per i mesi successivi.
    *
    * @param personsShiftHours contiene per ogni persona il numero dei giorni in turno lavorati
-   * (thDays) e gli eventuali minuti non lavorati (thLackTime)
+   *        (thDays) e gli eventuali minuti non lavorati (thLackTime)
    * @param year anno di riferimento dei turni
    * @param month mese di riferimento dei turni
    * @return la lista delle competenze corrispondenti ai turni lavorati
@@ -1095,8 +1051,8 @@ public class ShiftManager {
    *
    * @param personShiftDays lista di shiftDays.
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
-   * per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
-   * turno contenuti nella lista personShiftDays passata come parametro.
+   *        per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i 
+   *        giorni di turno contenuti nella lista personShiftDays passata come parametro.
    * @author arianna
    */
 
@@ -1154,7 +1110,7 @@ public class ShiftManager {
    * - thExceededMin - minuti in eccesso da accumulare nel mese successivo
    *
    * @param totalPersonShiftWorkedTime contiene per ogni persona, il numero di giorni lavorati e i
-   * minuti non lavorati in turno
+   *        minuti non lavorati in turno
    * @param competenceList lista di competenze relative ai turni di lavoro di un mese
    * @return totalShiftInfotabella testuale contenete tutte le informazioni
    */
@@ -1214,12 +1170,12 @@ public class ShiftManager {
    * e gli eventuali minuti non lavorati che non dovranno essere retribuite.
    *
    * @param personsShiftsWorkedDays contiene, per ogni persona e per ogni turno, il nuomero dei
-   * giorni di turno lavorati
+   *        giorni di turno lavorati
    * @param totalInconsistentAbsences contiene, per ogni persona, le eventuali inconsistenze ed in
-   * particolare la lista dei minuti non lavorati nella colonna thLackTime
+   *        particolare la lista dei minuti non lavorati nella colonna thLackTime
    * @return totalPersonShiftWorkedTime contiene per ogni persona il numero totale di giorni di
-   * turno lavorati (col thDays) e il numero totale di minuti non lavorati che non devono essere
-   * retribuiti (col thLackTime).
+   *        turno lavorati (col thDays) e il numero totale di minuti non lavorati che non devono 
+   *        essere retribuiti (col thLackTime).
    * @author arianna
    */
   public Table<Person, String, Integer> calcShiftWorkedDaysAndLackTime(
@@ -1281,7 +1237,7 @@ public class ShiftManager {
    * @param firstOfMonth primo giorno del mese
    * @param shiftType tipo del turno
    * @param shiftCalendar tabella [Turno, Giorno, SD] che viene modificata inserendo per giorno del
-   * mese la persona in turno di mattina e di pomeriggio per il turno shiftType
+   *        mese la persona in turno di mattina e di pomeriggio per il turno shiftType
    */
   public void buildMonthlyShiftCalendar(
       LocalDate firstOfMonth, ShiftType shiftType, Table<String, Integer, Sd> shiftCalendar) {
@@ -1406,7 +1362,7 @@ public class ShiftManager {
    * @param year anno di riferimento del calendario
    * @param type tipo di turni da caricare
    * @param personShift opzionale, contiene la persona della quale caricare i turni, se è vuota
-   * carica tutto il turno
+   *        carica tutto il turno
    * @return icsCalendar calendario
    * @author arianna
    */

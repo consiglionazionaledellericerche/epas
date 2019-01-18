@@ -31,7 +31,7 @@ import models.enumerate.Troubles;
 
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
-
+import play.jobs.Job;
 import play.libs.Mail;
 
 @Slf4j
@@ -241,21 +241,27 @@ public class PersonDayInTroubleManager {
    * @param person persona
    */
   public final void cleanPersonDayInTrouble(Person person) {
+    new Job<Void>() {
+      @Override
+      public void doJob() {
+        final List<PersonDayInTrouble> pdtList = 
+            personDayInTroubleDao.getPersonDayInTroubleInPeriod(
+            person, Optional.absent(), Optional.absent(), Optional.absent());
 
-    final List<PersonDayInTrouble> pdtList = personDayInTroubleDao.getPersonDayInTroubleInPeriod(
-        person, Optional.absent(), Optional.absent(), Optional.absent());
+        List<IWrapperContract> wrapperContracts = FluentIterable.from(person.contracts)
+            .transform(wrapperModelFunctionFactory.contract()).toList();
 
-    List<IWrapperContract> wrapperContracts = FluentIterable.from(person.contracts)
-        .transform(wrapperModelFunctionFactory.contract()).toList();
-
-    for (PersonDayInTrouble pdt : pdtList) {
-      boolean toDelete = wrapperContracts.stream()
-          .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.personDay.date,
-              wrContract.getContractDatabaseInterval()));
-      if (toDelete) {
-        log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.personDay.date);
-        pdt.delete();
+        for (PersonDayInTrouble pdt : pdtList) {
+          boolean toDelete = wrapperContracts.stream()
+              .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.personDay.date,
+                  wrContract.getContractDatabaseInterval()));
+          if (toDelete) {
+            log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.personDay.date);
+            pdt.delete();
+          }
+        }         
       }
-    }
+    }.now();
+
   }
 }

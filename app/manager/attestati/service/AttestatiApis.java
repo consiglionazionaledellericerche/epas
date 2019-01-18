@@ -1,6 +1,5 @@
 package manager.attestati.service;
 
-
 import com.google.common.base.Strings;
 
 import play.Play;

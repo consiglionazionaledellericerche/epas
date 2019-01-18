@@ -1,0 +1,65 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set absenceRequestTypeLabel: 'Visualizza flusso' /}
+#{set title:('ePAS - ' + absenceRequestTypeLabel) /}
+
+#{if absenceRequest.person != user.person }
+#{set breadcrumbs:['Richieste assenza':@AbsenceRequests.listToApprove(absenceRequest.type), ('Visualizza'):null] /}
+#{/if}
+#{else}
+#{set breadcrumbs:['Mie richieste':@AbsenceRequests.list(absenceRequest.type), ('Visualizza'):null] /}
+#{/else}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+#{title title: 'Richiesta per il/i giorno/i '+ absenceRequest.startAt.toLocalDate().format() + ' - ' + absenceRequest.endTo.toLocalDate().format() /}
+
+<br>
+ #{alert color:'info'}
+    <p>Elenco degli stati di approvazione della <strong>#{f.value 'absenceRequest.type', value:absenceRequest.type /}</strong>
+    per <strong>#{f.value 'absenceRequest.person.fullname', value:absenceRequest.person.fullname /}</strong>:</p>
+ #{/alert}
+ <div class="container-fluid center color:info">
+ 
+ 	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+</div>	
+<table class="table table-striped">
+<tr>
+	<th>Autore</th>
+	<th>Data e ora sottomissione</th>
+	<th>Tipo evento</th>
+	<th>Descrizione</th>
+	
+</tr>
+#{list items:absenceRequest.events, as:'item'}
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.DELETE)} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.eventType.equals(models.flows.enumerate.AbsenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+	>
+	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
+	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
+	<td>#{f.value 'item.description', value:item.description /}</td>
+</tr>
+#{/list}
+</table>
+
+	#{b.buttons center:true}
+		#{secure.check 'AbsenceRequests.delete', target:absenceRequest}
+			#{b.link @delete(absenceRequest.id), color:'danger', title:'Revoca' /}
+		#{/secure.check}
+		#{secure.check 'AbsenceRequests.approval', target:absenceRequest}
+			#{b.link @approval(absenceRequest.id), color:'success', title:'Approva'/}
+		#{/secure.check}
+		#{secure.check 'AbsenceRequests.disapproval', target:absenceRequest}
+			#{b.link @disapproval(absenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
+		#{/secure.check}
+	#{/b.buttons}
+</div>

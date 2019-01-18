@@ -11,6 +11,7 @@ import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
+import helpers.TemplateExtensions;
 import helpers.Web;
 
 import java.util.ArrayList;
@@ -105,9 +106,17 @@ public class ReperibilityCalendar extends Controller {
 
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
+    if (reperibilities.isEmpty()) {
+      log.info("Richiesta visualizzazione reperibilità ma nessun servizio di "
+          + "reperibilità presente");
+      flash.error("Nessun tipo di reperibilità presente");
+      Application.index();
+    }
+    
     final PersonReperibilityType reperibilitySelected = 
         reperibility.id != null ? reperibility : reperibilities.get(0);
 
+    
     rules.checkIfPermitted(reperibilitySelected);
 
     render(reperibilities, reperibilitySelected, currentDate);
@@ -369,6 +378,8 @@ public class ReperibilityCalendar extends Controller {
   }
 
   /**
+   * Verifica se il calendario è modificabile o meno nella data richiesta.
+   * 
    * @param reperibilityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
@@ -389,7 +400,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Calcola le ore di turno effettuate in quel periodo per ciascuna persona dell'attività
-   * specificata
+   * specificata.
    *
    * @param reperibilityId id dell'attività di reperibilità
    * @param start data iniziale
@@ -416,6 +427,8 @@ public class ReperibilityCalendar extends Controller {
   }
 
   /**
+   * DTO che modellano le assenze della persona nel periodo.
+   * 
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -468,7 +481,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Carica la lista delle reperibilità di un certo tipo associati ad una determinata persona in
-   * un intervallo di tempo
+   * un intervallo di tempo.
    *
    * @param reperibility attività di reperibilità
    * @param person persona associata ai turni
@@ -543,8 +556,7 @@ public class ReperibilityCalendar extends Controller {
     List<HolidaysReperibilityDto> listHolidaysRep = Lists.newArrayList();
     final List<Person> people = reperibilityManager2
         .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
-    final Map<Person, Integer> reperibilityWorkDaysCalculatedCompetences = new HashMap<>();
-    final Map<Person, Integer> reperibilityHolidaysCalculatedCompetences = new HashMap<>();
+
     CompetenceCode workDayReperibility = 
         competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
     CompetenceCode holidayReperibility = 
@@ -600,7 +612,7 @@ public class ReperibilityCalendar extends Controller {
     reperibilityTypeMonth.save();
     //TODO: completare questo metodo nel reperibility manager
     reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
-    args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.yearMonth.toLocalDate(1)));
     args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
 
@@ -622,7 +634,7 @@ public class ReperibilityCalendar extends Controller {
     reperibilityTypeMonth.save();
 
     Map<String, Object> args = new HashMap<>();
-    args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
+    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.yearMonth.toLocalDate(1)));
     args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
   }

@@ -47,6 +47,7 @@ epas:
 #    - JOBS_ACTIVE=                          # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
 #    - SKIP_IP_CHECK=                        # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
 #    - URL_ATTESTATI=                        # default: https://attestativ2.rm.cnr.it
+#    - FLOWS_ACTIVE=                         # defalut: false --(true,false) -- se impostato a true abilita l'utilizzo dei flussi interni a ePAS
 #    - URL_USER=
 #    - URL_PASS=
 ######## LOGS ###########

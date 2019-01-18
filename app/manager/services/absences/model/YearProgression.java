@@ -170,7 +170,7 @@ public enum YearProgression {
   permission2(2, ImmutableList.of(
       new YearPortion(1, 44, 0),
       new YearPortion(45, 225, 1),
-      new YearPortion(226, 336, 1)));
+      new YearPortion(226, 366, 1)));
 
   public List<YearPortion> yearPortions;
   public int total;

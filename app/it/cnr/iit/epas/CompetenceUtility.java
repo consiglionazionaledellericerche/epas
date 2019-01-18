@@ -2,11 +2,9 @@ package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.jpa.JPQLQueryFactory;
 import dao.PersonDayDao;
 import java.math.BigDecimal;
@@ -28,8 +26,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
 import models.query.QCompetenceCode;
-import models.query.QPerson;
-import models.query.QPersonShiftShiftType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.i18n.Messages;
@@ -174,105 +170,6 @@ public class CompetenceUtility {
     return Integer.toString(hours).concat(".").concat(Integer.toString(mins));
   }
 
-
-  /**
-   * Da chiamare per aggiornare la tabella competences inserendo i 30 minuti avanzati nella colonna
-   * exceeded_min  nel caso in cui ci sia stato un arrotondamento per difetto delle ore approvate
-   * rispetto a quelle richieste.
-   */
-//  public void updateExceedeMinInCompetenceTable() {
-//    int year = 2015;
-//    int month = 3;  // Mese attuale del quale dobbiamo ancora fare il pdf
-//
-//    int exceddedMin;
-//
-//    CompetenceCode competenceCode =
-//        CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift)
-//            .first();
-//    List<Person> personList;
-//
-//    QCompetence com = QCompetence.competence;
-//    QPerson person = QPerson.person;
-//    QPersonShiftShiftType personShiftShiftType = QPersonShiftShiftType.personShiftShiftType;
-//
-//    personList = queryFactory.from(person)
-//        .join(person.personShift.personShiftShiftTypes, personShiftShiftType)
-//        .where(
-//            personShiftShiftType.shiftType.type.in(ImmutableSet.of("A", "B"))
-//        ).list(person);
-//
-//    for (Person p : personList) {
-//
-//      final JPQLQuery query = queryFactory.query();
-//
-//      // leggo l'ultima competenza con il numero delle ore approvate
-//      // diverso da quello richieste
-//      final Competence myCompetence = query
-//          .from(com)
-//          .where(
-//              com.person.eq(p)
-//                  .and(com.year.eq(year))
-//                  .and(com.month.lt(month))
-//                  .and(com.competenceCode.eq(competenceCode))
-//                  .and(com.valueApproved.ne(0))
-//                  .and(com.valueRequested.ne(BigDecimal.ZERO))
-//                  .and(com.valueRequested.intValue().ne(com.valueApproved)
-//                      .or(com.valueRequested.floor().ne(com.valueRequested)))
-//          )
-//          .orderBy(com.year.desc(), com.month.desc())
-//          .limit(1)
-//          .uniqueResult(com);
-//
-//      // calcolo i minuti in eccesso non ancora remunerati
-//      if (myCompetence == null) {
-//        // we are at the first case, so the person has its fist 0.5 hour to accumulate
-//        log.debug("myCompetence is null");
-//        exceddedMin = 0;
-//      } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue()
-//          <= myCompetence.valueApproved) {
-//        log.debug("La query sulle competenze ha trovato {} e "
-//                + "myCompetence.valueRequested.ROUND_CEILING={} "
-//                + "<= myCompetence.valueApproved=%d",
-//            myCompetence.toString(), BigDecimal.ROUND_CEILING,
-//            myCompetence.valueApproved);
-//        // Last rounding was on ceiling, so we round to floor
-//        //valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
-//        exceddedMin = 0;
-//      } else {
-//        log.debug("La query sulle competenze ha trovato {}", myCompetence.toString());
-//        // we round to ceiling
-//        //valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
-//        exceddedMin = 30;
-//      }
-//
-//      Competence lastCompetence = getLastCompetence(p, year, month, competenceCode);
-//      // aggiorno la competenza con i minuti in eccesso calcolati
-//      lastCompetence.exceededMins = exceddedMin;
-//      lastCompetence.save();
-//    }
-//
-//  }
-
-
-  private Competence getLastCompetence(
-      Person person, int year, int month, CompetenceCode competenceCode) {
-    QCompetence com2 = QCompetence.competence;
-    QCompetenceCode comCode = QCompetenceCode.competenceCode;
-    // prendo la competenza del mese precedente
-    return queryFactory
-        .from(com2)
-        .join(com2.competenceCode, comCode)
-        .where(
-            com2.person.eq(person)
-                .and(com2.year.eq(year))
-                .and(com2.month.lt(month))
-                .and(comCode.eq(competenceCode))
-        )
-        .orderBy(com2.year.desc(), com2.month.desc())
-        .limit(1)
-        .uniqueResult(com2);
-  }
-
   /**
    * Aggiorna la tabella totalPersonShiftSumDays per contenere, per ogni persona nella lista dei
    * turni personShiftDays, e per ogni tipo di turno trovato, il numero di giorni di turno
@@ -280,8 +177,8 @@ public class CompetenceUtility {
    *
    * @param personShiftDays lista di shiftDays
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
-   * per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
-   * turno contenuti nella lista personShiftDays passata come parametro
+   *        per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i 
+   *        giorni di turno contenuti nella lista personShiftDays passata come parametro
    * @author arianna
    */
   public void countPersonsShiftsDays(

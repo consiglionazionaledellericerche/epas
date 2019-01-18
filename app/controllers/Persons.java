@@ -11,6 +11,9 @@ import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -27,12 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
+import manager.PersonManager;
 import manager.SecureManager;
+import manager.StabilizeManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
-
+import manager.services.absences.model.VacationSituation;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -42,7 +50,8 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
+import models.absences.GroupAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 
@@ -94,6 +103,15 @@ public class Persons extends Controller {
   static OfficeDao officeDao;
   @Inject
   static AbsenceService absenceService;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  static PersonManager personManager;
+  @Inject
+  static StabilizeManager stabilizeManager;
+  
 
 
   /**
@@ -122,6 +140,73 @@ public class Persons extends Controller {
     render(personList, office);
   }
 
+  /**
+   * Metodo che visualizza il risultato della funzionalità di stabilizzazione e permette 
+   * la persistenza dell'informazione.
+   * @param personId l'identificativo della persona da stabilizzare
+   */
+  public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
+      Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
+    LocalDate firstDayNewContract = StabilizeManager.firstDayNewContract;
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    
+    rules.checkIfPermitted(person.office);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    boolean isNotTime = false;
+    //Controllo se non sono ancora al 27 dicembre...
+    if (LocalDate.now().isBefore(firstDayNewContract)) {
+      isNotTime = true;
+      render(firstDayNewContract, step, isNotTime, wrPerson);
+    }
+    Optional<Contract> contract = wrPerson.getCurrentContract();
+    if (!step) {
+      //Qui faccio vedere all'amministratore cosa caricherò sul nuovo contratto che sto per creare
+      step = true;
+      
+      if (contract.isPresent()) {
+        
+        PersonStampingRecap psDto = stampingsRecapFactory.create(person, firstDayNewContract.getYear(), 
+            firstDayNewContract.getMonthOfYear(), true);
+        for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
+          if (mese.getValue().month == firstDayNewContract.getMonthOfYear()) {
+              residuoOrario = mese.getValue().remainingMinutesCurrentYear 
+                  + mese.getValue().remainingMinutesLastYear;           
+            //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
+            //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
+            //lanciata in un giorno successivo al 27/12/2018
+            residuoOrario = residuoOrario - stabilizeManager.adjustResidual(wrPerson);
+            buoniPasto = mese.getValue().remainingMealTickets;
+          }
+        }
+        GroupAbsenceType vacationGroup = absenceComponentDao
+            .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
+            firstDayNewContract.getYear(), vacationGroup, Optional.absent(), true);
+        if (vacationSituation == null) {
+          log.warn("Non esiste il riepilogo!!!");
+          render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
+              buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
+        }
+        ferieAnnoPassato = vacationSituation.lastYearCached.usable;
+        ferieAnnoPresente = vacationSituation.currentYearCached.usable;
+        permessi = vacationSituation.permissionsCached.usable;
+        
+        render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
+            buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
+      } else {
+        Boolean outOfContract = true;
+        render(firstDayNewContract, step, isNotTime, outOfContract);
+      }
+    } else {
+
+      stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto, 
+          ferieAnnoPassato, ferieAnnoPresente, permessi);
+      flash.success("Stabilizzato %s", wrPerson.getValue().fullName());
+      list(person.office.id, null);
+    }
+  }
+  
   /**
    * metodo che gestisce la pagina di inserimento persona.
    */
@@ -507,42 +592,5 @@ public class Persons extends Controller {
     children(child.person.id);
   }
 
-  public static void workGroup(Long personId) {
-    Person person = personDao.getPersonById(personId);
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(person.office);
-    List<Person> people = personDao
-        .list(Optional.<String>absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
-        .list();
-    render(people, person);
-  }
-
-
-  public static void confirmGroup(@Required List<Long> peopleGroupId, Long personId) {
-    Person person = personDao.getPersonById(personId);
-    Person p = null;
-    for (Long id : peopleGroupId) {
-      p = personDao.getPersonById(id);
-      p.personInCharge = person;
-      p.save();
-      person.people.add(p);
-    }
-    person.save();
-    flash.success("Aggiunte persone al gruppo di %s %s", person.name, person.surname);
-    workGroup(person.id);
-  }
-
-  public static void removePersonFromGroup(Long pId) {
-
-    Person person = personDao.getPersonById(pId);
-    Person supervisor = personDao.getPersonInCharge(person);
-    person.personInCharge = null;
-
-    supervisor.save();
-    person.save();
-    flash.success("Rimosso %s %s dal gruppo di %s %s", person.name, person.surname, supervisor.name,
-        supervisor.surname);
-    workGroup(supervisor.id);
-  }
 
 }

@@ -29,8 +29,12 @@ public class Application extends Controller {
 
     //Utenti di sistema (developer,admin)
     if (Security.getUser().get().person == null) {
-
-      Persons.list(null, null);
+      if (officeDao.getAllOffices().isEmpty()) {
+        //Db vuoto è necessario creare prima gli istituti.
+        Institutes.list(null, null, null);
+      } else {
+        Persons.list(null, null);
+      }
       return;
     }
 

@@ -68,7 +68,7 @@ require:
     - org.apache.commons -> commons-csv 1.4
     - org.apache.commons -> commons-compress 1.13
     - io.micrometer -> micrometer-registry-prometheus 1.0.6
-    - org.postgresql ->  postgresql 9.4.1207:
+    - org.postgresql ->  postgresql 42.2.5:
        force: true
        exclude:
         - org.osgi -> org.osgi.core

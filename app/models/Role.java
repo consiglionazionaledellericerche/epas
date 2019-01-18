@@ -24,6 +24,7 @@ public class Role extends BaseModel {
   public static final String TECHNICAL_ADMIN = "technicalAdmin";
   public static final String SHIFT_MANAGER = "shiftManager";
   public static final String REPERIBILITY_MANAGER = "reperibilityManager";
+  public static final String GROUP_MANAGER = "groupManager";
   private static final long serialVersionUID = 6717202212924325368L;
   public String name;
 
@@ -59,6 +60,9 @@ public class Role extends BaseModel {
     }
     if (name.equals(REST_CLIENT)) {
       return "Client rest";
+    }
+    if (name.equals(GROUP_MANAGER)) {
+      return "Responsabile gruppo";
     }
     return name;
   }
