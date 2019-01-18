@@ -1,0 +1,71 @@
+#{modalAsync id:'defaultModal', title:'Stabilizza '+wrPerson.value.fullname }
+#{if isNotTime}
+	#{alert color: 'warning'}
+		<p>In questo momento non è ancora possibile eseguire la stabilizzazione dal momento che, per poter trasferire
+		i residui orari e di ferie da un contratto all'altro, è necessario essere almeno al giorno della stabilizzazione.</p>
+	#{/alert}
+	#{b.buttons center:true}
+	<button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+	#{/b.buttons}
+#{/if}
+#{else}
+	<div id="stabilize">
+	#{if outOfContract}
+		#{alert color: 'danger'}
+			<p>Il dipendente ${wrPerson.value.fullname} non ha un contratto attivo da chiudere per permettere la creazione di
+			un nuovo contratto a tempo determinato. <br>
+			Verificare le date dei contratti del dipendente.
+			</p>
+		#{/alert}
+		#{b.buttons center:true}
+		<button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+		#{/b.buttons}
+	#{/if}
+	#{else}
+	
+	
+	
+	#{form action:@Persons.stabilize(), method:'POST', autocomplete:false,
+  		class:'form form-horizontal', 'data-async':'#page_content',
+  		'data-async-error':'#stabilize'}
+	#{alert color: 'info'}
+	<p>Ai sensi dell’art. 20, comma 1, del decreto legislativo 75/2017 – Approvazione della lista nominativa degli aventi diritto 
+	in attuazione della delibera n. 213/2018 adottata dal Consiglio di Amministrazione in data 16 novembre 2018, il nuovo contratto
+	a tempo indeterminato per ${wrPerson.value.fullname} prevede:
+	</p>
+	#{/alert}
+	#{f.hidden 'step', value:step /}
+	
+	#{f.hidden 'personId', value:wrPerson.value.id /}
+		<div class="container-fluid">
+		<div class="col-md-8 col-md-offset-4">
+		#{f.view 'residuoOrario', value:residuoOrario.toHourTime() /}
+		#{f.hidden 'residuoOrario', value:residuoOrario /}
+		</div>
+		<div class="col-md-8 col-md-offset-4">
+		#{f.view 'buoniPasto', value:buoniPasto /}
+		#{f.hidden 'buoniPasto', value:buoniPasto /}
+		</div>
+		<div class="col-md-8 col-md-offset-4">
+		#{f.view 'ferieAnnoPassato', value:ferieAnnoPassato /}
+		#{f.hidden 'ferieAnnoPassato', value:ferieAnnoPassato /}
+		</div>
+		<div class="col-md-8 col-md-offset-4">
+		#{f.view 'ferieAnnoPresente', value:ferieAnnoPresente /}
+		#{f.hidden 'ferieAnnoPresente', value:ferieAnnoPresente /}
+		</div>
+		<div class="col-md-8 col-md-offset-4">
+		#{f.view 'permessi', value:permessi /}
+		#{f.hidden 'permessi', value:permessi /}
+		</div>
+
+	</div>
+	  #{b.buttons center:true}
+	     #{b.submit 'Stabilizza'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	#{/else}
+	</div>
+#{/else}
+#{/modalAsync}

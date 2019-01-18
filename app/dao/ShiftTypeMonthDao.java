@@ -1,6 +1,5 @@
 package dao;
 
-
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQueryFactory;
@@ -47,7 +46,7 @@ public class ShiftTypeMonthDao extends DaoBase {
 
   /**
    * Questo metodo è utile in fase di assegnazione delle competenze in seguito all'approvazione
-   * del responsabile di turno (bisogna ricalcolare tutte le competenze delle persone coinvolte)
+   * del responsabile di turno (bisogna ricalcolare tutte le competenze delle persone coinvolte).
    *
    * @param month mese richiesto
    * @param people lista delle persone coinvolte nel mese richiesto

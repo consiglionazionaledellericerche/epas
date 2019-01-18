@@ -2,7 +2,9 @@ package persondays;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
+import com.google.inject.Inject;
+import dao.ZoneDao;
+import injection.StaticInject;
 import java.util.List;
 
 import lombok.val;
@@ -25,6 +27,7 @@ import org.junit.Test;
 
 import play.test.UnitTest;
 
+@StaticInject
 public class PersonDaysTest extends UnitTest {
 
   public static LocalTime startLunch = new LocalTime(1,0,0);
@@ -39,8 +42,8 @@ public class PersonDaysTest extends UnitTest {
   public static StampTypes lunchST = StampTypes.PAUSA_PRANZO;
   public static StampTypes serviceST = StampTypes.MOTIVI_DI_SERVIZIO;
   
-  public static PersonDayManager personDayManager = new PersonDayManager(
-      null, null, null, null, null, null, null);
+  @Inject  
+  private static PersonDayManager personDayManager;
   
   /**
    * Test su un giorno Normale.
@@ -52,8 +55,8 @@ public class PersonDaysTest extends UnitTest {
     PersonDay personDay = new PersonDay(person, second);
     
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 9, 30, WayType.in, null));
-    stampings.add(stampings(personDay, 16, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 9, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 16, 30, WayType.out, null, null));
     
     personDay.setStampings(stampings);
         
@@ -85,11 +88,11 @@ public class PersonDaysTest extends UnitTest {
     val person = new Person();
     PersonDay personDay = new PersonDay(person, second);
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 30, WayType.in, null));
-    stampings.add(stampings(personDay, 11, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, null, null));
     
-    stampings.add(stampings(personDay, 15, 30, WayType.in, null));
-    stampings.add(stampings(personDay, 19, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 15, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null, null));
     
     personDay.setStampings(stampings);
     
@@ -124,29 +127,29 @@ public class PersonDaysTest extends UnitTest {
     //coppia valida con dentro una timbratura di servizio ok
     PersonDay personDay = new PersonDay(null, second);
     List<Stamping> stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
-    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
-    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
     personDayManager.setValidPairStampings(personDay.stampings);
     org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
-    stamps.add(stampings(personDay, 14, 30, WayType.out, StampTypes.MOTIVI_DI_SERVIZIO));
-    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
-    stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO));
-    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
+    stamps.add(stampings(personDay, 14, 30, WayType.out, StampTypes.MOTIVI_DI_SERVIZIO, null));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
+    stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
     personDayManager.setValidPairStampings(personDay.stampings);
     org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia non valida 
     personDay = new PersonDay(null, second);
     stamps = Lists.newArrayList();
-    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
-    stamps.add(stampings(personDay, 15, 30, WayType.in, null));
-    stamps.add(stampings(personDay, 19, 30, WayType.out, null));
+    stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
+    stamps.add(stampings(personDay, 15, 30, WayType.in, null, null));
+    stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
     personDayManager.setValidPairStampings(personDay.stampings);
     org.assertj.core.api.Assertions.assertThat(!personDayManager.allValidStampings(personDay));
 
@@ -163,11 +166,11 @@ public class PersonDaysTest extends UnitTest {
     val person = new Person();
     PersonDay personDay = new PersonDay(person, second);
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 30, WayType.in, null));
-    stampings.add(stampings(personDay, 11, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, null, null));
     
-    stampings.add(stampings(personDay, 15, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
-    stampings.add(stampings(personDay, 19, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 15, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null, null));
     
     personDay.setStampings(stampings);
     
@@ -187,11 +190,11 @@ public class PersonDaysTest extends UnitTest {
     
     personDay = new PersonDay(person, second);
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 30, WayType.in, null));
-    stampings.add(stampings(personDay, 11, 30, WayType.out, StampTypes.PAUSA_PRANZO));
+    stampings.add(stampings(personDay, 8, 30, WayType.in, null, null));
+    stampings.add(stampings(personDay, 11, 30, WayType.out, StampTypes.PAUSA_PRANZO, null));
         
-    stampings.add(stampings(personDay, 15, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE));
-    stampings.add(stampings(personDay, 19, 30, WayType.out, null));
+    stampings.add(stampings(personDay, 15, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
+    stampings.add(stampings(personDay, 19, 30, WayType.out, null, null));
     
     personDay.setStampings(stampings);
     
@@ -228,10 +231,10 @@ public class PersonDaysTest extends UnitTest {
 
     // #1
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     
     personDay.setStampings(stampings);
     List<PairStamping> gapLunchPair = 
@@ -241,9 +244,9 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
 
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.stampings);
@@ -258,10 +261,10 @@ public class PersonDaysTest extends UnitTest {
 
     // #2
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
@@ -270,9 +273,9 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
     
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
@@ -285,10 +288,10 @@ public class PersonDaysTest extends UnitTest {
      
     // #3
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 13, 00, WayType.out, null));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, null, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     gapLunchPair = personDayManager
@@ -298,9 +301,9 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(gapLunchPair.get(0).timeInPair).isEqualTo(60);
     
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 13, 00, WayType.out, null));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, null, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, lunchST, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
@@ -313,10 +316,10 @@ public class PersonDaysTest extends UnitTest {
     
     // # L'ingresso post pranzo deve essere coerente.
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, StampTypes.MOTIVI_PERSONALI));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, StampTypes.MOTIVI_PERSONALI, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
@@ -327,12 +330,12 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(gapLunchPair.size()).isEqualTo(0);
        
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 8, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 12, 30, WayType.out, lunchST));
-    stampings.add(stampings(personDay, 13, 00, WayType.in, StampTypes.MOTIVI_PERSONALI));
-    stampings.add(stampings(personDay, 13, 30, WayType.out, StampTypes.MOTIVI_PERSONALI));
-    stampings.add(stampings(personDay, 14, 00, WayType.in, null));
-    stampings.add(stampings(personDay, 17, 00, WayType.out, null));
+    stampings.add(stampings(personDay, 8, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 12, 30, WayType.out, lunchST, null));
+    stampings.add(stampings(personDay, 13, 00, WayType.in, StampTypes.MOTIVI_PERSONALI, null));
+    stampings.add(stampings(personDay, 13, 30, WayType.out, StampTypes.MOTIVI_PERSONALI, null));
+    stampings.add(stampings(personDay, 14, 00, WayType.in, null, null));
+    stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
     // # Il test che secondo Daniele fallisce
@@ -363,7 +366,7 @@ public class PersonDaysTest extends UnitTest {
     PersonDay personDay = new PersonDay(person, second);
     
     List<Stamping> stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 9, 30, WayType.in, null));
+    stampings.add(stampings(personDay, 9, 30, WayType.in, null, null));
     
     LocalDateTime exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(), 
         second.getDayOfMonth(), 16, 30);
@@ -389,9 +392,9 @@ public class PersonDaysTest extends UnitTest {
     //Caso con uscita per pranzo
     personDay = new PersonDay(person, second);
     stampings = Lists.newArrayList();
-    stampings.add(stampings(personDay, 9, 00, WayType.in, null));       //4 ore mattina
-    stampings.add(stampings(personDay, 13, 00, WayType.out, null));     //pausa pranzo 1 ora
-    stampings.add(stampings(personDay, 14, 00, WayType.in, null));
+    stampings.add(stampings(personDay, 9, 00, WayType.in, null, null));       //4 ore mattina
+    stampings.add(stampings(personDay, 13, 00, WayType.out, null, null));     //pausa pranzo 1 ora
+    stampings.add(stampings(personDay, 14, 00, WayType.in, null, null));
     
     exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(),  //4 ore pom. 
         second.getDayOfMonth(), 18, 00);
@@ -425,12 +428,13 @@ public class PersonDaysTest extends UnitTest {
    * Supporto alla creazione di una stamping da non mockare.
    */
   public Stamping stampings(PersonDay personDay, int hour, int minute, 
-      WayType way, StampTypes stampType) {
+      WayType way, StampTypes stampType, String stampingZone) {
     LocalDateTime time = new LocalDateTime(personDay.getDate().getYear(), 
         personDay.getDate().getMonthOfYear(), personDay.getDate().getDayOfMonth(), hour, minute);
     Stamping stamping = new Stamping(personDay, time);
     stamping.way = way;
     stamping.stampType = stampType;
+    stamping.stampingZone = stampingZone;
     return stamping;
   }
   

@@ -1,3 +1,45 @@
+absenceRequest =richiesta di assenza
+
+absenceRequest.endTo =Fine
+absenceRequest.note =Note informative
+absenceRequest.person =Dipendente
+absenceRequest.startAt =Inizio
+absenceRequest.type =Tipologia
+absenceRequest.officeHeadApproved =Approvazione responsabile di sede
+absenceRequest.managerApproved =Approvazione responsabile di gruppo
+absenceRequest.administrativeApproved =Approvazione del amministrativo
+absenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+AbsenceRequests.approval=Approva
+AbsenceRequests.disapproval=Disapprova
+
+AbsenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+AbsenceRequestEventType.MANAGER_APPROVAL=Richiesta approvata dal responsabile del gruppo di lavoro
+AbsenceRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile del gruppo di lavoro
+AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL=Richiesta approvata dall'amministratore del personale
+AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+AbsenceRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede
+AbsenceRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+AbsenceRequestEventType.COMPLETE=Richiesta completata
+AbsenceRequestEventType.DELETE=Richiesta cancellata
+AbsenceRequestEventType.EXPIRING=Richiesta scaduta
+
+STARTING_APPROVAL_FLOW =Inizio approvazione
+MANAGER_APPROVAL =Approvata dal responsabile del gruppo di lavoro
+MANAGER_REFUSAL =Respinta dal responsabile del gruppo di lavoro
+ADMINISTRATIVE_APPROVAL =Approvata dall'amministratore del personale
+ADMINISTRATIVE_REFUSAL =Respinta dall'amministratore del personale
+OFFICE_HEAD_APPROVAL =Approvata dal responsabile di sede
+OFFICE_HEAD_REFUSAL =Respinta dal responsabile di sede
+COMPLETE =Richiesta completata
+DELETE =Richiesta cancellata
+EXPIRING =Richiesta scaduta
+AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
+AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
+AbsenceRequestType.VACATION_REQUEST=Ferie
+AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
+
 activity =Attività di turno
 ADD= Inserimento
 
@@ -235,6 +277,12 @@ group.limitValue =Quantità massima
 group.competenceCodes =Codici competenza da associare
 group.limitUnit =Unità di misura
 group.limitDescription =Descrizione limite
+group.name =Nome gruppo
+group.description =Descrizione
+group.manager =Responsabile
+group.people =Afferenti al gruppo
+group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
+groups =Gruppi di lavoro
 
 history.back= Indietro
 history.type= Operazione
@@ -331,6 +379,7 @@ errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle infor
 
 office.address=Indirizzo
 office.code= Codice
+office.beginDate =Data inizio utilizzo 
 office.codeId= Sede Id
 officeFilter= Filtra per Sede
 office.headQuarter=Sede principale
@@ -359,7 +408,7 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
-# CALENDARIO SHIFT
+################### CALENDARIO SHIFT #################################################
 
 shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
 calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
@@ -384,6 +433,7 @@ PDFReport.Troubles.NO_ABS_NO_STAMP=Mancata timbratura
 PDFReport.UNCOUPLED_WORKING=Timbrature errate
 PDFReport.NOT_ENOUGH_WORKTIME==Orario incompleto
 
+#######################################################################################
 
 peopleIds=Persone associabili all'attività
 
@@ -406,6 +456,7 @@ person.surname=Cognome
 person.telephone=Telefono
 person.user.username= Username in ePAS
 person.wantEmail=Invio Email
+person.beginDate=Data attivazione in ePAS
 
 personUser= Utente associato ad una persona
 
@@ -420,6 +471,8 @@ psst.endDate =Data fine
 psst.jolly =Jolly
 
 qualification=Livello
+
+reason=Motivazione
 
 regulations =Normativa
 
@@ -475,6 +528,7 @@ time= Orario
 
 type.type =Nome attività
 type.description =Descrizione
+type.allowUnpairSlots =Permetti disparità tra gli slot di turno 
 type.office =Sede
 type.supervisor =Supervisore servizio
 type.managers =Gestori reperibilità
@@ -590,6 +644,15 @@ zone =Zona di timbratura
 zone.name =Nome della zona di timbratura
 zone.description =Descrizione
 
+#######################################################
+# Traduzioni per form di stabilizzazione (provvisoria)#
+#######################################################
+residuoOrario=Residuo orario (ore:minuti)
+buoniPasto= Buoni pasto rimanenti
+ferieAnnoPassato= Ferie anno passato (da fare)
+ferieAnnoPresente= Ferie anno corrente (da fare)
+permessi= Permessi legge (da fare)
+
 ###########################
 # Messaggi di validazione
 ###########################
@@ -637,6 +700,7 @@ AbsenceGroups.showCategories=Categorie Assenze
 AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
 Administration.internalSearch=Ricerca
+Administration.adjustSeats=Rimodula sedi
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -663,6 +727,27 @@ Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
+
+AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.compensatoryRests =Miei riposi compensativi
+AbsenceRequests.shortTermPermit =Miei permessi brevi
+AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
+AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
+AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
+
+
+AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
+AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
+AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
+
+AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
+
+AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
@@ -699,6 +784,7 @@ Vacations.show= Ferie
 Vacations.list= Ferie e Permessi
 WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
+Groups.showGroups= Gestione gruppi
 Shift.handleShifts =Gestisci turni
 Calendar.show =Gestisci turni
 ReperibilityCalendar.show =Gestisci reperibilità
@@ -759,6 +845,8 @@ ShiftSlot.EVENING = Sera
 
 shift.absenceInDay = La persona nel giorno selezionato è assente
 shift.alreadyInShift = Già in turno per l'attività %s
+shift.maxQuantityInSlot = Non si può eccedere la differenza di 1 persona tra slot per l'attività %s
+shift.maxQuantity = Al massimo 3 persone al giorno sull'attività %s
 shift.slotAlreadyAssigned = Slot già assegnato a %s
 shift.personInactive = Persona non attiva sul turno
 shift.holidayShiftNotEnabled = La persona non ha abilitato il turno festivo
@@ -792,6 +880,7 @@ ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
 NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
 DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
+SEND_ADMIN_NOTIFICATION=Invio di notifiche agli amministratori del personale  
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
@@ -801,6 +890,7 @@ TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
+SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
@@ -819,6 +909,21 @@ MATERNITY_PERIOD=Periodo Maternità
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
+
+ENABLE_FLOWS =Flusso di richiesta assenza attivato
+
+VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
+VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 
+VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile gruppo di lavoro 
+VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione ferie per i Responsabili di gruppo da parte del Responsabile di Sede
+
+COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile gruppo di lavoro
+COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
+
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
@@ -876,6 +981,7 @@ type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscit
 type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
 type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
 type.enableHolidays.popover = Abilita l&#39;inserimento (e il conteggio) di turni anche nei giorni festivi
+type.allowUnpairSlots.popover = Permette di avere differenza di persone in numero tra i vari slot di turno (es.: 2 la mattina e 1 il pomeriggio o viceversa)
 
 ###########################################################################
 #	Messaggi utilizzati nelle viste

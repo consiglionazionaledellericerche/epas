@@ -14,4 +14,18 @@
     <file-match-pattern match-pattern="app/play/db/jpa/query" include-pattern="false"/>
   </fileset>
   <filter name="DerivedFiles" enabled="true"/>
+  <filter name="FilesFromPackage" enabled="true">
+    <filter-data value="app/models/absences/query"/>
+    <filter-data value="app/models/base/query"/>
+    <filter-data value="app/models/contractual/query"/>
+    <filter-data value="app/models/flows/query"/>
+    <filter-data value="app/models/query"/>
+    <filter-data value="app/play/db/jpa/query"/>
+    <filter-data value="shibboleth-1.2"/>
+    <filter-data value="secure"/>
+    <filter-data value="play-lombok-1.2.3"/>
+    <filter-data value="fastergt-1.9"/>
+    <filter-data value="docviewer"/>
+    <filter-data value="pdf-0.9"/>
+  </filter>
 </fileset-config>

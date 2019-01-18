@@ -1,27 +1,11 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.YearMonth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -29,11 +13,17 @@ import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperContractWorkingTimeType;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import it.cnr.iit.epas.DateInterval;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -42,7 +32,6 @@ import manager.configurations.EpasParam.RecomputationType;
 import manager.services.absences.AbsenceService;
 import models.Contract;
 import models.ContractMonthRecap;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -57,6 +46,12 @@ import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.libs.F.Promise;
@@ -79,7 +74,6 @@ public class ConsistencyManager {
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
   private final AbsenceDao absenceDao;
-
 
   /**
    * Constructor.
@@ -336,18 +330,22 @@ public class ConsistencyManager {
     // (5) Empty vacation cache and async recomputation
     
     absenceService.emptyVacationCache(person, from);
-    Optional<Contract> contract = wrPerson.getCurrentContract();
+    final Optional<Contract> contract = wrPerson.getCurrentContract();
+ 
     if (contract.isPresent()) {
       new Job<Void>() {
         @Override
         public void doJob() {
+          Verify.verifyNotNull(contract.get().id);          
           Contract currentContract = Contract.findById(contract.get().id);
+          Verify.verifyNotNull(currentContract, 
+              String.format("currentcontract is null, contract.id = %s", contract.get().id));
           GroupAbsenceType vacationGroup = absenceComponentDao
               .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
           absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(),
               vacationGroup, Optional.absent(), true);
         }
-      }.now();
+      }.afterRequest();
     }
     // (6) Controllo se per quel giorno person ha anche un turno associato ed effettuo, i ricalcoli
     
@@ -405,7 +403,7 @@ public class ConsistencyManager {
     // Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
     if (pd.getPersonDayContract().isPresent()
         && pd.getPersonDayContract().get().sourceDateResidual != null
-        && !pd.getValue().date.isAfter(pd.getPersonDayContract().get().sourceDateResidual)) {
+        && pd.getValue().date.isBefore(pd.getPersonDayContract().get().sourceDateResidual)) {
 
       pd.getValue().isHoliday = false;
       pd.getValue().timeAtWork = 0;

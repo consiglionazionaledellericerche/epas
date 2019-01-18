@@ -560,7 +560,10 @@ public class ContractMonthRecapManager {
       cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
       if (compensatoryRestClosureSeatRecovering.isPresent()) {
         for (TimeVariation tv : compensatoryRestClosureSeatRecovering.get()) {
-          cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+          if (tv.dateVariation.getYear() == cmr.year 
+              && tv.dateVariation.getMonthOfYear() == cmr.month) {
+            cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+          }          
         }
         cmr.riposiCompensativiChiusuraEnteMinutiPrint = cmr.riposiCompensativiChiusuraEnteMinuti;
       }
@@ -661,7 +664,7 @@ public class ContractMonthRecapManager {
   }
   
   private void assegnaRiposiCompensativiChiusuraEnte(ContractMonthRecap monthRecap) {
-  //quello che assegno al monte ore passato
+    //quello che assegno al monte ore passato
     if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesLastYear) {
       monthRecap.remainingMinutesLastYear =
           monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;

@@ -66,17 +66,14 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean sourceByAdmin = true;
 
   @Getter 
-  @Min(0) 
   @Max(32)
   public Integer sourceVacationLastYearUsed = null;
 
   @Getter 
-  @Min(0) 
   @Max(32)
   public Integer sourceVacationCurrentYearUsed = null;
 
   @Getter 
-  @Min(0) 
   @Max(4)
   public Integer sourcePermissionUsed = null;
 

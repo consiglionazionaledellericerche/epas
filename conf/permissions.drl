@@ -32,6 +32,10 @@ import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
+
+import models.flows.AbsenceRequest;
+import models.flows.Group;
+
 import security.PermissionCheck;
 
 global models.User currentOperator;
@@ -455,6 +459,17 @@ $c.grant();
 end
 
 
+rule isEmployeeForFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $ar: AbsenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "AbsenceRequests.show"), target == $ar, granted == false)
+then
+$c.grant();
+end
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
@@ -478,6 +493,19 @@ when
      	/* Gestione riposi compensativi per chiusura ente*/
      	"TimeVariations.personShow",
 
+		/* Richieste di assenza */
+		"AbsenceRequests.blank",
+		"AbsenceRequests.edit",
+		"AbsenceRequests.save",
+		"AbsenceRequests.list",
+		"AbsenceRequests.delete",
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.show",
+		"AbsenceRequests.flush",
+		
+		
      	/* Ferie */
      	"Vacations.show",
      	"Vacations.personVacationSummary",
@@ -536,12 +564,110 @@ then
  $c.grant();
 end
 
-rule personInCharge
+rule EmployCanEditOrDeleteAbsenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
-  Person (isPersonInCharge == true) from currentOperator.person
-  $c: PermissionCheck( action in ("Stampings.dailyPresenceForPersonInCharge" ,
-    "Competences.monthlyOvertime" ), granted == false)
+  AbsenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("AbsenceRequests.edit" ,
+    "AbsenceRequests.save", "AbsenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificAbsenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: AbsenceRequest(person == currentOperator.person, flowEnded == false,
+  		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
+  $c: PermissionCheck( action in ("AbsenceRequests.delete" ), target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showAbsenceRequest
+when 
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR)
+  $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
+  $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+
+rule personInCharge
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $c: PermissionCheck( action in (
+  			"Stampings.dailyPresenceForPersonInCharge" ,
+    		"Competences.monthlyOvertime",
+    		"Groups.showGroups",
+    		"Groups.edit",
+    		"AbsenceRequests.blank",
+			"AbsenceRequests.edit",
+			"AbsenceRequests.save",
+			"AbsenceRequests.list",
+			"AbsenceRequests.listToApprove",
+			"AbsenceRequests.vacationsToApprove",
+			"AbsenceRequests.compensatoryRestsToApprove",
+			
+			"AbsenceRequests.vacations",
+			"AbsenceRequests.compensatoryRests",
+			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.managerApproval",
+			"AbsenceRequests.show",
+			"AbsenceRequests.approval",
+			"AbsenceRequests.disapproval"
+		), target==null, granted == false)
+then
+  $c.grant();
+end
+
+rule personInChargeInOffice
+when
+  $uro: UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $o: Office( usersRolesOffices contains $uro)
+  $c: PermissionCheck( action in (
+  			"Stampings.dailyPresenceForPersonInCharge" ,
+    		"Competences.monthlyOvertime",
+    		"Groups.showGroups",
+    		"Groups.edit"), target==$o, granted==false)
+then
+  $c.grant();
+end
+
+rule personInChargeForFlows
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $ar: AbsenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $c: PermissionCheck( action in (
+    		"AbsenceRequests.blank",
+			"AbsenceRequests.edit",
+			"AbsenceRequests.save",
+			"AbsenceRequests.list",
+			"AbsenceRequests.listToApprove",
+			"AbsenceRequests.vacationsToApprove",
+			"AbsenceRequests.compensatoryRestsToApprove",
+			
+			"AbsenceRequests.vacations",
+			"AbsenceRequests.compensatoryRests",
+			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.managerApproval",
+			"AbsenceRequests.show"
+			
+		), target == $ar, granted == false)
+then
+  $c.grant();
+end
+
+rule personInChargeApprovalDisapproval
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $p: Person() from currentOperator.person
+  $ar: AbsenceRequest(person != $p && managerApprovalRequired == true && managerApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"AbsenceRequests.approval",
+			"AbsenceRequests.disapproval"
+  			), target == $ar, granted == false)
 then
   $c.grant();
 end
@@ -936,8 +1062,22 @@ when
 
         "Stampings.personStamping",
         "Vacations.list",
-        "Vacations.vacationSummary"
-
+        "Vacations.vacationSummary",
+		"AbsenceRequests.blank",
+		"AbsenceRequests.edit",
+		"AbsenceRequests.save",
+		"AbsenceRequests.list",
+		"AbsenceRequests.listToApprove",
+		"AbsenceRequests.vacationsToApprove",
+		"AbsenceRequests.compensatoryRestsToApprove",
+		
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.officeHeadApproval",
+		"AbsenceRequests.show",
+		"AbsenceRequests.approval",
+		"AbsenceRequests.disapproval"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -952,9 +1092,39 @@ when
  
         "Stampings.personStamping",
         "Vacations.list",
-        "Vacations.vacationSummary"
+        "Vacations.vacationSummary",
+        "AbsenceRequests.blank",
+		"AbsenceRequests.edit",
+		"AbsenceRequests.save",
+		"AbsenceRequests.list",
+		"AbsenceRequests.listToApprove",
+		"AbsenceRequests.vacationsToApprove",
+		"AbsenceRequests.compensatoryRestsToApprove",
+		
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.show"
 
         ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+
+rule RoleSeatSuperVisor_forFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ar: AbsenceRequest((officeHeadApprovalRequired == true && officeHeadApproved == null && flowEnded == false) 
+ 		|| (officeHeadApprovalForManagerRequired == true && flowEnded == false))
+ $c: PermissionCheck(action in (
+		"AbsenceRequests.edit",
+		"AbsenceRequests.show",
+		"AbsenceRequests.approval",
+		"AbsenceRequests.disapproval"
+		), target == $ar, granted == false)
 then
  $c.grant();
 end
@@ -1173,6 +1343,7 @@ when
 		/*********** duplicate prima di avere il contesto office  *************/
 
 		/* Vecchio permesso editPerson */
+		"Persons.stabilize",
         "Persons.edit",
         "Persons.update",
         "Persons.save",
@@ -1222,7 +1393,6 @@ when
      	"Persons.insertChild",
      	"Persons.deleteChild",
 
-     	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
 
@@ -1348,7 +1518,14 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation"
+        "Charts.exportTimesheetSituation",
+        
+        /*Permesso relativo alla gestione dei gruppi*/
+        "Groups.createGroup",
+        "Groups.blank",
+        "Groups.edit",
+        "Groups.deleteGroup",
+        "Groups.showGroups"
 
         ), target == null, granted == false)
 then
@@ -1362,6 +1539,7 @@ when
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
+ 		"Persons.stabilize",
         "Persons.edit",
         "Persons.update",
         "Persons.save",
@@ -1411,7 +1589,6 @@ when
      	"Persons.insertChild",
      	"Persons.deleteChild",
 
-     	"Persons.workGroup",
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
 
@@ -1526,7 +1703,14 @@ when
         "PersonMonths.save",
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
-        "Charts.exportTimesheetSituation"
+        "Charts.exportTimesheetSituation",
+        
+        /*Permesso relativo alla gestione dei gruppi*/
+        "Groups.createGroup",
+        "Groups.blank",
+        "Groups.edit",
+        "Groups.deleteGroup",
+        "Groups.showGroups"
 
        ), target == $o, granted == false)
 then
@@ -2081,4 +2265,18 @@ when
 		, granted == false)
 then
  $c.grant();
+end
+
+/*
+ * Permesso per l'abilitazione alla visualizzazione dei flussi delle assenze
+ */
+rule isFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
 end

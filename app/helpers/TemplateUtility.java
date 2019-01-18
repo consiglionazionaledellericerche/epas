@@ -6,12 +6,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import controllers.Security;
+import dao.AbsenceRequestDao;
 import dao.AbsenceTypeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.ContractualReferenceDao;
+import dao.GroupDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -22,6 +24,7 @@ import dao.QualificationDao;
 import dao.RoleDao;
 import dao.ShiftDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
@@ -54,8 +57,14 @@ import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
+import models.enumerate.NotificationSubject;
 import models.enumerate.StampTypes;
+import models.flows.AbsenceRequest;
+import models.flows.Group;
+import models.flows.enumerate.AbsenceRequestType;
+import play.Play;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -67,6 +76,7 @@ public class TemplateUtility {
   
   private final String WORKDAYS_REP = "207";
   private final String HOLIDAYS_REP = "208";
+  private final String FLOWS_ACTIVE = "flows.active";
 
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
@@ -86,6 +96,11 @@ public class TemplateUtility {
   private final CompetenceCodeDao competenceCodeDao;
   private final MemoizedCollection<Notification> notifications;
   private final MemoizedCollection<Notification> archivedNotifications;
+  private final AbsenceRequestDao absenceRequestDao;
+  private final UsersRolesOfficesDao uroDao;
+  private final GroupDao groupDao;
+  
+   
   
   @Inject
   public TemplateUtility(
@@ -98,7 +113,8 @@ public class TemplateUtility {
       AbsenceComponentDao absenceComponentDao,
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
-      ContractualReferenceDao contractualReferenceDao) {
+      ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
+      UsersRolesOfficesDao uroDao, GroupDao groupDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -116,13 +132,16 @@ public class TemplateUtility {
     this.userDao = userDao;
     this.categoryGroupAbsenceTypeDao = categoryGroupAbsenceTypeDao;
     this.contractualReferenceDao = contractualReferenceDao;
+    this.absenceRequestDao = absenceRequestDao;
+    this.uroDao = uroDao;
+    this.groupDao = groupDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listFor(Security.getUser().get(), Optional.absent(),
-                Optional.of(NotificationFilter.TO_READ));
+                Optional.of(NotificationFilter.TO_READ), Optional.absent());
           }
         });
 
@@ -131,13 +150,56 @@ public class TemplateUtility {
           @Override
           public ModelQuery.SimpleResults<Notification> get() {
             return notificationDao.listFor(Security.getUser().get(), Optional.absent(), 
-                Optional.of(NotificationFilter.ARCHIVED));
+                Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
-        });
+        });    
+    
+    
+  }
+  
+  /**
+   * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
+   *     compensativi da approvare nel template.
+   * @return la quantità di riposi compensativi da approvare.
+   */
+  public final int compensatoryRestRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie da approvare 
+   *     nel template.
+   * @return la quantità di richieste ferie da approvare.
+   */
+  public final int vacationRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), AbsenceRequestType.VACATION_REQUEST, groups, user.person);
+
+    return results.size();
   }
 
 
   /**
+   * Metodo di utilità per il nome del mese.
    * @param month numero mese nel formato stringa (ex: "1").
    * @return il nome del mese.
    */
@@ -147,6 +209,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Metodo di utilità per il nome del mese.
    * @param month numero mese formato integer (ex: 1).
    * @return il nome del mese.
    */
@@ -156,6 +219,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Metodo di utilità per aggiornare il mese successivo.
    * @param month mese di partenza.
    * @return mese successivo a mese di partenza.
    */
@@ -167,6 +231,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Metodo di utilità per aggiornare all'anno successivo.
    * @param month mese di partenza.
    * @param year  anno di partenza.
    * @return anno successivo al mese/anno di partenza.
@@ -179,6 +244,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Metodo di utilità per aggiornare al mese precedente.
    * @param month mese di partenza.
    * @return mese precedente a mese di partenza.
    */
@@ -190,6 +256,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Metodo di utilità per aggiornare all'anno precedente.
    * @param month mese di partenza.
    * @param year  anno di partenza.
    * @return anno precedente al mese/anno di partenza.
@@ -254,6 +321,18 @@ public class TemplateUtility {
   }
   
   /**
+   * Controlla se i flussi sono attivi.
+   * @return true se sono attivi i flussi su ePAS, false altrimenti.
+   * @throws NoSuchFieldException lancia eccezione se non esiste il campo in conf.
+   */
+  public boolean isFlowsActive() throws NoSuchFieldException {
+    if ("true".equals(Play.configuration.getProperty(FLOWS_ACTIVE))) {
+      return true;
+    }
+    return false;
+  }
+  
+  /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
   public List<User> usersInInstitute(Institute institute) {
@@ -288,6 +367,11 @@ public class TemplateUtility {
         .officesTechnicalAdminAllowed(Security.getUser().get()));
   }
 
+  /**
+   * Metodo che ritora la lista dei ruoli assegnabili.
+   * @param office la sede per cui si cerca la lista dei ruoli
+   * @return la lista dei ruoli assegnabili.
+   */
   public List<Role> rolesAssignable(Office office) {
 
     List<Role> roles = Lists.newArrayList();
@@ -305,6 +389,10 @@ public class TemplateUtility {
     return roles;
   }
 
+  /**
+   * Metodo che ritorna la lista dei ruoli di sistema. 
+   * @return la lista dei ruoli di sistema.
+   */
   public List<Role> allSystemRoles() {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
@@ -317,6 +405,10 @@ public class TemplateUtility {
     return roles;
   }
 
+  /**
+   * Metodo che ritorna la lista dei ruoli "fisici".
+   * @return la lista dei ruoli assegnabili a persone fisiche.
+   */
   public List<Role> allPhysicalRoles() {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
@@ -329,6 +421,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Ritorna tutti i ruoli presenti.
    * @return tutti i ruoli presenti.
    */
   public List<Role> getRoles() {
@@ -336,6 +429,7 @@ public class TemplateUtility {
   }
 
   /**
+   * Ritorna la lista degli uffici su cui l'utente ha ruolo di Technical Admin.
    * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN.
    */
   public List<Office> getTechnicalAdminOffices() {
@@ -585,4 +679,46 @@ public class TemplateUtility {
             || comp.competenceCode.code.equalsIgnoreCase(HOLIDAYS_REP)));
     
   }
+  
+  /**
+   * 
+   * @param office la sede per cui si ricercano le persone
+   * @return la lista di persone della sede abili a far parte di un gruppo.
+   */
+  public List<Person> peopleForGroups(Office office) {
+    List<Person> people = personDao.list(Optional.<String>absent(), 
+        Sets.newHashSet(office), false, LocalDate.now().dayOfMonth().withMinimumValue(), 
+        LocalDate.now().dayOfMonth().withMaximumValue(), true).list();
+    return people;
+  }
+  
+  //  /**
+  //   * 
+  //   * @return la quantità di riposi compensativi da approvare per l'utente loggato.
+  //   */
+  //  public int countCompensatoryRestRequests() {
+  //    
+  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
+  //      Security.getUser().get());
+  //    List<AbsenceRequest> list = absenceRequestDao
+  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
+  //            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST);
+  //    
+  //    return list.size();
+  //  }
+  //  
+  //  /**
+  //   * 
+  //   * @return la quantità di ferie da approvare per l'utente loggato.
+  //   */
+  //  public int countVacationsRequests() {
+  //    
+  //    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(
+  //        Security.getUser().get());
+  //    List<AbsenceRequest> list = absenceRequestDao
+  //        .findRequestsToApprove(uroList, LocalDateTime.now().minusMonths(1), 
+  //            Optional.absent(), AbsenceRequestType.VACATION_REQUEST);
+  //    
+  //    return list.size();
+  //  }
 }

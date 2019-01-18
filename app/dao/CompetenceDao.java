@@ -70,7 +70,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year e
-   * al mese month per la persona person.
+   *        al mese month per la persona person.
    */
   public List<Competence> getCompetences(
       Optional<Person> person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
@@ -94,7 +94,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la
-   * persona person.
+   *        persona person.
    */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
@@ -164,7 +164,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di
-   * straordinario (sommando i codici S1 S2 e S3).
+   *        straordinario (sommando i codici S1 S2 e S3).
    */
   public Optional<Integer> valueOvertimeApprovedByMonthAndYear(
       Integer year, Optional<Integer> month, Optional<Person> person,
@@ -192,7 +192,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che
-   * abbiano un valore approvato > 0.
+   *        abbiano un valore approvato > 0.
    */
   public List<Competence> getAllCompetenceForPerson(Person person, Integer year, Integer month) {
     return competenceInMonth(person, year, month, Optional.<List<String>>absent());

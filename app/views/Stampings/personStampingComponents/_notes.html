@@ -2,7 +2,7 @@
  #{accordionGroup 'tickets'}
  
   #{accordionItem ('accordion_contract_meal'+mese.contract.value.id), parent:'tickets', 
-                  title:'Situazione buoni pasto', open:true, color:'primary'} 
+                  title:('Situazione buoni pasto '+mese.value.contractDescription), open:true, color:'primary'} 
        #{if psDto.currentMonth}
 	   	   <p><em>Il giorno attuale non è considerato nel conteggio dei buoni pasto utilizzati.</em></p>
    	   #{/if}

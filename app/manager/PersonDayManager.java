@@ -107,8 +107,8 @@ public class PersonDayManager {
     }
     return Optional.absent();
   }
-  
- 
+
+
   /**
    * 
    * @param personDay il personDay in cui cercare l'assenza
@@ -130,7 +130,7 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
-  
+
   /**
    * 
    * @param personDay il personday da verificare
@@ -229,18 +229,29 @@ public class PersonDayManager {
 
     //1) Calcolare tutte le gapPair
     PairStamping previous = null;
-    for (PairStamping validPair : validPairs) {
+    //Verifico che esistano timbrature appartenenti a zone differenti per non conteggiarle ai 
+    //fini delle coppie valide per la pausa pranzo
+
+    for (PairStamping valid : validPairs) {
       if (previous != null) {
         if ((previous.second.stampType == null
             || previous.second.stampType.isGapLunchPairs())
-            && (validPair.first.stampType == null
-            || validPair.first.stampType.isGapLunchPairs())) {
-
-          allGapPairs.add(new PairStamping(previous.second, validPair.first));
+            && (valid.first.stampType == null
+            || valid.first.stampType.isGapLunchPairs())) {
+          Optional<ZoneToZones> zoneToZones = 
+              zoneDao.getByLinkNames(previous.second.stampingZone, valid.first.stampingZone);
+          if (zoneToZones.isPresent()) {
+            if (!isTimeInDelay(previous, valid, zoneToZones)) {
+              allGapPairs.add(new PairStamping(previous.second, valid.first));
+            }
+          } else {
+            allGapPairs.add(new PairStamping(previous.second, valid.first));
+          }             
         }
       }
-      previous = validPair;
+      previous = valid;
     }
+
 
     //2) selezionare quelle che appartengono alla fascia pranzo,
     // nel calcolo del tempo limare gli estremi a tale fascia se necessario
@@ -381,7 +392,7 @@ public class PersonDayManager {
       setTicketStatusIfNotForced(personDay, false);
       return personDay;
     }
-    
+
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
@@ -419,6 +430,7 @@ public class PersonDayManager {
 
     if (!link.isEmpty() && validPairs.size() > 1) {      
       justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
+
     }
     personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
 
@@ -429,14 +441,14 @@ public class PersonDayManager {
         + personDay.getApprovedOnHoliday()
         + personDay.getApprovedOutOpening()
         + personDay.getJustifiedTimeBetweenZones();
-        
+
 
 
     //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo
     // così posso sfruttare quel campo nel tabellone timbrature
 
     personDay.setTimeAtWork(computedTimeAtWork);
-    
+
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 
@@ -446,7 +458,7 @@ public class PersonDayManager {
     } else {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
     }
-    
+
     // Il caso di assenze a giustificazione "quello che manca"
     if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
       int missingTime = wttd.workingTime - personDay.getTimeAtWork() - personDay.getDecurtedMeal();
@@ -572,8 +584,15 @@ public class PersonDayManager {
    */
   private PersonDay updateTimeAtWorkFixed(PersonDay personDay, WorkingTimeTypeDay wttd) {
 
+    //In caso di giorno festivo niente tempo a lavoro ne festivo.
+    if (personDay.isHoliday()) {
+      personDay.setTimeAtWork(0);
+      setTicketStatusIfNotForced(personDay, false);
+      return personDay;
+    }
+
     if (getAllDay(personDay).isPresent() 
-          && !getAllDay(personDay).get().absenceType.timeForMealTicket
+        && !getAllDay(personDay).get().absenceType.timeForMealTicket
         || (getAssignAllDay(personDay).isPresent() 
             && !getAssignAllDay(personDay).get().absenceType.timeForMealTicket)
         || (getCompleteDayAndAddOvertime(personDay).isPresent() 
@@ -582,9 +601,8 @@ public class PersonDayManager {
     } else {
       setTicketStatusIfNotForced(personDay, true);
     }
-    
-    if (personDay.isHoliday
-        || getAllDay(personDay).isPresent()
+
+    if (getAllDay(personDay).isPresent()
         || getCompleteDayAndAddOvertime(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       return personDay;
@@ -606,15 +624,12 @@ public class PersonDayManager {
     PairStamping pair = validPairs.get(0);
     for (int i = 1; i < validPairs.size(); i++) {
       PairStamping next = validPairs.get(i);
-      if (next != null && !Strings.isNullOrEmpty(pair.second.stampingZone) 
-          && !Strings.isNullOrEmpty(next.first.stampingZone)
-          && !pair.second.stampingZone.equals(next.first.stampingZone)) {
+      if (next != null && stampingsBetweenZones(pair, next)) {
 
         Optional<ZoneToZones> zoneToZones = 
             zoneDao.getByLinkNames(pair.second.stampingZone, next.first.stampingZone);
         if (zoneToZones.isPresent()) {
-          if (DateUtility.toMinute(next.first.date) - DateUtility.toMinute(pair.second.date) 
-              < zoneToZones.get().delay) {
+          if (isTimeInDelay(pair, next, zoneToZones)) {
             timeToJustify +=  
                 (DateUtility.toMinute(next.first.date) 
                     - DateUtility.toMinute(pair.second.date));
@@ -627,6 +642,43 @@ public class PersonDayManager {
       pair = next;
     }
     return timeToJustify;
+  }
+
+  /**
+   * Metodo che controlla se il gap tra due timbrature avviene tra due zone di timbratura diverse.
+   * @param first la prima coppia di timbrature
+   * @param second la seconda coppia di timbrature
+   * @return true se il gap tra le due coppie è fatto tra due zone di timbratura associate.
+   */
+  private boolean stampingsBetweenZones(PairStamping first, PairStamping second) {
+
+    if (!Strings.isNullOrEmpty(first.second.stampingZone) 
+        && !Strings.isNullOrEmpty(second.first.stampingZone) 
+        && !first.second.stampingZone.equals(second.first.stampingZone)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Metodo che verifica se un intervallo tra due timbrature effettuate in un link tra zone
+   * sta all'interno del tempo di trasferimento previsto tra una zona e l'altra.
+   * @param first la prima coppia di timbrature
+   * @param second la seconda coppia di timbrature
+   * @param zoneToZones il link tra zone di timbratura
+   * @return true se il tempo trascorso tra una timbratura e l'altra è inferiore al tempo di
+   *     trasferimento previsto tra una zona e l'altra.
+   */
+  private boolean isTimeInDelay(PairStamping first, PairStamping second, 
+      Optional<ZoneToZones> zoneToZones) {
+    if (!zoneToZones.isPresent()) {
+      return false;
+    }
+    if (DateUtility.toMinute(second.first.date) - DateUtility.toMinute(first.second.date) 
+        < zoneToZones.get().delay) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -658,11 +710,11 @@ public class PersonDayManager {
       personDay.setDifference(0);
       return;
     } 
-    
+
     personDay.setDifference(personDay.getTimeAtWork() - plannedWorkingTime);
-    
+
     // Decurtazione straordinari
-    
+
     // in ogni caso nessun straordinario 
     for (Absence absence : personDay.absences) {
       if (absence.absenceType.getBehaviour(JustifiedBehaviourName.no_overtime).isPresent()) {
@@ -695,7 +747,7 @@ public class PersonDayManager {
         }
       } else {
         throw new IllegalStateException("Handler noOvertime non ancora implementato per " 
-          + absence.justifiedType.name);
+            + absence.justifiedType.name);
       }
     }
 
@@ -874,10 +926,10 @@ public class PersonDayManager {
         && isAllDayAbsences == false && personDay.isHoliday == false
         && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-      
+
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-      
+
     }
 
   }
@@ -1361,7 +1413,7 @@ public class PersonDayManager {
     //tempo a lavoro
     return workingTimeTypeDay.get().holiday;
   }
-  
+
   /**
    * Metodo che controlla se si è trascorso abbastanza tempo in sede per essere considerati 
    *    presenti.
@@ -1396,7 +1448,7 @@ public class PersonDayManager {
     }
     return enough;
   }
-  
+
   /**
    * Implementazione bizzarra dei permessi brevi... Andrà superata.
    * @param pd personDay
