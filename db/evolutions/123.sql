@@ -48,12 +48,10 @@ ALTER TABLE person_month_recap RENAME COLUMN toDate TO to_date;
 ALTER TABLE person_reperibility_types_persons RENAME TO person_reperibility_types_managers;
 ALTER TABLE person_reperibility_types_persons_history RENAME TO person_reperibility_types_managers_history;
 
-ALTER TABLE persons RENAME COLUMN badgeNumber TO badge_number;
 ALTER TABLE persons RENAME COLUMN iid TO i_id;
 ALTER TABLE persons RENAME COLUMN oldid TO old_id;
 ALTER TABLE persons RENAME COLUMN other_surnames TO others_surnames;
 ALTER TABLE persons RENAME COLUMN person_in_charge TO person_in_charge_id;
-ALTER TABLE persons_history RENAME COLUMN badgeNumber TO badge_number;
 ALTER TABLE persons_history RENAME COLUMN iid TO i_id;
 ALTER TABLE persons_history RENAME COLUMN oldid TO old_id;
 ALTER TABLE persons_history RENAME COLUMN other_surnames TO others_surnames;
@@ -92,6 +90,8 @@ ALTER TABLE working_time_type_days_history RENAME COLUMN timeslotexitfrom TO tim
 ALTER TABLE working_time_type_days_history RENAME COLUMN timeslotexitto TO time_slot_exit_to;
 ALTER TABLE working_time_type_days_history RENAME COLUMN workingtime TO working_time;
 
+ALTER TABLE groups_persons RENAME TO groups_people;
+ALTER TABLE groups_persons_history RENAME TO groups_people_history;
 
 # ---!Downs
 
@@ -128,12 +128,10 @@ ALTER TABLE shift_categories_managers_history RENAME TO shift_categories_persons
 ALTER TABLE person_reperibility_types RENAME COLUMN supervisor_id TO supervisor;
 ALTER TABLE person_reperibility_types_history RENAME COLUMN supervisor_id TO supervisor;
 
-ALTER TABLE persons RENAME COLUMN badge_number TO badgeNumber;
 ALTER TABLE persons RENAME COLUMN i_id TO iid;
 ALTER TABLE persons RENAME COLUMN old_id TO oldid;
 ALTER TABLE persons RENAME COLUMN others_surnames TO other_surnames;
 ALTER TABLE persons RENAME COLUMN person_in_charge_id TO person_in_charge;
-ALTER TABLE persons_history RENAME COLUMN badge_number TO badgeNumber;
 ALTER TABLE persons_history RENAME COLUMN i_id TO iid;
 ALTER TABLE persons_history RENAME COLUMN old_id TO oldid;
 ALTER TABLE persons_history RENAME COLUMN others_surnames to other_surnames;
@@ -185,3 +183,7 @@ ALTER TABLE absences_history RENAME COLUMN person_day_id TO personday_id;
 
 ALTER TABLE absence_types_qualifications RENAME COLUMN absence_types_id TO absencetypes_id;
 ALTER TABLE absence_types_qualifications_history RENAME COLUMN absence_types_id TO absencetypes_id;
+
+ALTER TABLE groups_people RENAME TO groups_persons;
+ALTER TABLE groups_people_history RENAME TO groups_persons_history;
+

@@ -6,24 +6,23 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.apache.commons.compress.utils.Lists;
-import org.hibernate.envers.Audited;
 import models.Person;
 import models.base.MutableModel;
+import org.apache.commons.compress.utils.Lists;
+import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
 @Audited
 @Entity
-@Table(name="groups")
+@Table(name = "groups")
 public class Group extends MutableModel {
 
   public String name;
   
   public String description;
   
-  @Column(name="send_flows_email")
+  @Column(name = "send_flows_email")
   public boolean sendFlowsEmail = false;
   
   @ManyToOne
