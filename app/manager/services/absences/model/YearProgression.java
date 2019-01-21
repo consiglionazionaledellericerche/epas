@@ -141,7 +141,7 @@ public enum YearProgression {
       new YearPortion(320, 349, 1),
       new YearPortion(350, 366, 1))),
 
-  vacation10(11, ImmutableList.of(
+  vacation10(10, ImmutableList.of(
       new YearPortion(1, 15, 0),
       new YearPortion(16, 45, 1),
       new YearPortion(46, 106, 1),
@@ -170,7 +170,7 @@ public enum YearProgression {
   permission2(2, ImmutableList.of(
       new YearPortion(1, 44, 0),
       new YearPortion(45, 225, 1),
-      new YearPortion(226, 366, 1)));
+      new YearPortion(226, 336, 1)));
 
   public List<YearPortion> yearPortions;
   public int total;
