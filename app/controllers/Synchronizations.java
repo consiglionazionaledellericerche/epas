@@ -614,7 +614,7 @@ public class Synchronizations extends Controller {
 
     boolean result = managerImportAllPersonInOffice(office);
 
-    if (result == false) {
+    if (!result) {
       flash.error("Per fare questa operazione tutte le persone già esistenti della sede "
           + "devono essere correttamente sincronizzate. Operazione annullata.");
       people(office.id);

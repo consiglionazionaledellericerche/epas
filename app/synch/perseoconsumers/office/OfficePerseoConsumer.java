@@ -42,7 +42,7 @@ public class OfficePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getOfficesEndpoint() + "list";
+      url = PerseoApis.getOfficesEndpoint();
       user = PerseoApis.getPerseoUser();
       pass = PerseoApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
