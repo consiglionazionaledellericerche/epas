@@ -46,7 +46,7 @@ public class PerseoApis {
     }
     return Play.configuration.getProperty(PERSEO_PASS);
   }
-
+  
   public static String getOfficesEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(OFFICES_ENDPOINT);
   }
