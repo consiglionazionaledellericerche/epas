@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 if [ -z "${VIRTUAL_HOST}" ]; then
@@ -199,14 +199,14 @@ sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.con
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
     echo "Applico eventuali evoluzioni al database..."
-    sudo -u ${user} -H play evolutions:apply --%prod
+    play evolutions:apply --%prod
     echo ".... evoluzioni terminate"
   else
     echo "Evoluzioni disabilitate dalla configurazione: EVOLUTIONS_ENABLED=$EVOLUTIONS_ENABLED"; 
   fi
   
   echo "Avvio ${APP}..."
-  sudo -u ${user} -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
+  play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
   echo "....${APP} avviato"
 }
 
@@ -215,7 +215,7 @@ appPlay() {
     echo "Per favore specifica almeno un'azione play da eseguire, es: evolutions, evolutions:apply, etc...."
     return 1
   fi
-  exec sudo -u ${user} -H play $@ --%prod
+  play $@ --%prod
 }
 
 appHelp () {
