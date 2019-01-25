@@ -1,14 +1,12 @@
 package models.exports;
 
 import models.Person;
-
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 /**
  * Esportazione delle informazioni relative alla missione.
- * @author dario
  *
+ * @author dario
  */
 public class MissionFromClient {
 
@@ -16,10 +14,10 @@ public class MissionFromClient {
   public int codiceSede;
   public Long id;
   public Person person;
-  public int matricola;
+  public String matricola;
   public LocalDateTime dataInizio;
   public LocalDateTime dataFine;
   public Long idOrdine;
-  
-  
+
+
 }

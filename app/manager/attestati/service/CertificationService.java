@@ -5,20 +5,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import dao.AbsenceDao;
 import dao.CertificationDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.PersonDayManager;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
@@ -31,7 +28,6 @@ import manager.attestati.dto.show.RigaFormazione;
 import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
-
 import models.Certification;
 import models.Competence;
 import models.Office;
@@ -39,10 +35,8 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.absences.Absence;
 import models.enumerate.CertificationType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.libs.WS.HttpResponse;
 import play.mvc.Http;
 
@@ -66,6 +60,7 @@ public class CertificationService implements ICertificationService {
 
   /**
    * Constructor.
+   *
    * @param certificationsComunication injected.
    * @param absenceDao injected.
    * @param competenceDao injected.
@@ -103,8 +98,8 @@ public class CertificationService implements ICertificationService {
    * Le certificazioni già presenti su attestati.
    *
    * @param person persona
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return null in caso di errore.
    */
   private Map<String, Certification> personAttestatiCertifications(Person person,
@@ -249,7 +244,6 @@ public class CertificationService implements ICertificationService {
     allKey.addAll(epasCertifications.keySet());
     allKey.addAll(attestatiCertifications.keySet());
 
-
     for (String key : allKey) {
 
       Certification epasCertification = epasCertifications.get(key);
@@ -275,8 +269,7 @@ public class CertificationService implements ICertificationService {
         epasCertification.save();
       }
 
-      if (epasCertification.attestatiId == null
-          || !epasCertification.attestatiId.equals(attestatiCertification.attestatiId)) {
+      if (!Objects.equals(epasCertification.attestatiId, attestatiCertification.attestatiId)) {
         epasCertification.attestatiId = attestatiCertification.attestatiId;
         epasCertification.save();
       }
@@ -495,8 +488,8 @@ public class CertificationService implements ICertificationService {
    * Produce le certification delle ore di formazione per la persona.
    *
    * @param person persona
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month,
@@ -528,8 +521,8 @@ public class CertificationService implements ICertificationService {
    * Produce le certification delle assenze per la persona.
    *
    * @param person persona
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> absences(Person person, int year, int month,
@@ -624,8 +617,8 @@ public class CertificationService implements ICertificationService {
    * Produce la certificazione buoni pasto della persona.
    *
    * @param person persona
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
@@ -640,7 +633,7 @@ public class CertificationService implements ICertificationService {
     Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
         .getPersonDayInMonth(person, new YearMonth(year, month)));
 
-    certification.content = mealTicket + "";
+    certification.content = String.valueOf(mealTicket);
 
     certifications.put(certification.aMapKey(), certification);
 
@@ -660,16 +653,16 @@ public class CertificationService implements ICertificationService {
     }
     return map;
   }
-  
+
   @Override
-  public Map<Integer, ContrattoAttestati> getCertificationContracts(Office office, int year,
+  public Map<String, ContrattoAttestati> getCertificationContracts(Office office, int year,
       int month) throws ExecutionException, NoSuchFieldException {
-    
+
     // Pulizia per recuperare il dato sui contratti attivi
-    Map<Integer, ContrattoAttestati> map = Maps.newHashMap();
+    Map<String, ContrattoAttestati> map = Maps.newHashMap();
     for (StatoAttestatoMese statoAttestatoMese : certificationsComunication
         .getStatoAttestatoMese(office, year, month)) {
-      
+
       LocalDate beginContract = new LocalDate(statoAttestatoMese.dipendente.dataAssunzione);
       LocalDate endContract = null;
       if (statoAttestatoMese.dipendente.dataCessazione != null) {
@@ -683,7 +676,7 @@ public class CertificationService implements ICertificationService {
     return map;
 
   }
-  
+
   @Override
   public CruscottoDipendente getCruscottoDipendente(Person person, int year)
       throws ExecutionException, NoSuchFieldException {
@@ -691,7 +684,7 @@ public class CertificationService implements ICertificationService {
     StatoAttestatoMese statoAttestatoMese = null;
     YearMonth yearMonth = null;
     while (statoAttestatoMese == null) {
-      
+
       if (yearMonth == null) {
         //first attempt  
         yearMonth = new YearMonth(LocalDate.now());
@@ -705,7 +698,7 @@ public class CertificationService implements ICertificationService {
           return null;
         }
       }
-      
+
       try {
         for (StatoAttestatoMese item : certificationsComunication
             .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {

@@ -367,7 +367,7 @@ public class Synchronizations extends Controller {
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
         .transform(wrapperFunctionFactory.person()).toList();
 
-    Map<Integer, Person> perseoPeopleByNumber = null;
+    Map<String, Person> perseoPeopleByNumber = null;
     try {
       perseoPeopleByNumber = 
           peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.perseoId));
@@ -446,7 +446,7 @@ public class Synchronizations extends Controller {
     List<Person> people = personDao.listFetched(Optional.<String>absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
-    Map<Integer, Person> perseoPeopleByNumber = null;
+    Map<String, Person> perseoPeopleByNumber = null;
     try {
       perseoPeopleByNumber = peoplePerseoConsumer
           .perseoPeopleByNumber(Optional.fromNullable(office.perseoId));

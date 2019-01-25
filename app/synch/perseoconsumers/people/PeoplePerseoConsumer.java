@@ -219,9 +219,9 @@ public class PeoplePerseoConsumer {
    *
    * @return mappa
    */
-  public Map<Integer, Person> perseoPeopleByNumber(Optional<Long> departmentPerseoId) {
+  public Map<String, Person> perseoPeopleByNumber(Optional<Long> departmentPerseoId) {
 
-    Map<Integer, Person> perseoPeopleMap = Maps.newHashMap();
+    Map<String, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoPeopleByPerseoId(departmentPerseoId).values()) {
       perseoPeopleMap.put(person.number, person);
     }

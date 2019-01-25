@@ -8,13 +8,13 @@ public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaAssenza(Certification certification) {
-    this.codiceSede = Integer.parseInt(certification.person.office.codeId);
-    this.anno = certification.year;
-    this.mese = certification.month;
-    
+    codiceSede = Integer.parseInt(certification.person.office.codeId);
+    anno = certification.year;
+    mese = certification.month;
+
     ItemDipendente dipendente = new ItemDipendente();
-    this.dipendenti.add(dipendente);
-    
+    dipendenti.add(dipendente);
+
     dipendente.matricola = certification.person.number;
     InsertRigaAssenza rigaAssenza = new InsertRigaAssenza();
     rigaAssenza.codiceAssenza = deserializeCode(certification.content);
@@ -22,17 +22,17 @@ public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
     rigaAssenza.giornoFine = deserializeEnd(certification.content);
     dipendente.righeAssenza.add(rigaAssenza);
   }
-  
+
   private String deserializeCode(String key) {
     return key.split(";")[0];
   }
-  
+
   private int deserializeBegin(String key) {
     return Integer.parseInt(key.split(";")[1]);
   }
-  
+
   private int deserializeEnd(String key) {
     return Integer.parseInt(key.split(";")[2]);
   }
-  
+
 }
