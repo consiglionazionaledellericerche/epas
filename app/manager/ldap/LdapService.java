@@ -25,13 +25,6 @@ public class LdapService {
 
   private static final int timeout = 
       Integer.parseInt(Play.configuration.getProperty("ldap.timeout", "1000"));  
-
-  /**
-   * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping
-   * con l'attributo eppn presente in ePAS.
-   */
-  public static final String eppnAttributeName = 
-      Play.configuration.getProperty("ldap.eppn.attribute.name", "eduPersonPrincipalName"); 
       
   /**
    * Esempio autenticazione LDAP.
@@ -55,7 +48,7 @@ public class LdapService {
 
     try {
       SearchControls ctrls = new SearchControls();
-      ctrls.setReturningAttributes(new String[] { "uid", "givenName", "sn", "mail", eppnAttributeName });
+      ctrls.setReturningAttributes(new String[] { "uid", "givenName", "sn", "mail", getEppnAttributeName() });
       ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
       
       DirContext authContext = new InitialDirContext(authEnv);
@@ -65,7 +58,7 @@ public class LdapService {
           authContext.search(baseDn, "(uid=" + username + ")", ctrls);
       javax.naming.directory.SearchResult result = answers.nextElement();      
 
-      return Optional.of(LdapUser.create(result.getAttributes(), eppnAttributeName));
+      return Optional.of(LdapUser.create(result.getAttributes(), getEppnAttributeName()));
     } catch (AuthenticationException authEx) {
       log.info("LDAP Authentication failed for {}", username, authEx);
       return Optional.absent();
@@ -73,5 +66,14 @@ public class LdapService {
       log.error("Something went wrong during LDAP authentication for {}", username, namEx);
       return Optional.absent();
     }
+  }
+  
+  /**
+   * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping
+   * con l'attributo eppn presente in ePAS. 
+   * @return nome del campo utilizzato per fare il match tra gli utenti LDAP e quelli di ePAS.
+   */
+  public static String getEppnAttributeName() {
+    return Play.configuration.getProperty("ldap.eppn.attribute.name", "eduPersonPrincipalName");
   }
 }
