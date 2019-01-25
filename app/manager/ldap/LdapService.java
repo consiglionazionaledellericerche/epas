@@ -67,7 +67,7 @@ public class LdapService {
 
       return Optional.of(LdapUser.create(result.getAttributes(), eppnAttributeName));
     } catch (AuthenticationException authEx) {
-      log.info("LDAP Authentication failed for {}", username);
+      log.info("LDAP Authentication failed for {}", username, authEx);
       return Optional.absent();
     } catch (NamingException namEx) {
       log.error("Something went wrong during LDAP authentication for {}", username, namEx);
