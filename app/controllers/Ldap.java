@@ -64,8 +64,8 @@ public class Ldap extends Controller {
     val eppn = ldapUser.get().getEppn();
     
     if (eppn == null) {
-      log.warn("Failed login for {}, {} attribute not set in LDAP", username, LdapService.eppnAttributeName);
-      flash.error("Oops! %s per %s non presente in LDAP, contattare l'helpdesk", LdapService.eppnAttributeName, username);
+      log.warn("Failed login for {}, {} attribute not set in LDAP", username, LdapService.getEppnAttributeName());
+      flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", LdapService.getEppnAttributeName(), username);
       redirect("/login");
     }
 
@@ -90,8 +90,10 @@ public class Ldap extends Controller {
       redirectToOriginalUrl();
       
     } else {
-      log.warn("Person with mail {} successfully logged in LDAP but unknonw to ePAS", eppn);
-      flash.error("Oops! email %s non riconosciuta da ePAS contattare l'helpdesk", eppn);
+      log.warn("Person with {} {} successfully logged in LDAP but unknonw to ePAS", 
+          LdapService.getEppnAttributeName(), eppn);
+      flash.error("Oops! {} %s non riconosciuto da ePAS. Contattare l'helpdesk.", 
+          LdapService.getEppnAttributeName(), eppn);
       redirect("/login");
     }
   }
