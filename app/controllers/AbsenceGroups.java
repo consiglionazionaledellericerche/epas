@@ -1,15 +1,6 @@
 
 package controllers;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -18,7 +9,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -29,13 +19,17 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -73,6 +67,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
+import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -80,7 +75,6 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.mvc.results.Redirect;
 import security.SecurityRules;
 
 @Slf4j
@@ -121,8 +115,6 @@ public class AbsenceGroups extends Controller {
   private static AbsenceDao absenceDao;
   @Inject
   private static IWrapperFactory wrapperFactory;
-  @Inject
-  private static ContractDao contractDao;
 
   /**
    * La lista delle categorie definite.
@@ -471,8 +463,8 @@ public class AbsenceGroups extends Controller {
    * Salva il nuovo/modificato codice di assenza.
    *
    * @param absenceType il tipo di assenza
-   * @param tecnologi   se il codice di assenza è valido per i tecnologi
-   * @param tecnici     se il codice di assenza è valido per i tecnici
+   * @param tecnologi se il codice di assenza è valido per i tecnologi
+   * @param tecnici se il codice di assenza è valido per i tecnici
    */
   public static void saveAbsenceType(@Valid AbsenceType absenceType,
       boolean tecnologi, boolean tecnici) {
@@ -515,6 +507,7 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Tab per la consultazione di tutti i codici e link per l'inserimento.
+   *
    * @param personId persona selezionata
    * @param from data selezionata
    */
@@ -525,8 +518,8 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
 
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
-            null, null, null, true, null, null, null, null, false, false);
-    
+        null, null, null, true, null, null, null, null, false, false);
+
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
     for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
@@ -547,16 +540,16 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per la simulazione di inserimento assenze.s
    *
-   * @param personId         persona
-   * @param from             data inizio
-   * @param categoryTab      tab
-   * @param to               data fine
+   * @param personId persona
+   * @param from data inizio
+   * @param categoryTab tab
+   * @param to data fine
    * @param groupAbsenceType gruppo assenze
-   * @param switchGroup      se cambio gruppo di assenze
-   * @param absenceType      tipo assenza
-   * @param justifiedType    tipo giustificativo
-   * @param hours            ore
-   * @param minutes          minuti
+   * @param switchGroup se cambio gruppo di assenze
+   * @param absenceType tipo assenza
+   * @param justifiedType tipo giustificativo
+   * @param hours ore
+   * @param minutes minuti
    */
   public static void insert(
       Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
@@ -572,7 +565,7 @@ public class AbsenceGroups extends Controller {
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
-            to, recoveryDate, groupAbsenceType, switchGroup, absenceType, 
+            to, recoveryDate, groupAbsenceType, switchGroup, absenceType,
             justifiedType, hours, minutes, false, false);
 
     InsertReport insertReport = absenceService.insert(person,
@@ -589,6 +582,7 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Inserimento assistito partendo dalla ricerca.
+   *
    * @param personId persona
    * @param from data inizio
    * @param absenceType tipo
@@ -606,7 +600,7 @@ public class AbsenceGroups extends Controller {
     if (groupAbsenceType.firstOfChain() != null) {
       groupAbsenceType = groupAbsenceType.firstOfChain();
     }
-    if (!groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.simpleGrouping)) {
+    if (groupAbsenceType.pattern != GroupAbsenceTypePattern.simpleGrouping) {
       absenceType = null;
     }
 
@@ -616,7 +610,7 @@ public class AbsenceGroups extends Controller {
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
-        absenceForm.from, absenceForm.to, 
+        absenceForm.from, absenceForm.to,
         absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
         absenceForm.hours, absenceForm.minutes, false, absenceManager);
 
@@ -626,15 +620,15 @@ public class AbsenceGroups extends Controller {
   /**
    * End Point per il salvataggio di assenze.
    *
-   * @param personId         persona
-   * @param from             data inizio
-   * @param to               data fine
+   * @param personId persona
+   * @param from data inizio
+   * @param to data fine
    * @param groupAbsenceType gruppo assenze
-   * @param absenceType      tipo assenza
-   * @param justifiedType    giustificativo
-   * @param hours            ore
-   * @param minutes          minuti
-   * @param forceInsert      forza inserimento
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @param forceInsert forza inserimento
    */
   public static void save(Long personId, LocalDate from, LocalDate to, LocalDate recoveryDate,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType,
@@ -663,13 +657,13 @@ public class AbsenceGroups extends Controller {
         if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
 
           absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
-        }        
+        }
         personDay.absences.add(absence);
         rules.checkIfPermitted(absence);
         absence.save();
         personDay.save();
 
-        notificationManager.notificationAbsencePolicy(Security.getUser().get(), 
+        notificationManager.notificationAbsencePolicy(Security.getUser().get(),
             absence, groupAbsenceType, true, false, false);
 
       }
@@ -683,7 +677,6 @@ public class AbsenceGroups extends Controller {
       flash.success("Codici di assenza inseriti.");
 
     }
-
 
     //String referer = request.headers.get("referer").value();
 
@@ -703,9 +696,9 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per visualizzare lo stato di un gruppo assenze alla data.
    *
-   * @param personId           persona
+   * @param personId persona
    * @param groupAbsenceTypeId gruppo
-   * @param from               data
+   * @param from data
    */
   public static void groupStatus(Long personId, Long groupAbsenceTypeId, LocalDate from) {
 
@@ -742,6 +735,7 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Elenco delle inizializzazioni assenze.
+   *
    * @param officeId sede
    * @param groupAbsenceTypeId gruppo
    */
@@ -770,7 +764,7 @@ public class AbsenceGroups extends Controller {
       boolean existInitialization = false;
       for (InitializationGroup initializationGroup : person.initializationGroups) {
 
-        if (groupAbsenceType == null 
+        if (groupAbsenceType == null
             || groupAbsenceType.equals(initializationGroup.groupAbsenceType)) {
           existInitialization = true;
           initializations.add(initializationGroup);
@@ -790,11 +784,11 @@ public class AbsenceGroups extends Controller {
   /**
    * End point per definire l'inizializzazione di un gruppo.
    *
-   * @param personId           persona
+   * @param personId persona
    * @param groupAbsenceTypeId gruppo
-   * @param date               data
+   * @param date data
    */
-  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date, 
+  public static void initialization(Long personId, Long groupAbsenceTypeId, LocalDate date,
       boolean redirectToStatus) {
 
     Person person = personDao.getPersonById(personId);
@@ -839,7 +833,6 @@ public class AbsenceGroups extends Controller {
       initializationGroup.averageWeekTime = averageWeekWorkingTime;
     }
 
-
     render(date, initializationGroup, periodChain, absencePeriod, redirectToStatus);
 
   }
@@ -849,7 +842,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup initializationGroup
    */
-  public static void saveInitialization(@Valid InitializationGroup initializationGroup, 
+  public static void saveInitialization(@Valid InitializationGroup initializationGroup,
       boolean redirectToStatus) {
 
     // Lo stato della richiesta
@@ -864,7 +857,6 @@ public class AbsenceGroups extends Controller {
         initializationGroup.groupAbsenceType, initializationGroup.date);
     Preconditions.checkState(!periodChain.periods.isEmpty());
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
-
 
     //Tempo a lavoro medio
     Optional<WorkingTimeType> wtt = workingTimeTypeDao
@@ -899,10 +891,10 @@ public class AbsenceGroups extends Controller {
     flash.success("Inizializzazione salvata con successo.");
 
     if (redirectToStatus) {
-      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
           initializationGroup.date);
     } else {
-      absenceInitializations(initializationGroup.person.office.id, 
+      absenceInitializations(initializationGroup.person.office.id,
           initializationGroup.groupAbsenceType.id);
     }
   }
@@ -912,7 +904,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup inizializzazione
    */
-  public static void deleteInitialization(InitializationGroup initializationGroup, 
+  public static void deleteInitialization(InitializationGroup initializationGroup,
       boolean redirectToStatus) {
 
     notFoundIfNull(initializationGroup);
@@ -926,10 +918,10 @@ public class AbsenceGroups extends Controller {
     //TODO: check del gruppo per i ricalcoli
 
     if (redirectToStatus) {
-      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id, 
+      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
           initializationGroup.date);
     } else {
-      absenceInitializations(initializationGroup.person.office.id, 
+      absenceInitializations(initializationGroup.person.office.id,
           initializationGroup.groupAbsenceType.id);
     }
 
@@ -962,7 +954,7 @@ public class AbsenceGroups extends Controller {
    * metodo che cancella una certa assenza fino ad un certo periodo.
    *
    * @param absenceId id dell'assenza
-   * @param dateTo    la data di fine periodo
+   * @param dateTo la data di fine periodo
    */
   public static void delete(final long absenceId, @Valid LocalDate dateTo) {
 
@@ -991,7 +983,6 @@ public class AbsenceGroups extends Controller {
       flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
     }
 
-
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
     if (!currentUser.isSystemUser()) {
@@ -1006,6 +997,7 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Gli errori sulle assenze di quella sede.
+   *
    * @param officeId sede
    */
   public static void absenceTroubles(Long officeId, int year, int month) {
@@ -1015,9 +1007,9 @@ public class AbsenceGroups extends Controller {
     rules.checkIfPermitted(office);
 
     //Tutte le persone attive nel mese attuale?
-    List<Person> people = personDao.list(Optional.<String>absent(), 
-        Sets.newHashSet(office), false, 
-        new LocalDate(year, month, 1), 
+    List<Person> people = personDao.list(Optional.<String>absent(),
+        Sets.newHashSet(office), false,
+        new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true).list();
 
     //Tutti gli absenceErrors di quelle persone...
@@ -1066,8 +1058,8 @@ public class AbsenceGroups extends Controller {
   /**
    * Salva i valori altrimenti non modificabili.
    *
-   * @param absenceId        tipo assenza
-   * @param justifiedType    tipo giustificativo
+   * @param absenceId tipo assenza
+   * @param justifiedType tipo giustificativo
    * @param justifiedMinutes minuti specificati
    */
   public static void saveAbsenceCriticalValue(Long absenceId,
@@ -1104,9 +1096,8 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Se lo stato del db è consistente la modellazione via enumerati (che garantisce il corretto
-   * funzionamento).
-   * Entità controllate:
-   * Tab, Categorie, Gruppi, Parte takable, Parte completamento, Codici Assenza  
+   * funzionamento). Entità controllate: Tab, Categorie, Gruppi, Parte takable, Parte completamento,
+   * Codici Assenza
    */
   public static void consistencyGroups() {
 
@@ -1160,8 +1151,8 @@ public class AbsenceGroups extends Controller {
   }
 
   /**
-   * Migra tutti i 661MO presi nel 2018, in accordo alle nuove normative.
-   * Una volta che sarà applicato a Roma sarà possibile cancellarlo ...
+   * Migra tutti i 661MO presi nel 2018, in accordo alle nuove normative. Una volta che sarà
+   * applicato a Roma sarà possibile cancellarlo ...
    */
   @SuppressWarnings("deprecation")
   public static void migration661M() {
@@ -1183,14 +1174,13 @@ public class AbsenceGroups extends Controller {
     // tutte le assenze 661MO
     for (Absence absence : absences) {
 
-
       // utilizzate dal 1/1/2018 al 31/12/2018
       if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), yearInterval)) {
         continue;
       }
       IWrapperPerson wPerson = wrapperFactory.create(absence.personDay.person);
 
-      Optional<Contract> contract = wPerson.getCurrentContract(); 
+      Optional<Contract> contract = wPerson.getCurrentContract();
       if (!contract.isPresent()) {
         continue;
       }
@@ -1201,16 +1191,14 @@ public class AbsenceGroups extends Controller {
         beginCalculation = yearInterval.getBegin();
       }
 
-      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), 
+      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(),
           new DateInterval(contract.get().beginDate, contract.get().endDate))) {
         continue;
       }
 
+      IWrapperPersonDay wPersonDay = wrapperFactory.create(absence.personDay);
 
-
-      IWrapperPersonDay wPersonDay = wrapperFactory.create(absence.personDay);  
-
-      Optional<WorkingTimeTypeDay>  wttd = wPersonDay.getWorkingTimeTypeDay();
+      Optional<WorkingTimeTypeDay> wttd = wPersonDay.getWorkingTimeTypeDay();
 
       if (!wttd.isPresent()) {
         continue;
@@ -1245,12 +1233,11 @@ public class AbsenceGroups extends Controller {
 
         // saranno inserite in uno stato di warning
         toScan.add(absence.personDay.person);
-      }      
+      }
 
     }
     JPA.em().flush();
     JPAPlugin.closeTx(false);
-    
 
     if (!toUpdate.isEmpty()) {
       for (Person person : toUpdate) {
@@ -1291,6 +1278,7 @@ public class AbsenceGroups extends Controller {
   /**
    * Import (e sincronizzazione) assenze da attestati. Le persone devono avere il monte ore
    * correttamente inizializzato.
+   *
    * @param officeId sede
    */
   public static void importCertificationsAbsences(Long officeId) {
@@ -1298,8 +1286,8 @@ public class AbsenceGroups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    List<IWrapperPerson> people = Lists.newArrayList(); 
-    Map<Integer, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
+    List<IWrapperPerson> people = Lists.newArrayList();
+    Map<String, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
 
     int year = LocalDate.now().getYear();
 
@@ -1324,10 +1312,10 @@ public class AbsenceGroups extends Controller {
     render(people, office, year, certificationsSummary);
   }
 
-  /** 
+  /**
    * Le assenze in attestati.
    */
-  public static void certificationsAbsences(Long personId, Integer year) 
+  public static void certificationsAbsences(Long personId, Integer year)
       throws NoSuchFieldException, ExecutionException {
 
     Person person = personDao.getPersonById(personId);
@@ -1342,6 +1330,7 @@ public class AbsenceGroups extends Controller {
 
   /**
    * Ricarica lo stato in cache della situazione import assenze.
+   *
    * @param personId persona
    */
   public static void reloadCertificationAbsences(Long personId) {
@@ -1365,7 +1354,7 @@ public class AbsenceGroups extends Controller {
   /**
    * Importa le assenze mancanti da attestati.
    */
-  public static void syncCertificationsAbsences(Long personId, Integer year) 
+  public static void syncCertificationsAbsences(Long personId, Integer year)
       throws NoSuchFieldException, ExecutionException {
 
     Person person = personDao.getPersonById(personId);
@@ -1373,7 +1362,7 @@ public class AbsenceGroups extends Controller {
     rules.checkIfPermitted(person.office);
     LocalDate updateFrom = LocalDate.now();
 
-    List<Absence> absences =  absenceCertificationService.absencesToPersist(person, year);
+    List<Absence> absences = absenceCertificationService.absencesToPersist(person, year);
 
     for (Absence absence : absences) {
       JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.

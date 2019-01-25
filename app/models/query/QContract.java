@@ -52,7 +52,7 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final BooleanPath onCertificate = createBoolean("onCertificate");
 
-    public final NumberPath<Long> perseoId = createNumber("perseoId", Long.class);
+    public final StringPath perseoId = createString("perseoId");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

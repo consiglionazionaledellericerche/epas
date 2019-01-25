@@ -82,7 +82,7 @@ public interface ICertificationService {
    * @param month mese
    * @return mappa matricola - contratto
    */
-  Map<Integer, ContrattoAttestati> getCertificationContracts(Office office, int year, int month) 
+  Map<String, ContrattoAttestati> getCertificationContracts(Office office, int year, int month)
       throws ExecutionException, NoSuchFieldException;
   
   /**
