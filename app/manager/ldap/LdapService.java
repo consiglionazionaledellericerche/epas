@@ -55,7 +55,7 @@ public class LdapService {
 
     try {
       SearchControls ctrls = new SearchControls();
-      ctrls.setReturningAttributes(new String[] { "uid", "givenName", "sn", "mail" });
+      ctrls.setReturningAttributes(new String[] { "uid", "givenName", "sn", "mail", eppnAttributeName });
       ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
       
       DirContext authContext = new InitialDirContext(authEnv);
