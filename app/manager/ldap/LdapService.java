@@ -30,7 +30,7 @@ public class LdapService {
    * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping
    * con l'attributo eppn presente in ePAS.
    */
-  private static final String eppnAttributeName = 
+  public static final String eppnAttributeName = 
       Play.configuration.getProperty("ldap.eppn.attribute.name", "eduPersonPrincipalName"); 
       
   /**

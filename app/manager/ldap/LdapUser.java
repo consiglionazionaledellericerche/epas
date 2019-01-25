@@ -40,6 +40,6 @@ public class LdapUser {
         attributes.get("givenName") != null ? attributes.get("givenName").get().toString() : null, 
         attributes.get("sn") != null ? attributes.get("sn").get().toString() : null, 
         attributes.get("mail") != null ? attributes.get("mail").get().toString() : null,
-        attributes.get(eppnAttributeName).get().toString());
+        attributes.get(eppnAttributeName) != null ? attributes.get(eppnAttributeName).get().toString() : null);
   }
 }

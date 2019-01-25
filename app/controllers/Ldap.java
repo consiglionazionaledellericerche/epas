@@ -61,14 +61,14 @@ public class Ldap extends Controller {
       redirect("/login");
     }
 
-    if (ldapUser.get().getMail() == null) {
-      log.info("Failed login for {}, mail attribute not set in LDAP", username);
-      flash.error("Oops! email per %s non presente in LDAP, contattare l'helpdesk", username);
-      redirect("/login");
-    }
-    
     val eppn = ldapUser.get().getEppn();
     
+    if (eppn == null) {
+      log.warn("Failed login for {}, {} attribute not set in LDAP", username, LdapService.eppnAttributeName);
+      flash.error("Oops! %s per %s non presente in LDAP, contattare l'helpdesk", LdapService.eppnAttributeName, username);
+      redirect("/login");
+    }
+
     log.debug("LDAP user = {}", ldapUser.get());
     
     Person person = personDao.byEppn(eppn).orNull();
