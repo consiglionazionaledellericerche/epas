@@ -6,7 +6,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -14,41 +13,37 @@ import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.rest.ApiRequestException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
+import manager.BadgeManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
-
+import models.BadgeSystem;
 import models.Contract;
 import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.people.PersonBadge;
 import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
@@ -77,6 +72,8 @@ public class Synchronizations extends Controller {
   static UserManager userManager;
   @Inject
   static OfficeManager officeManager;
+  @Inject
+  static BadgeManager badgeManager;
   @Inject
   static ConfigurationManager configurationManager;
   @Inject
@@ -152,7 +149,7 @@ public class Synchronizations extends Controller {
    * Lega l'istituto epas al perseoId. Da utilizzare manualmente con cautela!!!
    *
    * @param epasInstituteId id Istituto
-   * @param perseoId        Perseo id dell'istituto.
+   * @param perseoId Perseo id dell'istituto.
    */
   public static void joinInstitute(Long epasInstituteId, Long perseoId) {
     Optional<Institute> institute = officeDao.instituteById(epasInstituteId);
@@ -307,6 +304,7 @@ public class Synchronizations extends Controller {
 
   /**
    * Sincronizzazione persone.
+   *
    * @param officeId sede
    */
   public static void people(Long officeId) {
@@ -334,8 +332,7 @@ public class Synchronizations extends Controller {
       epasWrapperedPeople.put(person.getValue().id, person);
     }
 
-
-    // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli 
+    // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli
     // i ruoli (amministrativi) che ogni persona dell'office ha (anche in altri office).
 
     Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao
@@ -369,7 +366,7 @@ public class Synchronizations extends Controller {
 
     Map<String, Person> perseoPeopleByNumber = null;
     try {
-      perseoPeopleByNumber = 
+      perseoPeopleByNumber =
           peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.perseoId));
     } catch (ApiRequestException ex) {
       flash.error("%s", ex);
@@ -382,7 +379,7 @@ public class Synchronizations extends Controller {
    * Esegue il join per una persona specifica.
    *
    * @param epasPersonId id della Persona
-   * @param perseoId     Perseo id da legare alla persona specificata.
+   * @param perseoId Perseo id da legare alla persona specificata.
    */
   public static void joinPerson(Long epasPersonId, Long perseoId) {
 
@@ -408,7 +405,7 @@ public class Synchronizations extends Controller {
   // TODO: spostare nell'updater?
 
   /**
-   * @param epasPerson   Person presente su ePas
+   * @param epasPerson Person presente su ePas
    * @param perseoPerson Person prelevata da Perseo.
    */
   private static void join(Person epasPerson, Person perseoPerson) {
@@ -424,7 +421,7 @@ public class Synchronizations extends Controller {
     epasPerson.surname = perseoPerson.surname;
     epasPerson.number = perseoPerson.number;
     // per adesso le email non combaciano @iit.cnr.it vs @cnr.it
-    epasPerson.email = perseoPerson.email; 
+    epasPerson.email = perseoPerson.email;
     epasPerson.eppn = perseoPerson.email;
     epasPerson.qualification = perseoPerson.qualification;
     epasPerson.perseoId = perseoPerson.perseoId;
@@ -496,7 +493,7 @@ public class Synchronizations extends Controller {
       }
 
       personInPerseo.get().office = office.get();
-      personInPerseo.get().beginDate = 
+      personInPerseo.get().beginDate =
           LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
 
       validation.valid(personInPerseo.get());
@@ -571,19 +568,19 @@ public class Synchronizations extends Controller {
     for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
       if (epasPeopleByPerseoId.get(perseoPerson.perseoId) == null) {
 
-        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}", 
+        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
             perseoPerson.fullName(), perseoPerson.number,
             perseoPerson.qualification, perseoPerson.perseoId);
 
         // join dell'office (in automatico ancora non c'è...)
         perseoPerson.office = office;
-        perseoPerson.beginDate = 
+        perseoPerson.beginDate =
             LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
         validation.valid(perseoPerson);
         if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
           log.info("L'importazione della persone con perseoId={} ha comportato errori di "
-              + "validazione nella persona. errors={}.", 
+                  + "validazione nella persona. errors={}.",
               perseoPerson.perseoId, validation.errorsMap());
           Validation.clear();
           continue;
@@ -593,7 +590,7 @@ public class Synchronizations extends Controller {
         if (!personCreator(perseoPerson).isPresent()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
           log.info("L'importazione della persone con perseoId={} ha comportato errori di "
-              + "validazione nella persona. errors={}.", 
+                  + "validazione nella persona. errors={}.",
               perseoPerson.perseoId, validation.errorsMap());
           Validation.clear();
           continue;
@@ -652,7 +649,7 @@ public class Synchronizations extends Controller {
         flash.error("%s", ex);
       }
     }
-    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId, 
+    render(activeContractsEpasByPersonPerseoId, perseoDepartmentActiveContractsByPersonPerseoId,
         office);
   }
 
@@ -660,7 +657,7 @@ public class Synchronizations extends Controller {
    * Esegue il join per una persona specifica.
    *
    * @param epasContractId id del Contratto su ePas
-   * @param perseoId       id del Contratto su Perseo.
+   * @param perseoId id del Contratto su Perseo.
    */
   public static void joinContract(Long epasContractId, Long perseoId) {
 
@@ -685,6 +682,7 @@ public class Synchronizations extends Controller {
 
   /**
    * Associa tutti i contratti attivi.
+   *
    * @param officeId officeId
    */
   public static void joinAllActiveContractsInOffice(Long officeId) {
@@ -726,11 +724,10 @@ public class Synchronizations extends Controller {
     oldActiveContracts(office.id);
   }
 
-
   // TODO: spostare nell'updater?
 
   /**
-   * @param epasContract   contratto presente su ePas
+   * @param epasContract contratto presente su ePas
    * @param perseoContract contratto Prelevato da Perseo.
    */
   private static void joinUpdateContract(Contract epasContract, Contract perseoContract) {
@@ -804,7 +801,7 @@ public class Synchronizations extends Controller {
 
     if (perseoDepartmentActiveContractsByPersonPerseoId != null) {
       for (Contract perseoContract : perseoDepartmentActiveContractsByPersonPerseoId.values()) {
-        Contract epasContract = 
+        Contract epasContract =
             activeContractsEpasByPersonPerseoId.get(perseoContract.person.perseoId);
         if (epasContract != null) {
           continue;
@@ -870,5 +867,35 @@ public class Synchronizations extends Controller {
     flash.success("Istituto %s desincronizzato.", institute.name);
     oldInstitutes();
   }
-  
+
+  public static void test(Long id) {
+
+    final Office office = officeDao.getOfficeById(id);
+    notFoundIfNull(office);
+    List<PersonBadge> importedBadges = new ArrayList<>(0);
+    try {
+      importedBadges = peoplePerseoConsumer.getOfficeBadges(office.perseoId).get();
+    } catch (InterruptedException | ExecutionException e) {
+      flash.error("Impossibile i badge della sede con id %s: %s", office.perseoId,
+          e.getMessage());
+    }
+
+    if (!importedBadges.isEmpty()) {
+      BadgeSystem badgeSystem = badgeManager.getOrCreateDefaultBadgeSystem(office);
+
+      importedBadges.forEach(personBadge -> {
+        Person person = personDao.getPersonByPerseoId(personBadge.getPersonId());
+        if (person == null) {
+          log.warn("Sincronizzazione Badge: persona con perseoId={} non presente",
+              personBadge.getPersonId());
+        } else {
+          badgeManager.createPersonBadge(person, personBadge.getBadge(), badgeSystem);
+        }
+      });
+      BadgeSystems.edit(badgeSystem.id);
+    }
+    // TODO: 28/01/19 decidere cosa renderizzare in caso di fallimento
+    render();
+  }
+
 }
