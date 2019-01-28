@@ -25,6 +25,8 @@ public class PerseoApis {
   private static final String PERSON_FOR_EPAS_ENDPOINT =
       "perseo.rest.personforepasbyperseoid";
   private static final String ALL_ROLES_ENDPOINT = "perseo.rest.allrolesforepas";
+  private static final String OFFICE_BADGES = "endpoint.officebadges";
+  private static final String PERSON_BADGE = "endpoint.personbadge";
 
   private static String getPerseoBaseUrl() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(PERSEO_BASE_URL))) {
@@ -90,4 +92,11 @@ public class PerseoApis {
     return getPerseoBaseUrl() + Play.configuration.getProperty(ALL_ROLES_ENDPOINT);
   }
 
+  public static String getDepartmentsBadges() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(OFFICE_BADGES);
+  }
+
+  public static String getPersonBadge() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(PERSON_BADGE);
+  }
 }

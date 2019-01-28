@@ -12,23 +12,18 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-
 import dao.QualificationDao;
-
 import helpers.rest.ApiRequestException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
 import lombok.extern.slf4j.Slf4j;
-
+import models.Office;
 import models.Person;
 import models.Qualification;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-
 import synch.perseoconsumers.PerseoApis;
 
 @Slf4j
@@ -148,12 +143,12 @@ public class PeoplePerseoConsumer {
   /**
    * Conversione a oggetti epas. PerseoPerson.
    *
-   * @param perseoPerson      da convertire
+   * @param perseoPerson da convertire
    * @param qualificationsMap mappa delle qualifiche epas
    * @return person
    */
   private Person epasConverter(PerseoPerson perseoPerson,
-                               Map<Integer, Qualification> qualificationsMap) {
+      Map<Integer, Qualification> qualificationsMap) {
 
     Person person = new Person();
     person.name = perseoPerson.firstname;
@@ -251,4 +246,90 @@ public class PeoplePerseoConsumer {
     return Optional.fromNullable(epasConverter(perseoPerson, qualificationsMap));
   }
 
+  public ListenableFuture<PersonBadge> getPersonBadge(Long personId) {
+
+    final String url;
+    final String user;
+    final String pass;
+
+    try {
+      url = PerseoApis.getPersonBadge() + personId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Richiesta REST GET {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, response -> {
+      if (!response.success()) {
+        final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+            response.getStatus(), response.getStatusText());
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+      log.info("Recuperato Json contenente il badge della persona con id {}", personId);
+      try {
+        return new Gson().fromJson(response.getJson(), PersonBadge.class);
+      } catch (JsonSyntaxException ex) {
+        final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+    }, MoreExecutors.directExecutor());
+
+  }
+
+
+  public ListenableFuture<List<PersonBadge>> getOfficeBadges(Long departmentPerseoId) {
+
+    final String url;
+    final String user;
+    final String pass;
+
+    try {
+      url = PerseoApis.getDepartmentsBadges() + departmentPerseoId;
+      user = PerseoApis.getPerseoUser();
+      pass = PerseoApis.getPerseoPass();
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Richiesta REST GET {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, response -> {
+      if (!response.success()) {
+        final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+            response.getStatus(), response.getStatusText());
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+      log.info("Recuperato Json contenente i badges dell'ufficio con id {}", departmentPerseoId);
+      try {
+        return new Gson().fromJson(response.getJson(), new TypeToken<List<PersonBadge>>() {
+          private static final long serialVersionUID = -203781881911244237L;
+        }.getType());
+      } catch (JsonSyntaxException ex) {
+        final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+    }, MoreExecutors.directExecutor());
+
+  }
 }
