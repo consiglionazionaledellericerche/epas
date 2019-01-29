@@ -150,7 +150,7 @@ public class BadgeSystems extends Controller {
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
-    final BadgeSystem badgeSystem = GenericModel.findById(id);
+    final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
     rules.checkIfPermitted(badgeSystem.office);
 

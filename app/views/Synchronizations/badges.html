@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+<div class="container">
+#{title title:'Sincronizzazione Badge - ' + office /}
+</div>
+<div class="container">
+  
+  <table class="table table-bordered" datatable>
+  <thead>
+	<tr>
+	  <th>Dipendente</th>
+		<th>Matricola</th>
+		<th>ID esterno</th>
+	  <th>Badges</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list items:people, as:'person'}
+	    <tr>
+	      <td>
+						<em><strong>${person}</strong></em>
+				</td>
+				<td>
+					<em>${person.number}</em>
+				</td>
+				<td>
+					<em>${person.perseoId}</em>
+				</td>
+	      <td>
+	      #{list items:person.badges, as:'badge'}
+	        <span class="label label-success"><em>${badge.code}</em></span>
+				#{/list}
+	      </td>
+	    </tr>
+	#{/list}
+  </tbody>
+  </table>
+
+	#{b.buttons center:true}
+		#{b.link @importBadges(office.id), title:'Importa tutti', color: 'info', fa: 'cloud-download' /}
+	#{/b.buttons}
+</div>
+
+

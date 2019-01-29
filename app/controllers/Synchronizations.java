@@ -120,8 +120,8 @@ public class Synchronizations extends Controller {
    */
   public static void oldInstitutes() {
 
-    List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
-        Optional.<String>absent(), Optional.absent(),
+    List<Institute> institutes = officeDao.institutes(Optional.absent(),
+        Optional.absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<String, Institute> perseoInstitutesByCds = null;
@@ -868,16 +868,32 @@ public class Synchronizations extends Controller {
     oldInstitutes();
   }
 
-  public static void test(Long id) {
+  public static void badges(Long officeId) {
+    if (officeId == null) {
+      badRequest("officeId non valido");
+    }
 
-    final Office office = officeDao.getOfficeById(id);
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    final List<Person> people = office.persons;
+    render(office, people);
+  }
+
+  public static void importBadges(Long officeId) {
+
+    if (officeId == null) {
+      badRequest("officeId non valido");
+    }
+
+    final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     List<PersonBadge> importedBadges = new ArrayList<>(0);
     try {
       importedBadges = peoplePerseoConsumer.getOfficeBadges(office.perseoId).get();
     } catch (InterruptedException | ExecutionException e) {
-      flash.error("Impossibile i badge della sede con id %s: %s", office.perseoId,
-          e.getMessage());
+      flash.error("Impossibile importare i badge della sede con perseoId %s: %s",
+          office.perseoId, e.getMessage());
     }
 
     if (!importedBadges.isEmpty()) {
@@ -892,10 +908,9 @@ public class Synchronizations extends Controller {
           badgeManager.createPersonBadge(person, personBadge.getBadge(), badgeSystem);
         }
       });
-      BadgeSystems.edit(badgeSystem.id);
+      flash.success("Badge correttamente importati");
     }
-    // TODO: 28/01/19 decidere cosa renderizzare in caso di fallimento
-    render();
+    badges(office.id);
   }
 
 }

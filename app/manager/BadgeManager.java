@@ -1,6 +1,8 @@
 package manager;
 
+import dao.BadgeReaderDao;
 import dao.RoleDao;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -24,10 +26,13 @@ import models.UsersRolesOffices;
 public class BadgeManager {
 
   private final RoleDao roleDao;
+  private final BadgeReaderDao badgeReaderDao;
 
   @Inject
-  public BadgeManager(RoleDao roleDao) {
+  public BadgeManager(RoleDao roleDao, BadgeReaderDao badgeReaderDao) {
     this.roleDao = roleDao;
+
+    this.badgeReaderDao = badgeReaderDao;
   }
 
   /**
@@ -65,63 +70,74 @@ public class BadgeManager {
    */
   public boolean createPersonBadge(Person person, String code, BadgeSystem badgeSystem) {
 
-    boolean alreadyPresent = badgeSystem.badges.stream().anyMatch(badge -> badge.code.equals(code));
+    final String codeNormalized = String.valueOf(Integer.valueOf(code));
+    Optional<Badge> alreadyPresent = badgeSystem.badges.stream()
+        .filter(badge -> badge.code.equals(codeNormalized)).findAny();
 
-    if (!alreadyPresent) {
+    if (alreadyPresent.isPresent()) {
+      log.warn("Il Badge n. {} è già presente per {} - {}", codeNormalized, person, person.office);
+    } else {
       for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
         Badge badge = new Badge();
         badge.person = person;
-        badge.setCode(code);
+        badge.code = codeNormalized;
         badge.badgeSystem = badgeSystem;
         badge.badgeReader = badgeReader;
         badge.save();
       }
-      log.info("Creato nuovo badge {} per {}", code, person);
+      log.info("Creato nuovo badge {} per {}", codeNormalized, person);
     }
     // Restituisce false se non è stato creato
-    return !alreadyPresent;
+    return !alreadyPresent.isPresent();
   }
 
   public BadgeSystem getOrCreateDefaultBadgeSystem(Office office) {
     String namePattern = office.name.replaceAll("\\s+", "");
-    String badgeGroupName = "Badges" + namePattern;
-    // Caso semplice: non c'è ancora un gruppo Badge
-    Optional<BadgeSystem> badgeSystemOptional = office.badgeSystems.stream()
-        .filter(badgeSystem -> {
-          return badgeSystem.name.equals(badgeGroupName);
-        }).findFirst();
-
     BadgeSystem badgeSystem;
-    // TODO: 28/01/19 se non c'è il gruppo predefinito ma ce n'è un'altro, che faccio?
-    if (badgeSystemOptional.isPresent()) {
-      badgeSystem = badgeSystemOptional.get();
-    } else {
-      // Creo il Client timbrature
-      BadgeReader client = new BadgeReader();
-      client.user = new User();
-      client.code = "Reader" + namePattern;
-      client.user.username = namePattern.toLowerCase(Locale.ITALY);
-      client.user.owner = office;
-      client.user.save();
 
-      // Creo il Ruolo per il nuovo utente
-      UsersRolesOffices uro = new UsersRolesOffices();
-      uro.office = office;
-      uro.role = roleDao.getRoleByName(Role.BADGE_READER);
-      uro.user = client.user;
-      uro.save();
+    // Se non ne esiste uno lo creo
+    if (office.badgeSystems.isEmpty()) {
+
+      List<BadgeReader> readers = badgeReaderDao.getBadgeReaderByOffice(office);
+      BadgeReader badgeReader;
+
+      if (readers.isEmpty()) {
+        // Creo il Client timbrature se non è già presente
+        badgeReader = new BadgeReader();
+        badgeReader.user = new User();
+        badgeReader.code = namePattern;
+        badgeReader.user.username = namePattern.toLowerCase(Locale.ITALY);
+        badgeReader.user.owner = office;
+        badgeReader.user.save();
+
+        // Creo il Ruolo per il nuovo utente
+        UsersRolesOffices uro = new UsersRolesOffices();
+        uro.office = office;
+        uro.role = roleDao.getRoleByName(Role.BADGE_READER);
+        uro.user = badgeReader.user;
+        uro.save();
+      } else {
+        // prendo il primo se c'è già un client configurato
+        badgeReader = readers.iterator().next();
+      }
 
       // Creo il gruppo badge associato al nuovo Client
       badgeSystem = new BadgeSystem();
-      badgeSystem.name = badgeGroupName;
+      badgeSystem.name = namePattern;
       badgeSystem.office = office;
-      badgeSystem.badgeReaders.add(client);
+      badgeSystem.badgeReaders.add(badgeReader);
       badgeSystem.save();
 
-      client.badgeSystems.add(badgeSystem);
-      client.save();
-
+      badgeReader.badgeSystems.add(badgeSystem);
+      badgeReader.save();
+    } else {
+      // Altrimenti prendo il default o il primo che trovo
+      badgeSystem = office.badgeSystems.stream()
+          .filter(bs -> {
+            return bs.name.equals(namePattern);
+          }).findFirst().orElse(office.badgeSystems.iterator().next());
     }
+
     return badgeSystem;
   }
 }
