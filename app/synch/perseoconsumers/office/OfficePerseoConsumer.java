@@ -26,7 +26,7 @@ import models.Office;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 
-import synch.perseoconsumers.PerseoApis;
+import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
 public class OfficePerseoConsumer {
@@ -42,9 +42,9 @@ public class OfficePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getOfficesEndpoint();
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getOfficesEndpoint();
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -92,9 +92,9 @@ public class OfficePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getOfficeEndpoint() + perseoId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getOfficeEndpoint() + perseoId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -139,9 +139,9 @@ public class OfficePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getInstituteEndpoint() + perseoId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getInstituteEndpoint() + perseoId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);

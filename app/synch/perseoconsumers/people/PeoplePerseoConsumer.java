@@ -14,17 +14,15 @@ import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import dao.QualificationDao;
 import helpers.rest.ApiRequestException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
-import models.Office;
 import models.Person;
 import models.Qualification;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-import synch.perseoconsumers.PerseoApis;
+import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
 public class PeoplePerseoConsumer {
@@ -47,9 +45,9 @@ public class PeoplePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getPersonForEpasEndpoint() + perseoId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getPersonForEpasEndpoint() + perseoId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -97,12 +95,12 @@ public class PeoplePerseoConsumer {
 
     try {
       if (departmentPerseoId.isPresent()) {
-        url = PerseoApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
+        url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        url = PerseoApis.getAllPeopleForEpasEndpoint();
+        url = AnagraficaApis.getPeople();
       }
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -253,9 +251,9 @@ public class PeoplePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getPersonBadge() + personId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getPersonBadge() + personId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -296,9 +294,9 @@ public class PeoplePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getDepartmentsBadges() + departmentPerseoId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getDepartmentsBadges() + departmentPerseoId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
