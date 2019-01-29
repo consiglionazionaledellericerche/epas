@@ -1,4 +1,4 @@
-<div id="login-form" style="display:${shibAuthEnabled? 'none' : 'auto'}; padding: 0 em 1em">						
+<div id="login-form" style="display:${idpAuthEnabled? 'none' : 'auto'}; padding: 0 em 1em">						
   #{form @authenticate(), id:'login-form', role:'form'}
     <!-- User e Password -->
     <label>Username in ePAS</label>
@@ -15,7 +15,7 @@
 		  Remember me
 	  </label>
     </div>
-				
+
     <!-- Submit -->
     <input class="btn btn-primary btn-block" type="submit"
 	  id="signin" value="&{'secure.signin'}" />
