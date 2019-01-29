@@ -196,6 +196,60 @@ sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
+### Impostazione autenticazione LDAP
+
+LDAP_LOGIN=${LDAP_LOGIN:false}
+LDAP_URL=${LDAP_URL}
+LDAP_DN_BASE=${LDAP_DN_BASE}
+LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
+LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:-/}
+LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}
+
+sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
+
+if [ ${LDAP_LOGIN} = "true" ]; then
+  sed 's#{{LDAP_URL}}#'"${LDAP_URL}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{LDAP_TIMEOUT}}#'"${LDAP_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{LDAP_DN_BASE}}#'"${LDAP_DN_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf    
+  if [ -z "${LDAP_EPPN_ATTRIBUTE_NAME}" ]; then
+    sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{LDAP_EPPN_ATTRIBUTE_NAME}}#'"${LDAP_EPPN_ATTRIBUTE_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi    
+else
+  sed -n '/LDAP_URL/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_TIMEOUT/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_DN_BASE/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_LOGIN_RETURN/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf  
+fi
+
+
+### Fine impostazione autenticazione LDAP
+
+### Impostazione dati dell'ente/azienda che utilzza ePAS
+
+if [ -z "${COMPANY_CODE}" ]; then
+  sed -n '/COMPANY_CODE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{COMPANY_CODE}}#'"${COMPANY_CODE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${COMPANY_NAME}" ]; then
+  sed -n '/COMPANY_NAME/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{COMPANY_NAME}}#'"${COMPANY_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${COMPANY_URL}" ]; then
+  sed -n '/COMPANY_URL/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{COMPANY_URL}}#'"${COMPANY_URL}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+### Fine impostazione dati dell'ente/azienda che utilzza ePAS
+
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
     echo "Applico eventuali evoluzioni al database..."
