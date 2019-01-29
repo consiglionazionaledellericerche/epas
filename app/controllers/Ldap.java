@@ -92,7 +92,7 @@ public class Ldap extends Controller {
     } else {
       log.warn("Person with {} {} successfully logged in LDAP but unknonw to ePAS", 
           LdapService.getEppnAttributeName(), eppn);
-      flash.error("Oops! {} %s non riconosciuto da ePAS. Contattare l'helpdesk.", 
+      flash.error("Oops! %s %s non riconosciuto da ePAS. Contattare l'helpdesk.", 
           LdapService.getEppnAttributeName(), eppn);
       redirect("/login");
     }
