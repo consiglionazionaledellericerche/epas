@@ -21,8 +21,17 @@ public class TemplateDataInjector extends Controller {
   @Inject
   static Provider<TemplateUtility> templateUtility;
 
+  @Inject
+  static Provider<CompanyConfig> companyConfig;
+  
   @Before(unless = {"login", "authenticate", "logout"})
   static void injectTemplateData() {
     RenderArgs.current().put("templateUtility", templateUtility.get());
   }
+
+  @Before(unless = {"authenticate", "logout"})
+  static void injectTemplateConfig() {
+    RenderArgs.current().put("companyConfig", companyConfig.get());
+  }
+
 }
