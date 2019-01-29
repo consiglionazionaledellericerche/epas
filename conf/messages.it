@@ -777,6 +777,7 @@ Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
+Synchronizations.badges= Sincronizza Badges
 TimeVariations.show= Riposi compensativi chiusura ente
 TimeVariations.personShow= Riposi compensativi chiusura ente
 Users.list= Gestione Utenti

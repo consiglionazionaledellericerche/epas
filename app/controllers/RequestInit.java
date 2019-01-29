@@ -244,6 +244,7 @@ public class RequestInit extends Controller {
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
+        "Synchronizations.badges",
         "Synchronizations.oldPeople",
         "Synchronizations.activeContracts",
         "Synchronizations.oldActiveContracts",
