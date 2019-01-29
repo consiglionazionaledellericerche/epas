@@ -31,7 +31,6 @@ public class BadgeManager {
   @Inject
   public BadgeManager(RoleDao roleDao, BadgeReaderDao badgeReaderDao) {
     this.roleDao = roleDao;
-
     this.badgeReaderDao = badgeReaderDao;
   }
 
