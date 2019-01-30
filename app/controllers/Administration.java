@@ -64,7 +64,6 @@ import org.joda.time.YearMonth;
 import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
@@ -197,7 +196,7 @@ public class Administration extends Controller {
 
     for (Person person : people) {
 
-      person = GenericModel.findById(person.id);
+      person = Person.findById(person.id);
 
       log.info("Rimozione timbrature disaccoppiate per {} ...", person.fullName());
       List<PersonDay> persondays = personDayDao
@@ -229,7 +228,7 @@ public class Administration extends Controller {
   @SuppressWarnings("deprecation")
   public static void fixDaysInTrouble() {
 
-    List<Person> people = GenericModel.findAll();
+    List<Person> people = Person.findAll();
     for (Person person : people) {
 
       JPAPlugin.closeTx(false);
@@ -249,7 +248,7 @@ public class Administration extends Controller {
    */
   public static void capitalizePeople() {
 
-    List<Person> people = GenericModel.findAll();
+    List<Person> people = Person.findAll();
     for (Person person : people) {
 
       person.name = WordUtils.capitalizeFully(person.name);
@@ -427,7 +426,7 @@ public class Administration extends Controller {
    */
   public static void administratorsEmails() {
 
-    List<UsersRolesOffices> uros = GenericModel.findAll();
+    List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 
     List<String> emails = uros.stream().filter(uro ->
         uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
@@ -444,7 +443,7 @@ public class Administration extends Controller {
   public static void normalizationReperibilities() {
 
     Map<Person, List<PersonReperibility>> map = Maps.newHashMap();
-    List<PersonReperibility> list = GenericModel.findAll();
+    List<PersonReperibility> list = PersonReperibility.findAll();
     List<PersonReperibility> repList = null;
     log.info("Inizio la normalizzazione delle date...");
     log.info("Creo la mappa persona-personreperibility");
@@ -504,7 +503,7 @@ public class Administration extends Controller {
    * certa attività di turno. Rimuove tutte le occorrenze con data di inizio e fine nulle.
    */
   public static void normalizationShifts() {
-    List<PersonShiftShiftType> psstList = GenericModel.findAll();
+    List<PersonShiftShiftType> psstList = PersonShiftShiftType.findAll();
     log.info("Recupero tutte le associazioni tra persone e attività di turno.");
     for (PersonShiftShiftType psst : psstList) {
       if (psst.beginDate == null && psst.endDate == null) {
@@ -719,7 +718,7 @@ public class Administration extends Controller {
 
     SortedMap<Long, ContractMonthRecap> map = Maps.newTreeMap();
 
-    List<ContractMonthRecap> list = GenericModel.findAll();
+    List<ContractMonthRecap> list = ContractMonthRecap.findAll();
     for (ContractMonthRecap cmr : list) {
       if (cmr.year != LocalDate.now().minusMonths(1).getYear()) {
         continue;
@@ -766,14 +765,14 @@ public class Administration extends Controller {
    */
   public static void adjustSeats(Office office, Institute institute,
       String sedeId, String codiceSede) {
-    List<Office> officeList = GenericModel.findAll();
-    List<Institute> instituteList = GenericModel.findAll();
+    List<Office> officeList = Office.findAll();
+    List<Institute> instituteList = Institute.findAll();
     if (!office.isPersistent() || !institute.isPersistent()) {
       render(officeList, instituteList);
     } else {
       changeSeatLocation(office, institute, sedeId, codiceSede);
-      officeList = GenericModel.findAll();
-      instituteList = GenericModel.findAll();
+      officeList = Office.findAll();
+      instituteList = Institute.findAll();
       flash.success("Aggiornato rapporto tra %s e %s", office.name, institute.code);
       render(officeList, instituteList);
     }
