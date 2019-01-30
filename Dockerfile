@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk as builder
 # Converrebbe avere un'immagine con la jdk e il play già disponibile
 
-ENV PLAY_VERSION 1.4.3
+ENV PLAY_VERSION 1.4.2
 ENV APP_HOME /epas
 ENV PLAY_PATH /play-${PLAY_VERSION}
 

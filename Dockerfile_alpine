@@ -1,4 +1,4 @@
-FROM criluc/play1:1.4.3-jdk-alpine as builder
+FROM play1:1.4.2-jdk-alpine as builder
 
 ENV APP_HOME /epas
 
@@ -14,7 +14,7 @@ RUN touch conf/dev.conf && \
     play precompile && \
     mkdir attachments logs tools backups
 
-FROM criluc/play1:1.4.3-jre-alpine
+FROM play1:1.4.2-jre-alpine
 
 ENV APP_HOME /home/epas/epas
 ENV user epas
