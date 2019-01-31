@@ -153,7 +153,11 @@ public class PeoplePerseoConsumer {
     person.surname = perseoPerson.surname;
     person.number = perseoPerson.number;
     person.email = perseoPerson.email; //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
-    person.eppn = perseoPerson.email;
+    if (perseoPerson.eppn != null) {
+      person.eppn = perseoPerson.eppn;
+    } else {
+      person.eppn = perseoPerson.email;
+    }
     person.qualification = qualificationsMap.get(perseoPerson.qualification);
     person.perseoId = perseoPerson.id;
 

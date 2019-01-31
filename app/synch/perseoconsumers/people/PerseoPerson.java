@@ -14,4 +14,5 @@ public class PerseoPerson {
   public Integer qualification;
   public Long departmentId;
   public String updatedAt;
+  public String eppn;
 }
