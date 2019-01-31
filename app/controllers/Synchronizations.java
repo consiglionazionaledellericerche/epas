@@ -43,6 +43,7 @@ import play.mvc.With;
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.people.PerseoPerson;
 import synch.perseoconsumers.people.PersonBadge;
 import synch.perseoconsumers.roles.RolePerseoConsumer;
 
@@ -912,5 +913,51 @@ public class Synchronizations extends Controller {
     }
     badges(office.id);
   }
+
+  public static void eppn(Long officeId) {
+    if (officeId == null) {
+      badRequest("officeId non valido");
+    }
+
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    final List<Person> people = office.persons;
+    render(office, people);
+  }
+
+  public static void syncEppn(Long officeId) {
+
+    if (officeId == null) {
+      badRequest("officeId non valido");
+    }
+
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    List<PerseoPerson> people = new ArrayList<>(0);
+    try {
+      people = peoplePerseoConsumer.perseoPeople(Optional.fromNullable(office.perseoId)).get();
+    } catch (InterruptedException | ExecutionException e) {
+      flash.error(
+          "Errore nell'import delle persone dall'anagrafica per l'ufficio con PerseoId {}: {}",
+          office.perseoId, e.getMessage());
+    }
+
+    people.forEach(p -> {
+      Person person = personDao.getPersonByPerseoId(p.id);
+      if (person == null) {
+        log.warn("Sincronizzazione Eppn: persona con perseoId={} non presente", p.id);
+      } else if (p.eppn != null) {
+        person.eppn = p.eppn;
+        person.save();
+        log.info("Sincronizzato eppn per la persona {}", person);
+      }
+    });
+    flash.success("Sincronizzazione campo Eppn Terminata con Successo", people.size(),
+        office.persons.size());
+
+    eppn(office.id);
+  }
+
 
 }
