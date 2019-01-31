@@ -520,6 +520,8 @@ stampType= Causale
 synch.offices=Sincronizza sedi
 synch.people=Sincronizza persone
 synch.contracts=Sincronizza contratti
+synch.badges= Sincronizza Badges
+synch.eppn= Sincronizza campo Eppn
 
 systemUser= Utente con ruoli di Sistema
 ticketNumberFrom=Dal Numero

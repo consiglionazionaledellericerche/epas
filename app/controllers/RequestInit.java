@@ -245,6 +245,7 @@ public class RequestInit extends Controller {
         "Configurations.show",
         "Synchronizations.people",
         "Synchronizations.badges",
+        "Synchronizations.eppn",
         "Synchronizations.oldPeople",
         "Synchronizations.activeContracts",
         "Synchronizations.oldActiveContracts",

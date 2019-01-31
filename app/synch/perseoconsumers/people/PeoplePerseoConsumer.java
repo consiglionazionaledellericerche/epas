@@ -61,23 +61,20 @@ public class PeoplePerseoConsumer {
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
         .listenInPoolThread(request.getAsync());
 
-    return Futures.transform(future, new Function<HttpResponse, PerseoPerson>() {
-      @Override
-      public PerseoPerson apply(WS.HttpResponse response) {
-        if (!response.success()) {
-          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
-              response.getStatus(), response.getStatusText());
-          log.warn(error);
-          throw new ApiRequestException(error);
-        }
-        log.info("Recuperato Json contenente la Persona con id {} da Perseo", perseoId);
-        try {
-          return new Gson().fromJson(response.getJson(), PerseoPerson.class);
-        } catch (JsonSyntaxException ex) {
-          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
-          log.warn(error);
-          throw new ApiRequestException(error);
-        }
+    return Futures.transform(future, response -> {
+      if (!response.success()) {
+        final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
+            response.getStatus(), response.getStatusText());
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+      log.info("Recuperato Json contenente la Persona con id {} da Perseo", perseoId);
+      try {
+        return new Gson().fromJson(response.getJson(), PerseoPerson.class);
+      } catch (JsonSyntaxException ex) {
+        final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
+        log.warn(error);
+        throw new ApiRequestException(error);
       }
     }, MoreExecutors.directExecutor());
   }
@@ -87,7 +84,7 @@ public class PeoplePerseoConsumer {
    * La lista delle persone presenti su Perseo relative alla sede specificata. Tutte le persone se
    * non si specifica nessun id.
    */
-  private ListenableFuture<List<PerseoPerson>> perseoPeople(Optional<Long> departmentPerseoId) {
+  public ListenableFuture<List<PerseoPerson>> perseoPeople(Optional<Long> departmentPerseoId) {
 
     final String url;
     final String user;
@@ -114,26 +111,23 @@ public class PeoplePerseoConsumer {
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
         .listenInPoolThread(request.getAsync());
 
-    return Futures.transform(future, new Function<HttpResponse, List<PerseoPerson>>() {
-      @Override
-      public List<PerseoPerson> apply(WS.HttpResponse response) {
-        if (!response.success()) {
-          final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
-              response.getStatus(), response.getStatusText());
-          log.warn(error);
-          throw new ApiRequestException(error);
-        }
-        log.info("Recuperato Json contenente le persone da Perseo: {} {}",
+    return Futures.transform(future, response -> {
+      if (!response.success()) {
+        final String error = String.format("Errore nella risposta del server di Perseo: %s %s",
             response.getStatus(), response.getStatusText());
-        try {
-          return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoPerson>>() {
-            private static final long serialVersionUID = 6287635192815160188L;
-          }.getType());
-        } catch (JsonSyntaxException ex) {
-          final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
-          log.warn(error);
-          throw new ApiRequestException(error);
-        }
+        log.warn(error);
+        throw new ApiRequestException(error);
+      }
+      log.info("Recuperato Json contenente le persone da Perseo: {} {}",
+          response.getStatus(), response.getStatusText());
+      try {
+        return new Gson().fromJson(response.getJson(), new TypeToken<List<PerseoPerson>>() {
+          private static final long serialVersionUID = 6287635192815160188L;
+        }.getType());
+      } catch (JsonSyntaxException ex) {
+        final String error = String.format("Errore nel parsing del json: %s", ex.getMessage());
+        log.warn(error);
+        throw new ApiRequestException(error);
       }
     }, MoreExecutors.directExecutor());
   }
