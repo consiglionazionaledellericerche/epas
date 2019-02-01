@@ -2,14 +2,15 @@ Regole ed esempi del servizio
 =============================
 
 Per poter permettere la corretta integrazione tra i due sistemi è stato necessario aggiungere un parametro di configurazione 
-che permettesse al sistema ePAS di avere un riferimento orario in fase di inserimento dei codici di assenza per missione oraria o giornaliera: 
+che permettesse al sistema ePAS di avere un riferimento orario in fase di inserimento dei codici di assenza per missione oraria o giornaliera
+ 
 **Intervallo di attività lavorativa in sede per giorni missione** (v. :doc:`Configurazione del servizio </configurazione>` per info).
 Per prima cosa sono stati rivisti, di concerto con l’Ufficio Stato Giuridico e Trattamento Economico del Personale, 
 i codici di assenza da utilizzare:
 
     * 92: codice di missione a completamento giornaliero (non è cambiato)
     * 92M: codice di missione a giustificazione di ore e minuti. In fase di invio dati ad Attestati verrà inviato il codice orario più prossimo alla quantità giustificata in ore e minuti
-    * 92NG: codice di missione che non giustifica niente
+    * 92NG: codice di missione per info circa il fatto che sia un giorno di missione ma con partenza successiva alla fine dell'intervallo della giornata lavorativa o con arrivo precedente l'inizio della giornata lavorativa
    
 Per poter spiegare nel modo migliore come funziona questa integrazione e cosa gli amministratori del personale (e i dipendenti) troveranno
 sul cartellino mensile, abbiamo pensato che fosse più appropriato fornire una serie di esempi pratici che rispecchiano situazioni che si
@@ -63,7 +64,7 @@ all'intervallo di attività lavorativa in sede per giorni di missione, inserirà
 
 	* il 21 gennaio un codice 92NG che non giustifica niente (in fase di invio ad Attestati verrà inviato un 92). In questo caso la partenza è successiva alla fine dell'attività lavorativa in sede pertanto non giustifico niente.
 	* il 22 gennaio un codice 92 che giustifica l'intera giornata
-	* il 23 gennaio un codice 92NG che non giustifica niente (in fase di invio ad Attestati verrà inviato un 92). In questo caso l'arrivo è precedente all'inizio dell'attività lavorativa in sede pertanto non giustifico niente.
+	* il 23 gennaio un codice 92NG che non giustifica niente (in fase di invio ad Attestati verrà inviato un 92). In questo caso l'arrivo è precedente all'inizio dell'attività lavorativa in sede pertanto non giustifico niente. E' sempre possibile contattare l'USGTEP per concordare l'inserimento di un codice 92 che giustifichi l'intera giornata nel caso ad esempio di voli di ritorno intercontinentali.
 	
 .. _ordine-quartocaso-label:
 

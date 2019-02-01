@@ -18,11 +18,12 @@ Benvenuti nella documentazione Integrazione ePAS-Missioni!
 Introduzione
 ============
 
-Al fine di permettere una più veloce integrazione tra i sistemi informatizzati del CNR, è' stata terminata l'integrazione 
-del sistema ePAS con il sistema Missioni: sarà quindi possibile, previa configurazione interna alla sede,
-ricevere automaticamente sulla piattaforma ePAS tutte le informazioni relative ai giorni e orari delle missioni 
-che i dipendenti effettueranno su Missioni.
+Al fine di permettere una più efficace cooperazione tra i sistemi informatizzati del CNR, è’ stata terminata l’integrazione 
+del sistema ePAS con il sistema Missioni: sarà quindi possibile ricevere automaticamente sulla piattaforma ePAS tutte le informazioni 
+relative ai giorni e orari delle missioni che i dipendenti effettueranno su Missioni.
 
-Nelle pagine di questa documentazione è possibile trovare come effettuare la configurazione del servizio,
-come viene attuato il comportamento automatizzato di inserimento delle assenze e quali siano le regole che vengono applicate
-nell'inserimento/modifica/cancellazione dei codici di assenza per missione derivanti da ordini e rimborsi.
+Nella documentazione qui presente sono contenute le indicazioni necessarie al fine di:
+
+	* configurare il servizio;
+	* specificare il comportamento automatizzato di inserimento delle assenze;
+	* spiegare le regole che vengono applicate nell’inserimento/modifica/cancellazione dei codici di assenza per missione derivanti da ordini e rimborsi.
