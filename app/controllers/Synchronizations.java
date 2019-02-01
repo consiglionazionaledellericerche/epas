@@ -15,10 +15,12 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.rest.ApiRequestException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
@@ -48,7 +50,7 @@ import synch.perseoconsumers.people.PersonBadge;
 import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
-@With({Resecure.class})
+@With(Resecure.class)
 public class Synchronizations extends Controller {
 
   @Inject
@@ -96,8 +98,8 @@ public class Synchronizations extends Controller {
       flash.error("%s", ex);
     }
 
-    List<Institute> institutes = officeDao.institutes(Optional.<String>absent(),
-        Optional.<String>absent(), Optional.absent(),
+    List<Institute> institutes = officeDao.institutes(Optional.absent(),
+        Optional.absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN)).list();
 
     Map<Long, Institute> epasInstituteByPerseoId = Maps.newHashMap();
@@ -174,7 +176,7 @@ public class Synchronizations extends Controller {
       institute.get().name = instituteInPerseo.get().name;
       institute.get().save();
 
-      log.info("Associato istituto={} al perseoId={}", institute.get().toString(), perseoId);
+      log.info("Associato istituto={} al perseoId={}", institute.get(), perseoId);
       flash.success("Operazione effettuata correttamente");
     }
 
@@ -208,7 +210,7 @@ public class Synchronizations extends Controller {
 
       office.save();
 
-      log.info("Associata sede={} al perseoId={}", office.toString(), perseoId);
+      log.info("Associata sede={} al perseoId={}", office, perseoId);
       flash.success("Operazione effettuata correttamente");
     }
 
@@ -318,32 +320,35 @@ public class Synchronizations extends Controller {
           + "%s non lo è ancora.", office.toString());
       institutes();
     }
+    Map<Long, Person> perseoPeople = new HashMap<>(0);
+    Map<Long, Person> epasSynchronizedPeople = new HashMap<>(0);
+    Map<Long, List<Contract>> perseoPeopleContract = new HashMap<>(0);
+    Map<Long, IWrapperPerson> epasWrapperedPeople = new HashMap<>(0);
+    Map<Long, Set<String>> epasPeopleUros = new HashMap<>(0);
+    Map<Long, Set<String>> perseoPeopleUros = new HashMap<>(0);
+    try {
+      perseoPeople = peoplePerseoConsumer
+          .perseoPeopleByPerseoId(Optional.of(office.perseoId));
+      epasSynchronizedPeople = personDao.mapSynchronized(Optional.of(office));
+      perseoPeopleContract = contractPerseoConsumer
+          .perseoPeopleContractsMap(Optional.of(office));
 
-    Map<Long, Person> perseoPeople = peoplePerseoConsumer
-        .perseoPeopleByPerseoId(Optional.of(office.perseoId));
+      for (IWrapperPerson person : personDao.list(Optional.of(office)).list().stream()
+          .map(wrapperFunctionFactory.person()).collect(Collectors.toList())) {
+        epasWrapperedPeople.put(person.getValue().id, person);
+      }
 
-    Map<Long, Person> epasSynchronizedPeople = personDao.mapSynchronized(Optional.of(office));
-
-    Map<Long, List<Contract>> perseoPeopleContract = contractPerseoConsumer
-        .perseoPeopleContractsMap(Optional.of(office));
-
-    Map<Long, IWrapperPerson> epasWrapperedPeople = Maps.newHashMap();
-    for (IWrapperPerson person : FluentIterable.from(personDao
-        .list(Optional.of(office)).list()).transform(wrapperFunctionFactory.person()).toList()) {
-      epasWrapperedPeople.put(person.getValue().id, person);
+      // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli
+      // i ruoli (amministrativi) che ogni persona dell'office ha (anche in altri office).
+      epasPeopleUros = usersRolesOfficesDao
+          .getEpasRoles(Optional.fromNullable(office));
+      perseoPeopleUros = rolePerseoCunsomer.perseoRoles(Optional.of(office));
+    } catch (ApiRequestException ex) {
+      flash.error("%s", ex);
     }
-
-    // Tutti i ruoli epas formato Map<perseoPersonId, Set<String>> Contenente tutti gli
-    // i ruoli (amministrativi) che ogni persona dell'office ha (anche in altri office).
-
-    Map<Long, Set<String>> epasPeopleUros = usersRolesOfficesDao
-        .getEpasRoles(Optional.fromNullable(office));
-
-    Map<Long, Set<String>> perseoPeopleUros = rolePerseoCunsomer.perseoRoles(Optional.of(office));
 
     render(office, perseoPeople, epasSynchronizedPeople, perseoPeopleContract, epasWrapperedPeople,
         epasPeopleUros, perseoPeopleUros);
-
   }
 
   /**
@@ -359,7 +364,7 @@ public class Synchronizations extends Controller {
       oldInstitutes();
     }
 
-    List<Person> people = personDao.listFetched(Optional.<String>absent(), Sets.newHashSet(office),
+    List<Person> people = personDao.listFetched(Optional.absent(), Sets.newHashSet(office),
         false, null, null, false).list();
 
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
@@ -414,7 +419,7 @@ public class Synchronizations extends Controller {
 
     if (perseoPerson.qualification == null) {
       log.info("Impossibile associare la persona {} con qualifica nulla perseoId={}",
-          epasPerson.toString(), epasPerson.perseoId);
+          epasPerson, epasPerson.perseoId);
       return;
     }
 
@@ -427,7 +432,7 @@ public class Synchronizations extends Controller {
     epasPerson.qualification = perseoPerson.qualification;
     epasPerson.perseoId = perseoPerson.perseoId;
     epasPerson.save();
-    log.info("Associata persona={} al perseoId={}", epasPerson.toString(), epasPerson.perseoId);
+    log.info("Associata persona={} al perseoId={}", epasPerson, epasPerson.perseoId);
   }
 
   /**
@@ -441,7 +446,7 @@ public class Synchronizations extends Controller {
     Office office = officeDao.getOfficeById(epasOfficeId);
     notFoundIfNull(office);
 
-    List<Person> people = personDao.listFetched(Optional.<String>absent(),
+    List<Person> people = personDao.listFetched(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
     Map<String, Person> perseoPeopleByNumber = null;
@@ -528,11 +533,11 @@ public class Synchronizations extends Controller {
       person.user = userManager.createUser(person);
       person.save();
 
-      Role employee = Role.find("byName", Role.EMPLOYEE).first();
+      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
       officeManager.setUro(person.user, person.office, employee);
       person.save();
     } catch (Exception ex) {
-      return Optional.<Person>absent();
+      return Optional.absent();
     }
 
     return Optional.fromNullable(person);
@@ -551,7 +556,7 @@ public class Synchronizations extends Controller {
       ex.printStackTrace();
     }
 
-    List<Person> people = personDao.listFetched(Optional.<String>absent(),
+    List<Person> people = personDao.listFetched(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
     // questa operazione si può fare solo se non ci sono persone in epas
@@ -749,7 +754,7 @@ public class Synchronizations extends Controller {
     epasContract.save();
 
     log.info("Associata contratto={} al perseoId={}",
-        epasContract.toString(), epasContract.perseoId);
+        epasContract, epasContract.perseoId);
   }
 
   /**
@@ -939,8 +944,9 @@ public class Synchronizations extends Controller {
       people = peoplePerseoConsumer.perseoPeople(Optional.fromNullable(office.perseoId)).get();
     } catch (InterruptedException | ExecutionException e) {
       flash.error(
-          "Errore nell'import delle persone dall'anagrafica per l'ufficio con PerseoId {}: {}",
+          "Errore nell'import delle persone dall'anagrafica per l'ufficio con PerseoId %s: %s",
           office.perseoId, e.getMessage());
+      eppn(office.id);
     }
 
     people.forEach(p -> {
