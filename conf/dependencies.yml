@@ -5,7 +5,7 @@ require:
     - play -> secure    
     - play -> shibboleth 1.2
     - play-modules -> play-fastergt 1.9.4
-    - org.hibernate -> hibernate-envers 5.2.10.Final:
+    - org.hibernate -> hibernate-envers 5.3.6.Final:
        transitive: false
     - org.jadira.usertype -> usertype.core 6.0.1.GA
     - com.google.guava -> guava 26.0-jre
@@ -53,7 +53,7 @@ require:
         - org.eclipse.persistence -> eclipselink *
         - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
     - play-codeborne -> lombok 1.2.5
-    - org.projectlombok -> lombok 1.18.2
+    - org.projectlombok -> lombok 1.18.4
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
     - com.fasterxml.jackson.core -> jackson-core 2.9.6
     - com.fasterxml.jackson.core -> jackson-annotations 2.9.6
@@ -73,7 +73,7 @@ require:
        exclude:
         - org.osgi -> org.osgi.core
         - org.osgi -> org.osgi.enterprise
-    - xerces -> xercesImpl 2.9.1        
+    - xerces -> xercesImpl 2.12.0        
     
 # My custom repository
 
