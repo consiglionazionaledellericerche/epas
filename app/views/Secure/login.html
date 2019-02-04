@@ -1,7 +1,11 @@
 #{extends 'main.html' /} 
 #{set header:'banner' /} 
 #{set title:'ePAS - electronic Personnel Attendance System' /}
+#{set idpAuthEnabled: play.Play.configuration.getProperty("shib.login").equals("true") || play.Play.configuration.getProperty("ldap.login").equals("true") /}
 #{set shibAuthEnabled: play.Play.configuration.getProperty("shib.login").equals("true") /}
+#{set ldapAuthEnabled: play.Play.configuration.getProperty("ldap.login").equals("true") /}
+#{set companyCode: play.Play.configuration.getProperty("company.code") /}
+
 <div class="container">
   <div class="row col-md-4 col-md-offset-4 center margin-top-5 margin-bottom-3">
   	<h2>Benvenuto in ePAS</h2>
@@ -13,16 +17,20 @@
 	  	<!-- start of panel-heading -->
 		<div class="panel-heading">		
 		  <div class="row">
-		    #{if shibAuthEnabled}
+		    #{if idpAuthEnabled}
 			<div class="col-xs-6">
-			  <a href="#" class="active" id="login-idp-link">Credenziali CNR</a>
+			  <a href="#" class="active" id="login-idp-link">Credenziali ${companyCode}</a>
+			  <span class="badge"><i class="fa fa-question"
+			     data-toggle="tooltip" data-placement="right" 
+			     title="Credenziali ufficiali ${companyCode}."></i>
+	          </span>			  
 			</div>
 			<div class="col-xs-6">
 			  <a href="#" id="login-form-link">Credenziali ePAS</a>
 			  <span class="badge"><i class="fa fa-question"
 			     data-toggle="tooltip" data-placement="right" 
-			     title="Credenziali interne ad ePAS, queste non sono le credenziali ufficiali CNR."></i>
-			     </span>
+			     title="Credenziali interne ad ePAS, queste non sono le credenziali ufficiali ${companyCode}."></i>
+ 	          </span>
 			</div>			
 			#{/if} #{else}
 			  <a href="#" id="login-form-link" class="active">Autenticazione</a>
@@ -36,8 +44,8 @@
 		  <div class="row">
 			<div class="col-lg-12">
 			
-				#{if shibAuthEnabled}
-			      #{include './_login_cnr.html' /}
+				#{if idpAuthEnabled}
+			      #{include './_login_idp.html' /}
 			    #{/if}
 			    
 				#{include './_login_epas.html' /}
