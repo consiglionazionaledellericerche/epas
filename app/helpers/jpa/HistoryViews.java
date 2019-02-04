@@ -119,7 +119,7 @@ public class HistoryViews {
       cls.addMethod(ctMethod);
     }
     @SuppressWarnings("unchecked")
-    Class<T> result = cls.toClass();
+    Class result = cls.toClass();
     cls.detach();
     return result;
   }
@@ -191,7 +191,6 @@ public class HistoryViews {
       return null;
     }
 
-    @Override
     public void close() {
     }
   }
