@@ -58,9 +58,9 @@ public class VacationSituationTest extends UnitTest {
     h2AbsenceSupport.absence(DefaultAbsenceType.A_37, 
         new LocalDate(2016, 9, 1), Optional.absent(), 0, person);
     h2AbsenceSupport.absence(DefaultAbsenceType.A_32, 
-        new LocalDate(2016, 9, 10), Optional.absent(), 0, person);
+        new LocalDate(2016, 9, 12), Optional.absent(), 0, person);
     h2AbsenceSupport.absence(DefaultAbsenceType.A_94, 
-        new LocalDate(2016, 9, 11), Optional.absent(), 0, person);
+        new LocalDate(2016, 9, 13), Optional.absent(), 0, person);
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
         person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
@@ -92,9 +92,9 @@ public class VacationSituationTest extends UnitTest {
     h2AbsenceSupport.absence(DefaultAbsenceType.A_37, 
         new LocalDate(2016, 9, 1), Optional.absent(), 0, person2);
     h2AbsenceSupport.absence(DefaultAbsenceType.A_32, 
-        new LocalDate(2016, 9, 10), Optional.absent(), 0, person2);
+        new LocalDate(2016, 9, 12), Optional.absent(), 0, person2);
     h2AbsenceSupport.absence(DefaultAbsenceType.A_94, 
-        new LocalDate(2016, 9, 11), Optional.absent(), 0, person2);
+        new LocalDate(2016, 9, 13), Optional.absent(), 0, person2);
     
     VacationSituation vacationSituation2 = absenceService.buildVacationSituation(
         person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
