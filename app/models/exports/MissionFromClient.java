@@ -1,5 +1,6 @@
 package models.exports;
 
+import lombok.ToString;
 import models.Person;
 
 import org.joda.time.LocalDate;
@@ -10,6 +11,7 @@ import org.joda.time.LocalDateTime;
  * @author dario
  *
  */
+@ToString
 public class MissionFromClient {
 
   public String tipoMissione;
@@ -20,6 +22,5 @@ public class MissionFromClient {
   public LocalDateTime dataInizio;
   public LocalDateTime dataFine;
   public Long idOrdine;
-  
-  
+    
 }

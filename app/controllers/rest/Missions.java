@@ -42,6 +42,18 @@ public class Missions extends Controller {
   @Inject
   private static OfficeDao officeDao;
   
+  private static void logInfo(String description, MissionFromClient body) {
+    log.info("Integrazione Missioni: {}. Messaggio: {}", description, body);
+  }
+  
+  private static void logWarn(String description, MissionFromClient body) {
+    log.warn("Integrazione Missioni: {}. Messaggio: {}", description, body);
+  }
+  
+  private static void logError(String description, MissionFromClient body) {
+    log.error("Integrazione Missioni: {}. Messaggio: {}", description, body);
+  }
+  
   /**
    * metodo che processa il messaggio ricevuto dal kraken-listener.
    * @param body il dto costruito a partire dal binder
@@ -49,53 +61,56 @@ public class Missions extends Controller {
   @BasicAuth
   public static void amqpreceiver(@As(binder = JsonMissionBinder.class) MissionFromClient body) {
 
-    log.info("Arrivato messaggio da {} ", body);
+    logInfo("Ricevuto messaggio", body);
+    
     // Malformed Json (400)
     if (body == null || body.dataInizio == null || body.dataFine == null) {
+      logWarn("Messaggio, dataInizio o dataFine vuoti, messaggio scartato", body);
       JsonResponse.badRequest();
     }
     
     if (body.dataInizio.isAfter(body.dataFine)) {
+      logWarn("Data di inizio successiva alla data di fine, messaggio scartato", body);
       JsonResponse.badRequest();
-      return;
     }
     
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
+      logWarn("Dipendente riferito nel messaggio non trovato, messaggio scartato", body);
       JsonResponse.notFound();
     }
 
-    //log.info("Arrivato {} ", body.toString());
     Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
     
     // Check if integration ePAS-Missions is enabled
     if (!(Boolean)configurationManager
         .configValue(office.get(), EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
-      log.info("Non verrà processato il messaggio dalla piattaforma Missioni in quanto "
-          + "la sede {} cui appartiene il destinatario {} "
-          + "ha l'integrazione con Missioni disabilitata",
-          office.get().name, body.person.fullName());
+      logInfo(String.format("Non verrà processato il messaggio in quanto la sede %s "
+          + "cui appartiene il destinatario %s ha l'integrazione con Missioni disabilitata",
+          office.get().name, body.person.fullName()), body);
       JsonResponse.ok();
-    }    
-
+    }
+    
+    boolean success = false;
     switch (body.tipoMissione) {
       case "ORDINE":
-        if (!missionManager.createMissionFromClient(body, true)) {
-          JsonResponse.conflict();
-        }
+        success = missionManager.createMissionFromClient(body, true); 
         break;
       case "RIMBORSO":
-        if (!missionManager.manageMissionFromClient(body, true)) {
-          JsonResponse.notFound();
-        }
+        success =  missionManager.manageMissionFromClient(body, true);
         break;
       case "ANNULLAMENTO":
-        if (!missionManager.deleteMissionFromClient(body, true)) {
-          JsonResponse.badRequest();
-        }
+        success = missionManager.deleteMissionFromClient(body, true);
         break;
-      default: 
+      default:
         break;
+    }
+    
+    if (success) {
+      logInfo("Messaggio inserito con successo", body);
+    } else {
+      JsonResponse.conflict();
+      logError("Non è stato possibile inserire il messaggio", body);        
     }
 
     // Success (200)
