@@ -359,7 +359,7 @@ public class AbsenceDao extends DaoBase {
   }
   
   /**
-   * 
+   * Metodo che ritorna la lista delle assenze per missione contrassegnate dall'identificativo.
    * @param externalId l'identificativo esterno fornito dal client missioni in fase di persistenza
    *     dell'assenza sul db
    * @return la lista di assenze che hanno come identificativo l'id passato come parametro.
