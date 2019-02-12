@@ -250,6 +250,16 @@ public enum EpasParam {
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
+  
+  WORK_INTERVAL_MISSION_DAY("work_interval_mission_day",
+      EpasParamCategory.PERIODIC,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.LOCALTIME_INTERVAL,
+      EpasParamValueType
+          .formatValue(new LocalTimeInterval(new LocalTime(7, 0), new LocalTime(19, 0))),
+      Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
+          RecomputationType.RESIDUAL_MEALTICKETS),
+      Office.class),
 
   LUNCH_INTERVAL("lunch_interval",
       EpasParamCategory.PERIODIC,
