@@ -222,8 +222,10 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 
       0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime),
+          new Behaviour(JustifiedBehaviourName.minimumTime, 60),
           new Behaviour(JustifiedBehaviourName.maximumTime, 360)), 
       new LocalDate(2018, 7, 1), null),
+  
   A_631H1("631H1", "Permesso orario visita medica completamento 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       60, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
@@ -320,7 +322,7 @@ public enum DefaultAbsenceType {
   //0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
   A_92M("92M", "Missione in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), new LocalDate(2018,11,1), null),
+      0, null, Sets.newHashSet(), new LocalDate(2019,2,1), null),
   A_92NG("92", "Missione che non giustifica niente ai fini del tempo a lavoro",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
@@ -346,6 +348,29 @@ public enum DefaultAbsenceType {
   A_92H7("92H7", "Missione 7 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       420, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, null),
+  
+  
+  A_92HO1("92H1", "Missione 1 ora",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 60, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO2("92H2", "Missione 2 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO3("92H3", "Missione 3 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 180, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO4("92H4", "Missione 4 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 240, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO5("92H5", "Missione 5 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 300, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO6("92H6", "Missione 6 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 360, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
+  A_92HO7("92H7", "Missione 7 ore",
+      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 420, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2011,1,1), new LocalDate(2019,1,31)),
 
 
   A_31("31", "Ferie anno precedente",
@@ -377,7 +402,7 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes_limit), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
 
-  A_105BP("105BP", "Lavoro Fuori Sede - Intera Giornata",
+  A_105BP("105BP", "Convenzione CNR - Università",
       false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true,
       0, null, Sets.newHashSet(), null, null),
   
