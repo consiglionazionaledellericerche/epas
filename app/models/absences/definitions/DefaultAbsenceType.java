@@ -222,8 +222,10 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 
       0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime),
+          new Behaviour(JustifiedBehaviourName.minimumTime, 60),
           new Behaviour(JustifiedBehaviourName.maximumTime, 360)), 
       new LocalDate(2018, 7, 1), null),
+  
   A_631H1("631H1", "Permesso orario visita medica completamento 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       60, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), 
