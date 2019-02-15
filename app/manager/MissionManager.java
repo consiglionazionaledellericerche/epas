@@ -2,34 +2,25 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import controllers.Security;
-
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.PersistenceException;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
-
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -44,25 +35,11 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.exports.MissionFromClient;
-import models.exports.StampingFromClient;
-
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.Minutes;
-import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.testng.collections.Lists;
-
 import play.db.jpa.JPA;
-
-
-
 
 @Slf4j
 public class MissionManager {
@@ -80,6 +57,9 @@ public class MissionManager {
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
 
+  /**
+   * Default constructor.
+   */
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
@@ -149,6 +129,7 @@ public class MissionManager {
       log.warn("Sede di lavoro associata a {} non trovata!", body.person.fullName());
       return false;
     }
+
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         office.get(), EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
@@ -162,7 +143,7 @@ public class MissionManager {
       //Se esiste già una missione con quell'identificativo, la cancello e la reinserisco con i 
       //nuovi dati con il prosieguo dell'algoritmo.
       log.warn("E' stata riscontrata una missione con lo stesso identificativo di quella passata "
-          + "come parametro. La missione precedentemente inseritaverrà cancellata e verrà "
+          + "come parametro. La missione precedentemente inserita verrà cancellata e verrà "
           + "inserita questa");
       deleteMissionFromClient(body, true);
     }
@@ -602,9 +583,8 @@ public class MissionManager {
   }
   
   /**
-   * 
-   * @author dario
-   *     classe privata di aiuto.
+   * Classe privata di aiuto.
+   * @author dario     
    */
   private static class Situation {
     private int difference;
