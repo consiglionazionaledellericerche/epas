@@ -57,6 +57,8 @@ public class MissionManager {
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
 
+  public static final String LOG_PREFIX = "Integrazione Missioni. ";
+  
   /**
    * Default constructor.
    */
@@ -92,7 +94,8 @@ public class MissionManager {
 
     Optional<User> user = Security.getUser();
     if (!user.isPresent()) {
-      log.error("Impossibile recuperare l'utente che ha inviato la missione: {}", mission);
+      log.error(LOG_PREFIX + "Impossibile recuperare l'utente che ha inviato la missione: {}.", 
+          mission);
       return Optional.absent();
     }
 
@@ -102,8 +105,8 @@ public class MissionManager {
     if (person.isPresent()) {
       mission.person = person.get();      
     } else {
-      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la missione,"
-          + " matricola={}. Controllare il database.", mission.matricola);
+      log.warn(LOG_PREFIX +  "Non e' stato possibile recuperare la persona a cui si riferisce la "
+          + "missione, matricola={}. Controllare il database.", mission.matricola);
     }
 
     return person;
@@ -120,13 +123,13 @@ public class MissionManager {
 
     //AbsenceForm absenceForm = buildAbsenceForm(body);
     if (body.dataInizio.isAfter(body.dataFine)) {
-      log.warn("Le date di inizio e fine sono invertite!! La missione {} di {} "
-          + "non può essere processata!! Verificare!", body.idOrdine, body.person.fullName());
+      log.warn(LOG_PREFIX + "Le date di inizio e fine sono invertite!! La missione {} di {} "
+          + "non può essere processata!! Verificare!", body.id, body.person.fullName());
       return false;
     }
     Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
     if (!office.isPresent()) {
-      log.warn("Sede di lavoro associata a {} non trovata!", body.person.fullName());
+      log.warn(LOG_PREFIX + "Sede di lavoro associata a {} non trovata!", body.person.fullName());
       return false;
     }
 
@@ -134,17 +137,17 @@ public class MissionManager {
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         office.get(), EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
-      log.warn("Il parametro di orario di lavoro missione "
+      log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", office.get().name);
       return false;
     }
-    List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.id);
     if (!existingMission.isEmpty()) {
       //Se esiste già una missione con quell'identificativo, la cancello e la reinserisco con i 
       //nuovi dati con il prosieguo dell'algoritmo.
-      log.warn("E' stata riscontrata una missione con lo stesso identificativo di quella passata "
-          + "come parametro. La missione precedentemente inserita verrà cancellata e verrà "
-          + "inserita questa");
+      log.warn(LOG_PREFIX +  "E' stata riscontrata una missione con lo stesso identificativo di "
+          + "quella passata come parametro. La missione precedentemente inserita verrà cancellata "
+          + "e verrà inserita questa");
       deleteMissionFromClient(body, true);
     }
 
@@ -272,7 +275,7 @@ public class MissionManager {
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         body.person.office, EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
-      log.warn("Il parametro di orario di lavoro missione "
+      log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", body.person.office.name);
       return false;
     }
@@ -395,8 +398,8 @@ public class MissionManager {
           .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
     }
     
-    log.debug("Sto per inserire una missione per {}. Codice {}, {} - {}, tempo {}:{}", 
-        person, mission.code, from, to, hours, minutes);
+    log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
+        + "tempo {}:{}", person, mission.code, from, to, hours, minutes);
     
     Integer localHours = hours;
     Integer localMinutes = minutes;
@@ -424,14 +427,15 @@ public class MissionManager {
         final User currentUser = Security.getUser().get();
         notificationManager.notificationAbsencePolicy(currentUser, 
             absence, absenceForm.groupSelected, true, false, false);
-        log.info("inserita assenza {} del {} per {}", absence.absenceType.code, 
+        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", absence.absenceType.code, 
             absence.personDay.date, absence.personDay.person.fullName());
 
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager
         .sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+        log.info(LOG_PREFIX +  "Inserite assenze con reperibilità e turni {} {}. "
+            + "Le email sono disabilitate.",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
@@ -458,14 +462,14 @@ public class MissionManager {
       final User currentUser = Security.getUser().get();
       notificationManager.notificationAbsencePolicy(currentUser, 
           abs, absenceForm.groupSelected, false, true, false);
-      log.info("rimossa assenza {} del {} per {}", 
+      log.info(LOG_PREFIX + "Rimossa assenza {} del {} per {}.", 
           abs.absenceType.code, abs.personDay.date, abs.personDay.person.getFullname());
 
     }
     if (result) {
       return true;
     }
-    log.error("Errore in rimozione della missione}");
+    log.error(LOG_PREFIX + "Errore in rimozione della missione. Giorni di missione: {}.", missions);
     return false;
   }
 
