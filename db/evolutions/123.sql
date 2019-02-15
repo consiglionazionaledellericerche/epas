@@ -1,5 +1,9 @@
 # --- !Ups
 
+
+-- Creo una nouva revisione
+INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
+
 INSERT INTO absence_types_history (id, _revision, _revision_type, certification_code, code, considered_week_end, description, internal_use,
 justified_time_at_work, valid_from, valid_to, time_for_mealticket, justified_time, replacing_time, replacing_type_id, documentation)
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 1, certification_code, '92HO1', considered_week_end, description, internal_use,
