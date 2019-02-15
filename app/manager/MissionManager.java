@@ -2,34 +2,25 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import controllers.Security;
-
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.PersistenceException;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
-
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -44,25 +35,11 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.exports.MissionFromClient;
-import models.exports.StampingFromClient;
-
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.Minutes;
-import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.testng.collections.Lists;
-
 import play.db.jpa.JPA;
-
-
-
 
 @Slf4j
 public class MissionManager {
@@ -80,6 +57,11 @@ public class MissionManager {
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
 
+  public static final String LOG_PREFIX = "Integrazione Missioni. ";
+  
+  /**
+   * Default constructor.
+   */
   @Inject
   public MissionManager(PersonDao personDao, AbsenceService absenceService, 
       AbsenceManager absenceManager, PersonDayManager personDayManager,
@@ -112,7 +94,8 @@ public class MissionManager {
 
     Optional<User> user = Security.getUser();
     if (!user.isPresent()) {
-      log.error("Impossibile recuperare l'utente che ha inviato la missione: {}", mission);
+      log.error(LOG_PREFIX + "Impossibile recuperare l'utente che ha inviato la missione: {}.", 
+          mission);
       return Optional.absent();
     }
 
@@ -122,8 +105,8 @@ public class MissionManager {
     if (person.isPresent()) {
       mission.person = person.get();      
     } else {
-      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la missione,"
-          + " matricola={}. Controllare il database.", mission.matricola);
+      log.warn(LOG_PREFIX +  "Non e' stato possibile recuperare la persona a cui si riferisce la "
+          + "missione, matricola={}. Controllare il database.", mission.matricola);
     }
 
     return person;
@@ -140,30 +123,31 @@ public class MissionManager {
 
     //AbsenceForm absenceForm = buildAbsenceForm(body);
     if (body.dataInizio.isAfter(body.dataFine)) {
-      log.warn("Le date di inizio e fine sono invertite!! La missione {} di {} "
-          + "non può essere processata!! Verificare!", body.idOrdine, body.person.fullName());
+      log.warn(LOG_PREFIX + "Le date di inizio e fine sono invertite!! La missione {} di {} "
+          + "non può essere processata!! Verificare!", body.id, body.person.fullName());
       return false;
     }
     Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
     if (!office.isPresent()) {
-      log.warn("Sede di lavoro associata a {} non trovata!", body.person.fullName());
+      log.warn(LOG_PREFIX + "Sede di lavoro associata a {} non trovata!", body.person.fullName());
       return false;
     }
+
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         office.get(), EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
-      log.warn("Il parametro di orario di lavoro missione "
+      log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", office.get().name);
       return false;
     }
-    List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.idOrdine);
+    List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.id);
     if (!existingMission.isEmpty()) {
       //Se esiste già una missione con quell'identificativo, la cancello e la reinserisco con i 
       //nuovi dati con il prosieguo dell'algoritmo.
-      log.warn("E' stata riscontrata una missione con lo stesso identificativo di quella passata "
-          + "come parametro. La missione precedentemente inseritaverrà cancellata e verrà "
-          + "inserita questa");
+      log.warn(LOG_PREFIX +  "E' stata riscontrata una missione con lo stesso identificativo di "
+          + "quella passata come parametro. La missione precedentemente inserita verrà cancellata "
+          + "e verrà inserita questa");
       deleteMissionFromClient(body, true);
     }
 
@@ -291,7 +275,7 @@ public class MissionManager {
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         body.person.office, EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
-      log.warn("Il parametro di orario di lavoro missione "
+      log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", body.person.office.name);
       return false;
     }
@@ -414,8 +398,8 @@ public class MissionManager {
           .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
     }
     
-    log.debug("Sto per inserire una missione per {}. Codice {}, {} - {}, tempo {}:{}", 
-        person, mission.code, from, to, hours, minutes);
+    log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
+        + "tempo {}:{}", person, mission.code, from, to, hours, minutes);
     
     Integer localHours = hours;
     Integer localMinutes = minutes;
@@ -443,14 +427,15 @@ public class MissionManager {
         final User currentUser = Security.getUser().get();
         notificationManager.notificationAbsencePolicy(currentUser, 
             absence, absenceForm.groupSelected, true, false, false);
-        log.info("inserita assenza {} del {} per {}", absence.absenceType.code, 
+        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", absence.absenceType.code, 
             absence.personDay.date, absence.personDay.person.fullName());
 
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager
         .sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+        log.info(LOG_PREFIX +  "Inserite assenze con reperibilità e turni {} {}. "
+            + "Le email sono disabilitate.",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
@@ -477,14 +462,14 @@ public class MissionManager {
       final User currentUser = Security.getUser().get();
       notificationManager.notificationAbsencePolicy(currentUser, 
           abs, absenceForm.groupSelected, false, true, false);
-      log.info("rimossa assenza {} del {} per {}", 
+      log.info(LOG_PREFIX + "Rimossa assenza {} del {} per {}.", 
           abs.absenceType.code, abs.personDay.date, abs.personDay.person.getFullname());
 
     }
     if (result) {
       return true;
     }
-    log.error("Errore in rimozione della missione}");
+    log.error(LOG_PREFIX + "Errore in rimozione della missione. Giorni di missione: {}.", missions);
     return false;
   }
 
@@ -602,9 +587,8 @@ public class MissionManager {
   }
   
   /**
-   * 
-   * @author dario
-   *     classe privata di aiuto.
+   * Classe privata di aiuto.
+   * @author dario     
    */
   private static class Situation {
     private int difference;

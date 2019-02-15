@@ -46,7 +46,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
       
-      log.info("Effettuato il binding, MissionFromClient = {}", mission);
+      log.debug("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;
     } catch (Exception ex) {
       log.error("Problem during binding MissionFromClient: {}, {}, {}, {}, {}",
@@ -57,6 +57,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
   }
   
   /**
+   * Estrazione della data dalla stringa passata.
    * 
    * @param string la stringa contenente la data passata nel json
    * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
