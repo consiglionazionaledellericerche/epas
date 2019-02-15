@@ -105,12 +105,12 @@ public class Missions extends Controller {
       default:
         break;
     }
-    
+
     if (success) {
       logInfo("Messaggio inserito con successo", body);
     } else {
+      logError("Non è stato possibile inserire il messaggio", body);
       JsonResponse.conflict();
-      logError("Non è stato possibile inserire il messaggio", body);        
     }
 
     // Success (200)
