@@ -201,15 +201,15 @@ public class Administration extends Controller {
 
       Absence abs = val.value;
       long id = val.value.personDay.id;
-      log.debug("Id del personDay = {}", id);
+      log.info("Id del personDay = {}", id);
       PersonDay pd = personDayDao.getPersonDayById(id);
       if (pd != null) {
         if(pd.absences.contains(abs)) {
-          log.debug("l'assenza {} è già nel personday, non la inserisco", abs.id);
+          log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
           continue;
         }
         pd.save();
-        log.debug("Assenza con revisione {}, con id {} in data {} di tipo {}", val.type.name(), 
+        log.info("Assenza con revisione {}, con id {} in data {} di tipo {}", val.type.name(), 
             val.value.id, val.value.personDay.date, val.value.absenceType.code);
         List<HistoryValue<Absence>> absenceDeleted = historyDao.specificAbsence(val.value.id);
         if (!absenceDeleted.isEmpty()) {
@@ -227,7 +227,7 @@ public class Administration extends Controller {
 
           pd.absences.add(absence);
           pd.save();
-          log.debug("Salvo il personday"); 
+          log.info("Salvo il personday"); 
         }
 
       }
