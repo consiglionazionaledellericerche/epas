@@ -23,7 +23,11 @@
 	        #{f.input 'office.codeId', required:true, popover:true /}
 	        #{f.input 'office.code',popover:true /}
 	        #{f.input 'office.address'/}
+	        #{secure.check 'Office.updateBeginDate'}
+	        	#{f.date 'office.beginDate' /}
+	        #{/secure.check}
 	        #{f.booleanRadio 'office.headQuarter'/}
+	        
 	
 	    	#{b.buttons}
 	          #{b.save /}
