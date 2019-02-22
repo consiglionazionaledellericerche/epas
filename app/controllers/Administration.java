@@ -11,12 +11,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.UserDao;
+import dao.absences.AbsenceComponentDao;
+import dao.history.HistoryValue;
+import dao.history.PersonDayHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+
+import it.cnr.iit.epas.CompetenceUtility;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,9 +40,12 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -58,9 +70,14 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.Absence;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import org.apache.commons.lang.WordUtils;
+import org.hibernate.envers.RevisionType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
 import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -70,7 +87,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 @Slf4j
-@With(Resecure.class)
+@With({Resecure.class})
 public class Administration extends Controller {
 
   static final String SUDO_USERNAME = "sudo.username";
@@ -82,6 +99,8 @@ public class Administration extends Controller {
   static PersonDao personDao;
   @Inject
   static ConsistencyManager consistencyManager;
+  @Inject
+  static CompetenceUtility competenceUtility;
   @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
@@ -106,6 +125,16 @@ public class Administration extends Controller {
   static ContractManager contractManager;
   @Inject
   static ConfigurationManager configurationManager;
+  @Inject
+  static PersonDayHistoryDao historyDao;
+  @Inject
+  static UserDao userDao;
+  @Inject
+  static AbsenceTypeDao absenceTypeDao;
+  @Inject
+  static AbsenceDao absenceDao;
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
 
   /**
    * metodo che renderizza la pagina di utilities.
@@ -113,7 +142,7 @@ public class Administration extends Controller {
   public static void utilities() {
 
     final List<Person> personList = personDao.list(
-        Optional.absent(),
+        Optional.<String>absent(),
         secureManager.officesWriteAllowed(Security.getUser().get()),
         false, LocalDate.now(), LocalDate.now(), true)
         .list();
@@ -125,6 +154,7 @@ public class Administration extends Controller {
    * ritorna la/le persona/e che corrispondono ai criteri indicati.
    */
   public static void internalSearch(String name) {
+
 
     List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
         null, false, null, null, false).list();
@@ -141,14 +171,14 @@ public class Administration extends Controller {
    * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
    *
    * @param person la persona da fixare, -1 per fixare tutte le persone
-   * @param year l'anno dal quale far partire il fix
-   * @param month il mese dal quale far partire il fix
+   * @param year   l'anno dal quale far partire il fix
+   * @param month  il mese dal quale far partire il fix
    */
   public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
 
     LocalDate date = new LocalDate(year, month, 1);
 
-    Optional<Person> optPerson = Optional.absent();
+    Optional<Person> optPerson = Optional.<Person>absent();
     if (person.isPersistent()) {
       optPerson = Optional.fromNullable(person);
     }
@@ -160,12 +190,59 @@ public class Administration extends Controller {
   }
 
   /**
+   * 
+   */
+  public static void reset92H() {
+    List<HistoryValue<Absence>> allAbsences = historyDao.oldMissions();
+
+    log.debug("Trovate {} assenze totali", allAbsences.size());
+
+    for(HistoryValue<Absence> val : allAbsences) {
+
+      Absence abs = val.value;
+      long id = val.value.personDay.id;
+      log.info("Id del personDay = {}", id);
+      PersonDay pd = personDayDao.getPersonDayById(id);
+      if (pd != null) {
+        if(pd.absences.contains(abs)) {
+          log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
+          continue;
+        }
+        pd.save();
+        log.info("Assenza con revisione {}, con id {} in data {} di tipo {}", val.type.name(), 
+            val.value.id, val.value.personDay.date, val.value.absenceType.code);
+        List<HistoryValue<Absence>> absenceDeleted = historyDao.specificAbsence(val.value.id);
+        if (!absenceDeleted.isEmpty()) {
+
+          log.debug("L'assenza è stata anche cancellata, la ricreo");
+
+          Absence absence = new Absence();
+          absence.absenceType = abs.absenceType;  
+          JustifiedType type = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
+          absence.justifiedType = type;
+          absence.justifiedMinutes = abs.justifiedMinutes;
+          absence.personDay = pd;
+          absence.save(); 
+          JPA.em().flush();       
+
+          pd.absences.add(absence);
+          pd.save();
+          log.info("Salvo il personday"); 
+        }
+
+      }
+    }
+    //consistencyManager.fixPersonSituation(Optional.<Person>absent(), Security.getUser(), new LocalDate(2018,12,1), false);
+
+    renderText("Esecuzione terminata");
+  }
+  /**
    * metodo che cancella tutte le timbrature disaccoppiate nell'arco temporale specificato.
    *
    * @param peopleId l'id della persona
-   * @param begin la data da cui partire
-   * @param end la data in cui finire
-   * @param forAll se il controllo deve essere fatto per tutti
+   * @param begin    la data da cui partire
+   * @param end      la data in cui finire
+   * @param forAll   se il controllo deve essere fatto per tutti
    */
   public static void deleteUncoupledStampings(
       List<Long> peopleId, @Required LocalDate begin, LocalDate end, boolean forAll) {
@@ -195,6 +272,7 @@ public class Administration extends Controller {
     }
 
     for (Person person : people) {
+
 
       person = Person.findById(person.id);
 
@@ -243,8 +321,8 @@ public class Administration extends Controller {
   }
 
   /**
-   * Riformatta nome e cognome di tutte le persone in minuscolo con la prima lettera maiuscola (Es.
-   * Mario Rossi).
+   * Riformatta nome e cognome di tutte le persone in minuscolo con la prima lettera maiuscola
+   * (Es. Mario Rossi).
    */
   public static void capitalizePeople() {
 
@@ -316,8 +394,8 @@ public class Administration extends Controller {
   }
 
   /**
-   * @param name Nome del parametro
-   * @param value Valore del parametro
+   * @param name     Nome del parametro
+   * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
    */
   public static void saveConfiguration(@Required String name, @Required String value,
@@ -343,7 +421,7 @@ public class Administration extends Controller {
    */
   public static void switchUserTo(long id) {
 
-    final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.absent());
+    final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
 
     if (user == null || user.disabled) {
       notFound();
@@ -384,8 +462,8 @@ public class Administration extends Controller {
   /**
    * Sostituisce il dominio email di tutte le persone dell'ufficio specificato.
    *
-   * @param office Ufficio interessato.
-   * @param domain nuovo dominio
+   * @param office   Ufficio interessato.
+   * @param domain   nuovo dominio
    * @param sendMail booleano per effettuare l'invio email d'avviso di creazione delle persone.
    */
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
@@ -429,7 +507,7 @@ public class Administration extends Controller {
     List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 
     List<String> emails = uros.stream().filter(uro ->
-        uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
+    uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
         .map(uro -> uro.user.person.email).distinct().collect(Collectors.toList());
 
     renderText(emails);
@@ -437,8 +515,9 @@ public class Administration extends Controller {
   }
 
   /**
-   * normalizza le date dei personReperibilities nel caso in cui ci fossero dei problemi con più
-   * date che per la stessa persona, sullo stesso tipo di reperibilità, presentano endDate = null.
+   * normalizza le date dei personReperibilities nel caso in cui ci fossero dei problemi 
+   * con più date che per la stessa persona, sullo stesso tipo di reperibilità, 
+   * presentano endDate = null.
    */
   public static void normalizationReperibilities() {
 
@@ -450,13 +529,13 @@ public class Administration extends Controller {
     for (PersonReperibility pr : list) {
       if (pr.startDate != null && pr.endDate == null) {
         if (!map.containsKey(pr.person)) {
-          repList = Lists.newArrayList();
+          repList = Lists.newArrayList();                  
         } else {
-          repList = map.get(pr.person);
+          repList = map.get(pr.person);                  
         }
         repList.add(pr);
         map.put(pr.person, repList);
-      }
+      }      
     }
     log.info("Valuto la mappa per controllare le date dei personreperibilities");
     for (Map.Entry<Person, List<PersonReperibility>> entry : map.entrySet()) {
@@ -464,7 +543,7 @@ public class Administration extends Controller {
       if (entry.getValue().size() > 1) {
         List<PersonReperibility> multipleReps = entry.getValue();
         log.info("Ordino le person reperibilities");
-        Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);
+        Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);       
         PersonReperibility pr = null;
         log.info("Controllo le personreperibilities");
         for (PersonReperibility rep : multipleReps) {
@@ -474,15 +553,15 @@ public class Administration extends Controller {
           }
           if (rep.personReperibilityType.equals(pr.personReperibilityType)) {
             log.warn("Ho due person reperibilities relativi allo stesso tipo");
-            if (rep.startDate != null && pr.startDate != null
+            if (rep.startDate != null && pr.startDate != null 
                 && rep.endDate == null && pr.endDate == null) {
               log.warn("Sono nel caso di due person reperibilities con data fine nulla "
                   + "per lo stesso tipo");
               if (rep.startDate.isBefore(pr.startDate)) {
                 log.info("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
-                pr.delete();
+                pr.delete();                
               } else {
-                log.info("Cancello quello più futuro di {} con data {}",
+                log.info("Cancello quello più futuro di {} con data {}", 
                     rep.person, rep.startDate);
                 rep.delete();
               }
@@ -492,14 +571,14 @@ public class Administration extends Controller {
           }
         }
 
-      }
+      }      
     }
     log.info("Terminata esecuzione");
     renderText("Ok");
   }
 
   /**
-   * Metodo di normalizzazione degli elementi presenti nella lista delle persone assegnate a una
+   * Metodo di normalizzazione degli elementi presenti nella lista delle persone assegnate a una 
    * certa attività di turno. Rimuove tutte le occorrenze con data di inizio e fine nulle.
    */
   public static void normalizationShifts() {
@@ -507,25 +586,24 @@ public class Administration extends Controller {
     log.info("Recupero tutte le associazioni tra persone e attività di turno.");
     for (PersonShiftShiftType psst : psstList) {
       if (psst.beginDate == null && psst.endDate == null) {
-        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle",
+        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
             psst.personShift.person.fullName(), psst.shiftType.description);
         psst.delete();
       }
-    }
+    }    
     renderText("Ok");
   }
 
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
-   *
-   * @param office la sede
+   * @param office la sede 
    * @param code il codice di assenza
    * @param year l'anno
    * @param month il mese
    */
   public static void applyBonus(Office office, CompetenceCode code, int year, int month) {
 
-    Optional<Office> optOffice = Optional.absent();
+    Optional<Office> optOffice = Optional.<Office>absent();
     if (office.isPersistent()) {
       optOffice = Optional.fromNullable(office);
     }
@@ -539,10 +617,11 @@ public class Administration extends Controller {
   }
 
   /**
-   * Import data fine contratti a tempo determinato da attestati. Imposta la data fine per i soli
-   * contratti attivi epas: - con stessa data inizio - con data fine nulla - segnalati come
-   * temporary
-   *
+   * Import data fine contratti a tempo determinato da attestati.
+   * Imposta la data fine per i soli contratti attivi epas:
+   * - con stessa data inizio
+   * - con data fine nulla
+   * - segnalati come temporary
    * @param office sede
    */
   public static void importCertificationContracts(Office office) {
@@ -552,23 +631,23 @@ public class Administration extends Controller {
     Map<String, ContrattoAttestati> contrattiAttestati = null;
 
     //Doppio tentativo (mese corrente e mese precedente)
-    try {
-      contrattiAttestati = certService.getCertificationContracts(office,
+    try { 
+      contrattiAttestati = certService.getCertificationContracts(office, 
           LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     } catch (Exception ex) {
       log.info("Impossibile scaricare i contratti stralcio mese attuale");
     }
-    try {
+    try { 
       if (contrattiAttestati == null || contrattiAttestati.isEmpty()) {
-        contrattiAttestati = certService.getCertificationContracts(office,
+        contrattiAttestati = certService.getCertificationContracts(office, 
             LocalDate.now().getYear(), LocalDate.now().getMonthOfYear() - 1);
       }
     } catch (Exception ex) {
       log.info("Impossibile scaricare i contratti stralcio mese precedente");
     }
-    try {
+    try { 
       if (contrattiAttestati == null || contrattiAttestati.isEmpty()) {
-        contrattiAttestati = certService.getCertificationContracts(office,
+        contrattiAttestati = certService.getCertificationContracts(office, 
             LocalDate.now().getYear(), LocalDate.now().getMonthOfYear() - 2);
       }
     } catch (Exception ex2) {
@@ -592,7 +671,7 @@ public class Administration extends Controller {
       }
 
       JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
+      JPAPlugin.startTx(false);     
       Person person = personDao.getPersonByNumber(contrattoAttestati.matricola);
       if (person == null) {
         continue;
@@ -639,7 +718,7 @@ public class Administration extends Controller {
         ImmutableSet.of(office), false, null, null, false).list())) {
 
       JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
+      JPAPlugin.startTx(false);      
 
       person = personDao.getPersonById(person.id);
       IWrapperPerson wrPerson = wrapperFactory.create(person);
@@ -701,18 +780,19 @@ public class Administration extends Controller {
     }
 
     flash.success("Sono stati definiti %s tempi determinati, sono "
-            + "state disattivate %s persone perchè non più appartenenti alla sede, "
-            + "sono state terminate %s persone perchè hanno un contratto più recente su attestati, "
-            + "sono stati aggiornati %s contratti perchè iniziati successivamente ad attestati.",
+        + "state disattivate %s persone perchè non più appartenenti alla sede, "
+        + "sono state terminate %s persone perchè hanno un contratto più recente su attestati, "
+        + "sono stati aggiornati %s contratti perchè iniziati successivamente ad attestati.", 
         defined, terminatedInactive, terminatedNewContract, updateOldContract);
 
     utilities();
   }
 
   /**
-   * Un metodo da sviluppare per l'export della situazione delle persone attive formato csv. nome,
-   * contract.id, monte ore anno passato, monte ore anno corrente, buoni pasto residui. alla fine
-   * del mese precedente.
+   * Un metodo da sviluppare per l'export della situazione delle
+   * persone attive formato csv.
+   * nome, contract.id, monte ore anno passato, monte ore anno corrente, buoni pasto residui.
+   * alla fine del mese precedente.
    */
   public static void exportDifferences() throws IOException {
 
@@ -736,7 +816,7 @@ public class Administration extends Controller {
     for (ContractMonthRecap cmr : map.values()) {
 
       out.write(cmr.contract.person.fullName()
-          + "," + cmr.contract.id
+          + "," + cmr.contract.id 
           + "," + cmr.remainingMinutesLastYear
           + "," + cmr.remainingMinutesCurrentYear
           + "," + cmr.remainingMealTickets);
@@ -749,7 +829,7 @@ public class Administration extends Controller {
 
 
   /**
-   * @see ConfigurationManager::updateAllOfficeConfigurations
+   * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
     configurationManager.updateAllOfficesConfigurations();
@@ -759,11 +839,10 @@ public class Administration extends Controller {
 
   /**
    * Metodo che riposiziona una sede in un nuovo istituto in caso di accorpamenti.
-   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
-  public static void adjustSeats(Office office, Institute institute,
+  public static void adjustSeats(Office office, Institute institute, 
       String sedeId, String codiceSede) {
     List<Office> officeList = Office.findAll();
     List<Institute> instituteList = Institute.findAll();
@@ -775,26 +854,25 @@ public class Administration extends Controller {
       instituteList = Institute.findAll();
       flash.success("Aggiornato rapporto tra %s e %s", office.name, institute.code);
       render(officeList, instituteList);
-    }
+    }    
 
   }
 
   /**
    * Metodo privato che fa il cambio di appartenenza di una sede.
-   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
-  private static void changeSeatLocation(Office office, Institute institute,
+  private static void changeSeatLocation(Office office, Institute institute, 
       String sedeId, String codiceSede) {
     Institute oldInstitute = office.institute;
     oldInstitute.seats.remove(office);
     office.institute = institute;
-    int separatorChar = office.name.indexOf('-');
+    int separatorChar = office.name.indexOf("-");
     if (separatorChar == -1) {
-      separatorChar = office.name.indexOf(' ');
+      separatorChar = office.name.indexOf(" ");
     }
-    String city = office.name.substring(separatorChar);
+    String city = office.name.substring(separatorChar, office.name.length());
     office.name = institute.code + city;
     if (!Strings.isNullOrEmpty(sedeId)) {
       office.codeId = sedeId;

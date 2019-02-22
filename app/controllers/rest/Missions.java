@@ -43,15 +43,15 @@ public class Missions extends Controller {
   private static OfficeDao officeDao;
   
   private static void logInfo(String description, MissionFromClient body) {
-    log.info("Integrazione Missioni: {}. Messaggio: {}", description, body);
+    log.info(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
   }
   
   private static void logWarn(String description, MissionFromClient body) {
-    log.warn("Integrazione Missioni: {}. Messaggio: {}", description, body);
+    log.warn(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
   }
   
   private static void logError(String description, MissionFromClient body) {
-    log.error("Integrazione Missioni: {}. Messaggio: {}", description, body);
+    log.error(MissionManager.LOG_PREFIX +  "{}. Messaggio: {}", description, body);
   }
   
   /**
@@ -105,12 +105,12 @@ public class Missions extends Controller {
       default:
         break;
     }
-    
+
     if (success) {
       logInfo("Messaggio inserito con successo", body);
     } else {
+      logError("Non è stato possibile inserire il messaggio", body);
       JsonResponse.conflict();
-      logError("Non è stato possibile inserire il messaggio", body);        
     }
 
     // Success (200)
