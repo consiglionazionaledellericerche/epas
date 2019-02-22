@@ -134,7 +134,9 @@ public class Offices extends Controller {
         render("@edit", office, wrOffice);
       }
     } else {
-      office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      if (office.beginDate == null) {
+        office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      }      
       office.save();
 
       // Configurazione iniziale di default ...
