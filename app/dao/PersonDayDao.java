@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 
 import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.query.QPersonDay;
@@ -250,5 +251,16 @@ public class PersonDayDao extends DaoBase {
     final JPQLQuery query =
         getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
     return query.singleResult(personDay);
+  }
+  
+  /**
+   * 
+   * @param abs
+   * @return il personDay che conteneva l'assenza passata come parametro.
+   */
+  public Optional<PersonDay> getByAbsence(Absence abs) {
+    QPersonDay personDay = QPersonDay.personDay;
+    final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.absences.contains(abs));
+    return Optional.fromNullable(query.singleResult(personDay));
   }
 }
