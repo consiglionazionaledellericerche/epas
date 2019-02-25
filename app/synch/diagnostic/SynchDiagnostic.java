@@ -1,17 +1,13 @@
 package synch.diagnostic;
 
 import com.google.common.collect.Maps;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Map;
-
 import models.Contract;
 import models.Institute;
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -260,11 +256,15 @@ public class SynchDiagnostic {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }
-    if (epasContract.calculatedEnd() != null 
-        && !epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd())) {
+    
+    if (epasContract.calculatedEnd() == null && perseoContract.calculatedEnd() != null 
+        || epasContract.calculatedEnd() != null && perseoContract.calculatedEnd() == null) {
       return false;
     }
-    return true;
+        
+    return epasContract.calculatedEnd() == null && perseoContract.calculatedEnd() == null
+        || epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd());
+
   }
   
   /**
