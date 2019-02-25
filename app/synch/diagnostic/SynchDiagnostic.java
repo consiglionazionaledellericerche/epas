@@ -238,7 +238,12 @@ public class SynchDiagnostic {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }
-    return epasContract.calculatedEnd() == null
+    if (epasContract.calculatedEnd() == null && perseoContract.calculatedEnd() != null 
+        || epasContract.calculatedEnd() != null && perseoContract.calculatedEnd() == null) {
+      return false;
+    }
+        
+    return epasContract.calculatedEnd() == null && perseoContract.calculatedEnd() == null
         || epasContract.calculatedEnd().isEqual(perseoContract.calculatedEnd());
   }
 
