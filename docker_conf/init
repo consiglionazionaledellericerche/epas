@@ -198,7 +198,7 @@ sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.con
 
 ### Impostazione autenticazione LDAP
 
-LDAP_LOGIN=${LDAP_LOGIN:false}
+LDAP_LOGIN=${LDAP_LOGIN:-false}
 LDAP_URL=${LDAP_URL}
 LDAP_DN_BASE=${LDAP_DN_BASE}
 LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
