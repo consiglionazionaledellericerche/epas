@@ -94,9 +94,11 @@ public class PrintTags extends Controller {
     if (!forAll) {
       personList.add(person);
     } else {
+      Set<Office> set = Sets.newHashSet();
+      set.add(office);
       personList = personDao.list(
           Optional.<String>absent(),
-          secureManager.officesReadAllowed(Security.getUser().get()),
+          set,
           false, date, date.dayOfMonth().withMaximumValue(), true).list();
     }
 
