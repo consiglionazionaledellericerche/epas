@@ -236,6 +236,8 @@ public class RequestInit extends Controller {
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
+        "Competences.exportCompetences",
+        "Competences.getOvertimeInYear",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "WorkingTimes.manageWorkingTime",
