@@ -20,12 +20,18 @@ public class LdapService {
   
   public static final String ldapUrl = Play.configuration.getProperty("ldap.url");
 
+  public static final String ldapUniqueIdentifier = 
+      Play.configuration.getProperty("ldap.uniqueIdentifier", "uid");
+  
   //ou=People,dc=iit,dc=cnr,dc=it
   private static final String baseDn = Play.configuration.getProperty("ldap.dn.base");  
 
   private static final int timeout = 
       Integer.parseInt(Play.configuration.getProperty("ldap.timeout", "1000"));  
-      
+  
+  private static final boolean bindWithOnlyUid =
+      Boolean.parseBoolean(Play.configuration.getProperty("ldap.bind.useOnlyUid", "false"));
+  
   /**
    * Esempio autenticazione LDAP.
    * 
@@ -36,7 +42,7 @@ public class LdapService {
   public static Optional<LdapUser> authenticate(String username, String password) {
     val authEnv = new Hashtable<String, String>();
 
-    String dn = "uid=" + username + "," + baseDn;
+    String dn = bindWithOnlyUid ? username : ldapUniqueIdentifier + "=" + username + "," + baseDn; 
 
     authEnv.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
     authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + (timeout * 1000));
@@ -48,22 +54,31 @@ public class LdapService {
 
     try {
       SearchControls ctrls = new SearchControls();
-      ctrls.setReturningAttributes(new String[] { "uid", "givenName", "sn", "mail", getEppnAttributeName() });
+      ctrls.setReturningAttributes(
+          new String[] { ldapUniqueIdentifier, "givenName", "sn", "mail", 
+          getEppnAttributeName() });
       ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
       
       DirContext authContext = new InitialDirContext(authEnv);
       log.info("LDAP Authentication Success for {}", username);
-
+      
       NamingEnumeration<javax.naming.directory.SearchResult> answers = 
-          authContext.search(baseDn, "(uid=" + username + ")", ctrls);
+          authContext.search(baseDn, "(" + ldapUniqueIdentifier + "=" + username + ")", ctrls);
+      if (answers == null || !answers.hasMoreElements()) {
+        log.info("LdapSearch failed for {}={} using baseDn={}", 
+            ldapUniqueIdentifier, username, baseDn);
+        return Optional.absent();
+      }
       javax.naming.directory.SearchResult result = answers.nextElement();      
 
       return Optional.of(LdapUser.create(result.getAttributes(), getEppnAttributeName()));
     } catch (AuthenticationException authEx) {
-      log.info("LDAP Authentication failed for {}", username, authEx);
+      log.info("LDAP Authentication failed for {}={}, dn = {}", 
+          ldapUniqueIdentifier, username, dn, authEx);
       return Optional.absent();
-    } catch (NamingException namEx) {
-      log.error("Something went wrong during LDAP authentication for {}", username, namEx);
+    } catch (Exception ex) {
+      log.error("Something went wrong during LDAP authentication for {}={}, dn = {}", 
+          ldapUniqueIdentifier, username, dn, ex);
       return Optional.absent();
     }
   }
