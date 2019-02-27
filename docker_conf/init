@@ -276,6 +276,8 @@ LDAP_DN_BASE=${LDAP_DN_BASE}
 LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
 LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:-/}
 LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}
+LDAP_BIND_USE_ONLY_UID=${LDAP_BIND_USE_ONLY_UID:-false}
+LDAP_UNIQUE_IDENTIFIER=${LDAP_UNIQUE_IDENTIFIER:-uid}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
@@ -284,6 +286,8 @@ if [ ${LDAP_LOGIN} = "true" ]; then
   sed 's#{{LDAP_TIMEOUT}}#'"${LDAP_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_DN_BASE}}#'"${LDAP_DN_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf    
+  sed 's#{{LDAP_BIND_USE_ONLY_UID}}#'"${LDAP_BIND_USE_ONLY_UID}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{LDAP_UNIQUE_IDENTIFIER}}#'"${LDAP_UNIQUE_IDENTIFIER}"'#' -i ${APP_HOME}/conf/prod.conf  
   if [ -z "${LDAP_EPPN_ATTRIBUTE_NAME}" ]; then
     sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf
   else

@@ -64,8 +64,10 @@ public class Ldap extends Controller {
     val eppn = ldapUser.get().getEppn();
     
     if (eppn == null) {
-      log.warn("Failed login for {}, {} attribute not set in LDAP", username, LdapService.getEppnAttributeName());
-      flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", LdapService.getEppnAttributeName(), username);
+      log.warn("Failed login for {}, {} attribute not set in LDAP", 
+          username, LdapService.getEppnAttributeName());
+      flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", 
+          LdapService.getEppnAttributeName(), username);
       redirect("/login");
     }
 
