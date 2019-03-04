@@ -814,6 +814,8 @@ public class Synchronizations extends Controller {
         }
         // Salvare il contratto.
         if (!contractManager.properContractCreate(perseoContract, Optional.absent(), false)) {
+          flash.error("Problemi nel salvare il contratto con id = %s.", perseoContract.id);
+          log.warn("Impossibil e importare il contratto con id = {}", perseoContract.id);
           // TODO segnalare il conflitto
         }
       }
