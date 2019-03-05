@@ -14,16 +14,10 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.Web;
-import helpers.jpa.ModelQuery.SimpleResults;
-
-import javax.inject.Inject;
-
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
+import javax.inject.Inject;
 import lombok.val;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
@@ -41,16 +35,12 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.absences.AbsenceType;
-import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
-import models.absences.definitions.DefaultTab;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
-
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
@@ -419,8 +409,8 @@ public class AbsenceRequests extends Controller {
       absenceRequestManager.executeEvent(
           absenceRequest, absenceRequest.person, 
           AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR) 
-          || (absenceRequest.person.user.hasRoles(Role.GROUP_MANAGER) 
+      if (absenceRequest.person.isSeatSupervisor() 
+          || (absenceRequest.person.isGroupManager() 
               && !absenceRequest.officeHeadApprovalForManagerRequired)) {
         approval(absenceRequest.id);
       } else {
