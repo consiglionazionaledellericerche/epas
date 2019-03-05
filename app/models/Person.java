@@ -357,4 +357,15 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean isTopQualification() {
     return qualification != null && qualification.isTopQualification();
   }
+  
+  @Transient
+  public boolean isGroupManager() {
+    return user.hasRoles(Role.GROUP_MANAGER);
+  }
+  
+  @Transient
+  public boolean isSeatSupervisor() {
+    return user.hasRoles(Role.SEAT_SUPERVISOR);
+  }
+
 }

@@ -195,7 +195,7 @@ public class AbsenceRequestManager {
       }
     }
 
-    if (requestType.alwaysSkipManagerApproval) {
+    if (requestType.alwaysSkipManagerApproval || person.isGroupManager()) {
       absenceRequestConfiguration.managerApprovalRequired = false;
     } else {
       if (person.isTopQualification() 
@@ -215,7 +215,7 @@ public class AbsenceRequestManager {
     }    
     if (requestType.alwaysSkipOfficeHeadApproval) {
       absenceRequestConfiguration.officeHeadApprovalRequired = false;
-    } else {
+    } else {      
       if (person.isTopQualification() 
           && requestType.officeHeadApprovalRequiredTopLevel.isPresent()) {
         absenceRequestConfiguration.officeHeadApprovalRequired = 
@@ -235,8 +235,7 @@ public class AbsenceRequestManager {
     if (requestType.alwaysSkipOfficeHeadApprovalForManager) {
       absenceRequestConfiguration.officeHeadApprovalForManagerRequired = false;
     } else {
-      if (person.user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      if (person.isGroupManager()) {
         absenceRequestConfiguration.officeHeadApprovalForManagerRequired =
             (Boolean) configurationManager.configValue(person.office, 
                 requestType.officeHeadApprovalRequiredForManager.get(), LocalDate.now());
