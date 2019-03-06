@@ -90,6 +90,9 @@ public class BadgeManager {
     return !alreadyPresent.isPresent();
   }
 
+  /**
+   * Cerca il BadgeSystem associato all'ufficio passato e se non c'è lo crea. 
+   */
   public BadgeSystem getOrCreateDefaultBadgeSystem(Office office) {
     String namePattern = office.name.replaceAll("\\s+", "");
     BadgeSystem badgeSystem;

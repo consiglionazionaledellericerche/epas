@@ -15,13 +15,18 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.rest.ApiRequestException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import manager.ContractManager;
@@ -888,6 +893,9 @@ public class Synchronizations extends Controller {
     render(office, people);
   }
 
+  /**
+   * Importa tutti i badge non ancora presenti su ePAS.
+   */
   public static void importBadges(Long officeId) {
 
     if (officeId == null) {
@@ -896,9 +904,15 @@ public class Synchronizations extends Controller {
 
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    List<PersonBadge> importedBadges = new ArrayList<>(0);
+    List<PersonBadge> importedBadges = Lists.newArrayList();
     try {
-      importedBadges = peoplePerseoConsumer.getOfficeBadges(office.perseoId).get();
+      //Vengono filtrati tutti i badge uguali. Solo il primo incontrato
+      //viene importato.
+      importedBadges = 
+          Lists.newArrayList(peoplePerseoConsumer.getOfficeBadges(office.perseoId).get()
+          .stream().collect(Collectors.toCollection(
+              () -> new TreeSet<PersonBadge>(
+                  (pb1, pb2) -> pb1.getBadge().compareTo(pb2.getBadge())))));
     } catch (InterruptedException | ExecutionException e) {
       flash.error("Impossibile importare i badge della sede con perseoId %s: %s",
           office.perseoId, e.getMessage());
