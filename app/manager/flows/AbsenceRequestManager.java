@@ -2,10 +2,7 @@ package manager.flows;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-
 import controllers.Security;
-
-import dao.AbsenceDao;
 import dao.AbsenceRequestDao;
 import dao.GroupDao;
 import dao.RoleDao;
@@ -18,9 +15,8 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -44,7 +40,6 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import play.Play;
 import play.db.jpa.JPA;
 
 /**
@@ -332,7 +327,8 @@ public class AbsenceRequestManager {
 
     if (eventType == AbsenceRequestEventType.OFFICE_HEAD_APPROVAL 
         || eventType == AbsenceRequestEventType.OFFICE_HEAD_REFUSAL) {
-      if (!absenceRequest.officeHeadApprovalRequired) {
+      if (!absenceRequest.officeHeadApprovalRequired 
+          && !absenceRequest.officeHeadApprovalForManagerRequired) {
         return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
             + "da parte del responsabile di sede.");
       }
