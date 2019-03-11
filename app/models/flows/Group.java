@@ -10,6 +10,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.compress.utils.Lists;
 import org.hibernate.envers.Audited;
+import models.Office;
 import models.Person;
 import models.base.MutableModel;
 import play.data.validation.Required;
@@ -25,6 +26,10 @@ public class Group extends MutableModel {
   
   @Column(name="send_flows_email")
   public boolean sendFlowsEmail = false;
+  
+  @ManyToOne
+  @JoinColumn(name = "office_id", nullable = false)
+  public Office office;
   
   @ManyToOne
   @JoinColumn(name = "manager", nullable = false)

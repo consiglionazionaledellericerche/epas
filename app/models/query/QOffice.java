@@ -51,6 +51,8 @@ public class QOffice extends EntityPathBase<Office> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
+
     public final BooleanPath headQuarter = createBoolean("headQuarter");
 
     //inherited

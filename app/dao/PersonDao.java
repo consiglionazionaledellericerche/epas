@@ -32,6 +32,7 @@ import manager.configurations.EpasParam;
 import models.BadgeReader;
 import models.CompetenceCode;
 import models.Contract;
+import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -75,6 +76,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Lista di persone attive per anno/mese su set di sedi.
    * @param offices   la lista degli uffici
    * @param yearMonth l'oggetto anno/mese
    * @return la lista delle persone di un certo ufficio attive in quell'anno/mese.
@@ -154,6 +156,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Lista di persone in base alla sede.
    * @param office Ufficio
    * @return Restituisce la lista delle persone appartenenti all'ufficio specificato.
    */
@@ -162,6 +165,20 @@ public final class PersonDao extends DaoBase {
 
     return personQuery(Optional.absent(), ImmutableSet.of(office), false, Optional.absent(),
         Optional.absent(), false, Optional.absent(), Optional.absent(), false).list(person);
+  }
+  
+  /**
+   * Lista delle persone appartenenti all'istituto.
+   * @param institute l'istituto passato come parametro
+   * @return la lista delle persone afferenti all'istituto passato come parametro.
+   */
+  public List<Person> byInstitute(Institute institute) {
+    final QPerson person = QPerson.person;
+    
+    JPQLQuery query = getQueryFactory()
+        .from(person)
+        .where(person.office.institute.eq(institute)).orderBy(person.surname.asc());
+    return query.list(person);
   }
 
 
@@ -228,7 +245,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   *
+   * Lista per codice di competenza.
    * @param offices Uffici dei quali verificare le persone
    * @param yearMonth Il mese interessato
    * @param code  Il codice di competenza da considerare
@@ -313,6 +330,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Lista di contratti per persona nel periodo.
    * @param person   la persona di cui si vogliono i contratti
    * @param fromDate la data di inizio da cui cercare
    * @param toDate   la data di fine in cui cercare
@@ -438,6 +456,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dalla mail.
    * @param email la mail della persona.
    * @return la persona che ha associata la mail email.
    */
@@ -452,6 +471,7 @@ public final class PersonDao extends DaoBase {
 
 
   /**
+   * Persona (se esiste) a partire dall'eppn.
    * @param eppn il parametro eppn per autenticazione via shibboleth.
    * @return la persona se esiste associata al parametro eppn.
    */
@@ -465,6 +485,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dal perseoId.
    * @param perseoId l'id della persona sull'applicazione perseo.
    * @return la persona identificata dall'id con cui è salvata sul db di perseo.
    */
@@ -501,6 +522,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Lista di persone per tipo di reperibilità associata.
    * @param type il tipo della reperibilità.
    * @return la lista di persone in reperibilità con tipo type.
    */
@@ -521,6 +543,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Lista di persone per tipo di turno associato.
    * @param type il tipo di turno
    * @return la lista di persone che hanno come tipo turno quello passato come parametro.
    */
