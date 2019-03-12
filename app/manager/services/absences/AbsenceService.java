@@ -730,7 +730,7 @@ public class AbsenceService {
    */
   public void enumAllineator() {
 
-    enumAllineator.patchGroupsProduction();
+    //enumAllineator.patchGroupsProduction();
 
     enumAllineator.handleTab(false);
     enumAllineator.handleCategory(false);
