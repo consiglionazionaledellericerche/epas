@@ -17,6 +17,7 @@ import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
@@ -397,9 +398,9 @@ public class AbsenceRequests extends Controller {
       absenceRequestManager.executeEvent(
           absenceRequest, absenceRequest.person,
           AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      if (absenceRequest.person.user.hasRoles(Role.SEAT_SUPERVISOR)
-          || (absenceRequest.person.user.hasRoles(Role.GROUP_MANAGER)
-          && !absenceRequest.officeHeadApprovalForManagerRequired)) {
+      if (absenceRequest.person.isSeatSupervisor() 
+          || (absenceRequest.person.isGroupManager() 
+              && !absenceRequest.officeHeadApprovalForManagerRequired)) {
         approval(absenceRequest.id);
       } else {
         //invio la notifica al primo che deve validare la mia richiesta 

@@ -45,13 +45,13 @@
 				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
 								
 				#{if config.managerApprovalRequired}
-					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>
+					<td>#{f.value 'item.managerApproved', value:item.managerApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
 				#{if config.administrativeApprovalRequired}
-					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
+					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
 				#{if config.officeHeadApprovalRequired}
-					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
+					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>

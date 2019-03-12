@@ -33,7 +33,9 @@ import play.db.jpa.Blob;
  *
  */
 @ToString(of = {"type", "person", "startAt", "endTo", 
-    "managerApproved", "administrativeApproved", "officeHeadApproved"})
+    "managerApproved", "administrativeApproved", "officeHeadApproved",
+    "administrativeApprovalRequired", "officeHeadApprovalRequired",
+    "officeHeadApprovalForManagerRequired"})
 @Audited
 @Entity
 @Table(name = "absence_requests")
@@ -184,7 +186,7 @@ public class AbsenceRequest extends MutableModel {
         && (!this.administrativeApprovalRequired 
             || this.isAdministrativeApproved())
         && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
-            || (!this.officeHeadApprovalForManagerRequired 
-                && this.person.user.hasRoles(Role.GROUP_MANAGER) && this.isManagerApproved());
+        && (!this.officeHeadApprovalForManagerRequired 
+            || this.isOfficeHeadApproved());
   }
 }
