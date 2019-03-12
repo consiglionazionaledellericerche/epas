@@ -281,7 +281,7 @@ public class CompetenceManager {
         totale = result.get().longValue();
       }
 
-      log.debug("Totale per {} vale %d", p.getFullname(), totale);
+      log.debug("Totale per {} vale {}", p.getFullname(), totale);
       out.write(p.surname + ' ' + p.name + ',');
       if (totale != null) {
         out.append(totale.toString());

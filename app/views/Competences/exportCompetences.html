@@ -8,22 +8,15 @@
 
 #{include './_tabs.html' /}
 
-
-
-
-
 #{alert color:'info'}
   <p>
-   Esporta in formato.csv la situazione annuale degli straordinari per tutti i dipendenti gestiti.
+   Esporta in formato.csv la situazione annuale degli straordinari per i dipendenti della sede ${office.name}.
   </p>
 #{/alert}
  
- 	  #{form @Competences.getOvertimeInYear(), class:'form-inline'}
-
-      #{ff.finput 'year', type:'number', sronly:true, value:session.get('yearSelected'), faicon:'calendar' /}  	  
-       <input class="btn btn-primary" type="submit" value="Esporta straordinari"/>
-     #{/form}    
-     
-
- 
+ 	  	#{form @Competences.getOvertimeInYear(), class:'form-inline'}
+	  		#{f.hidden 'officeId', value:office.id /}
+      		#{ff.finput 'year', type:'number', sronly:true, value:session.get('yearSelected'), faicon:'calendar' /}  	  
+       		<input class="btn btn-primary" type="submit" value="Esporta straordinari"/>
+     	#{/form} 
 </div>

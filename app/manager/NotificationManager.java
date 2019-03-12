@@ -248,7 +248,12 @@ public class NotificationManager {
             || (absenceRequest.managerApproved != null 
             && absenceRequest.administrativeApproved != null)
             || (!absenceRequest.managerApprovalRequired 
-                && absenceRequest.administrativeApproved != null))) {
+                && absenceRequest.administrativeApproved != null))        
+        ) {
+      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    }
+    if (absenceRequest.officeHeadApprovalForManagerRequired && absenceRequest.officeHeadApproved == null 
+          && absenceRequest.person.isGroupManager()) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
     return role;
@@ -482,27 +487,36 @@ public class NotificationManager {
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).forEach(user -> {
-          Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
-          if (!group.isPresent()) {
-            return;
+          //Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+          if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+            Optional<Group> group = 
+                groupDao.checkManagerPerson(user.person, person);
+            if (!group.isPresent()) {
+              return;
+            }
+            if (!group.get().sendFlowsEmail) {
+              log.info("Non verrà inviata la mail al responsabile del gruppo {} "
+                  + "poichè l'invio è stato disattivato.", 
+                  user.person.fullName());
+              return;
+            }            
           }
-          if (!group.get().sendFlowsEmail) {
-            log.info("Non verrà inviata la mail al responsabile del gruppo {} poichè l'invio è stato disattivato.", 
-                user.person.fullName());
-            return;
-          }          
           try {
             simpleEmail.addTo(user.person.email);
           } catch (EmailException e) {
             e.printStackTrace();
           }
           simpleEmail.setSubject("ePas Approvazione flusso");
+          val mailBody = createAbsenceRequestEmail(absenceRequest, user);
           try {
-            simpleEmail.setMsg(createAbsenceRequestEmail(absenceRequest, user));
+            simpleEmail.setMsg(mailBody);
           } catch (EmailException e) {
             e.printStackTrace();
           }
           Mail.send(simpleEmail);
+          log.info("Inviata email per richiesta di flusso richiesta: {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}", 
+              absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
         });
   }
 
