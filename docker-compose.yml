@@ -100,6 +100,7 @@ epas:
 #    - LDAP_EPPN_ATTRIBUTE_NAME=             # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.
 #    - LDAP_BIND_USEONLYUID=                 # default: false. Se impostato a true nel bind LDAP utilizzerà solo lo username invece di uid=username,${LDAP_BASE_DN}
 #    - LDAP_UNIQUE_IDENTIFIER=               # default: uid. Nel caso di Active Directory potrebbe essere necessario utilizzare sAMAccountName
+#    - LDAP_UNIQUE_IDENTIFIER_POSTIX=        # defautl: nessun valore. Stringa aggiunta allo uid ldap per fare la bind. Per esempio @lamma.it.
 #### Dati dell'ente/azienda utilizzatrice ####
 #    - COMPANY_CODE=                         # default: CNR
 #    - COMPANY_NAME=                         # default: Consiglio Nazionale delle Ricerche

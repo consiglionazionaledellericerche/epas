@@ -5,7 +5,6 @@ import java.util.Hashtable;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
@@ -23,6 +22,9 @@ public class LdapService {
   public static final String ldapUniqueIdentifier = 
       Play.configuration.getProperty("ldap.uniqueIdentifier", "uid");
   
+  private static final Optional<String> ldapUniqueIdentifierPostfix = Optional.fromNullable(
+      Play.configuration.getProperty("ldap.uniqueIdentifier.postfix"));
+
   //ou=People,dc=iit,dc=cnr,dc=it
   private static final String baseDn = Play.configuration.getProperty("ldap.dn.base");  
 
@@ -31,7 +33,7 @@ public class LdapService {
   
   private static final boolean bindWithOnlyUid =
       Boolean.parseBoolean(Play.configuration.getProperty("ldap.bind.useOnlyUid", "false"));
-  
+
   /**
    * Esempio autenticazione LDAP.
    * 
@@ -39,10 +41,16 @@ public class LdapService {
    * @param password password ldap 
    * @return l'email dell'utente se autenticato e se l'email è presente. 
    */
-  public static Optional<LdapUser> authenticate(String username, String password) {
+  public Optional<LdapUser> authenticate(String username, String password) {
     val authEnv = new Hashtable<String, String>();
 
-    String dn = bindWithOnlyUid ? username : ldapUniqueIdentifier + "=" + username + "," + baseDn; 
+    String usernameForBind = username;
+    if (ldapUniqueIdentifierPostfix.isPresent()) {
+      usernameForBind += ldapUniqueIdentifierPostfix.get();
+    }
+    
+    String dn = bindWithOnlyUid 
+        ? usernameForBind : ldapUniqueIdentifier + "=" + usernameForBind + "," + baseDn; 
 
     authEnv.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
     authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + (timeout * 1000));
@@ -88,7 +96,7 @@ public class LdapService {
    * con l'attributo eppn presente in ePAS. 
    * @return nome del campo utilizzato per fare il match tra gli utenti LDAP e quelli di ePAS.
    */
-  public static String getEppnAttributeName() {
+  public String getEppnAttributeName() {
     return Play.configuration.getProperty("ldap.eppn.attribute.name", "eduPersonPrincipalName");
   }
 }
