@@ -1,6 +1,5 @@
 package manager.ldap;
 
-import com.google.common.base.Optional;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import lombok.AllArgsConstructor;
