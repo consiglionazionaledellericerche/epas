@@ -171,8 +171,9 @@ public class MissionManager {
 
       atomicInsert(situation, body, actualDate);
       actualDate = actualDate.plusDays(1);
-
+      
     }    
+    recalculate(body, Optional.<List<Absence>>absent());
     return true;
   }
   
@@ -315,17 +316,27 @@ public class MissionManager {
       LocalDateTime actual = body.dataInizio;
       while (!actual.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
         if (abs.personDay.date.isEqual(actual.toLocalDate())) {
+          int time = getFromDayOfMission(body.person, actual.toLocalDate()).workingTime;
           int minutes = abs.justifiedMinutes;
           Situation sit = getSituation(actual, body, workInterval);
           if (minutes != sit.difference) {
-            atomicRemoval(abs, true);
-            atomicInsert(sit, body, actual);
+            if ((minutes == 0 && sit.difference >= time) 
+                || (sit.difference >= time && minutes > time)) {
+              log.info("Si inserirebbe un codice di missione identico al precedente. "
+                  + "Non faccio niente.");
+            } else {
+              atomicRemoval(abs, true);
+              atomicInsert(sit, body, actual);
+            }
           }
-        }
+        }        
         actual = actual.plusDays(1);
       }
-    }
+    }    
     
+    //consistencyManager.updatePersonSituation(body.person.id, body.dataInizio.toLocalDate());
+    recalculate(body, Optional.fromNullable(missions));
+    log.debug("Lanciati i ricalcoli");
     return true;
   }
 
@@ -415,6 +426,7 @@ public class MissionManager {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
         absence.personDay = personDay;
+        personDay.absences.add(absence);
         if (idOrdine != null) {
           absence.externalIdentifier = idOrdine;
         } else {
@@ -487,7 +499,7 @@ public class MissionManager {
       result = true;
     } catch (Exception ex) {
       result = false;
-      throw new PersistenceException("Error in removing absence");
+      throw new PersistenceException("Error in removing absence ");
     }
 
     return result;
