@@ -42,12 +42,12 @@ public class MetricsProbe extends Controller {
   @Inject
   static IMinDurationCheck minDurationCheck;
 
-  @Before(priority=0)
+  @Before(priority = 0)
   static void starting() {
     request.args.put(PROBE, Timer.start(registry));
   }
 
-  @After(priority=Integer.MAX_VALUE)
+  @After(priority = Integer.MAX_VALUE)
   static void ending() {
     val sample = (Timer.Sample) request.args.get(PROBE);
     if (sample == null) {
@@ -62,7 +62,7 @@ public class MetricsProbe extends Controller {
       if (minDurationCheck.test(t)) {
         val params = request.params.all().entrySet().stream()
             .filter(i -> !PARAMS_SKIP.contains(i.getKey()))
-            .map(e -> e.getKey() + "=" + Joiner.on(',').join((String[]) e.getValue()))
+            .map(e -> e.getKey() + "=" + Joiner.on(',').skipNulls().join((String[]) e.getValue()))
             .collect(Collectors.joining(","));
         log.info("duration: {} ms, request {}({}) as {}", t / NANOS_TO_MS, request.action,
             params, Security.getUser().transform(User::toString).or("-"));
@@ -71,6 +71,7 @@ public class MetricsProbe extends Controller {
   }
 
   /**
+   * Tempo di esecuzione in nanosecondi.
    * @return il tempo in nanosecondi dall'inizio dell'esecuzione dell'azione.
    */
   public static long elapsedNanosec() {
