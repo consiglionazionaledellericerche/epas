@@ -2,13 +2,14 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType;
@@ -76,7 +77,7 @@ public class OfficeManager {
     Preconditions.checkState(!ipAddresses.isEmpty());
 
     if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
-      return FluentIterable.from(officeDao.getAllOffices()).toSet();
+      return new HashSet<>(officeDao.getAllOffices());
     }
 
     Set<Office> offices = Sets.newHashSet();

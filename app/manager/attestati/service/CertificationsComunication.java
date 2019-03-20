@@ -5,20 +5,17 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
-
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;
 import manager.attestati.dto.drop.CancellazioneRigaFormazione;
@@ -33,11 +30,9 @@ import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
-
 import models.Certification;
 import models.Office;
 import models.Person;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
@@ -62,7 +57,7 @@ public class CertificationsComunication {
 
   private static final String API_URL_ASSENZE_PER_CONTRATTO = "/contratto/codiciAssenza";
   //http://attestativ2.rm.cnr.it/api/ext/contratto/codiciAssenza/{CODICE_CONTRATTO}
-  
+
   //Attestati api internal
   private static final String API_URL_INT = "/api/rest";
   private static final String API_INT_STATO_ATTESTATO_MESE = "/sede/listaDipendenti";
@@ -89,13 +84,10 @@ public class CertificationsComunication {
   private CacheValues cacheValues;
 
   /**
-   * Per l'ottenenere il Bearer Token:
-   * curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded"
-   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
-   * -d 'username=app.epas&password=.............
-   * &grant_type=password&scope=read%20write
-   * &client_secret=mySecretOAuthSecret&client_id=attestatiapp'
-   * "http://as2dock.si.cnr.it/oauth/token"
+   * Per l'ottenenere il Bearer Token: curl -s -X POST -H "Content-Type:
+   * application/x-www-form-urlencoded" -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
+   * -d 'username=app.epas&password=............. &grant_type=password&scope=read%20write
+   * &client_secret=mySecretOAuthSecret&client_id=attestatiapp' "http://as2dock.si.cnr.it/oauth/token"
    *
    * @return il token
    */
@@ -174,8 +166,8 @@ public class CertificationsComunication {
   /**
    * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.
    *
-   * @param token       token
-   * @param url         url
+   * @param token token
+   * @param url url
    * @param contentType contentType
    */
   private WSRequest prepareOAuthRequest(String token, String url, String contentType)
@@ -195,11 +187,11 @@ public class CertificationsComunication {
    * Preleva la lista delle matricole da attestati.
    *
    * @param office sede
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return L'insieme delle matricole relative alla sede richiesta
    */
-  public Set<Integer> getPeopleList(Office office, int year, int month)
+  public Set<String> getPeopleList(Office office, int year, int month)
       throws NoSuchFieldException, ExecutionException {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
@@ -228,13 +220,12 @@ public class CertificationsComunication {
   }
 
   /**
-   * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7"
-   * -H "Content-Type: application/json"
-   * http://as2dock.si.cnr.it/api/ext/attestato/{{CODICESEDE}}/{{MATRICOLA}}/{{ANNO}}/{{MESE}}
+   * curl -X GET -H "Authorization: Bearer cf24c413-9cf7-485d-a10b-87776e5659c7" -H "Content-Type:
+   * application/json" http://as2dock.si.cnr.it/api/ext/attestato/{{CODICESEDE}}/{{MATRICOLA}}/{{ANNO}}/{{MESE}}
    *
    * @param person persona
-   * @param month  mese
-   * @param year   anno
+   * @param month mese
+   * @param year anno
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
       int month, int year) throws ExecutionException {
@@ -261,7 +252,7 @@ public class CertificationsComunication {
       SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
-      Verify.verify(seatCertification.dipendenti.get(0).matricola == person.number);
+      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, person.number));
 
       return Optional.of(seatCertification);
 
@@ -472,13 +463,14 @@ public class CertificationsComunication {
     }
     return Lists.newArrayList();
   }
-  
+
   /**
    * Preleva la lista sui periodi di attività dei dipendenti in attestati, per sede anno e mese
    * selezionati.
+   *
    * @param office sede
-   * @param year   anno
-   * @param month  mese
+   * @param year anno
+   * @param month mese
    * @return i contratti attivi nel mese dipendenti
    */
   public List<StatoAttestatoMese> getStatoAttestatoMese(Office office, int year, int month)
@@ -511,10 +503,11 @@ public class CertificationsComunication {
 
   /**
    * Preleva il periodo dipendente con quell'id.
+   *
    * @param periodoId il periodoId
    * @return periodoDipendente
    */
-  public PeriodoDipendente getPeriodoDipendente(int periodoId) 
+  public PeriodoDipendente getPeriodoDipendente(int periodoId)
       throws NoSuchFieldException, ExecutionException {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
@@ -538,13 +531,14 @@ public class CertificationsComunication {
 
     return periodoDipendente;
   }
-  
+
   /**
    * Preleva il cruscotto annuale del dipendente.
+   *
    * @param dipendenteId il dipendenteId
    * @return cruscottoDipendente
    */
-  public CruscottoDipendente getCruscotto(int dipendenteId, int year) 
+  public CruscottoDipendente getCruscotto(int dipendenteId, int year)
       throws NoSuchFieldException, ExecutionException {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
@@ -567,6 +561,6 @@ public class CertificationsComunication {
     log.info("Recuperato il CruscottoDipendente con id  {} e anno {}", dipendenteId, year);
 
     return cruscottoDipendente;
-  } 
+  }
 
 }

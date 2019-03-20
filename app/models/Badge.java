@@ -47,4 +47,11 @@ public class Badge extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "badge_system_id")
   public BadgeSystem badgeSystem;
+
+  public void setCode(String code) {
+    try {
+      this.code = String.valueOf(Integer.valueOf(code));
+    } catch (Exception ignored) {
+    }
+  }
 }

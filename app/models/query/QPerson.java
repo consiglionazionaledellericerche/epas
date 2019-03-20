@@ -64,8 +64,6 @@ public class QPerson extends EntityPathBase<Person> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
-
     public final SetPath<models.absences.InitializationGroup, models.absences.query.QInitializationGroup> initializationGroups = this.<models.absences.InitializationGroup, models.absences.query.QInitializationGroup>createSet("initializationGroups", models.absences.InitializationGroup.class, models.absences.query.QInitializationGroup.class, PathInits.DIRECT2);
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
@@ -74,7 +72,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath name = createString("name");
 
-    public final NumberPath<Integer> number = createNumber("number", Integer.class);
+    public final StringPath number = createString("number");
 
     public final QOffice office;
 

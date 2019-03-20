@@ -58,12 +58,12 @@ public final class CacheValues {
       .refreshAfterWrite(1, TimeUnit.MINUTES)
       .build(new OauthTokenCacheLoader());
 
-  public LoadingCache<Map.Entry<Office, YearMonth>, Set<Integer>> attestatiSerialNumbers =
+  public LoadingCache<Map.Entry<Office, YearMonth>, Set<String>> attestatiSerialNumbers =
       CacheBuilder.newBuilder()
           .expireAfterWrite(20, TimeUnit.MINUTES)
-          .build(new CacheLoader<Map.Entry<Office, YearMonth>, Set<Integer>>() {
+          .build(new CacheLoader<Map.Entry<Office, YearMonth>, Set<String>>() {
             @Override
-            public Set<Integer> load(Map.Entry<Office, YearMonth> key)
+            public Set<String> load(Map.Entry<Office, YearMonth> key)
                 throws ExecutionException, NoSuchFieldException {
               return certification.getPeopleList(
                   key.getKey(), key.getValue().getYear(), key.getValue().getMonthOfYear());
@@ -149,7 +149,7 @@ public final class CacheValues {
   private class StepCacheLoader extends CacheLoader<Map.Entry<Office, YearMonth>, Double> {
     @Override
     public Double load(Map.Entry<Office, YearMonth> key) throws ExecutionException {
-      final Set<Integer> matricoleAttestati = attestatiSerialNumbers.get(key);
+      final Set<String> matricoleAttestati = attestatiSerialNumbers.get(key);
       final int year = key.getValue().getYear();
       final int month = key.getValue().getMonthOfYear();
 
@@ -160,10 +160,10 @@ public final class CacheValues {
           Sets.newHashSet(Lists.newArrayList(key.getKey())), false,
           monthBegin, monthEnd, true).list();
 
-      final Set<Integer> matricoleEpas = people.stream().map(person -> person.number)
+      final Set<String> matricoleEpas = people.stream().map(person -> person.number)
           .distinct().collect(Collectors.toSet());
 
-      final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
+      final Set<String> matchNumbers = Sets.newHashSet(matricoleEpas);
       matchNumbers.retainAll(matricoleAttestati);
       log.debug("Calcolata percentuale caricamento per persona per l'ufficio {} - mese {}/{}",
           key.getKey(), month, year);

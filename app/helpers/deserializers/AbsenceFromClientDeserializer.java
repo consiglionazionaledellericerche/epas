@@ -49,15 +49,14 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
      * con cui viene salvata la persona sul db invece che la matricola
      */
     JsonArray tipoMatricola = jsonAbsence.getAsJsonArray("tipoMatricolaFirma");
-    String matricolaFirma = jsonAbsence.get("matricolaFirma").getAsString();
+    String matricola = jsonAbsence.get("matricolaFirma").getAsString();
 
     Person person = null;
 
     for (JsonElement je : tipoMatricola) {
       String tipo = je.getAsString();
 
-      if (tipo.equals("matricolaCNR")) {
-        Integer matricola = Integer.parseInt(matricolaFirma);
+      if ("matricolaCNR".equals(tipo)) {
         person = personDao.getPersonByNumber(matricola);
       }
 
@@ -67,8 +66,8 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
     }
 
     if (person == null) {
-      log.warn("Impossibile trovare la persona dal Json ricevuto: matricolaFirma {}", 
-          matricolaFirma);
+      log.warn("Impossibile trovare la persona dal Json ricevuto: matricolaFirma {}",
+          matricola);
       return null;
     }
     afc.person = person;

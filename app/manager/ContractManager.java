@@ -127,6 +127,10 @@ public class ContractManager {
       Optional<WorkingTimeType> wtt, 
       boolean recomputation) {
 
+    if (contract.beginDate == null) {
+      return false;
+    }
+    
     if (!isContractCrossFieldValidationPassed(contract)) {
       return false;
     }
