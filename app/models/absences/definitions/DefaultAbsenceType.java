@@ -321,7 +321,7 @@ public enum DefaultAbsenceType {
   //true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
   //0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
   A_92M("92M", "Missione in ore e minuti",
-      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, true,
       0, null, Sets.newHashSet(), new LocalDate(2019,2,1), null),
   A_92NG("92", "Missione che non giustifica niente ai fini del tempo a lavoro",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,

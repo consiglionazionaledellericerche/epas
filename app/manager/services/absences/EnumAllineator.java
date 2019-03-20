@@ -496,35 +496,7 @@ public class EnumAllineator {
     
     return edited;
   }
-  
-  /**
-   * Contenitore di patch specifiche per la generazione di gruppi partendo da situazioni 
-   * o codici pregressi.
-   */
-  public void patchGroupsProduction() {
-    
-    //1) Assemblea a grana ore e minuti 
-    // Creare il tipo a minuti 0M e convertire tutte le assenze orarie precedenti a grana oraria. 
-    // Una volta creato il codice 0M la patch non deve più essere applicata.
-    if (!absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_0M.getCode()).isPresent()) {
-      throw new IllegalStateException();
-      //      AbsenceType m = this.buildAbsenceType(DefaultAbsenceType.A_0M);
-      //      List<Absence> absences = absenceComponentDao.absences(Lists.newArrayList(
-      //          DefaultAbsenceType.A_01.getCode(), DefaultAbsenceType.A_02.getCode(),
-      //          DefaultAbsenceType.A_03.getCode(), DefaultAbsenceType.A_04.getCode(),
-      //          DefaultAbsenceType.A_05.getCode(), DefaultAbsenceType.A_06.getCode(),
-      //          DefaultAbsenceType.A_07.getCode(), DefaultAbsenceType.A_08.getCode()));
-      //      for (Absence absence : absences) {
-      //        //convertire tutti i 01... in 0M
-      //        absence.justifiedMinutes = absence.absenceType.justifiedTime;
-      //        absence.justifiedType = absenceComponentDao
-      //            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-      //        absence.absenceType = m;
-      //        absence.save();
-      //      }
-    }
-  }
-  
+ 
   /**
    * Costruisce un'absenceType a partire dall'enumerato.
    * @return entity costruita

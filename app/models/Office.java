@@ -180,8 +180,8 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
    *        indicato
    */
   public boolean checkConf(EpasParam param, String value) {
-    return configurations.stream().filter(conf -> conf.epasParam == param
-        && conf.fieldValue.equals(value)).findFirst().isPresent();
+    return configurations.stream().anyMatch(conf -> conf.epasParam == param
+        && conf.fieldValue.equals(value));
   }
 
 }

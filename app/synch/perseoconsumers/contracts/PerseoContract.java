@@ -2,7 +2,7 @@ package synch.perseoconsumers.contracts;
 
 public class PerseoContract {
 
-  public Long id;
+  public String id;
   public boolean temporary;
   public String beginContract;
   public String expireContract;

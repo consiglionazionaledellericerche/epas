@@ -10,8 +10,9 @@ public class PerseoPerson {
   public String firstname;
   public String surname;
   public String email;
-  public Integer number;
+  public String number;
   public Integer qualification;
   public Long departmentId;
   public String updatedAt;
+  public String eppn;
 }

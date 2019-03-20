@@ -29,20 +29,24 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
 
     Person person = new Person();
 
-    person.name = jsonPerson.has("otherNames")
-            ? jsonPerson.get("firstname").getAsString() + " "
-              + jsonPerson.get("otherNames").getAsString()
-            : jsonPerson.get("firstname").getAsString();
+    if (jsonPerson.has("otherNames")) {
+      person.name = jsonPerson.get("firstname").getAsString() + " "
+          + jsonPerson.get("otherNames").getAsString();
+    } else {
+      person.name = jsonPerson.get("firstname").getAsString();
+    }
 
-    person.surname = jsonPerson.has("otherSurnames")
-            ? jsonPerson.get("surname").getAsString() + " "
-              + jsonPerson.get("otherSurnames").getAsString()
-            : jsonPerson.get("surname").getAsString();
+    if (jsonPerson.has("otherSurnames")) {
+      person.surname = jsonPerson.get("surname").getAsString() + " "
+          + jsonPerson.get("otherSurnames").getAsString();
+    } else {
+      person.surname = jsonPerson.get("surname").getAsString();
+    }
 
     person.birthday = LocalDate.parse(jsonPerson.get("birthDate").getAsString(), dtf);
 
     person.email = jsonPerson.get("email").getAsString();
-    person.number = jsonPerson.get("number").getAsInt();
+    person.number = jsonPerson.get("number").getAsString();
 
     JsonArray badges = jsonPerson.get("badges").getAsJsonArray();
 

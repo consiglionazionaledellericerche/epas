@@ -4,27 +4,23 @@ import com.google.common.base.Strings;
 
 import play.Play;
 
-public class PerseoApis {
+public class AnagraficaApis {
 
-  private static final String PERSEO_BASE_URL = "perseo.base";
-  private static final String PERSEO_USER = "perseo.user";
-  private static final String PERSEO_PASS = "perseo.pass";
-  private static final String OFFICES_ENDPOINT = "perseo.rest.departments";
-  private static final String OFFICE_ENDPOINT = "perseo.rest.departmentbyperseoid";
-  private static final String INSTITUTE_ENDPOINT = "perseo.rest.institutebyperseoid";
-  private static final String ALL_DEPARTMENT_CONTRACTS_FOR_EPAS_ENDPOINT =
-      "perseo.rest.allcontractsindepartmentforepas";
-  private static final String ALL_CONTRACTS_FOR_EPAS_ENDPOINT =
-      "perseo.rest.allcontractsforepas";
-  private static final String CONTRACT_FOR_EPAS_ENDPOINT =
-      "perseo.rest.contractforepasbyperseoid";
-  private static final String ALL_DEPARTMENT_PEOPLE_FOR_EPAS_ENDPOINT =
-      "perseo.rest.alldepartmentpeopleforepas";
-  private static final String ALL_PEOPLE_FOR_EPAS_ENDPOINT =
-      "perseo.rest.allpeopleforepas";
-  private static final String PERSON_FOR_EPAS_ENDPOINT =
-      "perseo.rest.personforepasbyperseoid";
-  private static final String ALL_ROLES_ENDPOINT = "perseo.rest.allrolesforepas";
+  private static final String PERSEO_BASE_URL = "anagrafica.base";
+  private static final String PERSEO_USER = "anagrafica.user";
+  private static final String PERSEO_PASS = "anagrafica.pass";
+  private static final String OFFICES_ENDPOINT = "anagrafica.offices";
+  private static final String OFFICE_ENDPOINT = "anagrafica.office";
+  private static final String INSTITUTE_ENDPOINT = "anagrafica.institute";
+  private static final String CONTRACTS_IN_OFFICE = "anagrafica.contractsinoffice";
+  private static final String CONTRACTS = "anagrafica.contracts";
+  private static final String CONTRACT = "anagrafica.contract";
+  private static final String PEOPLE_IN_OFFICE = "anagrafica.peopleinoffice";
+  private static final String PEOPLE = "anagrafica.people";
+  private static final String PERSON_FOR_EPAS_ENDPOINT = "anagrafica.person";
+  private static final String ALL_ROLES_ENDPOINT = "anagrafica.roles";
+  private static final String OFFICE_BADGES = "anagrafica.badgesinoffice";
+  private static final String PERSON_BADGE = "anagrafica.badge";
 
   private static String getPerseoBaseUrl() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(PERSEO_BASE_URL))) {
@@ -46,7 +42,7 @@ public class PerseoApis {
     }
     return Play.configuration.getProperty(PERSEO_PASS);
   }
-
+  
   public static String getOfficesEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(OFFICES_ENDPOINT);
   }
@@ -61,25 +57,25 @@ public class PerseoApis {
 
   public static String getAllContractsForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
-        + Play.configuration.getProperty(ALL_CONTRACTS_FOR_EPAS_ENDPOINT);
+        + Play.configuration.getProperty(CONTRACTS);
   }
 
   public static String getAllDepartmentContractsForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
-        + Play.configuration.getProperty(ALL_DEPARTMENT_CONTRACTS_FOR_EPAS_ENDPOINT);
+        + Play.configuration.getProperty(CONTRACTS_IN_OFFICE);
   }
 
   public static String getContractForEpasEndpoint() throws NoSuchFieldException {
-    return getPerseoBaseUrl() + Play.configuration.getProperty(CONTRACT_FOR_EPAS_ENDPOINT);
+    return getPerseoBaseUrl() + Play.configuration.getProperty(CONTRACT);
   }
 
   public static String getAllDepartmentPeopleForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
-        + Play.configuration.getProperty(ALL_DEPARTMENT_PEOPLE_FOR_EPAS_ENDPOINT);
+        + Play.configuration.getProperty(PEOPLE_IN_OFFICE);
   }
 
-  public static String getAllPeopleForEpasEndpoint() throws NoSuchFieldException {
-    return getPerseoBaseUrl() + Play.configuration.getProperty(ALL_PEOPLE_FOR_EPAS_ENDPOINT);
+  public static String getPeople() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(PEOPLE);
   }
 
   public static String getPersonForEpasEndpoint() throws NoSuchFieldException {
@@ -90,4 +86,11 @@ public class PerseoApis {
     return getPerseoBaseUrl() + Play.configuration.getProperty(ALL_ROLES_ENDPOINT);
   }
 
+  public static String getDepartmentsBadges() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(OFFICE_BADGES);
+  }
+
+  public static String getPersonBadge() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(PERSON_BADGE);
+  }
 }

@@ -628,7 +628,7 @@ public class Administration extends Controller {
 
     notFoundIfNull(office);
 
-    Map<Integer, ContrattoAttestati> contrattiAttestati = null;
+    Map<String, ContrattoAttestati> contrattiAttestati = null;
 
     //Doppio tentativo (mese corrente e mese precedente)
     try { 
