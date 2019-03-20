@@ -236,10 +236,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-<<<<<<< HEAD
    * Lista per codice di competenza.
-=======
->>>>>>> refs/remotes/origin/master
    * @param offices Uffici dei quali verificare le persone
    * @param yearMonth Il mese interessato
    * @param code Il codice di competenza da considerare
@@ -324,12 +321,8 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-<<<<<<< HEAD
    * Lista di contratti per persona nel periodo.
-   * @param person   la persona di cui si vogliono i contratti
-=======
    * @param person la persona di cui si vogliono i contratti
->>>>>>> refs/remotes/origin/master
    * @param fromDate la data di inizio da cui cercare
    * @param toDate la data di fine in cui cercare
    * @return la lista di contratti che soddisfa le seguenti condizioni.
