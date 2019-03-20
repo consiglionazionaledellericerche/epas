@@ -36,7 +36,7 @@ public class GroupManager {
   public void createManager(Office office, Group group, UsersRolesOffices uro) {
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     Optional<UsersRolesOffices> uroPresent = 
-        uroDao.getUsersRolesOffices(group.manager.user, role, group.manager.office);
+        uroDao.getUsersRolesOffices(group.manager.user, role, group.office);
     if (uroPresent.isPresent()) {
       return;
     }

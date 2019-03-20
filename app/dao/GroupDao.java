@@ -32,7 +32,7 @@ public class GroupDao extends DaoBase {
   public List<Group> groupsByOffice(Office office, Optional<Person> manager) {
     final QGroup group = QGroup.group;
     BooleanBuilder condition = new BooleanBuilder();
-    final JPQLQuery query = getQueryFactory().from(group).where(group.manager.office.eq(office));
+    final JPQLQuery query = getQueryFactory().from(group).where(group.office.eq(office));
     if (manager.isPresent()) {
       condition.and(group.manager.eq(manager.get()));
     }

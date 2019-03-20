@@ -41,6 +41,8 @@ public class QGroup extends EntityPathBase<Group> {
 
     public final StringPath name = createString("name");
 
+    public final models.query.QOffice office;
+
     public final ListPath<models.Person, models.query.QPerson> people = this.<models.Person, models.query.QPerson>createList("people", models.Person.class, models.query.QPerson.class, PathInits.DIRECT2);
 
     //inherited
@@ -73,6 +75,7 @@ public class QGroup extends EntityPathBase<Group> {
     public QGroup(Class<? extends Group> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.manager = inits.isInitialized("manager") ? new models.query.QPerson(forProperty("manager"), inits.get("manager")) : null;
+        this.office = inits.isInitialized("office") ? new models.query.QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }
