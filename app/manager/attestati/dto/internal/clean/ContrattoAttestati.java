@@ -13,7 +13,7 @@ import org.joda.time.LocalDate;
 @Builder
 public class ContrattoAttestati {
 
-  public int matricola;
+  public String matricola;
   public LocalDate beginContract;
   public LocalDate endContract;
 

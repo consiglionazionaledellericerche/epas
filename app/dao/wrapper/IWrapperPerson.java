@@ -94,53 +94,53 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   /**
    * True se la persona è passata da determinato a indeterminato durante l'anno.
    */
-  public boolean hasPassToIndefiniteInYear(int year);
+  boolean hasPassToIndefiniteInYear(int year);
 
   /**
    * L'esito dell'invio attestati per la persona (null se non è ancora stato effettuato).
    */
-  public CertificatedData getCertificatedData(int year, int month);
+  CertificatedData getCertificatedData(int year, int month);
 
   /**
    * Getter per la competenza della persona tramite CompetenceCode, year e month.
    */
-  public Competence competence(final CompetenceCode code, final int year, final int month);
+  Competence competence(final CompetenceCode code, final int year, final int month);
 
   /**
    * Il residuo positivo del mese fatto dalla person.
    */
-  public Integer getPositiveResidualInMonth(int year, int month);
+  Integer getPositiveResidualInMonth(int year, int month);
 
   /**
    * Diagnostiche sui dati della persona.
    */
-  public boolean currentContractInitializationMissing();
+  boolean currentContractInitializationMissing();
 
-  public boolean currentContractMonthRecapMissing();
+  boolean currentContractMonthRecapMissing();
   
   /**
    * Diagnostiche sullo stato di sincronizzazione della persona.
    * Ha perseoId null oppure uno dei suoi contratti attivi o futuri ha perseoId null.
    */
-  public boolean isProperSynchronized();
+  boolean isProperSynchronized();
   
   /**
    * Il contratto della persona con quel perseoId.
    * @param perseoId perseoId
    * @return contratto
    */
-  public Contract perseoContract(Long perseoId);
+  Contract perseoContract(String perseoId);
   
   /**
    * 
    * @return true se la persona è un tecnico (liv. IV - VIII), false altrimenti
    */
-  public boolean isTechnician();
+  boolean isTechnician();
   
   /**
    * L'ultimo invio attestati effettuato tramite ePAS.
-   */ 
-  public Optional<YearMonth> lastUpload();
+   */
+  Optional<YearMonth> lastUpload();
   
 
 }

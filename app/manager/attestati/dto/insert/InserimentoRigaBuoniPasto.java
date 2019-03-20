@@ -8,15 +8,15 @@ public class InserimentoRigaBuoniPasto extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaBuoniPasto(Certification certification) {
-    this.codiceSede = Integer.parseInt(certification.person.office.codeId);
-    this.anno = certification.year;
-    this.mese = certification.month;
-    
+    codiceSede = Integer.parseInt(certification.person.office.codeId);
+    anno = certification.year;
+    mese = certification.month;
+
     ItemDipendente dipendente = new ItemDipendente();
-    this.dipendenti.add(dipendente);
-    
+    dipendenti.add(dipendente);
+
     dipendente.matricola = certification.person.number;
     dipendente.numBuoniPasto = Integer.parseInt(certification.content);
   }
-  
+
 }

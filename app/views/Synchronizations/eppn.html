@@ -1,0 +1,45 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Sincronizzazione campo Eppn per Sede'  /}
+
+<div class="container">
+#{title title:'Sincronizzazione Campo Eppn - ' + office /}
+</div>
+<div class="container">
+  #{tabs ['synch.badges':@badges(office.id),'synch.eppn':@eppn(office.id)] /}
+  <br>
+  <table class="table table-bordered" datatable>
+    <thead>
+    <tr>
+      <th>Dipendente</th>
+      <th>Matricola</th>
+      <th>ID esterno</th>
+      <th>Valore eppn</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:people, as:'person'}
+    <tr>
+      <td>
+        <em><strong>${person}</strong></em>
+      </td>
+      <td>
+        <em>${person.number}</em>
+      </td>
+      <td>
+        <em>${person.perseoId}</em>
+      </td>
+      <td>
+        <em><strong>${person.eppn}</strong></em>
+      </td>
+    </tr>
+    #{/list}
+    </tbody>
+  </table>
+
+#{b.buttons center:true}
+  #{b.link @syncEppn(office.id), title:'Importa tutti', color: 'info', fa: 'cloud-download' /}
+#{/b.buttons}
+</div>
+
+

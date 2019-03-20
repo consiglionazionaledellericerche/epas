@@ -520,6 +520,8 @@ stampType= Causale
 synch.offices=Sincronizza sedi
 synch.people=Sincronizza persone
 synch.contracts=Sincronizza contratti
+synch.badges= Sincronizza Badges
+synch.eppn= Sincronizza campo Eppn
 
 systemUser= Utente con ruoli di Sistema
 ticketNumberFrom=Dal Numero
@@ -777,6 +779,7 @@ Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
+Synchronizations.badges= Sincronizza Badges
 TimeVariations.show= Riposi compensativi chiusura ente
 TimeVariations.personShow= Riposi compensativi chiusura ente
 Users.list= Gestione Utenti
@@ -893,10 +896,10 @@ ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
-MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 1 a 3
-MONTH_EXPIRY_RECOVERY_DAYS_49=Mese massimo per utilizzo residui dell'anno precedente per i livelli da 4 a 9
-MAX_RECOVERY_DAYS_13=Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3
-MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9
+MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da I a III
+MONTH_EXPIRY_RECOVERY_DAYS_49=Mese massimo per utilizzo residui dell'anno precedente per i livelli da IV a VIII
+MAX_RECOVERY_DAYS_13=Numero massimo di giorni di recupero in un anno per i livelli da I a III
+MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livelli da IV a VIII
 
 DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	

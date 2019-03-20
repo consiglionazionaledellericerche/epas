@@ -4,18 +4,18 @@ import models.Certification;
 
 public class InserimentoRigaFormazione extends RichiestaInserimentoAttestati {
 
- 
+
   /**
    * Constructor.
    */
   public InserimentoRigaFormazione(Certification certification) {
-    this.codiceSede = Integer.parseInt(certification.person.office.codeId);
-    this.anno = certification.year;
-    this.mese = certification.month;
-    
+    codiceSede = Integer.parseInt(certification.person.office.codeId);
+    anno = certification.year;
+    mese = certification.month;
+
     ItemDipendente dipendente = new ItemDipendente();
-    this.dipendenti.add(dipendente);
-    
+    dipendenti.add(dipendente);
+
     dipendente.matricola = certification.person.number;
     InsertRigaFormazione rigaFormazione = new InsertRigaFormazione();
     rigaFormazione.giornoInizio = deserializeBegin(certification.content);
@@ -24,17 +24,17 @@ public class InserimentoRigaFormazione extends RichiestaInserimentoAttestati {
 
     dipendente.righeFormazione.add(rigaFormazione);
   }
-  
+
   private int deserializeNumber(String key) {
     return Integer.parseInt(key.split(";")[2]);
   }
-  
+
   private int deserializeBegin(String key) {
     return Integer.parseInt(key.split(";")[0]);
   }
-  
+
   private int deserializeEnd(String key) {
     return Integer.parseInt(key.split(";")[1]);
   }
-  
+
 }

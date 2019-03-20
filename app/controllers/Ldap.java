@@ -12,8 +12,6 @@ import play.Play;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.Http;
-import play.mvc.Router;
-import play.mvc.Router.Route;
 
 /**
  * Contiene i metodi per l'autentication tramite LDAP.
@@ -64,8 +62,10 @@ public class Ldap extends Controller {
     val eppn = ldapUser.get().getEppn();
     
     if (eppn == null) {
-      log.warn("Failed login for {}, {} attribute not set in LDAP", username, LdapService.getEppnAttributeName());
-      flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", LdapService.getEppnAttributeName(), username);
+      log.warn("Failed login for {}, {} attribute not set in LDAP", 
+          username, ldapService.getEppnAttributeName());
+      flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", 
+          ldapService.getEppnAttributeName(), username);
       redirect("/login");
     }
 
@@ -91,9 +91,9 @@ public class Ldap extends Controller {
       
     } else {
       log.warn("Person with {} {} successfully logged in LDAP but unknonw to ePAS", 
-          LdapService.getEppnAttributeName(), eppn);
+          ldapService.getEppnAttributeName(), eppn);
       flash.error("Oops! %s %s non riconosciuto da ePAS. Contattare l'helpdesk.", 
-          LdapService.getEppnAttributeName(), eppn);
+          ldapService.getEppnAttributeName(), eppn);
       redirect("/login");
     }
   }

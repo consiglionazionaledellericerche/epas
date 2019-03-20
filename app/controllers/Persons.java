@@ -3,35 +3,23 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
-import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.Web;
-
 import java.util.List;
-import java.util.Set;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
-import manager.PersonManager;
-import manager.SecureManager;
 import manager.StabilizeManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -40,7 +28,6 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.VacationSituation;
 import models.Contract;
-import models.ContractMonthRecap;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
@@ -54,7 +41,6 @@ import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -66,7 +52,6 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -78,8 +63,6 @@ public class Persons extends Controller {
   @Inject
   static EmailManager emailManager;
   @Inject
-  static SecureManager secureManager;
-  @Inject
   static OfficeManager officeManager;
   @Inject
   static PersonDao personDao;
@@ -89,8 +72,6 @@ public class Persons extends Controller {
   static ContractManager contractManager;
   @Inject
   static SecurityRules rules;
-  @Inject
-  static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static UserDao userDao;
   @Inject
@@ -108,10 +89,7 @@ public class Persons extends Controller {
   @Inject
   static AbsenceComponentDao absenceComponentDao;
   @Inject
-  static PersonManager personManager;
-  @Inject
   static StabilizeManager stabilizeManager;
-  
 
 
   /**
@@ -141,16 +119,17 @@ public class Persons extends Controller {
   }
 
   /**
-   * Metodo che visualizza il risultato della funzionalità di stabilizzazione e permette 
-   * la persistenza dell'informazione.
+   * Metodo che visualizza il risultato della funzionalità di stabilizzazione e permette la
+   * persistenza dell'informazione.
+   *
    * @param personId l'identificativo della persona da stabilizzare
    */
-  public static void stabilize(Long personId, boolean step, Integer residuoOrario, 
+  public static void stabilize(Long personId, boolean step, Integer residuoOrario,
       Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
     LocalDate firstDayNewContract = StabilizeManager.firstDayNewContract;
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    
+
     rules.checkIfPermitted(person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(person);
     boolean isNotTime = false;
@@ -163,50 +142,51 @@ public class Persons extends Controller {
     if (!step) {
       //Qui faccio vedere all'amministratore cosa caricherò sul nuovo contratto che sto per creare
       step = true;
-      
+
       if (contract.isPresent()) {
-        
-        PersonStampingRecap psDto = stampingsRecapFactory.create(person, firstDayNewContract.getYear(), 
-            firstDayNewContract.getMonthOfYear(), true);
+
+        PersonStampingRecap psDto = stampingsRecapFactory
+            .create(person, firstDayNewContract.getYear(),
+                firstDayNewContract.getMonthOfYear(), true);
         for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
           if (mese.getValue().month == firstDayNewContract.getMonthOfYear()) {
-              residuoOrario = mese.getValue().remainingMinutesCurrentYear 
-                  + mese.getValue().remainingMinutesLastYear;           
+            residuoOrario = mese.getValue().remainingMinutesCurrentYear
+                + mese.getValue().remainingMinutesLastYear;
             //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
             //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
             //lanciata in un giorno successivo al 27/12/2018
-            residuoOrario = residuoOrario - stabilizeManager.adjustResidual(wrPerson);
+            residuoOrario -= stabilizeManager.adjustResidual(wrPerson);
             buoniPasto = mese.getValue().remainingMealTickets;
           }
         }
         GroupAbsenceType vacationGroup = absenceComponentDao
             .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
-        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(), 
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(),
             firstDayNewContract.getYear(), vacationGroup, Optional.absent(), true);
         if (vacationSituation == null) {
           log.warn("Non esiste il riepilogo!!!");
-          render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
+          render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario,
               buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
         }
         ferieAnnoPassato = vacationSituation.lastYearCached.usable;
         ferieAnnoPresente = vacationSituation.currentYearCached.usable;
         permessi = vacationSituation.permissionsCached.usable;
-        
-        render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario, 
-            buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);        
+
+        render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario,
+            buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
       } else {
         Boolean outOfContract = true;
         render(firstDayNewContract, step, isNotTime, outOfContract);
       }
     } else {
 
-      stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto, 
+      stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto,
           ferieAnnoPassato, ferieAnnoPresente, permessi);
       flash.success("Stabilizzato %s", wrPerson.getValue().fullName());
       list(person.office.id, null);
     }
   }
-  
+
   /**
    * metodo che gestisce la pagina di inserimento persona.
    */
@@ -221,7 +201,7 @@ public class Persons extends Controller {
   /**
    * metodo che salva la persona inserita con il suo contratto.
    *
-   * @param person   la persona da inserire
+   * @param person la persona da inserire
    * @param contract il contratto associato alla persona
    */
   public static void save(@Valid @Required Person person, @Valid Contract contract) {
@@ -440,6 +420,7 @@ public class Persons extends Controller {
 
   /**
    * Salva la nuova password.
+   *
    * @param vecchiaPassword vecchia password
    * @param nuovaPassword nuova password
    * @param confermaPassword ripeti
@@ -449,11 +430,10 @@ public class Persons extends Controller {
       @Required @Equals(value = "nuovaPassword", message = "Le password non corrispondono")
           String confermaPassword) {
 
-
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori riportati");
       final User user = Security.getUser().get();
-      render("@changePassword",vecchiaPassword, nuovaPassword, confermaPassword, user);
+      render("@changePassword", vecchiaPassword, nuovaPassword, confermaPassword, user);
     }
 
     final User user = userDao.getUserByIdAndPassword(Security.getUser().get().id,
@@ -527,7 +507,7 @@ public class Persons extends Controller {
     }
     child.delete();
     JPA.em().flush();
-    
+
     //Scan degli errori sulle assenze
     LocalDate eldest = child.bornDate;
     person.refresh();
@@ -540,7 +520,7 @@ public class Persons extends Controller {
 
     flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname,
         person.getFullname());
-    
+
     children(person.id);
   }
 
@@ -575,7 +555,7 @@ public class Persons extends Controller {
 
     JPA.em().flush();
     child.person.refresh();
-    
+
     //Scan degli errori sulle assenze
     LocalDate eldest = child.bornDate;
     for (PersonChildren otherChild : child.person.personChildren) {
@@ -584,7 +564,7 @@ public class Persons extends Controller {
       }
     }
     absenceService.scanner(child.person, eldest);
-    
+
     log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", child.name, child.surname,
         child.person);
     flash.success(Web.msgSaved(PersonChildren.class));
