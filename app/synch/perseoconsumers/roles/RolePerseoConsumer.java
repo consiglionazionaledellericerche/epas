@@ -36,7 +36,7 @@ import models.UsersRolesOffices;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 
-import synch.perseoconsumers.PerseoApis;
+import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
 public class RolePerseoConsumer {
@@ -74,9 +74,9 @@ public class RolePerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getAllRolesEpasEndpoint();
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getAllRolesEpasEndpoint();
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);

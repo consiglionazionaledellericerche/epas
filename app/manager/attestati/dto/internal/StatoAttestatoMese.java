@@ -26,7 +26,7 @@ public class StatoAttestatoMese {
 
   public static class StatoDipendenteMese {
     
-    public int matricola;                               //17162           
+    public String matricola;                               //17162
     //public String nominativo;                         //TAGLIAFERRI DARIO
     public Long dataAssunzione;                         //1463349600000
     public Long dataCessazione;                         //1494799200000

@@ -43,14 +43,14 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   private static final long serialVersionUID = -4472102414284745470L;
 
   @Column(name = "perseo_id")
-  public Long perseoId;
+  public String perseoId;
 
   /**
    * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
    * determinato senza data fine specificata.
    */
   @Column(name = "is_temporary")
-  public boolean isTemporaryMissing = false;
+  public boolean isTemporaryMissing;
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
@@ -58,45 +58,45 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @Getter
   @Column(name = "source_date_residual")
-  public LocalDate sourceDateResidual = null;
+  public LocalDate sourceDateResidual;
   
   @Getter
   @Column(name = "source_date_vacation")
-  public LocalDate sourceDateVacation = null;
+  public LocalDate sourceDateVacation;
 
   @Getter
   @Column(name = "source_date_meal_ticket")
-  public LocalDate sourceDateMealTicket = null;
+  public LocalDate sourceDateMealTicket;
 
   @Column(name = "source_by_admin")
   public boolean sourceByAdmin = true;
 
   @Getter @Max(32)
   @Column(name = "source_vacation_last_year_used")
-  public Integer sourceVacationLastYearUsed = null;
+  public Integer sourceVacationLastYearUsed;
 
   @Getter @Max(32)
   @Column(name = "source_vacation_current_year_used")
-  public Integer sourceVacationCurrentYearUsed = null;
+  public Integer sourceVacationCurrentYearUsed;
 
   @Getter @Max(4)
   @Column(name = "source_permission_used")
-  public Integer sourcePermissionUsed = null;
+  public Integer sourcePermissionUsed;
 
   // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
   @Min(0) @Max(100)
   @Column(name = "source_recovery_day_used")
-  public Integer sourceRecoveryDayUsed = null;
+  public Integer sourceRecoveryDayUsed;
 
   @Column(name = "source_remaining_minutes_last_year")
-  public Integer sourceRemainingMinutesLastYear = null;
+  public Integer sourceRemainingMinutesLastYear;
 
   @Column(name = "source_remaining_minutes_current_year")
-  public Integer sourceRemainingMinutesCurrentYear = null;
+  public Integer sourceRemainingMinutesCurrentYear;
 
   @Getter
   @Column(name = "source_remaining_meal_ticket")
-  public Integer sourceRemainingMealTicket = null;
+  public Integer sourceRemainingMealTicket;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
@@ -119,17 +119,17 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Getter
   @NotAudited
-  @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
   public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
   @NotAudited
-  @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
   public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
   @NotAudited
-  @OneToMany(mappedBy = "contract", cascade = {CascadeType.REMOVE})
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   public List<MealTicket> mealTickets;
 
   @Required
@@ -166,7 +166,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @Transient
   public List<ContractWorkingTimeType> getContractWorkingTimeTypeOrderedList() {
-    List<ContractWorkingTimeType> list = Lists.newArrayList(this.contractWorkingTimeType);
+    List<ContractWorkingTimeType> list = Lists.newArrayList(contractWorkingTimeType);
     Collections.sort(list);
     return list;
   }
@@ -179,13 +179,13 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public Collection<IPropertyInPeriod> periods(Object type) {
 
     if (type.equals(ContractWorkingTimeType.class)) {
-      return Sets.<IPropertyInPeriod>newHashSet(contractWorkingTimeType);
+      return Sets.newHashSet(contractWorkingTimeType);
     }
     if (type.equals(ContractStampProfile.class)) {
-      return Sets.<IPropertyInPeriod>newHashSet(contractStampProfile);
+      return Sets.newHashSet(contractStampProfile);
     }
     if (type.equals(VacationPeriod.class)) {
-      return Sets.<IPropertyInPeriod>newHashSet(vacationPeriods);
+      return Sets.newHashSet(vacationPeriods);
     }
     return null;
   }
@@ -198,7 +198,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public LocalDate calculatedEnd() {
-    return computeEnd(this.endDate, this.endContract);
+    return computeEnd(endDate, endContract);
   }
 
   public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
@@ -210,10 +210,8 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Transient
   public boolean isProperSynchronized() {
-    if (this.calculatedEnd() == null || !this.calculatedEnd().isBefore(LocalDate.now())) {
-      if (this.perseoId == null) {
-        return false;
-      }
+    if (calculatedEnd() == null || !calculatedEnd().isBefore(LocalDate.now())) {
+      return perseoId != null;
     }
     return true;
   }

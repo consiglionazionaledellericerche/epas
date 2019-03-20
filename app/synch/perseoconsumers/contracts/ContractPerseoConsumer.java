@@ -36,7 +36,7 @@ import org.joda.time.LocalDate;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 
-import synch.perseoconsumers.PerseoApis;
+import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
 public class ContractPerseoConsumer {
@@ -69,9 +69,9 @@ public class ContractPerseoConsumer {
     final String pass;
 
     try {
-      url = PerseoApis.getContractForEpasEndpoint() + perseoContractId;
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      url = AnagraficaApis.getContractForEpasEndpoint() + perseoContractId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);
@@ -119,12 +119,12 @@ public class ContractPerseoConsumer {
 
     try {
       if (departmentPerseoId.isPresent()) {
-        url = PerseoApis.getAllDepartmentContractsForEpasEndpoint() + departmentPerseoId.get();
+        url = AnagraficaApis.getAllDepartmentContractsForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        url = PerseoApis.getAllContractsForEpasEndpoint();
+        url = AnagraficaApis.getAllContractsForEpasEndpoint();
       }
-      user = PerseoApis.getPerseoUser();
-      pass = PerseoApis.getPerseoPass();
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
     } catch (NoSuchFieldException ex) {
       final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
       log.error(error);

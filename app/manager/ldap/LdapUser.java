@@ -1,6 +1,5 @@
 package manager.ldap;
 
-import com.google.common.base.Optional;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import lombok.AllArgsConstructor;
@@ -36,10 +35,11 @@ public class LdapUser {
   public static LdapUser create(Attributes attributes, String eppnAttributeName) 
       throws NamingException {    
     return new LdapUser(
-        attributes.get("uid").get().toString(), 
+        attributes.get(LdapService.ldapUniqueIdentifier).get().toString(), 
         attributes.get("givenName") != null ? attributes.get("givenName").get().toString() : null, 
         attributes.get("sn") != null ? attributes.get("sn").get().toString() : null, 
         attributes.get("mail") != null ? attributes.get("mail").get().toString() : null,
-        attributes.get(eppnAttributeName) != null ? attributes.get(eppnAttributeName).get().toString() : null);
+        attributes.get(eppnAttributeName) != null 
+          ? attributes.get(eppnAttributeName).get().toString() : null);
   }
 }
