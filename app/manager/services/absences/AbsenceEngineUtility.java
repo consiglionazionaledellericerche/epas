@@ -233,7 +233,7 @@ public class AbsenceEngineUtility {
       return -1;
     }
     if (amountType.equals(AmountType.units) 
-        && absenceType.getReplacingType().getName().equals(JustifiedTypeName.all_day)) {
+        && (absenceType.getReplacingType().getName().equals(JustifiedTypeName.all_day))) {
       return unitReplacingAmount; //una unità
     } 
     if (amountType.equals(AmountType.minutes) 
