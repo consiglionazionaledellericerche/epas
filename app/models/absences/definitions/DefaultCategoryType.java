@@ -17,6 +17,7 @@ import org.assertj.core.util.Lists;
 public enum DefaultCategoryType {
 
   MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
+  MISSIONE_CNR_ESTERO("Missioni CNR Estero", 2, DefaultTab.MISSIONE),
   FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI),
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   

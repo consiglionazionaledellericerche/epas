@@ -412,7 +412,7 @@ public class AbsenceType extends BaseModel {
               return Optional.of(false);
             }
           } else {
-            if (!defaultType.replacingType.equals(this.replacingType.name)) {
+            if (this.replacingType == null || !defaultType.replacingType.equals(this.replacingType.name)) {
               return Optional.of(false);
             }
           }
