@@ -1,6 +1,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import controllers.Security;
 import dao.AbsenceDao;
@@ -143,12 +144,25 @@ public class MissionManager {
     }
     List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.id);
     if (!existingMission.isEmpty()) {
-      //Se esiste già una missione con quell'identificativo, la cancello e la reinserisco con i 
-      //nuovi dati con il prosieguo dell'algoritmo.
+      //Se esiste già una missione con quell'identificativo, la scarto.
       log.warn(LOG_PREFIX +  "E' stata riscontrata una missione con lo stesso identificativo di "
-          + "quella passata come parametro. La missione precedentemente inserita verrà cancellata "
-          + "e verrà inserita questa");
-      deleteMissionFromClient(body, true);
+          + "quella passata come parametro: {}. Questa missione non viene processata.", body.id);
+      return false;      
+    }
+    
+    //controllo se sono già stati inseriti a mano i giorni di missione
+    final List<JustifiedTypeName> types = ImmutableList
+        .of(JustifiedTypeName.complete_day_and_add_overtime, JustifiedTypeName.specified_minutes);
+    List<Absence> existingMissionWithoutId = 
+        absenceDao.filteredByTypes(body.person, body.dataInizio.toLocalDate(), 
+            body.dataFine.toLocalDate(), types);
+    if (!existingMissionWithoutId.isEmpty() && 
+        existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
+            || abs.absenceType.code.equals("92M"))) {
+      log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
+          + " nei giorni {}-{}. Questa missione non viene processata.", 
+          body.dataInizio.toLocalDate(), body.dataFine.toLocalDate());
+      return false;
     }
 
     Situation situation;
