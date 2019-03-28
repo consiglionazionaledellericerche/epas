@@ -88,8 +88,12 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_92H6, 
           DefaultAbsenceType.A_92H7)),
   C_92E(AmountType.units,
-      ImmutableSet.of(DefaultAbsenceType.A_92M),
+      ImmutableSet.of(DefaultAbsenceType.A_92E),
       ImmutableSet.of(DefaultAbsenceType.A_92E)),
+  C_92I(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_92),
+      ImmutableSet.of(DefaultAbsenceType.A_92)),
+  
   
   C_631(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_631M), 

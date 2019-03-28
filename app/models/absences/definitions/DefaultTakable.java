@@ -107,16 +107,23 @@ public enum DefaultTakable {
       1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
 
   T_MISSIONE(AmountType.minutes, 
-      ImmutableSet.of(DefaultAbsenceType.A_92,DefaultAbsenceType.A_92M,
-          DefaultAbsenceType.A_92NG),
-      ImmutableSet.of(DefaultAbsenceType.A_92, DefaultAbsenceType.A_92M,
-           DefaultAbsenceType.A_92NG),
-      345600, TakeAmountAdjustment.workingTimePercent),
+      ImmutableSet.of(DefaultAbsenceType.A_92M),
+      ImmutableSet.of(DefaultAbsenceType.A_92M),
+      -1, null),
       
   T_MISSIONE_ESTERA(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_92E),
-      ImmutableSet.of(DefaultAbsenceType.A_92E),
+      ImmutableSet.of(DefaultAbsenceType.A_92E,
+          DefaultAbsenceType.A_92NG),
+      ImmutableSet.of(DefaultAbsenceType.A_92E,
+          DefaultAbsenceType.A_92NG),
       180, null),
+  
+  T_MISSIONE_INTERNA(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_92,
+          DefaultAbsenceType.A_92NG),
+      ImmutableSet.of(DefaultAbsenceType.A_92,
+          DefaultAbsenceType.A_92NG),
+      240, null),
 
   T_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, //taken
