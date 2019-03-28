@@ -306,8 +306,8 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null),
 
   A_92("92", "Missione",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
-      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.maximumTime, 1000)), null, null),
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
+      0, null, Sets.newHashSet(), null, null),
   A_92E("92E", "Missione all'estero",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
