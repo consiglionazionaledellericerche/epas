@@ -300,13 +300,7 @@ public enum DefaultAbsenceType {
   A_08("08", "Assemblea completamento 8 ore",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, true,
       480, JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, null),
-  
-  //  A_09B("09B", "Permesso visita medica completamento giornata",
-  //      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
-  //      0, JustifiedTypeName.all_day, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
-  //  A_09M("09M", "Permesso visita medica in ore e minuti",
-  //      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-  //      0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
+
   A_09BI("09B", "Permesso visita medica completamento giornata da importazione",
       true, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
@@ -315,11 +309,9 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
   A_92E("92E", "Missione all'estero",
-      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
-  //A_09M("09M", "Permesso visita medica in ore e minuti",
-  //true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-  //0, null, Sets.newHashSet(), null, new LocalDate(2018, 8, 15)),
+
   A_92M("92M", "Missione in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, true,
       0, null, Sets.newHashSet(), new LocalDate(2019,2,1), null),
