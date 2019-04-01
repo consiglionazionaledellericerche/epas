@@ -178,7 +178,7 @@ public class AbsenceService {
       } else {
         //selezionare missione?
         for (GroupAbsenceType group : groupsPermitted) {
-          if (group.name.equals(DefaultGroup.MISSIONE.name())) {
+          if (group.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())) {
             groupAbsenceType = group;
             break;
           }

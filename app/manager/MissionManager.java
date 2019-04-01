@@ -35,6 +35,7 @@ import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import models.exports.MissionFromClient;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -57,6 +58,7 @@ public class MissionManager {
   private final OfficeDao officeDao;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
+  
 
   public static final String LOG_PREFIX = "Integrazione Missioni. ";
   
@@ -404,6 +406,7 @@ public class MissionManager {
 
     AbsenceType mission = null;
     JustifiedType type = null;
+    GroupAbsenceType group = null;
     int quantity = 0;
     if (hours != null && minutes != null) {
       quantity = hours * DateTimeConstants.MINUTES_PER_HOUR + minutes;
@@ -412,15 +415,18 @@ public class MissionManager {
     if (quantity < 0) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92NG").get();
       type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
+      group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
     } else if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
+      group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
     } else {
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
+      group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ORARIA.name()).get();
     }
     
     log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
@@ -429,7 +435,7 @@ public class MissionManager {
     Integer localHours = hours;
     Integer localMinutes = minutes;
   
-    val absenceForm = buildAbsenceForm(person, from.toLocalDate(), to.toLocalDate());
+    val absenceForm = buildAbsenceForm(person, from.toLocalDate(), to.toLocalDate(), group);
 
     InsertReport insertReport = 
         absenceService.insert(person, absenceForm.groupSelected, from.toLocalDate(), 
@@ -533,8 +539,8 @@ public class MissionManager {
     return absenceForm;
   }
 
-  private AbsenceForm buildAbsenceForm(Person person, LocalDate dataInizio, LocalDate dataFine) {
-    return absenceService.buildAbsenceForm(person, dataInizio, null, dataFine, null, null, false, 
+  private AbsenceForm buildAbsenceForm(Person person, LocalDate dataInizio, LocalDate dataFine, GroupAbsenceType group) {
+    return absenceService.buildAbsenceForm(person, dataInizio, null, dataFine, null, group, false, 
         null, null, null, null, false, false);
   }
 

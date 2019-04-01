@@ -326,7 +326,8 @@ public class NotificationManager {
     }
 
     if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name()) 
-        || groupAbsenceType.name.equals(DefaultGroup.MISSIONE.name())
+        || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())
+        || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
