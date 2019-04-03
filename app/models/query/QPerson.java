@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Person;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QPerson is a Querydsl query type for Person
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QPerson extends EntityPathBase<Person> {
 
     private static final long serialVersionUID = -1261627527L;
@@ -64,8 +64,6 @@ public class QPerson extends EntityPathBase<Person> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final NumberPath<Integer> iId = createNumber("iId", Integer.class);
-
     public final SetPath<models.absences.InitializationGroup, models.absences.query.QInitializationGroup> initializationGroups = this.<models.absences.InitializationGroup, models.absences.query.QInitializationGroup>createSet("initializationGroups", models.absences.InitializationGroup.class, models.absences.query.QInitializationGroup.class, PathInits.DIRECT2);
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
@@ -74,7 +72,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath name = createString("name");
 
-    public final NumberPath<Integer> number = createNumber("number", Integer.class);
+    public final StringPath number = createString("number");
 
     public final QOffice office;
 
@@ -129,18 +127,18 @@ public class QPerson extends EntityPathBase<Person> {
     }
 
     public QPerson(Path<? extends Person> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QPerson(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QPerson(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QPerson(PathMetadata<?> metadata, PathInits inits) {
+    public QPerson(PathMetadata metadata, PathInits inits) {
         this(Person.class, metadata, inits);
     }
 
-    public QPerson(Class<? extends Person> type, PathMetadata<?> metadata, PathInits inits) {
+    public QPerson(Class<? extends Person> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;

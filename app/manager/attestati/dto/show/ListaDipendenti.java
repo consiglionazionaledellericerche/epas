@@ -12,7 +12,7 @@ public class ListaDipendenti {
   public List<Matricola> dipendenti = Lists.newArrayList();
 
   public static class Matricola {
-    public int matricola;
+    public String matricola;
   }
 
 }

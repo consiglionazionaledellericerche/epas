@@ -631,9 +631,10 @@ public class Competences extends Controller {
   /**
    * Report. Esporta in formato .csv la situazione annuale degli straordinari
    */
-  public static void exportCompetences() {
+  public static void exportCompetences(Long officeId) {
+    Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted();
-    render();
+    render(office);
   }
 
   /**
@@ -642,13 +643,18 @@ public class Competences extends Controller {
    *
    * @param year anno
    */
-  public static void getOvertimeInYear(int year) throws IOException {
+  public static void getOvertimeInYear(int year, Long officeId) throws IOException {
 
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
 
     List<Person> personList = personDao
         .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"),
             Optional.fromNullable(""),
-            secureManager.officesReadAllowed(Security.getUser().get()),
+            set,
             false, new LocalDate(year, 1, 1),
             new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
             Optional.<Person>absent()).list();

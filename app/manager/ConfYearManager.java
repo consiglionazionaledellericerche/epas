@@ -3,26 +3,22 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.jpa.impl.JPAQueryFactory;
-
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.ConfYear;
 import models.Office;
 import models.enumerate.Parameter;
 import models.query.QConfYear;
-
 import org.joda.time.LocalDate;
-
 import play.cache.Cache;
 
 /**
  * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
- * @author alessandro
  *
+ * @author alessandro
  */
 @Deprecated
 public class ConfYearManager {
@@ -38,16 +34,17 @@ public class ConfYearManager {
   ConfYearManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     this.queryFactory = new JPAQueryFactory(emp);
   }
-  
+
   /**
    * La configurazione annuale con l'id.
+   *
    * @return confYear
    */
   public ConfYear getById(Long id) {
     QConfYear confYear = QConfYear.confYear;
-    final JPQLQuery query = queryFactory.from(confYear)
-            .where(confYear.id.eq(id));
-    return query.singleResult(confYear);
+    final JPQLQuery<?> query = queryFactory.from(confYear)
+        .where(confYear.id.eq(id));
+    return (ConfYear) query.fetchOne();
   }
 
   /**
@@ -124,8 +121,8 @@ public class ConfYearManager {
   }
 
   /**
-   * Si recupera l'oggetto quando si vuole modificare il parametro.
-   * Se serve il valore utilizzare getFieldValue (utilizzo della cache).
+   * Si recupera l'oggetto quando si vuole modificare il parametro. Se serve il valore utilizzare
+   * getFieldValue (utilizzo della cache).
    */
   public ConfYear getByField(Parameter param, Office office, Integer year) {
 
@@ -205,12 +202,12 @@ public class ConfYearManager {
   private Optional<ConfYear> getByFieldName(String field, Integer year, Office office) {
 
     final QConfYear confYear = QConfYear.confYear;
-    final JPQLQuery query = queryFactory.from(confYear);
+    final JPQLQuery<?> query = queryFactory.from(confYear);
 
     query.where(confYear.year.eq(year)
-            .and(confYear.field.eq(field)).and(confYear.office.eq(office)));
+        .and(confYear.field.eq(field)).and(confYear.office.eq(office)));
 
-    return Optional.fromNullable(query.singleResult(confYear));
+    return Optional.fromNullable((ConfYear) query.fetchOne());
   }
 
   /**
@@ -225,7 +222,7 @@ public class ConfYearManager {
     if (conf.field.equals(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR.description)) {
 
       Integer month = getIntegerFieldValue(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR,
-              conf.office, year);
+          conf.office, year);
       try {
         new LocalDate(year, month, Integer.parseInt(value));
       } catch (Exception ex) {
@@ -240,7 +237,7 @@ public class ConfYearManager {
     if (conf.field.equals(Parameter.MONTH_EXPIRY_VACATION_PAST_YEAR.description)) {
 
       Integer day = getIntegerFieldValue(Parameter.DAY_EXPIRY_VACATION_PAST_YEAR,
-              conf.office, year);
+          conf.office, year);
       try {
         new LocalDate(year, Integer.parseInt(value), day);
       } catch (Exception ex) {
@@ -277,12 +274,13 @@ public class ConfYearManager {
     }
 
     saveConfYear(getParameter(conf), conf.office, conf.year,
-            Optional.fromNullable(value));
+        Optional.fromNullable(value));
 
     return new MessageResult(true, "parametro di configurazione correttamente inserito");
   }
 
   public static final class MessageResult {
+
     public boolean result;
     public String message;
 

@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.StampModificationType;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QStampModificationType is a Querydsl query type for StampModificationType
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QStampModificationType extends EntityPathBase<StampModificationType> {
 
     private static final long serialVersionUID = 928972853L;
@@ -52,7 +52,7 @@ public class QStampModificationType extends EntityPathBase<StampModificationType
         super(path.getType(), path.getMetadata());
     }
 
-    public QStampModificationType(PathMetadata<?> metadata) {
+    public QStampModificationType(PathMetadata metadata) {
         super(StampModificationType.class, metadata);
     }
 

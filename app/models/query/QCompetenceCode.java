@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.CompetenceCode;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QCompetenceCode is a Querydsl query type for CompetenceCode
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
 
     private static final long serialVersionUID = 435340666L;
@@ -63,18 +63,18 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
     }
 
     public QCompetenceCode(Path<? extends CompetenceCode> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QCompetenceCode(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QCompetenceCode(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QCompetenceCode(PathMetadata<?> metadata, PathInits inits) {
+    public QCompetenceCode(PathMetadata metadata, PathInits inits) {
         this(CompetenceCode.class, metadata, inits);
     }
 
-    public QCompetenceCode(Class<? extends CompetenceCode> type, PathMetadata<?> metadata, PathInits inits) {
+    public QCompetenceCode(Class<? extends CompetenceCode> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.competenceCodeGroup = inits.isInitialized("competenceCodeGroup") ? new QCompetenceCodeGroup(forProperty("competenceCodeGroup")) : null;
     }

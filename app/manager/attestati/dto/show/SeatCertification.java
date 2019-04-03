@@ -28,7 +28,7 @@ public class SeatCertification {
   }
 
   public static class PersonCertification {
-    public int matricola;
+    public String matricola;
     public boolean validato;
     public int numBuoniPasto;
     public List<RigaAssenza> righeAssenza = Lists.newArrayList();

@@ -4,17 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import java.util.List;
 import javax.persistence.EntityManager;
-
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -44,9 +40,8 @@ public class BadgeSystemDao extends DaoBase {
 
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
 
-    final JPQLQuery query = getQueryFactory().from(badgeSystem)
-        .where(badgeSystem.id.eq(id));
-    return query.singleResult(badgeSystem);
+    return getQueryFactory().selectFrom(badgeSystem)
+        .where(badgeSystem.id.eq(id)).fetchOne();
   }
 
   /**
@@ -56,9 +51,8 @@ public class BadgeSystemDao extends DaoBase {
 
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
 
-    final JPQLQuery query = getQueryFactory().from(badgeSystem)
-        .where(badgeSystem.name.eq(name));
-    return query.singleResult(badgeSystem);
+    return getQueryFactory().selectFrom(badgeSystem)
+        .where(badgeSystem.name.eq(name)).fetchOne();
   }
 
   public SimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
@@ -67,16 +61,17 @@ public class BadgeSystemDao extends DaoBase {
     final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
     final QBadgeReader qBadgeReader = QBadgeReader.badgeReader;
 
-    JPQLQuery query = getQueryFactory()
-        .from(badgeSystem);
+    JPQLQuery<?> query;
 
     final BooleanBuilder condition = new BooleanBuilder();
 
     if (badgeReader.isPresent()) {
-      query = getQueryFactory()
+      query = getQueryFactory().select(badgeSystem)
           .from(qBadgeReader)
           .rightJoin(qBadgeReader.badgeSystems, badgeSystem);
       condition.and(qBadgeReader.eq(badgeReader.get()));
+    } else {
+      query = getQueryFactory().from(badgeSystem);
     }
     if (name.isPresent()) {
       condition.and(matchBadgeSystemName(badgeSystem, name.get()));
@@ -104,11 +99,10 @@ public class BadgeSystemDao extends DaoBase {
 
     final QBadge badge = QBadge.badge;
 
-    JPQLQuery query = getQueryFactory()
-        .from(badge)
+    return getQueryFactory()
+        .selectFrom(badge)
         .where(badge.badgeSystem.eq(badgeSystem))
-        .orderBy(badge.code.asc()).orderBy(badge.person.id.asc());
-    return query.list(badge);
+        .orderBy(badge.code.asc()).orderBy(badge.person.id.asc()).fetch();
 
   }
 

@@ -3,18 +3,14 @@ package manager.cache;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.jpa.impl.JPAQueryFactory;
-
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
-
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.query.QStampModificationType;
-
 import org.apache.commons.lang.NotImplementedException;
-
 import play.cache.Cache;
 
 public class StampTypeManager {
@@ -31,16 +27,16 @@ public class StampTypeManager {
    * @return lo stampModificationType relativo al codice code passato come parametro.
    */
   private StampModificationType getStampModificationTypeByCode(
-          StampModificationTypeCode smtCode) {
+      StampModificationTypeCode smtCode) {
 
     Preconditions.checkNotNull(smtCode);
 
     final QStampModificationType smt = QStampModificationType.stampModificationType;
 
-    JPQLQuery query = queryFactory.from(smt)
-            .where(smt.code.eq(smtCode.getCode()));
+    JPQLQuery<?> query = queryFactory.from(smt)
+        .where(smt.code.eq(smtCode.getCode()));
 
-    return query.singleResult(smt);
+    return (StampModificationType) query.fetchOne();
   }
 
   /**
@@ -48,7 +44,7 @@ public class StampTypeManager {
    * cache.
    */
   public void saveStampType(String code, String value)
-          throws NotImplementedException {
+      throws NotImplementedException {
     throw new NotImplementedException();
   }
 
@@ -56,7 +52,7 @@ public class StampTypeManager {
    * Preleva dalla cache lo stamp modifcation type.
    */
   public StampModificationType getStampMofificationType(
-          StampModificationTypeCode code) {
+      StampModificationTypeCode code) {
 
     Preconditions.checkNotNull(code);
 

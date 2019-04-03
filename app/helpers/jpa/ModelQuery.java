@@ -2,18 +2,14 @@ package helpers.jpa;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.mysema.query.QueryModifiers;
-import com.mysema.query.SearchResults;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.impl.JPAQuery;
-import com.mysema.query.types.Expression;
-
+import com.querydsl.core.QueryModifiers;
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.Expression;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import helpers.Paginator;
-
 import java.util.List;
-
 import models.base.BaseModel;
-
 import play.db.jpa.JPA;
 import play.mvc.Scope;
 
@@ -31,11 +27,11 @@ public class ModelQuery {
   private ModelQuery() {
   }
 
-  public static JPQLQuery createQuery() {
+  public static JPQLQuery<?> createQuery() {
     return new JPAQuery(JPA.em());
   }
 
-  public static JPQLQuery paginatedQuery(JPQLQuery query) {
+  public static JPQLQuery<?> paginatedQuery(JPQLQuery<?> query) {
     final Integer page = Optional.fromNullable(Scope.Params.current()
         .get(Paginator.PAGE_PARAM, Integer.class)).or(1);
     final long limit = Optional.fromNullable(Scope.Params.current()
@@ -44,14 +40,14 @@ public class ModelQuery {
         (page - 1L) * DEFAULT_PAGE_SIZE));
   }
 
-  public static JPQLQuery createPaginatedQuery() {
+  public static JPQLQuery<?> createPaginatedQuery() {
     return paginatedQuery(createQuery());
   }
 
   /**
    * @return a simplequery object, wrap list or listResults.
    */
-  public static <T> SimpleResults<T> wrap(JPQLQuery query,
+  public static <T> SimpleResults<T> wrap(JPQLQuery<?> query,
       Expression<T> expression) {
     return new SimpleResults<T>(query, expression);
   }
@@ -62,7 +58,7 @@ public class ModelQuery {
    * @return jpaquery
    */
   @Deprecated
-  public static JPAQuery clone(JPAQuery qry) {
+  public static JPAQuery<?> clone(JPAQuery<?> qry) {
     return qry.clone(JPA.em());
   }
 
@@ -74,54 +70,43 @@ public class ModelQuery {
    * @return la funzione di trasformazione da modello a proprio id.
    */
   public static <T extends BaseModel> Function<T, Long> jpaId() {
-    return new Function<T, Long>() {
-
-      @Override
-      public Long apply(T input) {
-        return input.id;
-      }
-    };
+    return input -> input.id;
   }
 
   /**
    * @return la funzione per ottenere un oggetto via em.find().
    */
   public static <T extends BaseModel> Function<Integer, T> jpaFind(final Class<T> model) {
-    return new Function<Integer, T>() {
-
-      @Override
-      public T apply(Integer id) {
-        return JPA.em().find(model, id);
-      }
-    };
+    return id -> JPA.em().find(model, id);
   }
 
   /**
    * @author marco
    */
   public static class SimpleResults<T> {
-    private final Expression<T> expression;
-    private final JPQLQuery query;
 
-    SimpleResults(JPQLQuery query, Expression<T> expression) {
+    private final Expression<T> expression;
+    private final JPQLQuery<?> query;
+
+    SimpleResults(JPQLQuery<?> query, Expression<T> expression) {
       this.query = query;
       this.expression = expression;
     }
 
     public long count() {
-      return query.count();
+      return query.fetchCount();
     }
 
     public List<T> list() {
-      return query.list(expression);
+      return (List<T>) query.fetch();
     }
 
     public List<T> list(long limits) {
-      return query.restrict(QueryModifiers.limit(limits)).list(expression);
+      return (List<T>) query.restrict(QueryModifiers.limit(limits)).fetch();
     }
 
-    public SearchResults<T> listResults() {
-      return paginatedQuery(query).listResults(expression);
+    public QueryResults<T> listResults() {
+      return (QueryResults<T>) paginatedQuery(query).fetchResults();
     }
 
   }

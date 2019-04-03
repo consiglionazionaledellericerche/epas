@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.CertificatedData;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QCertificatedData is a Querydsl query type for CertificatedData
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
     private static final long serialVersionUID = -122268133L;
@@ -65,18 +65,18 @@ public class QCertificatedData extends EntityPathBase<CertificatedData> {
     }
 
     public QCertificatedData(Path<? extends CertificatedData> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QCertificatedData(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QCertificatedData(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QCertificatedData(PathMetadata<?> metadata, PathInits inits) {
+    public QCertificatedData(PathMetadata metadata, PathInits inits) {
         this(CertificatedData.class, metadata, inits);
     }
 
-    public QCertificatedData(Class<? extends CertificatedData> type, PathMetadata<?> metadata, PathInits inits) {
+    public QCertificatedData(Class<? extends CertificatedData> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }

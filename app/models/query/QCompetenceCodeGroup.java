@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.CompetenceCodeGroup;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QCompetenceCodeGroup is a Querydsl query type for CompetenceCodeGroup
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QCompetenceCodeGroup extends EntityPathBase<CompetenceCodeGroup> {
 
     private static final long serialVersionUID = 1280154917L;
@@ -54,7 +54,7 @@ public class QCompetenceCodeGroup extends EntityPathBase<CompetenceCodeGroup> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QCompetenceCodeGroup(PathMetadata<?> metadata) {
+    public QCompetenceCodeGroup(PathMetadata metadata) {
         super(CompetenceCodeGroup.class, metadata);
     }
 

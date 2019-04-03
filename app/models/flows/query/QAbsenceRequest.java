@@ -1,21 +1,21 @@
 package models.flows.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.flows.AbsenceRequest;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QAbsenceRequest is a Querydsl query type for AbsenceRequest
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     private static final long serialVersionUID = 1310860991L;
@@ -83,18 +83,18 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
     }
 
     public QAbsenceRequest(Path<? extends AbsenceRequest> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QAbsenceRequest(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QAbsenceRequest(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QAbsenceRequest(PathMetadata<?> metadata, PathInits inits) {
+    public QAbsenceRequest(PathMetadata metadata, PathInits inits) {
         this(AbsenceRequest.class, metadata, inits);
     }
 
-    public QAbsenceRequest(Class<? extends AbsenceRequest> type, PathMetadata<?> metadata, PathInits inits) {
+    public QAbsenceRequest(Class<? extends AbsenceRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new models.query.QPerson(forProperty("person"), inits.get("person")) : null;
     }

@@ -3,8 +3,7 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
 import models.Office;
@@ -20,7 +19,7 @@ import org.joda.time.YearMonth;
 
 /**
  * DAO per l'accesso alle informazioni delle timbrature.
- * 
+ *
  * @author dario.
  */
 public class StampingDao extends DaoBase {
@@ -32,7 +31,7 @@ public class StampingDao extends DaoBase {
 
   /**
    * Ritorna la prima (eventuale) timbratura che corrisponde ai dati passati.
-   * 
+   *
    * @param dateTime data della timbratura
    * @param person persona a cui si riferisce
    * @param way verso.
@@ -40,25 +39,25 @@ public class StampingDao extends DaoBase {
    */
   public Optional<Stamping> getStamping(LocalDateTime dateTime, Person person, WayType way) {
     final QStamping stamping = QStamping.stamping;
-    final JPQLQuery query = getQueryFactory().from(stamping)
+    final Stamping result = getQueryFactory().selectFrom(stamping)
         .where(stamping.date.eq(dateTime).and(stamping.personDay.person.eq(person))
             .and(stamping.way.eq(way)))
         .orderBy(stamping.id.desc())
-        .limit(1);
-    return Optional.fromNullable(query.singleResult(stamping));
+        .limit(1)
+        .fetchOne();
+    return Optional.fromNullable(result);
   }
-  
+
   /**
    * Preleva una timbratura tramite il suo id.
-   * 
+   *
    * @param id l'id associato alla Timbratura sul db.
    * @return la timbratura corrispondente all'id passato come parametro.
    */
   public Stamping getStampingById(Long id) {
     final QStamping stamping = QStamping.stamping;
-    final JPQLQuery query = getQueryFactory().from(stamping)
-        .where(stamping.id.eq(id));
-    return query.singleResult(stamping);
+    return getQueryFactory().selectFrom(stamping)
+        .where(stamping.id.eq(id)).fetchOne();
   }
 
   /**
@@ -68,15 +67,14 @@ public class StampingDao extends DaoBase {
   public StampModificationType getStampModificationTypeById(Long id) {
     final QStampModificationType smt = QStampModificationType.stampModificationType;
 
-    JPQLQuery query = getQueryFactory().from(smt)
-        .where(smt.id.eq(id));
-    return query.singleResult(smt);
+    return getQueryFactory().selectFrom(smt)
+        .where(smt.id.eq(id)).fetchOne();
   }
 
-  
-  /** 
+
+  /**
    * Lista delle timbrature inserire dall'amministratore in un determinato mese.
-   * 
+   *
    * @param yearMonth mese di riferimento
    * @param office ufficio
    * @return lista delle timbrature inserite dell'amministratore
@@ -84,16 +82,16 @@ public class StampingDao extends DaoBase {
   public List<Stamping> adminStamping(YearMonth yearMonth, Office office) {
     final QStamping stamping = QStamping.stamping;
     final QPerson person = QPerson.person;
-    final JPQLQuery query = getQueryFactory().from(stamping)
+    return getQueryFactory().selectFrom(stamping)
         .join(stamping.personDay.person, person)
         .where(stamping.markedByAdmin.eq(true)
             .and(stamping.personDay.date.goe(yearMonth.toLocalDate(1)))
             .and(stamping.personDay.date
-                  .loe(yearMonth.toLocalDate(1).dayOfMonth()
-                      .withMaximumValue()))
+                .loe(yearMonth.toLocalDate(1).dayOfMonth()
+                    .withMaximumValue()))
             .and(person.office.isNotNull())
             .and(person.office.eq(office)))
-        .orderBy(person.surname.asc(), stamping.personDay.date.asc());
-    return query.list(stamping);
+        .orderBy(person.surname.asc(), stamping.personDay.date.asc())
+        .fetch();
   }
 }

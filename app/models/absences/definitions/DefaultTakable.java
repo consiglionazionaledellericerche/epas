@@ -19,7 +19,7 @@ import org.assertj.core.util.Lists;
  *
  */
 public enum DefaultTakable {
-  
+
   T_18(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_18, 
           DefaultAbsenceType.A_18M,
@@ -34,7 +34,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_18PM), 
       ImmutableSet.of(DefaultAbsenceType.A_18P, DefaultAbsenceType.A_18PM), 
       3, null),
-  
+
   T_182(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_182, 
           DefaultAbsenceType.A_182M,
@@ -64,12 +64,12 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_19PM), 
       ImmutableSet.of(DefaultAbsenceType.A_19P, DefaultAbsenceType.A_19PM), 
       3, null),
-  
+
   T_26(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
       -1, null),
-  
+
   T_C1718(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       ImmutableSet.of(DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
@@ -90,6 +90,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
       600, null),
+
 //  T_09(AmountType.units, 
 //      ImmutableSet.of(DefaultAbsenceType.A_09M), 
 //      ImmutableSet.of(DefaultAbsenceType.A_09M), 
@@ -105,25 +106,25 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_631M), 
       1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
 
-  T_MISSIONE(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_92,
-          DefaultAbsenceType.A_92E,
+  T_MISSIONE(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_92M,DefaultAbsenceType.A_92,
+          DefaultAbsenceType.A_92E, DefaultAbsenceType.A_92NG/*,
           DefaultAbsenceType.A_92H1, 
           DefaultAbsenceType.A_92H2, 
           DefaultAbsenceType.A_92H3, 
           DefaultAbsenceType.A_92H4, 
           DefaultAbsenceType.A_92H5, 
           DefaultAbsenceType.A_92H6, 
-          DefaultAbsenceType.A_92H7), 
-      ImmutableSet.of(DefaultAbsenceType.A_92,
-          DefaultAbsenceType.A_92E,
+          DefaultAbsenceType.A_92H7*/), 
+      ImmutableSet.of(DefaultAbsenceType.A_92M, DefaultAbsenceType.A_92,
+          DefaultAbsenceType.A_92E, DefaultAbsenceType.A_92NG/*,
           DefaultAbsenceType.A_92H1, 
           DefaultAbsenceType.A_92H2, 
           DefaultAbsenceType.A_92H3, 
           DefaultAbsenceType.A_92H4, 
           DefaultAbsenceType.A_92H5, 
           DefaultAbsenceType.A_92H6, 
-          DefaultAbsenceType.A_92H7), 
+          DefaultAbsenceType.A_92H7*/),
       -1, null),
 
   T_FERIE_CNR(AmountType.units, 
@@ -135,7 +136,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_32, 
           DefaultAbsenceType.A_94), 
       -1, null),
-  
+
   T_FERIE_CNR_PROROGA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, 
           DefaultAbsenceType.A_32, 
@@ -143,22 +144,22 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_94),
       ImmutableSet.of(DefaultAbsenceType.A_37), 
       -1, null),
-  
+
   T_RIPOSI_CNR(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       -1, null),
-  
+
   T_RIPOSI_CNR_FESTIVO(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_91F), 
       ImmutableSet.of(DefaultAbsenceType.A_91F), 
       -1, null),
-  
+
   T_RIPOSI_CHIUSURA_ENTE(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_91CE),
       ImmutableSet.of(DefaultAbsenceType.A_91CE),
       -1, null),
-  
+
   T_LAVORO_FUORI_SEDE(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
@@ -180,7 +181,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_25M, 
           DefaultAbsenceType.A_25U), 
       150, null),
-  
+
   T_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24, 
           DefaultAbsenceType.A_24M, 
@@ -207,7 +208,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_252M, 
           DefaultAbsenceType.A_252U), 
       150, null),
-  
+
   T_242(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_242, 
           DefaultAbsenceType.A_242M, 
@@ -234,7 +235,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_253M, 
           DefaultAbsenceType.A_253U), 
       150, null),
-  
+
   T_243(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_243, 
           DefaultAbsenceType.A_243M, 
@@ -243,7 +244,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_243M, 
           DefaultAbsenceType.A_243U), 
       600, null),
-  
+
   T_25P(AmountType.units,                             //se fosse primo figlio mettere: 
       ImmutableSet.of(DefaultAbsenceType.A_25P,       //23 23M 25 25M 25P 25PM
           DefaultAbsenceType.A_25PM), 
@@ -279,25 +280,25 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11R9,
           DefaultAbsenceType.A_11S), 
       -1, null),
-  
+
   T_VISITE_MEDICHE_TERAPIE(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_111VM, 
-      DefaultAbsenceType.A_119VM, 
-      DefaultAbsenceType.A_115VM),
+          DefaultAbsenceType.A_119VM, 
+          DefaultAbsenceType.A_115VM),
       ImmutableSet.of(DefaultAbsenceType.A_111VM, 
-      DefaultAbsenceType.A_119VM, 
-      DefaultAbsenceType.A_115VM), -1, null),
+          DefaultAbsenceType.A_119VM, 
+          DefaultAbsenceType.A_115VM), -1, null),
 
   T_MALATTIA_FIGLIO_1(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
       ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
       -1, null),
-  
+
   T_MALATTIA_FIGLIO_2(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_122, DefaultAbsenceType.A_132, DefaultAbsenceType.A_142),
       ImmutableSet.of(DefaultAbsenceType.A_122, DefaultAbsenceType.A_132, DefaultAbsenceType.A_142),
       -1, null),
-  
+
   T_MALATTIA_FIGLIO_3(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
@@ -312,38 +313,38 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
-          
+
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
           DefaultAbsenceType.A_77, DefaultAbsenceType.A_78,
-          
+
           DefaultAbsenceType.A_71A, DefaultAbsenceType.A_72A, 
           DefaultAbsenceType.A_73A, DefaultAbsenceType.A_74A, DefaultAbsenceType.A_75A, 
           DefaultAbsenceType.A_76A, DefaultAbsenceType.A_77A, DefaultAbsenceType.A_78A,
-          
+
           DefaultAbsenceType.A_71S, DefaultAbsenceType.A_72S, 
           DefaultAbsenceType.A_73S, DefaultAbsenceType.A_74S, DefaultAbsenceType.A_75S, 
           DefaultAbsenceType.A_76S, DefaultAbsenceType.A_77S,
-          
+
           DefaultAbsenceType.A_71R, DefaultAbsenceType.A_72R, 
           DefaultAbsenceType.A_73R, DefaultAbsenceType.A_74R, DefaultAbsenceType.A_75R, 
           DefaultAbsenceType.A_76R, DefaultAbsenceType.A_77R,
-          
+
           DefaultAbsenceType.A_71D, DefaultAbsenceType.A_72D, 
           DefaultAbsenceType.A_73D, DefaultAbsenceType.A_74D, DefaultAbsenceType.A_75D, 
           DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, DefaultAbsenceType.A_78D,
-          
+
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
           DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
-          
+
           DefaultAbsenceType.A_OA1, DefaultAbsenceType.A_OA2, 
           DefaultAbsenceType.A_OA3, DefaultAbsenceType.A_OA4, DefaultAbsenceType.A_OA5, 
           DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
-          
+
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
-          
+
 
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
           DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
@@ -405,12 +406,12 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52),
       -1, null),
-  
+
   T_CONGEDO_MATRIMONIO(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_45), 
       ImmutableSet.of(DefaultAbsenceType.A_45), 
       -1, null),
-  
+
   T_681(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_681),
       ImmutableSet.of(DefaultAbsenceType.A_681),
@@ -423,7 +424,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_683),
       ImmutableSet.of(DefaultAbsenceType.A_683),
       3, null),
-  
+
   T_CONGEDI_PRENATALI(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
       ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
@@ -458,7 +459,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_95054S, DefaultAbsenceType.A_95055S, DefaultAbsenceType.A_95056S,
           DefaultAbsenceType.A_95057S), 
       -1, null),
-  
+
   T_MALATTIA_3_ANNI(AmountType.units,
       ImmutableSet.of(
           /*DefaultAbsenceType.A_09B,*/ DefaultAbsenceType.A_09BI, DefaultAbsenceType.A_111,
@@ -477,12 +478,12 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11R9, DefaultAbsenceType.A_11S,
           DefaultAbsenceType.A_631), 
       -1, null),
-  
+
   T_PB(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_PB), 
       ImmutableSet.of(DefaultAbsenceType.A_PB), 
       2160, null),
-  
+
   T_RIDUCE_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(
           DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
@@ -507,7 +508,7 @@ public enum DefaultTakable {
           //DefaultAbsenceType.A_17C,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
       -1, null),
-  
+
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
       ImmutableSet.of(
           DefaultAbsenceType.A_91, DefaultAbsenceType.A_91F, DefaultAbsenceType.A_91CE), 
@@ -533,7 +534,7 @@ public enum DefaultTakable {
     this.takableAmountAdjustment = takableAmountAdjustment;
 
   }
-  
+
   /**
    * Ricerca i comportamenti prendibilità modellati e non presenti fra quelle passate in arg (db).
    * @return list
@@ -554,7 +555,7 @@ public enum DefaultTakable {
     }
     return missing;
   }
-  
+
   /**
    * L'enumerato corrispettivo del takable (se esiste...) 
    * @return optional dell'enumerato

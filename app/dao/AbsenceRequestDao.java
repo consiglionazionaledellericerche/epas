@@ -4,17 +4,15 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.group.QPair;
-import com.mysema.query.jpa.JPASubQuery;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.Expression;
-import helpers.jpa.ModelQuery;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.val;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
@@ -23,16 +21,15 @@ import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
 import models.flows.query.QGroup;
+import models.query.QOffice;
 import models.query.QPerson;
 import org.joda.time.LocalDateTime;
 
 
-
 /**
  * Dao per l'accesso alle richiesta di assenza.
- * 
- * @author cristian
  *
+ * @author cristian
  */
 public class AbsenceRequestDao extends DaoBase {
 
@@ -42,25 +39,25 @@ public class AbsenceRequestDao extends DaoBase {
   }
 
   /**
-   * Ritorna la lista delle richieste d'assenza non ancora validate che presentano date di 
-   *     inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta 
-   *     d'assenza da validare.
+   * Ritorna la lista delle richieste d'assenza non ancora validate che presentano date di
+   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta d'assenza da
+   * validare.
+   *
    * @param request la richiesta d'assenza da far validare
-   * @return la lista delle richieste di assenza che hanno parametri che non permettono la corretta 
-   *     creazione della richiesta d'assenza passata come parametro.
+   * @return la lista delle richieste di assenza che hanno parametri che non permettono la corretta
+   * creazione della richiesta d'assenza passata come parametro.
    */
   public List<AbsenceRequest> existingAbsenceRequests(AbsenceRequest request) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    JPQLQuery query = getQueryFactory().from(absenceRequest)
+    return getQueryFactory().selectFrom(absenceRequest)
         .where(absenceRequest.person.eq(request.person)
-            .and(absenceRequest.flowEnded.eq(false))
-            );
-    return query.list(absenceRequest);
+            .and(absenceRequest.flowEnded.eq(false)))
+        .fetch();
   }
 
   /**
    * Lista delle richiesta di assenza per persona e data.
-   * 
+   *
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -68,7 +65,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
   public List<AbsenceRequest> findByPersonAndDate(Person person,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, boolean active) {
 
     Preconditions.checkNotNull(person);
@@ -87,24 +84,23 @@ public class AbsenceRequestDao extends DaoBase {
     } else {
       conditions.and(absenceRequest.flowEnded.eq(true));
     }
-    JPQLQuery query = getQueryFactory().from(absenceRequest)
-        .where(conditions);
-    return query.list(absenceRequest);
+    return getQueryFactory().selectFrom(absenceRequest)
+        .where(conditions).fetch();
   }
-
 
 
   /**
    * Metodo che ritorna tutti i flussi attivi da approvare.
-   * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le 
-   *     richieste da approvare.
+   *
+   * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le
+   * richieste da approvare.
    * @param fromDate la data da cui cercare
    * @param toDate (opzionale) la data entro cui cercare
    * @param absenceRequestType il tipo di richiesta da cercare
    * @return la lista di tutti i flussi attivi da approvare.
    */
   public List<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
@@ -114,37 +110,71 @@ public class AbsenceRequestDao extends DaoBase {
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    JPQLQuery query = null;
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
         || uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType)
-        .and(absenceRequest.flowStarted.isTrue())
-        .and(absenceRequest.flowEnded.isFalse()));
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+
+    List<AbsenceRequest> results = new ArrayList<>();
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results.addAll(
+          toApproveResultsAsSeatSuperVisor(
+              uros, fromDate, toDate, absenceRequestType, groups, signer));
+    }
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      conditions = managerQuery(conditions, signer);
+      List<AbsenceRequest> queryResults = getQueryFactory().selectFrom(absenceRequest)
+          .join(absenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions))
+          .fetch();
+      results.addAll(queryResults);
+    }
+    return results;
+  }
+
+  /**
+   * Lista delle AbsenceRequest da Approvare come responsabile di sede.
+   */
+  private List<AbsenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
+    conditions.and(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      conditions = seatSupervisorQuery(conditions, signer);     
-      query = getQueryFactory().from(absenceRequest).where(conditions);
-
-    } else if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
-      conditions = managerQuery(conditions, signer);          
-      query = getQueryFactory().from(absenceRequest)
-          .join(absenceRequest.person, person)
-          .join(person.groups, group)
-          .where(group.manager.eq(signer).and(conditions));
+      conditions = seatSupervisorQuery(conditions, signer);
+      return getQueryFactory().selectFrom(absenceRequest).where(conditions).fetch();
     } else {
       return Lists.newArrayList();
     }
-    return query.list(absenceRequest);
+
   }
 
   /**
    * Metodo che ritorna la lista di tutte le richieste di assenza attive.
+   *
    * @param uros la lista dei ruoli della persona che deve approvare
    * @param fromDate da quando cercare le richieste
    * @param toDate a quando cercare le richieste (opzionale)
@@ -154,7 +184,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @return la lista di tutte le richieste di assenza attive.
    */
   public List<AbsenceRequest> allResults(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
@@ -164,38 +194,79 @@ public class AbsenceRequestDao extends DaoBase {
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER) 
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
         || uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    JPQLQuery query = null;
+    val results = Lists.<AbsenceRequest>newArrayList();
+
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType)
-        .and(absenceRequest.flowStarted.isTrue())
-        .and(absenceRequest.flowEnded.isFalse())
-        .and(absenceRequest.person.office.eq(signer.office)));
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse())
+            .and(absenceRequest.person.office.eq(signer.office)));
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results.addAll(allResultsAsSuperVisor(
+          uros, fromDate, toDate, absenceRequestType, groups, signer));
+    }
+    JPQLQuery<AbsenceRequest> query;
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
-      .and(absenceRequest.managerApproved.isNotNull()) 
-        .and(person.office.eq(signer.office));  
-      query = getQueryFactory().from(absenceRequest)
+          .and(absenceRequest.managerApproved.isNotNull())
+          .and(person.office.eq(signer.office));
+      query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
           .join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
     } else {
-      query = getQueryFactory().from(absenceRequest).where(conditions);
+      query = getQueryFactory().selectFrom(absenceRequest).where(conditions);
     }
-
-    return query.list(absenceRequest);
+    results.addAll(query.fetch());
+    return results;
   }
 
+  private List<AbsenceRequest> allResultsAsSuperVisor(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
+    Preconditions.checkNotNull(fromDate);
+
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final QPerson person = QPerson.person;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    conditions.and(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse())
+            .and(absenceRequest.person.office.eq(signer.office)));
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      conditions.and(absenceRequest.managerApprovalRequired.isTrue())
+          .and(absenceRequest.officeHeadApprovalRequired.isNotNull()
+              .or(absenceRequest.officeHeadApprovalForManagerRequired.isNotNull()))
+          .and(person.office.eq(signer.office));
+      return getQueryFactory().selectFrom(absenceRequest)
+          .join(absenceRequest.person, person)
+          .where(person.office.in(
+              uros.stream().map(
+                  userRoleOffice -> userRoleOffice.office)
+                  .collect(Collectors.toSet())).and(conditions))
+          .fetch();
+    } else {
+      return Lists.newArrayList();
+    }
+  }
 
   /**
    * Metodo che ritorna la lista delle richieste di assenza già approvate per ruolo data e tipo.
+   *
    * @param uros la lista degli users_roles_offices
    * @param fromDate la data da cui cercare le richieste di assenza
    * @param toDate la data fino a cui cercare le richieste di assenza (opzionale)
@@ -203,7 +274,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @return la lista delle richieste totalmente approvate.
    */
   public List<AbsenceRequest> totallyApproved(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate, 
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
@@ -212,29 +283,73 @@ public class AbsenceRequestDao extends DaoBase {
     final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
-    JPQLQuery query = null;
+    List<AbsenceRequest> results = new ArrayList<>();
+    JPQLQuery<AbsenceRequest> query;
+
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())
-        .and(absenceRequest.person.office.eq(signer.office)));
+            .and(absenceRequest.person.office.eq(signer.office)));
 
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
     }
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {      
+
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results
+          .addAll(totallyApprovedAsSuperVisor(
+              uros, fromDate, toDate, absenceRequestType, groups, signer));
+    }
+
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
-      .and(absenceRequest.managerApproved.isNotNull()) 
-          .and(person.office.eq(signer.office));          
-      query = getQueryFactory().from(absenceRequest)
+          .and(absenceRequest.managerApproved.isNotNull())
+          .and(person.office.eq(signer.office));
+      query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
           .join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
-
     } else {
       query = getQueryFactory()
-          .from(absenceRequest).where(conditions);
+          .selectFrom(absenceRequest).where(conditions);
+    }
+    results.addAll(query.fetch());
+    return results;
+  }
+
+  private List<AbsenceRequest> totallyApprovedAsSuperVisor(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
+    Preconditions.checkNotNull(fromDate);
+
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    final QPerson person = QPerson.person;
+    final QOffice office = QOffice.office;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+    conditions.and(absenceRequest.startAt.after(fromDate))
+        .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())
+            .and(absenceRequest.person.office.eq(signer.office)));
+
+    if (toDate.isPresent()) {
+      conditions.and(absenceRequest.endTo.before(toDate.get()));
+    }
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      conditions.and(
+          absenceRequest.officeHeadApprovalRequired.isTrue()
+              .or(absenceRequest.officeHeadApprovalForManagerRequired.isTrue()))
+          .and(absenceRequest.officeHeadApproved.isNotNull())
+          .and(person.office.eq(signer.office));
+      return getQueryFactory().selectFrom(absenceRequest)
+          .join(absenceRequest.person, person)
+          .join(person.office, office)
+          .where(office.in(uros.stream().map(
+              userRoleOffices -> userRoleOffices.office)
+              .collect(Collectors.toSet())).and(conditions))
+          .fetch();
+    } else {
+      return Lists.newArrayList();
     }
 
-    return query.list(absenceRequest);
   }
 
   private BooleanBuilder seatSupervisorQuery(BooleanBuilder condition, Person signer) {
@@ -242,9 +357,9 @@ public class AbsenceRequestDao extends DaoBase {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.person.office.eq(signer.office))
         .andAnyOf(absenceRequest.officeHeadApprovalForManagerRequired.isTrue(),
-            (absenceRequest.managerApprovalRequired.isTrue()
-                .and(absenceRequest.managerApproved.isNotNull()))); 
-  
+            absenceRequest.managerApprovalRequired.isTrue()
+                .and(absenceRequest.managerApproved.isNotNull()));
+
     return condition;
 
 
@@ -268,8 +383,8 @@ public class AbsenceRequestDao extends DaoBase {
   private BooleanBuilder managerQuery(BooleanBuilder condition, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.managerApprovalRequired.isTrue())
-    .and(absenceRequest.managerApproved.isNull()) 
-      .and(absenceRequest.person.office.eq(signer.office)); 
+        .and(absenceRequest.managerApproved.isNull())
+        .and(absenceRequest.person.office.eq(signer.office));
     return condition;
 
   }

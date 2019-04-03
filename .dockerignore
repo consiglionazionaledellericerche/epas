@@ -6,4 +6,5 @@ conf/log4j.dev.properties
 !db
 !docker_conf
 !public
+!build.xml
 

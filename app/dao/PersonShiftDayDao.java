@@ -2,9 +2,8 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -34,23 +33,22 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in
-   *     turno Null altrimenti.
+   * turno Null altrimenti.
    */
   public Optional<PersonShiftDay> getPersonShiftDay(Person person, LocalDate date) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
     final QPersonShift personShift = QPersonShift.personShift;
 
-    JPQLQuery query = getQueryFactory().from(personShiftDay)
+    final PersonShiftDay result = getQueryFactory().selectFrom(personShiftDay)
         .join(personShiftDay.personShift, personShift)
-        .where(personShift.person.eq(person).and(personShiftDay.date.eq(date)));
-    PersonShiftDay psd = query.singleResult(personShiftDay);
+        .where(personShift.person.eq(person).and(personShiftDay.date.eq(date))).fetchOne();
 
-    return Optional.fromNullable(psd);
+    return Optional.fromNullable(result);
   }
 
   /**
    * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo
-   *     shiftType 'type'. Se specificato filtra sulla persona richiesta.
+   * shiftType 'type'. Se specificato filtra sulla persona richiesta.
    */
   public List<PersonShiftDay> byTypeInPeriod(
       LocalDate from, LocalDate to, ShiftType type, Optional<Person> person) {
@@ -65,102 +63,97 @@ public class PersonShiftDayDao extends DaoBase {
       condition.and(personShiftDay.personShift.person.eq(person.get()));
     }
 
-    return getQueryFactory().from(personShiftDay)
-        .where(condition).orderBy(personShiftDay.date.asc()).list(personShiftDay);
+    return getQueryFactory().selectFrom(personShiftDay)
+        .where(condition).orderBy(personShiftDay.date.asc()).fetch();
   }
-  
+
   /**
    * Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
-   * 
+   *
    * @return il personShiftDay relativo al tipo 'shiftType' nel giorno 'date' con lo slot
-   *     'shiftSlot'.
+   * 'shiftSlot'.
    */
   public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
       ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
-    JPQLQuery query = getQueryFactory().from(personShiftDay).where(personShiftDay.date.eq(date)
+    return getQueryFactory().selectFrom(personShiftDay).where(personShiftDay.date.eq(date)
         .and(personShiftDay.shiftType.eq(shiftType)
-            .and(personShiftDay.shiftSlot.eq(shiftSlot))));
-    return query.singleResult(personShiftDay);
+            .and(personShiftDay.shiftSlot.eq(shiftSlot))))
+        .fetchOne();
   }
 
 
   /**
    * PersonShift associato alla persona passata.
-   * 
+   *
    * @return il personShift associato alla persona passata come parametro.
    */
   public PersonShift getPersonShiftByPerson(Person person, LocalDate date) {
     final QPersonShift personShift = QPersonShift.personShift;
-    JPQLQuery query = getQueryFactory().from(personShift).where(personShift.person.eq(person)
+    return getQueryFactory().selectFrom(personShift).where(personShift.person.eq(person)
         .and(personShift.beginDate.loe(date)
-            .andAnyOf(personShift.endDate.goe(date), personShift.endDate.isNull())));
-    return query.singleResult(personShift);
+            .andAnyOf(personShift.endDate.goe(date), personShift.endDate.isNull())))
+        .fetchOne();
   }
-  
+
   /**
-   * 
    * @return la lista dei personShift disabilitati.
    */
   public List<PersonShift> getDisabled() {
     final QPersonShift personShift = QPersonShift.personShift;
-    JPQLQuery query = getQueryFactory().from(personShift).where(personShift.disabled.eq(true));
-    return query.list(personShift);
+    return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)).fetch();
   }
 
   /**
    * Tutti i PersonReperibilityType.
-   * 
+   *
    * @return la lista di tutti i PersonReperibilityType presenti sul db.
    */
   public List<ShiftCategories> getAllShiftType() {
-    QShiftCategories shift = QShiftCategories.shiftCategories;
-    JPQLQuery query = getQueryFactory().from(shift).orderBy(shift.description.asc());
-    return query.list(shift);
+    final QShiftCategories shift = QShiftCategories.shiftCategories;
+    return getQueryFactory().selectFrom(shift).orderBy(shift.description.asc()).fetch();
   }
 
   /**
    * Cerca un PersonShiftDay per persona e data.
-   * 
+   *
    * @param person Person da cercare.
    * @param date data del personShiftDay.
-   * @return
    */
   public Optional<PersonShiftDay> byPersonAndDate(Person person, LocalDate date) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
 
-    return Optional.fromNullable(getQueryFactory().from(shiftDay)
+    return Optional.fromNullable(getQueryFactory().selectFrom(shiftDay)
         .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date)))
-        .singleResult(shiftDay));
+        .fetchOne());
   }
 
   /**
    * Cerca un PersonShiftDay per typo e data.
-   * 
+   *
    * @param shiftType tipo del PersonShiftDay
    * @param date data del PersonShiftDay da cercare
-   * @return
    */
   public Optional<PersonShiftDay> byTypeAndDate(ShiftType shiftType, LocalDate date) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
 
-    return Optional.fromNullable(getQueryFactory().from(shiftDay)
+    return Optional.fromNullable(getQueryFactory().selectFrom(shiftDay)
         .where(shiftDay.shiftType.eq(shiftType).and(shiftDay.date.eq(date)))
-        .singleResult(shiftDay));
+        .fetchOne());
   }
-  
+
   public long countByPersonAndDate(Person person, LocalDate date) {
 
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
     return getQueryFactory().from(shiftDay)
-        .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date))).count();
+        .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date))).fetchCount();
   }
 
   public List<PersonShiftDay> listByDateAndActivity(LocalDate date, ShiftType activity) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
-    return getQueryFactory().from(shiftDay)
-        .where(shiftDay.date.eq(date).and(shiftDay.shiftType.eq(activity))).list(shiftDay);
+    return getQueryFactory().selectFrom(shiftDay)
+        .where(shiftDay.date.eq(date).and(shiftDay.shiftType.eq(activity))).fetch();
   }
 
 }

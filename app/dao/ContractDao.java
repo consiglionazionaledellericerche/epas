@@ -3,29 +3,20 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Contract;
 import models.ContractStampProfile;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
-import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
-import models.query.QContractWorkingTimeType;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -49,9 +40,8 @@ public class ContractDao extends DaoBase {
    */
   public Contract getContractById(Long id) {
     QContract contract = QContract.contract;
-    final JPQLQuery query = getQueryFactory().from(contract)
-        .where(contract.id.eq(id));
-    return query.singleResult(contract);
+    return getQueryFactory().selectFrom(contract)
+        .where(contract.id.eq(id)).fetchOne();
   }
 
   /**
@@ -75,15 +65,15 @@ public class ContractDao extends DaoBase {
     if (people.isPresent()) {
       condition.and(contract.person.in(people.get()));
     }
-    
+
     if (office.isPresent()) {
       condition.and(contract.person.office.eq(office.get()));
     }
 
-    return getQueryFactory().from(contract).where(condition).list(contract);
+    return getQueryFactory().selectFrom(contract).where(condition).fetch();
   }
 
-  public List<Contract> getActiveContractsInPeriod(LocalDate begin, Optional<LocalDate> end, 
+  public List<Contract> getActiveContractsInPeriod(LocalDate begin, Optional<LocalDate> end,
       Optional<Office> office) {
     return getActiveContractsInPeriod(Optional.absent(), begin, end, office);
   }
@@ -96,13 +86,12 @@ public class ContractDao extends DaoBase {
 
   /**
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   *     data inizio contratto.
+   * data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
-    final JPQLQuery query = getQueryFactory().from(contract)
-        .where(contract.person.eq(person)).orderBy(contract.beginDate.asc());
-    return query.list(contract);
+    return getQueryFactory().selectFrom(contract)
+        .where(contract.person.eq(person)).orderBy(contract.beginDate.asc()).fetch();
   }
 
   /**
@@ -123,9 +112,9 @@ public class ContractDao extends DaoBase {
 
   /**
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   *     passati come parametro e ordinati per data inizio del contractStampProfile La funzione 
-   *     permette di scegliere quale dei due parametri indicare per effettuare la ricerca. 
-   *     Sono mutuamente esclusivi.
+   * passati come parametro e ordinati per data inizio del contractStampProfile La funzione permette
+   * di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono mutuamente
+   * esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
       Optional<Contract> contract) {
@@ -137,9 +126,8 @@ public class ContractDao extends DaoBase {
     if (contract.isPresent()) {
       condition.and(csp.contract.eq(contract.get()));
     }
-    final JPQLQuery query = getQueryFactory().from(csp)
-        .where(condition).orderBy(csp.beginDate.asc());
-    return query.list(csp);
+    return getQueryFactory().selectFrom(csp)
+        .where(condition).orderBy(csp.beginDate.asc()).fetch();
 
   }
 
@@ -148,9 +136,8 @@ public class ContractDao extends DaoBase {
    */
   public ContractStampProfile getContractStampProfileById(Long id) {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
-    final JPQLQuery query = getQueryFactory().from(csp)
-        .where(csp.id.eq(id));
-    return query.singleResult(csp);
+    return getQueryFactory().selectFrom(csp)
+        .where(csp.id.eq(id)).fetchOne();
   }
 
 }

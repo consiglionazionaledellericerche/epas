@@ -2,11 +2,8 @@ package dao;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import java.util.Collection;
-import java.util.List;
 
 /**
  * It stores the results of expensive function calls and returns the cached Collection when the same
@@ -26,24 +23,9 @@ public class MemoizedResults<T> implements MemoizedCollection<T> {
 
   MemoizedResults(final Supplier<SimpleResults<T>> results) {
 
-    count = Suppliers.memoize(new Supplier<Long>() {
-      @Override
-      public Long get() {
-        return results.get().count();
-      }
-    });
-    partial = Suppliers.memoize(new Supplier<Collection<T>>() {
-      @Override
-      public List<T> get() {
-        return results.get().list(FIRST_ITEMS);
-      }
-    });
-    list = Suppliers.memoize(new Supplier<Collection<T>>() {
-      @Override
-      public List<T> get() {
-        return results.get().list();
-      }
-    });
+    count = Suppliers.memoize(() -> results.get().count());
+    partial = Suppliers.memoize(() -> results.get().list(FIRST_ITEMS));
+    list = Suppliers.memoize(() -> results.get().list());
   }
 
   public long getCount() {

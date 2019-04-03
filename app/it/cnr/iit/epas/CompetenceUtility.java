@@ -5,7 +5,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.mysema.query.jpa.JPQLQueryFactory;
 import dao.PersonDayDao;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,8 +14,6 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.PairStamping;
-import models.Competence;
-import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
@@ -24,8 +21,6 @@ import models.PersonShiftDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
-import models.query.QCompetence;
-import models.query.QCompetenceCode;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.i18n.Messages;
@@ -60,26 +55,22 @@ public class CompetenceUtility {
   public static String thExceededMin = Messages.get("PDFReport.thExceededMin");
   public static String thIncompleteTime = Messages.get("PDFReport.thIncompleteTime");
 
-  private final JPQLQueryFactory queryFactory;
   private final PersonDayDao personDayDao;
-  private PersonDayManager personDayManager;
+  private final PersonDayManager personDayManager;
 
   /**
    * Construttore predefinito che inizializza queryFactory e vari manager.
    */
   @Inject
-  public CompetenceUtility(JPQLQueryFactory queryFactory,
-      PersonDayDao personDayDao, PersonDayManager personDayManager) {
+  public CompetenceUtility(PersonDayDao personDayDao, PersonDayManager personDayManager) {
 
-    this.queryFactory = queryFactory;
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
   }
 
   /**
-   * Calcola le ore di turno dai giorni (days)
-   * resto = (days%2 == 0) ? 0 : 0.5
-   * ore = days*6 + (int)(days/2) + resto;
+   * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
+   * (int)(days/2) + resto;
    *
    * @author arianna TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
    */
@@ -98,9 +89,8 @@ public class CompetenceUtility {
   }
 
   /**
-   * Calcola le ore di turno dai giorni (days)
-   * resto = (days%2 == 0) ? 0 : 0.5
-   * ore = days*6 + (int)(days/2) + resto;
+   * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
+   * (int)(days/2) + resto;
    *
    * @author arianna TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
    */
@@ -123,8 +113,7 @@ public class CompetenceUtility {
 
 
   /**
-   * Calcola le oer e i minuti dal numero totale dei minuti
-   * lavorati.
+   * Calcola le oer e i minuti dal numero totale dei minuti lavorati.
    *
    * @author arianna
    */
@@ -148,8 +137,7 @@ public class CompetenceUtility {
 
 
   /**
-   * Calcola il LocalTime dal numero dei minuti
-   * che compongono l'orario.
+   * Calcola il LocalTime dal numero dei minuti che compongono l'orario.
    *
    * @author arianna
    */
@@ -177,8 +165,8 @@ public class CompetenceUtility {
    *
    * @param personShiftDays lista di shiftDays
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
-   *        per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i 
-   *        giorni di turno contenuti nella lista personShiftDays passata come parametro
+   * per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
+   * turno contenuti nella lista personShiftDays passata come parametro
    * @author arianna
    */
   public void countPersonsShiftsDays(
@@ -229,9 +217,9 @@ public class CompetenceUtility {
 
 
   /**
-   * crea una tabella con le eventuali inconsistenze tra le timbrature dei
-   * reperibili di un certo tipo e i turni di reperibilit√† svolti in un determinato periodo di
-   * tempo ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>).
+   * crea una tabella con le eventuali inconsistenze tra le timbrature dei reperibili di un certo
+   * tipo e i turni di reperibilit√† svolti in un determinato periodo di tempo ritorna una tabella
+   * del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>).
    *
    * @author arianna
    */
@@ -304,9 +292,9 @@ public class CompetenceUtility {
 
 
   /**
-   * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature
-   * ritorna una tabella del tipo (Person, [thNoStamping, thAbsence, thBadStampings],
-   * [List<'gg MMM'>, List<'gg MMM'>, 'dd MMM -> HH:mm-HH:mm']).
+   * Costruisce la tabella delle inconsistenza tra i giorni di turno dati e le timbrature ritorna
+   * una tabella del tipo (Person, [thNoStamping, thAbsence, thBadStampings], [List<'gg MMM'>,
+   * List<'gg MMM'>, 'dd MMM -> HH:mm-HH:mm']).
    */
   public void getShiftInconsistencyTimestampTable(
       List<PersonShiftDay> personShiftDays,

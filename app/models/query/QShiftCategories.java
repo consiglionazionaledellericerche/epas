@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.ShiftCategories;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QShiftCategories is a Querydsl query type for ShiftCategories
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QShiftCategories extends EntityPathBase<ShiftCategories> {
 
     private static final long serialVersionUID = 322977946L;
@@ -55,18 +55,18 @@ public class QShiftCategories extends EntityPathBase<ShiftCategories> {
     }
 
     public QShiftCategories(Path<? extends ShiftCategories> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QShiftCategories(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QShiftCategories(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QShiftCategories(PathMetadata<?> metadata, PathInits inits) {
+    public QShiftCategories(PathMetadata metadata, PathInits inits) {
         this(ShiftCategories.class, metadata, inits);
     }
 
-    public QShiftCategories(Class<? extends ShiftCategories> type, PathMetadata<?> metadata, PathInits inits) {
+    public QShiftCategories(Class<? extends ShiftCategories> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;

@@ -56,8 +56,8 @@ public class Persons extends Controller {
     if (email == null) {
       email = "cristian.lucchesi@iit.cnr.it";
     }
-    Person person = personDao.getPersonByEmail(email);
-    if (person == null) {
+    Optional<Person> person = personDao.byEmail(email);
+    if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
               + "mail cnr che serve per la ricerca. Assicurarsi di aver"
               + "lanciato il job per la sincronizzazione delle email dei dipendenti");
@@ -67,19 +67,16 @@ public class Persons extends Controller {
     }
 
     List<DayRecap> personDays = FluentIterable.from(personDao.getPersonDayIntoInterval(
-            person, new DateInterval(start, end), false))
-            .transform(new Function<PersonDay, DayRecap>() {
-              @Override
-              public DayRecap apply(PersonDay personday) {
-                DayRecap dayRecap = new DayRecap();
-                
-                dayRecap.workingMinutes = personday.getAssignableTime();
-                dayRecap.date = personday.date.toString();
-                dayRecap.mission = personDayManager.isOnMission(personday);
-                dayRecap.workingTime =
-                    wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
-                return dayRecap;
-              }
+            person.get(), new DateInterval(start, end), false))
+            .transform(personday -> {
+              DayRecap dayRecap = new DayRecap();
+
+              dayRecap.workingMinutes = personday.getAssignableTime();
+              dayRecap.date = personday.date.toString();
+              dayRecap.mission = personDayManager.isOnMission(personday);
+              dayRecap.workingTime =
+                  wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
+              return dayRecap;
             }).toList();
 
     renderJSON(personDays);
@@ -91,25 +88,22 @@ public class Persons extends Controller {
     if (email == null) {
       email = "cristian.lucchesi@iit.cnr.it";
     }
-    Person person = personDao.getPersonByEmail(email);
+    Optional<Person> person = personDao.byEmail(email);
     List<DayRecap> personDays = Lists.newArrayList();
-    if (person != null) {
+    if (person.isPresent()) {
 
       personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
-                  Optional.fromNullable(person), start, Optional.fromNullable(end), forAttachment))
-              .transform(new Function<Absence, DayRecap>() {
-                @Override
-                public DayRecap apply(Absence absence) {
-                  DayRecap dayRecap = new DayRecap();
-                  dayRecap.workingMinutes = 0;
-                  dayRecap.date = absence.personDay.date.toString();
-                  if (personDayManager.isOnMission(absence.personDay)) {
-                    dayRecap.mission = true;
-                  } else {
-                    dayRecap.mission = false;
-                  }
-                  return dayRecap;
+                  person, start, Optional.fromNullable(end), forAttachment))
+              .transform(absence -> {
+                DayRecap dayRecap = new DayRecap();
+                dayRecap.workingMinutes = 0;
+                dayRecap.date = absence.personDay.date.toString();
+                if (personDayManager.isOnMission(absence.personDay)) {
+                  dayRecap.mission = true;
+                } else {
+                  dayRecap.mission = false;
                 }
+                return dayRecap;
               }).toList();
     }
     renderJSON(personDays);

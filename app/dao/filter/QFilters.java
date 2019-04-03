@@ -1,9 +1,7 @@
 package dao.filter;
 
 import com.google.common.base.Optional;
-
-import com.mysema.query.BooleanBuilder;
-
+import com.querydsl.core.BooleanBuilder;
 import models.query.QPerson;
 
 public class QFilters {
@@ -17,7 +15,7 @@ public class QFilters {
 
     if (name.isPresent() && !name.get().trim().isEmpty()) {
       condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
-              person.surname.startsWithIgnoreCase(name.get()));
+          person.surname.startsWithIgnoreCase(name.get()));
     }
 
     return condition;
