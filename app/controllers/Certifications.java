@@ -111,7 +111,7 @@ public class Certifications extends Controller {
     LocalDate monthBegin = new LocalDate(validYear, validMonth, 1);
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 
-    Set<Integer> matricoleAttestati = new HashSet<>();
+    Set<String> matricoleAttestati = new HashSet<>();
 
     final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
         .SimpleEntry<>(office, monthToUpload.get());
@@ -134,14 +134,14 @@ public class Certifications extends Controller {
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
-    final Set<Integer> matricoleEpas = people.stream().map(person -> person.number)
-        .distinct().collect(Collectors.toSet());
+    final Set<String> matricoleEpas = people.stream().map(person -> person.number)
+        .collect(Collectors.toSet());
 
-    final Set<Integer> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
+    final Set<String> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
 
-    final Set<Integer> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
+    final Set<String> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
 
-    final Set<Integer> matchNumbers = Sets.newHashSet(matricoleEpas);
+    final Set<String> matchNumbers = Sets.newHashSet(matricoleEpas);
     matchNumbers.retainAll(matricoleAttestati);
 
     // Controlli sull'abilitazione del calendario turni
@@ -164,10 +164,9 @@ public class Certifications extends Controller {
 
   /**
    * Metodo scritto per evitare di passare direttamente al controller il boolean per effetuare
-   * l'invio degli attestati.
-   * In questo nell'url non rimane mai l'indirizzo che effettua l'invio dei dati e se si ricarica
-   * la pagina non si corre il rischio di farlo.
-   * La soluzione fa abbastanza schifo...trovarne una migliore
+   * l'invio degli attestati. In questo nell'url non rimane mai l'indirizzo che effettua l'invio dei
+   * dati e se si ricarica la pagina non si corre il rischio di farlo. La soluzione fa abbastanza
+   * schifo...trovarne una migliore
    *
    * @param officeId id Ufficio
    * @param year anno
@@ -206,10 +205,10 @@ public class Certifications extends Controller {
 
     personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
         false, monthBegin, monthEnd, true).list().forEach(person -> {
-          final Map.Entry<Person, YearMonth> personKey = new AbstractMap
-              .SimpleEntry<>(person, yearMonth);
-          cacheValues.personStatus.invalidate(personKey);
-        });
+      final Map.Entry<Person, YearMonth> personKey = new AbstractMap
+          .SimpleEntry<>(person, yearMonth);
+      cacheValues.personStatus.invalidate(personKey);
+    });
     log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
   }

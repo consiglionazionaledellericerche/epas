@@ -10,7 +10,7 @@ import org.joda.time.LocalDate;
  **/
 public class RenderResult {
   public String line;
-  public Integer matricola;
+  public String matricola;
   public String nome;
   public String cognome;
   public String codice;
@@ -24,7 +24,7 @@ public class RenderResult {
    * Costruttore.
    */
   public RenderResult(
-      String line, Integer matricola, String nome, String cognome, String codice,
+      String line, String matricola, String nome, String cognome, String codice,
       LocalDate data, boolean check, String message, String codiceInAnagrafica, CheckType type) {
     this.line = line;
     this.matricola = matricola;

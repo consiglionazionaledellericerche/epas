@@ -6,7 +6,7 @@ import cnr.sync.dto.DayRecap;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
+import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
@@ -14,7 +14,7 @@ import dao.history.StampingHistoryDao;
 import dao.wrapper.IWrapperFactory;
 
 import java.util.List;
-
+import java.util.Set;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
@@ -94,9 +94,11 @@ public class PrintTags extends Controller {
     if (!forAll) {
       personList.add(person);
     } else {
+      Set<Office> set = Sets.newHashSet();
+      set.add(office);
       personList = personDao.list(
           Optional.<String>absent(),
-          secureManager.officesReadAllowed(Security.getUser().get()),
+          set,
           false, date, date.dayOfMonth().withMaximumValue(), true).list();
     }
 
@@ -132,9 +134,11 @@ public class PrintTags extends Controller {
 
     LocalDate date = new LocalDate(year, month, 1);
     Office office = officeDao.getOfficeById(officeId);
+    Set<Office> set = Sets.newHashSet();
+    set.add(office);
     List<Person> personList = personDao.list(
         Optional.<String>absent(),
-        secureManager.officesReadAllowed(Security.getUser().get()),
+        set,
         false, date, date.dayOfMonth().withMaximumValue(), true).list();
     boolean forAll = true;
 

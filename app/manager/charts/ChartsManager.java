@@ -141,9 +141,6 @@ public class ChartsManager {
     List<PersonOvertime> poList = Lists.newArrayList();
     List<Person> noOvertimePeople = Lists.newArrayList();
     for (Person p : personList) {
-      if (p.surname.equals("Baesso")) {
-        log.debug("eccoci");
-      }
       // PersonDay pd = personDayDao.getOrBuildPersonDay(p, new LocalDate(year, month, 1));
       // int workingTime = wrapperFactory.create(pd).getWorkingTimeTypeDay().get().workingTime;
       PersonOvertime po = new PersonOvertime();
@@ -156,7 +153,7 @@ public class ChartsManager {
           po.overtimeHour =
               recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
           po.positiveHourForOvertime =
-              (recap.get().getPositiveResidualInMonth()) / DateTimeConstants.MINUTES_PER_HOUR;
+              recap.get().getPositiveResidualInMonth() / DateTimeConstants.MINUTES_PER_HOUR;
           po.month = month;
           po.year = year;
           po.name = p.name;
@@ -190,25 +187,24 @@ public class ChartsManager {
       for (Contract contract : yearContracts) {
         IWrapperContract wrContract = wrapperFactory.create(contract);
         for (int i = 1; i < 13; i++) {
-          int month = i;
           Optional<ContractMonthRecap> recap =
-              wrContract.getContractMonthRecap(new YearMonth(year, month));
+              wrContract.getContractMonthRecap(new YearMonth(year, i));
           if (recap.isPresent() && recap.get().getStraordinarioMinuti() != 0) {
-            po.overtimeHour = po.overtimeHour
-                + recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
-            po.positiveHourForOvertime = po.positiveHourForOvertime
-                + (recap.get().getPositiveResidualInMonth()) / DateTimeConstants.MINUTES_PER_HOUR;
+            po.overtimeHour +=
+                recap.get().getStraordinarioMinuti() / DateTimeConstants.MINUTES_PER_HOUR;
+            po.positiveHourForOvertime +=
+                recap.get().getPositiveResidualInMonth() / DateTimeConstants.MINUTES_PER_HOUR;
             po.year = year;
             po.name = p.name;
             po.surname = p.surname;
 
           }
         }
-        if (po.overtimeHour != 0) {
-          poList.add(po);
-        } else {
+        if (po.overtimeHour == 0) {
           log.debug("Il dipendente {} non ha effettuato ore di straordinario "
               + "nell'anno pur avendo ore in più", p.fullName());
+        } else {
+          poList.add(po);
         }
       }
     }
@@ -233,7 +229,7 @@ public class ChartsManager {
     }
     log.debug("Passato il file {}", file.getName());
 
-    final Map<Integer, List<ResultFromFile>> map = createMap(file);
+    final Map<String, List<ResultFromFile>> map = createMap(file);
 
     final List<F.Promise<List<RenderResult>>> promises = Lists.newArrayList();
     if (map != null && !map.isEmpty()) {
@@ -313,27 +309,25 @@ public class ChartsManager {
             Optional<ContractMonthRecap> recap = contr.getContractMonthRecap(actual);
             if (recap.isPresent()) {
               situazione = situazione
-                  + (new Integer(recap.get().straordinariMinuti / 60).toString()) + ','
-                  + (new Integer(recap.get().riposiCompensativiMinuti / 60).toString()) + ','
-                  + (new Integer(
-                      (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti)
-                          / 60).toString())
+                  + recap.get().straordinariMinuti / 60 + ','
+                  + recap.get().riposiCompensativiMinuti / 60 + ','
+                  + (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti)
+                  / 60
                   + ',';
-              totalOvertime = totalOvertime + new Integer(recap.get().straordinariMinuti / 60);
-              totalCompensatoryRest =
-                  totalCompensatoryRest + new Integer(recap.get().riposiCompensativiMinuti / 60);
-              totalPlusHours = totalPlusHours + new Integer(
-                  (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti) / 60);
+              totalOvertime += recap.get().straordinariMinuti / 60;
+              totalCompensatoryRest += recap.get().riposiCompensativiMinuti / 60;
+              totalPlusHours +=
+                  (recap.get().getPositiveResidualInMonth() + recap.get().straordinariMinuti) / 60;
             } else {
-              situazione = situazione + ("0" + ',' + "0" + ',' + "0");
+              situazione += ("0" + ',' + "0" + ',' + "0");
             }
             actual = actual.plusMonths(1);
           }
 
           out.append(situazione);
-          out.append(new Integer(totalOvertime).toString() + ',');
-          out.append(new Integer(totalCompensatoryRest).toString() + ',');
-          out.append(new Integer(totalPlusHours).toString() + ',');
+          out.append(Integer.toString(totalOvertime) + ',');
+          out.append(Integer.toString(totalCompensatoryRest) + ',');
+          out.append(Integer.toString(totalPlusHours) + ',');
         }
 
       }
@@ -387,12 +381,11 @@ public class ChartsManager {
 
     out.append(person.surname + ' ' + person.name + ',');
 
-    out.append(new Integer(vacationSituation.currentYear.used()).toString() + ','
-        + new Integer(vacationSituation.lastYear != null 
-        ? vacationSituation.lastYear.used() : 0).toString() + ','
-        + new Integer(vacationSituation.currentYear.used()).toString() + ','
-        + new Integer(recap.get().remainingMinutesCurrentYear).toString() + ','
-        + new Integer(recap.get().remainingMinutesLastYear).toString() + ',');
+    out.append(Integer.toString(vacationSituation.currentYear.used()) + ','
+        + (vacationSituation.lastYear != null ? vacationSituation.lastYear.used() : 0) + ','
+        + vacationSituation.currentYear.used() + ','
+        + recap.get().remainingMinutesCurrentYear + ','
+        + recap.get().remainingMinutesLastYear + ',');
 
     int workingTime = wtt.get().workingTimeTypeDays.get(0).workingTime;
 
@@ -405,7 +398,7 @@ public class ChartsManager {
         riposiCompensativiMinuti += recap.get().riposiCompensativiMinuti;
       }
     }
-    out.append(new Integer(riposiCompensativiMinuti / workingTime).toString());
+    out.append(Integer.toString(riposiCompensativiMinuti / workingTime));
 
     out.close();
     return inputStream;
@@ -416,12 +409,12 @@ public class ChartsManager {
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
    *         tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
-  private Map<Integer, List<ResultFromFile>> createMap(File file) {
+  private Map<String, List<ResultFromFile>> createMap(File file) {
     if (file == null) {
       log.warn("file nullo nella chiamata della checkSituationPastYear");
     }
     final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY H.mm.ss");
-    Map<Integer, List<ResultFromFile>> map = Maps.newHashMap();
+    Map<String, List<ResultFromFile>> map = Maps.newHashMap();
     try {
       InputStream targetStream = new FileInputStream(file);
       BufferedReader in = new BufferedReader(new InputStreamReader(targetStream));
@@ -457,7 +450,7 @@ public class ChartsManager {
 
         try {
 
-          int matricola = Integer.parseInt(elements.get(indexMatricola));
+          String matricola = elements.get(indexMatricola);
           String assenza = elements.get(indexAssenza);
           LocalDate dataAssenza = LocalDate.parse(elements.get(indexDataAssenza), dtf);
 
@@ -509,13 +502,13 @@ public class ChartsManager {
       throws ArchiveException, IOException {
 
     Set<Office> offices = Sets.newHashSet(office);
-    List<Person> personList = Lists.newArrayList();
+    List<Person> personList;
     if (!forAll) {
       personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
           .collect(Collectors.toList());
     } else {
       personList = personDao
-          .list(Optional.<String>absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
+          .list(Optional.absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
           .list();
     }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -524,7 +517,7 @@ public class ChartsManager {
 
     File file = null;
     // controllo che tipo di esportazione devo fare...
-    if (exportFile.equals(ExportFile.CSV)) {
+    if (exportFile == ExportFile.CSV) {
 
       for (Person person : personList) {
         LocalDate tempDate = beginDate;
@@ -703,7 +696,7 @@ public class ChartsManager {
       row = sheet.createRow(0);
       row.setHeightInPoints(30);
       for (int i = 0; i < 7; i++) {
-        sheet.setColumnWidth((short) (i), (short) ((50 * 8) / ((double) 1 / 20)));
+        sheet.setColumnWidth((short) i, (short) ((50 * 8) / ((double) 1 / 20)));
         cell = row.createCell(i);
         cell.setCellStyle(cs);
         switch (i) {

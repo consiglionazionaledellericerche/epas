@@ -19,6 +19,7 @@ import manager.configurations.EpasParam;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -86,6 +87,9 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+
+  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
+  public List<Group> groups = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
@@ -161,8 +165,8 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
    *        indicato
    */
   public boolean checkConf(EpasParam param, String value) {
-    return configurations.stream().filter(conf -> conf.epasParam == param
-        && conf.fieldValue.equals(value)).findFirst().isPresent();
+    return configurations.stream().anyMatch(conf -> conf.epasParam == param
+        && conf.fieldValue.equals(value));
   }
 
 }

@@ -1,20 +1,20 @@
-package play.db.jpa.query;
+package models.play.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import play.db.jpa.JPABase;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QJPABase is a Querydsl query type for JPABase
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QJPABase extends EntityPathBase<JPABase> {
 
     private static final long serialVersionUID = 1552226979L;
@@ -33,7 +33,7 @@ public class QJPABase extends EntityPathBase<JPABase> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QJPABase(PathMetadata<?> metadata) {
+    public QJPABase(PathMetadata metadata) {
         super(JPABase.class, metadata);
     }
 

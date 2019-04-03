@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 if [ -z "${VIRTUAL_HOST}" ]; then
@@ -178,18 +178,90 @@ else
   sed 's#{{OIL_CATEGORIES_DEFAULT}}#'"${OIL_CATEGORIES_DEFAULT}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
-if [ -z "${PERSEO_BASE}" ]; then
-  sed -n '/PERSEO_BASE/!p' -i ${APP_HOME}/conf/prod.conf
+if [ -z "${ANAGRAFICA_BASE}" ]; then
+  sed -n '/ANAGRAFICA_BASE/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{PERSEO_BASE}}#'"${PERSEO_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{ANAGRAFICA_BASE}}#'"${ANAGRAFICA_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
-if [ -z "${PERSEO_USER}" ]; then
-  sed -n '/PERSEO_USER/!p' -i ${APP_HOME}/conf/prod.conf
-  sed -n '/PERSEO_PASS/!p' -i ${APP_HOME}/conf/prod.conf
+if [ -z "${ANAGRAFICA_USER}" ]; then
+  sed -n '/ANAGRAFICA_USER/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/ANAGRAFICA_PASS/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{PERSEO_USER}}#'"${PERSEO_USER}"'#' -i ${APP_HOME}/conf/prod.conf
-  sed 's#{{PERSEO_PASS}}#'"${PERSEO_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{ANAGRAFICA_USER}}#'"${ANAGRAFICA_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{ANAGRAFICA_PASS}}#'"${ANAGRAFICA_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_PERSON}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_PERSON/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_PERSON}}#'"${ANAGRAFICA_ENDPOINT_PERSON}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_PEOPLE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_PEOPLE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_PEOPLE}}#'"${ANAGRAFICA_ENDPOINT_PEOPLE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_PEOPLEINOFFICE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_PEOPLEINOFFICE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_PEOPLEINOFFICE}}#'"${ANAGRAFICA_ENDPOINT_PEOPLEINOFFICE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_OFFICES}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_OFFICES/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_OFFICES}}#'"${ANAGRAFICA_ENDPOINT_OFFICES}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_OFFICE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_OFFICE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_OFFICE}}#'"${ANAGRAFICA_ENDPOINT_OFFICE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_INSTITUTE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_INSTITUTE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_INSTITUTE}}#'"${ANAGRAFICA_ENDPOINT_INSTITUTE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_CONTRACTS}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_CONTRACTS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_CONTRACTS}}#'"${ANAGRAFICA_ENDPOINT_CONTRACTS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_CONTRACTSINOFFICE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_CONTRACTSINOFFICE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_CONTRACTSINOFFICE}}#'"${ANAGRAFICA_ENDPOINT_CONTRACTSINOFFICE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_CONTRACT}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_CONTRACT/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_CONTRACT}}#'"${ANAGRAFICA_ENDPOINT_CONTRACT}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_ROLES}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_ROLES/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_ROLES}}#'"${ANAGRAFICA_ENDPOINT_ROLES}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_BADGESINOFFICE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_BADGESINOFFICE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_BADGESINOFFICE}}#'"${ANAGRAFICA_ENDPOINT_BADGESINOFFICE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_ENDPOINT_BADGE}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_BADGE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_BADGE}}#'"${ANAGRAFICA_ENDPOINT_BADGE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
@@ -198,12 +270,15 @@ sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.con
 
 ### Impostazione autenticazione LDAP
 
-LDAP_LOGIN=${LDAP_LOGIN:false}
+LDAP_LOGIN=${LDAP_LOGIN:-false}
 LDAP_URL=${LDAP_URL}
 LDAP_DN_BASE=${LDAP_DN_BASE}
 LDAP_TIMEOUT=${LDAP_TIMEOUT:-1000}
 LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN:-/}
 LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}
+LDAP_BIND_USE_ONLY_UID=${LDAP_BIND_USE_ONLY_UID:-false}
+LDAP_UNIQUE_IDENTIFIER=${LDAP_UNIQUE_IDENTIFIER:-uid}
+LDAP_UNIQUE_IDENTIFIER_POSTFIX=${LDAP_UNIQUE_IDENTIFIER_POSTFIX}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
@@ -216,13 +291,24 @@ if [ ${LDAP_LOGIN} = "true" ]; then
     sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf
   else
     sed 's#{{LDAP_EPPN_ATTRIBUTE_NAME}}#'"${LDAP_EPPN_ATTRIBUTE_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
-  fi    
+  fi
+  sed 's#{{LDAP_BIND_USE_ONLY_UID}}#'"${LDAP_BIND_USE_ONLY_UID}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed 's#{{LDAP_UNIQUE_IDENTIFIER}}#'"${LDAP_UNIQUE_IDENTIFIER}"'#' -i ${APP_HOME}/conf/prod.conf   
+  if [ -z "${LDAP_UNIQUE_IDENTIFIER_POSTFIX}" ]; then
+    sed -n '/LDAP_UNIQUE_IDENTIFIER_POSTFIX/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{LDAP_UNIQUE_IDENTIFIER_POSTFIX}}#'"${LDAP_UNIQUE_IDENTIFIER_POSTFIX}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+
 else
   sed -n '/LDAP_URL/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_TIMEOUT/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_DN_BASE/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_LOGIN_RETURN/!p' -i ${APP_HOME}/conf/prod.conf
-  sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf  
+  sed -n '/LDAP_EPPN_ATTRIBUTE_NAME/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_BIND_USE_ONLY_UID/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_UNIQUE_IDENTIFIER/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/LDAP_UNIQUE_IDENTIFIER_POSTFIX/!p' -i ${APP_HOME}/conf/prod.conf
 fi
 
 
@@ -253,14 +339,14 @@ fi
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
     echo "Applico eventuali evoluzioni al database..."
-    sudo -u ${user} -H play evolutions:apply --%prod
+    play evolutions:apply --%prod
     echo ".... evoluzioni terminate"
   else
     echo "Evoluzioni disabilitate dalla configurazione: EVOLUTIONS_ENABLED=$EVOLUTIONS_ENABLED"; 
   fi
   
   echo "Avvio ${APP}..."
-  sudo -u ${user} -H play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
+  play run --%prod -Dprecompiled=true -Duser.country=IT -Duser.language=it
   echo "....${APP} avviato"
 }
 
@@ -269,7 +355,7 @@ appPlay() {
     echo "Per favore specifica almeno un'azione play da eseguire, es: evolutions, evolutions:apply, etc...."
     return 1
   fi
-  exec sudo -u ${user} -H play $@ --%prod
+  play $@ --%prod
 }
 
 appHelp () {

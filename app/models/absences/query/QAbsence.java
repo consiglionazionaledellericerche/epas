@@ -1,21 +1,21 @@
 package models.absences.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.absences.Absence;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QAbsence is a Querydsl query type for Absence
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QAbsence extends EntityPathBase<Absence> {
 
     private static final long serialVersionUID = -580774647L;
@@ -71,18 +71,18 @@ public class QAbsence extends EntityPathBase<Absence> {
     }
 
     public QAbsence(Path<? extends Absence> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QAbsence(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QAbsence(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QAbsence(PathMetadata<?> metadata, PathInits inits) {
+    public QAbsence(PathMetadata metadata, PathInits inits) {
         this(Absence.class, metadata, inits);
     }
 
-    public QAbsence(Class<? extends Absence> type, PathMetadata<?> metadata, PathInits inits) {
+    public QAbsence(Class<? extends Absence> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.absenceType = inits.isInitialized("absenceType") ? new QAbsenceType(forProperty("absenceType"), inits.get("absenceType")) : null;
         this.justifiedType = inits.isInitialized("justifiedType") ? new QJustifiedType(forProperty("justifiedType")) : null;

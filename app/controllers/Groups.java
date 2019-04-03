@@ -45,6 +45,8 @@ public class Groups extends Controller {
   private static GroupDao groupDao;
   @Inject
   private static GroupManager groupManager;
+  @Inject
+  private static PersonDao personDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -57,9 +59,10 @@ public class Groups extends Controller {
       response.status = 400;
       render("@blank", office);
     }
-    rules.checkIfPermitted(group.manager.office);
+    rules.checkIfPermitted(group.office);
+    group.office = office;
     group.save();
-    log.debug("Salvato nuovo gruppo di lavoro: {}", group.name);
+    log.debug("Salvato nuovo gruppo di lavoro: {} per la sede {}", group.name, group.office);
     UsersRolesOffices uro = new UsersRolesOffices();
     groupManager.createManager(office, group, uro);
     
@@ -122,7 +125,8 @@ public class Groups extends Controller {
     notFoundIfNull(group);
     rules.checkIfPermitted(group.manager.office);
     Office office = group.manager.office;
-    render(group, office);
+    List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+    render(group, office, peopleForGroups);
   }
 
   /**
@@ -133,7 +137,8 @@ public class Groups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    render("@edit", office);
+    List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+    render("@edit", office, peopleForGroups);
   }
   
   //  public static void manageGroup() {

@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.ContractMonthRecap;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QContractMonthRecap is a Querydsl query type for ContractMonthRecap
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
 
     private static final long serialVersionUID = 2028405493L;
@@ -107,18 +107,18 @@ public class QContractMonthRecap extends EntityPathBase<ContractMonthRecap> {
     }
 
     public QContractMonthRecap(Path<? extends ContractMonthRecap> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QContractMonthRecap(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QContractMonthRecap(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QContractMonthRecap(PathMetadata<?> metadata, PathInits inits) {
+    public QContractMonthRecap(PathMetadata metadata, PathInits inits) {
         this(ContractMonthRecap.class, metadata, inits);
     }
 
-    public QContractMonthRecap(Class<? extends ContractMonthRecap> type, PathMetadata<?> metadata, PathInits inits) {
+    public QContractMonthRecap(Class<? extends ContractMonthRecap> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
     }

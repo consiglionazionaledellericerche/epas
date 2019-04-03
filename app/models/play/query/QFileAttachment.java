@@ -1,20 +1,20 @@
-package play.db.jpa.query;
+package models.play.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import play.db.jpa.FileAttachment;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QFileAttachment is a Querydsl query type for FileAttachment
  */
-@Generated("com.mysema.query.codegen.EmbeddableSerializer")
+@Generated("com.querydsl.codegen.EmbeddableSerializer")
 public class QFileAttachment extends BeanPath<FileAttachment> {
 
     private static final long serialVersionUID = -1147555192L;
@@ -31,7 +31,7 @@ public class QFileAttachment extends BeanPath<FileAttachment> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QFileAttachment(PathMetadata<?> metadata) {
+    public QFileAttachment(PathMetadata metadata) {
         super(FileAttachment.class, metadata);
     }
 

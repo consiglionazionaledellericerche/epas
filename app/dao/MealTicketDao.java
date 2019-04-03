@@ -3,27 +3,19 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
-import injection.StaticInject;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
-
 import models.Contract;
 import models.MealTicket;
 import models.Office;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -42,16 +34,15 @@ public class MealTicketDao extends DaoBase {
    * @param code codice del buono pasto
    * @return il mealTicket corrispondente al codice code e alla sede office passati come parametro.
    */
-  
+
   public MealTicket getMealTicketByCode(String code) {
 
-    QMealTicket mealTicket = QMealTicket.mealTicket;
+    final QMealTicket mealTicket = QMealTicket.mealTicket;
 
-    final JPQLQuery query = getQueryFactory()
-        .from(mealTicket)
-        .where(mealTicket.code.eq(code));
-
-    return query.singleResult(mealTicket);
+    return getQueryFactory()
+        .selectFrom(mealTicket)
+        .where(mealTicket.code.eq(code))
+        .fetchOne();
   }
 
 
@@ -61,7 +52,7 @@ public class MealTicketDao extends DaoBase {
    *
    * @param contract contratto
    * @param interval intervallo
-   * @param order    ordinamento
+   * @param order ordinamento
    * @param returned se voglio quelli riconsegnati o quelli disponibili
    */
   public List<MealTicket> contractMealTickets(Contract contract, Optional<DateInterval> interval,
@@ -83,17 +74,17 @@ public class MealTicketDao extends DaoBase {
       condition.and(mealTicket.date.between(interval.get().getBegin(), interval.get().getEnd()));
     }
 
-    final JPQLQuery query = getQueryFactory().from(mealTicket).where(condition);
+    final JPQLQuery<MealTicket> query = getQueryFactory().selectFrom(mealTicket).where(condition);
 
-    if (order.equals(MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC)) {
+    if (order == MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC) {
       query.orderBy(mealTicket.expireDate.asc());
-    } else if (order.equals(MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC)) {
+    } else if (order == MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC) {
       query.orderBy(mealTicket.date.desc());
     }
 
     query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc());
 
-    return query.list(mealTicket);
+    return query.fetch();
   }
 
   /**
@@ -109,23 +100,13 @@ public class MealTicketDao extends DaoBase {
     final QPerson qp = QPerson.person;
     final QContract qc = QContract.contract;
 
-    final JPQLQuery query = getQueryFactory()
+    return getQueryFactory().select(qmt.expireDate)
         .from(qmt)
         .leftJoin(qmt.contract, qc)
         .leftJoin(qc.person, qp)
         .where(qp.office.id.eq(office.id))
         .groupBy(qmt.expireDate)
-        .orderBy(qmt.expireDate.desc());
-
-    List<LocalDate> date = query.list(qmt.expireDate);
-
-    if (date.size() == 0) {
-      return null;
-    }
-
-    return date.get(0);
-
-    //FIXME trovare un modo di selezionare solo il primo elemento
+        .orderBy(qmt.expireDate.desc()).fetchFirst();
   }
 
   /**
@@ -133,32 +114,31 @@ public class MealTicketDao extends DaoBase {
    * per codice asc. Se contract presente i soli associati a quel contratto.
    *
    * @param codeBlock il codice del blocco.
-   * @param contract  contratto
+   * @param contract contratto
    * @return la lista dei meal tickets nel blocco.
    */
   public List<MealTicket> getMealTicketsInCodeBlock(String codeBlock, Optional<Contract> contract) {
 
     final QMealTicket mealTicket = QMealTicket.mealTicket;
-
-    final JPQLQuery query = getQueryFactory()
-        .from(mealTicket)
-        .where(mealTicket.block.eq(codeBlock));
+    BooleanBuilder condition = new BooleanBuilder().and(
+        mealTicket.block.eq(codeBlock));
 
     if (contract.isPresent()) {
-      query.where(mealTicket.contract.eq(contract.get()));
+      condition.and(mealTicket.contract.eq(contract.get()));
     }
 
-    query.orderBy(mealTicket.code.asc());
-
-    return query.list(mealTicket);
-
+    return getQueryFactory()
+        .selectFrom(mealTicket)
+        .where(condition)
+        .orderBy(mealTicket.code.asc())
+        .fetch();
   }
 
   /**
    * I buoni pasto che matchano il codice passato. Se office presente i soli appartenti a contratti
    * di quell'office.
    *
-   * @param code   codice match
+   * @param code codice match
    * @param office sede
    * @return elenco
    */
@@ -168,8 +148,8 @@ public class MealTicketDao extends DaoBase {
     QContract contract = QContract.contract;
     QPerson person = QPerson.person;
 
-    final JPQLQuery query = getQueryFactory()
-        .from(mealTicket);
+    final JPQLQuery<MealTicket> query = getQueryFactory()
+        .selectFrom(mealTicket);
 
     if (office.isPresent()) {
       query.leftJoin(mealTicket.contract, contract);
@@ -181,9 +161,7 @@ public class MealTicketDao extends DaoBase {
       query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(true)));
     }
 
-    query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc());
-
-    return query.list(mealTicket);
+    return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();
 
   }
 

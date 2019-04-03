@@ -3,9 +3,8 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -47,8 +46,8 @@ public class CompetenceDao extends DaoBase {
 
     final QCompetence competence = QCompetence.competence;
 
-    return getQueryFactory().from(competence)
-        .where(competence.id.eq(id)).singleResult(competence);
+    return getQueryFactory().selectFrom(competence)
+        .where(competence.id.eq(id)).fetchOne();
   }
 
   /**
@@ -59,18 +58,18 @@ public class CompetenceDao extends DaoBase {
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
 
-    return getQueryFactory().from(competenceCode)
-        .leftJoin(competenceCode.personCompetenceCodes, pcc).fetch()
+    return getQueryFactory().selectFrom(competenceCode)
+        .leftJoin(competenceCode.personCompetenceCodes, pcc).fetchJoin()
         .where(pcc.person.office.eq(office)
             .and(pcc.beginDate.loe(date)
                 .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
         .orderBy(competenceCode.code.asc())
-        .distinct().list(competenceCode);
+        .distinct().fetch();
   }
 
   /**
    * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year e
-   *        al mese month per la persona person.
+   * al mese month per la persona person.
    */
   public List<Competence> getCompetences(
       Optional<Person> person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
@@ -85,29 +84,28 @@ public class CompetenceDao extends DaoBase {
     if (person.isPresent()) {
       condition.and(competence.person.eq(person.get()));
     }
-    final JPQLQuery query = getQueryFactory().from(competence)
-        .leftJoin(competence.competenceCode).fetch()
-        .where(condition);
-
-    return query.list(competence);
+    return getQueryFactory().selectFrom(competence)
+        .leftJoin(competence.competenceCode).fetchJoin()
+        .where(condition)
+        .fetch();
   }
 
   /**
    * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la
-   *        persona person.
+   * persona person.
    */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
 
     final QCompetence competence = QCompetence.competence;
 
-    final JPQLQuery query = getQueryFactory().from(competence)
+    final Competence result = getQueryFactory().selectFrom(competence)
         .where(competence.person.eq(person)
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)
-                    .and(competence.competenceCode.eq(code)))));
+                    .and(competence.competenceCode.eq(code))))).fetchOne();
 
-    return Optional.fromNullable(query.singleResult(competence));
+    return Optional.fromNullable(result);
 
   }
 
@@ -138,8 +136,8 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.month.eq(month));
     }
 
-    return getQueryFactory().from(competence)
-        .where(condition).list(competence);
+    return getQueryFactory().selectFrom(competence)
+        .where(condition).fetch();
   }
 
   /**
@@ -157,14 +155,14 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.person.office.eq(office.get()));
     }
 
-    return getQueryFactory().from(competence)
+    return getQueryFactory().selectFrom(competence)
         .where(condition).orderBy(competence.competenceCode.code.asc())
-        .list(competence);
+        .fetch();
   }
 
   /**
    * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di
-   *        straordinario (sommando i codici S1 S2 e S3).
+   * straordinario (sommando i codici S1 S2 e S3).
    */
   public Optional<Integer> valueOvertimeApprovedByMonthAndYear(
       Integer year, Optional<Integer> month, Optional<Person> person,
@@ -179,20 +177,21 @@ public class CompetenceDao extends DaoBase {
     if (person.isPresent()) {
       condition.and(competence.person.eq(person.get()));
     }
-    final JPQLQuery query =
-        getQueryFactory()
+    final Integer result =
+        getQueryFactory().select(competence.valueApproved.sum())
             .from(competence)
             .where(condition.and(competence.year.eq(year)
-                .and(competence.competenceCode.in(codeList))));
+                .and(competence.competenceCode.in(codeList))))
+            .fetchOne();
 
-    return Optional.fromNullable(query.singleResult(competence.valueApproved.sum()));
+    return Optional.fromNullable(result);
 
   }
 
 
   /**
    * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che
-   *        abbiano un valore approvato > 0.
+   * abbiano un valore approvato > 0.
    */
   public List<Competence> getAllCompetenceForPerson(Person person, Integer year, Integer month) {
     return competenceInMonth(person, year, month, Optional.<List<String>>absent());
@@ -213,8 +212,8 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.competenceCode.code.in(codes.get()));
     }
 
-    return getQueryFactory().from(competence)
-        .where(condition).list(competence);
+    return getQueryFactory().selectFrom(competence)
+        .where(condition).fetch();
   }
 
   /**
@@ -234,7 +233,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * @return la lista di competenze relative all'anno year, al mese month e al codice code di
-   *     persone che hanno reperibilità di tipo type associata.
+   * persone che hanno reperibilità di tipo type associata.
    */
   public List<Competence> getCompetenceInReperibility(
       PersonReperibilityType type, int year, int month, CompetenceCode code) {
@@ -243,7 +242,7 @@ public class CompetenceDao extends DaoBase {
     final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     final QPersonReperibility rep = QPersonReperibility.personReperibility;
 
-    JPQLQuery query = getQueryFactory().from(competence)
+    return getQueryFactory().selectFrom(competence)
         .leftJoin(competence.person, person)
         .leftJoin(person.reperibility, rep)
         .leftJoin(rep.personReperibilityType, prt)
@@ -251,9 +250,7 @@ public class CompetenceDao extends DaoBase {
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)
                     .and(competence.competenceCode.eq(code)))))
-        .orderBy(competence.person.surname.asc());
-
-    return query.list(competence);
+        .orderBy(competence.person.surname.asc()).fetch();
   }
 
 
@@ -263,7 +260,7 @@ public class CompetenceDao extends DaoBase {
   public Competence getLastPersonCompetenceInYear(
       Person person, int year, int month, CompetenceCode competenceCode) {
     final QCompetence com = QCompetence.competence;
-    return getQueryFactory().from(com)
+    return getQueryFactory().selectFrom(com)
         .where(
             com.person.eq(person)
                 .and(com.year.eq(year))
@@ -272,8 +269,7 @@ public class CompetenceDao extends DaoBase {
         )
         .orderBy(com.month.desc())
         .limit(1)
-        .uniqueResult(com);
-
+        .fetchOne();
   }
 
   /**
@@ -282,8 +278,7 @@ public class CompetenceDao extends DaoBase {
    */
   public List<Competence> findCompetence(CompetenceCode code) {
     final QCompetence comp = QCompetence.competence;
-    final JPQLQuery query = getQueryFactory().from(comp).where(comp.competenceCode.eq(code));
-    return query.list(comp);
+    return getQueryFactory().selectFrom(comp).where(comp.competenceCode.eq(code)).fetch();
   }
 
 
@@ -293,9 +288,9 @@ public class CompetenceDao extends DaoBase {
   public List<TotalOvertime> getTotalOvertime(Integer year, Office office) {
     final QTotalOvertime totalOvertime = QTotalOvertime.totalOvertime;
 
-    return getQueryFactory().from(totalOvertime)
+    return getQueryFactory().selectFrom(totalOvertime)
         .where(totalOvertime.year.eq(year).and(totalOvertime.office.eq(office)))
-        .list(totalOvertime);
+        .fetch();
   }
 
   /**
@@ -306,9 +301,9 @@ public class CompetenceDao extends DaoBase {
     final QPersonHourForOvertime personHourForOvertime =
         QPersonHourForOvertime.personHourForOvertime;
 
-    return getQueryFactory().from(personHourForOvertime)
+    return getQueryFactory().selectFrom(personHourForOvertime)
         .where(personHourForOvertime.person.eq(person))
-        .singleResult(personHourForOvertime);
+        .fetchOne();
   }
 
 }

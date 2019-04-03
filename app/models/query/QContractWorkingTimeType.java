@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.ContractWorkingTimeType;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QContractWorkingTimeType is a Querydsl query type for ContractWorkingTimeType
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTimeType> {
 
     private static final long serialVersionUID = 162260706L;
@@ -53,18 +53,18 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
     }
 
     public QContractWorkingTimeType(Path<? extends ContractWorkingTimeType> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QContractWorkingTimeType(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QContractWorkingTimeType(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QContractWorkingTimeType(PathMetadata<?> metadata, PathInits inits) {
+    public QContractWorkingTimeType(PathMetadata metadata, PathInits inits) {
         this(ContractWorkingTimeType.class, metadata, inits);
     }
 
-    public QContractWorkingTimeType(Class<? extends ContractWorkingTimeType> type, PathMetadata<?> metadata, PathInits inits) {
+    public QContractWorkingTimeType(Class<? extends ContractWorkingTimeType> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
         this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType"), inits.get("workingTimeType")) : null;

@@ -3,29 +3,25 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.jpa.impl.JPAQueryFactory;
-
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
+import lombok.val;
 import models.ConfGeneral;
 import models.Office;
 import models.enumerate.Parameter;
 import models.query.QConfGeneral;
-
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-
 import play.cache.Cache;
 
 /**
  * Da eliminare quando è stata applicata la migrazione in tutte le installazioni.
- * @author alessandro
  *
+ * @author alessandro
  */
 @Deprecated
 public class ConfGeneralManager {
@@ -46,9 +42,11 @@ public class ConfGeneralManager {
     final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 
     final JPQLQuery query = queryFactory.from(confGeneral)
-            .where(confGeneral.id.eq(pk));
+        .where(confGeneral.id.eq(pk));
 
-    return Optional.fromNullable(query.singleResult(confGeneral));
+    val conf = (ConfGeneral) query.select(confGeneral).fetchOne();
+
+    return Optional.fromNullable(conf);
   }
 
 
@@ -60,27 +58,29 @@ public class ConfGeneralManager {
     final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 
     final JPQLQuery query = queryFactory.from(confGeneral)
-            .where(confGeneral.field.eq(param.description).and(confGeneral.office.eq(office)));
+        .where(confGeneral.field.eq(param.description).and(confGeneral.office.eq(office)));
 
-    return Optional.fromNullable(query.singleResult(confGeneral));
+    val conf = (ConfGeneral) query.select(confGeneral).fetchOne();
+
+    return Optional.fromNullable(conf);
   }
 
   /**
    * @return restituisce la lista di tutti i confGeneral che nel parametro field, contengono il
-   *     valore value.
+   * valore value.
    */
   public List<ConfGeneral> containsValue(String field, String value) {
 
     final QConfGeneral confGeneral = QConfGeneral.confGeneral;
 
-    return queryFactory.from(confGeneral).where(confGeneral.field.eq(field)
-            .and(confGeneral.fieldValue.contains(value))).list(confGeneral);
+    return (List<ConfGeneral>) queryFactory.from(confGeneral).where(confGeneral.field.eq(field)
+        .and(confGeneral.fieldValue.contains(value))).fetch();
 
   }
 
   /**
-   * Produce la configurazione generale di default.
-   * Se overwrite è false mantiene senza sovrascrivere eventuali parametri generali preesitenti.
+   * Produce la configurazione generale di default. Se overwrite è false mantiene senza
+   * sovrascrivere eventuali parametri generali preesitenti.
    */
   public void buildOfficeConfGeneral(Office office, boolean overwrite) {
 
@@ -101,8 +101,7 @@ public class ConfGeneralManager {
 
   /**
    * Aggiorna il parametro di configurazione relativo all'office. Se value non è presente viene
-   * persistito il valore di default.
-   * Il valore precedente se presente viene sovrascritto.
+   * persistito il valore di default. Il valore precedente se presente viene sovrascritto.
    */
   public ConfGeneral saveConfGeneral(Parameter param, Office office, Optional<String> value) {
     // Il valore passato o in alternativa il valore di default
@@ -111,7 +110,7 @@ public class ConfGeneralManager {
 
     // Prelevo quella esistente se esiste, altrimenti ne creo una nuova
     ConfGeneral confGeneral = getByField(param, office)
-            .or(new ConfGeneral(office, param.description, newValue));
+        .or(new ConfGeneral(office, param.description, newValue));
 
     confGeneral.fieldValue = newValue;
     confGeneral.save();

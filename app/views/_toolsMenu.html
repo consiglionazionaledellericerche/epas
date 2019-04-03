@@ -5,6 +5,7 @@
   'Administration.playConfiguration',
   'Synchronizations.institutes',
   'Synchronizations.people',
+  'Synchronizations.badges',
   'AbsenceGroups.certificationsAbsenceCodes',
   'AbsenceGroups.certificationsAbsences'] /}
 
@@ -40,6 +41,10 @@
 
       #{secure.li @Synchronizations.people(session.get("officeSelected")) }
       <i class="fa fa-refresh" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Synchronizations.badges(session.get("officeSelected")) }
+        <i class="fa fa-refresh" aria-hidden="true"></i>
       #{/secure.li}
       
       #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }

@@ -2,9 +2,8 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -45,77 +44,70 @@ public class ShiftDao extends DaoBase {
    */
   public ShiftType getShiftTypeByType(String type) {
     final QShiftType shiftType = QShiftType.shiftType;
-    JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.type.eq(type));
-    return query.singleResult(shiftType);
+    return getQueryFactory().selectFrom(shiftType).where(shiftType.type.eq(type)).fetchOne();
   }
 
   /**
-   * 
    * @param id l'identificativo numerico dell'attività sul turno
    * @return l'attività del servizio.
    */
   public Optional<ShiftType> getShiftTypeById(Long id) {
     final QShiftType shiftType = QShiftType.shiftType;
-    JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.id.eq(id));
-    return Optional.fromNullable(query.singleResult(shiftType));
+    final ShiftType result = getQueryFactory().selectFrom(shiftType)
+        .where(shiftType.id.eq(id)).fetchOne();
+    return Optional.fromNullable(result);
   }
-  
+
   /**
-   * 
    * @param id l'id della timeTable che si intende ritornare
    * @return la timeTable per i turni da associare al servizio.
    */
   public PersonShiftDay getPersonShiftDayById(Long id) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
-    JPQLQuery query = getQueryFactory().from(psd).where(psd.id.eq(id));
-    return query.singleResult(psd);
+    return getQueryFactory().selectFrom(psd).where(psd.id.eq(id)).fetchOne();
   }
-  
+
   /**
    * @return la lista dei personShiftDay con ShiftType 'type' presenti nel periodo tra 'begin' e
-   *     'to'.
+   * 'to'.
    */
   public List<PersonShiftDay> getShiftDaysByPeriodAndType(
       LocalDate begin, LocalDate to, ShiftType type) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
-    JPQLQuery query = getQueryFactory().from(psd)
-            .where(psd.date.between(begin, to)
-                    .and(psd.shiftType.eq(type))).orderBy(psd.shiftSlot.asc(), psd.date.asc());
-    return query.list(psd);
+    return getQueryFactory().selectFrom(psd)
+        .where(psd.date.between(begin, to)
+            .and(psd.shiftType.eq(type))).orderBy(psd.shiftSlot.asc(), psd.date.asc())
+        .fetch();
   }
 
   /**
-   * @author arianna
-   *
    * @return la lista dei 'personShiftDay' della persona 'person' di tipo 'type' presenti nel
-   *     periodo tra 'begin' e 'to'.
+   * periodo tra 'begin' e 'to'.
+   * @author arianna
    */
   public List<PersonShiftDay> getPersonShiftDaysByPeriodAndType(
       LocalDate begin, LocalDate to, ShiftType type, Person person) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
-    JPQLQuery query = getQueryFactory().from(psd)
-            .where(psd.date.between(begin, to)
-                    .and(psd.shiftType.eq(type))
-                    .and(psd.personShift.person.eq(person))
-            )
-            .orderBy(psd.shiftSlot.asc(), psd.date.asc());
-    return query.list(psd);
+    return getQueryFactory().selectFrom(psd)
+        .where(psd.date.between(begin, to)
+            .and(psd.shiftType.eq(type))
+            .and(psd.personShift.person.eq(person)))
+        .orderBy(psd.shiftSlot.asc(), psd.date.asc())
+        .fetch();
   }
 
 
   /**
+   * @return la lista dei turni cancellati relativi al tipo 'type' nel periodo compreso tra 'from' e
+   * 'to'.
    * @author arianna
-   * 
-   * @return la lista dei turni cancellati relativi al tipo 'type' nel periodo compreso tra 'from'
-   *     e 'to'.
    */
   public List<ShiftCancelled> getShiftCancelledByPeriodAndType(
       LocalDate from, LocalDate to, ShiftType type) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
-    JPQLQuery query =
-        getQueryFactory().from(sc)
-          .where(sc.date.between(from, to).and(sc.type.eq(type))).orderBy(sc.date.asc());
-    return query.list(sc);
+    return getQueryFactory().selectFrom(sc)
+        .where(sc.date.between(from, to).and(sc.type.eq(type))).orderBy(sc.date.asc())
+        .fetch();
   }
 
   /**
@@ -123,8 +115,7 @@ public class ShiftDao extends DaoBase {
    */
   public ShiftCancelled getShiftCancelled(LocalDate day, ShiftType type) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
-    JPQLQuery query = getQueryFactory().from(sc).where(sc.date.eq(day).and(sc.type.eq(type)));
-    return query.singleResult(sc);
+    return getQueryFactory().selectFrom(sc).where(sc.date.eq(day).and(sc.type.eq(type))).fetchOne();
   }
 
   /**
@@ -134,11 +125,11 @@ public class ShiftDao extends DaoBase {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
     return getQueryFactory().delete(sc).where(sc.date.eq(day).and(sc.type.eq(type))).execute();
   }
-  
+
   /**
    * @return il quantitativo di turni effettivamente cancellati.
    */
-  public Long deletePersonShiftDay(PersonShiftDay personShiftDay) {  
+  public Long deletePersonShiftDay(PersonShiftDay personShiftDay) {
 
     final QPersonShiftDay sc = QPersonShiftDay.personShiftDay;
     return getQueryFactory().delete(sc)
@@ -155,191 +146,164 @@ public class ShiftDao extends DaoBase {
   public PersonShift getPersonShiftByPersonAndType(Long personId, String type) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
 
-    JPQLQuery query = getQueryFactory().from(psst).where(
-            psst.personShift.person.id.eq(personId)
-                    .and(psst.shiftType.type.eq(type))
-                    .and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())))
-                    .and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))
-    );
-    return query.singleResult(psst.personShift);
+    return getQueryFactory().select(psst.personShift).from(psst)
+        .where(psst.personShift.person.id.eq(personId)
+            .and(psst.shiftType.type.eq(type))
+            .and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())))
+            .and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))
+        ).fetchOne();
   }
 
   /**
-   * 
    * @param office la sede di cui si vogliono le persone che stanno in turno
-   * @return la lista dei personShift con persone che appartengono all'ufficio 
-   *     passato come parametro. 
+   * @return la lista dei personShift con persone che appartengono all'ufficio passato come
+   * parametro.
    */
   public List<PersonShift> getPeopleForShift(Office office, LocalDate date) {
     final QPersonShift ps = QPersonShift.personShift;
     final QPerson person = QPerson.person;
-    JPQLQuery query = getQueryFactory().from(person)
+    return getQueryFactory().select(ps).from(person)
         .leftJoin(person.personShifts, ps).fetchAll()
         .where(person.office.eq(office)
             .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
-            .and(person.eq(ps.person).and(ps.disabled.eq(false))));
-    return query.list(ps);
+            .and(person.eq(ps.person).and(ps.disabled.eq(false)))).fetch();
   }
 
   /**
-   * 
    * @param id l'id del personShift
    * @return il personShift associato all'id passato come parametro.
    */
   public PersonShift getPersonShiftById(Long id) {
     final QPersonShift ps = QPersonShift.personShift;
-    JPQLQuery query = getQueryFactory().from(ps).where(ps.id.eq(id));
-    return query.singleResult(ps);        
+    return getQueryFactory().selectFrom(ps).where(ps.id.eq(id)).fetchOne();
   }
-  
-  /**
-   * @author arianna
 
+  /**
    * @return la categoria associata al tipo di turno.
-   *
+   * @author arianna
    */
   public ShiftCategories getShiftCategoryByType(String type) {
     final QShiftType st = QShiftType.shiftType;
 
-    JPQLQuery query = getQueryFactory().from(st)
-            .where(st.type.eq(type));
-    return query.singleResult(st.shiftCategories);
+    return getQueryFactory().select(st.shiftCategories).from(st)
+        .where(st.type.eq(type)).fetchOne();
   }
-  
+
   /**
-   * 
    * @param office l'ufficio per cui si chiede la lista dei servizi
    * @param isActive se passato, controlla solo i servizi attivi
    * @return la lista dei servizi per cui è stato attivato il turno.
    */
-  public List<ShiftCategories> getAllCategoriesByOffice(Office office, 
+  public List<ShiftCategories> getAllCategoriesByOffice(Office office,
       Optional<Boolean> isActive) {
-    QShiftCategories sc = QShiftCategories.shiftCategories;
+    final QShiftCategories sc = QShiftCategories.shiftCategories;
     BooleanBuilder condition = new BooleanBuilder();
     if (isActive.isPresent()) {
       condition.and(sc.disabled.eq(isActive.get()));
     }
-    JPQLQuery query = getQueryFactory().from(sc).where(sc.office.eq(office).and(condition));
-    return query.list(sc);
+    return getQueryFactory().selectFrom(sc).where(sc.office.eq(office).and(condition)).fetch();
   }
-  
+
   /**
-   * 
    * @param id l'identificativo del turno
    * @return la categoria di turno corrispondente all'id passato come parametro.
    */
   public ShiftCategories getShiftCategoryById(Long id) {
     final QShiftCategories sc = QShiftCategories.shiftCategories;
 
-    JPQLQuery query = getQueryFactory().from(sc)
-            .where(sc.id.eq(id));
-    return query.singleResult(sc.shiftCategories);
-
+    return getQueryFactory().selectFrom(sc)
+        .where(sc.id.eq(id)).fetchOne();
   }
-  
+
   /**
-   * 
    * @param person il supervisore di cui si vuol sapere i turni
    * @return la lista dei turni in cui person è supervisore.
    */
   public List<ShiftCategories> getCategoriesBySupervisor(Person person) {
     final QShiftCategories sc = QShiftCategories.shiftCategories;
-    JPQLQuery query = getQueryFactory().from(sc).where(sc.supervisor.eq(person));
-    return query.list(sc);
+    return getQueryFactory().selectFrom(sc).where(sc.supervisor.eq(person)).fetch();
   }
-  
-  
+
+
   /**
-   * 
-   * @param sc la categoria di turno 
+   * @param sc la categoria di turno
    * @return la lista dei tipi turno associati alla categoria passata come parametro.
    */
   public List<ShiftType> getTypesByCategory(ShiftCategories sc) {
     final QShiftType shiftType = QShiftType.shiftType;
-    JPQLQuery query = getQueryFactory().from(shiftType).where(shiftType.shiftCategories.eq(sc));
-    return query.list(shiftType);
+    return getQueryFactory().selectFrom(shiftType).where(shiftType.shiftCategories.eq(sc))
+        .fetch();
   }
 
   /**
-   * 
    * @return la lista di tutti i tipi di turno disponibili in anagrafica.
    */
   public List<ShiftTimeTable> getAllShifts(Office office) {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
-    JPQLQuery query = 
-        getQueryFactory().from(stt).where(stt.office.isNull().or(stt.office.eq(office)));
-    return query.list(stt);
+    return getQueryFactory().selectFrom(stt).where(stt.office.isNull().or(stt.office.eq(office)))
+        .fetch();
   }
-  
-  
+
 
   /**
-   * 
    * @param id l'id della timeTable che si intende ritornare
    * @return la timeTable per i turni da associare al servizio.
    */
   public ShiftTimeTable getShiftTimeTableById(Long id) {
     final QShiftTimeTable stt = QShiftTimeTable.shiftTimeTable;
-    JPQLQuery query = getQueryFactory().from(stt).where(stt.id.eq(id));
-    return query.singleResult(stt);
+    return getQueryFactory().selectFrom(stt).where(stt.id.eq(id)).fetchOne();
   }
-  
+
   /**
-   * 
    * @param shiftType l'attività per cui si vogliono le persone associate
-   * @param date se presente, la data in cui si richiede la situazione dei dipendenti 
-   *     associati al turno
+   * @param date se presente, la data in cui si richiede la situazione dei dipendenti associati al
+   * turno
    * @return la lista di persone associate all'attività passata come parametro.
    */
-  public List<PersonShiftShiftType> getAssociatedPeopleToShift(ShiftType shiftType, 
+  public List<PersonShiftShiftType> getAssociatedPeopleToShift(ShiftType shiftType,
       Optional<LocalDate> date) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
     BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(psst.beginDate.loe(date.get())
-          .andAnyOf(psst.endDate.isNull(), 
+          .andAnyOf(psst.endDate.isNull(),
               psst.endDate.gt(date.get())));
 
     }
-    JPQLQuery query = getQueryFactory().from(psst).where(psst.shiftType.eq(shiftType)
-        .and(condition));
-    return query.list(psst);
+    return getQueryFactory().selectFrom(psst).where(psst.shiftType.eq(shiftType)
+        .and(condition)).fetch();
   }
-  
+
   /**
-   * 
    * @param personShift la persona associata al turno
    * @param shiftType l'attività di un servizio di turno
    * @return l'eventuale associazione tra persona e attività di turno se presente.
    */
-  public Optional<PersonShiftShiftType> getByPersonShiftAndShiftType(PersonShift personShift, 
+  public Optional<PersonShiftShiftType> getByPersonShiftAndShiftType(PersonShift personShift,
       ShiftType shiftType) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-    JPQLQuery query = getQueryFactory().from(psst)
+    final PersonShiftShiftType result = getQueryFactory().selectFrom(psst)
         .where(psst.personShift.eq(personShift)
-            .and(psst.shiftType.eq(shiftType)));
-    return Optional.fromNullable(query.singleResult(psst));
+            .and(psst.shiftType.eq(shiftType))).fetchOne();
+    return Optional.fromNullable(result);
   }
-  
 
   public PersonShiftShiftType getById(Long id) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-    JPQLQuery query = getQueryFactory().from(psst)
-        .where(psst.id.eq(id));
-    return query.singleResult(psst);
+    return getQueryFactory().selectFrom(psst)
+        .where(psst.id.eq(id)).fetchOne();
   }
 
   /**
-   * 
    * @return la lista delle associazioni persona/attività relative ai parametri passati.
    */
   public List<PersonShiftShiftType> getByPersonShiftAndDate(
       PersonShift personShift, LocalDate date) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
-    JPQLQuery query = getQueryFactory().from(psst)
+    return getQueryFactory().selectFrom(psst)
         .where(psst.personShift.eq(personShift)
-            .and(psst.beginDate.loe(date).andAnyOf(psst.endDate.isNull(), psst.endDate.goe(date))));
-    return query.list(psst);
+            .and(psst.beginDate.loe(date).andAnyOf(psst.endDate.isNull(), psst.endDate.goe(date))))
+        .fetch();
 
   }
 }

@@ -1,21 +1,21 @@
 package models.base.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.base.Revision;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QRevision is a Querydsl query type for Revision
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QRevision extends EntityPathBase<Revision> {
 
     private static final long serialVersionUID = -1702410764L;
@@ -37,18 +37,18 @@ public class QRevision extends EntityPathBase<Revision> {
     }
 
     public QRevision(Path<? extends Revision> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QRevision(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QRevision(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QRevision(PathMetadata<?> metadata, PathInits inits) {
+    public QRevision(PathMetadata metadata, PathInits inits) {
         this(Revision.class, metadata, inits);
     }
 
-    public QRevision(Class<? extends Revision> type, PathMetadata<?> metadata, PathInits inits) {
+    public QRevision(Class<? extends Revision> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.owner = inits.isInitialized("owner") ? new models.query.QUser(forProperty("owner"), inits.get("owner")) : null;
     }

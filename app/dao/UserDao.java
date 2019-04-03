@@ -4,23 +4,19 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
-
-import lombok.val;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import lombok.val;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.Role;
@@ -50,9 +46,8 @@ public class UserDao extends DaoBase {
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
-    final JPQLQuery query = getQueryFactory().from(user)
-        .where(condition.and(user.id.eq(id)));
-    return query.singleResult(user);
+    return getQueryFactory().selectFrom(user)
+        .where(condition.and(user.id.eq(id))).fetchOne();
   }
 
   /**
@@ -60,9 +55,8 @@ public class UserDao extends DaoBase {
    */
   public User getUserByRecoveryToken(String recoveryToken) {
     final QUser user = QUser.user;
-    final JPQLQuery query = getQueryFactory().from(user)
-        .where(user.recoveryToken.eq(recoveryToken));
-    return query.singleResult(user);
+    return getQueryFactory().selectFrom(user)
+        .where(user.recoveryToken.eq(recoveryToken)).fetchOne();
   }
 
   /**
@@ -77,9 +71,8 @@ public class UserDao extends DaoBase {
     if (password.isPresent()) {
       condition.and(user.password.eq(password.get()));
     }
-    final JPQLQuery query = getQueryFactory().from(user)
-        .where(condition.and(user.username.eq(username)));
-    return query.singleResult(user);
+    return getQueryFactory().selectFrom(user)
+        .where(condition.and(user.username.eq(username))).fetchOne();
   }
 
   public User byUsername(String username) {
@@ -88,6 +81,7 @@ public class UserDao extends DaoBase {
 
   /**
    * Tutti gli username già presenti che contengono il pattern all'interno del proprio username.
+   *
    * @param pattern pattern
    * @return list
    */
@@ -95,12 +89,13 @@ public class UserDao extends DaoBase {
     Preconditions.checkState(!Strings.isNullOrEmpty(pattern));
     final QUser user = QUser.user;
 
-    return getQueryFactory().from(user).where(user.username.contains(pattern)).list(user.username);
+    return getQueryFactory().select(user.username).from(user)
+        .where(user.username.contains(pattern)).fetch();
   }
 
   /**
-   * @param name       Filtro sul nome
-   * @param offices    Gli uffici che hanno qualche tipo di relazione con gli user restituiti
+   * @param name Filtro sul nome
+   * @param offices Gli uffici che hanno qualche tipo di relazione con gli user restituiti
    * @param onlyEnable filtra solo sugli utenti abilitati
    * @return una lista di utenti.
    */
@@ -126,8 +121,8 @@ public class UserDao extends DaoBase {
       condition.and(user.disabled.isFalse());
     }
 
-    return ModelQuery.wrap(getQueryFactory().from(user).leftJoin(user.person, person)
-        .leftJoin(user.badgeReader, badgeReader)
+    return ModelQuery.wrap(getQueryFactory().selectFrom(user).leftJoin(user.person, person)
+        .leftJoin(user.badgeReaders, badgeReader)
         .where(condition).orderBy(user.username.asc()), user);
   }
 
@@ -149,9 +144,9 @@ public class UserDao extends DaoBase {
       condition.and(matchUserName(user, name.get()));
     }
 
-    return ModelQuery.wrap(getQueryFactory().from(user)
+    return ModelQuery.wrap(getQueryFactory().selectFrom(user)
         .leftJoin(user.person, person)
-        .leftJoin(user.badgeReader, badgeReader)
+        .leftJoin(user.badgeReaders, badgeReader)
         .where(condition)
         .orderBy(user.username.asc()), user);
   }
@@ -167,6 +162,7 @@ public class UserDao extends DaoBase {
 
   /**
    * Ritorna true se l'user è di sistema oppure è amministatore: responsabile, personale, tecnico.
+   *
    * @param user user
    * @return esito
    */
@@ -174,62 +170,63 @@ public class UserDao extends DaoBase {
     Preconditions.checkNotNull(user);
 
     return user.isSystemUser()
-        || user.hasRoles(Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN, 
-            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
+        || user.hasRoles(Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN,
+        Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
   }
 
   /**
-   * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti 
-   * di amministrazione potranno usufruire della sola causale lavoro fuori sede.
+   * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti di
+   * amministrazione potranno usufruire della sola causale lavoro fuori sede.
+   *
    * @param user user
    * @return list
    */
   public static List<StampTypes> getAllowedStampTypes(final User user) {
 
-    if (user.isSystemUser()){
+    if (user.isSystemUser()) {
       return StampTypes.onlyActive();
     }
     val stampTypes = Lists.<StampTypes>newArrayList();
-    if (user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, 
+    if (user.hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI,
         Role.TECHNICAL_ADMIN)) {
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
     }
-    if ((user.person.qualification.qualification <= 3 
-        && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true"))) {
+    if (user.person.qualification.qualification <= 3
+        && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
 
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
-    } 
-    if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+    }
+    if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true")
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
     }
 
     return stampTypes;
   }
-  
+
   /**
    * Gli utenti con almeno uno dei ruoli passati nella lista all'interno dell'office.
+   *
    * @param office ufficio del quale restituire gli utenti
    * @param roles ruoli da considerare
    * @return La lista degli utenti con i ruoli specificati nell'ufficio passato come parametro
    */
   public List<User> getUsersWithRoles(final Office office, String... roles) {
-       
+
     return office.usersRolesOffices.stream()
         .filter(uro -> Arrays.asList(roles).contains(uro.role.name))
         .map(uro -> uro.user).distinct().collect(Collectors.toList());
   }
 
   /**
-   * 
    * @param accountRole il ruolo di sistema per cui richiedere l'utente
    * @return l'utente, se esiste, con associato il ruolo di sistema accountRole.
    */
   public User getSystemUserByRole(AccountRole accountRole) {
     final QUser user = QUser.user;
-        
-    JPQLQuery query = getQueryFactory().from(user).where(user.roles.any().eq(accountRole)).limit(1);
-    return query.singleResult(user);
+
+    return getQueryFactory().selectFrom(user).where(user.roles.any().eq(accountRole))
+        .limit(1).fetchOne();
   }
 
 }

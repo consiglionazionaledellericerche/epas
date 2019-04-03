@@ -16,8 +16,8 @@
   #{f.input 'group.name', required:true /}
   #{f.input 'group.description' /}
   #{f.hidden 'office.id' /}  
-  #{f.selectModel 'group.manager', items: templateUtility.peopleForGroups(office), required:true /}
-  #{f.selectMultipleModel 'group.people', values: templateUtility.peopleForGroups(office) /}
+  #{f.selectModel 'group.manager', items: peopleForGroups, required:true /}
+  #{f.selectMultipleModel 'group.people', values: peopleForGroups /}
   #{f.booleanRadio 'group.sendFlowsEmail' /}
 
   #{b.buttons center:true}

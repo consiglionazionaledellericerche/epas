@@ -1,20 +1,20 @@
-package play.db.jpa.query;
+package models.play.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import play.db.jpa.GenericModel;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QGenericModel is a Querydsl query type for GenericModel
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QGenericModel extends EntityPathBase<GenericModel> {
 
     private static final long serialVersionUID = 1320149147L;
@@ -37,7 +37,7 @@ public class QGenericModel extends EntityPathBase<GenericModel> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QGenericModel(PathMetadata<?> metadata) {
+    public QGenericModel(PathMetadata metadata) {
         super(GenericModel.class, metadata);
     }
 

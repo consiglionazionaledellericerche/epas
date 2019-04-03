@@ -4,18 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Office;
@@ -26,7 +21,7 @@ import models.query.QUser;
 
 /**
  * Dao per l'accesso alle informazioni dei BadgeReader.
- * 
+ *
  * @author alessandro
  */
 public class BadgeReaderDao extends DaoBase {
@@ -44,9 +39,7 @@ public class BadgeReaderDao extends DaoBase {
   public BadgeReader byId(Long id) {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
-
-    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.id.eq(id));
-    return query.singleResult(badgeReader);
+    return getQueryFactory().selectFrom(badgeReader).where(badgeReader.id.eq(id)).fetchOne();
   }
 
   /**
@@ -55,9 +48,7 @@ public class BadgeReaderDao extends DaoBase {
   public BadgeReader byCode(String code) {
 
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
-
-    final JPQLQuery query = getQueryFactory().from(badgeReader).where(badgeReader.code.eq(code));
-    return query.singleResult(badgeReader);
+    return getQueryFactory().selectFrom(badgeReader).where(badgeReader.code.eq(code)).fetchOne();
   }
 
   /**
@@ -69,16 +60,17 @@ public class BadgeReaderDao extends DaoBase {
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
     final QBadgeSystem qBadgeSystem = QBadgeSystem.badgeSystem;
 
-    JPQLQuery query = getQueryFactory()
-        .from(badgeReader);
+    JPQLQuery<?> query;
 
     final BooleanBuilder condition = new BooleanBuilder();
 
     if (badgeSystem.isPresent()) {
-      query = getQueryFactory()
+      query = getQueryFactory().select(badgeReader)
           .from(qBadgeSystem)
           .rightJoin(qBadgeSystem.badgeReaders, badgeReader);
       condition.and(qBadgeSystem.eq(badgeSystem.get()));
+    } else {
+      query = getQueryFactory().selectFrom(badgeReader);
     }
 
     if (name.isPresent()) {
@@ -106,9 +98,10 @@ public class BadgeReaderDao extends DaoBase {
   public List<User> usersBadgeReader() {
 
     final QUser user = QUser.user;
+    final QBadgeReader badgeReader = QBadgeReader.badgeReader;
 
-    return getQueryFactory().from(user).leftJoin(user.badgeReader)
-        .where(user.badgeReader.isNotNull()).orderBy(user.badgeReader.code.asc()).list(user);
+    return getQueryFactory().select(user).from(badgeReader).leftJoin(badgeReader.user)
+        .where(badgeReader.user.isNotNull()).orderBy(badgeReader.code.asc()).fetch();
   }
 
   /**
@@ -116,9 +109,8 @@ public class BadgeReaderDao extends DaoBase {
    */
   public List<BadgeReader> getBadgeReaderByOffice(Office office) {
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
-    final JPQLQuery query = 
-        getQueryFactory().from(badgeReader).where(badgeReader.user.owner.eq(office));
-    return query.list(badgeReader);
+    return getQueryFactory().selectFrom(badgeReader)
+        .where(badgeReader.user.owner.eq(office)).fetch();
   }
 
 }

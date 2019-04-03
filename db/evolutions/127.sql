@@ -48,11 +48,9 @@ ALTER TABLE person_month_recap RENAME COLUMN toDate TO to_date;
 ALTER TABLE person_reperibility_types_persons RENAME TO person_reperibility_types_managers;
 ALTER TABLE person_reperibility_types_persons_history RENAME TO person_reperibility_types_managers_history;
 
-ALTER TABLE persons RENAME COLUMN iid TO i_id;
 ALTER TABLE persons RENAME COLUMN oldid TO old_id;
 ALTER TABLE persons RENAME COLUMN other_surnames TO others_surnames;
 ALTER TABLE persons RENAME COLUMN person_in_charge TO person_in_charge_id;
-ALTER TABLE persons_history RENAME COLUMN iid TO i_id;
 ALTER TABLE persons_history RENAME COLUMN oldid TO old_id;
 ALTER TABLE persons_history RENAME COLUMN other_surnames TO others_surnames;
 ALTER TABLE persons_history RENAME COLUMN person_in_charge TO person_in_charge_id;

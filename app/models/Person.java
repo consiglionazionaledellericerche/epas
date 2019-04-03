@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,7 +19,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -82,20 +80,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * Numero di matricola.
    */
   @Unique
-  public Integer number;
-
+  public String number;
 
   /**
    * id che questa persona aveva nel vecchio database.
    */
   public Long oldId;
-
-  /**
-   * Internal ID: server per l'identificazione univoca della persona nella sincronizzazione con
-   * Perseo (Person.id di Perseo).
-   */
-  @Unique
-  public Integer iId;
 
   /**
    * Campo da usarsi in caso di autenticazione via shibboleth.
@@ -221,14 +211,13 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
 
   @ManyToMany(mappedBy = "managers")
-  public List<ShiftCategories> categories = Lists.newArrayList(); 
+  public List<ShiftCategories> categories = Lists.newArrayList();
 
   @ManyToMany(mappedBy = "managers")
-  public List<PersonReperibilityType> reperibilities = Lists.newArrayList(); 
+  public List<PersonReperibilityType> reperibilities = Lists.newArrayList();
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<InitializationGroup> initializationGroups;
-
 
 
   public String getName() {
@@ -241,6 +230,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Nome completo della persona.
+   *
    * @return il nome completo.
    */
   public String getFullname() {
@@ -290,6 +280,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Comparatore di persone per fullname e poi id.
+   *
    * @return un Comparator che compara per fullname poi id.
    */
   public static Comparator<Person> personComparator() {
@@ -304,10 +295,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Controlla il valore del parametro indicato.
+   *
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
-   *     indicato
+   * indicato
    */
   public boolean checkConf(EpasParam param, String value) {
     return personConfigurations.stream().filter(conf -> conf.epasParam == param
@@ -315,12 +307,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
-   * Verifica se il mese passato come parametro è successivo all'ultimo mese inviato
-   * con gli attestati.
+   * Verifica se il mese passato come parametro è successivo all'ultimo mese inviato con gli
+   * attestati.
    *
    * @param readablePartial La 'data' da verificare
    * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono
-   *     stati inviati gli attestai per la persona interessata
+   * stati inviati gli attestai per la persona interessata
    */
   public boolean checkLastCertificationDate(final ReadablePartial readablePartial) {
 
@@ -334,20 +326,33 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Associazione tra le zone.
+   *
    * @return la lista delle ZoneToZones associate ai badge della persona.
    */
   public List<ZoneToZones> getZones() {
     return badges.stream().<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
-        .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
+        .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))
         .collect(Collectors.toList());
   }
-  
+
   /**
    * Verifica se è un livello I-III.
+   *
    * @return true se è un livello I-III, false altrimenti.
    */
   @Transient
   public boolean isTopQualification() {
     return qualification != null && qualification.isTopQualification();
   }
+  
+  @Transient
+  public boolean isGroupManager() {
+    return user.hasRoles(Role.GROUP_MANAGER);
+  }
+  
+  @Transient
+  public boolean isSeatSupervisor() {
+    return user.hasRoles(Role.SEAT_SUPERVISOR);
+  }
+
 }

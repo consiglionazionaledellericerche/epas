@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Office;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QOffice is a Querydsl query type for Office
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QOffice extends EntityPathBase<Office> {
 
     private static final long serialVersionUID = -1289700640L;
@@ -50,6 +50,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
 
     public final BooleanPath headQuarter = createBoolean("headQuarter");
 
@@ -93,18 +95,18 @@ public class QOffice extends EntityPathBase<Office> {
     }
 
     public QOffice(Path<? extends Office> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QOffice(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QOffice(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QOffice(PathMetadata<?> metadata, PathInits inits) {
+    public QOffice(PathMetadata metadata, PathInits inits) {
         this(Office.class, metadata, inits);
     }
 
-    public QOffice(Class<? extends Office> type, PathMetadata<?> metadata, PathInits inits) {
+    public QOffice(Class<? extends Office> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.institute = inits.isInitialized("institute") ? new QInstitute(forProperty("institute")) : null;
     }

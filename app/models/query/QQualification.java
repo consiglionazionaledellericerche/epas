@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Qualification;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QQualification is a Querydsl query type for Qualification
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QQualification extends EntityPathBase<Qualification> {
 
     private static final long serialVersionUID = -1883508405L;
@@ -54,7 +54,7 @@ public class QQualification extends EntityPathBase<Qualification> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QQualification(PathMetadata<?> metadata) {
+    public QQualification(PathMetadata metadata) {
         super(Qualification.class, metadata);
     }
 

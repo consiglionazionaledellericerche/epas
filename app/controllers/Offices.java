@@ -2,34 +2,25 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
-
 import helpers.Web;
-
 import javax.inject.Inject;
-
-import manager.OfficeManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationManager;
-
 import models.Institute;
 import models.Office;
 import models.Role;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -38,8 +29,6 @@ public class Offices extends Controller {
   private static final Logger log = LoggerFactory.getLogger(Offices.class);
   @Inject
   static OfficeDao officeDao;
-  @Inject
-  static OfficeManager officeManager;
   @Inject
   static ConfigurationManager configurationManager;
   @Inject
@@ -65,7 +54,7 @@ public class Offices extends Controller {
 
     //la lista di institutes su cui si ha technical admin in almeno un office
 
-    SearchResults<?> results = officeDao.institutes(
+    QueryResults<?> results = officeDao.institutes(
         Optional.<String>fromNullable(name), Optional.absent(), Optional.absent(),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();
@@ -90,7 +79,6 @@ public class Offices extends Controller {
    * @param id dell'istituto da modificare
    */
   public static void edit(Long id) {
-
 
     final Office office = Office.findById(id);
     notFoundIfNull(office);
@@ -134,7 +122,9 @@ public class Offices extends Controller {
         render("@edit", office, wrOffice);
       }
     } else {
-      office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      if (office.beginDate == null) {
+        office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      }
       office.save();
 
       // Configurazione iniziale di default ...

@@ -3,42 +3,33 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.PersonDao;
-
 import helpers.Web;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import manager.BadgeManager;
-
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
-@With({Resecure.class})
+@With(Resecure.class)
 public class BadgeSystems extends Controller {
 
   private static final Logger log = LoggerFactory.getLogger(BadgeSystems.class);
@@ -66,9 +57,9 @@ public class BadgeSystems extends Controller {
    */
   public static void list(String name) {
 
-    SearchResults<?> results =
-        badgeSystemDao.badgeSystems(Optional.<String>fromNullable(name),
-            Optional.<BadgeReader>absent()).listResults();
+    QueryResults<?> results =
+        badgeSystemDao.badgeSystems(Optional.fromNullable(name),
+            Optional.absent()).listResults();
 
     render(results, name);
   }
@@ -77,7 +68,7 @@ public class BadgeSystems extends Controller {
    * @param id identificativo del gruppo badge.
    */
   public static void show(Long id) {
-    final BadgeSystem badgeSystem = BadgeSystem.findById(id);
+    final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
     render(badgeSystem);
   }
@@ -91,7 +82,7 @@ public class BadgeSystems extends Controller {
     notFoundIfNull(badgeSystem);
     rules.checkIfPermitted(badgeSystem.office);
 
-    SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.<String>absent(),
+    QueryResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.absent(),
         Optional.fromNullable(badgeSystem)).listResults();
 
     List<Badge> badges = badgeSystemDao.badges(badgeSystem)
@@ -131,7 +122,6 @@ public class BadgeSystems extends Controller {
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
 
-
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeSystem, validation.errorsMap());
@@ -150,7 +140,7 @@ public class BadgeSystems extends Controller {
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
-    final BadgeSystem badgeSystem = BadgeSystem.findById(id);
+    final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
     rules.checkIfPermitted(badgeSystem.office);
 
@@ -179,7 +169,7 @@ public class BadgeSystems extends Controller {
      * in questa vista che nell'edit della singola persona. (e ovviamente implementare lo stesso
      * controllo anche nella save).
      */
-    List<Person> officePeople = personDao.list(Optional.<String>absent(),
+    List<Person> officePeople = personDao.list(Optional.absent(),
         Sets.newHashSet(badgeSystem.office), false, null, null, false).list();
 
     render("@joinBadges", badgeSystem, officePeople);
@@ -209,15 +199,15 @@ public class BadgeSystems extends Controller {
     rules.checkIfPermitted(badgeSystem.office);
 
     List<Person> activePersons = Lists.newArrayList();
-    if (!validation.hasError("badgeSystem")) {
+    if (!Validation.hasError("badgeSystem")) {
       activePersons =
           personDao.list(
-              Optional.<String>absent(),
+              Optional.absent(),
               Sets.newHashSet(badgeSystem.office), false,
               LocalDate.now(), LocalDate.now(), true).list();
     }
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;
       render("@joinBadges", badgeSystem, code, person, activePersons, personFixed);
     }
@@ -233,7 +223,7 @@ public class BadgeSystems extends Controller {
       badge.badgeSystem = badgeSystem;
       badge.badgeReader = badgeReader;
 
-      Optional<Badge> alreadyExists = alreadyExists(badge);
+      Optional<Badge> alreadyExists = badgeDao.byCode(code, badgeReader);
       if (alreadyExists.isPresent()) {
         if (!alreadyExists.get().person.equals(badge.person)) {
           violatedBadges.add(alreadyExists.get());
@@ -244,7 +234,7 @@ public class BadgeSystems extends Controller {
     }
 
     if (!violatedBadges.isEmpty()) {
-      validation.addError("code", "già assegnato in almeno una sorgente timbrature.");
+      Validation.addError("code", "già assegnato in almeno una sorgente timbrature.");
       response.status = 400;
       render("@joinBadges", badgeSystem, code, person, activePersons, violatedBadges, personFixed);
     }
@@ -259,19 +249,6 @@ public class BadgeSystems extends Controller {
     }
     edit(badgeSystem.id);
   }
-
-  /**
-   * TODO: spostare nel manager o nel wrapper.
-   */
-  public static Optional<Badge> alreadyExists(Badge badge) {
-    Optional<Badge> old = badgeDao.byCode(badge.code, badge.badgeReader);
-    if (!old.isPresent()) {
-      return Optional.<Badge>absent();
-    } else {
-      return old;
-    }
-  }
-
 
 
   /**
@@ -295,11 +272,11 @@ public class BadgeSystems extends Controller {
       for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
         Badge badge = new Badge();
         badge.person = person;
-        badge.code = (person.number + "").replaceFirst("^0+(?!$)", "");
+        badge.code = person.number.replaceFirst("^0+(?!$)", "");
         badge.badgeSystem = badgeSystem;
         badge.badgeReader = badgeReader;
 
-        Optional<Badge> alreadyExists = alreadyExists(badge);
+        Optional<Badge> alreadyExists = badgeDao.byCode(badge.code, badgeReader);
         if (alreadyExists.isPresent()) {
           if (!alreadyExists.get().person.equals(badge.person)) {
             violatedBadges.add(alreadyExists.get());

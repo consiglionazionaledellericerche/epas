@@ -3,18 +3,13 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.types.expr.BooleanExpression;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -22,11 +17,11 @@ import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.query.QWorkingTimeType;
-
 import org.joda.time.LocalDate;
 
 /**
  * Dao per i WorkingTimeType.
+ *
  * @author dario
  */
 public class WorkingTimeTypeDao extends DaoBase {
@@ -35,7 +30,7 @@ public class WorkingTimeTypeDao extends DaoBase {
 
   @Inject
   WorkingTimeTypeDao(JPQLQueryFactory queryFactory,
-                     Provider<EntityManager> emp, ContractDao contractDao) {
+      Provider<EntityManager> emp, ContractDao contractDao) {
     super(queryFactory, emp);
     this.contractDao = contractDao;
   }
@@ -45,19 +40,18 @@ public class WorkingTimeTypeDao extends DaoBase {
    * il tipo orario di default con quella descrizione.
    */
   public WorkingTimeType workingTypeTypeByDescription(String description,
-                                                      Optional<Office> office) {
+      Optional<Office> office) {
 
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+    final BooleanBuilder condition = new BooleanBuilder();
 
     if (office.isPresent()) {
-      return getQueryFactory().from(wtt)
-              .where(wtt.description.eq(description).and(wtt.office.eq(office.get())))
-              .singleResult(wtt);
+      condition.and(wtt.description.eq(description).and(wtt.office.eq(office.get())));
     } else {
-      return getQueryFactory().from(wtt)
-              .where(wtt.description.eq(description).and(wtt.office.isNull()))
-              .singleResult(wtt);
+      condition.and(wtt.description.eq(description).and(wtt.office.isNull()));
     }
+
+    return getQueryFactory().selectFrom(wtt).where(condition).fetchOne();
 
   }
 
@@ -67,8 +61,7 @@ public class WorkingTimeTypeDao extends DaoBase {
    */
   public List<WorkingTimeType> getAllWorkingTimeType() {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    final JPQLQuery query = getQueryFactory().from(wtt);
-    return query.list(wtt);
+    return getQueryFactory().selectFrom(wtt).fetch();
   }
 
   /**
@@ -77,23 +70,21 @@ public class WorkingTimeTypeDao extends DaoBase {
   public List<WorkingTimeType> getEnabledWorkingTimeTypeForOffice(Office office) {
 
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    final JPQLQuery query = getQueryFactory()
-            .from(wtt)
-            .where(wtt.office.isNull().or(
-                BooleanExpression.allOf(wtt.office.eq(office).and(wtt.disabled.eq(false)))));
-    return query.list(wtt);
+    return getQueryFactory()
+        .selectFrom(wtt)
+        .where(wtt.office.isNull().or(wtt.office.eq(office).and(wtt.disabled.eq(false)))).fetch();
   }
 
   /**
    * WorkingTimeType by id.
+   *
    * @param id id
    * @return wtt
    */
   public WorkingTimeType getWorkingTimeTypeById(Long id) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    final JPQLQuery query = getQueryFactory().from(wtt)
-            .where(wtt.id.eq(id));
-    return query.singleResult(wtt);
+    return getQueryFactory().selectFrom(wtt)
+        .where(wtt.id.eq(id)).fetchOne();
   }
 
 
@@ -102,17 +93,17 @@ public class WorkingTimeTypeDao extends DaoBase {
    */
   public List<WorkingTimeType> getDefaultWorkingTimeType() {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    final JPQLQuery query = getQueryFactory().from(wtt)
-            .where(wtt.office.isNull()).orderBy(wtt.description.asc());
-    return query.list(wtt);
+    return getQueryFactory().selectFrom(wtt)
+        .where(wtt.office.isNull()).orderBy(wtt.description.asc()).fetch();
   }
 
   /**
    * @return il tipo di orario di lavoro utilizzato in date.
    */
-  
+
   /**
    * Il tipo orario per la persona attivo nel giorno.
+   *
    * @param date data
    * @param person persona
    * @return il tipo orario se presente
@@ -131,9 +122,10 @@ public class WorkingTimeTypeDao extends DaoBase {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Il tipo orario del giorno per la persona.
+   *
    * @param date data
    * @param person persona
    * @return il tipo orario del giorno se presente
@@ -144,18 +136,18 @@ public class WorkingTimeTypeDao extends DaoBase {
       return Optional.absent();
     }
     int index = date.getDayOfWeek() - 1;
-    Verify.verify(index < wtt.get().workingTimeTypeDays.size(), 
+    Verify.verify(index < wtt.get().workingTimeTypeDays.size(),
         String.format("Definiti %d giorni nel WorkingTimeType %s, "
-            + "richiesto giorno non presente con indice %d", 
+                + "richiesto giorno non presente con indice %d",
             wtt.get().workingTimeTypeDays.size(), wtt.get(), index));
-    
-    Optional<WorkingTimeTypeDay> wttd = 
+
+    Optional<WorkingTimeTypeDay> wttd =
         Optional.fromNullable(wtt.get().workingTimeTypeDays.get(index));
 
     Verify.verify(wttd.isPresent());
     Verify.verify(wttd.get().dayOfWeek == date.getDayOfWeek());
-    
+
     return wttd;
   }
-  
+
 }
