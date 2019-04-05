@@ -1,4 +1,4 @@
-package models.play.query;
+package play.db.jpa.query;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 import play.db.jpa.JPABase;
