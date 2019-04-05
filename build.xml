@@ -62,8 +62,8 @@ Sets the play path to the build.xml directly.
     <javac destdir="${dst}" classpathref="cp" includeantruntime="false"
         target="1.8" source="1.8">
         <compilerclasspath refid="cp" />
-        <src path="${play.path}/framework/src/play/db/jpa/"/>
-        <filename name="*.java"/>
+        <src path="${play.path}/framework/src"/>
+        <filename name="play/db/jpa/*.java"/>
         <compilerarg value="-proc:only"/>
         <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
         <compilerarg value="-processor"/>

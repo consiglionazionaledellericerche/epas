@@ -9,7 +9,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-import models.play.query.QGenericModel;
 
 
 /**
@@ -22,7 +21,7 @@ public class QBaseModel extends EntityPathBase<BaseModel> {
 
     public static final QBaseModel baseModel = new QBaseModel("baseModel");
 
-    public final QGenericModel _super = new QGenericModel(this);
+    public final play.db.jpa.query.QGenericModel _super = new play.db.jpa.query.QGenericModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
