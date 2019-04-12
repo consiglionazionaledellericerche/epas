@@ -1816,11 +1816,12 @@ when
     "Stampings.edit",
     "Stampings.editOffSite",
     "Stampings.saveOffSite",
-    "Stampings.delete",
-    "AbsenceGroups.insert",
-    "AbsenceGroups.edit",
-    "AbsenceGroups.delete",
-    "AbsenceGroups.save"), granted == false, target == null)
+    "Stampings.delete"
+    //"AbsenceGroups.insert",
+    //"AbsenceGroups.edit",
+    //"AbsenceGroups.delete",
+    //"AbsenceGroups.save"
+    ), granted == false, target == null)
 then
  $c.grant();
 end
@@ -1835,7 +1836,12 @@ when
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert","Stampings.insert", "Stampings.insertOffsite", "Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite"), target == $p, granted == false)
+ $c: PermissionCheck(action in (//"AbsenceGroups.insert",
+ 	"Stampings.insert", 
+ 	"Stampings.insertOffsite", 
+ 	"Stampings.edit", 
+ 	"Stampings.editOffSite", 
+ 	"Stampings.saveOffSite"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -1859,6 +1865,20 @@ then
  $c.grant();
 end
 
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie assenze per il lavoro fuori Sede se...
+ ***********************************************************************************/
+rule employeeCanInsertAbsencesOffsiteWithConvention
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
 
 /******************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza se:
@@ -1869,10 +1889,10 @@ when
  $p: Person() from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
- PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION, fieldValue == true) from $p.personConfigurations
  /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
  $target: Absence(DefaultGroup.employeeOffSeatCodes().contains(this.getCode()), this.getOwner() == $p)
- $c: PermissionCheck(action in ("AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
@@ -1888,8 +1908,7 @@ when
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
  $o: Office() from $p.office
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
- $c: PermissionCheck(action in ("Stampings.insert", 
- 							 
+ $c: PermissionCheck(action in ("Stampings.insert", 							 
  							"Stampings.edit",
  							"Stampings.save",
  							"Stampings.delete" ), target == null, granted == false)
