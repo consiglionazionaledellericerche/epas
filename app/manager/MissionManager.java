@@ -55,7 +55,6 @@ public class MissionManager {
   private final AbsenceDao absenceDao;
   private final AbsenceTypeDao absenceTypeDao;
   private final ConfigurationManager configurationManager;
-  private final OfficeDao officeDao;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
   
@@ -70,7 +69,7 @@ public class MissionManager {
       AbsenceManager absenceManager, PersonDayManager personDayManager,
       ConsistencyManager consistencyManager, NotificationManager notificationManager,
       AbsenceDao absenceDao, AbsenceTypeDao absenceTypeDao, 
-      ConfigurationManager configurationManager, OfficeDao officeDao, 
+      ConfigurationManager configurationManager, 
       IWrapperFactory wrapperFactory, AbsenceComponentDao absComponentDao) {
     this.personDao = personDao;
     this.absenceService = absenceService;
@@ -81,7 +80,6 @@ public class MissionManager {
     this.absenceDao = absenceDao;
     this.absenceTypeDao = absenceTypeDao;
     this.configurationManager = configurationManager;
-    this.officeDao = officeDao;
     this.wrapperFactory = wrapperFactory;
     this.absComponentDao = absComponentDao;
   }
@@ -130,18 +128,15 @@ public class MissionManager {
           + "non può essere processata!! Verificare!", body.id, body.person.fullName());
       return false;
     }
-    Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
-    if (!office.isPresent()) {
-      log.warn(LOG_PREFIX + "Sede di lavoro associata a {} non trovata!", body.person.fullName());
-      return false;
-    }
+    
+    Office office = body.person.office;
 
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        office.get(), EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
+        office, EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
-          + "non è valorizzato per la sede {}", office.get().name);
+          + "non è valorizzato per la sede {}", office.name);
       return false;
     }
     List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.id);
