@@ -538,7 +538,7 @@ public class AbsenceService {
       groupsPermitted = Lists.newArrayList();
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
-          && (Boolean) confManager.configValue(person, EpasParam.OFF_SITE_STAMPING)) {
+          && (Boolean) confManager.configValue(person, EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
         groupsPermitted.add(employeeOffseat);
       }
 
