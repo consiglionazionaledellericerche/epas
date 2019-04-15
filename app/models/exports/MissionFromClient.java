@@ -13,12 +13,15 @@ import org.joda.time.LocalDateTime;
 public class MissionFromClient {
 
   public String tipoMissione;
-  public int codiceSede;
+  public String destinazioneMissione;
+  public String codiceSede;
   public Long id;
   public Person person;
   public String matricola;
   public LocalDateTime dataInizio;
   public LocalDateTime dataFine;
   public Long idOrdine;
+  public int anno;
+  public Long numero;
 
 }
