@@ -909,6 +909,7 @@ WORK_INTERVAL=Intervallo apertura / chiusura istituto
 
 OFF_SITE_STAMPING=Inserimento timbratura lavoro fuori sede
 MATERNITY_PERIOD=Periodo Maternità
+TELEWORK=Telelavoro
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
