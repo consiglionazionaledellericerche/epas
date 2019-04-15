@@ -67,8 +67,8 @@ public class Administrators extends Controller {
       log.warn("validation errors for {}: {}", uro,
           validation.errorsMap());
       flash.error(Web.msgHasErrors());
-
-      render("@insertNewAdministrator", uro);
+      Validation.addError("uro.role", "Esiste già quel ruolo assegnato alla persona");
+      render("@blank", uro);
     } else {
 
       rules.checkIfPermitted(uro.office);
