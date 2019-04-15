@@ -318,6 +318,10 @@ public enum DefaultAbsenceType {
   A_92NG("92", "Missione che non giustifica niente ai fini del tempo a lavoro",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
+  A_92RE("92RE", "Missione comune residenza BP",
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, true,
+      0, null, Sets.newHashSet(), new LocalDate(2019,4,1), null),
+  
   
   A_92H1("92H1", "Missione 1 ora",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
