@@ -124,6 +124,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_92,
           DefaultAbsenceType.A_92NG),
       240, null),
+  
+  T_MISSIONE_COMUNE_RESIDENZA(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_92RE),
+      ImmutableSet.of(DefaultAbsenceType.A_92RE),
+      -1, null),
 
   T_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, //taken

@@ -170,7 +170,7 @@ public class MissionManager {
       if (insertMission(body.destinazioneMissione, body.person, 
           new Integer(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
           new Integer(situation.difference % DateTimeConstants.MINUTES_PER_HOUR),
-          body.dataInizio, body.dataFine, body.id, body.idOrdine)) {
+          body.dataInizio, body.dataFine, body.id, body.idOrdine, body.anno, body.numero)) {
         recalculate(body, Optional.<List<Absence>>absent());
         return true;
       } else {
@@ -420,7 +420,7 @@ public class MissionManager {
    */
   private boolean insertMission(String destination, Person person, 
       Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to,
-      Long id, Long idOrdine) {
+      Long id, Long idOrdine, int anno, Long numero) {
 
     AbsenceType mission = null;
     JustifiedType type = null;
@@ -428,9 +428,11 @@ public class MissionManager {
     switch (destination) {
       case "ITALIA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
+        mission = absenceTypeDao.getAbsenceTypeByCode("92").get(); 
         break;
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
+        mission = absenceTypeDao.getAbsenceTypeByCode("92E").get();
         break;
         default:
           break;
@@ -446,15 +448,13 @@ public class MissionManager {
       
     } else if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
-      mission = absenceTypeDao.getAbsenceTypeByCode("92").get();
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
       
     } else {
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
       type = absComponentDao
-          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
-      
+          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);      
     }
     
     log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
@@ -480,7 +480,9 @@ public class MissionManager {
         } else {
           absence.externalIdentifier = id;
         }
-        absence.note = "Identificativo Missione: " + absence.externalIdentifier;
+        absence.note = "Missione: " + numero +'\n' 
+            + "Anno: " +anno+'\n' 
+            + "(Identificativo: " +absence.externalIdentifier +")";
                 
         absence.save();
         
@@ -603,6 +605,7 @@ public class MissionManager {
       if (actual.toLocalDate().isEqual(date)) {
         return actual;
       }
+      actual = actual.plusDays(1);
     }
     return null;
   }
@@ -619,28 +622,28 @@ public class MissionManager {
         //sono partito dopo la fine della giornata lavorativa o sono tornato prima dell'inizio 
         //della stessa --> metto un 92M con 1 minuto
         if (insertMission(body.destinazioneMissione, body.person, new Integer(0), new Integer(-1), 
-            actualDate, actualDate, body.id, body.idOrdine)) {
+            actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
           recalculate(body, Optional.<List<Absence>>absent());            
         } 
       } else {
         if (situation.difference 
             > getFromDayOfMission(body.person, actualDate.toLocalDate()).workingTime) {
           if (insertMission(body.destinazioneMissione, body.person,  
-              null, null, actualDate, actualDate, body.id, body.idOrdine)) {
+              null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
             recalculate(body, Optional.<List<Absence>>absent());            
           } 
         } else {
           if (insertMission(body.destinazioneMissione, body.person,  
               new Integer(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
               new Integer(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
-              actualDate, actualDate, body.id, body.idOrdine)) {
+              actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
             recalculate(body, Optional.<List<Absence>>absent());            
           } 
         }        
       }
     } else {
       if (insertMission(body.destinazioneMissione, body.person,  
-          null, null, actualDate, actualDate, body.id, body.idOrdine)) {
+          null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
         recalculate(body, Optional.<List<Absence>>absent());            
       } 
     }
