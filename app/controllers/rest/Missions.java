@@ -80,14 +80,30 @@ public class Missions extends Controller {
       JsonResponse.notFound();
     }
 
-    Optional<Office> office = officeDao.byCodeId(body.codiceSede + "");
+    //Ufficio prelevato tramite il codice sede passato nel JSON
+    Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
+    //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
+    Office office = body.person.office;
+    
+    if (!officeByMessage.isPresent()) {
+      logWarn(
+          String.format("Attenzione il codice sede %s non è presente su ePAS ed il dipendente %s "
+              + "è associato all'ufficio %s.", 
+              body.codiceSede, body.person.getFullname(), office.name), 
+          body);
+    } else if (!body.codiceSede.equals(office.codeId)) {     
+      logWarn(
+          String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
+              + "sede associata a %s.", body.codiceSede, office.name, body.person.getFullname())
+          , body);
+    }
     
     // Check if integration ePAS-Missions is enabled
     if (!(Boolean)configurationManager
-        .configValue(office.get(), EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
+        .configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
       logInfo(String.format("Non verrà processato il messaggio in quanto la sede %s "
           + "cui appartiene il destinatario %s ha l'integrazione con Missioni disabilitata",
-          office.get().name, body.person.fullName()), body);
+          office.name, body.person.fullName()), body);
       JsonResponse.ok();
     }
     
