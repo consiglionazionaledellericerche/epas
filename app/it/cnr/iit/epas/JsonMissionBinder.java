@@ -32,8 +32,9 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       final JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
       log.debug("jsonObject = {}", jsonObject);
       MissionFromClient mission = new MissionFromClient();
+      mission.destinazioneMissione = jsonObject.get("dest_missione").getAsString();
       mission.tipoMissione = jsonObject.get("tipo_missione").getAsString();
-      mission.codiceSede = jsonObject.get("codice_sede").getAsInt();
+      mission.codiceSede = jsonObject.get("codice_sede").getAsString();
       mission.id = jsonObject.get("id").getAsLong();
       mission.matricola = jsonObject.get("matricola").getAsString();
       mission.dataInizio = 
@@ -45,6 +46,8 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       } else {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
+      mission.anno = jsonObject.get("anno").getAsInt();
+      mission.numero = jsonObject.get("numero").getAsLong();
       
       log.debug("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;

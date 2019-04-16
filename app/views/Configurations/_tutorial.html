@@ -85,8 +85,7 @@
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.WORKING_OFF_SITE) }
       <p>Tramite questo parametro è possibile permettere ai dipendenti che lavorano fuori sede di giustificare l'intera giornata
       lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
-      <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede"
-      o di inserire il codice giustificativo giornaliero "105BP".</p>
+      <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede".</p>
     #{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_VACATIONS) }
@@ -172,6 +171,19 @@
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.OFF_SITE_STAMPING) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente le timbratura di lavoro fuori sede.
+      </p> 
+    #{/if}
+    
+
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TELEWORK) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza relativo al Telelavoro (103).
+	  </p> 
+    #{/if}
+	
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le assenze che giustificano l'intera giornata per lavoro fuori sede presso sede convenzionata.
       </p> 
     #{/if}
     

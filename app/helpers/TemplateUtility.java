@@ -386,6 +386,7 @@ public class TemplateUtility {
       roles.add(roleDao.getRoleByName(Role.SEAT_SUPERVISOR));
       roles.add(roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+      roles.add(roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER));
       roles.add(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
       return roles;
     }

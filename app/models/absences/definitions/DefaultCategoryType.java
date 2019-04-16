@@ -17,6 +17,7 @@ import org.assertj.core.util.Lists;
 public enum DefaultCategoryType {
 
   MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
+  MISSIONE_CNR_ESTERO("Missioni CNR Estero", 2, DefaultTab.MISSIONE),
   FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI),
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   
@@ -52,6 +53,7 @@ public enum DefaultCategoryType {
   LAVORO_FUORI_SEDE("Lavoro fuori sede", 17, DefaultTab.LAVORO_FUORI_SEDE),
   FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI),
   RIPOSI_COMPENSATIVI_DIPENDENTI("Riposi compensativi", 19, DefaultTab.RIPOSI_DIPENDENTI),
+  TELELAVORO("Telelavoro", 20, DefaultTab.TELELAVORO),
   
   CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
 

@@ -77,6 +77,15 @@ public class WrapperOffice implements IWrapperOffice {
     Role role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
     return filterUros(role);
   }
+  
+  /**
+   * 
+   * @return i gestori dei buoni pasto
+   */
+  public List<UsersRolesOffices> getMealTicketManagers() {
+    Role role = roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER);
+    return filterUros(role);
+  }
 
   /**
    * Il primo mese per cui è possibile effettuare l'upload degli attestati.
