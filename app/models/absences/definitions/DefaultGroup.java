@@ -244,6 +244,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year,
       DefaultTakable.T_441, null, null, false, false),
   
+  G_43("43 - Ferie radiazioni ionizzanti",
+      "",
+      DefaultCategoryType.ALTRI_CODICI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_43, null, null, false, false),
+  
 
   
   G_ALTRI_CODICI("Altri Codici", 
