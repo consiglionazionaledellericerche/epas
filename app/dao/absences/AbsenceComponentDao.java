@@ -41,6 +41,7 @@ import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedBehaviour;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+import models.query.QContract;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import org.joda.time.LocalDate;
@@ -566,15 +567,23 @@ public class AbsenceComponentDao extends DaoBase {
    * @param people le persone
    * @return list
    */
+  
   public Map<Person, List<Absence>> absenceTroubles(List<Person> people) {
 
     QAbsence absence = QAbsence.absence;
+    QContract contract = QContract.contract;
+    
     final JPQLQuery<?> query = getQueryFactory()
         .from(absence)
         .leftJoin(absence.troubles, QAbsenceTrouble.absenceTrouble)
         .leftJoin(absence.personDay, QPersonDay.personDay)
         .leftJoin(absence.personDay.person, QPerson.person)
-        .where(absence.troubles.isNotEmpty().and(absence.personDay.person.in(people)));
+        .leftJoin(absence.personDay.person.contracts, contract)        
+        .where(absence.troubles.isNotEmpty().and(absence.personDay.person.in(people)
+            .andAnyOf((contract.sourceDateResidual.isNotNull()
+                .and(absence.personDay.date.goe(contract.sourceDateResidual))),
+            (contract.sourceDateResidual.isNull()
+                .and(absence.personDay.date.goe(contract.beginDate))))));
     List<Absence> absences = (List<Absence>) query.fetch();
     Map<Person, List<Absence>> map = Maps.newHashMap();
     for (Absence trouble : absences) {
@@ -588,6 +597,7 @@ public class AbsenceComponentDao extends DaoBase {
     return map;
   }
 
+  
   /**
    * Le assenze con quel codice in quel giorno per la persona.
    *

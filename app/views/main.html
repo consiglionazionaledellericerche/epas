@@ -87,7 +87,8 @@
         *{Ruoli di Sistema, Amministratore del personale, Amministratore del personale in sola lettura}*
         #{if currentUser.roles.contains(models.enumerate.AccountRole.ADMIN) 
         	|| currentUser.roles.contains(models.enumerate.AccountRole.DEVELOPER)
-        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, models.Role.SEAT_SUPERVISOR) }
+        	|| currentUser.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, 
+        		models.Role.SEAT_SUPERVISOR, models.Role.MEAL_TICKET_MANAGER) }
           #{include './_adminMenu.html' /}
         #{/if}
         

@@ -29,6 +29,7 @@ public enum DefaultTab {
   LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9),
   FERIE_DIPENDENTI("Ferie e Permessi", 10),
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11),
+  TELELAVORO("Telelavoro", 12),
   
   AUTOMATICI("Codici Automatici", 11);
   

@@ -178,7 +178,7 @@ public class AbsenceService {
       } else {
         //selezionare missione?
         for (GroupAbsenceType group : groupsPermitted) {
-          if (group.name.equals(DefaultGroup.MISSIONE.name())) {
+          if (group.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())) {
             groupAbsenceType = group;
             break;
           }
@@ -510,10 +510,10 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
+    final GroupAbsenceType telework = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
 
     final User currentUser = Security.getUser().get();
-    //final User currentUser = userDao.byUsername("app.missioni");
-    //final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
 
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
@@ -526,6 +526,7 @@ public class AbsenceService {
       groupsPermitted.remove(employeeVacation);
       groupsPermitted.remove(employeeOffseat);
       groupsPermitted.remove(employeeCompensatory);
+      groupsPermitted.remove(telework);
       return groupsPermitted;
     }
 
@@ -537,7 +538,7 @@ public class AbsenceService {
       groupsPermitted = Lists.newArrayList();
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
-          && (Boolean) confManager.configValue(person, EpasParam.OFF_SITE_STAMPING)) {
+          && (Boolean) confManager.configValue(person, EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
         groupsPermitted.add(employeeOffseat);
       }
 
@@ -549,6 +550,10 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person.office, EpasParam.TR_COMPENSATORY)
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
+        groupsPermitted.add(telework);
       }
 
       log.info("groupPermitted = {}", groupsPermitted);

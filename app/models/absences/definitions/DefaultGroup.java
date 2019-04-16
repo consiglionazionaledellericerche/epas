@@ -3,7 +3,8 @@ package models.absences.definitions;
 import com.google.common.base.Optional;
 
 import java.util.List;
-
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
@@ -75,21 +76,33 @@ public enum DefaultGroup {
       DefaultCategoryType.ALTRI_CODICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
-//  G_09("09 - Permesso orario visita medica", 
-//      "", 
-//      DefaultCategoryType.VISITA_MEDICA, 0,
-//      GroupAbsenceTypePattern.programmed, PeriodType.always, 
-//      DefaultTakable.T_09, DefaultComplation.C_09, null, false, true),
+
   G_631("631 - Permesso per visita medica", 
       "", 
       DefaultCategoryType.VISITA_MEDICA, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_631, DefaultComplation.C_631, null, false, true),
-  MISSIONE("Missione", 
+      MISSIONE_GIORNALIERA("Missione giornaliera", 
       "", 
       DefaultCategoryType.MISSIONE_CNR, 0,
-      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_MISSIONE_INTERNA, null, null, false, false),
+  MISSIONE_COMUNE_RESIDENZA("Missione nel comune di residenza", 
+      "", 
+      DefaultCategoryType.MISSIONE_CNR, 2,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.year, 
+      DefaultTakable.T_MISSIONE_COMUNE_RESIDENZA, null, null, false, false),
+  MISSIONE_ORARIA("Missione oraria", 
+      "", 
+      DefaultCategoryType.MISSIONE_CNR, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_MISSIONE, DefaultComplation.C_92, null, false, false),
+  MISSIONE_ESTERA("Missione estera", 
+      "", 
+      DefaultCategoryType.MISSIONE_CNR_ESTERO, 2,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_MISSIONE_ESTERA, null, null, false, false),
+  
   FERIE_CNR("31/94/32 - Ferie e permessi legge", 
       "", 
       DefaultCategoryType.FERIE_CNR, 0,
@@ -245,6 +258,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_LAVORO_FUORI_SEDE, null, null, false, false),
   
+  TELELAVORO("Telelavoro", 
+      "", 
+      DefaultCategoryType.TELELAVORO, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_TELELAVORO, null, null, false, false),
+  
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", 
       "", 
       DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
@@ -370,11 +389,7 @@ public enum DefaultGroup {
    * @return list
    */
   public static List<String> employeeVacationCodes() {
-    List<String> codes = Lists.newArrayList();
-    for (DefaultAbsenceType takable : DefaultGroup.FERIE_CNR_DIPENDENTI.takable.takableCodes) {
-      codes.add(takable.getCode());
-    }
-    return codes;
+    return getCodes(DefaultGroup.FERIE_CNR_DIPENDENTI);
   }
   
   /**
@@ -382,11 +397,7 @@ public enum DefaultGroup {
    * @return list
    */
   public static List<String> employeeCompensatoryCodes() {
-    List<String> codes = Lists.newArrayList();
-    for (DefaultAbsenceType takable : DefaultGroup.RIPOSI_CNR_DIPENDENTI.takable.takableCodes) {
-      codes.add(takable.getCode());
-    }
-    return codes;
+    return getCodes(DefaultGroup.RIPOSI_CNR_DIPENDENTI);
   }
   
   /**
@@ -394,11 +405,20 @@ public enum DefaultGroup {
    * @return list
    */
   public static List<String> employeeOffSeatCodes() {
-    List<String> codes = Lists.newArrayList();
-    for (DefaultAbsenceType takable : DefaultGroup.LAVORO_FUORI_SEDE.takable.takableCodes) {
-      codes.add(takable.getCode());
-    }
-    return codes;
+    return getCodes(DefaultGroup.LAVORO_FUORI_SEDE);
+  }
+  
+  /**
+   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
+   * @return list
+   */
+  public static List<String> employeeTeleworkCodes() {
+    return getCodes(DefaultGroup.TELELAVORO);
+  }
+  
+  private static List<String> getCodes(DefaultGroup defaultGroup) {
+    return defaultGroup.takable.takableCodes.stream()
+        .map(tc -> tc.getCode()).collect(Collectors.toList());
   }
 
 }

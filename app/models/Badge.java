@@ -10,7 +10,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import lombok.EqualsAndHashCode;
-
+import lombok.val;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -25,7 +25,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Audited
-@EqualsAndHashCode(exclude = {"badgeReader"})
+@EqualsAndHashCode(exclude = { "badgeReader" })
 @Table(name = "badges", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"badge_reader_id", "code"})})
 public class Badge extends BaseModel {
@@ -51,7 +51,8 @@ public class Badge extends BaseModel {
   public void setCode(String code) {
     try {
       this.code = String.valueOf(Integer.valueOf(code));
-    } catch (Exception ignored) {
+    } catch (NumberFormatException ignored) {
+      this.code = code;
     }
   }
 }
