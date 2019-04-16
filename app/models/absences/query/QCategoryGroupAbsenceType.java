@@ -1,21 +1,21 @@
 package models.absences.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.absences.CategoryGroupAbsenceType;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QCategoryGroupAbsenceType is a Querydsl query type for CategoryGroupAbsenceType
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsenceType> {
 
     private static final long serialVersionUID = 107691754L;
@@ -55,18 +55,18 @@ public class QCategoryGroupAbsenceType extends EntityPathBase<CategoryGroupAbsen
     }
 
     public QCategoryGroupAbsenceType(Path<? extends CategoryGroupAbsenceType> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QCategoryGroupAbsenceType(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QCategoryGroupAbsenceType(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QCategoryGroupAbsenceType(PathMetadata<?> metadata, PathInits inits) {
+    public QCategoryGroupAbsenceType(PathMetadata metadata, PathInits inits) {
         this(CategoryGroupAbsenceType.class, metadata, inits);
     }
 
-    public QCategoryGroupAbsenceType(Class<? extends CategoryGroupAbsenceType> type, PathMetadata<?> metadata, PathInits inits) {
+    public QCategoryGroupAbsenceType(Class<? extends CategoryGroupAbsenceType> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contractualClause = inits.isInitialized("contractualClause") ? new models.contractual.query.QContractualClause(forProperty("contractualClause")) : null;
         this.tab = inits.isInitialized("tab") ? new QCategoryTab(forProperty("tab")) : null;

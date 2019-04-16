@@ -88,12 +88,18 @@ public class Security extends Secure.Security {
   }
 
   /**
+   * Verifica se abilitare o meno la trimbratura web.
+   * 
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
    *        ricevuta, false altrimenti.
    */
   @Util
   public static boolean checkForWebstamping() {
 
+    if (Http.Request.current() == null || Http.Request.current().remoteAddress == null) {
+      log.debug("Remote addresses not present, web stamping not permitted");
+      return false;
+    }
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 

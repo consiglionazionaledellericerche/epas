@@ -3,23 +3,17 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQueryFactory;
 import dao.filter.QFilters;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.EntityManager;
-
 import models.ContractMonthRecap;
 import models.Office;
 import models.query.QContract;
 import models.query.QContractMonthRecap;
 import models.query.QPerson;
-
 import org.joda.time.YearMonth;
 
 /**
@@ -29,6 +23,7 @@ import org.joda.time.YearMonth;
  *
  * - situazione residuale ferie (solo per il mese di dicembre)
  * </p>
+ *
  * @author alessandro
  */
 public class ContractMonthRecapDao extends DaoBase {
@@ -39,8 +34,8 @@ public class ContractMonthRecapDao extends DaoBase {
   }
 
   /**
-   * I riepiloghi delle persone con un massimo di buoni pasto passato come parametro.
-   * TODO: il filtro sugli office delle persone.
+   * I riepiloghi delle persone con un massimo di buoni pasto passato come parametro. TODO: il
+   * filtro sugli office delle persone.
    */
   public List<ContractMonthRecap> getPersonMealticket(
       YearMonth yearMonth, Optional<Integer> max, Optional<String> name,
@@ -56,14 +51,13 @@ public class ContractMonthRecapDao extends DaoBase {
     }
     condition.and(new QFilters().filterNameFromPerson(person, name));
 
-    final JPQLQuery query = getQueryFactory().from(recap)
-            .leftJoin(recap.contract, contract)
-            .leftJoin(contract.person, person)
-            .where(recap.year.eq(yearMonth.getYear())
-                    .and(recap.month.eq(yearMonth.getMonthOfYear())
-                            .and(person.office.in(offices))
-                            .and(condition))).orderBy(recap.contract.person.surname.asc());
-
-    return query.list(recap);
+    return getQueryFactory().selectFrom(recap)
+        .leftJoin(recap.contract, contract)
+        .leftJoin(contract.person, person)
+        .where(recap.year.eq(yearMonth.getYear())
+            .and(recap.month.eq(yearMonth.getMonthOfYear())
+                .and(person.office.in(offices))
+                .and(condition))).orderBy(recap.contract.person.surname.asc())
+        .fetch();
   }
 }

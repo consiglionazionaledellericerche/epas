@@ -3,38 +3,29 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.PersonDao;
-
 import helpers.Web;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import manager.BadgeManager;
-
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
@@ -66,7 +57,7 @@ public class BadgeSystems extends Controller {
    */
   public static void list(String name) {
 
-    SearchResults<?> results =
+    QueryResults<?> results =
         badgeSystemDao.badgeSystems(Optional.fromNullable(name),
             Optional.absent()).listResults();
 
@@ -91,7 +82,7 @@ public class BadgeSystems extends Controller {
     notFoundIfNull(badgeSystem);
     rules.checkIfPermitted(badgeSystem.office);
 
-    SearchResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.absent(),
+    QueryResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.absent(),
         Optional.fromNullable(badgeSystem)).listResults();
 
     List<Badge> badges = badgeSystemDao.badges(badgeSystem)
@@ -130,7 +121,6 @@ public class BadgeSystems extends Controller {
    * @param badgeSystem badgeSystem da salvare.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
-
 
     if (Validation.hasErrors()) {
       response.status = 400;

@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Zone;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QZone is a Querydsl query type for Zone
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QZone extends EntityPathBase<Zone> {
 
     private static final long serialVersionUID = 1339775184L;
@@ -53,18 +53,18 @@ public class QZone extends EntityPathBase<Zone> {
     }
 
     public QZone(Path<? extends Zone> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QZone(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QZone(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QZone(PathMetadata<?> metadata, PathInits inits) {
+    public QZone(PathMetadata metadata, PathInits inits) {
         this(Zone.class, metadata, inits);
     }
 
-    public QZone(Class<? extends Zone> type, PathMetadata<?> metadata, PathInits inits) {
+    public QZone(Class<? extends Zone> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
     }

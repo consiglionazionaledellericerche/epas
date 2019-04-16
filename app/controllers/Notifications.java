@@ -1,22 +1,15 @@
 package controllers;
 
 import com.google.common.base.Optional;
-
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.NotificationDao;
 import dao.NotificationDao.NotificationFilter;
-
+import java.util.List;
 import javax.inject.Inject;
-
 import models.Notification;
-
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
-
-import java.util.List;
 
 /**
  * Controller to manage notifications.
@@ -26,21 +19,22 @@ import java.util.List;
  */
 @With(Resecure.class)
 public class Notifications extends Controller {
-  
+
   @Inject
   static NotificationDao notificationDao;
   @Inject
   static SecurityRules rules;
-  
+
   /**
    * Applica i parametri per filtrare le notifiche.
+   *
    * @param message se definito filtra sul testo del messaggio
    * @param filter filtra per notifiche da leggere o archiviate
    */
   public static void filter(String message, NotificationFilter filter) {
     list(message, filter);
   }
-  
+
   /**
    * Visualizza le notifiche dell'operatore corrente.
    */
@@ -48,12 +42,12 @@ public class Notifications extends Controller {
     if (filter == null) {
       filter = NotificationFilter.ALL;
     }
-    final SearchResults<Notification> notifications = notificationDao
-        .listFor(Security.getUser().get(), Optional.fromNullable(message), 
+    final QueryResults<Notification> notifications = notificationDao
+        .listFor(Security.getUser().get(), Optional.fromNullable(message),
             Optional.of(filter), Optional.absent()).listResults();
-    
-    final SearchResults<Notification> unReadNotifications = notificationDao
-        .listFor(Security.getUser().get(), Optional.fromNullable(message), 
+
+    final QueryResults<Notification> unReadNotifications = notificationDao
+        .listFor(Security.getUser().get(), Optional.fromNullable(message),
             Optional.of(NotificationFilter.TO_READ), Optional.absent()).listResults();
     render(notifications, unReadNotifications, message, filter);
   }
@@ -87,15 +81,14 @@ public class Notifications extends Controller {
     notification.save();
     list(message, filter);
   }
-  
+
   /**
    * Questa chiamata si assume che sia sempre POST+ajax.
-   *
    */
   public static void readAll(String message, NotificationFilter filter) {
-    
+
     rules.checkIfPermitted();
-    List<Notification> list = notificationDao.listAllFor(Security.getUser().get(), 
+    List<Notification> list = notificationDao.listAllFor(Security.getUser().get(),
         Optional.fromNullable(message), Optional.fromNullable(filter), Optional.absent());
     for (Notification notification : list) {
       if (notification.read) {

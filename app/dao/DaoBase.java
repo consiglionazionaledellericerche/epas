@@ -1,9 +1,8 @@
 package dao;
 
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.jpa.impl.JPAQueryFactory;
-
+import com.querydsl.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
 
 /**
@@ -22,7 +21,7 @@ public abstract class DaoBase {
   }
 
   protected JPQLQueryFactory getQueryFactory() {
-    return this.queryFactory;
+    return queryFactory;
   }
 
   protected EntityManager getEntityManager() {

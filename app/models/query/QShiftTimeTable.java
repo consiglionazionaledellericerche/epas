@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.ShiftTimeTable;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QShiftTimeTable is a Querydsl query type for ShiftTimeTable
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
     private static final long serialVersionUID = -144019773L;
@@ -75,18 +75,18 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
     }
 
     public QShiftTimeTable(Path<? extends ShiftTimeTable> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QShiftTimeTable(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QShiftTimeTable(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QShiftTimeTable(PathMetadata<?> metadata, PathInits inits) {
+    public QShiftTimeTable(PathMetadata metadata, PathInits inits) {
         this(ShiftTimeTable.class, metadata, inits);
     }
 
-    public QShiftTimeTable(Class<? extends ShiftTimeTable> type, PathMetadata<?> metadata, PathInits inits) {
+    public QShiftTimeTable(Class<? extends ShiftTimeTable> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }

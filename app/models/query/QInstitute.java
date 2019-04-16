@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Institute;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QInstitute is a Querydsl query type for Institute
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QInstitute extends EntityPathBase<Institute> {
 
     private static final long serialVersionUID = -703259791L;
@@ -60,7 +60,7 @@ public class QInstitute extends EntityPathBase<Institute> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QInstitute(PathMetadata<?> metadata) {
+    public QInstitute(PathMetadata metadata) {
         super(Institute.class, metadata);
     }
 

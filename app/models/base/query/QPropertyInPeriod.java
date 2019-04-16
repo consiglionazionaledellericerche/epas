@@ -1,20 +1,20 @@
 package models.base.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.base.PropertyInPeriod;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QPropertyInPeriod is a Querydsl query type for PropertyInPeriod
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QPropertyInPeriod extends EntityPathBase<PropertyInPeriod> {
 
     private static final long serialVersionUID = -380616364L;
@@ -49,7 +49,7 @@ public class QPropertyInPeriod extends EntityPathBase<PropertyInPeriod> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QPropertyInPeriod(PathMetadata<?> metadata) {
+    public QPropertyInPeriod(PathMetadata metadata) {
         super(PropertyInPeriod.class, metadata);
     }
 

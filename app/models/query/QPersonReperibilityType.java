@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.PersonReperibilityType;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QPersonReperibilityType is a Querydsl query type for PersonReperibilityType
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityType> {
 
     private static final long serialVersionUID = -1571481893L;
@@ -57,18 +57,18 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
     }
 
     public QPersonReperibilityType(Path<? extends PersonReperibilityType> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QPersonReperibilityType(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QPersonReperibilityType(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QPersonReperibilityType(PathMetadata<?> metadata, PathInits inits) {
+    public QPersonReperibilityType(PathMetadata metadata, PathInits inits) {
         this(PersonReperibilityType.class, metadata, inits);
     }
 
-    public QPersonReperibilityType(Class<? extends PersonReperibilityType> type, PathMetadata<?> metadata, PathInits inits) {
+    public QPersonReperibilityType(Class<? extends PersonReperibilityType> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;

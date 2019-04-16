@@ -9,9 +9,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import models.Office;
+import org.hibernate.envers.Audited;
 import models.Person;
 import models.base.MutableModel;
-import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
 @Audited
@@ -22,7 +22,7 @@ public class Group extends MutableModel {
   private static final long serialVersionUID = -5169540784395404L;
 
   public String name;
-
+  
   public String description;
 
   @Column(name = "send_flows_email")
@@ -36,7 +36,7 @@ public class Group extends MutableModel {
   @JoinColumn(name = "manager", nullable = false)
   @Required
   public Person manager;
-
+  
   @ManyToMany
   public List<Person> people = Lists.newArrayList();
 }

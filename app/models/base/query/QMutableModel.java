@@ -1,20 +1,20 @@
 package models.base.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.base.MutableModel;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QMutableModel is a Querydsl query type for MutableModel
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QMutableModel extends EntityPathBase<MutableModel> {
 
     private static final long serialVersionUID = 469300540L;
@@ -47,7 +47,7 @@ public class QMutableModel extends EntityPathBase<MutableModel> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QMutableModel(PathMetadata<?> metadata) {
+    public QMutableModel(PathMetadata metadata) {
         super(MutableModel.class, metadata);
     }
 

@@ -1,14 +1,10 @@
 package dao;
 
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Person;
 import models.PersonChildren;
 import models.query.QPersonChildren;
@@ -31,10 +27,10 @@ public class PersonChildrenDao extends DaoBase {
    * @return il personChildren relativo all'id passato come parametro.
    */
   public PersonChildren getById(Long id) {
-    QPersonChildren personChildren = QPersonChildren.personChildren;
-    final JPQLQuery query = getQueryFactory().from(personChildren)
-            .where(personChildren.id.eq(id));
-    return query.singleResult(personChildren);
+    final QPersonChildren personChildren = QPersonChildren.personChildren;
+    return getQueryFactory().selectFrom(personChildren)
+        .where(personChildren.id.eq(id))
+        .fetchOne();
   }
 
 
@@ -42,10 +38,10 @@ public class PersonChildrenDao extends DaoBase {
    * @return la lista di tutti i figli della persona.
    */
   public List<PersonChildren> getAllPersonChildren(Person person) {
-    QPersonChildren personChildren = QPersonChildren.personChildren;
-    final JPQLQuery query = getQueryFactory().from(personChildren)
-            .where(personChildren.person.eq(person));
-    query.orderBy(personChildren.bornDate.asc());
-    return query.list(personChildren);
+    final QPersonChildren personChildren = QPersonChildren.personChildren;
+    return getQueryFactory().selectFrom(personChildren)
+        .where(personChildren.person.eq(person))
+        .orderBy(personChildren.bornDate.asc())
+        .fetch();
   }
 }

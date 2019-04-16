@@ -1,21 +1,21 @@
 package models.absences.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.absences.TakableAbsenceBehaviour;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QTakableAbsenceBehaviour is a Querydsl query type for TakableAbsenceBehaviour
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QTakableAbsenceBehaviour extends EntityPathBase<TakableAbsenceBehaviour> {
 
     private static final long serialVersionUID = -1159491612L;
@@ -58,7 +58,7 @@ public class QTakableAbsenceBehaviour extends EntityPathBase<TakableAbsenceBehav
         super(path.getType(), path.getMetadata());
     }
 
-    public QTakableAbsenceBehaviour(PathMetadata<?> metadata) {
+    public QTakableAbsenceBehaviour(PathMetadata metadata) {
         super(TakableAbsenceBehaviour.class, metadata);
     }
 

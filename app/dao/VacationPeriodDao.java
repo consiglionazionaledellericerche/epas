@@ -1,14 +1,10 @@
 package dao;
 
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Contract;
 import models.VacationPeriod;
 import models.query.QVacationPeriod;
@@ -31,8 +27,9 @@ public class VacationPeriodDao extends DaoBase {
    */
   public List<VacationPeriod> getVacationPeriodByContract(Contract contract) {
     final QVacationPeriod vacationPeriod = QVacationPeriod.vacationPeriod;
-    final JPQLQuery query = getQueryFactory().from(vacationPeriod)
-            .where(vacationPeriod.contract.eq(contract));
-    return query.orderBy(vacationPeriod.beginDate.asc()).list(vacationPeriod);
+    return getQueryFactory().selectFrom(vacationPeriod)
+        .where(vacationPeriod.contract.eq(contract))
+        .orderBy(vacationPeriod.beginDate.asc())
+        .fetch();
   }
 }

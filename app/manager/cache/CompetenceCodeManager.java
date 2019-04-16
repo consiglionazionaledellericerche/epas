@@ -3,17 +3,13 @@ package manager.cache;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-import com.mysema.query.jpa.impl.JPAQueryFactory;
-
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
-
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
-
 import org.apache.commons.lang.NotImplementedException;
-
 import play.cache.Cache;
 
 public class CompetenceCodeManager {
@@ -31,7 +27,7 @@ public class CompetenceCodeManager {
    * cache.
    */
   public void saveCompetenceCode(String code, String value)
-          throws NotImplementedException {
+      throws NotImplementedException {
     throw new NotImplementedException();
   }
 
@@ -39,7 +35,7 @@ public class CompetenceCodeManager {
    * Preleva dalla cache il competence code.
    */
   public CompetenceCode getCompetenceCode(
-          String code) {
+      String code) {
 
     Preconditions.checkNotNull(code);
 
@@ -64,16 +60,16 @@ public class CompetenceCodeManager {
    * @return il CompetenceCode relativo al codice code passato come parametro.
    */
   private CompetenceCode getCompetenceCodeByCode(
-          String code) {
+      String code) {
 
     Preconditions.checkNotNull(code);
 
     final QCompetenceCode compCode = QCompetenceCode.competenceCode;
 
-    JPQLQuery query = queryFactory.from(compCode)
-            .where(compCode.code.eq(code));
+    JPQLQuery<?> query = queryFactory.from(compCode)
+        .where(compCode.code.eq(code));
 
-    return query.singleResult(compCode);
+    return (CompetenceCode) query.fetchOne();
   }
 
 }

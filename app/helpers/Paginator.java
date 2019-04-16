@@ -5,10 +5,8 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import java.util.Map;
-
 import play.mvc.Http.Request;
 import play.mvc.Router;
 import play.mvc.Scope;
@@ -32,7 +30,7 @@ public class Paginator {
   private final Map<String, Object> params;
   private final String action;
 
-  public Paginator(SearchResults<?> results) {
+  public Paginator(QueryResults<?> results) {
     // this.results = results;
     size = results.getResults().size();
     hasNext = results.getTotal() > results.getOffset() + size;
@@ -53,13 +51,13 @@ public class Paginator {
     params.remove("body");
 
     int lastPage = (int) (results.getTotal() / results.getLimit()
-            + (results.getTotal() % results.getLimit() == 0 ? 0 : 1));
+        + (results.getTotal() % results.getLimit() == 0 ? 0 : 1));
     pages = ContiguousSet.create(Range.closed(Math.max(current - 5, 1),
-            Math.min(current + 5, lastPage)),
-            DiscreteDomain.integers());
+        Math.min(current + 5, lastPage)),
+        DiscreteDomain.integers());
   }
 
-  public static Paginator instanceFor(SearchResults<?> sr) {
+  public static Paginator instanceFor(QueryResults<?> sr) {
     return new Paginator(sr);
   }
 

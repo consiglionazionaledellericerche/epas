@@ -1,19 +1,13 @@
 package absences;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-import org.junit.Test;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
 import injection.StaticInject;
-import manager.services.absences.AbsenceEngineUtility;
+import java.util.List;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
@@ -23,6 +17,8 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
+import org.joda.time.LocalDate;
+import org.junit.Test;
 import play.test.UnitTest;
 
 

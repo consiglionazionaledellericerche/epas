@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Certification;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QCertification is a Querydsl query type for Certification
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QCertification extends EntityPathBase<Certification> {
 
     private static final long serialVersionUID = -1896699882L;
@@ -61,18 +61,18 @@ public class QCertification extends EntityPathBase<Certification> {
     }
 
     public QCertification(Path<? extends Certification> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QCertification(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QCertification(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QCertification(PathMetadata<?> metadata, PathInits inits) {
+    public QCertification(PathMetadata metadata, PathInits inits) {
         this(Certification.class, metadata, inits);
     }
 
-    public QCertification(Class<? extends Certification> type, PathMetadata<?> metadata, PathInits inits) {
+    public QCertification(Class<? extends Certification> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }

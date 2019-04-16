@@ -425,7 +425,6 @@ public class AbsenceService {
    */
   public Scanner scanner(Person person, LocalDate from) {
 
-    log.debug("");
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
     List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from,

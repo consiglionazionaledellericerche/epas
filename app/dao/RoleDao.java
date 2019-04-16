@@ -1,20 +1,16 @@
 package dao;
 
 import com.google.inject.Provider;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-
 import models.Role;
 import models.query.QRole;
 
 /**
  * Dao per l'accesso alle informazioni dei Role.
- * 
+ *
  * @author dario
  */
 public class RoleDao extends DaoBase {
@@ -29,20 +25,20 @@ public class RoleDao extends DaoBase {
    * @return il ruolo identificato dall'id passato come parametro.
    */
   public Role getRoleById(Long id) {
-    QRole role = QRole.role;
-    final JPQLQuery query = getQueryFactory().from(role)
-        .where(role.id.eq(id));
-    return query.singleResult(role);
+    final QRole role = QRole.role;
+    return getQueryFactory().selectFrom(role)
+        .where(role.id.eq(id))
+        .fetchOne();
   }
 
   /**
    * @return il ruolo identificato dal nome passato come parametro.
    */
   public Role getRoleByName(String name) {
-    QRole role = QRole.role;
-    final JPQLQuery query = getQueryFactory().from(role)
-        .where(role.name.eq(name));
-    return query.singleResult(role);
+    final QRole role = QRole.role;
+    return getQueryFactory().selectFrom(role)
+        .where(role.name.eq(name))
+        .fetchOne();
   }
 
   /**
@@ -50,7 +46,7 @@ public class RoleDao extends DaoBase {
    */
   public List<Role> getAll() {
     final QRole role = QRole.role;
-    return getQueryFactory().from(role).list(role);
+    return getQueryFactory().selectFrom(role).fetch();
   }
 
 }
