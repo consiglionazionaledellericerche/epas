@@ -491,13 +491,13 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(absenceType.replacingGroup).fetchJoin()
         .leftJoin(absenceType.takableGroup).fetchJoin()
         .leftJoin(absenceType.takenGroup).fetchJoin()
-        .leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
-        .leftJoin(behaviour.justifiedBehaviour).fetchJoin()
-        .leftJoin(absence.troubles).fetchJoin()
+        //.leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
+        //.leftJoin(behaviour.justifiedBehaviour).fetchJoin()
+        //.leftJoin(absence.troubles).fetchJoin()
         .leftJoin(absence.personDay).fetchJoin()
         .where(absence.personDay.person.eq(person)
             .and(conditions))
-        .orderBy(absence.personDay.date.asc()).distinct().fetch();
+        .orderBy(absence.personDay.date.asc()).fetch();
   }
 
   /**
