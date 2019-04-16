@@ -1,29 +1,23 @@
 package models;
 
+import com.google.common.collect.Lists;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
-import com.google.common.collect.Lists;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -49,14 +43,12 @@ public class PersonReperibilityType extends BaseModel {
 
   /* responsabile della reperibilità */
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "supervisor")
   @Required
   public Person supervisor;
   
   public boolean disabled;
   
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
-  @JoinColumn(name = "office_id")
   @NotNull
   public Office office; 
  

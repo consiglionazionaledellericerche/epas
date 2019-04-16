@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.services.absences.AbsenceService;
 
 import org.dbunit.DatabaseUnitException;
@@ -31,7 +31,8 @@ import play.jobs.OnApplicationStart;
  * @author cristian
  *
  */
-@OnApplicationStart
+@Slf4j
+@OnApplicationStart(async = false)
 public class Startup extends Job<Void> {
 
   @Inject
@@ -69,6 +70,7 @@ public class Startup extends Job<Void> {
       // come assicurazione del fatto che è nei test.
       return;
     }
+    log.info("Inizializzazione del db per i test");
     Session session = (Session) JPA.em().getDelegate();
 
     session.doWork(
@@ -76,7 +78,7 @@ public class Startup extends Job<Void> {
             DatabaseOperation.INSERT,
             Resources.getResource(
                 Startup.class, "data/qualifications.xml")));
-
+    
     //competenceCode
     session.doWork(
         new DatasetImport(
@@ -111,5 +113,7 @@ public class Startup extends Job<Void> {
         new DatasetImport(
             DatabaseOperation.INSERT,
             Resources.getResource(Startup.class, "data/lucchesi-login-logout.xml")));
+    
+    log.info("Terminato inserimento dati nel db di test");
   }
 }

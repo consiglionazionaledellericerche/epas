@@ -67,7 +67,7 @@ Sets the play path to the build.xml directly.
         <compilerarg value="-proc:only"/>
         <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
         <compilerarg value="-processor"/>
-        <compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
+        <compilerarg value="com.querydsl.apt.jpa.JPAAnnotationProcessor"/>
         <compilerarg value="-s"/>
         <compilerarg value="${generated}"/>
     </javac>
@@ -79,7 +79,7 @@ Sets the play path to the build.xml directly.
         <compilerarg value="-proc:only"/>
         <compilerarg value="-Aquerydsl.packageSuffix=.query"/>
         <compilerarg value="-processor"/>
-        <compilerarg value="com.mysema.query.apt.jpa.JPAAnnotationProcessor"/>
+        <compilerarg value="com.querydsl.apt.jpa.JPAAnnotationProcessor"/>
         <compilerarg value="-s"/>
         <compilerarg value="${generated}"/>
     </javac>

@@ -1,21 +1,21 @@
 package models.absences.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.absences.JustifiedBehaviour;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QJustifiedBehaviour is a Querydsl query type for JustifiedBehaviour
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QJustifiedBehaviour extends EntityPathBase<JustifiedBehaviour> {
 
     private static final long serialVersionUID = 1575250450L;
@@ -48,7 +48,7 @@ public class QJustifiedBehaviour extends EntityPathBase<JustifiedBehaviour> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QJustifiedBehaviour(PathMetadata<?> metadata) {
+    public QJustifiedBehaviour(PathMetadata metadata) {
         super(JustifiedBehaviour.class, metadata);
     }
 

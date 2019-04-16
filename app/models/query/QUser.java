@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.User;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QUser is a Querydsl query type for User
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QUser extends EntityPathBase<User> {
 
     private static final long serialVersionUID = 1339629807L;
@@ -26,7 +26,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final QBadgeReader badgeReader;
+    public final ListPath<models.BadgeReader, QBadgeReader> badgeReaders = this.<models.BadgeReader, QBadgeReader>createList("badgeReaders", models.BadgeReader.class, QBadgeReader.class, PathInits.DIRECT2);
 
     public final BooleanPath disabled = createBoolean("disabled");
 
@@ -39,6 +39,8 @@ public class QUser extends EntityPathBase<User> {
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final StringPath label = createString("label");
 
     public final QOffice owner;
 
@@ -53,6 +55,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final SetPath<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>> roles = this.<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>>createSet("roles", models.enumerate.AccountRole.class, EnumPath.class, PathInits.DIRECT2);
 
+    public final BooleanPath systemUser = createBoolean("systemUser");
+
     public final StringPath username = createString("username");
 
     public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
@@ -65,20 +69,19 @@ public class QUser extends EntityPathBase<User> {
     }
 
     public QUser(Path<? extends User> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QUser(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QUser(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QUser(PathMetadata<?> metadata, PathInits inits) {
+    public QUser(PathMetadata metadata, PathInits inits) {
         this(User.class, metadata, inits);
     }
 
-    public QUser(Class<? extends User> type, PathMetadata<?> metadata, PathInits inits) {
+    public QUser(Class<? extends User> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.badgeReader = inits.isInitialized("badgeReader") ? new QBadgeReader(forProperty("badgeReader"), inits.get("badgeReader")) : null;
         this.owner = inits.isInitialized("owner") ? new QOffice(forProperty("owner"), inits.get("owner")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }

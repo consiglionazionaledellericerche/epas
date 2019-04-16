@@ -4,12 +4,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.JoinType;
 import dao.AbsenceTypeDao;
-import lombok.val;
-import java.util.ArrayList;
 import java.util.List;
-
 import models.Stamping;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -17,8 +13,6 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
-import org.hibernate.envers.query.criteria.AuditCriterion;
-import org.joda.time.LocalDate;
 
 /**
  * Dao per lo storico dei PersonDay.
@@ -63,7 +57,6 @@ public class PersonDayHistoryDao {
   }
 
   /**
-   * 
    * @return la lista dello storico di tutti i codici di missione orari.
    */
   public List<HistoryValue<Absence>> oldMissions() {
@@ -85,26 +78,23 @@ public class PersonDayHistoryDao {
 
     final AuditQuery query = auditReader.get().createQuery()
         .forRevisionsOfEntity(Absence.class, false, true)
-        .add(AuditEntity.or(AuditEntity.property("absenceType").eq(type), 
-            AuditEntity.or(AuditEntity.property("absenceType").eq(type2), 
-                AuditEntity.or(AuditEntity.property("absenceType").eq(type3), 
-                    AuditEntity.or(AuditEntity.property("absenceType").eq(type4), 
-                        AuditEntity.or(AuditEntity.property("absenceType").eq(type5), 
-                            AuditEntity.or(AuditEntity.property("absenceType").eq(type6), 
+        .add(AuditEntity.or(AuditEntity.property("absenceType").eq(type),
+            AuditEntity.or(AuditEntity.property("absenceType").eq(type2),
+                AuditEntity.or(AuditEntity.property("absenceType").eq(type3),
+                    AuditEntity.or(AuditEntity.property("absenceType").eq(type4),
+                        AuditEntity.or(AuditEntity.property("absenceType").eq(type5),
+                            AuditEntity.or(AuditEntity.property("absenceType").eq(type6),
                                 AuditEntity.property("absenceType").eq(type7))))))))
         .addOrder(AuditEntity.property("id").asc());
 
-
     return FluentIterable.from(query.getResultList())
         .transform(HistoryValue.fromTuple(Absence.class))
-        .toList(); 
+        .toList();
 
   }
 
   /**
-   * 
-   * @param id
-   * @return
+   *
    */
   public List<HistoryValue<Absence>> specificAbsence(long id) {
     final AuditQuery query = auditReader.get().createQuery()

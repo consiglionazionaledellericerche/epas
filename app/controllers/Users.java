@@ -4,30 +4,21 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.OfficeDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
-
 import helpers.Web;
-
 import it.cnr.iit.epas.NullStringBinder;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.SecureManager;
-
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AccountRole;
-
 import play.data.binding.As;
 import play.data.validation.Equals;
 import play.data.validation.Required;
@@ -36,7 +27,6 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -72,7 +62,7 @@ public class Users extends Controller {
     Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
         secureManager.officesTechnicalAdminAllowed(user);
 
-    SearchResults<?> results = userDao.listUsersByOffice(Optional.fromNullable(name),
+    QueryResults<?> results = userDao.listUsersByOffice(Optional.fromNullable(name),
         offices, onlyEnabled).listResults();
 
     render(results, name);
@@ -80,7 +70,7 @@ public class Users extends Controller {
 
   public static void noOwnerUsers(@As(binder = NullStringBinder.class) String name) {
 
-    SearchResults<?> results = userDao
+    QueryResults<?> results = userDao
         .noOwnerUsers(Optional.fromNullable(name)).listResults();
 
     render(results, name);

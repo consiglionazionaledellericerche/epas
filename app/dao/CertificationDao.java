@@ -2,13 +2,9 @@ package dao;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import models.Certification;
 import models.Person;
 import models.enumerate.CertificationType;
@@ -34,17 +30,17 @@ public class CertificationDao extends DaoBase {
    * @return le certificazioni epas della persona nel mese e nell'anno.
    */
   public List<Certification> personCertifications(Person person, int year, int month) {
-    
+
     QCertification certification = QCertification.certification;
-    
+
     return getQueryFactory()
-        .from(certification)
+        .selectFrom(certification)
         .where(certification.person.eq(person)
             .and(certification.year.eq(year))
             .and(certification.month.eq(month)))
-        .list(certification);
+        .fetch();
   }
-  
+
   /**
    * @param person la persona di cui cercare le certificazioni.
    * @param year l'anno delle certificazioni.
@@ -54,16 +50,16 @@ public class CertificationDao extends DaoBase {
    */
   public List<Certification> personCertificationsByType(
       Person person, int year, int month, CertificationType type) {
-    
+
     QCertification certification = QCertification.certification;
     return getQueryFactory()
-        .from(certification)
+        .selectFrom(certification)
         .where(certification.person.eq(person)
             .and(certification.year.eq(year))
             .and(certification.month.eq(month))
             .and(certification.certificationType.eq(type)))
-        .list(certification);
+        .fetch();
   }
 
-  
+
 }

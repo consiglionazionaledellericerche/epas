@@ -1,21 +1,21 @@
 package models.absences.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.absences.ComplationAbsenceBehaviour;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QComplationAbsenceBehaviour is a Querydsl query type for ComplationAbsenceBehaviour
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QComplationAbsenceBehaviour extends EntityPathBase<ComplationAbsenceBehaviour> {
 
     private static final long serialVersionUID = 194414252L;
@@ -54,7 +54,7 @@ public class QComplationAbsenceBehaviour extends EntityPathBase<ComplationAbsenc
         super(path.getType(), path.getMetadata());
     }
 
-    public QComplationAbsenceBehaviour(PathMetadata<?> metadata) {
+    public QComplationAbsenceBehaviour(PathMetadata metadata) {
         super(ComplationAbsenceBehaviour.class, metadata);
     }
 

@@ -1,20 +1,20 @@
 package models.base.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.base.PeriodModel;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QPeriodModel is a Querydsl query type for PeriodModel
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QPeriodModel extends EntityPathBase<PeriodModel> {
 
     private static final long serialVersionUID = 1259083055L;
@@ -47,7 +47,7 @@ public class QPeriodModel extends EntityPathBase<PeriodModel> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QPeriodModel(PathMetadata<?> metadata) {
+    public QPeriodModel(PathMetadata metadata) {
         super(PeriodModel.class, metadata);
     }
 

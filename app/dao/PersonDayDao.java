@@ -3,14 +3,11 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
@@ -19,7 +16,6 @@ import models.absences.query.QAbsenceType;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -43,25 +39,25 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
 
     return getQueryFactory()
-        .from(personDay)
+        .selectFrom(personDay)
         .where(personDay.id.eq(personDayId))
-        .singleResult(personDay);
+        .fetchOne();
   }
 
   /**
    * @param person la persona
-   * @param date   la data
+   * @param date la data
    * @return un personday se esiste per quella persona in quella data.
    */
   public Optional<PersonDay> getPersonDay(Person person, LocalDate date) {
 
     final QPersonDay personDay = QPersonDay.personDay;
 
-    final JPQLQuery query = getQueryFactory()
-        .from(personDay)
-        .where(personDay.person.eq(person).and(personDay.date.eq(date)));
+    final PersonDay result = getQueryFactory()
+        .selectFrom(personDay)
+        .where(personDay.person.eq(person).and(personDay.date.eq(date))).fetchOne();
 
-    return Optional.fromNullable(query.singleResult(personDay));
+    return Optional.fromNullable(result);
   }
 
   /**
@@ -71,12 +67,11 @@ public class PersonDayDao extends DaoBase {
 
     final QPersonDay personDay = QPersonDay.personDay;
 
-    final JPQLQuery query = getQueryFactory()
-        .from(personDay)
+    return getQueryFactory()
+        .selectFrom(personDay)
         .where(personDay.person.eq(person).and(personDay.date.lt(date)))
-        .orderBy(personDay.date.desc());
-
-    return query.singleResult(personDay);
+        .orderBy(personDay.date.desc())
+        .fetchFirst();
   }
 
   /**
@@ -85,10 +80,9 @@ public class PersonDayDao extends DaoBase {
   public List<PersonDay> getAllPersonDay(Person person) {
 
     final QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = getQueryFactory().from(personDay)
-        .where(personDay.person.eq(person));
-
-    return query.list(personDay);
+    return getQueryFactory().selectFrom(personDay)
+        .where(personDay.person.eq(person))
+        .fetch();
   }
 
   /**
@@ -96,7 +90,7 @@ public class PersonDayDao extends DaoBase {
    * per data
    *
    * @param fetchAbsences true se fetch di absences anzichè stampings
-   * @param orderedDesc   true se si vuole ordinamento decrescente
+   * @param orderedDesc true se si vuole ordinamento decrescente
    */
   private List<PersonDay> getPersonDaysFetched(Person person,
       LocalDate begin, Optional<LocalDate> end, boolean fetchAbsences,
@@ -105,36 +99,34 @@ public class PersonDayDao extends DaoBase {
     final QPersonDay personDay = QPersonDay.personDay;
     final QStamping stamping = QStamping.stamping;
 
-    JPQLQuery query = build(person, begin, end, orderedDesc, onlyIsTicketAvailable);
-    query = query.leftJoin(personDay.stampings, stamping).fetch();
-    query.list(personDay);
+    JPQLQuery<PersonDay> query = build(person, begin, end, orderedDesc, onlyIsTicketAvailable);
+    query = query.leftJoin(personDay.stampings, stamping).fetchJoin();
+    query.fetch();
 
     final QPersonDayInTrouble troubles = QPersonDayInTrouble.personDayInTrouble;
 
     build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-        .leftJoin(personDay.troubles, troubles).fetch()
-        .list(personDay);
+        .leftJoin(personDay.troubles, troubles).fetchJoin()
+        .fetch();
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
 
     return build(person, begin, end, orderedDesc, onlyIsTicketAvailable)
-        .leftJoin(personDay.absences, absence).fetch()
-        .leftJoin(absence.absenceType, absenceType).fetch()
+        .leftJoin(personDay.absences, absence).fetchJoin()
+        .leftJoin(absence.absenceType, absenceType).fetchJoin()
         .orderBy(personDay.date.asc())
-        .list(personDay);
+        .fetch();
 
   }
 
-  private JPQLQuery build(Person person,
+  private JPQLQuery<PersonDay> build(Person person,
       LocalDate begin, Optional<LocalDate> end,
       boolean orderedDesc, boolean onlyIsTicketAvailable) {
 
     final QPersonDay personDay = QPersonDay.personDay;
 
     final BooleanBuilder condition = new BooleanBuilder();
-    final JPQLQuery query = getQueryFactory().from(personDay);
-
 
     condition.and(personDay.date.goe(begin));
     if (end.isPresent()) {
@@ -144,7 +136,7 @@ public class PersonDayDao extends DaoBase {
     if (onlyIsTicketAvailable) {
       condition.and(personDay.isTicketAvailable.eq(true));
     }
-    query.where(condition);
+    final JPQLQuery<PersonDay> query = getQueryFactory().selectFrom(personDay).where(condition);
 
     if (orderedDesc) {
       query.orderBy(personDay.date.desc());
@@ -161,8 +153,8 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * @param person la persona
-   * @param begin  la data inizio da cui cercare
-   * @param end    la data fino a cui cercare
+   * @param begin la data inizio da cui cercare
+   * @param end la data fino a cui cercare
    * @return la lista dei personday presenti in un intervallo temporale.
    */
   public List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin,
@@ -173,8 +165,8 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * @param person la persona di cui si vogliono i personday
-   * @param begin  la data di inizio da cui cercare i personday
-   * @param end    la data di fine (opzionale)
+   * @param begin la data di inizio da cui cercare i personday
+   * @param end la data di fine (opzionale)
    * @return la lista dei personday ordinati decrescenti.
    */
   public List<PersonDay> getPersonDayInPeriodDesc(Person person, LocalDate begin,
@@ -208,8 +200,6 @@ public class PersonDayDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
-    final JPQLQuery query = getQueryFactory().from(personDay);
-
     condition.and(personDay.person.eq(person));
     condition.and(personDay.timeAtWork.goe(1));
     condition.and(personDay.isHoliday.eq(true));
@@ -224,43 +214,40 @@ public class PersonDayDao extends DaoBase {
       condition.and(personDay.date.between(yearBegin, yearEnd));
     }
 
-    query.where(condition);
-
-    return query.orderBy(personDay.person.surname.asc())
-        .orderBy(personDay.date.asc()).list(personDay);
+    return getQueryFactory().selectFrom(personDay).where(condition)
+        .orderBy(personDay.person.surname.asc())
+        .orderBy(personDay.date.asc())
+        .fetch();
   }
 
 
   /**
    * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
-   *        lista.
+   * lista.
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
-    QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query =
-        getQueryFactory().from(personDay)
-            .where(personDay.date.eq(date).and(personDay.person.in(personList)));
-    return query.orderBy(personDay.person.surname.asc()).list(personDay);
+    final QPersonDay personDay = QPersonDay.personDay;
+    return getQueryFactory().selectFrom(personDay)
+        .where(personDay.date.eq(date).and(personDay.person.in(personList)))
+        .orderBy(personDay.person.surname.asc()).fetch();
   }
 
   /**
    * @return il personday facente riferimento al giorno più vecchio presente sul db.
    */
   public PersonDay getOldestPersonDay() {
-    QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query =
-        getQueryFactory().from(personDay).orderBy(personDay.date.asc()).limit(1);
-    return query.singleResult(personDay);
+    final QPersonDay personDay = QPersonDay.personDay;
+    return getQueryFactory().selectFrom(personDay).orderBy(personDay.date.asc()).limit(1)
+        .fetchOne();
   }
-  
+
   /**
-   * 
-   * @param abs
    * @return il personDay che conteneva l'assenza passata come parametro.
    */
   public Optional<PersonDay> getByAbsence(Absence abs) {
     QPersonDay personDay = QPersonDay.personDay;
-    final JPQLQuery query = getQueryFactory().from(personDay).where(personDay.absences.contains(abs));
-    return Optional.fromNullable(query.singleResult(personDay));
+    final PersonDay result = getQueryFactory().selectFrom(personDay)
+        .where(personDay.absences.contains(abs)).fetchOne();
+    return Optional.fromNullable(result);
   }
 }

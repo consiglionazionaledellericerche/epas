@@ -1,20 +1,20 @@
 package models.base.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.base.BaseModel;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
+import com.querydsl.core.types.Path;
 
 
 /**
  * QBaseModel is a Querydsl query type for BaseModel
  */
-@Generated("com.mysema.query.codegen.SupertypeSerializer")
+@Generated("com.querydsl.codegen.SupertypeSerializer")
 public class QBaseModel extends EntityPathBase<BaseModel> {
 
     private static final long serialVersionUID = 721081311L;
@@ -41,7 +41,7 @@ public class QBaseModel extends EntityPathBase<BaseModel> {
         super(path.getType(), path.getMetadata());
     }
 
-    public QBaseModel(PathMetadata<?> metadata) {
+    public QBaseModel(PathMetadata metadata) {
         super(BaseModel.class, metadata);
     }
 

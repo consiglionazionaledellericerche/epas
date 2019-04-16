@@ -2,27 +2,20 @@ package models;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import it.cnr.iit.epas.NullStringBinder;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
 import manager.configurations.EpasParam;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
@@ -30,7 +23,6 @@ import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
-
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -38,12 +30,10 @@ import play.data.validation.Unique;
 
 @Entity
 @Audited
-@Table(name = "office")
 public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
-  @Column(name = "perseo_id")
   public Long perseoId;
 
   @Required
@@ -53,24 +43,19 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //Codice della sede, per esempio per la sede di Pisa è "044000"
   @As(binder = NullStringBinder.class)
-  @Column(nullable = false)
   public String code;
 
   //sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
   @Required
   @Unique
   @NotNull
-  @Column(name = "code_id", nullable = false)
   public String codeId;
 
-  @Column
   public String address;
 
-  @Column(name = "joining_date")
   public LocalDate joiningDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "institute_id")
   public Institute institute;
 
   public boolean headQuarter = false;
@@ -102,7 +87,7 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Group> groups = Lists.newArrayList();
 

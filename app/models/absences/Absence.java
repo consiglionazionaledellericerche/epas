@@ -27,6 +27,19 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 @Audited
 @Entity
 @Table(name = "absences")
@@ -38,26 +51,23 @@ public class Absence extends BaseModel {
 
   @Getter
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "personDay_id", nullable = false)
+  @JoinColumn(nullable = false)
   public PersonDay personDay;
 
   // Nuova Modellazione
 
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "absence_type_id")
   public AbsenceType absenceType;
 
   @Column(name = "absence_file", nullable = true)
   public Blob absenceFile;
 
   @Getter
-  @Column(name = "justified_minutes", nullable = true)
   public Integer justifiedMinutes;
 
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "justified_type_id")
   public JustifiedType justifiedType;
 
   @NotAudited
@@ -65,25 +75,21 @@ public class Absence extends BaseModel {
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
 
   //Nuovo campo per la gestione delle missioni in caso di modifica delle date
-  @Column(name = "external_identifier")
   public Long externalIdentifier;
 
 
   //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
-  @Column(name = "expire_recover_date")
   public LocalDate expireRecoverDate;
 
-  @Column(name = "time_to_recover")
   public int timeToRecover;
 
   @Audited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.ALL})
   public Set<TimeVariation> timeVariations = Sets.newHashSet();
 
-  @Column(name = "note")
   public String note;
 
-
+  
   @Override
   public String toString() {
     if (personDay == null) {

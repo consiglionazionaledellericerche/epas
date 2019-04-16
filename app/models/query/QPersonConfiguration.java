@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.PersonConfiguration;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QPersonConfiguration is a Querydsl query type for PersonConfiguration
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QPersonConfiguration extends EntityPathBase<PersonConfiguration> {
 
     private static final long serialVersionUID = -1843971587L;
@@ -55,18 +55,18 @@ public class QPersonConfiguration extends EntityPathBase<PersonConfiguration> {
     }
 
     public QPersonConfiguration(Path<? extends PersonConfiguration> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QPersonConfiguration(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QPersonConfiguration(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QPersonConfiguration(PathMetadata<?> metadata, PathInits inits) {
+    public QPersonConfiguration(PathMetadata metadata, PathInits inits) {
         this(PersonConfiguration.class, metadata, inits);
     }
 
-    public QPersonConfiguration(Class<? extends PersonConfiguration> type, PathMetadata<?> metadata, PathInits inits) {
+    public QPersonConfiguration(Class<? extends PersonConfiguration> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }

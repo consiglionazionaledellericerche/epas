@@ -2,20 +2,14 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
-
 import java.util.List;
-
 import models.Notification;
 import models.User;
 import models.enumerate.NotificationSubject;
-import models.flows.AbsenceRequest;
-import models.flows.AbsenceRequestEvent;
 import models.query.QNotification;
 
 /**
@@ -25,8 +19,8 @@ import models.query.QNotification;
  */
 public class NotificationDao {
 
-  public static enum NotificationFilter {
-    ALL, TO_READ, ARCHIVED;
+  public enum NotificationFilter {
+    ALL, TO_READ, ARCHIVED
   }
   
   
@@ -37,16 +31,16 @@ public class NotificationDao {
     this.queryFactory = queryFactory;
   }
   
-  private JPQLQuery notifications(User operator, Optional<String> message, 
+  private JPQLQuery<Notification> notifications(User operator, Optional<String> message,
       Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
     
     final QNotification qn = QNotification.notification;
     final BooleanBuilder condition = new BooleanBuilder().and(qn.recipient.eq(operator));
     if (filter.isPresent()) {
-      if (filter.get().equals(NotificationFilter.ARCHIVED)) {
+      if (filter.get() == NotificationFilter.ARCHIVED) {
         condition.and(qn.read.eq(true));
       } 
-      if (filter.get().equals(NotificationFilter.TO_READ)) {
+      if (filter.get() == NotificationFilter.TO_READ) {
         condition.and(qn.read.eq(false));
       } 
     }
@@ -54,12 +48,12 @@ public class NotificationDao {
       condition.and(qn.message.toLowerCase().contains(message.get().toLowerCase()));
     }
     if (subject.isPresent()) {
-      if (subject.get().equals(NotificationSubject.ABSENCE_REQUEST)) {
+      if (subject.get() == NotificationSubject.ABSENCE_REQUEST) {
         condition.and(qn.subject.eq(NotificationSubject.ABSENCE_REQUEST));
       }
     }
     
-    return queryFactory.from(qn)
+    return queryFactory.selectFrom(qn)
         .where(condition)
         .orderBy(qn.createdAt.desc()); 
   }
@@ -87,8 +81,7 @@ public class NotificationDao {
    */
   public List<Notification> listAllFor(User operator, Optional<String> message, 
       Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
-    final QNotification qn = QNotification.notification;
-    return notifications(operator, message, filter, subject).list(qn);
+    return notifications(operator, message, filter, subject).fetch();
   } 
   
 }

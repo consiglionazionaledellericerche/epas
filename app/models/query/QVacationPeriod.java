@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.VacationPeriod;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QVacationPeriod is a Querydsl query type for VacationPeriod
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
 
     private static final long serialVersionUID = -1413922014L;
@@ -61,18 +61,18 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
     }
 
     public QVacationPeriod(Path<? extends VacationPeriod> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QVacationPeriod(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QVacationPeriod(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QVacationPeriod(PathMetadata<?> metadata, PathInits inits) {
+    public QVacationPeriod(PathMetadata metadata, PathInits inits) {
         this(VacationPeriod.class, metadata, inits);
     }
 
-    public QVacationPeriod(Class<? extends VacationPeriod> type, PathMetadata<?> metadata, PathInits inits) {
+    public QVacationPeriod(Class<? extends VacationPeriod> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
     }

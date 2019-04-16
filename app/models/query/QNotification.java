@@ -1,21 +1,21 @@
 package models.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.Notification;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QNotification is a Querydsl query type for Notification
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QNotification extends EntityPathBase<Notification> {
 
     private static final long serialVersionUID = -1246275057L;
@@ -59,18 +59,18 @@ public class QNotification extends EntityPathBase<Notification> {
     }
 
     public QNotification(Path<? extends Notification> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QNotification(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QNotification(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QNotification(PathMetadata<?> metadata, PathInits inits) {
+    public QNotification(PathMetadata metadata, PathInits inits) {
         this(Notification.class, metadata, inits);
     }
 
-    public QNotification(Class<? extends Notification> type, PathMetadata<?> metadata, PathInits inits) {
+    public QNotification(Class<? extends Notification> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.recipient = inits.isInitialized("recipient") ? new QUser(forProperty("recipient"), inits.get("recipient")) : null;
     }

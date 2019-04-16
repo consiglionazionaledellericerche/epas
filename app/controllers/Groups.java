@@ -1,26 +1,14 @@
 package controllers;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-import org.testng.collections.Lists;
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDao.PersonLite;
-import dao.RoleDao;
-import dao.UsersRolesOfficesDao;
 import helpers.Web;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.GroupManager;
-import models.BadgeReader;
-import models.BadgeSystem;
 import models.Office;
 import models.Person;
 import models.Role;

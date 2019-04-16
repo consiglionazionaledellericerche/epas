@@ -55,7 +55,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -2293369685203872207L;
 
-  @Column(name = "perseo_id")
   public Long perseoId;
 
   @Required
@@ -64,10 +63,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   public String surname;
 
-  @Column(name = "other_surnames")
   public String othersSurnames;
 
-  @Column(name = "birthday")
   public LocalDate birthday;
 
   @Email
@@ -77,7 +74,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public String email;
 
   @OneToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
   public User user;
 
   /**
@@ -104,7 +100,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public String mobile;
 
-  @Column(name = "want_email")
   public boolean wantEmail;
 
   /**
@@ -118,7 +113,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
 
   /**
-   * relazione con i turni e le reperibilità.
+   * relazione con i turni.
    */
   @OneToMany(mappedBy = "supervisor")
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
@@ -184,12 +179,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<PersonShift> personShifts = Lists.newArrayList();
 
   @ManyToOne
-  @JoinColumn(name = "qualification_id")
   @Required
   public Qualification qualification;
 
   @ManyToOne
-  @JoinColumn(name = "office_id")
   @Required
   public Office office;
 
@@ -200,7 +193,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Transient
   public Long perseoOfficeId = null;
 
-
+  
   /**
    * Sono stati implementati i metodi Equals e HashCode sulla classe Badge in modo che Se sono
    * presenti più badge per la persona che differiscono solo per il campo badgeReader venga

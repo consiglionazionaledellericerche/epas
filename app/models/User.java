@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
@@ -56,8 +58,8 @@ public class User extends BaseModel {
   public Person person;
 
   @NotAudited
-  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-  public BadgeReader badgeReader;
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  public List<BadgeReader> badgeReaders = Lists.newArrayList();
 
   @ElementCollection
   @Enumerated(EnumType.STRING)
@@ -84,12 +86,20 @@ public class User extends BaseModel {
   @JoinColumn(name = "office_owner_id")
   public Office owner;
 
+  @Transient
+  public BadgeReader getBadgeReader() {
+    if (badgeReaders.size() > 0) {
+      return badgeReaders.get(0);
+    }
+    return null;
+  }
+  
   @Override
   public String getLabel() {
     if (this.person != null) {
       return this.person.fullName() + " - " + this.person.office.name;
-    } else if (this.badgeReader != null) {
-      return this.badgeReader.code;
+    } else if (this.getBadgeReader() != null) {
+      return this.getBadgeReader().code;
 
     } else {
       return this.username;

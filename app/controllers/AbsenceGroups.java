@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.AbsenceDao;
-import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;

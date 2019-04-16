@@ -42,7 +42,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
-  @Column(name = "perseo_id")
   public String perseoId;
 
   /**
@@ -57,49 +56,41 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * anche la sourceDateMealTicket
    */
   @Getter
-  @Column(name = "source_date_residual")
-  public LocalDate sourceDateResidual;
+  public LocalDate sourceDateResidual = null;
   
   @Getter
-  @Column(name = "source_date_vacation")
-  public LocalDate sourceDateVacation;
+  public LocalDate sourceDateVacation = null;
 
   @Getter
-  @Column(name = "source_date_meal_ticket")
-  public LocalDate sourceDateMealTicket;
+  public LocalDate sourceDateMealTicket = null;
 
-  @Column(name = "source_by_admin")
   public boolean sourceByAdmin = true;
 
-  @Getter @Max(32)
-  @Column(name = "source_vacation_last_year_used")
-  public Integer sourceVacationLastYearUsed;
-
-  @Getter @Max(32)
-  @Column(name = "source_vacation_current_year_used")
-  public Integer sourceVacationCurrentYearUsed;
-
-  @Getter @Max(4)
-  @Column(name = "source_permission_used")
-  public Integer sourcePermissionUsed;
-
-  // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
-  @Min(0) @Max(100)
-  @Column(name = "source_recovery_day_used")
-  public Integer sourceRecoveryDayUsed;
-
-  @Column(name = "source_remaining_minutes_last_year")
-  public Integer sourceRemainingMinutesLastYear;
-
-  @Column(name = "source_remaining_minutes_current_year")
-  public Integer sourceRemainingMinutesCurrentYear;
+  @Getter
+  @Max(32)
+  public Integer sourceVacationLastYearUsed = null;
 
   @Getter
-  @Column(name = "source_remaining_meal_ticket")
-  public Integer sourceRemainingMealTicket;
+  @Max(32)
+  public Integer sourceVacationCurrentYearUsed = null;
+
+  @Getter
+  @Max(4)
+  public Integer sourcePermissionUsed = null;
+
+  // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
+  @Min(0)
+  @Max(100)
+  public Integer sourceRecoveryDayUsed = null;
+
+  public Integer sourceRemainingMinutesLastYear = null;
+
+  public Integer sourceRemainingMinutesCurrentYear = null;
+
+  @Getter
+  public Integer sourceRemainingMealTicket = null;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "person_id")
   public Person person;
 
   @Getter
@@ -114,7 +105,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
   @Getter
-  @Column(name = "end_contract")
   public LocalDate endContract;
 
   @Getter

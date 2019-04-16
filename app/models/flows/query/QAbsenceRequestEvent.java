@@ -1,21 +1,21 @@
 package models.flows.query;
 
-import static com.mysema.query.types.PathMetadataFactory.*;
+import static com.querydsl.core.types.PathMetadataFactory.*;
 import models.flows.AbsenceRequestEvent;
 
 
-import com.mysema.query.types.path.*;
+import com.querydsl.core.types.dsl.*;
 
-import com.mysema.query.types.PathMetadata;
+import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.path.PathInits;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
  * QAbsenceRequestEvent is a Querydsl query type for AbsenceRequestEvent
  */
-@Generated("com.mysema.query.codegen.EntitySerializer")
+@Generated("com.querydsl.codegen.EntitySerializer")
 public class QAbsenceRequestEvent extends EntityPathBase<AbsenceRequestEvent> {
 
     private static final long serialVersionUID = 1496759067L;
@@ -53,18 +53,18 @@ public class QAbsenceRequestEvent extends EntityPathBase<AbsenceRequestEvent> {
     }
 
     public QAbsenceRequestEvent(Path<? extends AbsenceRequestEvent> path) {
-        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QAbsenceRequestEvent(PathMetadata<?> metadata) {
-        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    public QAbsenceRequestEvent(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QAbsenceRequestEvent(PathMetadata<?> metadata, PathInits inits) {
+    public QAbsenceRequestEvent(PathMetadata metadata, PathInits inits) {
         this(AbsenceRequestEvent.class, metadata, inits);
     }
 
-    public QAbsenceRequestEvent(Class<? extends AbsenceRequestEvent> type, PathMetadata<?> metadata, PathInits inits) {
+    public QAbsenceRequestEvent(Class<? extends AbsenceRequestEvent> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.absenceRequest = inits.isInitialized("absenceRequest") ? new QAbsenceRequest(forProperty("absenceRequest"), inits.get("absenceRequest")) : null;
         this.owner = inits.isInitialized("owner") ? new models.query.QUser(forProperty("owner"), inits.get("owner")) : null;

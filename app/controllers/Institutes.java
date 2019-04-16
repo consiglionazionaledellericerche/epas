@@ -1,21 +1,14 @@
 package controllers;
 
 import com.google.common.base.Optional;
-
-import com.mysema.query.SearchResults;
-
+import com.querydsl.core.QueryResults;
 import dao.OfficeDao;
 import dao.RoleDao;
-
 import helpers.Web;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Institute;
 import models.Role;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -37,12 +30,13 @@ public class Institutes extends Controller {
 
   /**
    * Lista degli istituti.
+   *
    * @param instituteName filtro nome istituto
    * @param officeName filtro sede
    */
   public static void list(String instituteName, String officeName, String codes) {
 
-    SearchResults<?> results = officeDao.institutes(Optional.<String>fromNullable(instituteName),
+    QueryResults<?> results = officeDao.institutes(Optional.<String>fromNullable(instituteName),
         Optional.<String>fromNullable(officeName), Optional.<String>fromNullable(codes),
         Security.getUser().get(), roleDao.getRoleByName(Role.TECHNICAL_ADMIN))
         .listResults();

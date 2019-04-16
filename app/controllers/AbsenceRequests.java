@@ -15,7 +15,6 @@ import dao.wrapper.IWrapperPerson;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;

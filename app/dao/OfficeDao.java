@@ -4,18 +4,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
-
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import models.Institute;
 import models.Office;
 import models.Role;
@@ -46,9 +41,8 @@ public class OfficeDao extends DaoBase {
 
     final QOffice office = QOffice.office;
 
-    final JPQLQuery query = getQueryFactory().from(office)
-        .where(office.id.eq(id));
-    return query.singleResult(office);
+    return getQueryFactory().selectFrom(office)
+        .where(office.id.eq(id)).fetchOne();
   }
 
   /**
@@ -58,10 +52,7 @@ public class OfficeDao extends DaoBase {
 
     final QOffice office = QOffice.office;
 
-    final JPQLQuery query = getQueryFactory().from(office);
-
-    return query.list(office);
-
+    return getQueryFactory().selectFrom(office).fetch();
   }
 
   /**
@@ -70,9 +61,9 @@ public class OfficeDao extends DaoBase {
   public Optional<Office> byCode(String code) {
 
     final QOffice office = QOffice.office;
-    final JPQLQuery query = getQueryFactory().from(office)
-        .where(office.code.eq(code));
-    return Optional.fromNullable(query.singleResult(office));
+    final Office result = getQueryFactory().selectFrom(office)
+        .where(office.code.eq(code)).fetchOne();
+    return Optional.fromNullable(result);
 
   }
 
@@ -81,9 +72,10 @@ public class OfficeDao extends DaoBase {
    */
   public Optional<Office> byCodeId(String codeId) {
     final QOffice office = QOffice.office;
-    final JPQLQuery query = getQueryFactory().from(office)
-        .where(office.codeId.eq(codeId));
-    return Optional.fromNullable(query.singleResult(office));
+    final Office result =  getQueryFactory().selectFrom(office)
+        .where(office.codeId.eq(codeId))
+        .fetchOne();
+    return Optional.fromNullable(result);
   }
 
   /**
@@ -91,9 +83,9 @@ public class OfficeDao extends DaoBase {
    */
   public Optional<Office> byPerseoId(Long perseoId) {
     final QOffice office = QOffice.office;
-    final JPQLQuery query = getQueryFactory().from(office)
-        .where(office.perseoId.eq(perseoId));
-    return Optional.fromNullable(query.singleResult(office));
+    final Office result = getQueryFactory().selectFrom(office)
+        .where(office.perseoId.eq(perseoId)).fetchOne();
+    return Optional.fromNullable(result);
   }
 
 
@@ -138,16 +130,16 @@ public class OfficeDao extends DaoBase {
     }
 
     if (user.isSystemUser()) {
-      final JPQLQuery query = getQueryFactory()
-          .from(institute)
+      final JPQLQuery<Institute> query = getQueryFactory()
+          .selectFrom(institute)
           .leftJoin(institute.seats, office)
           .where(condition)
           .distinct();
       return ModelQuery.wrap(query, institute);
     }
 
-    final JPQLQuery query = getQueryFactory()
-        .from(institute)
+    final JPQLQuery<Institute> query = getQueryFactory()
+        .selectFrom(institute)
         .leftJoin(institute.seats, office)
         .leftJoin(office.usersRolesOffices, uro)
         .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
@@ -165,8 +157,8 @@ public class OfficeDao extends DaoBase {
 
     final QOffice office = QOffice.office;
 
-    final JPQLQuery query = getQueryFactory()
-        .from(office)
+    final JPQLQuery<Office> query = getQueryFactory()
+        .selectFrom(office)
         .distinct()
         .orderBy(office.name.asc());
 
@@ -188,24 +180,24 @@ public class OfficeDao extends DaoBase {
       condition.and(matchOfficeName(office, name.get()));
       condition.and(matchInstituteName(institute, name.get()));
     }
-
+    final JPQLQuery<Office> query;
     if (user.isSystemUser()) {
-      final JPQLQuery query = getQueryFactory()
-          .from(office)
-          .leftJoin(office.institute, institute).fetch()
+      query = getQueryFactory()
+          .selectFrom(office)
+          .leftJoin(office.institute, institute).fetchJoin()
           .where(condition)
           .distinct()
           .orderBy(office.institute.name.asc());
-      return ModelQuery.wrap(query, office);
-    }
 
-    final JPQLQuery query = getQueryFactory()
-        .from(office)
-        .leftJoin(office.usersRolesOffices, uro)
-        .leftJoin(office.institute, institute).fetch()
-        .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
-        .distinct()
-        .orderBy(office.institute.name.asc());
+    } else {
+      query = getQueryFactory()
+          .selectFrom(office)
+          .leftJoin(office.usersRolesOffices, uro)
+          .leftJoin(office.institute, institute).fetchJoin()
+          .where(condition.and(uro.user.eq(user).and(uro.role.eq(role))))
+          .distinct()
+          .orderBy(office.institute.name.asc());
+    }
 
     return ModelQuery.wrap(query, office);
 
@@ -215,21 +207,22 @@ public class OfficeDao extends DaoBase {
   public Optional<Institute> byCds(String cds) {
 
     final QInstitute institute = QInstitute.institute;
-    final JPQLQuery query = queryFactory.from(institute).where(institute.cds.eq(cds));
-    return Optional.fromNullable(query.singleResult(institute));
+    final Institute result = queryFactory.selectFrom(institute).where(institute.cds.eq(cds))
+        .fetchOne();
+    return Optional.fromNullable(result);
   }
 
   public Optional<Institute> instituteById(Long id) {
 
     final QInstitute institute = QInstitute.institute;
-    final JPQLQuery query = queryFactory.from(institute).where(institute.id.eq(id));
-    return Optional.fromNullable(query.singleResult(institute));
+    final Institute result = queryFactory.selectFrom(institute).where(institute.id.eq(id))
+        .fetchOne();
+    return Optional.fromNullable(result);
   }
-  
+
   public List<Office> byInstitute(Institute institute) {
     final QOffice office = QOffice.office;
-    final JPQLQuery query = queryFactory.from(office).where(office.institute.eq(institute));
-    return query.list(office);
+    return queryFactory.selectFrom(office).where(office.institute.eq(institute)).fetch();
   }
 
 }
