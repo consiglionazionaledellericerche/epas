@@ -252,6 +252,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_LAVORO_FUORI_SEDE, null, null, false, false),
   
+  TELELAVORO("Telelavoro", 
+      "", 
+      DefaultCategoryType.TELELAVORO, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_TELELAVORO, null, null, false, false),
+  
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", 
       "", 
       DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
@@ -403,6 +409,18 @@ public enum DefaultGroup {
   public static List<String> employeeOffSeatCodes() {
     List<String> codes = Lists.newArrayList();
     for (DefaultAbsenceType takable : DefaultGroup.LAVORO_FUORI_SEDE.takable.takableCodes) {
+      codes.add(takable.getCode());
+    }
+    return codes;
+  }
+  
+  /**
+   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
+   * @return list
+   */
+  public static List<String> employeeTeleworkCodes() {
+    List<String> codes = Lists.newArrayList();
+    for (DefaultAbsenceType takable : DefaultGroup.TELELAVORO.takable.takableCodes) {
       codes.add(takable.getCode());
     }
     return codes;
