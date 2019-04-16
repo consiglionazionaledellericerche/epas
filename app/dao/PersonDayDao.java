@@ -71,7 +71,7 @@ public class PersonDayDao extends DaoBase {
         .selectFrom(personDay)
         .where(personDay.person.eq(person).and(personDay.date.lt(date)))
         .orderBy(personDay.date.desc())
-        .fetchOne();
+        .fetchFirst();
   }
 
   /**

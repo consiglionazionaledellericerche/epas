@@ -94,11 +94,10 @@ public class AbsenceComponentDao extends DaoBase {
   public List<AbsenceType> absenceTypesByCertificationCode(String string) {
 
     QAbsenceType absenceType = QAbsenceType.absenceType;
-    final JPQLQuery<?> query = getQueryFactory()
-        .from(absenceType)
+    return getQueryFactory()
+        .selectFrom(absenceType)
         .where(absenceType.certificateCode.eq(string)
-            .or(absenceType.certificateCode.equalsIgnoreCase(string)));
-    return (List<AbsenceType>) query.fetch();
+            .or(absenceType.certificateCode.equalsIgnoreCase(string))).fetch();
   }
 
   /**
@@ -112,7 +111,7 @@ public class AbsenceComponentDao extends DaoBase {
       return Lists.newArrayList();
     }
     QAbsenceType absenceType = QAbsenceType.absenceType;
-    List<AbsenceType> types = (List<AbsenceType>) getQueryFactory().from(absenceType)
+    List<AbsenceType> types = getQueryFactory().selectFrom(absenceType)
         .where(absenceType.id.in(ids)).fetch();
     if (types.size() != ids.size()) {
       return null;
@@ -193,7 +192,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<CategoryGroupAbsenceType> categoryByNames(List<String> names) {
     QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
-    return (List<CategoryGroupAbsenceType>) getQueryFactory().from(category)
+    return getQueryFactory().selectFrom(category)
         .where(category.name.in(names)).fetch();
   }
 
@@ -205,7 +204,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public Optional<CategoryGroupAbsenceType> categoryByName(String name) {
     QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
-    return Optional.fromNullable((CategoryGroupAbsenceType) getQueryFactory().from(category)
+    return Optional.fromNullable((CategoryGroupAbsenceType) getQueryFactory().selectFrom(category)
         .where(category.name.eq(name)).fetchOne());
   }
 
@@ -214,8 +213,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<CategoryGroupAbsenceType> categoriesByPriority() {
     QCategoryGroupAbsenceType category = QCategoryGroupAbsenceType.categoryGroupAbsenceType;
-    return (List<CategoryGroupAbsenceType>) getQueryFactory().from(category)
-        .orderBy(category.priority.asc()).fetch();
+    return getQueryFactory().selectFrom(category).orderBy(category.priority.asc()).fetch();
   }
 
   /**
@@ -223,7 +221,7 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<CategoryTab> tabsByPriority() {
     QCategoryTab categoryTab = QCategoryTab.categoryTab;
-    return (List<CategoryTab>) getQueryFactory().from(categoryTab).orderBy(categoryTab.priority.asc())
+    return getQueryFactory().selectFrom(categoryTab).orderBy(categoryTab.priority.asc())
         .fetch();
   }
 
@@ -296,7 +294,7 @@ public class AbsenceComponentDao extends DaoBase {
 
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
 
-    return (List<GroupAbsenceType>) getQueryFactory().from(groupAbsenceType)
+    return getQueryFactory().selectFrom(groupAbsenceType)
         .where(groupAbsenceType.name.in(names)).fetch();
   }
 
@@ -310,7 +308,7 @@ public class AbsenceComponentDao extends DaoBase {
 
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
 
-    return (GroupAbsenceType) getQueryFactory().from(groupAbsenceType)
+    return getQueryFactory().selectFrom(groupAbsenceType)
         .where(groupAbsenceType.id.eq(id)).fetchOne();
   }
 
@@ -327,7 +325,7 @@ public class AbsenceComponentDao extends DaoBase {
     if (!alsoAutomatic) {
       conditions.and(groupAbsenceType.automatic.eq(false));
     }
-    return (List<GroupAbsenceType>) getQueryFactory().from(groupAbsenceType)
+    return getQueryFactory().selectFrom(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetchJoin()
         .leftJoin(groupAbsenceType.previousGroupChecked).fetchJoin()
         .where(conditions)
@@ -365,7 +363,7 @@ public class AbsenceComponentDao extends DaoBase {
   public List<GroupAbsenceType> groupAbsenceTypeOfPattern(GroupAbsenceTypePattern pattern) {
     QGroupAbsenceType groupAbsenceType = QGroupAbsenceType.groupAbsenceType;
 
-    return (List<GroupAbsenceType>) getQueryFactory().from(groupAbsenceType)
+    return getQueryFactory().selectFrom(groupAbsenceType)
         .leftJoin(groupAbsenceType.category).fetchJoin()
         .leftJoin(groupAbsenceType.previousGroupChecked).fetchJoin()
         .where(groupAbsenceType.pattern.eq(pattern))
@@ -486,7 +484,7 @@ public class AbsenceComponentDao extends DaoBase {
     if (!codeSet.isEmpty()) {
       conditions.and(absence.absenceType.in(codeSet));
     }
-    return (List<Absence>) getQueryFactory().from(absence)
+    return getQueryFactory().selectFrom(absence)
         .leftJoin(absence.justifiedType).fetchJoin()
         .leftJoin(absence.absenceType, absenceType).fetchJoin()
         .leftJoin(absenceType.complationGroup).fetchJoin()
@@ -510,10 +508,9 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<InitializationGroup> personInitializationGroups(Person person) {
     QInitializationGroup initializationGroup = QInitializationGroup.initializationGroup;
-    final JPQLQuery<?> query = getQueryFactory()
-        .from(initializationGroup)
-        .where(initializationGroup.person.eq(person));
-    return (List<InitializationGroup>) query.fetch();
+    return getQueryFactory()
+        .selectFrom(initializationGroup)
+        .where(initializationGroup.person.eq(person)).fetch();
   }
 
   /**
@@ -573,8 +570,8 @@ public class AbsenceComponentDao extends DaoBase {
     QAbsence absence = QAbsence.absence;
     QContract contract = QContract.contract;
     
-    final JPQLQuery<?> query = getQueryFactory()
-        .from(absence)
+    final JPQLQuery<Absence> query = getQueryFactory()
+        .selectFrom(absence)
         .leftJoin(absence.troubles, QAbsenceTrouble.absenceTrouble)
         .leftJoin(absence.personDay, QPersonDay.personDay)
         .leftJoin(absence.personDay.person, QPerson.person)
@@ -584,7 +581,7 @@ public class AbsenceComponentDao extends DaoBase {
                 .and(absence.personDay.date.goe(contract.sourceDateResidual))),
             (contract.sourceDateResidual.isNull()
                 .and(absence.personDay.date.goe(contract.beginDate))))));
-    List<Absence> absences = (List<Absence>) query.fetch();
+    List<Absence> absences = query.fetch();
     Map<Person, List<Absence>> map = Maps.newHashMap();
     for (Absence trouble : absences) {
       List<Absence> personAbsences = map.get(trouble.personDay.person);
@@ -608,8 +605,8 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<Absence> findAbsences(Person person, LocalDate date, String code) {
     QAbsence absence = QAbsence.absence;
-    return (List<Absence>) getQueryFactory()
-        .from(absence)
+    return getQueryFactory()
+        .selectFrom(absence)
         .leftJoin(absence.personDay, QPersonDay.personDay)
         .leftJoin(absence.personDay.person, QPerson.person)
         .where(absence.personDay.person.eq(person)
@@ -626,8 +623,8 @@ public class AbsenceComponentDao extends DaoBase {
    */
   public List<Absence> absences(List<String> codes) {
     QAbsence absence = QAbsence.absence;
-    return (List<Absence>) getQueryFactory()
-        .from(absence)
+    return getQueryFactory()
+        .selectFrom(absence)
         .leftJoin(absence.personDay, QPersonDay.personDay)
         .where(absence.absenceType.code.in(codes))
         .fetch();

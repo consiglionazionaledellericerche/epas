@@ -23,9 +23,7 @@ import dao.history.PersonDayHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import it.cnr.iit.epas.CompetenceUtility;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,12 +38,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -74,10 +69,8 @@ import models.absences.Absence;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import org.apache.commons.lang.WordUtils;
-import org.hibernate.envers.RevisionType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;

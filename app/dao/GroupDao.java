@@ -8,13 +8,11 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
-import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
 import models.flows.Group;
 import models.flows.query.QGroup;
 
-@Slf4j
 public class GroupDao extends DaoBase {
 
   @Inject

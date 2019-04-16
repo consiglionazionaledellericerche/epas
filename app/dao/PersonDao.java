@@ -1,7 +1,6 @@
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -149,8 +148,6 @@ public final class PersonDao extends DaoBase {
    * @return Restituisce la lista delle persone appartenenti all'ufficio specificato.
    */
   public List<Person> byOffice(Office office) {
-    final QPerson person = QPerson.person;
-
     return personQuery(Optional.absent(), ImmutableSet.of(office), false, Optional.absent(),
         Optional.absent(), false, Optional.absent(), Optional.absent(), false).fetch();
   }

@@ -207,7 +207,7 @@ public class CompetenceCodeDao extends DaoBase {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
     final PersonCompetenceCodes result = getQueryFactory().selectFrom(pcc)
         .where(pcc.person.eq(person).and(pcc.competenceCode.eq(code).and(pcc.beginDate.gt(date))))
-        .orderBy(pcc.beginDate.asc()).fetchOne();
+        .orderBy(pcc.beginDate.asc()).fetchFirst();
     return Optional.fromNullable(result);
   }
 

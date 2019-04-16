@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;

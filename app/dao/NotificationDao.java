@@ -81,7 +81,6 @@ public class NotificationDao {
    */
   public List<Notification> listAllFor(User operator, Optional<String> message, 
       Optional<NotificationFilter> filter, Optional<NotificationSubject> subject) {
-    final QNotification qn = QNotification.notification;
     return notifications(operator, message, filter, subject).fetch();
   } 
   

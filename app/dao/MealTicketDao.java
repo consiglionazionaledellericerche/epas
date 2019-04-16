@@ -31,22 +31,6 @@ public class MealTicketDao extends DaoBase {
   }
 
   /**
-   * @param code codice del buono pasto
-   * @return il mealTicket corrispondente al codice code e alla sede office passati come parametro.
-   */
-
-  public MealTicket getMealTicketByCode(String code) {
-
-    final QMealTicket mealTicket = QMealTicket.mealTicket;
-
-    return getQueryFactory()
-        .selectFrom(mealTicket)
-        .where(mealTicket.code.eq(code))
-        .fetchOne();
-  }
-
-
-  /**
    * MealTickets assegnati alla persona nella finestra temporale specificata.<br> Ordinati in base
    * al tipo di ordinamento enumerato e come secondo ordine per codice.
    *

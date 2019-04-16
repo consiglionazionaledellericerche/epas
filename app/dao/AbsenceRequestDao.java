@@ -365,20 +365,6 @@ public class AbsenceRequestDao extends DaoBase {
 
   }
 
-  private void personnelAdminQuery(BooleanBuilder condition) {
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-      condition.or(absenceRequest.administrativeApprovalRequired.isTrue()
-          .and(absenceRequest.administrativeApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    } else {
-      condition.and(absenceRequest.administrativeApprovalRequired.isTrue()
-          .and(absenceRequest.administrativeApproved.isNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    }
-
-  }
 
   private BooleanBuilder managerQuery(BooleanBuilder condition, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
@@ -389,49 +375,4 @@ public class AbsenceRequestDao extends DaoBase {
 
   }
 
-
-  private void seatSupervisorQueryApproved(BooleanBuilder condition) {
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-      condition.or(condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
-          .and(absenceRequest.officeHeadApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isTrue())))));
-    } else {
-      condition.and(absenceRequest.officeHeadApprovalRequired.isTrue()
-          .and(absenceRequest.officeHeadApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isTrue()))));
-    }
-
-  }
-
-  private void personnelAdminQueryApproved(BooleanBuilder condition) {
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-      condition.or(absenceRequest.administrativeApprovalRequired.isTrue()
-          .and(absenceRequest.administrativeApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    } else {
-      condition.and(absenceRequest.administrativeApprovalRequired.isTrue()
-          .and(absenceRequest.administrativeApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue().and(absenceRequest.flowEnded.isFalse()))));
-    }
-
-  }
-
-  private void managerQueryApproved(BooleanBuilder condition) {
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    if (condition.hasValue()) {
-      condition.or(absenceRequest.managerApprovalRequired.isTrue()
-          .and(absenceRequest.managerApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue())));
-    } else {
-      condition.and(absenceRequest.managerApprovalRequired.isTrue()
-          .and(absenceRequest.managerApproved.isNotNull()
-              .and(absenceRequest.flowStarted.isTrue())));
-    }
-
-  }
 }
