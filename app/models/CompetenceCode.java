@@ -50,6 +50,7 @@ public class CompetenceCode extends BaseModel {
   @Column
   public String codeToPresence;
 
+  @Unique
   @Required
   public String description;
 

@@ -2,10 +2,8 @@ package controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
@@ -13,50 +11,33 @@ import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
 import helpers.TemplateExtensions;
 import helpers.Web;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-import javax.xml.ws.Holder;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.PersonDayManager;
 import manager.ReperibilityManager2;
-
 import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonShiftDay;
-import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
-import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.HolidaysReperibilityDto;
 import models.dto.PNotifyObject;
 import models.dto.ReperibilityEvent;
 import models.dto.WorkDaysReperibilityDto;
-
 import models.enumerate.EventColor;
-import models.enumerate.ShiftSlot;
-import models.enumerate.ShiftTroubles;
-
 import org.assertj.core.util.Lists;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.Period;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -64,7 +45,6 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 

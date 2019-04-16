@@ -86,8 +86,6 @@ public class Competences extends Controller {
   @Inject
   private static OfficeDao officeDao;
   @Inject
-  private static SecureManager secureManager;
-  @Inject
   private static CompetenceManager competenceManager;
   @Inject
   private static SecurityRules rules;

@@ -21,7 +21,6 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.Role;
 import models.User;
-import models.enumerate.AccountRole;
 import models.enumerate.StampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
@@ -216,17 +215,6 @@ public class UserDao extends DaoBase {
     return office.usersRolesOffices.stream()
         .filter(uro -> Arrays.asList(roles).contains(uro.role.name))
         .map(uro -> uro.user).distinct().collect(Collectors.toList());
-  }
-
-  /**
-   * @param accountRole il ruolo di sistema per cui richiedere l'utente
-   * @return l'utente, se esiste, con associato il ruolo di sistema accountRole.
-   */
-  public User getSystemUserByRole(AccountRole accountRole) {
-    final QUser user = QUser.user;
-
-    return getQueryFactory().selectFrom(user).where(user.roles.any().eq(accountRole))
-        .limit(1).fetchOne();
   }
 
 }
