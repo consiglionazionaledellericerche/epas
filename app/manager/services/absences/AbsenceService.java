@@ -511,10 +511,10 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
     final GroupAbsenceType employeeOffseat = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
+    final GroupAbsenceType telework = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
 
     final User currentUser = Security.getUser().get();
-    //final User currentUser = userDao.byUsername("app.missioni");
-    //final User currentUser = userDao.getSystemUserByRole(AccountRole.MISSIONS_MANAGER);
 
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
@@ -527,6 +527,7 @@ public class AbsenceService {
       groupsPermitted.remove(employeeVacation);
       groupsPermitted.remove(employeeOffseat);
       groupsPermitted.remove(employeeCompensatory);
+      groupsPermitted.remove(telework);
       return groupsPermitted;
     }
 
@@ -550,6 +551,10 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person.office, EpasParam.TR_COMPENSATORY)
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
+        groupsPermitted.add(telework);
       }
 
       log.info("groupPermitted = {}", groupsPermitted);
