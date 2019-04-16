@@ -167,6 +167,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
       ImmutableSet.of(DefaultAbsenceType.A_105BP), 
       -1, null),
+  
+  T_TELELAVORO(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_103), 
+      ImmutableSet.of(DefaultAbsenceType.A_103), 
+      -1, null),
 
   T_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23, 
