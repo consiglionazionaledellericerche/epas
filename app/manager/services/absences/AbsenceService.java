@@ -526,7 +526,7 @@ public class AbsenceService {
       groupsPermitted.remove(employeeVacation);
       groupsPermitted.remove(employeeOffseat);
       groupsPermitted.remove(employeeCompensatory);
-      groupsPermitted.remove(telework);
+      //groupsPermitted.remove(telework);
       return groupsPermitted;
     }
 
