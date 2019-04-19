@@ -633,12 +633,16 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null),
   
+  A_100("100", "Festività locali",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null),
+  
   A_102("102", "Collocamento fuori ruolo all'estero",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   
   A_103("103", "Telelavoro",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, true, false,
+      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
   A_103BP("103BP", "Telelavoro buono pasto",
       false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, true, true,
@@ -1411,13 +1415,21 @@ public enum DefaultAbsenceType {
   
   A_407("407", "Ferie missione Antartide anno precedente",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, Sets.newHashSet(), null, null),
+      0, null, Sets.newHashSet(), new LocalDate(2018, 1, 1), new LocalDate(2018, 12, 31)),
   A_418("418", "Riposo compensativo missione Antartide",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
-      0, null, Sets.newHashSet(), null, null),
-  A_408("408", "Ferie missione Antartide anno corrente",
+      0, null, Sets.newHashSet(), new LocalDate(2018, 1, 1), new LocalDate(2018, 12, 31)),
+  A_408("408", "Ferie missione Antartide anno precedente",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null),  
+  
+  A_409("409", "Ferie missione Antartide anno corrente",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null),
+  A_419("419", "Riposo compensativo missione Antartide",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null),
+  
   
   A_NC("NC", "Giorno non conteggiato ai fini del tempo a lavoro",
       true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
