@@ -77,9 +77,6 @@ public class Bootstrap extends Job<Void> {
       Fixtures.loadModels("../db/import/developer.yml");
     }
 
-    // Allinea tutte le sequenze del db
-    Fixtures.executeSQL(Play.getFile("db/import/fix_sequences.sql"));
-
     //impostare il campo tipo orario orizzondale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
