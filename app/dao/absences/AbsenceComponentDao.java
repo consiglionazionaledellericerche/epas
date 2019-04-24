@@ -9,11 +9,13 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.DaoBase;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.absences.Absence;
@@ -250,7 +252,7 @@ public class AbsenceComponentDao extends DaoBase {
 
     return Optional.fromNullable(
         (ComplationAbsenceBehaviour) getQueryFactory().from(complationAbsenceBehaviour)
-            .where(complationAbsenceBehaviour.name.eq(name)).fetchOne());
+        .where(complationAbsenceBehaviour.name.eq(name)).fetchOne());
   }
 
   /**
@@ -484,20 +486,26 @@ public class AbsenceComponentDao extends DaoBase {
     if (!codeSet.isEmpty()) {
       conditions.and(absence.absenceType.in(codeSet));
     }
-    return getQueryFactory().selectFrom(absence)
+    List<Absence> absences =  getQueryFactory().selectFrom(absence)
         .leftJoin(absence.justifiedType).fetchJoin()
         .leftJoin(absence.absenceType, absenceType).fetchJoin()
         .leftJoin(absenceType.complationGroup).fetchJoin()
         .leftJoin(absenceType.replacingGroup).fetchJoin()
         .leftJoin(absenceType.takableGroup).fetchJoin()
         .leftJoin(absenceType.takenGroup).fetchJoin()
-        //.leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
-        //.leftJoin(behaviour.justifiedBehaviour).fetchJoin()
-        //.leftJoin(absence.troubles).fetchJoin()
+        .leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
+        .leftJoin(behaviour.justifiedBehaviour).fetchJoin()
+        .leftJoin(absence.troubles).fetchJoin()
         .leftJoin(absence.personDay).fetchJoin()
         .where(absence.personDay.person.eq(person)
-            .and(conditions))
-        .orderBy(absence.personDay.date.asc()).fetch();
+            .and(conditions)).distinct().fetch();
+    //comparatore per ovviare al problema della orderby che non funziona in questo caso con il querydsl nuovo
+    Comparator<Absence> absenceComparator
+    = Comparator.comparing(
+        Absence::getPersonDay, (s1, s2) -> {
+          return s2.date.compareTo(s1.date);
+        });
+    return absences.stream().sorted(absenceComparator).collect(Collectors.toList());
   }
 
   /**
@@ -564,12 +572,12 @@ public class AbsenceComponentDao extends DaoBase {
    * @param people le persone
    * @return list
    */
-  
+
   public Map<Person, List<Absence>> absenceTroubles(List<Person> people) {
 
     QAbsence absence = QAbsence.absence;
     QContract contract = QContract.contract;
-    
+
     final JPQLQuery<Absence> query = getQueryFactory()
         .selectFrom(absence)
         .leftJoin(absence.troubles, QAbsenceTrouble.absenceTrouble)
@@ -579,8 +587,8 @@ public class AbsenceComponentDao extends DaoBase {
         .where(absence.troubles.isNotEmpty().and(absence.personDay.person.in(people)
             .andAnyOf((contract.sourceDateResidual.isNotNull()
                 .and(absence.personDay.date.goe(contract.sourceDateResidual))),
-            (contract.sourceDateResidual.isNull()
-                .and(absence.personDay.date.goe(contract.beginDate))))));
+                (contract.sourceDateResidual.isNull()
+                    .and(absence.personDay.date.goe(contract.beginDate))))));
     List<Absence> absences = query.fetch();
     Map<Person, List<Absence>> map = Maps.newHashMap();
     for (Absence trouble : absences) {
@@ -594,7 +602,7 @@ public class AbsenceComponentDao extends DaoBase {
     return map;
   }
 
-  
+
   /**
    * Le assenze con quel codice in quel giorno per la persona.
    *
@@ -629,4 +637,6 @@ public class AbsenceComponentDao extends DaoBase {
         .where(absence.absenceType.code.in(codes))
         .fetch();
   }
+
+
 } 
