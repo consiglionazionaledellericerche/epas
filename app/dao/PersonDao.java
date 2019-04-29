@@ -792,6 +792,7 @@ public final class PersonDao extends DaoBase {
         .leftJoin(contract.contractMonthRecaps).fetchJoin()
         .leftJoin(contract.contractStampProfile).fetchJoin()
         .leftJoin(contract.contractWorkingTimeType, cwtt).fetchJoin()
+        .where(condition)
         .orderBy(contract.beginDate.asc()).distinct()
         .fetch();
 
