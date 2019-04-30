@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.inject.Binder;
@@ -44,7 +44,7 @@ public class JacksonModule implements Module {
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JodaModule())
             .registerModule(new AfterburnerModule())
-            .registerModule(new Hibernate4Module())
+            .registerModule(new Hibernate5Module())
             .setVisibility(PropertyAccessor.FIELD, Visibility.PUBLIC_ONLY)
             .setVisibility(PropertyAccessor.GETTER, Visibility.PUBLIC_ONLY)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
