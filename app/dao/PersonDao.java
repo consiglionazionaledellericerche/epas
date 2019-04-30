@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.val;
 import manager.configurations.EpasParam;
 import models.BadgeReader;
 import models.CompetenceCode;
@@ -362,6 +363,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Preleva la persona passata per id.
    * @param personId l'id della persona.
    * @return la persona corrispondente all'id passato come parametro.
    */
@@ -778,7 +780,6 @@ public final class PersonDao extends DaoBase {
     // Fetch dei contratti appartenenti all'intervallo
     QContract contract = QContract.contract;
     QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
-    QVacationPeriod vp = QVacationPeriod.vacationPeriod;
     QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
 
     final BooleanBuilder condition = new BooleanBuilder();
@@ -795,15 +796,6 @@ public final class PersonDao extends DaoBase {
         .where(condition)
         .orderBy(contract.beginDate.asc()).distinct()
         .fetch();
-
-    // fetch contract multiple bags (1) vacation periods
-    contracts = getQueryFactory().selectFrom(contract)
-        .leftJoin(contract.vacationPeriods, vp).fetchJoin()
-        .orderBy(contract.beginDate.asc())/*.orderBy(vp.beginDate.asc())*/.distinct().fetch();
-    // TODO: riportare a List tutte le relazioni uno a molti di contract
-    // e inserire singolarmente la fetch.
-    // TODO 2: in realtà questo è opinabile. Anche i Set
-    // sono semanticamente corretti. Decidere.
 
     if (!person.isEmpty()) {
       // Fetch dei tipi orario associati ai contratti (verificare l'utilità)
