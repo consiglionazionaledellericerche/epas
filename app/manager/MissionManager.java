@@ -452,6 +452,7 @@ public class MissionManager {
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
       
     } else {
+      group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ORARIA.name()).get();
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);      
@@ -600,7 +601,10 @@ public class MissionManager {
    *     al periodo di inizio/fine presente nel body.
    */
   private LocalDateTime rightDate(LocalDate date, MissionFromClient body) {
-    LocalDateTime actual = body.dataInizio;
+    LocalDateTime actual = body.dataInizio.withHourOfDay(body.dataFine.getHourOfDay())
+        .withMinuteOfHour(body.dataFine.getMinuteOfHour())
+        .withSecondOfMinute(body.dataFine.getSecondOfMinute());
+    
     while (!actual.isAfter(body.dataFine)) {
       if (actual.toLocalDate().isEqual(date)) {
         return actual;
