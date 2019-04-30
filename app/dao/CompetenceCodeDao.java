@@ -176,7 +176,8 @@ public class CompetenceCodeDao extends DaoBase {
         .where(pcc.person.eq(person)
             .and(pcc.competenceCode.eq(code))
             .and(pcc.beginDate.loe(date).andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())))
-        .fetchOne();
+        .orderBy(pcc.beginDate.asc())
+        .fetchFirst();
 
     return Optional.fromNullable(result);
   }
