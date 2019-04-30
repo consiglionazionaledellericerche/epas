@@ -1015,6 +1015,7 @@ public class PersonDayManager {
     //(1)Costruisco le coppie valide per calcolare il worktime
     List<PairStamping> validPairs = Lists.newArrayList();
     List<Stamping> serviceStampings = Lists.newArrayList();
+    List<Stamping> tunnelStampings = Lists.newArrayList();
     Stamping stampEnter = null;
 
     for (Stamping stamping : orderedStampings) {
@@ -1025,6 +1026,10 @@ public class PersonDayManager {
         serviceStampings.add(stamping);
         continue;
       }
+//      if (stamping.stampType == StampTypes.TUNNEL) {
+//        tunnelStampings.add(stamping);
+//        continue;
+//      }
       //cerca l'entrata
       if (stampEnter == null) {
         if (stamping.isIn()) {
@@ -1083,6 +1088,33 @@ public class PersonDayManager {
         stamping.valid = false;
       }
     }
+    
+    //(2a) scarto le stamping di tunnel di timbratura che non appartengono ad alcuna coppia valida
+//    List<Stamping> tunnelStampingsToCheck = Lists.newArrayList();
+//    for (Stamping stamping : tunnelStampings) {
+//      boolean belongToValidPairNotTunnel = false;
+//      boolean belongToValidPairTunnel = false;
+//      for (PairStamping validPair : validPairs) {
+//        LocalDateTime outTime = validPair.second.date;
+//        LocalDateTime inTime = validPair.first.date;
+//        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
+//          if (validPair.second.stampType == StampTypes.TUNNEL
+//              || validPair.first.stampType == StampTypes.TUNNEL) {
+//            belongToValidPairTunnel = true;
+//          } else {
+//            belongToValidPairNotTunnel = true;
+//          }
+//          break;
+//        }
+//      }
+//      if (belongToValidPairNotTunnel) {
+//        tunnelStampingsToCheck.add(stamping);
+//      } else if (belongToValidPairTunnel) {
+//        stamping.valid = true;         //capire se è corretto...
+//      } else {
+//        stamping.valid = false;
+//      }
+//    }
 
     //(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
     for (PairStamping validPair : validPairs) {
@@ -1123,6 +1155,45 @@ public class PersonDayManager {
         }
       }
     }
+    //(3a) aggrego le stampings del tunnel per coppie valide ed eseguo il check di coppia valida
+//    for (PairStamping validPair : validPairs) {
+//      LocalDateTime outTime = validPair.second.date;
+//      LocalDateTime inTime = validPair.first.date;
+//      List<Stamping> tunnelStampingsInSinglePair = tunnelStampingsToCheck.stream()
+//          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+//          .collect(Collectors.toList());
+//      //check
+//      Stamping tunnelExit = null;
+//      for (Stamping stamping : tunnelStampingsInSinglePair) {
+//        //cerca l'uscita di tunnel
+//        if (tunnelExit == null) {
+//          if (stamping.isOut()) {
+//            tunnelExit = stamping;
+//            continue;
+//          }
+//          if (stamping.isIn()) {
+//            //una entrata di tunnel prima di una uscita da tunnel e' come se non esistesse
+//            stamping.valid = false;
+//            continue;
+//          }
+//        }
+//        //cerca l'entrata nel tunnel
+//        if (tunnelExit != null) {
+//          if (stamping.isIn()) {
+//            stamping.valid = true;
+//            tunnelExit.valid = true;
+//            tunnelExit = null;
+//            continue;
+//          }
+//          //trovo una seconda uscita da tunnel, butto via la prima
+//          if (stamping.isOut()) {
+//            tunnelExit.valid = false;
+//            tunnelExit = stamping;
+//            continue;
+//          }
+//        }
+//      }
+//    }
 
     return validPairs;
   }
