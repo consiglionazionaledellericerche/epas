@@ -17,7 +17,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
@@ -148,8 +148,11 @@ public class Vacations extends Controller {
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     
     for (Person person : personList) {
-
-      for (Contract contract : person.contracts) {
+      if (person.id == 3486) {
+        log.debug("find!");
+      }
+      List<Contract> contracts = person.contracts.stream().distinct().collect(Collectors.toList());
+      for (Contract contract : contracts) {
 
         IWrapperContract cwrContract = wrapperFactory.create(contract);
         if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
