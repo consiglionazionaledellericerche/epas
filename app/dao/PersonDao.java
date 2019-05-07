@@ -1,6 +1,7 @@
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import lombok.val;
 import manager.configurations.EpasParam;
 import models.BadgeReader;
 import models.CompetenceCode;
@@ -44,7 +44,6 @@ import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
-import models.query.QVacationPeriod;
 import models.query.QWorkingTimeType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -381,6 +380,7 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Matricola per persona ed ufficio.
    * @param number la matricola passata come parametro.
    * @return la persona corrispondente alla matricola passata come parametro.
    */
@@ -603,7 +603,7 @@ public final class PersonDao extends DaoBase {
     final JPQLQuery<Person> query = getQueryFactory().selectFrom(person)
 
         // join one to many or many to many (only one bag fetchable!!!)
-        .leftJoin(person.contracts, contract).fetchJoin()
+        .leftJoin(person.contracts, contract)
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
         .leftJoin(person.user, QUser.user)
         .leftJoin(person.groups, QGroup.group)
@@ -856,7 +856,7 @@ public final class PersonDao extends DaoBase {
    * Query ad hoc fatta per i Jobs che inviano le email di alert per segnalare problemi sui giorni.
    *
    * @return la Lista di tutte le persone con i requisiti adatti per poter effettuare le
-   * segnalazioni dei problemi.
+   *        segnalazioni dei problemi.
    */
   public List<Person> eligiblesForSendingAlerts() {
 
@@ -929,7 +929,7 @@ public final class PersonDao extends DaoBase {
    * attestati, parametro wantEmail true etc...)
    *
    * @return La lista contenente tutti i tecnologi e ricercatori delle sedi nelle quali è attiva
-   * l'autocertificazione.
+   *        l'autocertificazione.
    */
   public List<Person> trWithAutocertificationOn() {
 
