@@ -351,7 +351,7 @@ public class TemplateUtility {
     }
 
     List<Person> personList = personDao.listPerseo(Optional.<String>absent(), offices, false,
-        LocalDate.now(), LocalDate.now(), true).list();
+        LocalDate.now(), LocalDate.now(), false).list();
 
     List<User> users = Lists.newArrayList();
     for (Person person : personList) {
