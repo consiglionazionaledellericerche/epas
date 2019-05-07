@@ -352,6 +352,10 @@ public class ShiftManager2 {
         shiftTroubles.add(ShiftTroubles.PERSON_IS_ABSENT);
       }
 
+      if (personShiftDay.date.isBefore(today)) {
+        fixShiftTrouble(personShiftDay, ShiftTroubles.FUTURE_DAY);        
+      }
+
       // Nelle date passate posso effettuare i controlli sul tempo a lavoro
       if (personShiftDay.date.isBefore(today)) {
 
@@ -370,9 +374,7 @@ public class ShiftManager2 {
             .collect(Collectors.toList());
 
         // Se ci sono timbrature valide..
-        if (slotBegin != null && slotEnd != null && !shiftPairs.isEmpty()) {
-
-    
+        if (slotBegin != null && slotEnd != null && !shiftPairs.isEmpty()) {   
 
           // 2.a Verifiche sulle soglie
 
@@ -898,5 +900,6 @@ public class ShiftManager2 {
     }
     return list;
   }
-
+  
+  
 }

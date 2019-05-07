@@ -208,7 +208,6 @@ public class Calendar extends Controller {
       List<PersonShiftShiftType> people = shiftManager2.shiftWorkers(activity.get(), start, end);
 
       int index = 0;
-
       // prende i turni associati alle persone attive in quel turno
       for (PersonShiftShiftType personShift : people) {
         final Person person = personShift.personShift.person;
@@ -251,8 +250,13 @@ public class Calendar extends Controller {
               .borderColor(color.borderColor)
               .className("removable")
               .build();
-
+          
+          if (shiftDay.date.isBefore(LocalDate.now())) {
+            shiftManager2.fixShiftTrouble(shiftDay, ShiftTroubles.FUTURE_DAY);        
+          }
+          
           if (!shiftDay.troubles.isEmpty()) {
+            
             final List<String> troubles = shiftDay.troubles.stream()
                 .map(trouble -> Messages
                     .get(trouble.cause.getClass().getSimpleName() + "." + trouble.cause.name()))
@@ -263,6 +267,8 @@ public class Calendar extends Controller {
           return event;
         }).collect(Collectors.toList());
   }
+  
+
 
   /**
    * @param person Persona della quale recuperare le assenze
