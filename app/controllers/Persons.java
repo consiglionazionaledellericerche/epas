@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
-import manager.StabilizeManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecap;
@@ -88,9 +87,7 @@ public class Persons extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
-  @Inject
-  static StabilizeManager stabilizeManager;
-
+  
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -117,75 +114,7 @@ public class Persons extends Controller {
 
     render(personList, office);
   }
-
-  /**
-   * Metodo che visualizza il risultato della funzionalità di stabilizzazione e permette la
-   * persistenza dell'informazione.
-   *
-   * @param personId l'identificativo della persona da stabilizzare
-   */
-  public static void stabilize(Long personId, boolean step, Integer residuoOrario,
-      Integer buoniPasto, Integer ferieAnnoPassato, Integer ferieAnnoPresente, Integer permessi) {
-    LocalDate firstDayNewContract = StabilizeManager.firstDayNewContract;
-    Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-
-    rules.checkIfPermitted(person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(person);
-    boolean isNotTime = false;
-    //Controllo se non sono ancora al 27 dicembre...
-    if (LocalDate.now().isBefore(firstDayNewContract)) {
-      isNotTime = true;
-      render(firstDayNewContract, step, isNotTime, wrPerson);
-    }
-    Optional<Contract> contract = wrPerson.getCurrentContract();
-    if (!step) {
-      //Qui faccio vedere all'amministratore cosa caricherò sul nuovo contratto che sto per creare
-      step = true;
-
-      if (contract.isPresent()) {
-
-        PersonStampingRecap psDto = stampingsRecapFactory
-            .create(person, firstDayNewContract.getYear(),
-                firstDayNewContract.getMonthOfYear(), true);
-        for (IWrapperContractMonthRecap mese : psDto.contractMonths) {
-          if (mese.getValue().month == firstDayNewContract.getMonthOfYear()) {
-            residuoOrario = mese.getValue().remainingMinutesCurrentYear
-                + mese.getValue().remainingMinutesLastYear;
-            //sottraggo dal residuo mensile la somma delle eventuali differenze maturate dal giorno 
-            //della stabilizzazione al giorno in cui viene lanciata la procedura se questa viene 
-            //lanciata in un giorno successivo al 27/12/2018
-            residuoOrario -= stabilizeManager.adjustResidual(wrPerson);
-            buoniPasto = mese.getValue().remainingMealTickets;
-          }
-        }
-        GroupAbsenceType vacationGroup = absenceComponentDao
-            .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
-        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract.get(),
-            firstDayNewContract.getYear(), vacationGroup, Optional.absent(), true);
-        if (vacationSituation == null) {
-          log.warn("Non esiste il riepilogo!!!");
-          render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario,
-              buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
-        }
-        ferieAnnoPassato = vacationSituation.lastYearCached.usable;
-        ferieAnnoPresente = vacationSituation.currentYearCached.usable;
-        permessi = vacationSituation.permissionsCached.usable;
-
-        render(firstDayNewContract, step, psDto, isNotTime, wrPerson, residuoOrario,
-            buoniPasto, ferieAnnoPassato, ferieAnnoPresente, permessi);
-      } else {
-        Boolean outOfContract = true;
-        render(firstDayNewContract, step, isNotTime, outOfContract);
-      }
-    } else {
-
-      stabilizeManager.stabilizePerson(wrPerson, residuoOrario, buoniPasto,
-          ferieAnnoPassato, ferieAnnoPresente, permessi);
-      flash.success("Stabilizzato %s", wrPerson.getValue().fullName());
-      list(person.office.id, null);
-    }
-  }
+  
 
   /**
    * metodo che gestisce la pagina di inserimento persona.
