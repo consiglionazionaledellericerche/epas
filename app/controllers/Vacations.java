@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -12,33 +11,24 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.VacationSituation;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
-
 import models.Contract;
 import models.Office;
 import models.Person;
 import models.User;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -148,11 +138,7 @@ public class Vacations extends Controller {
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     
     for (Person person : personList) {
-      if (person.id == 3486) {
-        log.debug("find!");
-      }
-      List<Contract> contracts = person.contracts.stream().distinct().collect(Collectors.toList());
-      for (Contract contract : contracts) {
+      for (Contract contract : person.contracts) {
 
         IWrapperContract cwrContract = wrapperFactory.create(contract);
         if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
