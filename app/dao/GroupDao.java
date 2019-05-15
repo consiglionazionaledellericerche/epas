@@ -73,7 +73,7 @@ public class GroupDao extends DaoBase {
   public Optional<Group> checkManagerPerson(Person manager, Person person) {
     final QGroup group = QGroup.group;
     final Group result = getQueryFactory().selectFrom(group)
-        .where(group.manager.eq(manager).and(group.people.contains(person))).fetchOne();
+        .where(group.manager.eq(manager).and(group.people.contains(person))).fetchFirst();
     return Optional.fromNullable(result);
   }
 }
