@@ -99,7 +99,6 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  @NotAudited
   public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
