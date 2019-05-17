@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
@@ -42,6 +43,11 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 2,
       GroupAbsenceTypePattern.programmed, PeriodType.month, 
       DefaultTakable.T_19, DefaultComplation.C_19, null, false, false),
+  G_19_DIPENDENTI("19 - Permesso per dipendente disabile L. 104/92 tre giorni mese", 
+      "", 
+      DefaultCategoryType.L_104_DIPENDENTI, 2,
+      GroupAbsenceTypePattern.programmed, PeriodType.month, 
+      DefaultTakable.T_19, DefaultComplation.C_19, null, false, false),
   G_19P("19P - Permesso provv. per dipendente disabile L. 104/92 tre giorni mese", 
       "", 
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0,
@@ -51,6 +57,11 @@ public enum DefaultGroup {
   G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", 
       "", 
       DefaultCategoryType.ALTRI_104, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_26, null, null, false, false),
+  G_26_DIPENDENTI("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", 
+      "", 
+      DefaultCategoryType.ALTRI_104_DIPENDENTI, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_26, null, null, false, false),
   
@@ -423,7 +434,12 @@ public enum DefaultGroup {
   }
   
   public static List<String> employeeDisabledPersonCodes() {
-    return getCodes(DefaultGroup.G_19);
+    List<String> g19 = getCodes(DefaultGroup.G_19_DIPENDENTI);
+    List<String> g26 = getCodes(DefaultGroup.G_26_DIPENDENTI);
+    
+    return Stream.of(g19,g26)
+        .flatMap(x -> x.stream())
+        .collect(Collectors.toList());
   }
   
   private static List<String> getCodes(DefaultGroup defaultGroup) {
