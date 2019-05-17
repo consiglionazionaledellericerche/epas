@@ -80,7 +80,7 @@ public class PersonShiftDayDao extends DaoBase {
     return getQueryFactory().selectFrom(personShiftDay).where(personShiftDay.date.eq(date)
         .and(personShiftDay.shiftType.eq(shiftType)
             .and(personShiftDay.shiftSlot.eq(shiftSlot))))
-        .fetchOne();
+        .fetchFirst();
   }
 
 
@@ -126,7 +126,7 @@ public class PersonShiftDayDao extends DaoBase {
 
     return Optional.fromNullable(getQueryFactory().selectFrom(shiftDay)
         .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date)))
-        .fetchOne());
+        .fetchFirst());
   }
 
   /**
@@ -140,7 +140,7 @@ public class PersonShiftDayDao extends DaoBase {
 
     return Optional.fromNullable(getQueryFactory().selectFrom(shiftDay)
         .where(shiftDay.shiftType.eq(shiftType).and(shiftDay.date.eq(date)))
-        .fetchOne());
+        .fetchFirst());
   }
 
   public long countByPersonAndDate(Person person, LocalDate date) {
