@@ -71,6 +71,15 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  DISABLED_PERSON_PERMISSION("disabled_person_permission",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
 
   OFF_SITE_ABSENCE_WITH_CONVENTION("off_site_absence_with_convention",
 

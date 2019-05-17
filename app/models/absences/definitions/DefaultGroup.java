@@ -422,6 +422,10 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.TELELAVORO);
   }
   
+  public static List<String> employeeDisabledPersonCodes() {
+    return getCodes(DefaultGroup.G_19);
+  }
+  
   private static List<String> getCodes(DefaultGroup defaultGroup) {
     return defaultGroup.takable.takableCodes.stream()
         .map(tc -> tc.getCode()).collect(Collectors.toList());

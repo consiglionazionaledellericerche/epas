@@ -1905,6 +1905,24 @@ then
  $c.grant();
 end
 
+/******************************************************************
+ * Azioni per utente employee abilitato alla assenza per telelavoro
+ ******************************************************************/
+rule Disabled_person
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"
+    ), granted == false, target == null)
+then
+ $c.grant();
+end
+
 /************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
  ***********************************************************************************/
@@ -1972,6 +1990,19 @@ then
  $c.grant();
 end
 
+/*********************************************************************************************
+ * Un dipendente può autocertificare le proprie assenze per permesso dipendente disabile se...
+ *********************************************************************************************/
+rule employeeCanInsertAbsencesDisabledPerson
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
 /*****************************************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per lavoro fuori sede in convenzione se:
  *****************************************************************************************************/
@@ -2000,6 +2031,22 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.TELEWORK, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeTeleworkCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per telelavoro se:
+ *******************************************************************************/
+rule EmployeeCanEditDisabledPersonAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeDisabledPersonCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
