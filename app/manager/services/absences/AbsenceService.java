@@ -512,6 +512,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
     final GroupAbsenceType telework = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
+    final GroupAbsenceType disabledPersonAbsence = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_19.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -554,6 +556,10 @@ public class AbsenceService {
       
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_PERSON_PERMISSION)) {
+        groupsPermitted.add(disabledPersonAbsence);
       }
 
       log.info("groupPermitted = {}", groupsPermitted);
