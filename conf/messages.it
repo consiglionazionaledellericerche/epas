@@ -911,6 +911,7 @@ OFF_SITE_STAMPING=Inserimento timbratura lavoro fuori sede
 OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con convenzione
 MATERNITY_PERIOD=Periodo Maternità
 TELEWORK=Telelavoro
+DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
