@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
@@ -20,6 +21,7 @@ import play.data.validation.Required;
 @Table(
     name = "contract_month_recap",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"year", "month", "contract_id"})})
+@Audited
 public class ContractMonthRecap extends BaseModel {
 
   private static final long serialVersionUID = 5381901476391668672L;
