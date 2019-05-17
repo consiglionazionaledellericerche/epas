@@ -30,7 +30,7 @@ public enum DefaultTab {
   FERIE_DIPENDENTI("Ferie e Permessi", 10),
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11),
   TELELAVORO("Telelavoro", 12),
-  
+  LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
   AUTOMATICI("Codici Automatici", 11);
   
   public String description;
