@@ -1,5 +1,21 @@
 package manager.charts;
 
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.gdata.util.common.base.Preconditions;
+import controllers.Charts.ExportFile;
+import dao.CompetenceCodeDao;
+import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import it.cnr.iit.epas.DateUtility;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -19,45 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import javax.inject.Inject;
-
-import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-
-import controllers.Charts.ExportFile;
-import dao.CompetenceCodeDao;
-import dao.PersonDao;
-import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContract;
-import dao.wrapper.IWrapperFactory;
-import dao.wrapper.IWrapperPerson;
-import it.cnr.iit.epas.DateUtility;
 import jobs.ChartJob;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +60,24 @@ import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.exports.PersonOvertime;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.libs.F;
 
 public class ChartsManager {
@@ -98,10 +94,6 @@ public class ChartsManager {
   /**
    * Costruttore.
    *
-   * @param competenceCodeDao competenceCodeDao
-   * @param personDao personDao
-   * @param vacationsService vacationsService
-   * @param wrapperFactory wrapperFactory
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao, PersonDao personDao,
@@ -119,8 +111,10 @@ public class ChartsManager {
 
 
   /**
-   * @return la lista dei competenceCode che comprende tutti i codici di straordinario presenti in
-   *         anagrafica.
+   * La lista dei competenceCode che comprende tutti i codici di straordinario presenti in
+   * anagrafica.
+   * 
+   * @return la lista dei competenceCode.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
     List<CompetenceCode> codeList = Lists.newArrayList();
@@ -134,6 +128,8 @@ public class ChartsManager {
   }
 
   /**
+   * Costruisce la lista dei PersonOvertime corrispondenti ai parametri passati.
+   * 
    * @return la lista dei personOvertime.
    */
   public List<PersonOvertime> populatePersonOvertimeList(List<Person> personList,
@@ -174,6 +170,8 @@ public class ChartsManager {
 
 
   /**
+   * La lista dei personOvertime con i valori su base annuale.
+   * 
    * @return la lista dei personOvertime con i valori su base annuale.
    */
   public List<PersonOvertime> populatePersonOvertimeListInYear(List<Person> personList,
@@ -217,7 +215,7 @@ public class ChartsManager {
 
 
   /**
-   * Javadoc da scrivere
+   * Javadoc da scrivere.
    *
    * @param file file
    * @return la situazione dopo il check del file.
@@ -247,6 +245,9 @@ public class ChartsManager {
   }
 
   /**
+   * Esporta in un file la situazione di ore in più, ore di straordinario e riposi
+   * compensativi delle persone passate per parametro.
+   * 
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
    *         compensativi per ciascuna persona della lista passata come parametro relativa all'anno
    *         year.
@@ -341,6 +342,9 @@ public class ChartsManager {
   }
 
   /**
+   * Esporta in un file la situazione in termini di ferie usate anno corrente e passato, permessi 
+   * usati e residuo di una persona.
+   * 
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
    *         residuo per la persona passata come parametro.
    */
@@ -405,7 +409,7 @@ public class ChartsManager {
   }
 
   /**
-   * @param file file daparsare per il recupero delle informazioni sulle assenze
+   * @param file file da parsare per il recupero delle informazioni sulle assenze
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
    *         tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
    */
