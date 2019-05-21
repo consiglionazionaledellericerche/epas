@@ -18,7 +18,7 @@ import models.PersonReperibility;
 import models.PersonShift;
 
 import org.joda.time.LocalDate;
-
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
@@ -37,6 +37,13 @@ public class FixReperibilityShiftDates extends Job<Void> {
   
   @Override
   public void doJob() {
+    
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
+    
     CompetenceCode t1 = codeDao.getCompetenceCodeByCode(T1);
     CompetenceCode fer = codeDao.getCompetenceCodeByCode(Fer);
     
