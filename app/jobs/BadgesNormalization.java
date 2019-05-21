@@ -1,20 +1,17 @@
 package jobs;
 
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.BadgeManager;
-
 import models.Badge;
-
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 /**
+ * Normalizza eventuali numeri di bagde non corretti.
+ * 
  * @author daniele
  * @since 30/06/16.
  */
