@@ -85,10 +85,15 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_661M, DefaultAbsenceType.A_661G),  // takable
       1080, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
 
-  T_89(AmountType.minutes, 
-      ImmutableSet.of(DefaultAbsenceType.A_89M), 
-      ImmutableSet.of(DefaultAbsenceType.A_89M), 
-      9000, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
+//  T_89(AmountType.minutes, 
+//      ImmutableSet.of(DefaultAbsenceType.A_89M), 
+//      ImmutableSet.of(DefaultAbsenceType.A_89M), 
+//      9000, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
+  
+  T_STUDIO(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_89M, DefaultAbsenceType.A_99), 
+      ImmutableSet.of(DefaultAbsenceType.A_89M, DefaultAbsenceType.A_99), 
+      9000, TakeAmountAdjustment.workingTimePercent),
 
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
