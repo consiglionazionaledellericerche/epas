@@ -26,6 +26,12 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 
+/**
+ * Classi di supporto per l'invio delle segnalazioni utente.
+ * 
+ * @author cristian
+ *
+ */
 @Slf4j
 public class ReportCentre extends Controller {
 
@@ -74,6 +80,9 @@ public class ReportCentre extends Controller {
     }
   }
 
+  /**
+   * Form per l'invio di ulteriori informazioni relativemante ad un ticket OIL.
+   */
   public static void oilUserReply(@Required String id, @Required String azione) {
     if (Validation.hasErrors()) {
       flash.error(Web.MSG_HAS_ERRORS);
@@ -82,6 +91,9 @@ public class ReportCentre extends Controller {
     render(id, azione);
   }
 
+  /**
+   * Invio ad OIL delle informazioni aggiuntive relative ad un ticket.
+   */
   public static void sendOilUserReplay(@Required String id, @Required String azione,
       @Required String description) {
     if (Validation.hasErrors()) {

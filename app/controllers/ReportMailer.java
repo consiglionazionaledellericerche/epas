@@ -4,11 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import dao.UserDao;
-
 import helpers.deserializers.InlineStreamHandler;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,17 +13,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import models.Role;
 import models.User;
 import models.exports.ReportData;
-
 import org.apache.commons.mail.EmailAttachment;
-
 import play.Play;
 import play.mvc.Mailer;
 import play.mvc.Scope;
@@ -94,8 +87,13 @@ public class ReportMailer extends Mailer {
       setReplyTo(user.get().person.email);
     }
     setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL_FROM));
-    setSubject(Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT));
-
+    val username = user.isPresent() 
+        ? user.get().person != null 
+          ? user.get().person.getFullname() : user.get().username : "utente anonimo"; 
+    setSubject(
+        String.format("%s: %s", 
+            Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT),
+            username));
     try {
       ByteArrayOutputStream htmlGz = new ByteArrayOutputStream();
       GZIPOutputStream gz = new GZIPOutputStream(htmlGz);
