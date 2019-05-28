@@ -1,0 +1,18 @@
+<table class="table">
+	<tr>
+		<th>Ufficio</th><th>Sede id</th><th>codice</th>
+		<th>indirizzo</th><th>sede principale</th>
+	</tr>
+	#{list items:_offices, as:'office'}
+		<tr>		
+			<td>${office.name}</td>
+			<td>${office.codeId}</td>
+			<td>${office.code}</td>
+			<td>${office.address}</td>
+			<td>
+				<i class="fa ${office.headQuarter ? 'fa-check-square-o' : 'fa-square-o text-muted'}"></i>
+                 <span class="sr-only">${office.headQuarter ? 'si':'no'}</span>			
+			</td>
+		</tr>
+	#{/list}
+</table>  	 
