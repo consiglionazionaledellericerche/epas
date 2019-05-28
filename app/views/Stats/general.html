@@ -1,0 +1,98 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Statistiche utilizzo del sistema'  /}
+
+<div class="container">
+  #{title title:('Statistiche utilizzatori del sistema') /}
+    
+  <div class="pull-right">
+	  #{b.buttons}
+	    #{b.link @Stats.exportStats(), fa:'download'}Esporta in Excel#{/b.link}
+	  #{/b.buttons}
+  </div>
+  
+  #{accordionGroup 'stats'}
+  
+    #{accordionItem 'generalInfo',
+    	title:'Dati generali', open:true, parent:'stats'}
+
+		<ul class="list-group">
+	  	  <li class="list-group-item">
+	    	<span class="badge">${institutes.size()}</span>
+	    	Istituti
+	  	  </li>
+	  	  <li class="list-group-item">
+	    	<span class="badge">${departments.size()}</span>
+	    	Dipartimenti
+	  	  </li>
+	  	  <li class="list-group-item">
+	    	<span class="badge">${numberOfOffices}</span>
+	    	Uffici Totali
+	  	  </li>
+	  	  <li class="list-group-item">
+	    	<span class="badge">${headQuarterOffices.size()}</span>
+	    	Uffici SAC
+	  	  </li>
+		</ul>
+	    
+	    <ul class="list-group">
+	  	  <li class="list-group-item">
+	    	<span class="badge">${numberOfPersons}</span>
+	    	Numero dipendenti in anagrafica
+	  	  </li>
+	  	  <li class="list-group-item">
+	    	<span class="badge">${numberOfTopLevels}</span>
+	    	Numero dipendenti livelli I - III
+	  	  </li>
+	  	  <li class="list-group-item">
+	    	<span class="badge">${numberOfTechnicians}</span>
+	    	Numero dipendenti livelli IV - VIII
+	  	  </li>	  	  
+		</ul>
+	    
+	    <ul class="list-group">
+	    	<li class="list-group-item">
+	    	<span class="badge">${numberOfHeadQuarterPersons}</span>
+	    	Numero dipendenti della SAC
+	  	  </li>
+	    </ul>             
+    #{/accordionItem}
+    
+	#{accordionItem 'istitutes', 
+	  title:"Istituti <span class=\"badge\">${institutes.size()}</span>".raw(), 
+	  open:false, parent:'stats', color:'primary'}
+	  #{accordionGroup 'institutesDetails'}
+  	  	#{list items:institutes, as:'institute'}	  	
+		  #{accordionItem 'offices' + institute.code, 
+			title:"${institute.name} ( ${institute.code} ). Sedi <span class=\"badge\">${institute.seats.size()}</span>".raw(),
+			open:close, parent:'institutesDetails', color:'primary'}
+			#{officesTable offices:institute.seats /}			
+		  #{/accordionItem}
+	  	#{/list}
+	  #{/accordionGroup}
+	#{/accordionItem}
+
+	#{accordionItem 'departments', 
+	  title:"Dipartimenti <span class=\"badge\">${departments.size()}</span>".raw(), 
+	  open:false, parent:'stats', color:'primary'}
+	  #{accordionGroup 'departmentsDetails'}
+  	  	#{list items:departments, as:'institute'}	  			
+			#{accordionItem 'departmentOffices' + institute.code, 
+		  		title:"${institute.name}. ( ${institute.code} ). Sedi <span class=\"badge\">${institute.seats.size()}</span>".raw(),
+		  		open:close, parent:'departmentsDetails', color:'primary'}
+				#{officesTable offices:institute.seats /} 		  		
+		  	#{/accordionItem}
+	  	#{/list}
+	  #{/accordionGroup}
+	#{/accordionItem}
+	
+	#{accordionItem 'headQuarterOffices', 
+	  title:"Uffici SAC <span class=\"badge\">${headQuarterOffices.size()}</span>".raw(), 
+	  open:false, parent:'stats', color:'primary'}
+		#{officesTable offices:headQuarterOffices /}		  
+	#{/accordionItem}
+
+  #{/accordionGroup}
+	
+	
+</div>

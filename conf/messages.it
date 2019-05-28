@@ -777,6 +777,9 @@ Stampings.missingStamping= Riepilogo problemi sui giorni
 Stampings.stampingsByAdmin= Timbrature da amministratore
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
+
+Stats.general =Statistiche utilizzatori
+
 Synchronizations.institutes= Sincronizza Sedi
 Synchronizations.people= Sincronizza Personale
 Synchronizations.badges= Sincronizza Badges
