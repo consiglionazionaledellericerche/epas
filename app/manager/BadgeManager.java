@@ -42,7 +42,7 @@ public class BadgeManager {
    */
   public void normalizeBadgeCode(Badge badge, boolean persist) {
     try {
-      String code = badge.code;
+      String code = badge.code.trim();
       Integer number = Integer.parseInt(code);
       badge.code = String.valueOf(number);
       if (!code.equals(String.valueOf(number))) {
