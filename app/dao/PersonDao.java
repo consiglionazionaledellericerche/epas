@@ -1,7 +1,6 @@
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -82,7 +81,21 @@ public final class PersonDao extends DaoBase {
         true, Optional.absent(), Optional.absent(), false).fetch();
   }
 
+  /**
+   * Lista dei tecnici attivi per anno/mese su set di sedi.
+   *
+   * @param offices la lista degli uffici
+   * @param yearMonth l'oggetto anno/mese
+   * @return la lista delle persone di un certo ufficio attive in quell'anno/mese.
+   */
+  public List<Person> getActiveTechnicianInMonth(Set<Office> offices, YearMonth yearMonth) {    
+    return personQuery(Optional.absent(), offices, true, 
+        Optional.of(yearMonth.toLocalDate(1)), 
+        Optional.of(yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue()),
+        true, Optional.absent(), Optional.absent(), false).fetch();
+  }
 
+  
   /**
    * La lista di persone una volta applicati i filtri dei parametri. (Dovrà sostituire list
    * deprecata). TODO: Perseo significa che utilizza i metodi puliti di paginazione implementati da

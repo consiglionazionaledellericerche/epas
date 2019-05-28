@@ -35,6 +35,8 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
+   * Preleva l'office dal suo id.
+   * 
    * @return l'ufficio identificato dall'id passato come parametro.
    */
   public Office getOfficeById(Long id) {
@@ -46,6 +48,8 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
+   * Tutti gli Uffici presenti.
+   * 
    * @return la lista di tutti gli uffici presenti sul database.
    */
   public List<Office> getAllOffices() {
@@ -55,6 +59,7 @@ public class OfficeDao extends DaoBase {
     return getQueryFactory().selectFrom(office).fetch();
   }
 
+  
   /**
    * @return l'ufficio associato al codice passato come parametro.
    */

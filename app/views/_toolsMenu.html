@@ -53,6 +53,9 @@
       #{secure.li @AbsenceGroups.certificationsAbsences(session.get("personSelected"), session.get("yearSelected")) }
       <i class="fa fa-cloud" aria-hidden="true"></i>
       #{/secure.li}
+      #{secure.li @Stats.general() }
+      <i class="fa fa-bar-chart" aria-hidden="true"></i>
+      #{/secure.li}
 
     </ul>
   </li>
