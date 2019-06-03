@@ -174,7 +174,10 @@ public class Contracts extends Controller {
     contract.endDate = endDate;
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
-    contract.isTemporaryMissing = isTemporaryMissing;
+    if (isTemporaryMissing != null) {
+      contract.isTemporaryMissing = isTemporaryMissing;  
+    }
+
     if (!contractManager.isContractNotOverlapping(contract)) {
       Validation.addError("contract.crossValidationFailed",
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
