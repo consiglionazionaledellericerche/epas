@@ -99,7 +99,7 @@ public enum DefaultGroup {
       DefaultCategoryType.VISITA_MEDICA, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_631, DefaultComplation.C_631, null, false, true),
-      MISSIONE_GIORNALIERA("Missione giornaliera", 
+  MISSIONE_GIORNALIERA("Missione giornaliera", 
       "", 
       DefaultCategoryType.MISSIONE_CNR, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
