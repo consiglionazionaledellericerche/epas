@@ -391,6 +391,7 @@ office=Sede
 officeIds= Sedi su cui associare l'utente
 
 onCertificate=In attestati
+isTemporaryMissing =Informazioni tempo determinato mancanti
 
 disabledUser= Utente disabilitato
 orphanUser= Utente Orfano

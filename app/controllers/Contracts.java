@@ -118,9 +118,10 @@ public class Contracts extends Controller {
     LocalDate endDate = contract.endDate;
     LocalDate endContract = contract.endContract;
     boolean onCertificate = contract.onCertificate;
-
+    boolean isTemporaryMissing = contract.isTemporaryMissing;
+    
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate);
+        onCertificate, isTemporaryMissing);
   }
 
   /**
@@ -135,7 +136,7 @@ public class Contracts extends Controller {
    */
   public static void update(@Valid Contract contract, @Required LocalDate beginDate,
       @Valid LocalDate endDate, @Valid LocalDate endContract,
-      boolean onCertificate, boolean confirmed) {
+      boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -173,6 +174,10 @@ public class Contracts extends Controller {
     contract.endDate = endDate;
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
+    if (isTemporaryMissing != null) {
+      contract.isTemporaryMissing = isTemporaryMissing;  
+    }
+
     if (!contractManager.isContractNotOverlapping(contract)) {
       Validation.addError("contract.crossValidationFailed",
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
@@ -189,7 +194,7 @@ public class Contracts extends Controller {
       confirmed = true;
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-          onCertificate, recomputeRecap);
+          onCertificate, isTemporaryMissing, recomputeRecap);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
