@@ -153,8 +153,8 @@ public class MissionManager {
     List<Absence> existingMissionWithoutId = 
         absenceDao.filteredByTypes(body.person, body.dataInizio.toLocalDate(), 
             body.dataFine.toLocalDate(), types);
-    if (!existingMissionWithoutId.isEmpty() && 
-        existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
+    if (!existingMissionWithoutId.isEmpty()  
+        && existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
             || abs.absenceType.code.equals("92M"))) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
           + " nei giorni {}-{}. Questa missione non viene processata.", 
@@ -621,35 +621,42 @@ public class MissionManager {
    * @param actualDate la data attuale su cui lavorare
    */
   private void atomicInsert(Situation situation, MissionFromClient body, LocalDateTime actualDate) {
+    boolean missionInserted = false;
+    
     if (situation.isFirstOrLastDay) {
       if (situation.difference < 0) {
         //sono partito dopo la fine della giornata lavorativa o sono tornato prima dell'inizio 
         //della stessa --> metto un 92M con 1 minuto
         if (insertMission(body.destinazioneMissione, body.person, new Integer(0), new Integer(-1), 
             actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
-          recalculate(body, Optional.<List<Absence>>absent());            
+          missionInserted = true;
         } 
       } else {
         if (situation.difference 
             > getFromDayOfMission(body.person, actualDate.toLocalDate()).workingTime) {
           if (insertMission(body.destinazioneMissione, body.person,  
               null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
-            recalculate(body, Optional.<List<Absence>>absent());            
+            missionInserted = true;
           } 
         } else {
           if (insertMission(body.destinazioneMissione, body.person,  
               new Integer(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
               new Integer(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
               actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
-            recalculate(body, Optional.<List<Absence>>absent());            
+            missionInserted = true;
           } 
         }        
       }
     } else {
       if (insertMission(body.destinazioneMissione, body.person,  
           null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
-        recalculate(body, Optional.<List<Absence>>absent());            
+        missionInserted = true;
       } 
+    }
+    if (missionInserted) {
+      log.info("Inserita missione {} per il giorno {}. id = {}, "
+          + "idOrdine = {}, anno = {}, numero = {}", body.destinazioneMissione, 
+          actualDate, body.id, body.idOrdine, body.anno, body.numero);      
     }
   }
   
