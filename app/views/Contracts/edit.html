@@ -55,6 +55,9 @@
 	    	#{f.date 'endDate', value:endDate?.format() /}
 	    	#{f.date 'endContract', value:endContract?.format() /}
 	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
+	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
+	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
 	    	<div class="alert alert-danger">
@@ -75,6 +78,9 @@
 			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
 			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
+			#{secure.check 'Contracts.updateIsTemporyMissing'}
+				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
+			#{/secure.check}				
 			<input type="hidden" name="confirmed" value="true" />
 			
 			#{recomputeRecap.show recomputeRecap:recomputeRecap /}
