@@ -26,6 +26,7 @@ public class Role extends BaseModel {
   public static final String REPERIBILITY_MANAGER = "reperibilityManager";
   public static final String GROUP_MANAGER = "groupManager";
   public static final String MEAL_TICKET_MANAGER = "mealTicketManager";
+  public static final String REGISTRY_MANAGER = "registryManager";
   private static final long serialVersionUID = 6717202212924325368L;
   public String name;
 
@@ -67,6 +68,9 @@ public class Role extends BaseModel {
     }
     if (name.equals(MEAL_TICKET_MANAGER)) {
       return "Gestore buoni pasto";
+    }
+    if (name.equals(REGISTRY_MANAGER)) {
+      return "Gestore anagrafica";
     }
     return name;
   }

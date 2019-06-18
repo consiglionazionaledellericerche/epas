@@ -86,6 +86,15 @@ public class WrapperOffice implements IWrapperOffice {
     Role role = roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER);
     return filterUros(role);
   }
+  
+  /**
+   * 
+   * @return i gestori dell'anagrafica
+   */
+  public List<UsersRolesOffices> getRegistryManagers() {
+    Role role = roleDao.getRoleByName(Role.REGISTRY_MANAGER);
+    return filterUros(role);
+  }
 
   /**
    * Il primo mese per cui è possibile effettuare l'upload degli attestati.

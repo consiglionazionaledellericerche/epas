@@ -827,12 +827,7 @@ when
     "ContractualClauses.list",
     "ContractualClauses.show",
     "Institutes.list",
-    //"MealTickets.editPersonMealTickets",
-    //"MealTickets.findCodeBlock",
-    //"MealTickets.personMealTickets",
-    //"MealTickets.recapMealTickets",
-    //"MealTickets.recapPersonMealTickets",
-    //"MealTickets.returnedMealTickets",
+
     "MonthRecaps.customRecap",
     "MonthRecaps.showRecaps",
     "PersonDays.personDayHistory",
@@ -1141,7 +1136,7 @@ when
  $c: PermissionCheck(action in (
 
         /* Vecchio permesso viewPerson */
-        "Persons.list",
+        //"Persons.list",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
 
@@ -1205,13 +1200,6 @@ when
         "Configurations.edit",
         "Configurations.removeAttachment",
 
-     	//"MealTickets.recapMealTickets",
-     	//"MealTickets.personMealTickets",
-     	//"MealTickets.recapPersonMealTickets",
-        //"MealTickets.editPersonMealTickets",
-     	//"MealTickets.returnedMealTickets",
-        //"MealTickets.findCodeBlock",
-
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
 
@@ -1248,16 +1236,9 @@ when
  $c: PermissionCheck(action in (
 
  	   /* Vecchio permesso viewPerson */
- 	   "Persons.list",
+ 	   //"Persons.list",
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
-
-       //"MealTickets.recapMealTickets",
-       //"MealTickets.personMealTickets",
-       //"MealTickets.recapPersonMealTickets",
-       //"MealTickets.editPersonMealTickets",
-       //"MealTickets.returnedMealTickets",
-       //"MealTickets.findCodeBlock",
 
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
@@ -1331,7 +1312,6 @@ when
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
-        "Persons.insertPerson",
 
         "AbsenceGroups.showGroups",
         "AbsenceGroups.showAbsenceTypes",
@@ -1343,40 +1323,6 @@ when
 		/*********** duplicate prima di avere il contesto office  *************/
 
 		/* Vecchio permesso editPerson */
-		"Persons.stabilize",
-        "Persons.edit",
-        "Persons.update",
-        "Persons.save",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.getAttachment",
-        "Configurations.removeAttachment",
-
-        "Contracts.personContracts",
-        "Contracts.insert",
-        "Contracts.save",
-        "Contracts.edit",
-        "Contracts.update",
-        "Contracts.delete",
-
-        "Contracts.initializationsStatus",
-        "Contracts.initializationsVacation",
-        "Contracts.initializationsMeal",
-        "Contracts.updateSourceContract",
-        "Contracts.updateSourceContractVacation",
-        "Contracts.updateSourceContractMeal",
-     	"Contracts.saveResidualSourceContract",
-     	"Contracts.saveVacationSourceContract",
-     	"Contracts.saveMealTicketSourceContract",
-		"Contracts.updateContractStampProfile",
-        "Contracts.saveContractStampProfile",
-        "Contracts.updateContractWorkingTimeType",
-        "Contracts.saveContractWorkingTimeType",
-        "Contracts.updateContractVacationPeriod",
-        "Contracts.saveContractVacationPeriod",
         
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.initialization",
@@ -1386,25 +1332,6 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences",
-        
-     	"Persons.children",
-     	"Persons.editChild",
-     	"Persons.saveChild",
-     	"Persons.insertChild",
-     	"Persons.deleteChild",
-
-     	"Persons.confirmGroup",
-     	"Persons.removePersonFromGroup",
-
-     	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail",
-
-     	//"MealTickets.submitPersonMealTicket",
-     	//"MealTickets.returnPersonCodeBlock",
-     	//"MealTickets.performReturnPersonCodeBlock",
-        //"MealTickets.deletePersonCodeBlock",
-        //"MealTickets.performDeletePersonCodeBlock",
-        //"MealTickets.mealTicketsLegacy",
 
         /* Vecchio permesso editPersonDay */
         "AbsenceGroups.insert",
@@ -1539,39 +1466,6 @@ when
  $c: PermissionCheck(action in (
 
  		/* Vecchio permesso editPerson */
- 		"Persons.stabilize",
-        "Persons.edit",
-        "Persons.update",
-        "Persons.save",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
-
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.uploadAttachment",
-
-        "Contracts.personContracts",
-        "Contracts.insert",
-        "Contracts.save",
-        "Contracts.edit",
-        "Contracts.update",
-        "Contracts.delete",
-
-        "Contracts.initializationsStatus",
-        "Contracts.initializationsVacation",
-        "Contracts.initializationsMeal",
-        "Contracts.updateSourceContract",
-        "Contracts.updateSourceContractVacation",
-        "Contracts.updateSourceContractMeal",
-     	"Contracts.saveResidualSourceContract",
-     	"Contracts.saveVacationSourceContract",
-     	"Contracts.saveMealTicketSourceContract",
-        "Contracts.updateContractWorkingTimeType",
-        "Contracts.saveContractWorkingTimeType",
-        "Contracts.updateContractVacationPeriod",
-        "Contracts.saveContractVacationPeriod",
-        
         "AbsenceGroups.insertAssisted",
         "AbsenceGroups.findCode",
         "AbsenceGroups.absenceInitializations",
@@ -1583,24 +1477,6 @@ when
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences", 
         
-     	"Persons.children",
-     	"Persons.editChild",
-     	"Persons.saveChild",
-     	"Persons.insertChild",
-     	"Persons.deleteChild",
-
-     	"Persons.confirmGroup",
-     	"Persons.removePersonFromGroup",
-
-     	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail",
-
-     	//"MealTickets.submitPersonMealTicket",
-     	//"MealTickets.returnPersonCodeBlock",
-     	//"MealTickets.performReturnPersonCodeBlock",
-        //"MealTickets.deletePersonCodeBlock",
-        //"MealTickets.performDeletePersonCodeBlock",
-        //"MealTickets.mealTicketsLegacy",
 
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
@@ -1757,6 +1633,117 @@ when
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.mealTicketsLegacy"), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************
+ * Azioni per ruolo di gestore dell'anagrafica (registry_manager)
+ ******************************************************************/
+rule OnlyForRegistryManager_Generic
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $c: PermissionCheck(action in (
+ 		"Persons.list",
+    	"Persons.edit",
+    	"Persons.insertPerson",
+		"Persons.update",
+        "Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+     	"Persons.showCurrentContractWorkingTimeType",
+    	"Persons.showCurrentVacation",
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
+     	"Configurations.getAttachment",
+        "Configurations.removeAttachment",
+        "Contracts.personContracts",
+        "Contracts.insert",
+        "Contracts.save",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
+
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsVacation",
+        "Contracts.initializationsMeal",
+        "Contracts.updateSourceContract",
+        "Contracts.updateSourceContractVacation",
+        "Contracts.updateSourceContractMeal",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveVacationSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
+		"Persons.children",
+     	"Persons.editChild",
+     	"Persons.saveChild",
+     	"Persons.insertChild",
+     	"Persons.deleteChild",
+
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
+
+     	"Persons.modifySendEmail",
+     	"Persons.updateSendEmail"), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule OnlyForRegistryManager_InOffice
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $o: Office( usersRolesOffices contains $uro)
+ $c: PermissionCheck(action in (
+		"Persons.list",
+    	"Persons.edit",
+    	"Persons.insertPerson",
+		"Persons.update",
+        "Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+     	"Persons.showCurrentContractWorkingTimeType",
+    	"Persons.showCurrentVacation",
+     	"Configurations.personShow",
+     	"Configurations.personEdit",
+     	"Configurations.personUpdate",
+     	"Configurations.getAttachment",
+        "Configurations.removeAttachment",
+        "Contracts.personContracts",
+        "Contracts.insert",
+        "Contracts.save",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsVacation",
+        "Contracts.initializationsMeal",
+        "Contracts.updateSourceContract",
+        "Contracts.updateSourceContractVacation",
+        "Contracts.updateSourceContractMeal",
+     	"Contracts.saveResidualSourceContract",
+     	"Contracts.saveVacationSourceContract",
+     	"Contracts.saveMealTicketSourceContract",
+		"Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
+		"Persons.children",
+     	"Persons.editChild",
+     	"Persons.saveChild",
+     	"Persons.insertChild",
+     	"Persons.deleteChild",
+     	"Persons.confirmGroup",
+     	"Persons.removePersonFromGroup",
+     	"Persons.modifySendEmail",
+     	"Persons.updateSendEmail"), target == $o, granted == false)
 then
  $c.grant();
 end
