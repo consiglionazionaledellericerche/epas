@@ -106,7 +106,7 @@ categoryTab.name =nome
 categoryTab.description =descrizione
 categoryTab.priority =priorità
 
-child.bornDate= Data di Nascita
+child.bornDate= Data entrata in famiglia
 child.name= Nome
 child.surname= Cognome
 personChildren=Figlio Dipendente
