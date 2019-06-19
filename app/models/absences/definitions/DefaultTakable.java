@@ -441,6 +441,16 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_683),
       ImmutableSet.of(DefaultAbsenceType.A_683),
       3, null),
+  
+  T_6N(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_6N),
+      ImmutableSet.of(DefaultAbsenceType.A_6N),
+      30, null),
+  
+  T_6NTD(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_6NTD),
+      ImmutableSet.of(DefaultAbsenceType.A_6NTD),
+      15, null),
 
   T_CONGEDI_PRENATALI(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_20, DefaultAbsenceType.A_21), 
