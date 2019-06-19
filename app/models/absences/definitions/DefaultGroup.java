@@ -76,12 +76,19 @@ public enum DefaultGroup {
       DefaultCategoryType.PERMESSI_PERSONALI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_661, DefaultComplation.C_661, null, false, true),
+  
+  G_6N("6N - permesso motivi privati non retribuito", 
+      "", 
+      DefaultCategoryType.PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_6N, null, null, false, false),
+  
+  G_6NTD("6NTD - permesso motivi privati non retribuito t.d.", 
+      "", 
+      DefaultCategoryType.PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO_TD, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_6NTD, null, null, false, false),
 
-//  G_89("89 - Permesso diritto allo studio 150 ore anno", 
-//      "", 
-//      DefaultCategoryType.PERMESSI_PERSONALI, 1,
-//      GroupAbsenceTypePattern.programmed, PeriodType.year, 
-//      DefaultTakable.T_89, DefaultComplation.C_89, null, false, true),
   
   G_STUDIO("STUDIO - Permesso diritto allo studio 150 ore anno", 
       "", 
