@@ -100,11 +100,7 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_631H4, 
           DefaultAbsenceType.A_631H5, 
           DefaultAbsenceType.A_631H6)),
-  
-//  C_89(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_89M), 
-//      ImmutableSet.of(DefaultAbsenceType.A_89)),
-  
+ 
   C_STUDIO(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_89M), 
       ImmutableSet.of(DefaultAbsenceType.A_89)),
@@ -115,10 +111,7 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_03, 
           DefaultAbsenceType.A_04, DefaultAbsenceType.A_05, DefaultAbsenceType.A_06,
           DefaultAbsenceType.A_07, DefaultAbsenceType.A_08)),
-  
-//  C_09(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_09M), 
-//      ImmutableSet.of(DefaultAbsenceType.A_09B)),
+
   C_43(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       ImmutableSet.of(DefaultAbsenceType.A_43)),
