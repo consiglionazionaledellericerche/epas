@@ -7,8 +7,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import models.BadgeReader;
 import models.Zone;
@@ -33,7 +33,7 @@ public class Zones extends Controller {
   private static ZoneDao zoneDao;
 
   /**
-   * 
+   * Form di inserimento di una nuova zona associata ad un sorgente timbratura.
    * @param badgeReaderId l'id della sorgente timbratura a cui associare le zone.
    */
   public static void insertZone(long badgeReaderId) {
@@ -49,7 +49,7 @@ public class Zones extends Controller {
   }
   
   /**
-   * 
+   * Salvataggio di una nuova zona.
    * @param zone la zona che si intende persistere.
    */
   public static void save(Zone zone, long readerId) {
@@ -81,6 +81,7 @@ public class Zones extends Controller {
   }
   
   /**
+   * Salva il collegamentro tra due zone di timbratura.
    * 
    * @param link il collegamento tra zone da salvare.
    */
@@ -119,7 +120,7 @@ public class Zones extends Controller {
   }
   
   /**
-   * il metodo che elimina un collegamento tra zone.
+   * Il metodo che elimina un collegamento tra zone.
    * @param linkId l'id del collegamento da eliminare
    * @param confirmed il booleano che mi identifica se devo confermare o meno la cancellazione
    */

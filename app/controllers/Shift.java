@@ -1,6 +1,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -45,7 +46,6 @@ import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import play.data.binding.As;
 import play.data.validation.Required;
-import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;

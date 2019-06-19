@@ -23,7 +23,12 @@
 		  epasPerson = epasSynchronizedPeople.get(perseoPerson.perseoId);
 		  properSynchronized = true;
 		  if (epasPerson) {
-		    properSynchronized = epasWrapperedPeople.get(epasPerson.id).isProperSynchronized();
+		    if (epasWrapperedPeople.get(epasPerson.id)) {
+		      properSynchronized = epasWrapperedPeople.get(epasPerson.id).isProperSynchronized();
+		    } else {
+		      properSynchronized = false
+		    }
+		    
 		  }
 		}%
 		

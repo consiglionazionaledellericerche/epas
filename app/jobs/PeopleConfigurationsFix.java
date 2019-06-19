@@ -15,6 +15,10 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 /**
+ * Aggiorna i parametri di configurazione di tutte le persone presenti nel db.
+ * Gli aggiornamenti possono essere necessari in casi di inserimento di nuovi
+ * parametri.
+ * 
  * @author daniele
  * @since 30/06/16.
  */

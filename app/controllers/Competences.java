@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
-import manager.SecureManager;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
