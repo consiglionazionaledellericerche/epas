@@ -68,7 +68,8 @@ public class Users extends Controller {
     render(results, name);
   }
 
-  public static void noOwnerUsers(@As(binder = NullStringBinder.class) String name) {
+  public static void noOwnerUsers(
+      @As(binder = NullStringBinder.class) String name) {
 
     QueryResults<?> results = userDao
         .noOwnerUsers(Optional.fromNullable(name)).listResults();

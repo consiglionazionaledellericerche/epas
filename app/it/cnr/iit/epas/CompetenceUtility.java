@@ -165,8 +165,8 @@ public class CompetenceUtility {
    *
    * @param personShiftDays lista di shiftDays
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
-   * per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
-   * turno contenuti nella lista personShiftDays passata come parametro
+   *     per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
+   *     turno contenuti nella lista personShiftDays passata come parametro
    * @author arianna
    */
   public void countPersonsShiftsDays(
