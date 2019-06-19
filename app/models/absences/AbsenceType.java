@@ -6,32 +6,10 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
-import lombok.Getter;
-
-import models.Qualification;
-import models.absences.AbsenceTrouble.AbsenceProblem;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
-import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
-import models.absences.definitions.DefaultAbsenceType;
-import models.absences.definitions.DefaultAbsenceType.Behaviour;
-import models.absences.definitions.DefaultGroup;
-import models.base.BaseModel;
-import models.enumerate.QualificationMapping;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import play.data.validation.Required;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -41,6 +19,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import models.Qualification;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultAbsenceType.Behaviour;
+import models.absences.definitions.DefaultGroup;
+import models.base.BaseModel;
+import models.enumerate.QualificationMapping;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+import play.data.validation.Required;
 
 @Entity
 @Table(name = "absence_types")
@@ -228,7 +220,7 @@ public class AbsenceType extends BaseModel {
 
   /**
    * Se il tipo ha quel comportamento.
-   * @param behaviourName comportamento
+   * @param behaviour comportamento
    * @return il payload del comportamento se esiste
    */
   public Optional<AbsenceTypeJustifiedBehaviour> getBehaviour(JustifiedBehaviourName behaviour) {
@@ -412,7 +404,8 @@ public class AbsenceType extends BaseModel {
               return Optional.of(false);
             }
           } else {
-            if (this.replacingType == null || !defaultType.replacingType.equals(this.replacingType.name)) {
+            if (this.replacingType == null 
+                || !defaultType.replacingType.equals(this.replacingType.name)) {
               return Optional.of(false);
             }
           }

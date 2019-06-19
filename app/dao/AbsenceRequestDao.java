@@ -45,7 +45,7 @@ public class AbsenceRequestDao extends DaoBase {
    *
    * @param request la richiesta d'assenza da far validare
    * @return la lista delle richieste di assenza che hanno parametri che non permettono la corretta
-   * creazione della richiesta d'assenza passata come parametro.
+   *     creazione della richiesta d'assenza passata come parametro.
    */
   public List<AbsenceRequest> existingAbsenceRequests(AbsenceRequest request) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
@@ -93,7 +93,7 @@ public class AbsenceRequestDao extends DaoBase {
    * Metodo che ritorna tutti i flussi attivi da approvare.
    *
    * @param uros la lista degli user_role_office associati alla persona pr cui si cercano le
-   * richieste da approvare.
+   *     richieste da approvare.
    * @param fromDate la data da cui cercare
    * @param toDate (opzionale) la data entro cui cercare
    * @param absenceRequestType il tipo di richiesta da cercare

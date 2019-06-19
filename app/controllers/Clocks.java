@@ -3,25 +3,18 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-
 import controllers.Resecure.NoCheck;
-
 import dao.OfficeDao;
 import dao.PersonDao;
-
 import it.cnr.iit.epas.NullStringBinder;
-import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
-
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -30,11 +23,9 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.enumerate.StampTypes;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
-
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -42,7 +33,6 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
-@Slf4j
 @With(Resecure.class)
 public class Clocks extends Controller {
 

@@ -17,14 +17,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
-
 import models.CompetenceCode;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonShiftDay;
-import models.PersonShiftDayInTrouble;
 import models.PersonShiftShiftType;
 import models.ShiftType;
 import models.ShiftTypeMonth;
@@ -35,7 +32,6 @@ import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
@@ -48,14 +44,12 @@ import play.mvc.Router;
 import play.mvc.With;
 import security.SecurityRules;
 
-
 /**
  * @author arianna
  * @author daniele
  * @since 15/05/17.
  */
 @With(Resecure.class)
-@Slf4j
 public class Calendar extends Controller {
 
   @Inject

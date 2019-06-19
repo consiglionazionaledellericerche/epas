@@ -33,7 +33,11 @@ public class RemoveInvalidStampingsJob extends Job<Void> {
   private final LocalDate begin;
   private final LocalDate end;
 
-  public RemoveInvalidStampingsJob(Person person, LocalDate begin, LocalDate end) {
+  /**
+   * Default constructor.
+   */
+  public RemoveInvalidStampingsJob(
+      Person person, LocalDate begin, LocalDate end) {
     this.person = person;
     this.begin = begin;
     this.end = end;

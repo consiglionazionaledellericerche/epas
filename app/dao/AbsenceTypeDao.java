@@ -112,7 +112,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
-   * codice di assenza crescente.
+   *     codice di assenza crescente.
    */
   public List<AbsenceType> getAbsenceTypeFromEffectiveDate(
       LocalDate date) {

@@ -31,7 +31,6 @@ import models.query.QConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
-import play.db.jpa.GenericModel;
 
 @Slf4j
 public class ConfigurationManager {

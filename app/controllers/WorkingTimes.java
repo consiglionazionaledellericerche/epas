@@ -269,7 +269,8 @@ public class WorkingTimes extends Controller {
   }
   
   /**
-   *
+   * Inserimento di un tipo part-time verticale.
+   * 
    * @param officeId id Ufficio proprietario
    * @param name nome dell'orario di lavoro
    * @param step numero dello step di creazione dell'orario verticale
@@ -292,7 +293,7 @@ public class WorkingTimes extends Controller {
 
     //Caso del cambio giorno ...
     if (switchDay) {
-      validation.clear();
+      Validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
       render(office, vwt, name, step, daysProcessed);
     }
