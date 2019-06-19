@@ -43,7 +43,11 @@ public class SwitchTemplate extends Controller {
     redirect(Router.reverse(action, args).url);
   }
 
-  public static void updateDay(Integer day, final String actionSelected) throws Throwable {
+  /**
+   * Aggiorna in sessione il giorno selezionato nel menu.
+   */
+  public static void updateDay(
+      Integer day, final String actionSelected) throws Throwable {
     
     if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
@@ -56,7 +60,11 @@ public class SwitchTemplate extends Controller {
 
   }
 
-  public static void updatePerson(Person person, final String actionSelected) throws Throwable {
+  /**
+   * Aggiorna in sessione la persona selezionata nel menu.
+   */
+  public static void updatePerson(
+      Person person, final String actionSelected) throws Throwable {
 
     if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");
@@ -72,7 +80,11 @@ public class SwitchTemplate extends Controller {
     executeAction(actionSelected);
   }
 
-  public static void updateOffice(Office office, final String actionSelected) throws Throwable {
+  /**
+   * Aggiorna in sessione l'ufficio selezionato nel menu.
+   */
+  public static void updateOffice(
+      Office office, final String actionSelected) throws Throwable {
 
     if (actionSelected == null || session.isEmpty()) {
       flash.error("La sessione è scaduta. Effettuare nuovamente login.");

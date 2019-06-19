@@ -4,15 +4,11 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import dao.absences.AbsenceComponentDao;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
@@ -20,7 +16,6 @@ import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
-
 import org.joda.time.LocalDate;
 
 //@Slf4j

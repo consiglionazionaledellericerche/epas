@@ -78,6 +78,10 @@ epas:
 #    - PERSEO_BASE=                          # default: http://perseo.devel.iit.cnr.it
 #    - PERSEO_PASS=                          # password utilizzata per l'autenticazione con le interfacce rest di perseo
 #    - PERSEO_USER=                          # user utilizzato per l'autenticazione con le interfacce rest di perseo
+#### Sicronizzazioni Anagrafiche
+#    - ANAGRAFICA_SYNC_BADGES_ENABLED=       # default: false. Abilita la sincronizzazione dei badge con un job
+#    - ANAGRAFICA_SYNC_OFFICES_ENABLED=      # default: false. Abilita la sincronizzazione degli uffici con un job
+#    - ANAGRAFICA_SYNC_PERSONS_ENABLED=      # default: false. Abilita la sincronizzazione delle persone con un job
 #### Integrazione OIL ###
 #    - OIL_ENABLED=true                      # default: false. Se impostato abilita l'invio delle segnalazioni ad OIL
 #    - OIL_EMAIL_TO=                         # default: helpdesk.mailbox@cnr.it

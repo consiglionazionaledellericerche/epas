@@ -56,7 +56,8 @@ public enum DefaultCategoryType {
   FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI),
   RIPOSI_COMPENSATIVI_DIPENDENTI("Riposi compensativi", 19, DefaultTab.RIPOSI_DIPENDENTI),
   TELELAVORO("Telelavoro", 20, DefaultTab.TELELAVORO),
-  L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 20, DefaultTab.LEGGE_104_DIPENDENTI),
+  L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 
+      20, DefaultTab.LEGGE_104_DIPENDENTI),
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
 

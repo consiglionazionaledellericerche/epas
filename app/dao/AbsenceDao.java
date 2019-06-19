@@ -45,6 +45,8 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * Preleva un'assenza tramite il suo id.
+   * 
    * @param id id dell'Absence.
    * @return la Absence corrispondente all'id passato.
    */
@@ -61,9 +63,10 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * La lista di assenze di una persona tra due date.
    * @return la lista di assenze di una persona tra due date se e solo se il campo dateTo isPresent.
-   * In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno. Se il
-   * booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
+   *     In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno. Se il
+   *     booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
    */
   public List<Absence> getAbsencesInPeriod(Optional<Person> person,
       LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment) {

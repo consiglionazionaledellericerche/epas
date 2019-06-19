@@ -1,28 +1,19 @@
 package controllers;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.TimeVariationDao;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
-
-import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
 import manager.PersonManager;
 import manager.TimeVariationManager;
-
 import models.Office;
 import models.Person;
 import models.TimeVariation;
@@ -30,16 +21,12 @@ import models.User;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
-@Slf4j
 @With({Resecure.class})
 public class TimeVariations extends Controller {
 

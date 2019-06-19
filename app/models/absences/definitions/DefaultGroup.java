@@ -1,15 +1,12 @@
 package models.absences.definitions;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
-
 import org.assertj.core.util.Lists;
 
 public enum DefaultGroup {

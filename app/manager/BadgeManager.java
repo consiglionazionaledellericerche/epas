@@ -1,12 +1,18 @@
 package manager;
 
+import com.google.common.collect.Lists;
 import dao.BadgeReaderDao;
+import dao.PersonDao;
 import dao.RoleDao;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -15,6 +21,8 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import synch.perseoconsumers.people.PeoplePerseoConsumer;
+import synch.perseoconsumers.people.PersonBadge;
 
 /**
  * TODO: In questo manager andrebbero spostati i metodi che gestiscono i controllers BadgeReaders e
@@ -27,11 +35,19 @@ public class BadgeManager {
 
   private final RoleDao roleDao;
   private final BadgeReaderDao badgeReaderDao;
-
+  private final PersonDao personDao;
+  private final PeoplePerseoConsumer peoplePerseoConsumer;
+  
+  /**
+   * Default constructor.
+   */
   @Inject
-  public BadgeManager(RoleDao roleDao, BadgeReaderDao badgeReaderDao) {
+  public BadgeManager(RoleDao roleDao, BadgeReaderDao badgeReaderDao,
+      PersonDao personDao, PeoplePerseoConsumer peoplePerseoConsumer) {
     this.roleDao = roleDao;
     this.badgeReaderDao = badgeReaderDao;
+    this.personDao = personDao;
+    this.peoplePerseoConsumer = peoplePerseoConsumer;
   }
 
   /**
@@ -67,14 +83,20 @@ public class BadgeManager {
    * @param badgeSystem il gruppo badge sul quale associare il badge
    * @return true se l'operazione va a buon fine, false se il badge è già presente.
    */
-  public boolean createPersonBadge(Person person, String code, BadgeSystem badgeSystem) {
+  public List<Badge> createPersonBadges(
+      Person person, String code, BadgeSystem badgeSystem) {
 
     final String codeNormalized = String.valueOf(Integer.valueOf(code));
+    val badges = checkBadgeTransfer(person, code, badgeSystem);
+    
     Optional<Badge> alreadyPresent = badgeSystem.badges.stream()
-        .filter(badge -> badge.code.equals(codeNormalized)).findAny();
-
+        .filter(badge -> badge.code.equals(codeNormalized) 
+            && badge.person.equals(person)).findAny();
+    
+    
     if (alreadyPresent.isPresent()) {
-      log.warn("Il Badge n. {} è già presente per {} - {}", codeNormalized, person, person.office);
+      log.debug("Il Badge n. {} è già presente per {} - {}", codeNormalized, person, person.office);
+      return badges;
     } else {
       for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
         Badge badge = new Badge();
@@ -83,11 +105,38 @@ public class BadgeManager {
         badge.badgeSystem = badgeSystem;
         badge.badgeReader = badgeReader;
         badge.save();
+        badges.add(badge);
       }
       log.info("Creato nuovo badge {} per {}", codeNormalized, person);
     }
-    // Restituisce false se non è stato creato
-    return !alreadyPresent.isPresent();
+    return badges;
+  }
+  
+  /**
+   * Rimuove da tutte le altre persone il badge indicato.
+   * Il badge da rimuovere viene cercato in tutti quelli appartenenti al badgeSystem.
+   * 
+   * @return la lista dei badge rimossi  
+   */
+  private List<Badge> checkBadgeTransfer(Person person, String code, BadgeSystem badgeSystem) {
+    final String codeNormalized = String.valueOf(Integer.valueOf(code));
+    val transferedBadges = Lists.<Badge>newArrayList();
+    for (BadgeReader br : badgeSystem.badgeReaders) {
+      val badges = br.badges.stream()
+          .filter(badge -> badge.code.equals(codeNormalized) 
+              && !badge.person.equals(person)).collect(Collectors.toList());
+      
+      badges.stream().forEach(b -> {
+        log.info("Cambio attribuzione badge n. {} (id = {}) "
+            + "da {} a {}.",
+            b.code, b.id, b.person.getFullname(), person.getFullname());
+        b.person = person;
+        b.save();
+      });
+      transferedBadges.addAll(badges);
+    }
+            
+    return transferedBadges;    
   }
 
   /**
@@ -141,5 +190,44 @@ public class BadgeManager {
     }
 
     return badgeSystem;
+  }
+  
+  /**
+   * Importa/aggiorna i badge di un ufficio.
+   * @param office l'Ufficio di cui importare i badge.
+   * @return la lista dei badge importati/aggiornati.
+   */
+  public List<Badge> importBadges(Office office) {    
+    
+    List<PersonBadge> importedBadges = Lists.newArrayList();
+    try {
+      //Vengono filtrati tutti i badge uguali. Solo il primo incontrato
+      //viene importato.
+      importedBadges = 
+          Lists.newArrayList(peoplePerseoConsumer.getOfficeBadges(office.perseoId).get()
+          .stream().collect(Collectors.toCollection(
+              () -> new TreeSet<PersonBadge>(
+                  (pb1, pb2) -> pb1.getBadge().compareTo(pb2.getBadge())))));
+    } catch (InterruptedException | ExecutionException e) {
+      log.error("Impossibile importare i badge della sede con perseoId {}: {}",
+          office.perseoId, e.getMessage());
+      throw new IllegalStateException("Impossibile importare i badge");
+    }
+
+    val badges = Lists.<Badge>newArrayList();
+    if (!importedBadges.isEmpty()) {
+      BadgeSystem badgeSystem = getOrCreateDefaultBadgeSystem(office);
+
+      importedBadges.forEach(personBadge -> {
+        Person person = personDao.getPersonByPerseoId(personBadge.getPersonId());
+        if (person == null) {
+          log.warn("Sincronizzazione Badge: persona con perseoId={} non presente",
+              personBadge.getPersonId());
+        } else {
+          badges.addAll(createPersonBadges(person, personBadge.getBadge(), badgeSystem));          
+        }
+      });
+    }
+    return badges;
   }
 }
