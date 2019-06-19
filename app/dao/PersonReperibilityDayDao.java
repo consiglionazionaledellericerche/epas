@@ -117,7 +117,7 @@ public class PersonReperibilityDayDao extends DaoBase {
       long personReperibilityDayId) {
     final QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
     final PersonReperibilityDay result = getQueryFactory().selectFrom(prd)
-        .where(prd.id.eq(personReperibilityDayId)).fetchOne();
+        .where(prd.id.eq(personReperibilityDayId)).fetchFirst();
     return Optional.fromNullable(result);
   }
 
@@ -130,7 +130,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    */
   public PersonReperibilityType getPersonReperibilityTypeById(Long id) {
     final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
-    return getQueryFactory().selectFrom(prt).where(prt.id.eq(id)).fetchOne();
+    return getQueryFactory().selectFrom(prt).where(prt.id.eq(id)).fetchFirst();
   }
 
   /**
@@ -166,7 +166,7 @@ public class PersonReperibilityDayDao extends DaoBase {
       Office office) {
     final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     final PersonReperibilityType result = getQueryFactory().selectFrom(prt)
-        .where(prt.description.eq(description).and(prt.office.eq(office))).fetchOne();
+        .where(prt.description.eq(description).and(prt.office.eq(office))).fetchFirst();
     return Optional.fromNullable(result);
   }
 
@@ -182,7 +182,7 @@ public class PersonReperibilityDayDao extends DaoBase {
       Person person, PersonReperibilityType type) {
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
     return getQueryFactory().selectFrom(pr)
-        .where(pr.person.eq(person).and(pr.personReperibilityType.eq(type))).fetchOne();
+        .where(pr.person.eq(person).and(pr.personReperibilityType.eq(type))).fetchFirst();
   }
 
 
