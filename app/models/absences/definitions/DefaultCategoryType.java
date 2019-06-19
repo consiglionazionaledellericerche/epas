@@ -45,6 +45,7 @@ public enum DefaultCategoryType {
   
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
   PERMESSO_ESAMI("Permesso esami", 12, DefaultTab.ALTRI_CODICI),
+  ORE_AGGIUNTIVE("Ore aggiuntive", 13, DefaultTab.ALTRI_CODICI),
  
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
   ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI),

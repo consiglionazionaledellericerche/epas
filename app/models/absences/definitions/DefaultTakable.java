@@ -99,12 +99,6 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
       600, null),
-
-//  T_09(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_09M), 
-//      ImmutableSet.of(DefaultAbsenceType.A_09M), 
-//      -1, null),
-  
   
   T_631(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_631, // capire se considerare il vecchio 631 
@@ -114,6 +108,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_631G,
           DefaultAbsenceType.A_631M), 
       1080, TakeAmountAdjustment.workingTimePercent), // si riduce solo se partTime
+  
+  T_ORE_AGGIUNTIVE(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_OAM),
+      ImmutableSet.of(DefaultAbsenceType.A_OAM),
+      9600, null),
 
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M),
