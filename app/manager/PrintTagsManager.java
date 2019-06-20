@@ -14,7 +14,7 @@ import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 
 import models.Stamping;
-
+import models.dto.OffSiteWorkingTemp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,5 +48,31 @@ public class PrintTagsManager {
       }
     }
     return historyStampingsList;
+  }
+  
+  /**
+   * Metodo che ritorna le informazioni sulle timbrature fuori sede.
+   * @param psDto il personStampingRecap contenente il recap delle timbrature del dipendente
+   * @return la lista contenente tutte le timbrature fuori sede per la persona.
+   */
+  public List<OffSiteWorkingTemp> getOffSiteStampings(PersonStampingRecap psDto) {
+    List<OffSiteWorkingTemp> list = Lists.newArrayList();
+    for (PersonStampingDayRecap day : psDto.daysRecap) {
+      if (!day.ignoreDay) {
+        for (Stamping stamping : day.personDay.stampings) {
+          if (stamping.isOffSiteWork()) {
+            OffSiteWorkingTemp temp = new OffSiteWorkingTemp();
+            temp.date = stamping.personDay.date;
+            temp.stamping = stamping;
+            temp.reason = stamping.reason;
+            temp.place = stamping.place;
+            temp.note = stamping.note;
+            list.add(temp);
+          }            
+        }
+      }
+    }
+    
+    return list;
   }
 }
