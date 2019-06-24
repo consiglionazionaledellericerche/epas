@@ -1,7 +1,6 @@
 package models.flows;
 
 import com.beust.jcommander.internal.Lists;
-import java.util.Comparator;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,9 +14,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.ToString;
 import models.Person;
-import models.Role;
 import models.base.MutableModel;
-import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;

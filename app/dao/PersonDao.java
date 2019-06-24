@@ -1,6 +1,7 @@
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;

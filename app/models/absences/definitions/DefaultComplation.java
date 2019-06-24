@@ -101,7 +101,6 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_631H5, 
           DefaultAbsenceType.A_631H6)),
 
-  
   C_STUDIO(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_89M), 
       ImmutableSet.of(DefaultAbsenceType.A_89)),

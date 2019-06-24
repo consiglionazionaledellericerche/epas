@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import manager.ContractManager;
@@ -877,6 +878,9 @@ public class Synchronizations extends Controller {
     oldInstitutes();
   }
 
+  /**
+   * Mostra i badge associati ad un determinato ufficio.
+   */
   public static void badges(Long officeId) {
     if (officeId == null) {
       badRequest("officeId non valido");
@@ -890,7 +894,8 @@ public class Synchronizations extends Controller {
   }
 
   /**
-   * Importa tutti i badge non ancora presenti su ePAS.
+   * Importa tutti i badge non ancora presenti su ePAS e sincronizza
+   * quelli già esistenti.
    */
   public static void importBadges(Long officeId) {
 
@@ -900,37 +905,23 @@ public class Synchronizations extends Controller {
 
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    List<PersonBadge> importedBadges = Lists.newArrayList();
+    
     try {
-      //Vengono filtrati tutti i badge uguali. Solo il primo incontrato
-      //viene importato.
-      importedBadges = 
-          Lists.newArrayList(peoplePerseoConsumer.getOfficeBadges(office.perseoId).get()
-          .stream().collect(Collectors.toCollection(
-              () -> new TreeSet<PersonBadge>(
-                  (pb1, pb2) -> pb1.getBadge().compareTo(pb2.getBadge())))));
-    } catch (InterruptedException | ExecutionException e) {
-      flash.error("Impossibile importare i badge della sede con perseoId %s: %s",
-          office.perseoId, e.getMessage());
+      val badges = badgeManager.importBadges(office);
+      if (!badges.isEmpty()) {
+        flash.success("Importati correttamente %s badge", badges.size());
+      }
+    } catch (RuntimeException e) {
+      flash.error("Errore durante l'importazione dei badge, contattare "
+          + "l'amministratore di ePAS");
     }
 
-    if (!importedBadges.isEmpty()) {
-      BadgeSystem badgeSystem = badgeManager.getOrCreateDefaultBadgeSystem(office);
-
-      importedBadges.forEach(personBadge -> {
-        Person person = personDao.getPersonByPerseoId(personBadge.getPersonId());
-        if (person == null) {
-          log.warn("Sincronizzazione Badge: persona con perseoId={} non presente",
-              personBadge.getPersonId());
-        } else {
-          badgeManager.createPersonBadge(person, personBadge.getBadge(), badgeSystem);
-        }
-      });
-      flash.success("Badge correttamente importati");
-    }
     badges(office.id);
   }
 
+  /**
+   * Mostra la form per la sincronizzazione del campo eppn.
+   */
   public static void eppn(Long officeId) {
     if (officeId == null) {
       badRequest("officeId non valido");

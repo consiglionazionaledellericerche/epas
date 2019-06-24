@@ -1,21 +1,15 @@
 package manager.services.absences;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-
-import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
-
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
@@ -34,6 +28,8 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
+import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
 
 public class AbsenceEngineUtility {
   
@@ -144,7 +140,8 @@ public class AbsenceEngineUtility {
       amount = 0;
     } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
         || absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day_limit)
-        || absence.getJustifiedType().getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+        || absence.getJustifiedType().getName()
+          .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
       amount = absenceWorkingTime(person, absence);
     } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.half_day)) {
       amount = absenceWorkingTime(person, absence) / 2;

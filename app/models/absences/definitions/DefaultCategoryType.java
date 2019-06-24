@@ -46,6 +46,10 @@ public enum DefaultCategoryType {
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
   PERMESSO_ESAMI("Permesso esami", 12, DefaultTab.ALTRI_CODICI),
   ORE_AGGIUNTIVE("Ore aggiuntive", 13, DefaultTab.ALTRI_CODICI),
+  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO("Permesso motivi privati non retribuito", 
+      13, DefaultTab.ALTRI_CODICI),
+  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO_TD("Permesso motivi privati non retribuito t.d.", 
+      13, DefaultTab.ALTRI_CODICI),
  
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
   ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI),
@@ -55,7 +59,8 @@ public enum DefaultCategoryType {
   FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI),
   RIPOSI_COMPENSATIVI_DIPENDENTI("Riposi compensativi", 19, DefaultTab.RIPOSI_DIPENDENTI),
   TELELAVORO("Telelavoro", 20, DefaultTab.TELELAVORO),
-  L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 20, DefaultTab.LEGGE_104_DIPENDENTI),
+  L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 
+      20, DefaultTab.LEGGE_104_DIPENDENTI),
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
 

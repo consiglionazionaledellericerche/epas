@@ -13,6 +13,9 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 /**
+ * Creazione degli ShiftTypeMonth per ogni attività di turno 
+ * (shiftType) nel pregresso.
+ * 
  * @author daniele
  * @since 09/06/17.
  */
