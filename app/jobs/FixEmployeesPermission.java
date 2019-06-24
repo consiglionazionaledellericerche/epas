@@ -18,6 +18,9 @@ public class FixEmployeesPermission {
   @Inject
   static OfficeManager officeManager;
 
+  /**
+   * Esecuzione del job.
+   */
   public static void doJob() {
 
     /* Procedura un pò esagerata per la riassociazione dei ruoli e permessi corretti

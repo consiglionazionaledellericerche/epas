@@ -1,13 +1,9 @@
 package manager.services.absences.model;
 
+import com.google.common.collect.Lists;
+import it.cnr.iit.epas.DateUtility;
 import java.io.Serializable;
 import java.util.List;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
-
-import it.cnr.iit.epas.DateUtility;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
 import models.Contract;
 import models.Person;
@@ -15,6 +11,7 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
+import org.joda.time.LocalDate;
 
 /**
  * Contiene lo stato ferie annuale di un contratto.

@@ -3,10 +3,9 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
-
-import models.absences.Absence;
+import java.util.List;
+import java.util.Set;
 import models.absences.AbsenceType;
 import models.absences.AbsenceTypeJustifiedBehaviour;
 import models.absences.CategoryGroupAbsenceType;
@@ -24,12 +23,8 @@ import models.absences.definitions.DefaultComplation;
 import models.absences.definitions.DefaultGroup;
 import models.absences.definitions.DefaultTab;
 import models.absences.definitions.DefaultTakable;
-
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
-
-import java.util.List;
-import java.util.Set;
 
 public class EnumAllineator {
   

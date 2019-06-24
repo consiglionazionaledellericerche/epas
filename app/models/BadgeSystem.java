@@ -24,6 +24,8 @@ import play.data.validation.Unique;
 
 
 /**
+ * Gruppi di badge.
+ * 
  * @author alessandro.
  */
 @Entity

@@ -264,6 +264,24 @@ else
   sed 's#{{ANAGRAFICA_ENDPOINT_BADGE}}#'"${ANAGRAFICA_ENDPOINT_BADGE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${ANAGRAFICA_SYNC_BADGES_ENABLED}" ]; then
+  sed -n '/ANAGRAFICA_SYNC_BADGES_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_SYNC_BADGES_ENABLED}}#'"${ANAGRAFICA_SYNC_BADGES_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_SYNC_OFFICES_ENABLED}" ]; then
+  sed -n '/ANAGRAFICA_SYNC_OFFICES_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_SYNC_OFFICES_ENABLED}}#'"${ANAGRAFICA_SYNC_OFFICES_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${ANAGRAFICA_SYNC_PERSONS_ENABLED}" ]; then
+  sed -n '/ANAGRAFICA_SYNC_PERSONS_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_SYNC_PERSONS_ENABLED}}#'"${ANAGRAFICA_SYNC_PERSONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf

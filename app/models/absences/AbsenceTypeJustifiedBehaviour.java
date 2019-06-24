@@ -1,20 +1,17 @@
 package models.absences;
 
-import lombok.Getter;
-import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
-import models.base.BaseModel;
-
-import org.hibernate.envers.Audited;
-
 import it.cnr.iit.epas.DateUtility;
-import play.data.validation.Required;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+import play.data.validation.Required;
 
 @Audited
 @Entity
