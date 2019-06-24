@@ -45,8 +45,11 @@ public enum DefaultCategoryType {
   
   PERMESSI_PERSONALI("Permessi Personali", 12, DefaultTab.FERIE_PERMESSI_RIPOSI),
   PERMESSO_ESAMI("Permesso esami", 12, DefaultTab.ALTRI_CODICI),
-  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO("Permesso motivi privati non retribuito", 13, DefaultTab.ALTRI_CODICI),
-  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO_TD("Permesso motivi privati non retribuito t.d.", 13, DefaultTab.ALTRI_CODICI),
+  ORE_AGGIUNTIVE("Ore aggiuntive", 13, DefaultTab.ALTRI_CODICI),
+  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO("Permesso motivi privati non retribuito", 
+      13, DefaultTab.ALTRI_CODICI),
+  PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO_TD("Permesso motivi privati non retribuito t.d.", 
+      13, DefaultTab.ALTRI_CODICI),
  
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI),
   ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI),
