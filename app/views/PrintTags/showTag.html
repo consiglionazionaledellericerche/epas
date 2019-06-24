@@ -235,7 +235,41 @@
   </table>
 </div>
 #{/ifnot}
-#{if dto.includeStampingDetails == true}
+#{if !dto.offSiteWorkingTempList.isEmpty()}
+<h2 id="stampingsDetailsTitle">Dettagli Timbrature lavoro fuori sede</h2>
+<table>
+  <tr>
+    <th>&{'stamping'}</th>
+    <th>&{'stamping.way'}</th>
+    <th>&{'stamping.stampType'}</th>
+    <th>&{'stamping.note'}</th>
+    <th>&{'stamping.reason'}</th>
+    <th>&{'stamping.place'}</th>
+  </tr>
+
+  #{list dto.offSiteWorkingTempList,as:'offSiteStamp'}
+  
+  <tr>
+    <td>${offSiteStamp?.date.format()}</td>
+    <td>${offSiteStamp?.stamping.way.label()}</td>
+    <td>${offSiteStamp?.stamping.stampType.label()}</td>
+    <td>${offSiteStamp?.note}</td>
+    <td>${offSiteStamp?.reason}</td>
+    <td>${offSiteStamp?.place}</td>
+  </tr>
+  
+  #{/list}
+</table>
+
+<p style="text-align: right;margin-top:6em;">
+  AUTOCERTIFICAZIONE
+  <br><br>
+  Firma
+  <br><br>
+  _____________________________
+</p>
+#{/if}
+#{if dto.includeStampingDetails == true && !dto.historyStampingsList.isEmpty()}
 <h2 id="stampingsDetailsTitle">Dettagli Timbrature modificate dall'amministratore</h2>
 <table>
   <tr>

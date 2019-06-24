@@ -19,6 +19,8 @@ public class PrintTagsInfo {
   
   public List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
   
+  public List<OffSiteWorkingTemp> offSiteWorkingTempList = Lists.newArrayList();
+  
   public boolean includeStampingDetails;
   
 }
