@@ -7,7 +7,8 @@ ALTER TABLE absence_types ADD COLUMN reperibility_compatible BOOLEAN ;
 ALTER TABLE absence_types_history ADD COLUMN reperibility_compatible BOOLEAN ;
 
 
-UPDATE absence_types SET reperibility_compatible = false ;
+UPDATE absence_types SET reperibility_compatible = false WHERE code not like '91%';
+UPDATE absence_types SET reperibility_compatible = true WHERE code like '91%';
 
 INSERT INTO absence_types_history (id, _revision, _revision_type, certification_code, code, considered_week_end, description, internal_use,
 justified_time_at_work, valid_from, valid_to, time_for_mealticket, justified_time, replacing_time, replacing_type_id, documentation,
