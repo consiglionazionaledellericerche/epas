@@ -97,6 +97,12 @@ public enum DefaultGroup {
       DefaultCategoryType.ALTRI_CODICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
+  
+  G_OA("Ore aggiuntive", 
+      "", 
+      DefaultCategoryType.ORE_AGGIUNTIVE, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_ORE_AGGIUNTIVE, DefaultComplation.C_OA, null, false, false),
 
   G_631("631 - Permesso per visita medica", 
       "", 
