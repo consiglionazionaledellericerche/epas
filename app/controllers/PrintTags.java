@@ -19,6 +19,7 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
 import models.Stamping;
+import models.dto.OffSiteWorkingTemp;
 import models.dto.PrintTagsInfo;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
@@ -93,10 +94,12 @@ public class PrintTags extends Controller {
       if (includeStampingDetails) {
         historyStampingsList = printTagsManager.getHistoricalList(psDto);
       }        
+      List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
       PrintTagsInfo info = PrintTagsInfo.builder()
           .psDto(psDto)
           .person(p)
           .includeStampingDetails(includeStampingDetails)
+          .offSiteWorkingTempList(offSiteWorkingTemp)
           .historyStampingsList(historyStampingsList)
           .build();
       log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
