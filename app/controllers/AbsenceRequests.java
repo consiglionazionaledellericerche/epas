@@ -476,7 +476,7 @@ public class AbsenceRequests extends Controller {
         && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       absenceRequestManager.officeHeadApproval(id, user);
     }
-
+    notificationManager.sendEmailToUser(absenceRequest);
     flash.success("Operazione conclusa correttamente");
     AbsenceRequests.listToApprove(absenceRequest.type);
 
