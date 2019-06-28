@@ -520,6 +520,45 @@ public class NotificationManager {
               absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
         });
   }
+  
+  /**
+   * Metodo privato che invia la mail al richiedente la ferie/riposo compensativo.
+   * @param absenceRequest la richiesta d'assenza
+   */
+  private void sendEmailAbsenceRequestConfirmation(AbsenceRequest absenceRequest) {
+    Verify.verifyNotNull(absenceRequest);
+    final Person person = absenceRequest.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    try {
+      simpleEmail.addTo(person.email);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    String requestType = "";
+    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+      requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else {
+      requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
+    }
+    simpleEmail.setSubject("ePas Approvazione flusso");
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", person.fullName()));
+    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s",
+        requestType));
+    message.append(String.format("\r\n per i giorni %s - %s", 
+        absenceRequest.startAt.toLocalDate(), absenceRequest.endTo.toLocalDate()));
+    val mailBody = message.toString();
+    try {
+      simpleEmail.setMsg(mailBody);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    Mail.send(simpleEmail);
+    log.info("Inviata email per approvazione di flusso richiesta: {}. "
+        + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}", 
+        absenceRequest, person.email, simpleEmail.getSubject(), mailBody);
+  
+  }
 
   /**
    * Metodo che compone il corpo della mail da inviare.
@@ -559,5 +598,15 @@ public class NotificationManager {
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
+  }
+
+  /**
+   * Metodo void che chiama il metodo privato che invia la mail al richiedente l'assenza.
+   * @param absenceRequest la richiesta d'assenza con tutti i parametri.
+   */
+  public void sendEmailToUser(AbsenceRequest absenceRequest) {
+
+    sendEmailAbsenceRequestConfirmation(absenceRequest);
+    
   }
 }
