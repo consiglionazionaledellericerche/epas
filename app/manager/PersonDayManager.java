@@ -137,12 +137,10 @@ public class PersonDayManager {
    * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
    */
   public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
-    for (Absence absence: personDay.absences) {
-      if (absence.absenceType.reperibilityCompatible) {
-        return true;
-      }
-    }
-    return false;
+    
+    return personDay.absences.stream()
+        .noneMatch(abs -> !abs.absenceType.reperibilityCompatible);
+
   }
 
   /**
