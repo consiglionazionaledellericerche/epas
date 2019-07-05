@@ -187,11 +187,11 @@ public class PersonManager {
         contract.sourceDateResidual != null).max(Comparator
         .comparing(Contract::getSourceDateResidual)).orElse(null);
 
-    if (newerContract != null && newerContract.sourceDateResidual != null
-        && !newerContract.sourceDateResidual.isBefore(begin)
-        && !newerContract.sourceDateResidual.isAfter(end)) {
+    if (newerContract != null && newerContract.sourceDateRecoveryDay != null
+        && !newerContract.sourceDateRecoveryDay.isBefore(begin)
+        && !newerContract.sourceDateRecoveryDay.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed + absenceDao
-          .absenceInPeriod(person, newerContract.sourceDateResidual, end, "91").size();
+          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay, end, "91").size();
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
