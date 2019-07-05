@@ -56,6 +56,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Getter
   public LocalDate sourceDateMealTicket = null;
+  
+  @Getter
+  public LocalDate sourceDateRecoveryDay = null;
 
   public boolean sourceByAdmin = true;
 
