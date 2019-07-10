@@ -807,6 +807,7 @@ AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
+AccountRole.PERSONDAY_READER =Lettore informazioni
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
