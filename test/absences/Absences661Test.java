@@ -120,9 +120,9 @@ public class Absences661Test extends UnitTest {
         Lists.newArrayList(), 
         Lists.newArrayList());
     
-    //dal 2016-7-1 al 2016-12-31 sono 184 giorni su 366. da 1080 si passa a 542
-    // 366 : 1080 = 184 : x
-    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 542);
+    //dal 2016-7-1 al 2016-12-31 sono 184 giorni su 366. 
+    // Col corretto comportamento il codice 661 non si riproporziona
+    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 1080);
     
     //CASO 2 
     //la persona ha il part time 50%
@@ -136,6 +136,7 @@ public class Absences661Test extends UnitTest {
         Lists.newArrayList());
 
     //1080 * 50 / 100 = 540
+    // In questo caso il riproporzionamento è corretto: vale solo sull'orario di lavoro
     assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 540);
     
     //CASO 3 
@@ -150,8 +151,8 @@ public class Absences661Test extends UnitTest {
         Lists.newArrayList(), 
         Lists.newArrayList());
 
-    //Si parte dai 542 di prima ottenuti lavorando 184 giorni, ridotti al 50 % 
-    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 271);
+    //Anche in questo caso consideriamo solo il riproporzionamento dovuto all'orario di lavoro
+    assertEquals(periodChain.periods.get(0).getPeriodTakableAmount(), 540);
 
     
   }
