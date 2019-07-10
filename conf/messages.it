@@ -148,6 +148,7 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+contract.perseoId =Identificato contratto in Anagrafica
 
 contractualClause =Istituto contrattuale
 contractualClause.name =nome
