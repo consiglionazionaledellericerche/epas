@@ -26,7 +26,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_18P,
           DefaultAbsenceType.A_18PM), 
       ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
-      3, null),
+      3, TakeAmountAdjustment.workingTimePercent),
   T_18P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_18, 
           DefaultAbsenceType.A_18M,
@@ -41,7 +41,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_182P,
           DefaultAbsenceType.A_182PM), 
       ImmutableSet.of(DefaultAbsenceType.A_182, DefaultAbsenceType.A_182M), 
-      3, null),
+      3, TakeAmountAdjustment.workingTimePercent),
   T_182P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_182, 
           DefaultAbsenceType.A_182M,
@@ -56,7 +56,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_19P,
           DefaultAbsenceType.A_19PM), 
       ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
-      3, null),
+      3, TakeAmountAdjustment.workingTimePercent),
   T_19P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19, 
           DefaultAbsenceType.A_19M,
@@ -83,7 +83,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M, 
           DefaultAbsenceType.A_661G), // taken (scala dal limite per lo storico)
       ImmutableSet.of(DefaultAbsenceType.A_661M, DefaultAbsenceType.A_661G),  // takable
-      1080, TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent),
+      1080, TakeAmountAdjustment.workingTimePercent),
 
   //  T_89(AmountType.minutes, 
   //      ImmutableSet.of(DefaultAbsenceType.A_89M), 

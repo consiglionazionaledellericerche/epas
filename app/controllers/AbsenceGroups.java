@@ -1360,7 +1360,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     LocalDate updateFrom = LocalDate.now();
-
+    LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
     List<Absence> absences = absenceCertificationService.absencesToPersist(person, year);
 
     for (Absence absence : absences) {
@@ -1376,6 +1376,16 @@ public class AbsenceGroups extends Controller {
       personDay.absences.add(absence);
       absence.save();
       personDay.save();
+      if (absence.absenceType.code.equals(DefaultAbsenceType.A_91.certificationCode) 
+          && !absence.getAbsenceDate().isBefore(beginYear)) {
+        IWrapperPerson wrPerson = wrapperFactory.create(person);
+        Optional<Contract> contract = wrPerson.getCurrentContract();
+        if (contract.isPresent()) {
+          contract.get().sourceDateRecoveryDay = updateFrom;
+          contract.get().sourceRecoveryDayUsed ++;
+          contract.get().save();
+        }
+      }
       if (personDay.date.isBefore(updateFrom)) {
         updateFrom = personDay.date;
       }

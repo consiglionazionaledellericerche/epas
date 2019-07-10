@@ -176,6 +176,10 @@ public class CertificationYearSituation implements Serializable {
     MALATTIA_FIGLIO_2("Malattia secondo figlio", DefaultGroup.MALATTIA_FIGLIO_2),
     MALATTIA_FIGLIO_3("Malattia terzo figlio", DefaultGroup.MALATTIA_FIGLIO_3),
     
+    MISSIONE("Missione", DefaultGroup.MISSIONE_GIORNALIERA),
+    MISSIONE_ESTERA("Missione estera", DefaultGroup.MISSIONE_ESTERA),
+    MISSIONE_ORARIA("Missione oraria", DefaultGroup.MISSIONE_ORARIA),
+    
     ALTRI("Altri codici", null);
     
     public DefaultGroup group;
