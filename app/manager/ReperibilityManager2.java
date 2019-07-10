@@ -250,7 +250,8 @@ public class ReperibilityManager2 {
     final Optional<PersonDay> personDay = personDayDao
         .getPersonDay(personReperibilityDay.personReperibility.person, personReperibilityDay.date);
 
-    if (personDay.isPresent() && personDayManager.isAllDayAbsences(personDay.get())) {
+    if (personDay.isPresent() 
+        && !personDayManager.isAbsenceCompatibleWithReperibility(personDay.get())) {
       return Optional.of(Messages.get("reperibility.absenceInDay"));
     }
 
