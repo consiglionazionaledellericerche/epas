@@ -19,19 +19,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.BadgeManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
-import models.BadgeSystem;
+import manager.sync.SynchronizationManager;
 import models.Contract;
 import models.Institute;
 import models.Office;
@@ -48,7 +47,6 @@ import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.office.OfficePerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
 import synch.perseoconsumers.people.PerseoPerson;
-import synch.perseoconsumers.people.PersonBadge;
 import synch.perseoconsumers.roles.RolePerseoConsumer;
 
 @Slf4j
@@ -87,7 +85,9 @@ public class Synchronizations extends Controller {
   static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
   static UsersRolesOfficesDao usersRolesOfficesDao;
-
+  @Inject
+  static SynchronizationManager synchronizationManager;
+  
   /**
    * Gli istituti perseo.
    */
@@ -515,7 +515,7 @@ public class Synchronizations extends Controller {
       }
 
       // Creazione!
-      if (!personCreator(personInPerseo.get()).isPresent()) {
+      if (!synchronizationManager.personCreator(personInPerseo.get()).isPresent()) {
         flash.error("La persona selezionata non può essere importata a causa di errori.");
       } else {
         flash.success("La persona %s è stata importata con successo da Perseo!",
@@ -524,25 +524,6 @@ public class Synchronizations extends Controller {
     }
 
     people(office.get().id);
-  }
-
-  /**
-   * Da spostare in un updater.
-   */
-  private static Optional<Person> personCreator(Person person) {
-
-    try {
-      person.user = userManager.createUser(person);
-      person.save();
-
-      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.user, person.office, employee);
-      person.save();
-    } catch (Exception ex) {
-      return Optional.absent();
-    }
-
-    return Optional.fromNullable(person);
   }
 
   /**
@@ -574,7 +555,7 @@ public class Synchronizations extends Controller {
     }
 
     for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
-      if (epasPeopleByPerseoId.get(perseoPerson.perseoId) == null) {
+      if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
 
         log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
             perseoPerson.fullName(), perseoPerson.number,
@@ -587,7 +568,7 @@ public class Synchronizations extends Controller {
         validation.valid(perseoPerson);
         if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
-          log.info("L'importazione della persone con perseoId={} ha comportato errori di "
+          log.info("L'importazione della persona con perseoId={} ha comportato errori di "
                   + "validazione nella persona. errors={}.",
               perseoPerson.perseoId, validation.errorsMap());
           Validation.clear();
@@ -595,7 +576,7 @@ public class Synchronizations extends Controller {
         }
 
         // Creazione!
-        if (!personCreator(perseoPerson).isPresent()) {
+        if (!synchronizationManager.personCreator(perseoPerson).isPresent()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
           log.info("L'importazione della persone con perseoId={} ha comportato errori di "
                   + "validazione nella persona. errors={}.",
@@ -768,21 +749,12 @@ public class Synchronizations extends Controller {
     Person person = personDao.getPersonById(epasPersonId);
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(person.perseoId);
-
-    Optional<Contract> contractInPerseo = Optional.absent();
-    try {
-      contractInPerseo = contractPerseoConsumer.perseoContractPerseoId(perseoId, person);
-    } catch (ApiRequestException ex) {
-      flash.error("%s", ex);
-    }
-
-    if (contractInPerseo.isPresent()) {
-      // Salvare il contratto.
-      if (!contractManager.properContractCreate(contractInPerseo.get(), Optional.absent(), false)) {
-        flash.error("Il contratto non può essere importato a causa di errori");
-        people(person.office.id);
-      }
-      flash.success("Contratto di %s importato con successo da Perseo!", person.toString());
+    
+    val syncResult = synchronizationManager.importContract(perseoId, epasPersonId);
+    if (syncResult.isSuccess()) {
+      flash.success(syncResult.toString());
+    } else {
+      flash.error(syncResult.toString());
     }
 
     people(person.office.id);
@@ -968,5 +940,16 @@ public class Synchronizations extends Controller {
     eppn(office.id);
   }
 
+  /**
+   * Sincronizza le persone presenti in un ufficio, prelevando le persone
+   * assegnato all'ufficio dall'anagrafica esterna.
+   * 
+   * @param id l'id dell'ufficio da sincronizzare.
+   */
+  public void syncPeopleInOffice(Long id) {
+    Office office = Office.findById(id);
+    notFoundIfNull(office);
+    synchronizationManager.syncPeopleInOffice(office, false);
+  }
 
 }

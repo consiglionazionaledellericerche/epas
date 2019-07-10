@@ -1,0 +1,449 @@
+package manager.sync;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import dao.PersonDao;
+import dao.RoleDao;
+import helpers.rest.ApiRequestException;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import manager.ContractManager;
+import manager.OfficeManager;
+import manager.RegistryNotificationManager;
+import manager.UserManager;
+import models.Contract;
+import models.Office;
+import models.Person;
+import models.Role;
+import org.joda.time.LocalDate;
+import play.data.validation.Validation;
+import synch.perseoconsumers.contracts.ContractPerseoConsumer;
+import synch.perseoconsumers.people.PeoplePerseoConsumer;
+
+@Slf4j
+public class SynchronizationManager {
+
+  private PeoplePerseoConsumer peoplePerseoConsumer;
+  private ContractPerseoConsumer contractPerseoConsumer;
+  private PersonDao personDao;
+  private UserManager userManager;
+  private ContractManager contractManager;
+  private RoleDao roleDao;
+  private OfficeManager officeManager;
+  private RegistryNotificationManager registryNotificationManager;
+
+  /**
+   * Default constructor, useful for injection.  
+   */
+  @Inject
+  public SynchronizationManager(PeoplePerseoConsumer peoplePerseoConsumer,
+      ContractPerseoConsumer contractPerseoConsumer,
+      PersonDao personDao, UserManager userManager, 
+      ContractManager contractManager, RoleDao roleDao,
+      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager) {
+    this.peoplePerseoConsumer = peoplePerseoConsumer;
+    this.contractPerseoConsumer = contractPerseoConsumer;
+    this.personDao = personDao;
+    this.userManager = userManager;
+    this.contractManager = contractManager;
+    this.roleDao = roleDao;
+    this.officeManager = officeManager;
+    this.registryNotificationManager = registryNotificationManager;
+  }
+
+  /**
+   * Sincronizza le persone di un ufficio presenti nell'anagrafica principale con 
+   * quelle di ePAS.
+   * @param office l'ufficio di cui sincronizzare le persone.
+   */
+  public SyncResult syncPeopleInOffice(Office office, boolean alsoContracts) {
+    log.info("Sincronizzazione delle persone presenti nell'ufficio {}.",
+        office.getName());
+    val result = new SyncResult();
+
+    val perseoPeople = peoplePerseoConsumer
+        .perseoPeopleByPerseoId(Optional.fromNullable(office.perseoId));
+    log.debug("Trovate {} persone in anagrafica associate all'ufficio {}",
+        perseoPeople.size(), office.getName());
+
+    List<Person> epasPeople = personDao.listFetched(Optional.absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
+
+    log.debug("Trovate {} persone in ePAS associate all'ufficio {}",
+        epasPeople.size(), office.getName());
+
+    val epasPeopleByPerseoId = epasPeople.stream().filter(p -> p.perseoId != null)
+        .collect(Collectors.toMap(p -> p.perseoId, p -> p));
+
+    for (Person perseoPerson : perseoPeople.values()) {      
+      if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
+        result.add(createOrTransferPerson(perseoPerson, office));
+      } else {
+        result.add(
+            syncPerson(epasPeopleByPerseoId.get(perseoPerson.perseoId), perseoPerson));
+      }
+    }
+
+    log.info("Terminata la sincronizzazione delle persone presenti nell'ufficio {}.",
+        office.getName());
+    return result;
+  }
+
+  /**
+   * Crea una persona in ePAS associandola alla sede se non è presente in ePAS.
+   * Se la persona è presente in ePAS gli cambia l'assegnazione della sede.
+   */
+  public SyncResult createOrTransferPerson(Person perseoPerson, Office office) {
+    log.info("Persona {} (matricola:{} perseoId:{}) non associata in ePAS all'ufficio {}.",
+        perseoPerson.fullName(), perseoPerson.number,
+        perseoPerson.perseoId, office.getName());
+
+    val syncResult = new SyncResult();
+
+    val epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    if (epasPerson != null) {
+      log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
+          + "Effettuo il cambio di sede.",
+          epasPerson.getFullname(), epasPerson.number, epasPerson.office.getName());
+
+      Office oldOffice = epasPerson.office; 
+      epasPerson.office = office;
+      epasPerson.save();
+
+      registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
+      return syncResult.add(
+          String.format(
+              "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
+              epasPerson.fullName(), oldOffice.name, epasPerson.office.name));
+    }
+
+    // join dell'office (in automatico ancora non c'è...)
+    perseoPerson.office = office;
+    perseoPerson.beginDate =
+        LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    val validation = Validation.current.get(); 
+    validation.valid(perseoPerson);
+    if (Validation.hasErrors()) {
+      // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+      log.info("L'importazione della persona con perseoId={} ha comportato errori di "
+          + "validazione nella persona. errors={}.",
+          perseoPerson.perseoId, validation.errorsMap());
+      Validation.clear();
+      syncResult.setSuccess(false);
+      return syncResult.add(
+          String.format("Tentativo di importazione della persona con perseoId = %s fallito per "
+              + "errori di validazione dei suoi dati.", 
+              perseoPerson.perseoId));
+    }
+
+    // Creazione!
+    val newPerson = personCreator(perseoPerson);
+    if (!newPerson.isPresent()) {
+      // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
+      log.info("L'importazione della persone con perseoId={} ha comportato errori di "
+          + "validazione nella persona. errors={}.",
+          perseoPerson.perseoId, validation.errorsMap());
+      Validation.clear();
+
+      return syncResult.add(
+          String.format("Tentativo di importazione della persona con perseoId = %s fallito per "
+              + "errori di validazione dei suoi dati.", 
+              perseoPerson.perseoId));
+    } else {
+
+      log.info("Creata la nuova persona {}, matricola = {}, ufficio = {}",
+          newPerson.get().getFullname(), newPerson.get().number, 
+          newPerson.get().office.getName());
+
+      syncResult.add(importContracts(newPerson.get()));
+
+      registryNotificationManager.notifyNewPerson(newPerson.get());
+      return syncResult.add(
+          String.format("Creata la nuova persona %s, matricola = %s, ufficio = %s",
+              newPerson.get().getFullname(), newPerson.get().number, 
+              newPerson.get().office.getName()));
+    }
+
+  }
+
+  /**
+   * Crea utente, persona e ruoli necessari.
+   */
+  public Optional<Person> personCreator(Person person) {
+
+    try {
+      person.user = userManager.createUser(person);
+      person.save();
+
+      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
+      officeManager.setUro(person.user, person.office, employee);
+      person.save();
+    } catch (Exception ex) {
+      return Optional.absent();
+    }
+
+    return Optional.fromNullable(person);
+  }
+
+  /**
+   * Aggiorna la persona presente in ePAS con i dati della persona prelevata dall'anagrafica.
+   *  
+   * @return una stringa con la descrizione dei cambiamanti se ci sono stati. empty altrimenti.
+   */
+  public SyncResult syncPerson(Person epasPerson, Person registryPerson) {
+
+    val syncResult = new SyncResult();
+
+    if (!epasPerson.name.equals(registryPerson.name)) {
+      syncResult.add(
+          String.format("Cambiato nome da {} a {}", epasPerson.name, registryPerson.name));
+      epasPerson.name = registryPerson.name;
+
+    }
+    if (!epasPerson.surname.equals(registryPerson.surname)) {
+      syncResult.add(String.format("Cambiato cognome da {} a {}", 
+          epasPerson.surname, registryPerson.surname));
+      epasPerson.surname = registryPerson.surname;
+    }
+    if ((epasPerson.number == null && registryPerson.number != null) 
+        || epasPerson.number != null && registryPerson.number != null 
+        && !epasPerson.number.equals(registryPerson.number)) {
+      epasPerson.number = registryPerson.number;
+      syncResult.add(String.format("Assegnato il numero di matricola {} a {}", 
+          epasPerson.number, epasPerson.getFullname()));
+    }
+    if (!syncResult.getMessages().isEmpty()) {
+      epasPerson.save();
+    }
+    return syncResult;
+  }
+
+
+  /**
+   * Effettua l'importazione di un contratto di una perseo dall'anagrafica.
+   * 
+   * @param perseoContractId l'id in anagrafica del contratto da importare
+   * @param epasPersonId l'id della persona in ePAS
+   */
+  public SyncResult importContract(Long perseoContractId, Long epasPersonId) {
+    Person person = personDao.getPersonById(epasPersonId);
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(person.perseoId);
+
+    val syncResult = new SyncResult();
+    Optional<Contract> contractInPerseo = Optional.absent();
+    try {
+      contractInPerseo = contractPerseoConsumer.perseoContractPerseoId(perseoContractId, person);
+    } catch (ApiRequestException ex) {
+      log.warn("Problemi nell'importazione del contratto di {}", 
+          person.getFullname(), ex);
+
+      return syncResult.setFailed()
+          .add(
+              String.format("Problemi nell'importazione dei dati del contratto di %s. "
+                  + "Impossibile importare il contratto: %s", 
+                  person.getFullname(), ex.toString()));
+    }
+
+    if (contractInPerseo.isPresent()) {
+      // Salvare il contratto.
+      if (!contractManager.properContractCreate(contractInPerseo.get(), Optional.absent(), false)) {
+        return 
+            syncResult.setFailed()
+            .add(String.format("Il contratto di %s non può essere importato a causa di errori",
+                person.getFullname()));
+      }
+      log.info("Importato con successo il contratto di {}. {}", 
+          person.getFullname(), contractInPerseo.get());
+      return syncResult.add(
+          String.format("Contratto di %s importato con successo dall'anagrafica", 
+              person.toString()));
+    }
+
+    log.warn("Problemi nell'importazione del contratto di {}. "
+        + "Contratto non presente in anagrafica.", person.getFullname());    
+    return syncResult.setFailed()
+        .add(String.format("Contratto di {} non presente in anagrafica", person.getFullname()));
+  }
+
+  /**
+   * Effettua l'importazione dei contratti di una persona dall'anagrafica.
+   * 
+   * @param person la persona in ePAS di cui importare i contratti.
+   */
+  public SyncResult importContracts(Person person) {
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(person.perseoId);
+
+    val syncResult = new SyncResult();
+    List<Contract> contractsInRegistry = Lists.newArrayList();
+    try {
+      contractsInRegistry = 
+          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.perseoId, person);
+    } catch (ApiRequestException ex) {
+      log.warn("Problemi nell'importazione dei contratti di {}", 
+          person.getFullname(), ex);
+      return syncResult.setFailed()
+          .add(
+              String.format("Problemi nell'importazione dei dati del contratto di %s. "
+                  + "Impossibile importare il contratto: %s", 
+                  person.getFullname(), ex.toString()));
+    }
+
+    contractsInRegistry.stream().forEach(registryContract -> {
+      // Salvare il contratto.
+      if (!contractManager.properContractCreate(registryContract, Optional.absent(), false)) {
+        syncResult.setFailed()
+            .add(String.format(
+            "Il contratto di %s non può essere importato a causa di errori",
+            person.getFullname()));
+      }
+      log.info("Importato con successo il contratto di {}. {}", 
+          person.getFullname(), registryContract);
+      syncResult.add(
+          String.format("Contratto di %s importato con successo dall'anagrafica", 
+              person.toString()));
+    });
+
+    if (contractsInRegistry.isEmpty()) {
+      log.warn("Problemi nell'importazione del contratto di {}. "
+          + "Contratto non presente in anagrafica.", person.getFullname());    
+      syncResult.setFailed()
+          .add(String.format("Contratto di {} non presente in anagrafica", person.getFullname()));
+
+    }
+    return syncResult;
+
+  }
+
+  /**
+   * Sincronizza i contratti presenti in ePAS con quelli presenti in anagrafica. 
+   * @param person la persona di cui sincronizzare i contratti.
+   * @return il risultato della sincronizzazione.
+   */
+  public SyncResult syncContracts(Person person) {
+    Verify.verifyNotNull(person);
+    Verify.verifyNotNull(person.perseoId);
+
+    val syncResult = new SyncResult();
+    List<Contract> contractsInRegistry = Lists.newArrayList();
+    try {
+      contractsInRegistry = 
+          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.perseoId, person);
+    } catch (ApiRequestException ex) {
+      log.warn("Problemi nell'importazione dei contratti di {}", 
+          person.getFullname(), ex);
+      return syncResult.setFailed()
+          .add(String.format("Problemi nell'importazione dei dati del contratto di %s. "
+              + "Impossibile importare il contratto: %s", 
+              person.getFullname(), ex.toString()));
+    }
+
+    if (contractsInRegistry.isEmpty() && person.contracts.isEmpty()) {
+      log.debug("Non ci sono contratti presenti per {} ne in anagrafica ne in ePAS."
+          + "Niente da sincronizzare.", person.getFullname());
+      return syncResult;
+    }
+
+    contractsInRegistry.forEach(contractInRegistry -> {
+      val matchingContracts = matchingContracts(contractInRegistry, person);
+      if (matchingContracts.isPresent()) {
+        syncResult.add(syncContract(
+            matchingContracts.get().getRegistryContract(), 
+            matchingContracts.get().getEpasContract()));        
+      } else {
+        // Salvare il contratto.
+        if (!contractManager.properContractCreate(contractInRegistry, Optional.absent(), false)) { 
+          syncResult.setFailed()
+              .add(String.format("Il contratto di %s non può essere importato a causa di errori",
+              person.getFullname()));
+        }
+      }
+    });
+    return syncResult;
+  }
+
+  /**
+   * Verifica se trai contratti passati c'è n'è uno che corrisponde ai contratti
+   * della persona.
+   * 
+   * @param contract il contratti dall'anagrafica
+   * @param person persona di cui verificare i contratti
+   * @return
+   */
+  private Optional<MatchingContracts> matchingContracts(
+      Contract contract, Person person) {
+    Verify.verifyNotNull(contract);
+    Verify.verifyNotNull(person);
+    MatchingContracts matchingContracts = new MatchingContracts();
+
+    java.util.Optional<Contract> matchingContract = 
+        person.contracts.stream().filter(
+            c ->
+            c.person.id.equals(contract.person.id) 
+            && 
+            (c.perseoId != null && c.perseoId.equals(contract.perseoId)) 
+            || 
+            (c.beginDate != null && c.beginDate.equals(contract.beginDate) 
+            && c.endDate.equals(contract.endContract)))
+        .findAny();
+    if (matchingContract.isPresent()) {
+      matchingContracts.setRegistryContract(contract);
+      matchingContracts.setEpasContract(matchingContract.get());
+    }
+
+    if (matchingContracts.isEmpty()) {
+      return Optional.absent();
+    }
+    return Optional.of(matchingContracts);
+  }
+
+  @Data
+  public class MatchingContracts {
+    private Contract registryContract = null;
+    private Contract epasContract = null;
+
+    private boolean isEmpty() {
+      return registryContract == null || epasContract == null;
+    }
+  }
+
+  private SyncResult syncContract(Contract registryContract, Contract epasContract) {
+    val syncResult = new SyncResult();
+    if (registryContract.beginDate != null 
+        && !registryContract.beginDate.equals(epasContract.beginDate)) {
+      epasContract.beginDate = registryContract.beginDate;
+      syncResult.add(
+          String.format("Aggiornata la data di inizio del contratto di %s a %s",
+              epasContract.person.getFullname(), epasContract.beginDate));
+    }
+    if (registryContract.endDate != null 
+        && !registryContract.endDate.equals(epasContract.endDate)) {
+      epasContract.endDate = registryContract.endDate;
+      syncResult.add(
+          String.format("Aggiornata la data di fine del contratto di %s a %s",
+              epasContract.person.getFullname(), epasContract.endDate));
+    }
+    if (registryContract.endContract != null 
+        && !registryContract.endContract.equals(epasContract.endContract)) {
+      epasContract.endContract = registryContract.endContract;
+      syncResult.add(
+          String.format("Aggiornata la data di terminazione contratto di %s a %s",
+              epasContract.person.getFullname(), epasContract.endContract));
+    }
+    if (registryContract.perseoId != null 
+        && !registryContract.perseoId.equals(epasContract.perseoId)) {
+      epasContract.perseoId = registryContract.perseoId;
+      syncResult.add(
+          String.format("Aggiornato l'identificato anagrafico del contratto di %s a %s",
+              epasContract.person.getFullname(), epasContract.perseoId));
+    }
+    return syncResult;
+  }
+}

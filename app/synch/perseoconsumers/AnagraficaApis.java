@@ -15,6 +15,7 @@ public class AnagraficaApis {
   private static final String CONTRACTS_IN_OFFICE = "anagrafica.contractsinoffice";
   private static final String CONTRACTS = "anagrafica.contracts";
   private static final String CONTRACT = "anagrafica.contract";
+  private static final String CONTRACTS_BY_PERSON_ID = "anagrafica.contractsByPersonId";
   private static final String PEOPLE_IN_OFFICE = "anagrafica.peopleinoffice";
   private static final String PEOPLE = "anagrafica.people";
   private static final String PERSON_FOR_EPAS_ENDPOINT = "anagrafica.person";
@@ -29,13 +30,21 @@ public class AnagraficaApis {
     return Play.configuration.getProperty(PERSEO_BASE_URL);
   }
 
+  /** 
+   * Utente per autenticazione anagrafica.
+   * @return l'utente con cui autenticarsi con l'anagrafica. 
+   */
   public static String getPerseoUser() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(PERSEO_USER))) {
       throw new NoSuchFieldException(PERSEO_USER);
     }
     return Play.configuration.getProperty(PERSEO_USER);
   }
-
+  
+  /** 
+   * Password per autenticazione anagrafica.
+   * @return password con cui autenticarsi con l'anagrafica. 
+   */
   public static String getPerseoPass() throws NoSuchFieldException {
     if (Strings.isNullOrEmpty(Play.configuration.getProperty(PERSEO_PASS))) {
       throw new NoSuchFieldException(PERSEO_PASS);
@@ -69,6 +78,10 @@ public class AnagraficaApis {
     return getPerseoBaseUrl() + Play.configuration.getProperty(CONTRACT);
   }
 
+  public static String getContractsByPersonIdForEpasEndpoint() throws NoSuchFieldException {
+    return getPerseoBaseUrl() + Play.configuration.getProperty(CONTRACTS_BY_PERSON_ID);
+  }
+  
   public static String getAllDepartmentPeopleForEpasEndpoint() throws NoSuchFieldException {
     return getPerseoBaseUrl()
         + Play.configuration.getProperty(PEOPLE_IN_OFFICE);
