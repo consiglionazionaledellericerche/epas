@@ -59,6 +59,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final ListPath<models.Qualification, models.query.QQualification> qualifications = this.<models.Qualification, models.query.QQualification>createList("qualifications", models.Qualification.class, models.query.QQualification.class, PathInits.DIRECT2);
 
+    public final BooleanPath reperibilityCompatible = createBoolean("reperibilityCompatible");
+
     public final SetPath<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour> replacingGroup = this.<models.absences.ComplationAbsenceBehaviour, QComplationAbsenceBehaviour>createSet("replacingGroup", models.absences.ComplationAbsenceBehaviour.class, QComplationAbsenceBehaviour.class, PathInits.DIRECT2);
 
     public final NumberPath<Integer> replacingTime = createNumber("replacingTime", Integer.class);
