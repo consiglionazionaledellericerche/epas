@@ -952,4 +952,17 @@ public class Synchronizations extends Controller {
     synchronizationManager.syncPeopleInOffice(office, false);
   }
 
+  /**
+   * Sincronizza i dati di una persona presente in ePAS con quelli 
+   * dell'anagrafica.
+   * 
+   * @param id id in ePAS della persona da sincronizzare.
+   */
+  public void syncPerson(Long id) {
+    Verify.verifyNotNull(id);
+    Person person = Person.findById(id);
+    Verify.verifyNotNull(person);
+    synchronizationManager.syncPerson(person);
+    renderText("sincronizzato " + person.getFullname());
+  }
 }
