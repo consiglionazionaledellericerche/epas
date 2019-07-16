@@ -2441,3 +2441,20 @@ when
 then
   $c.grant();
 end
+
+/*******************************************************************************
+ * Azioni via REST per PERSONDAY READER
+ ******************************************************************************/
+ 
+rule managePersonDay
+when
+ AccountRole(this in (AccountRole.PERSONDAY_READER)) 
+ $c: PermissionCheck(action in (
+
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation",
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
