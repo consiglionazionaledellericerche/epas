@@ -768,7 +768,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 360, false, true,
       0, null, Sets.newHashSet(), null, null,false),
   A_77D("77D", "perm. sind. 7 ore dirigenti sindac.",
-      false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 420, false, true,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null,false),
   A_78D("78D", "perm. sind. 8 ore dirigenti sindac.",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 480, false, true,
