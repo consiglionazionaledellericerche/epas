@@ -5,27 +5,20 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import dao.UserDao;
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-
 import org.joda.time.LocalDate;
-
 import play.libs.Codec;
 
 /**
