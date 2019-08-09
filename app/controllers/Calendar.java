@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.CompetenceCode;
 import models.Person;
@@ -49,6 +50,7 @@ import security.SecurityRules;
  * @author daniele
  * @since 15/05/17.
  */
+@Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
 
@@ -82,8 +84,10 @@ public class Calendar extends Controller {
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
     final List<ShiftType> activities = shiftManager2.getUserActivities();
-
-    final ShiftType activitySelected = activity.id != null ? activity : activities.get(0);
+    log.info("userActivities.size() = {}", activities.size());
+    
+    final ShiftType activitySelected = activity.id != null 
+        ? activity : activities.size() > 0 ?  activities.get(0) : null;
 
     rules.checkIfPermitted(activitySelected);
 
