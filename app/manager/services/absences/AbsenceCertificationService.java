@@ -724,8 +724,8 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType nothing = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+    JustifiedType completeDayAndAddOvertime = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
@@ -853,13 +853,6 @@ public class AbsenceCertificationService {
             continue;
           } 
 
-          //4) 09 (visita medica). Utilizzo il codice sostitutivo.
-//          if (code.equals(DefaultAbsenceType.A_09B.getCode())) {
-//            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_09BI.getCode()).get();
-//            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-//                  aux, nothing, 0, 0).absencesToPersist); 
-//            continue;
-//          }
           
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
@@ -879,6 +872,11 @@ public class AbsenceCertificationService {
             int minute = type.get().justifiedTime % 60;
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, hour, minute).absencesToPersist); 
+            continue;
+          }
+          if (justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+            absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
+                type.get(), justifiedType, 0, 0).absencesToPersist);
             continue;
           }
         }

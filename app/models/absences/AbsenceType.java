@@ -115,6 +115,12 @@ public class AbsenceType extends BaseModel {
    */
   public String documentation; 
   
+  /**
+   * per il controllo della prendibilità della reperibilità sul giorno di assenza
+   */
+  @Column(name = "reperibility_compatible")
+  public boolean reperibilityCompatible;
+  
   // Metodi
   
   /**
