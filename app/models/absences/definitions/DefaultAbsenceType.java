@@ -475,7 +475,7 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
 
   A_242("242", "Astensione facoltativa post partum non retrib. secondo figlio intera giornata",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_242M("242M", "Astensione facoltativa post partum non retrib. secondo figlio in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
@@ -857,7 +857,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_6N("6N", "permesso motivi privati non retribuito",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_6NTD("6NTD", "permesso motivi privati non retribuito tempo determinato",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
