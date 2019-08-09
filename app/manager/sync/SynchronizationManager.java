@@ -453,22 +453,21 @@ public class SynchronizationManager {
 
   private SyncResult syncContract(Contract registryContract, Contract epasContract) {
     val syncResult = new SyncResult();
-    if (registryContract.beginDate != null 
-        && !registryContract.beginDate.equals(epasContract.beginDate)) {
+    log.debug("Inizio sincronizzazione contratti. Registry contract = {}. ePAS contract = {}",
+        registryContract, epasContract);
+    if (!matching(registryContract.beginDate, epasContract.beginDate)) {
       epasContract.beginDate = registryContract.beginDate;
       syncResult.add(
           String.format("Aggiornata la data di inizio del contratto di %s a %s",
               epasContract.person.getFullname(), epasContract.beginDate));
     }
-    if (registryContract.endDate != null 
-        && !registryContract.endDate.equals(epasContract.endDate)) {
+    if (!matching(registryContract.endDate, epasContract.endDate)) {
       epasContract.endDate = registryContract.endDate;
       syncResult.add(
           String.format("Aggiornata la data di fine del contratto di %s a %s",
               epasContract.person.getFullname(), epasContract.endDate));
     }
-    if (registryContract.endContract != null 
-        && !registryContract.endContract.equals(epasContract.endContract)) {
+    if (!matching(registryContract.endContract, epasContract.endContract)) {
       epasContract.endContract = registryContract.endContract;
       syncResult.add(
           String.format("Aggiornata la data di terminazione contratto di %s a %s",
@@ -490,5 +489,10 @@ public class SynchronizationManager {
     }
     
     return syncResult;
+  }
+  
+  private boolean matching(LocalDate firstDate, LocalDate secondDate) {
+    return (firstDate != null && firstDate.equals(secondDate)) 
+        || (firstDate == null && secondDate == null);
   }
 }

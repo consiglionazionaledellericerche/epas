@@ -4,13 +4,12 @@
 
 #{synch.synchPeopleTabs activeAction:'people' /}
 
-
 <div class="container">
   
   <table class="table table-bordered" datatable>
   <thead>
 	<tr>
-	  <th>Persone Perseo</th>
+	  <th>Persone Anagrafica Esterna</th>
 	  <th>Contratti</th>
 	  <th>Ruoli</th>
 	</tr>
@@ -44,7 +43,7 @@
 	        #{/if}#{else}
 	           #{if !properSynchronized}
 	            <i class="fa fa-warning fa-2x text-danger" aria-hidden="true"
-		           popover-hover-2 data-content="Associato a Perseo con errori..."></i>
+		           popover-hover-2 data-content="Associato all'Anagrafica con errori..."></i>
 		       #{/if}
 	           #{if templateUtility.syncDiagnostic.personEquals(epasPerson, perseoPerson) == false}
 	             <i class="fa fa-times fa-2x text-danger" aria-hidden="true"
@@ -52,7 +51,10 @@
 	             <span class="label label-default">${epasPerson.number}</span>
 	             <span class="label label-default">${epasPerson.name}</span>
 	             <span class="label label-default">${epasPerson.surname}</span>
-	             <span class="label label-default">${epasPerson.qualification}</span>  
+	             <span class="label label-default">${epasPerson.qualification}</span>
+	             <a href="@{Synchronizations.syncPerson(epasPerson.id)}"
+	           	 	class="btn btn-xs btn-info">sincronizza</a>	           
+	               
 	           #{/if}
 	        #{/else}
 	      </td>
@@ -81,6 +83,8 @@
 	             #{if epasContract.isTemporaryMissing && epasContract.endDate == null}
 	               <span class="label label-warning">Temporary</span>
 	             #{/if} 
+	             <a href="@{Synchronizations.syncPerson(epasPerson.id)}"
+	             	class="btn btn-xs btn-info">sincronizza</a>
 	           #{/if}
 	        #{/if}#{else}
 	          <a class="btn btn btn-info btn-xs" 
@@ -112,7 +116,7 @@
 	            #{/if} #{else}
 	              <span class="label label-warning">${uro}</span>
 	                <i class="fa fa-times text-danger" aria-hidden="true"
-		             popover-hover-2 data-content="Permesso mancante in Perseo."></i> 
+		             popover-hover-2 data-content="Permesso mancante in Anagrafica."></i> 
 	              <br>
 	            #{/else}
 	          #{/list}
@@ -137,8 +141,8 @@
   
   
   #{alert color:'warning'}
-    <p>La <strong>tabella sottostante</strong> contiene tutte le persone ePAS non associate a Perseo, oppure, che hanno contratti
-    attivi o futuri anch'essi non associati a Perseo.</p>
+    <p>La <strong>tabella sottostante</strong> contiene tutte le persone ePAS non associate all'Anagrafica esterna, oppure, che hanno contratti
+    attivi o futuri anch'essi non associati all'Anagrafica esterna.</p>
     <p>Una volta completate le procedure di associazione conterrà l'eventuale personale non strutturato gestito
     da ePAS per la sede selezionata.</p>
   #{/alert}
