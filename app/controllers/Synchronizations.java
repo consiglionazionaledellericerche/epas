@@ -958,11 +958,16 @@ public class Synchronizations extends Controller {
    * 
    * @param id id in ePAS della persona da sincronizzare.
    */
-  public void syncPerson(Long id) {
+  public static void syncPerson(Long id) {
     Verify.verifyNotNull(id);
     Person person = Person.findById(id);
     Verify.verifyNotNull(person);
-    synchronizationManager.syncPerson(person);
-    renderText("sincronizzato " + person.getFullname());
+    val result = synchronizationManager.syncPerson(person);
+    if (result.isSuccess()) {
+      flash.success("%s: ", person.getFullname(), result.toString());
+    } else {
+      flash.error("%s: %s", person.getFullname(), result.toString());
+    }
+    people(person.office.id);    
   }
 }
