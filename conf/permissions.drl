@@ -766,12 +766,9 @@ when
     || action.startsWith("Administration.")
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
-    || action.startsWith("Competences.")
-    || action.startsWith("MealTickets.")
     || action.startsWith("PrintTags.")
     || action.startsWith("PersonMonths.")
     || action.startsWith("Stampings.")
-    || action.startsWith("UploadSituation.")
     || action.startsWith("Vacations."))
 then
  $c.revoke();
@@ -827,7 +824,6 @@ when
     "ContractualClauses.list",
     "ContractualClauses.show",
     "Institutes.list",
-
     "MonthRecaps.customRecap",
     "MonthRecaps.showRecaps",
     "PersonDays.personDayHistory",
