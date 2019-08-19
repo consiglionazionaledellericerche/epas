@@ -2,6 +2,7 @@ package manager;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import dao.AbsenceDao;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import lombok.val;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -315,6 +317,23 @@ public class PersonManager {
        ).toList();
 
     return absencesToRecover;
+  }
+  
+  /**
+   * eppn viene calcolato come username @ ultimi due livelli 
+   * del nome a dominio dell'email.
+   * Per esempio se l'username è giuseppe.verdi e l'mail è g.verdi@iit.cnr.it
+   * il campo ePPN viene impostato a giuseppe.verdi@cnr.it
+  */ 
+  public String eppn(String username, String email) {
+    Verify.verifyNotNull(username);
+    Verify.verifyNotNull(email);
+    if (email.split("\\.").length > 2) {
+      val emailTokens = email.split("\\.");
+      return username + "@" + "" + emailTokens[emailTokens.length - 2] + "." 
+          + emailTokens[emailTokens.length - 1];
+    } 
+    return null;
   }
 
 }
