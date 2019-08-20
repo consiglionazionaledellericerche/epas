@@ -21,6 +21,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -371,6 +373,12 @@ public class Absences extends Controller {
       to = LocalDate.now();
     }
 
+    class DateComparator implements Comparator<Absence> {
+      @Override
+      public int compare(Absence a, Absence b) {
+          return a.personDay.date.compareTo(b.personDay.date);
+      }
+    }
     List<Absence> missioni = Lists.newArrayList();
     List<Absence> ferie = Lists.newArrayList();
     List<Absence> riposiCompensativi = Lists.newArrayList();
@@ -387,9 +395,8 @@ public class Absences extends Controller {
 
     rules.checkIfPermitted(person.office);
 
-    List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person),
-        Optional.<String>absent(), from, to,
-        Optional.of(JustifiedTypeName.all_day), false, false);
+    List<Absence> absenceList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
+        from, Optional.fromNullable(to), false);
 
     for (Absence abs : absenceList) {
       if (AbsenceTypeMapping.MISSIONE.is(abs.absenceType)) {
@@ -404,6 +411,8 @@ public class Absences extends Controller {
         altreAssenze.add(abs);
       }
     }
+
+    Collections.sort(absenceList, new DateComparator());
     render(personList, person, absenceList, from, to, missioni, ferie,
         riposiCompensativi, altreAssenze, person.id);
 
