@@ -29,6 +29,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.testng.collections.Lists;
 
 public class AbsenceEngineUtility {
@@ -201,7 +202,16 @@ public class AbsenceEngineUtility {
       for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
         if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
           if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
-            return 0;
+            if (absence.absenceType.isConsideredWeekEnd()) {
+              LocalDate dateToChange = date;
+              while (!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), dateToChange)) {
+                dateToChange = dateToChange.plusDays(1);
+              }
+              return cwtt.workingTimeType.workingTimeTypeDays.get(dateToChange.getDayOfWeek() - 1)
+                  .workingTime;
+            } else {
+              return 0;
+            }            
           }
           return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
               .workingTime;
