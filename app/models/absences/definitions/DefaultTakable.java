@@ -308,8 +308,10 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_115VM), -1, null),
 
   T_MALATTIA_FIGLIO_1(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
-      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14), 
+      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14, 
+          DefaultAbsenceType.A_12U), 
+      ImmutableSet.of(DefaultAbsenceType.A_12, DefaultAbsenceType.A_13, DefaultAbsenceType.A_14, 
+          DefaultAbsenceType.A_12U), 
       -1, null),
 
   T_MALATTIA_FIGLIO_2(AmountType.units, 

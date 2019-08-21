@@ -601,6 +601,10 @@ public enum DefaultAbsenceType {
   A_12("12", "malattia primo figlio/a <= 3 anni retribuita 100%",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
+  
+  A_12U("12U", "malattia primo figlio/a <= 3 anni retribuita 100% altro genitore", 
+      true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+      0, null, Sets.newHashSet(), null, null, false),
 
   A_13("13", "malattia primo figlio/a > 3 anni senza retr.",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
