@@ -156,7 +156,7 @@ public class Absences extends Controller {
    * @param hours le ore da salvare
    * @param minutes i minuti da salvare
    */
-  public static void overtimeMission(Long absenceId, Integer hours, Integer minutes) {
+  public static void overtimeAbsence(Long absenceId, Integer hours, Integer minutes) {
     //TODO: va completata la business logic di questo metodo!!!
     Absence absence = absenceDao.getAbsenceById(absenceId);
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
@@ -172,7 +172,7 @@ public class Absences extends Controller {
     absence.personDay.setWorkingTimeInMission(overtimeMission);
     absence.personDay.save();
     consistencyManager.updatePersonSituation(absence.personDay.person.id, absence.personDay.date);
-    flash.success("Ore in più in missione salvate correttamente");
+    flash.success("Ore in più per l'assenza salvate correttamente");
     Stampings.personStamping(absence.personDay.person.id,
         absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
   }
