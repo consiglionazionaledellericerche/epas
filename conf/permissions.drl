@@ -586,13 +586,13 @@ end
 
 rule showAbsenceRequest
 when 
-  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR)
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
+  || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
 end
-
 
 rule personInCharge
 when
@@ -1130,6 +1130,12 @@ when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
+ 		
+ 		/* Permesso per vedere la lista delle richieste di assenza*/
+ 		"AbsenceRequests.vacationsToApprove",
+ 		"AbsenceRequests.compensatoryRestsToApprove",
+ 		"AbsenceRequests.listToApprove",
+ 		
 
         /* Vecchio permesso viewPerson */
         //"Persons.list",
