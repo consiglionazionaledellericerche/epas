@@ -1,6 +1,5 @@
 package synch.perseoconsumers.people;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.Qualification;
 import play.libs.WS;
-import play.libs.WS.HttpResponse;
 import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
@@ -173,7 +171,7 @@ public class PeoplePerseoConsumer {
       Person person = epasConverter(perseoPerson, qualificationsMap);
       if (person.number == null) {
         //non dovrebbe succedere...
-        log.info("Giunta da Siper persona senza matricola... {}.", person.toString());
+        log.warn("Ricevuta dall'anagrafica una persona senza matricola... {}.", person.toString());
       } else {
         people.add(person);
       }

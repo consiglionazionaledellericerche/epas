@@ -10,8 +10,8 @@ import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Notification;
@@ -20,7 +20,6 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.absences.Absence;
-import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
@@ -51,6 +50,9 @@ public class NotificationManager {
   private GroupDao groupDao;
   private ConfigurationManager configurationManager;
 
+  /**
+   * Default constructor.
+   */
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao, 
@@ -108,8 +110,8 @@ public class NotificationManager {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.STAMPING, stamping.id).create();
           } else {
-          // per la notifica delle delete niente redirect altrimenti tocca
-          // andare a prelevare l'entity dallo storico
+            // per la notifica delle delete niente redirect altrimenti tocca
+            // andare a prelevare l'entity dallo storico
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.STAMPING).create();
           }
@@ -252,7 +254,8 @@ public class NotificationManager {
         ) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
-    if (absenceRequest.officeHeadApprovalForManagerRequired && absenceRequest.officeHeadApproved == null 
+    if (absenceRequest.officeHeadApprovalForManagerRequired 
+        && absenceRequest.officeHeadApproved == null 
           && absenceRequest.person.isGroupManager()) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
