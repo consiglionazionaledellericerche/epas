@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.RegistryNotificationManager;
@@ -69,25 +70,36 @@ public class SynchronizationManager {
 
     val perseoPeople = peoplePerseoConsumer
         .perseoPeopleByPerseoId(Optional.fromNullable(office.perseoId));
-    log.debug("Trovate {} persone in anagrafica associate all'ufficio {}",
+    log.debug("Trovate {} persone in anagrafica associate all'ufficio {}.",
         perseoPeople.size(), office.getName());
 
     List<Person> epasPeople = personDao.listFetched(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
-    log.debug("Trovate {} persone in ePAS associate all'ufficio {}",
+    log.debug("Trovate {} persone in ePAS associate all'ufficio {}.",
         epasPeople.size(), office.getName());
 
     val epasPeopleByPerseoId = epasPeople.stream().filter(p -> p.perseoId != null)
         .collect(Collectors.toMap(p -> p.perseoId, p -> p));
 
-    for (Person perseoPerson : perseoPeople.values()) {      
-      if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
+    val epasPeopleByNumber = epasPeople.stream().filter(p -> p.number != null)
+        .collect(Collectors.toMap(p -> p.number, p -> p));
+    
+    for (Person perseoPerson : perseoPeople.values()) {
+      //Se il perseoId e la matricola non sono presenti per l'ufficio corrente 
+      //allora viene creata o trasferita la persona
+      if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId) 
+          && !epasPeopleByNumber.containsKey(perseoPerson.number)) {
         result.add(createOrTransferPerson(perseoPerson, office));
       } else {
+        Person personToSync = null;
+        if (epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
+          personToSync = epasPeopleByPerseoId.get(perseoPerson.perseoId);
+        } else {
+          personToSync = epasPeopleByNumber.get(perseoPerson.number);
+        }
         result.add(
-            syncPersonWithPersonRegistry(
-                epasPeopleByPerseoId.get(perseoPerson.perseoId), perseoPerson));
+            syncPersonWithPersonRegistry(personToSync, perseoPerson));
       }
     }
 
@@ -107,7 +119,11 @@ public class SynchronizationManager {
 
     val syncResult = new SyncResult();
 
-    val epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    var epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    if (epasPerson == null) {
+      epasPerson = personDao.getPersonByNumber(perseoPerson.number);
+    }
+
     if (epasPerson != null) {
       log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
           + "Effettuo il cambio di sede.",
@@ -223,7 +239,7 @@ public class SynchronizationManager {
   /**
    * Aggiorna la persona presente in ePAS con i dati della persona prelevata dall'anagrafica.
    *  
-   * @return una stringa con la descrizione dei cambiamanti se ci sono stati. empty altrimenti.
+   * @return una stringa con la descrizione dei cambiamenti se ci sono stati. empty altrimenti.
    */
   public SyncResult syncPersonWithPersonRegistry(Person epasPerson, Person registryPerson) {
 
@@ -231,12 +247,11 @@ public class SynchronizationManager {
 
     if (!epasPerson.name.equals(registryPerson.name)) {
       syncResult.add(
-          String.format("Cambiato nome da {} a {}", epasPerson.name, registryPerson.name));
+          String.format("Cambiato nome da %s a %s", epasPerson.name, registryPerson.name));
       epasPerson.name = registryPerson.name;
-
     }
     if (!epasPerson.surname.equals(registryPerson.surname)) {
-      syncResult.add(String.format("Cambiato cognome da {} a {}", 
+      syncResult.add(String.format("Cambiato cognome da %s a %s", 
           epasPerson.surname, registryPerson.surname));
       epasPerson.surname = registryPerson.surname;
     }
@@ -244,9 +259,16 @@ public class SynchronizationManager {
         || epasPerson.number != null && registryPerson.number != null 
         && !epasPerson.number.equals(registryPerson.number)) {
       epasPerson.number = registryPerson.number;
-      syncResult.add(String.format("Assegnato il numero di matricola {} a {}", 
+      syncResult.add(String.format("Assegnato il numero di matricola %s a %s", 
           epasPerson.number, epasPerson.getFullname()));
     }
+    if (epasPerson.perseoId == null 
+        || !epasPerson.perseoId.equals(registryPerson.perseoId)) {
+      epasPerson.perseoId = registryPerson.perseoId;
+      syncResult.add(String.format("Assegnato il campo perseoId %s a %s", 
+          epasPerson.perseoId, epasPerson.getFullname()));
+    }
+    
     if (!syncResult.getMessages().isEmpty()) {
       epasPerson.save();
     }

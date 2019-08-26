@@ -48,6 +48,7 @@ administrator= Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+Administration.generalSetting.table= Impostazioni generali di sistema
 Administration.playConfiguration.table= Parametri di Configurazione Play! framework
 Administration.jvmConfiguration.table= Parametri Jvm
 Administration.runtimeData.table= Valori di Runtime
@@ -271,6 +272,11 @@ endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. D
 firstDay= Giorno inizio contratto
 
 forceInsert= Forza Inserimento
+
+generalSetting =Impostazioni generali di sistema
+generalSetting.syncBadgesEnabled =Sincronizzazione badge
+generalSetting.syncOfficesEnabled =Sincronizzazione uffici
+generalSetting.syncPersonsEnabled =Sincronizzazione persone
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -705,6 +711,7 @@ AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
 Administration.internalSearch=Ricerca
 Administration.adjustSeats=Rimodula sedi
+Administration.generalSetting= Informazioni Applicazione
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature

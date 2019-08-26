@@ -942,7 +942,7 @@ public class Synchronizations extends Controller {
 
   /**
    * Sincronizza le persone presenti in un ufficio, prelevando le persone
-   * assegnato all'ufficio dall'anagrafica esterna.
+   * assegnate all'ufficio dall'anagrafica esterna.
    * 
    * @param id l'id dell'ufficio da sincronizzare.
    */
