@@ -61,6 +61,7 @@ public enum DefaultCategoryType {
   TELELAVORO("Telelavoro", 20, DefaultTab.TELELAVORO),
   L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 
       20, DefaultTab.LEGGE_104_DIPENDENTI),
+  STUDIO_DIPENDENTI("Permesso studio", 19, DefaultTab.STUDIO_DIPENDENTI),
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
 

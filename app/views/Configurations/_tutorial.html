@@ -181,6 +181,12 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.RIGHT_TO_STUDY) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi ai permessi per diritto allo studio.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLED_PERSON_PERMISSION) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente il codice di assenza per legge 104 per dipendente disabile (19).
