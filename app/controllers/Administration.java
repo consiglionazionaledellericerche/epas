@@ -11,9 +11,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import com.google.inject.internal.Messages;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
+import dao.GeneralSettingDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
@@ -23,6 +25,7 @@ import dao.history.PersonDayHistoryDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.Web;
 import it.cnr.iit.epas.CompetenceUtility;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,6 +43,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.validation.Valid;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
@@ -55,6 +60,7 @@ import manager.configurations.ConfigurationManager;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.GeneralSetting;
 import models.Institute;
 import models.Office;
 import models.Person;
@@ -128,7 +134,9 @@ public class Administration extends Controller {
   static AbsenceDao absenceDao;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
-
+  @Inject
+  static GeneralSettingDao generalSettingDao;
+  
   /**
    * metodo che renderizza la pagina di utilities.
    */
@@ -190,14 +198,14 @@ public class Administration extends Controller {
 
     log.debug("Trovate {} assenze totali", allAbsences.size());
 
-    for(HistoryValue<Absence> val : allAbsences) {
+    for (HistoryValue<Absence> val : allAbsences) {
 
       Absence abs = val.value;
       long id = val.value.personDay.id;
       log.info("Id del personDay = {}", id);
       PersonDay pd = personDayDao.getPersonDayById(id);
       if (pd != null) {
-        if(pd.absences.contains(abs)) {
+        if (pd.absences.contains(abs)) {
           log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
           continue;
         }
@@ -211,7 +219,8 @@ public class Administration extends Controller {
 
           Absence absence = new Absence();
           absence.absenceType = abs.absenceType;  
-          JustifiedType type = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
+          JustifiedType type = 
+              absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
           absence.justifiedType = type;
           absence.justifiedMinutes = abs.justifiedMinutes;
           absence.personDay = pd;
@@ -225,10 +234,10 @@ public class Administration extends Controller {
 
       }
     }
-    //consistencyManager.fixPersonSituation(Optional.<Person>absent(), Security.getUser(), new LocalDate(2018,12,1), false);
 
     renderText("Esecuzione terminata");
   }
+
   /**
    * metodo che cancella tutte le timbrature disaccoppiate nell'arco temporale specificato.
    *
@@ -334,6 +343,28 @@ public class Administration extends Controller {
 
   }
 
+  /**
+   * Mostra i parametri generali dell'applicazione.
+   */
+  public static void generalSetting() {
+    val generalSetting = generalSettingDao.generalSetting();    
+    render("@data", generalSetting);
+  }
+
+  /**
+   * Salvataggio delle impostazioni generali.
+   * @param generalSetting impostazioni generali da salvare.
+   */
+  public static void saveGeneralSetting(@Required @Valid GeneralSetting generalSetting) {
+    if (Validation.hasErrors()) {
+      render("@data", generalSetting);
+    } else {
+      generalSetting.save();
+      flash.success(Web.msgSaved(GeneralSetting.class));
+      generalSetting();
+    }
+  }
+  
   /**
    * Mostra tutti i parametri di configurazione del play.
    */
@@ -500,7 +531,7 @@ public class Administration extends Controller {
     List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 
     List<String> emails = uros.stream().filter(uro ->
-    uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
+        uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
         .map(uro -> uro.user.person.email).distinct().collect(Collectors.toList());
 
     renderText(emails);
