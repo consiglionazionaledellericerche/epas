@@ -406,7 +406,7 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
 
   A_105BP("105BP", "Convenzione CNR - Università",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true,
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, true,
       0, null, Sets.newHashSet(), null, null, false),
   
   A_23("23", "Astensione facoltativa post partum 100% primo figlio intera giornata",
