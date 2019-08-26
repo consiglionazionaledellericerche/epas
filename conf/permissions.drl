@@ -2210,13 +2210,14 @@ then
 end
 
 /**************************************************************************************************
- * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione
+ * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione 
+ * così come per il 105BP che ha lo stesso comportamento dei codici giornalieri di missione.
  **************************************************************************************************/
 rule overtimeInMission
 when
  UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $abt: AbsenceType(code == "92" || code == "92E") 
- $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
+ $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP') 
+ $c: PermissionCheck(action == "Absences.overtimeAbsence", target == $abt, granted == false )
 then
  $c.grant();
 end
