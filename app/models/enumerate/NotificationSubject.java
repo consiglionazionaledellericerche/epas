@@ -1,9 +1,8 @@
 package models.enumerate;
 
 import com.google.common.collect.Maps;
-
 import java.util.Map;
-
+import models.Person;
 import models.Stamping;
 import models.absences.Absence;
 import models.flows.AbsenceRequest;
@@ -38,7 +37,11 @@ public enum NotificationSubject {
   /**
    * Notifiche per i flussi di lavoro. 
    */
-  ABSENCE_REQUEST;
+  ABSENCE_REQUEST,
+  /*
+   * Notifiche per i cambi di assegnazione ad un ufficio.
+   */
+  PERSON_HAS_CHANGED_OFFICE;
 
   private String toUrl(String action, Map<String, Object> params) {
     if (params == null) {
@@ -85,7 +88,18 @@ public enum NotificationSubject {
         params.put("id", absenceRequest.id);
         params.put("type", absenceRequest.type);
         return toUrl("AbsenceRequests.show", params);
-        
+      case PERSON_HAS_CHANGED_OFFICE:
+        //Se non c'è riferimento alla persona allora vuol dire che non è 
+        //più gestita dal precedente ufficio.
+        if (referenceId == null) {
+          return null;
+        }
+        final Person person = Person.findById(referenceId);        
+        if (person == null) {
+          return null;
+        }
+        params.put("personId", person.id);
+        return toUrl("Persons.edit", params);
       // case SYSTEM:
       default:
         throw new IllegalStateException("unknown target: " + this.name());

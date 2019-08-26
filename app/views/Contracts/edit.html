@@ -58,6 +58,9 @@
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
 	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
 	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updatePersonId'}
+	    		#{f.input 'contract.perseoId', value:contract.perseoId /}
+	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
 	    	<div class="alert alert-danger">

@@ -123,6 +123,7 @@ public class Notification extends MutableModel {
   }
 
   /**
+   * Crea un builder per costruire le notifiche.
    * @return a new notification, saved.
    */
   public static NotificationBuilderOperator builder() {
