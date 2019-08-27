@@ -282,7 +282,7 @@ public class SynchronizationManager {
    * @param perseoContractId l'id in anagrafica del contratto da importare
    * @param epasPersonId l'id della persona in ePAS
    */
-  public SyncResult importContract(Long perseoContractId, Long epasPersonId) {
+  public SyncResult importContract(String perseoContractId, Long epasPersonId) {
     Person person = personDao.getPersonById(epasPersonId);
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(person.perseoId);
@@ -429,7 +429,7 @@ public class SynchronizationManager {
   }
 
   /**
-   * Verifica se trai contratti passati c'è n'è uno che corrisponde ai contratti
+   * Verifica se tra i contratti passati c'è n'è uno che corrisponde ai contratti
    * della persona.
    * 
    * @param contract il contratti dall'anagrafica
@@ -449,8 +449,8 @@ public class SynchronizationManager {
             && 
             (c.perseoId != null && c.perseoId.equals(contract.perseoId)) 
             || 
-            (c.beginDate != null && c.beginDate.equals(contract.beginDate) 
-            && c.endDate.equals(contract.endContract)))
+            (c.beginDate != null && c.beginDate.equals(contract.beginDate)
+            ))
         .findAny();
     if (matchingContract.isPresent()) {
       matchingContracts.setRegistryContract(contract);
@@ -504,10 +504,15 @@ public class SynchronizationManager {
     }
     
     if (syncResult.getMessages().size() > 0) {
-      log.info("Aggiornato il contratto di {}. {}", 
-          epasContract.person.getFullname(), syncResult);
-      contractManager.properContractUpdate(epasContract, null, false);
-      epasContract.save();
+      if (contractManager.properContractUpdate(epasContract, null, false)) {
+        log.info("Aggiornato il contratto di {}. {}", 
+            epasContract.person.getFullname(), syncResult);
+        epasContract.save();     
+      } else {
+        syncResult.setFailed()
+            .add(String.format("Il contratto di %s non può essere aggiornato a causa di errori.",
+            epasContract.person.getFullname()));        
+      }      
     }
     
     return syncResult;

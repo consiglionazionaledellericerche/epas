@@ -648,7 +648,7 @@ public class Synchronizations extends Controller {
    * @param epasContractId id del Contratto su ePas
    * @param perseoId id del Contratto su Perseo.
    */
-  public static void joinContract(Long epasContractId, Long perseoId) {
+  public static void joinContract(Long epasContractId, String perseoId) {
 
     Contract contract = contractDao.getContractById(epasContractId);
     Verify.verifyNotNull(contract);
@@ -744,7 +744,7 @@ public class Synchronizations extends Controller {
    * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
    * conflitti con le date dei contratti epas.
    */
-  public static void importContract(Long perseoId, Long epasPersonId) {
+  public static void importContract(String perseoId, Long epasPersonId) {
 
     Person person = personDao.getPersonById(epasPersonId);
     Verify.verifyNotNull(person);
