@@ -92,6 +92,13 @@ public enum DefaultGroup {
       DefaultCategoryType.PERMESSI_PERSONALI, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_STUDIO, DefaultComplation.C_STUDIO, null, false, true),
+  
+  G_STUDIO_DIPENDENTI("STUDIO - Permesso diritto allo studio 150 ore anno", 
+      "", 
+      DefaultCategoryType.STUDIO_DIPENDENTI, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_STUDIO, DefaultComplation.C_STUDIO, null, false, true),
+  
   G_0("0 - Assemblea", 
       "", 
       DefaultCategoryType.ALTRI_CODICI, 0,
@@ -458,6 +465,10 @@ public enum DefaultGroup {
         .collect(Collectors.toList());
   }
   
+  public static List<String> employeeRightToStudyCodes() {
+    return getCodes(DefaultGroup.G_STUDIO_DIPENDENTI);
+  }
+    
   private static List<String> getCodes(DefaultGroup defaultGroup) {
     return defaultGroup.takable.takableCodes.stream()
         .map(tc -> tc.getCode()).collect(Collectors.toList());
