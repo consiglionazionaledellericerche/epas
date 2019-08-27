@@ -19,5 +19,10 @@ public class GeneralSetting extends BaseModel {
   public boolean syncPersonsEnabled = false;
   
   // Fine parametri gestione anagrafica
+  
+  // Parametri gestione invio dati a fine mese
+  
+  public boolean onlyMealTicket = false;
 
+  // Fine parametri gestione invio dati a fine mese
 }

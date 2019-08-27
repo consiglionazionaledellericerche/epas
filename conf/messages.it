@@ -277,6 +277,7 @@ generalSetting =Impostazioni generali di sistema
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
+generalSetting.onlyMealTicket =Invio solo dei buoni pasto
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
