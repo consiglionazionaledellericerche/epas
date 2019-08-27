@@ -96,7 +96,7 @@ public class ContractPerseoConsumer {
    * @param perseoContractId id di Perseo del contratto richiesta
    * @return Il Contratto relativo all'id specificato.
    */
-  private ListenableFuture<PerseoContract> perseoContractByPerseoId(Long perseoContractId) {
+  private ListenableFuture<PerseoContract> perseoContractByPerseoId(String perseoContractId) {
 
     final String url;
     final String user;
@@ -330,7 +330,7 @@ public class ContractPerseoConsumer {
    *
    * @return contratto contratto
    */
-  public Optional<Contract> perseoContractPerseoId(Long contractPerseoId, Person person) {
+  public Optional<Contract> perseoContractPerseoId(String contractPerseoId, Person person) {
 
     PerseoContract perseoContract = null;
     try {
