@@ -1,10 +1,12 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import controllers.RequestInit.CurrentData;
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.ShiftTypeMonthDao;
@@ -28,6 +30,7 @@ import models.Person;
 import models.ShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.Play;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -56,8 +59,11 @@ public class Certifications extends Controller {
   static ICertificationService certService;
   @Inject
   static CacheValues cacheValues;
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
+
 
   /**
    * Pagina principale nuovo invio attestati.
@@ -65,18 +71,9 @@ public class Certifications extends Controller {
    * @param officeId sede
    * @param year anno
    * @param month mese
+   * @throws NoSuchFieldException 
    */
-  public static void certifications(Long officeId, Integer year, Integer month) {
-
-    // Utilizzato per capire quando effettuare l'invio delle informazioni ad attestati
-    // Questo perchè se utilizzassimo un controller apposito che si occupa anche di fare la render
-    // rimarrebbe l'url nella barra degli indirizzi e un eventuale refresh ne causerebbe il reinvio
-    // TODO trovare una soluzione più elegante
-    final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
-    Boolean process = (Boolean) Cache.get(commandKey);
-    Cache.safeDelete(commandKey);
-
-    flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
+  public static void certifications(Long officeId, Integer year, Integer month) throws NoSuchFieldException {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -96,70 +93,87 @@ public class Certifications extends Controller {
     int validYear = monthToUpload.get().getYear();
     int validMonth = monthToUpload.get().getMonthOfYear();
 
-    // Patch per la navigazione del menù ... ####################################
-    // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
-    // (NextMonthToUpload). In quel caso aggiorno la sessione nel cookie. Dovrebbe
-    // occuparsene la RequestInit.
-    session.put("monthSelected", validMonth);
-    session.put("yearSelected", validYear);
-    renderArgs.put("currentData", new CurrentData(validYear, validMonth,
-        Integer.parseInt(session.get("daySelected")),
-        Long.parseLong(session.get("personSelected")),
-        office.id));
-    // ##########################################################################
-
-    LocalDate monthBegin = new LocalDate(validYear, validMonth, 1);
-    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-
-    Set<String> matricoleAttestati = new HashSet<>();
-
-    final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(office, monthToUpload.get());
-
-    try {
-      matricoleAttestati = cacheValues.attestatiSerialNumbers.get(cacheKey);
-    } catch (Exception ex) {
-      flash.error("Errore di connessione al server di Attestati - %s",
-          cleanMessage(ex).getMessage());
-      log.error("Errore durante la connessione al server di attestati: {}", ex.getMessage());
-      render(office, validYear, validMonth);
-    }
-
-    if (matricoleAttestati.isEmpty()) {
-      flash.error("Nessuna matricola presente per il mese %s/%s.\r\n"
-          + "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
-      render(office, validYear, validMonth);
-    }
-
-    final List<Person> people = personDao.list(Optional.absent(),
-        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
-
-    final Set<String> matricoleEpas = people.stream().map(person -> person.number)
-        .collect(Collectors.toSet());
-
-    final Set<String> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
-
-    final Set<String> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
-
-    final Set<String> matchNumbers = Sets.newHashSet(matricoleEpas);
-    matchNumbers.retainAll(matricoleAttestati);
-
-    // Controlli sull'abilitazione del calendario turni
-    final boolean enabledCalendar = office.configurations.stream()
-        .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
-            && "true".equals(configuration.fieldValue));
-
-    final List<ShiftTypeMonth> unApprovedActivities;
-
-    if (enabledCalendar) {
-      unApprovedActivities = shiftTypeMonthDao.byOfficeInMonth(office, monthToUpload.get()).stream()
-          .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+    if (generalSettingDao.generalSetting().onlyMealTicket == true) {
+      //Caso di invio solo buoni pasto per INAF
+      
     } else {
-      unApprovedActivities = new ArrayList<>();
-    }
+      //Caso di invio totale per CNR
+      // Utilizzato per capire quando effettuare l'invio delle informazioni ad attestati
+      // Questo perchè se utilizzassimo un controller apposito che si occupa anche di fare la render
+      // rimarrebbe l'url nella barra degli indirizzi e un eventuale refresh ne causerebbe il reinvio
+      // TODO trovare una soluzione più elegante
+      final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
+      Boolean process = (Boolean) Cache.get(commandKey);
+      Cache.safeDelete(commandKey);
 
-    render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers,
-        process, unApprovedActivities, enabledCalendar);
+      flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
+
+            // Patch per la navigazione del menù ... ####################################
+      // Al primo accesso (da menù) dove non ho mese e anno devo prendere il default
+      // (NextMonthToUpload). In quel caso aggiorno la sessione nel cookie. Dovrebbe
+      // occuparsene la RequestInit.
+      session.put("monthSelected", validMonth);
+      session.put("yearSelected", validYear);
+      renderArgs.put("currentData", new CurrentData(validYear, validMonth,
+          Integer.parseInt(session.get("daySelected")),
+          Long.parseLong(session.get("personSelected")),
+          office.id));
+      // ##########################################################################
+
+      LocalDate monthBegin = new LocalDate(validYear, validMonth, 1);
+      LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+
+      Set<String> matricoleAttestati = new HashSet<>();
+
+      final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
+          .SimpleEntry<>(office, monthToUpload.get());
+
+      try {
+        matricoleAttestati = cacheValues.attestatiSerialNumbers.get(cacheKey);
+      } catch (Exception ex) {
+        flash.error("Errore di connessione al server di Attestati - %s",
+            cleanMessage(ex).getMessage());
+        log.error("Errore durante la connessione al server di attestati: {}", ex.getMessage());
+        render(office, validYear, validMonth);
+      }
+
+      if (matricoleAttestati.isEmpty()) {
+        flash.error("Nessuna matricola presente per il mese %s/%s.\r\n"
+            + "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
+        render(office, validYear, validMonth);
+      }
+
+      final List<Person> people = personDao.list(Optional.absent(),
+          Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
+
+      final Set<String> matricoleEpas = people.stream().map(person -> person.number)
+          .collect(Collectors.toSet());
+
+      final Set<String> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
+
+      final Set<String> notInAttestati = Sets.difference(matricoleEpas, matricoleAttestati);
+
+      final Set<String> matchNumbers = Sets.newHashSet(matricoleEpas);
+      matchNumbers.retainAll(matricoleAttestati);
+
+      // Controlli sull'abilitazione del calendario turni
+      final boolean enabledCalendar = office.configurations.stream()
+          .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
+              && "true".equals(configuration.fieldValue));
+
+      final List<ShiftTypeMonth> unApprovedActivities;
+
+      if (enabledCalendar) {
+        unApprovedActivities = shiftTypeMonthDao.byOfficeInMonth(office, monthToUpload.get()).stream()
+            .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+      } else {
+        unApprovedActivities = new ArrayList<>();
+      }
+
+      render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers,
+          process, unApprovedActivities, enabledCalendar);
+    }
+    
   }
 
   /**
@@ -171,8 +185,9 @@ public class Certifications extends Controller {
    * @param officeId id Ufficio
    * @param year anno
    * @param month mese.
+   * @throws NoSuchFieldException 
    */
-  public static void processAll(Long officeId, Integer year, Integer month) {
+  public static void processAll(Long officeId, Integer year, Integer month) throws NoSuchFieldException {
 
     final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
     Cache.safeAdd(commandKey, Boolean.TRUE, "10s");
@@ -186,8 +201,9 @@ public class Certifications extends Controller {
    * @param officeId id del'ufficio
    * @param year anno
    * @param month mese.
+   * @throws NoSuchFieldException 
    */
-  public static void clearCacheValues(Long officeId, Integer year, Integer month) {
+  public static void clearCacheValues(Long officeId, Integer year, Integer month) throws NoSuchFieldException {
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
@@ -271,8 +287,9 @@ public class Certifications extends Controller {
    * @param personId id della persona
    * @param year anno
    * @param month mese.
+   * @throws NoSuchFieldException 
    */
-  public static void process(Long personId, int year, int month, boolean redirect) {
+  public static void process(Long personId, int year, int month, boolean redirect) throws NoSuchFieldException {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);

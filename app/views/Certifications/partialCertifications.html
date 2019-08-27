@@ -1,25 +1,18 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set title: 'ePAS - Stampa cartellino' /}
+#{set title: 'ePAS - Invio buoni pasto'  /}
 
-#{set 'moreStyles'}
-<style type="text/css">
-  .panel{
-  margin-top: 5%;
-  }
-</style>
-#{get 'moreStyles' /}
-#{/set}
 <div class="container">
-  #{title title:'Stampa cartellino', administration:true /}
+  #{title title:'ePAS - Supporto per Invio informazioni di fine mese', administration:true /}
 </div>
+
 <div class="container">
 
-  #{panel title:'Creazione cartellino mensile del Personale', color:'primary'}
+  #{panel title:'Creazione file per invio delle informazioni di fine mese', color:'primary'}
 
   #{alert color:'info'}
-  <p>Sarà generato un file PDF contenenti le informazioni della persona selezionata.</p>
-  <p>Selezionare uno dei nomi presenti nella lista e premere ok</p>
+  <p>Sarà generato un file PDF contenenti le informazioni da inviare a fine mese della sede selezionata.</p>
+  
   #{/alert}
 
   #{form @PrintTags.showTag(), method:'POST', autocomplete:false, class:'form form-horizontal'}
@@ -40,17 +33,3 @@
   #{/panel}
 
 </div>
-
-#{set 'moreScripts'}
-  <script type="text/javascript">
-	$(document).ready(function() {
-					
-		$("input[name='forAll']").change(function(){
-			
-			jQuery( "#single-person" ).toggle(0);
-		
-		});
-		       
-	 });
-	</script>
-#{/set}
