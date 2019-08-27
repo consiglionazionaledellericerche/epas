@@ -18,7 +18,7 @@ import play.jobs.On;
  * @since 19/06/2019
  */
 @Slf4j
-@On("0 36 6,12,15 * * ?")
+@On("0 15 6,15 * * ?")
 public class SyncPeopleInOffices extends Job<Void> {
 
   @Inject
