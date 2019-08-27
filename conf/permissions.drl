@@ -1894,14 +1894,32 @@ then
  $c.grant();
 end
 
-/******************************************************************
- * Azioni per utente employee abilitato alla assenza per telelavoro
- ******************************************************************/
+/***********************************************************************************
+ * Azioni per utente employee abilitato alla assenza per assistenza parenti disabili
+ ***********************************************************************************/
 rule Disabled_person
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"
+    ), granted == false, target == null)
+then
+ $c.grant();
+end
+
+/***************************************************************************
+ * Azioni per utente employee abilitato alla assenza per diritto allo studio
+ ***************************************************************************/
+rule Right_to_study_person
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -1979,6 +1997,19 @@ then
  $c.grant();
 end
 
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie assenze per diritto allo studio se...
+ ************************************************************************************/
+rule employeeCanInsertAbsencesRightToStudy
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
 /*********************************************************************************************
  * Un dipendente può autocertificare le proprie assenze per permesso dipendente disabile se...
  *********************************************************************************************/
@@ -2028,7 +2059,7 @@ then
 end
 
 /*******************************************************************************
- * L'impiegato può modificare/salvare una determinata assenza per telelavoro se:
+ * L'impiegato può modificare/salvare una determinata assenza per legge 104 se:
  *******************************************************************************/
 rule EmployeeCanEditDisabledPersonAbsence
 when
@@ -2036,6 +2067,22 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeDisabledPersonCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/****************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per diritto allo studio se:
+ ****************************************************************************************/
+rule EmployeeCanEditRightToStudyAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeRightToStudyCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))

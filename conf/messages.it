@@ -924,6 +924,7 @@ OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con c
 MATERNITY_PERIOD=Periodo Maternità
 TELEWORK=Telelavoro
 DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
+RIGHT_TO_STUDY=Permessi per diritto allo studio
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
