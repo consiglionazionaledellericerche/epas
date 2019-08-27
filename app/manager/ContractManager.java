@@ -191,14 +191,24 @@ public class ContractManager {
    * @param from       da quando effettuare il ricalcolo.
    * @param onlyRecaps ricalcolare solo i riepiloghi mensili.
    */
-  public final void properContractUpdate(final Contract contract, final LocalDate from,
+  public final boolean properContractUpdate(final Contract contract, final LocalDate from,
                                          final boolean onlyRecaps) {
+    
+    if (!isContractCrossFieldValidationPassed(contract)) {
+      return false;
+    }
+
+    if (!isContractNotOverlapping(contract)) {
+      return false;
+    }
     
     contract.save();
     periodManager.updatePropertiesInPeriodOwner(contract);
     personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
     
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
+    
+    return true;
   }
 
   /**
