@@ -29,6 +29,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final BooleanPath onlyMealTicket = createBoolean("onlyMealTicket");
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
