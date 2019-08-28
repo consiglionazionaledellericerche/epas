@@ -799,6 +799,7 @@ when
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
     "Certifications.certifications",
+    "Certifications.sendPartialCertification",
     "Charts.checkLastYearAbsences",
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
@@ -1411,6 +1412,7 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.sendPartialCertification",
         "Certifications.clearCacheValues",
         "Certifications.personStatus",
         "Certifications.process",
@@ -1548,6 +1550,7 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.sendPartialCertification",
         "Certifications.clearCacheValues",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
