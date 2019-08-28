@@ -59,7 +59,7 @@
 	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
 	    	#{/secure.check}
 	    	#{secure.check 'Contracts.updatePersonId'}
-	    		#{f.input 'contract.perseoId', value:contract.perseoId /}
+	    		#{f.input 'perseoId', label:'contract.perseoId', value:perseoId /}
 	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
@@ -83,7 +83,10 @@
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
-			#{/secure.check}				
+			#{/secure.check}
+			#{secure.check 'Contracts.updatePersonId'}
+				#{f.simpleView 'perseoId', label:'contract.perseoId', value:perseoId, hidden:true /}
+			#{/secure.check}
 			<input type="hidden" name="confirmed" value="true" />
 			
 			#{recomputeRecap.show recomputeRecap:recomputeRecap /}
