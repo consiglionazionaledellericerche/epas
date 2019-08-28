@@ -830,7 +830,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_33("33", "congedo per motivi di studio retribuito",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_33B("33B", "congedo per motivi di studio retribuito / borsa CNR",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
