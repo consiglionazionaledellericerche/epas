@@ -39,11 +39,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final StringPath codeId = createString("codeId");
 
-    public final ListPath<models.ConfGeneral, QConfGeneral> confGeneral = this.<models.ConfGeneral, QConfGeneral>createList("confGeneral", models.ConfGeneral.class, QConfGeneral.class, PathInits.DIRECT2);
-
     public final ListPath<models.Configuration, QConfiguration> configurations = this.<models.Configuration, QConfiguration>createList("configurations", models.Configuration.class, QConfiguration.class, PathInits.DIRECT2);
-
-    public final ListPath<models.ConfYear, QConfYear> confYear = this.<models.ConfYear, QConfYear>createList("confYear", models.ConfYear.class, QConfYear.class, PathInits.DIRECT2);
 
     //inherited
     public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
