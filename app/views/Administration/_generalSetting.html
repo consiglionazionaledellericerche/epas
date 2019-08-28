@@ -4,12 +4,23 @@
   #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:true}
   	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
   		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Abilita la sincronizzazione dei badgi di tutti gli uffici con l'anagrafica centrale#{/alert}
+  		#{alert color:'info'}Abilita la sincronizzazione dei badge di tutti gli uffici con l'anagrafica centrale#{/alert}
 		#{f.booleanRadio 'generalSetting.syncBadgesEnabled' /}
 		#{alert color:'info'}Abilita la sincronizzazione delle persone con l'anagrafica centrale verificando la
 		presenza della persona in ePAS e la sua attuale apppartenza all'ufficio corretto.#{/alert}
   		#{f.booleanRadio 'generalSetting.syncOfficesEnabled' /}
   		<!--  #{f.booleanRadio 'generalSetting.syncPersonsEnabled' /}  -->
+  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
+  #{accordionItem 'registryToSendData', parent:'generalSetting', title:'Tipologia invio dati di fine mese', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Abilita l'invio solo dei buoni pasto in fase di invio dati a fine mese #{/alert}
+		#{f.booleanRadio 'generalSetting.onlyMealTicket' /}
   		
         #{b.buttons}
         	#{b.save /}
