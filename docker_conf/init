@@ -246,6 +246,12 @@ else
   sed 's#{{ANAGRAFICA_ENDPOINT_CONTRACT}}#'"${ANAGRAFICA_ENDPOINT_CONTRACT}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${ANAGRAFICA_ENDPOINT_CONTRACTS_BY_PERSON_ID}" ]; then
+  sed -n '/ANAGRAFICA_ENDPOINT_CONTRACTS_BY_PERSON_ID/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{ANAGRAFICA_ENDPOINT_CONTRACTS_BY_PERSON_ID}}#'"${ANAGRAFICA_ENDPOINT_CONTRACTS_BY_PERSON_ID}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${ANAGRAFICA_ENDPOINT_ROLES}" ]; then
   sed -n '/ANAGRAFICA_ENDPOINT_ROLES/!p' -i ${APP_HOME}/conf/prod.conf
 else
