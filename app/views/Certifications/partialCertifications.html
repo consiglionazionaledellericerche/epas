@@ -11,25 +11,29 @@
   #{panel title:'Creazione file per invio delle informazioni di fine mese', color:'primary'}
 
   #{alert color:'info'}
-  <p>Sarà generato un file PDF contenenti le informazioni da inviare a fine mese della sede selezionata.</p>
-  
+  <p>Sarà generato un file .csv contenenti le informazioni da inviare a fine mese della sede selezionata.</p>  
   #{/alert}
 
-  #{form @PrintTags.showTag(), method:'POST', autocomplete:false, class:'form form-horizontal'}
-  	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
-  	<input type="hidden" name="year" value="${date.getYear()}"/>
-  	<input type="hidden" name="officeId" value="${office.id}"/>
-  #{f.booleanRadio 'forAll', label:'Per tutti' /}
-  <div id="single-person" #{if forAll} style="display: none" #{/if}>	
-  #{f.selectModel 'person', items:personList /}
-  </div>
-  #{f.checkbox 'includeStampingDetails' /}
+	#{b.link @sendPartialCertification(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
+        <span class="text-default">Genera file .CSV per i buoni pasto</span>
+    #{/b.link}
+    <ul class="list-group">
+
+    #{list people, as:'person' }
+
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-xs-3">
+            <strong>${person.fullname}</strong>
+            <br><em>matricola:</em> ${person.number}
+          </div>
+
+        </div>
+      </li>
+    
+    #{/list}
+  </ul>
   
-  #{b.buttons center:'true'}
-  #{b.back /}
-  #{b.ok /}
-  #{/b.buttons}
-  #{/form}
   #{/panel}
 
 </div>

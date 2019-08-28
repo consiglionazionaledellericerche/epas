@@ -16,7 +16,7 @@ public class SwitchTemplate extends Controller {
 
   public static final String USERNAME_SESSION_KEY = "username";
 
-  private static void executeAction(String action) throws NoSuchFieldException {
+  private static void executeAction(String action) {
 
     Integer year = Integer.parseInt(session.get("yearSelected"));
     Integer month = Integer.parseInt(session.get("monthSelected"));
