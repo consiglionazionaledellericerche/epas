@@ -1,10 +1,8 @@
 # subject; condition;  limit; restrictions
 competence_codes; ; ; .embedded
-
 # from A (or association name); to B; restriction-condition
 inverse-fkbe7a61ca62728bb1; ; ignore
 inverse-fk218a96913c1ea3e; ; ignore
-
 #! block xml-mapping
 fkbf232f8afb1f039e;fkbf232f8afb1f039e;NONE
 fk74fdda1835555570;fk74fdda1835555570;NONE
@@ -79,8 +77,6 @@ inverse-fkbfc8501d54d10ea;absence_types_qualifications_history;NONE
 inverse-fk10e41b2bd54d10ea;absences_history;NONE
 inverse-fkf30286c9d54d10ea;badge_readers_history;NONE
 inverse-fk64d88a51d54d10ea;certificated_data_history;NONE
-inverse-fk77a6922d54d10ea;conf_general_history;NONE
-inverse-fkd883fbcdd54d10ea;conf_year_history;NONE
 inverse-fkda8f2892d54d10ea;configurations_history;NONE
 inverse-fke66d2abed54d10ea;contact_data_history;NONE
 inverse-fkb7d05129d54d10ea;groups_history;NONE
@@ -184,25 +180,19 @@ inverse-fk84df567fac97433e;web_stamping_address;NONE
 fk6674c5d65b5f15b1;fk6674c5d65b5f15b1;NONE
 fk6674c5d6fbe89596;fk6674c5d6fbe89596;NONE
 fk1fe1fac5d54d10ea;fk1fe1fac5d54d10ea;NONE
-
 #! block datamodelfolder
 epas-devel
-
 #! block export modus
 DBUNIT_FLAT_XML
-
 #! block xml settings
 yyyy-MM-dd;yyyy-MM-dd-HH.mm.ss;rowset
 #! block xml column mapping
 #! block upserts
-
 #! block filters
-
 #! block layout
 competence_codes; competence_codes; 0.0; 0.0; 1.0
 competence_codes; competences; -428.6413269042969; -50.207637786865234; 1.0
 competence_codes; $ZOOMBOX; 0.0; 0.0; 1.0
 competence_codes; persons_competence_codes; 290.6801986694336; -163.9777431488037; 1.0
-
 #! block version
 4.1.1

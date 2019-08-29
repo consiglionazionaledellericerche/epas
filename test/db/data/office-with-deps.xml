@@ -15,8 +15,6 @@
       badge_readers_badge_systems    2
       badge_systems                  2
       badges                         140
-      conf_general                   38
-      conf_year                      62
       configurations                 32
       institutes                     1
       office                         2
@@ -32,68 +30,6 @@
   <office id="1" name="IIT - Pisa" address="Via Moruzzi 1, Pisa" code_id="223400" code="044000" institute_id="1" head_quarter="false" begin_date="2012-07-30"/>
   <office id="2" name="IIT - UOS Cosenza" address="Via P. Bucci 1, Cosenza" code_id="223410" code="044001" joining_date="2013-03-14" institute_id="1" head_quarter="false" begin_date="2014-03-06"/>
 
-  <conf_year id="1" field="month_expiry_vacation_past_year" field_value="8" year="2014" office_id="1"/>
-  <conf_year id="2" field="day_expiry_vacation_past_year" field_value="31" year="2014" office_id="1"/>
-  <conf_year id="3" field="month_expire_recovery_days_13" field_value="0" year="2014" office_id="1"/>
-  <conf_year id="4" field="month_expire_recovery_days_49" field_value="4" year="2014" office_id="1"/>
-  <conf_year id="5" field="max_recovery_days_13" field_value="22" year="2014" office_id="1"/>
-  <conf_year id="6" field="max_recovery_days_49" field_value="0" year="2014" office_id="1"/>
-  <conf_year id="7" field="hour_max_to_calculate_worktime" field_value="5" year="2014" office_id="1"/>
-  <conf_year id="8" field="month_expiry_vacation_past_year" field_value="8" year="2013" office_id="1"/>
-  <conf_year id="9" field="day_expiry_vacation_past_year" field_value="31" year="2013" office_id="1"/>
-  <conf_year id="10" field="month_expire_recovery_days_13" field_value="0" year="2013" office_id="1"/>
-  <conf_year id="11" field="month_expire_recovery_days_49" field_value="4" year="2013" office_id="1"/>
-  <conf_year id="12" field="max_recovery_days_13" field_value="22" year="2013" office_id="1"/>
-  <conf_year id="13" field="max_recovery_days_49" field_value="0" year="2013" office_id="1"/>
-  <conf_year id="14" field="hour_max_to_calculate_worktime" field_value="5" year="2013" office_id="1"/>
-  <conf_year id="15" field="day_expiry_vacation_past_year" field_value="31" year="2013" office_id="2"/>
-  <conf_year id="16" field="month_expiry_vacation_past_year" field_value="8" year="2013" office_id="2"/>
-  <conf_year id="17" field="month_expire_recovery_days_13" field_value="0" year="2013" office_id="2"/>
-  <conf_year id="18" field="month_expire_recovery_days_49" field_value="4" year="2013" office_id="2"/>
-  <conf_year id="19" field="max_recovery_days_13" field_value="22" year="2013" office_id="2"/>
-  <conf_year id="20" field="max_recovery_days_49" field_value="0" year="2013" office_id="2"/>
-  <conf_year id="21" field="hour_max_to_calculate_worktime" field_value="5" year="2013" office_id="2"/>
-  <conf_year id="22" field="day_expiry_vacation_past_year" field_value="31" year="2014" office_id="2"/>
-  <conf_year id="23" field="month_expiry_vacation_past_year" field_value="8" year="2014" office_id="2"/>
-  <conf_year id="24" field="month_expire_recovery_days_13" field_value="0" year="2014" office_id="2"/>
-  <conf_year id="25" field="month_expire_recovery_days_49" field_value="4" year="2014" office_id="2"/>
-  <conf_year id="26" field="max_recovery_days_13" field_value="22" year="2014" office_id="2"/>
-  <conf_year id="27" field="max_recovery_days_49" field_value="0" year="2014" office_id="2"/>
-  <conf_year id="28" field="hour_max_to_calculate_worktime" field_value="1" year="2014" office_id="2"/>
-  <conf_year id="29" field="day_expiry_vacation_past_year" field_value="31" year="2015" office_id="1"/>
-  <conf_year id="30" field="month_expiry_vacation_past_year" field_value="8" year="2015" office_id="1"/>
-  <conf_year id="31" field="month_expire_recovery_days_13" field_value="0" year="2015" office_id="1"/>
-  <conf_year id="32" field="month_expire_recovery_days_49" field_value="4" year="2015" office_id="1"/>
-  <conf_year id="33" field="max_recovery_days_13" field_value="22" year="2015" office_id="1"/>
-  <conf_year id="34" field="max_recovery_days_49" field_value="0" year="2015" office_id="1"/>
-  <conf_year id="35" field="hour_max_to_calculate_worktime" field_value="05" year="2015" office_id="1"/>
-  <conf_year id="36" field="day_expiry_vacation_past_year" field_value="31" year="2015" office_id="2"/>
-  <conf_year id="37" field="month_expiry_vacation_past_year" field_value="8" year="2015" office_id="2"/>
-  <conf_year id="38" field="month_expire_recovery_days_13" field_value="0" year="2015" office_id="2"/>
-  <conf_year id="39" field="month_expire_recovery_days_49" field_value="3" year="2015" office_id="2"/>
-  <conf_year id="40" field="max_recovery_days_13" field_value="22" year="2015" office_id="2"/>
-  <conf_year id="41" field="max_recovery_days_49" field_value="0" year="2015" office_id="2"/>
-  <conf_year id="42" field="hour_max_to_calculate_worktime" field_value="1" year="2015" office_id="2"/>
-  <conf_year id="43" field="day_expiry_vacation_past_year" field_value="31" year="2016" office_id="2"/>
-  <conf_year id="44" field="month_expiry_vacation_past_year" field_value="8" year="2016" office_id="2"/>
-  <conf_year id="45" field="month_expire_recovery_days_13" field_value="0" year="2016" office_id="2"/>
-  <conf_year id="46" field="month_expire_recovery_days_49" field_value="3" year="2016" office_id="2"/>
-  <conf_year id="47" field="max_recovery_days_13" field_value="22" year="2016" office_id="2"/>
-  <conf_year id="48" field="max_recovery_days_49" field_value="0" year="2016" office_id="2"/>
-  <conf_year id="49" field="hour_max_to_calculate_worktime" field_value="01" year="2016" office_id="2"/>
-  <conf_year id="50" field="month_expiry_vacation_past_year" field_value="8" year="2016" office_id="1"/>
-  <conf_year id="51" field="day_expiry_vacation_past_year" field_value="31" year="2016" office_id="1"/>
-  <conf_year id="52" field="hour_max_to_calculate_worktime" field_value="05" year="2016" office_id="1"/>
-  <conf_year id="53" field="month_expire_recovery_days_13" field_value="0" year="2016" office_id="1"/>
-  <conf_year id="54" field="month_expire_recovery_days_49" field_value="4" year="2016" office_id="1"/>
-  <conf_year id="55" field="max_recovery_days_13" field_value="22" year="2016" office_id="1"/>
-  <conf_year id="56" field="max_recovery_days_49" field_value="0" year="2016" office_id="1"/>
-  <conf_year id="57" field="day_expiry_vacation_past_year" field_value="31" year="2012" office_id="1"/>
-  <conf_year id="58" field="month_expiry_vacation_past_year" field_value="8" year="2012" office_id="1"/>
-  <conf_year id="59" field="month_expire_recovery_days_13" field_value="0" year="2012" office_id="1"/>
-  <conf_year id="60" field="month_expire_recovery_days_49" field_value="4" year="2012" office_id="1"/>
-  <conf_year id="61" field="max_recovery_days_13" field_value="22" year="2012" office_id="1"/>
-  <conf_year id="62" field="max_recovery_days_49" field_value="0" year="2012" office_id="1"/>
 
   <total_overtime id="1" date="2003-12-03" number_of_hours="1530" year="2003" office_id="1"/>
   <total_overtime id="2" date="2004-04-19" number_of_hours="1575" year="2004" office_id="1"/>
@@ -176,44 +112,6 @@
   <working_time_types id="13" description="maternità orario 85%" shift="false" meal_ticket_enabled="true" office_id="1" disabled="false" horizontal="true"/>
   <working_time_types id="14" description="70%" shift="false" meal_ticket_enabled="true" office_id="1" disabled="false" horizontal="true"/>
 
-  <conf_general id="1" field="init_use_program" field_value="2012-07-30" office_id="1"/>
-  <conf_general id="2" field="institute_name" field_value="IIT" office_id="1"/>
-  <conf_general id="3" field="email_to_contact" field_value="segreteria@iit.cnr.it" office_id="1"/>
-  <conf_general id="4" field="seat_code" field_value="223400" office_id="1"/>
-  <conf_general id="5" field="url_to_presence" field_value="https://attestati.rm.cnr.it/attestati/" office_id="1"/>
-  <conf_general id="6" field="user_to_presence" office_id="1"/>
-  <conf_general id="7" field="password_to_presence" office_id="1"/>
-  <conf_general id="8" field="number_of_viewing_couple" field_value="3" office_id="1"/>
-  <conf_general id="9" field="month_of_patron" field_value="6" office_id="1"/>
-  <conf_general id="10" field="day_of_patron" field_value="17" office_id="1"/>
-  <conf_general id="11" field="web_stamping_allowed" field_value="false" office_id="1"/>
-  <conf_general id="12" field="meal_time_start_hour" field_value="1" office_id="1"/>
-  <conf_general id="13" field="meal_time_start_minute" field_value="0" office_id="1"/>
-  <conf_general id="14" field="meal_time_end_hour" field_value="23" office_id="1"/>
-  <conf_general id="15" field="meal_time_end_minute" field_value="0" office_id="1"/>
-  <conf_general id="16" field="init_use_program" field_value="2014-01-01" office_id="2"/>
-  <conf_general id="17" field="institute_name" field_value="UOS Cosenza" office_id="2"/>
-  <conf_general id="18" field="email_to_contact" field_value="segreteria@iit.cnr.it" office_id="2"/>
-  <conf_general id="19" field="seat_code" field_value="223410" office_id="2"/>
-  <conf_general id="20" field="user_to_presence" field_value="giuseppealfredo.cavarretta" office_id="2"/>
-  <conf_general id="21" field="password_to_presence" office_id="2"/>
-  <conf_general id="22" field="month_of_patron" field_value="2" office_id="2"/>
-  <conf_general id="23" field="day_of_patron" field_value="20" office_id="2"/>
-  <conf_general id="24" field="web_stamping_allowed" field_value="false" office_id="2"/>
-  <conf_general id="25" field="meal_time_start_hour" field_value="1" office_id="2"/>
-  <conf_general id="26" field="meal_time_start_minute" field_value="0" office_id="2"/>
-  <conf_general id="27" field="meal_time_end_hour" field_value="23" office_id="2"/>
-  <conf_general id="28" field="meal_time_end_minute" field_value="0" office_id="2"/>
-  <conf_general id="29" field="url_to_presence" field_value="https://attestati.rm.cnr.it/attestati/" office_id="2"/>
-  <conf_general id="30" field="number_of_viewing_couple" field_value="3" office_id="2"/>
-  <conf_general id="31" field="date_start_meal_ticket" field_value="2014-07-01" office_id="1"/>
-  <conf_general id="32" field="date_start_meal_ticket" field_value="2014-07-01" office_id="2"/>
-  <conf_general id="34" field="email_from_jobs" field_value="segreteria@iit.cnr.it" office_id="2"/>
-  <conf_general id="35" field="email_from_jobs" field_value="segreteria@iit.cnr.it" office_id="1"/>
-  <conf_general id="36" field="send_email" field_value="true" office_id="1"/>
-  <conf_general id="37" field="send_email" field_value="true" office_id="2"/>
-  <conf_general id="38" field="addresses_allowed" office_id="1"/>
-  <conf_general id="39" field="addresses_allowed" office_id="2"/>
 
   <users id="10004" password="f432b651de481a4bfbda3410cc1d5b49" username="pisaBadge" disabled="false" office_owner_id="1"/>
   <users id="10005" password="94df00d24c47a63e19403b1f2b643ee9" username="cosenzaBadge" disabled="false" office_owner_id="1"/>

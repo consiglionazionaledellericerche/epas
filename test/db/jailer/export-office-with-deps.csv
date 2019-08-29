@@ -1,11 +1,9 @@
 # subject; condition;  limit; restrictions
 office; id=1; ; .embedded
-
 # from A (or association name); to B; restriction-condition
 inverse-badges_badge_reader_id_fkey; ; ignore
 inverse-badges_badge_system_id_fkey; ; ignore
 badges_person_id_fkey; ; ignore
-conf_year_tmp_fkey; ; ignore
 inverse-fk353559b3fb1f039e; ; ignore
 inverse-fkd78fcfbe2d0fa45e; ; ignore
 inverse-users_roles_offices_office_id_fkey; ; ignore
@@ -20,9 +18,7 @@ inverse-users_roles_offices_user_id_fkey; ; ignore
 inverse-fk353559b335555570; ; ignore
 inverse-fkb943247635555570; ; ignore
 inverse-fk74fdda1835555570; ; ignore
-
 #! block xml-mapping
-conf_period_office_id_fkey;conf_period_office_id_fkey;NONE
 fk5170df70e7a7b1be;fk5170df70e7a7b1be;NONE
 shift_categories_supervisor_fkey;shift_categories_supervisor_fkey;NONE
 inverse-shift_type_shift_categories_id_fkey;shift_type;NONE
@@ -34,9 +30,6 @@ fk64d88a51d54d10ea;fk64d88a51d54d10ea;NONE
 fk7757fc5e29b090bd;fk7757fc5e29b090bd;NONE
 fk7757fc5ebbfca55b;fk7757fc5ebbfca55b;NONE
 inverse-badge_systems_office_id_fkey;badge_systems;NONE
-inverse-conf_general_tmp_fkey;conf_general;NONE
-inverse-conf_period_office_id_fkey;conf_period;NONE
-inverse-conf_year_tmp_fkey;conf_year;NONE
 inverse-configurations_office_id_fkey;configurations;NONE
 office_institute_id_fkey;office_institute_id_fkey;NONE
 inverse-fkd78fcfbe2d0fa45e;persons;NONE
@@ -74,7 +67,6 @@ fk6674c5d65b5f15b1;fk6674c5d65b5f15b1;NONE
 fk6674c5d6fbe89596;fk6674c5d6fbe89596;NONE
 inverse-fkbe7a61ca62728bb1;competences;NONE
 inverse-fk218a96913c1ea3e;persons_competence_codes;NONE
-conf_period_history__revision_fkey;conf_period_history__revision_fkey;NONE
 fk1fe1fac5d54d10ea;fk1fe1fac5d54d10ea;NONE
 fk82ea23ccd54d10ea;fk82ea23ccd54d10ea;NONE
 institutes_history__revision_fkey;institutes_history__revision_fkey;NONE
@@ -119,7 +111,6 @@ person_person_months_recap_fkey;person_person_months_recap_fkey;NONE
 inverse-office_institute_id_fkey;office;NONE
 badge_readers_badge_systems_badgereaders_id_fkey;badge_readers_badge_systems_badgereaders_id_fkey;NONE
 badge_readers_badge_systems_badgesystems_id_fkey;badge_readers_badge_systems_badgesystems_id_fkey;NONE
-conf_general_tmp_fkey;conf_general_tmp_fkey;NONE
 badge_readers_user_id_fkey;badge_readers_user_id_fkey;NONE
 inverse-badge_readers_badge_systems_badgereaders_id_fkey;badge_readers_badge_systems;NONE
 inverse-badges_badge_reader_id_fkey;badges;NONE
@@ -134,9 +125,6 @@ inverse-badge_readers_history__revision_fkey;badge_readers_history;NONE
 inverse-badge_systems_history__revision_fkey;badge_systems_history;NONE
 inverse-badges_history__revision_fkey;badges_history;NONE
 inverse-fk64d88a51d54d10ea;certificated_data_history;NONE
-inverse-revinfo_conf_general_tmp_history_fkey;conf_general_history;NONE
-inverse-conf_period_history__revision_fkey;conf_period_history;NONE
-inverse-revinfo_conf_year_tmp_history_fkey;conf_year_history;NONE
 inverse-configurations_history__revision_fkey;configurations_history;NONE
 inverse-institutes_history__revision_fkey;institutes_history;NONE
 inverse-meal_ticket_history__revision_fkey;meal_ticket_history;NONE
@@ -181,7 +169,6 @@ inverse-fk5170df70e7a7b1be;vacation_periods;NONE
 fk71b9ff7730325be3;fk71b9ff7730325be3;NONE
 inverse-fkfe65dbf7ca0a1c8a;absence_types;NONE
 badge_systems_history__revision_fkey;badge_systems_history__revision_fkey;NONE
-revinfo_conf_year_tmp_history_fkey;revinfo_conf_year_tmp_history_fkey;NONE
 fk10e41b2bd54d10ea;fk10e41b2bd54d10ea;NONE
 fk18bdcd6dd54d10ea;fk18bdcd6dd54d10ea;NONE
 fk94fa58aad54d10ea;fk94fa58aad54d10ea;NONE
@@ -195,7 +182,6 @@ inverse-fkb943247635555570;persons_working_time_types;NONE
 inverse-fk74fdda1835555570;working_time_type_days;NONE
 wtt_office_key;wtt_office_key;NONE
 inverse-shift_type_shift_time_table_id_fkey;shift_type;NONE
-revinfo_conf_general_tmp_history_fkey;revinfo_conf_general_tmp_history_fkey;NONE
 revinfo_person_months_recap_history_fkey;revinfo_person_months_recap_history_fkey;NONE
 fk5c3f2f67d54d10ea;fk5c3f2f67d54d10ea;NONE
 fk68e007b9d54d10ea;fk68e007b9d54d10ea;NONE
@@ -214,7 +200,6 @@ shift_categories_history__revision_fkey;shift_categories_history__revision_fkey;
 badges_badge_reader_id_fkey;badges_badge_reader_id_fkey;NONE
 badges_badge_system_id_fkey;badges_badge_system_id_fkey;NONE
 badges_person_id_fkey;badges_person_id_fkey;NONE
-conf_year_tmp_fkey;conf_year_tmp_fkey;NONE
 roles_history__revision_fkey;roles_history__revision_fkey;NONE
 fk8fa3d556d54d10ea;fk8fa3d556d54d10ea;NONE
 fk5c2b915dd54d10ea;fk5c2b915dd54d10ea;NONE
@@ -224,38 +209,26 @@ fkfceabd13d54d10ea;fkfceabd13d54d10ea;NONE
 fk2631804cd54d10ea;fk2631804cd54d10ea;NONE
 fkbfc8501d54d10ea;fkbfc8501d54d10ea;NONE
 fk20975c68e7a7b1be;fk20975c68e7a7b1be;NONE
-
 #! block datamodelfolder
 ePAS
-
 #! block export modus
 DBUNIT_FLAT_XML
-
 #! block xml settings
 yyyy-MM-dd;yyyy-MM-dd-HH.mm.ss;rowset
 #! block xml column mapping
 #! block upserts
-
 #! block filters
 configurations;id;field_values IS NOT NULL
 users_roles_offices;role_id;role_id in (2,6,7)
-
 #! block layout
-conf_year; conf_year; 0.0; 0.0; 1.0
-conf_year; $ZOOMBOX; 0.0; 0.0; 1.0
-conf_year; office; 117.55113983154297; -25.095537185668945; 1.0
-office; conf_period; -142.93374633789062; 20.24692153930664; 1.0
-office; conf_year; 108.07392120361328; 116.67559814453125; 1.0
 office; total_overtime; 190.1190185546875; 27.322853088378906; 0.0
 office; $ZOOMBOX; 0.0; 0.0; 1.0
 office; badge_systems; -95.19812774658203; -127.05477142333984; 1.0
 office; configurations; 116.46019744873047; -95.7109603881836; 1.0
 office; working_time_types; -164.4590301513672; 146.15525817871094; 0.0
-office; conf_general; -44.30393981933594; 138.2537078857422; 1.0
 office; badge_readers_badge_systems; -82.04182434082031; -282.8303527832031; 0.0
 office; office; 0.0; 0.0; 1.0
 office; badge_readers; 47.607826232910156; -340.4355773925781; 0.0
 office; users; 147.9065399169922; -237.83522033691406; 1.0
-
 #! block version
 5.3

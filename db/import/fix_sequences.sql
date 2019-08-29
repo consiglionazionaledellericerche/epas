@@ -7,8 +7,6 @@ SELECT SETVAL('public.seq_badge_readers', COALESCE(MAX(id), 1), MAX(id) IS NOT N
 SELECT SETVAL('public.seq_certificated_data', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.certificated_data;
 SELECT SETVAL('public.seq_competence_codes', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.competence_codes;
 SELECT SETVAL('public.seq_competences', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.competences;
-SELECT SETVAL('public.seq_conf_general', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.conf_general;
-SELECT SETVAL('public.seq_conf_year', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.conf_year;
 SELECT SETVAL('public.seq_contracts', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.contracts;
 SELECT SETVAL('public.seq_contracts_working_time_types', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.contracts_working_time_types;
 SELECT SETVAL('public.seq_office', COALESCE(MAX(id), 1), MAX(id) IS NOT NULL ) FROM public.office;
