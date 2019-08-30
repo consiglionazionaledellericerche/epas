@@ -101,7 +101,7 @@ public class TimeVariations extends Controller {
 
     Absence absence = timeVariation.absence;
     timeVariation.delete();
-    consistencyManager.updatePersonSituation(absence.personDay.person.id, LocalDate.now());
+    consistencyManager.updatePersonSituation(absence.personDay.person.id, timeVariation.dateVariation);
     flash.success("Rimossa variazione oraria per il %s del giorno %s", 
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 
