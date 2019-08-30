@@ -44,10 +44,11 @@ public class TimeVariationManager {
    * @param minutes i minuti da recuperare
    * @return il timevariation creato con i campi passati come parametro.
    */
-  public TimeVariation create(Absence absence, int hours, int minutes) {
+  public TimeVariation create(Absence absence, int hours, int minutes, Optional<LocalDate> dateVariation) {
+    
     TimeVariation timeVariation = new TimeVariation();
     timeVariation.absence = absence;
-    timeVariation.dateVariation = LocalDate.now();
+    timeVariation.dateVariation = dateVariation.or(LocalDate.now());
     timeVariation.timeVariation = (hours * DateTimeConstants.MINUTES_PER_HOUR) + minutes;
     log.info("Creata variazione oraria per giustificare l'assenza {} di {} del giorno {}", 
         absence.absenceType.code, absence.personDay.person.fullName(), absence.personDay.date);
