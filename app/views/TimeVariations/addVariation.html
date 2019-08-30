@@ -13,7 +13,10 @@ title:'Recupero orario per assenza ' + absence.absenceType.code
 		#{f.hidden 'absenceId', value:absence.id /}
 	    #{f.input 'hours', type:number, value:hours  /}
 	    #{f.input 'minutes', type:number, value:minutes  /}
-	    #{f.date 'dateVariation', value:dateVariation.format() /}
+	    
+	    #{secure.check 'TimeVariation.setDateVariation'}
+	    	#{f.date 'dateVariation', value:dateVariation.format() /}
+		#{/secure.check}
 
 		#{secure.check 'TimeVariations.saveVariation'}
 	      #{b.buttons center:true}
