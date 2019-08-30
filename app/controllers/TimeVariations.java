@@ -59,7 +59,8 @@ public class TimeVariations extends Controller {
     int difference = absence.timeToRecover - totalTimeRecovered;
     int hours = difference / 60;
     int minutes = difference % 60;
-    render(absence, hours, minutes);
+    LocalDate dateVariation = LocalDate.now();
+    render(absence, hours, minutes, dateVariation);
   }
 
   /**
@@ -69,7 +70,7 @@ public class TimeVariations extends Controller {
    * @param hours le ore da restituire
    * @param minutes i minuti da restituire
    */
-  public static void saveVariation(long absenceId, int hours, int minutes) {
+  public static void saveVariation(long absenceId, int hours, int minutes, Optional<LocalDate> dateVariation) {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
     rules.checkIfPermitted(absence.personDay.person);
@@ -79,10 +80,10 @@ public class TimeVariations extends Controller {
       Stampings.personStamping(absence.personDay.person.id, 
           LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-    TimeVariation timeVariation = timeVariationManager.create(absence, hours, minutes);
+    TimeVariation timeVariation = timeVariationManager.create(absence, hours, minutes, dateVariation);
     
     timeVariation.save();
-    consistencyManager.updatePersonSituation(absence.personDay.person.id, LocalDate.now());
+    consistencyManager.updatePersonSituation(absence.personDay.person.id, dateVariation.or(LocalDate.now()));
     flash.success("Aggiornato recupero ore per assenza %s in data %s", 
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 
