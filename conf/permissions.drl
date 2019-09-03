@@ -1346,7 +1346,7 @@ when
      	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
-     	"Absences.overtimeMission",
+     	"Absences.overtimeAbsence",
 
         "Stampings.insert",
         "Stampings.insertOffsite",
@@ -1485,7 +1485,7 @@ when
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
      	"Absences.removeAttach",
-     	"Absences.overtimeMission",
+     	"Absences.overtimeAbsence",
 
        	"Stampings.insert",
        	"Stampings.insertOffsite",
