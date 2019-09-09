@@ -1658,6 +1658,16 @@ when
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
     	"Persons.showCurrentVacation",
+
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+    	
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
@@ -1714,6 +1724,16 @@ when
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
     	"Persons.showCurrentVacation",
+
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+    	
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
