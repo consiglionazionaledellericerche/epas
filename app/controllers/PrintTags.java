@@ -1,6 +1,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

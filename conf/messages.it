@@ -250,6 +250,8 @@ dateTo=Fino Al
 day= Giorno (se presente)
 deliveryDate=Consegnato il
 
+dateVariation= Data Variazione
+
 DEL= Eliminazione
 
 domain= Dominio
