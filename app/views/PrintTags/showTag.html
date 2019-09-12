@@ -212,7 +212,7 @@
       <th>Ore e minuti</th>
     </tr>
     #{list dto.psDto.absenceList, as:'abs'}
-    #{if abs.justifiedMinutes != null}
+
     <tr>
       <td>${abs.personDay.date}</td>
       <td>${abs.absenceType.code}</td>
@@ -224,13 +224,11 @@
       #{elseif abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.complete_day_and_add_overtime)}
       	A completamento giornaliero
       #{/elseif}
-      #{else}
+      #{elseif abs.justifiedMinutes != null}
       	${abs.justifiedMinutes} minuti
-      #{/else}
-      </td>  
-          
+      #{/elseif}
+      </td>
     </tr>
-    #{/if}
     #{/list}
   </table>
 </div>
