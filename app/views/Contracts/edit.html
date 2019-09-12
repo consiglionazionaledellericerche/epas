@@ -61,6 +61,9 @@
 	    	#{secure.check 'Contracts.updatePersonId'}
 	    		#{f.input 'perseoId', label:'contract.perseoId', value:perseoId /}
 	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.date 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format() /}
+	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
 	    	<div class="alert alert-danger">
@@ -69,7 +72,7 @@
 	    	#{/ifError}
 
 				#{secure.check 'Contracts.update'}
-	    	<div class="text-center">
+	    		<div class="text-center">
 	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
 				</div>
 				#{/secure.check}
@@ -87,6 +90,9 @@
 			#{secure.check 'Contracts.updatePersonId'}
 				#{f.simpleView 'perseoId', label:'contract.perseoId', value:perseoId, hidden:true /}
 			#{/secure.check}
+			#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.simpleView 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format(), hidden:true /}
+	    	#{/secure.check}
 			<input type="hidden" name="confirmed" value="true" />
 			
 			#{recomputeRecap.show recomputeRecap:recomputeRecap /}
