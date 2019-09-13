@@ -1470,13 +1470,13 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
   
   A_96("96", "sosp.ne cautelare e/o dal servizio",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_96A("96A", "sospensione dal lavoro",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_96B("96B", "sospensione dal servizio",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
       0, null, Sets.newHashSet(), null, null, false);
   
   
