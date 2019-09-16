@@ -24,6 +24,7 @@ import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1362,6 +1363,7 @@ public class AbsenceGroups extends Controller {
     LocalDate updateFrom = LocalDate.now();
     LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
     List<Absence> absences = absenceCertificationService.absencesToPersist(person, year);
+    absences.sort(Comparator.comparing(Absence::getAbsenceDate));
 
     for (Absence absence : absences) {
       JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
