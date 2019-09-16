@@ -309,6 +309,19 @@ public class DateUtility {
     LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
     return date.monthOfYear().getAsText();
   }
+  
+  /**
+   * 
+   * @param month il mese da formattare
+   * @return il mese se maggiore di 10, con lo 0 davanti se minore di 10.
+   */
+  public static String checkMonth(int month) {
+    if (month < 10) {
+      return "0"+month;
+    } else {
+      return ""+month;
+    }
+  }
 
   /**
    * @param minute minuti da formattare.
