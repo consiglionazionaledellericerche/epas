@@ -34,7 +34,7 @@
       #{secure.li @Persons.list() }
       <i class="fa fa-users" aria-hidden="true"></i>
       #{/secure.li}
-      #{secure.li @Contracts.initializationsStatus(session.get("officeSelected")) }
+      #{secure.li @Contracts.initializationsStatus(currentData.officeId) }
       <i class="fa fa-flag-checkered" aria-hidden="true"></i>
       #{/secure.li}
 
@@ -44,31 +44,31 @@
 
       *{ Gestione Presenze Timbrature / Assenze / Competenze / Ferie e Permessi / Buoni Pasto / Ore di formazione }*
 
-      #{secure.li @Stampings.personStamping(session.get("personSelected"),session.get("yearSelected"), session.get("monthSelected")) }
+      #{secure.li @Stampings.personStamping(currentData.personId, currentData.year, currentData.month) }
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @Absences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @Absences.showGeneralMonthlyAbsences(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
       
-      #{secure.li @TimeVariations.show(session.get("officeSelected"))}
+      #{secure.li @TimeVariations.show(currentData.officeId)}
 	  <i class="fa fa-search-plus" aria-hidden="true"></i>
       #{/secure.li}
       
-      #{secure.li @Vacations.list(session.get("yearSelected"), session.get("officeSelected")) }
+      #{secure.li @Vacations.list(currentData.year, currentData.officeId) }
       <i class="fa fa-plane" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @Competences.showCompetences(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-money" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @MealTickets.recapMealTickets(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-cutlery" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @PersonMonths.visualizePeopleTrainingHours(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @PersonMonths.visualizePeopleTrainingHours(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-graduation-cap" aria-hidden="true"></i>
       #{/secure.li}
 
@@ -78,19 +78,19 @@
 
       *{ Controllo Presenze Timbrature Mancanti / Presenza giornaliera / Riepilogo Mensile }*
 
-      #{secure.li @Stampings.missingStamping(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @Stampings.missingStamping(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @Stampings.stampingsByAdmin(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @Stampings.stampingsByAdmin(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-legal" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @Stampings.dailyPresence(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected"), session.get("officeSelected")) }
+      #{secure.li @Stampings.dailyPresence(currentData.year, currentData.month, currentData.day, currentData.officeId) }
       <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @MonthRecaps.showRecaps(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @MonthRecaps.showRecaps(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-calendar" aria-hidden="true"></i>
       #{/secure.li}
 
@@ -98,11 +98,11 @@
       <li class="divider"></li>
       #{/secure.check}
 
-      #{secure.li @Charts.checkLastYearAbsences(null,session.get("officeSelected")) }
+      #{secure.li @Charts.checkLastYearAbsences(null,currentData.officeId) }
       <i class="fa fa-pie-chart" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.li @PrintTags.listPersonForPrintTags(session.get("yearSelected"), session.get("monthSelected"), session.get("officeSelected")) }
+      #{secure.li @PrintTags.listPersonForPrintTags(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}
 
@@ -112,7 +112,7 @@
 
       *{ Invio Attestati }*
 
-      #{secure.li @Certifications.certifications(session.get("officeSelected")) }
+      #{secure.li @Certifications.certifications(currentData.officeId) }
         <i class="fa fa-cloud-upload" aria-hidden="true"></i>
       #{/secure.li}
 

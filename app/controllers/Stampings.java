@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -120,8 +121,13 @@ public class Stampings extends Controller {
     if (year == null || month == null) {
       stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-    IWrapperPerson wrperson = wrapperFactory
-        .create(Security.getUser().get().person);
+    val currentPerson = Security.getUser().get().person;
+    //Accesso da utente di sistema senza persona associata
+    if (currentPerson == null) {
+      Application.index();
+    }
+    
+    IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
       flash.error("Non esiste situazione mensile per il mese di %s %s",
