@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -11,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
+import models.enumerate.CalculationType;
+import models.enumerate.LimitUnit;
 import org.joda.time.LocalTime;
 
 @Entity
@@ -79,6 +83,10 @@ public class ShiftTimeTable extends BaseModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   public Office office;
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "calculation_type")
+  public CalculationType calculationType;
 
   @Transient
   public int slotCount() {
