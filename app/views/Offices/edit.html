@@ -26,6 +26,9 @@
 	        #{secure.check 'Office.updateBeginDate'}
 	        	#{f.date 'office.beginDate' /}
 	        #{/secure.check}
+	        #{secure.check 'Office.updatePerseoId'}
+	        	#{f.input 'office.perseoId' /}
+	        #{/secure.check}
 	        #{f.booleanRadio 'office.headQuarter'/}
 	        
 	
