@@ -119,9 +119,10 @@ public class Contracts extends Controller {
     LocalDate endContract = contract.endContract;
     boolean onCertificate = contract.onCertificate;
     boolean isTemporaryMissing = contract.isTemporaryMissing;
-    
+    String perseoId = contract.perseoId;
+    LocalDate sourceDateRecoveryDay = contract.sourceDateRecoveryDay;
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate, isTemporaryMissing);
+        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay);
   }
 
   /**
@@ -136,7 +137,8 @@ public class Contracts extends Controller {
    */
   public static void update(@Valid Contract contract, @Required LocalDate beginDate,
       @Valid LocalDate endDate, @Valid LocalDate endContract,
-      boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing) {
+      boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing,
+      String perseoId, LocalDate sourceDateRecoveryDay) {
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -163,7 +165,7 @@ public class Contracts extends Controller {
     if (Validation.hasErrors()) {
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate);
+          onCertificate, perseoId, sourceDateRecoveryDay);
     }
 
     // Salvo la situazione precedente
@@ -174,6 +176,8 @@ public class Contracts extends Controller {
     contract.endDate = endDate;
     contract.endContract = endContract;
     contract.onCertificate = onCertificate;
+    contract.perseoId = perseoId;
+    contract.sourceDateRecoveryDay = sourceDateRecoveryDay;
     if (isTemporaryMissing != null) {
       contract.isTemporaryMissing = isTemporaryMissing;  
     }
@@ -182,7 +186,7 @@ public class Contracts extends Controller {
       Validation.addError("contract.crossValidationFailed",
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate);
+          onCertificate, perseoId, sourceDateRecoveryDay);
     }
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -194,7 +198,7 @@ public class Contracts extends Controller {
       confirmed = true;
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-          onCertificate, isTemporaryMissing, recomputeRecap);
+          onCertificate, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);

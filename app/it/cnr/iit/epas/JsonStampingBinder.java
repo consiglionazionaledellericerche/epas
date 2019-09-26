@@ -62,9 +62,16 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
           stamping.markedByAdmin = true;
         }
       }
-      
-      if (jsonObject.get("terminale") != null) {
-        stamping.zona = jsonObject.get("terminale").getAsString();
+      String terminal = "";
+      if (jsonObject.has("terminale")) {
+        terminal = jsonObject.get("terminale").getAsString();
+      } else if (jsonObject.has("lettore")) {
+        terminal = jsonObject.get("lettore").getAsString();
+      } else {
+        terminal = "";
+      }
+      if (!Strings.isNullOrEmpty(terminal)) {
+        stamping.zona = terminal;
       } else {
         stamping.zona = null;
       }

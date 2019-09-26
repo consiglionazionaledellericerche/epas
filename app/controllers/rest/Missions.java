@@ -94,8 +94,9 @@ public class Missions extends Controller {
     } else if (!body.codiceSede.equals(office.codeId)) {     
       logWarn(
           String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
-              + "sede associata a %s.", body.codiceSede, office.name, body.person.getFullname())
-          , body);
+              + "sede associata a %s.", 
+              body.codiceSede, office.name, office.codeId, body.person.getFullname()), 
+          body);
     }
     
     // Check if integration ePAS-Missions is enabled

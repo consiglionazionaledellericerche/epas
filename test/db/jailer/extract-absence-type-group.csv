@@ -1,6 +1,5 @@
 # subject; condition;  limit; restrictions
 group_absence_types; ; ; .embedded
-
 # from A (or association name); to B; restriction-condition
 absence_troubles_absence_id_fkey; ; ignore
 inverse-fk6674c5d65b5f15b1; ; ignore
@@ -16,7 +15,6 @@ inverse-fk6674c5d6fbe89596; ; ignore
 inverse-initialization_groups_person_id_fkey; ; ignore
 fkd78fcfbe786a4ab6; ; ignore
 inverse-fkd78fcfbe786a4ab6; ; ignore
-
 #! block xml-mapping
 fk5170df70e7a7b1be;fk5170df70e7a7b1be;NONE
 person_configurations_history__revision_fkey;person_configurations_history__revision_fkey;NONE
@@ -39,7 +37,6 @@ group_absence_types_history__revision_fkey;group_absence_types_history__revision
 competence_codes_competence_code_group_id_fkey;competence_codes_competence_code_group_id_fkey;NONE
 inverse-fkbe7a61ca62728bb1;competences;NONE
 inverse-persons_competence_codes_competence_code_id_fkey;persons_competence_codes;NONE
-conf_period_history__revision_fkey;conf_period_history__revision_fkey;NONE
 fk1fe1fac5d54d10ea;fk1fe1fac5d54d10ea;NONE
 takable_absence_behaviours_history__revision_fkey;takable_absence_behaviours_history__revision_fkey;NONE
 institutes_history__revision_fkey;institutes_history__revision_fkey;NONE
@@ -97,9 +94,6 @@ inverse-competence_code_groups_history__revision_fkey;competence_code_groups_his
 inverse-competence_codes_history__revision_fkey;competence_codes_history;NONE
 inverse-complation_absence_behaviours_history__revision_fkey;complation_absence_behaviours_history;NONE
 inverse-complation_codes_group_history__revision_fkey;complation_codes_group_history;NONE
-inverse-revinfo_conf_general_tmp_history_fkey;conf_general_history;NONE
-inverse-conf_period_history__revision_fkey;conf_period_history;NONE
-inverse-revinfo_conf_year_tmp_history_fkey;conf_year_history;NONE
 inverse-configurations_history__revision_fkey;configurations_history;NONE
 inverse-group_absence_types_history__revision_fkey;group_absence_types_history;NONE
 inverse-initialization_groups_history__revision_fkey;initialization_groups_history;NONE
@@ -137,13 +131,11 @@ attachments_office_id_fkey;attachments_office_id_fkey;NONE
 fk785e8f14fbe89596;fk785e8f14fbe89596;NONE
 fk785e8f1435175bce;fk785e8f1435175bce;NONE
 absence_troubles_absence_id_fkey;absence_troubles_absence_id_fkey;NONE
-revinfo_conf_year_tmp_history_fkey;revinfo_conf_year_tmp_history_fkey;NONE
 person_configurations_person_id_fkey;person_configurations_person_id_fkey;NONE
 fk94fa58aad54d10ea;fk94fa58aad54d10ea;NONE
 totalovertime_office_key;totalovertime_office_key;NONE
 takable_codes_group_history__revision_fkey;takable_codes_group_history__revision_fkey;NONE
 inverse-shift_type_shift_time_table_id_fkey;shift_type;NONE
-revinfo_conf_general_tmp_history_fkey;revinfo_conf_general_tmp_history_fkey;NONE
 revinfo_person_months_recap_history_fkey;revinfo_person_months_recap_history_fkey;NONE
 fk5c3f2f67d54d10ea;fk5c3f2f67d54d10ea;NONE
 fk68e007b9d54d10ea;fk68e007b9d54d10ea;NONE
@@ -168,7 +160,6 @@ justified_types_history__revision_fkey;justified_types_history__revision_fkey;NO
 user_roles_history__revision_fkey;user_roles_history__revision_fkey;NONE
 fk5c2b915dd54d10ea;fk5c2b915dd54d10ea;NONE
 fk2631804cd54d10ea;fk2631804cd54d10ea;NONE
-conf_period_office_id_fkey;conf_period_office_id_fkey;NONE
 shift_categories_supervisor_fkey;shift_categories_supervisor_fkey;NONE
 inverse-shift_type_shift_categories_id_fkey;shift_type;NONE
 fk353559b3fb1f039e;fk353559b3fb1f039e;NONE
@@ -176,9 +167,6 @@ fk353559b335555570;fk353559b335555570;NONE
 fk64d88a51d54d10ea;fk64d88a51d54d10ea;NONE
 inverse-attachments_office_id_fkey;attachments;NONE
 inverse-badge_systems_office_id_fkey;badge_systems;NONE
-inverse-conf_general_tmp_fkey;conf_general;NONE
-inverse-conf_period_office_id_fkey;conf_period;NONE
-inverse-conf_year_tmp_fkey;conf_year;NONE
 inverse-configurations_office_id_fkey;configurations;NONE
 office_institute_id_fkey;office_institute_id_fkey;NONE
 inverse-person_reperibility_types_office_id_fkey;person_reperibility_types;NONE
@@ -243,7 +231,6 @@ group_absence_types_next_group_to_check_id_fkey;group_absence_types_next_group_t
 inverse-group_absence_types_next_group_to_check_id_fkey;group_absence_types;NONE
 group_absence_types_takable_behaviour_id_fkey;group_absence_types_takable_behaviour_id_fkey;NONE
 inverse-initialization_groups_group_absence_type_id_fkey;initialization_groups;NONE
-conf_general_tmp_fkey;conf_general_tmp_fkey;NONE
 contract_stamp_profiles_contract_id_fkey;contract_stamp_profiles_contract_id_fkey;NONE
 inverse-group_absence_types_takable_behaviour_id_fkey;group_absence_types;NONE
 inverse-takable_codes_group_takable_behaviour_id_fkey;takable_codes_group;NONE
@@ -291,7 +278,6 @@ fkb20b55e47d5fd20c;fkb20b55e47d5fd20c;NONE
 badges_badge_reader_id_fkey;badges_badge_reader_id_fkey;NONE
 badges_badge_system_id_fkey;badges_badge_system_id_fkey;NONE
 badges_person_id_fkey;badges_person_id_fkey;NONE
-conf_year_tmp_fkey;conf_year_tmp_fkey;NONE
 category_group_absence_types_history__revision_fkey;category_group_absence_types_history__revision_fkey;NONE
 taken_codes_group_history__revision_fkey;taken_codes_group_history__revision_fkey;NONE
 fk8fa3d556d54d10ea;fk8fa3d556d54d10ea;NONE
@@ -300,22 +286,16 @@ fkca05bafce7a7b1be;fkca05bafce7a7b1be;NONE
 fkfceabd13d54d10ea;fkfceabd13d54d10ea;NONE
 fkbfc8501d54d10ea;fkbfc8501d54d10ea;NONE
 fk20975c68e7a7b1be;fk20975c68e7a7b1be;NONE
-
 #! block datamodelfolder
 epas-devel
-
 #! block additional subjects
-
 #! block export modus
 DBUNIT_FLAT_XML
-
 #! block xml settings
 yyyy-MM-dd;yyyy-MM-dd-HH.mm.ss;rowset
 #! block xml column mapping
 #! block upserts
-
 #! block filters
-
 #! block layout
 group_absence_types; complation_absence_behaviours; -26.34807014465332; -143.03482055664062; 1.0
 group_absence_types; justified_types; -644.513671875; -105.64083099365234; 1.0
@@ -366,6 +346,5 @@ absence_types; complation_codes_group; 99.7842788696289; 79.12934112548828; 0.0
 absence_types; takable_absence_behaviours; -258.7020568847656; -157.3701171875; 1.0
 absence_types; replacing_codes_group; 193.67670440673828; 227.34317016601562; 1.0
 absence_types; taken_codes_group; -109.66578674316406; -69.93148040771484; 1.0
-
 #! block version
 6.0.3

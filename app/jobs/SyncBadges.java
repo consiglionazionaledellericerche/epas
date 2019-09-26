@@ -1,5 +1,6 @@
 package jobs;
 
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +21,14 @@ import play.jobs.On;
 @On("0 0 7,16 * * ?") // Ore 7 e 14
 public class SyncBadges extends Job<Void> {
 
-  static final String SYNC_BADGES_ENABLED = "anagrafica.sync.badges.enabled";
-
   @Inject
   static OfficeDao officeDao;
   
   @Inject
   static BadgeManager badgeManager;
+  
+  @Inject
+  static GeneralSettingDao settings;
   
   /**
    * Esecuzione Job.
@@ -36,7 +38,7 @@ public class SyncBadges extends Job<Void> {
     
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))
-        || !"true".equals(Play.configuration.getProperty(SYNC_BADGES_ENABLED))) {
+        || !settings.generalSetting().syncBadgesEnabled) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }

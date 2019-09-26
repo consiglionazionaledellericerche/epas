@@ -24,7 +24,7 @@ import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 import models.Contract;
@@ -59,10 +59,44 @@ public class ContractPerseoConsumer {
   }
 
   /**
+   * Preleva dall'anagrafica la lista dei contratti di una persona.
+   * 
+   * @param perseoId id di Perseo della persona di cui prelevare i contratti
+   * @return La lista dei contratto relativi alla persona specificata.
+   */
+  private ListenableFuture<List<PerseoContract>> perseoContractsByPerson(Long perseoId) {
+
+    final String url;
+    final String user;
+    final String pass;
+
+    try {
+      url = AnagraficaApis.getContractsByPersonIdForEpasEndpoint() + perseoId;
+      user = AnagraficaApis.getPerseoUser();
+      pass = AnagraficaApis.getPerseoPass();
+    } catch (NoSuchFieldException ex) {
+      final String error = String.format("Parametro necessario non trovato: %s", ex.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    final WS.WSRequest request = WS.url(url).authenticate(user, pass);
+
+    log.info("Invio richiesta Contratti a Perseo: {}", request.url);
+
+    ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
+        .listenInPoolThread(request.getAsync());
+
+    return Futures.transform(future, buildPerseoContracts(), MoreExecutors.directExecutor());
+  }
+
+  /**
+   * Preleva dall'anagrafica il contratto relativo all'id contratto passato.
+   * 
    * @param perseoContractId id di Perseo del contratto richiesta
    * @return Il Contratto relativo all'id specificato.
    */
-  private ListenableFuture<PerseoContract> perseoContractByPerseoId(Long perseoContractId) {
+  private ListenableFuture<PerseoContract> perseoContractByPerseoId(String perseoContractId) {
 
     final String url;
     final String user;
@@ -85,7 +119,11 @@ public class ContractPerseoConsumer {
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
         .listenInPoolThread(request.getAsync());
 
-    return Futures.transform(future, new Function<HttpResponse, PerseoContract>() {
+    return Futures.transform(future, buildPerseoContract(), MoreExecutors.directExecutor());
+  }
+
+  private Function<HttpResponse, PerseoContract> buildPerseoContract() {
+    return new Function<HttpResponse, PerseoContract>() {
       @Override
       public PerseoContract apply(WS.HttpResponse response) {
         if (!response.success()) {
@@ -94,7 +132,8 @@ public class ContractPerseoConsumer {
           log.warn(error);
           throw new ApiRequestException(error);
         }
-        log.info("Recuperato Json contenente il contratto con id {} da Perseo", perseoContractId);
+        log.info("Recuperato Json contenente il contratto dall'anagrafica: {} {}",
+            response.getStatus(), response.getStatusText());
         try {
           return new Gson().fromJson(response.getJson(), PerseoContract.class);
         } catch (JsonSyntaxException ex) {
@@ -103,10 +142,12 @@ public class ContractPerseoConsumer {
           throw new ApiRequestException(error);
         }
       }
-    }, MoreExecutors.directExecutor());
+    };
   }
 
   /**
+   * Preleva dall'anagrafica la lista dei contratti relativi alla sede indicata.
+   * 
    * @param departmentPerseoId id (di Perseo) della sede sulla quale recuperare i contratti
    * @return La Lista dei contratti delle persone appartenenti alla sede specificata.
    */
@@ -138,7 +179,15 @@ public class ContractPerseoConsumer {
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
         .listenInPoolThread(request.getAsync());
 
-    return Futures.transform(future, new Function<HttpResponse, List<PerseoContract>>() {
+    return Futures.transform(future, buildPerseoContracts(), MoreExecutors.directExecutor());
+  }
+
+  /**
+   * Funzione per costruire la lista di contratti a partire dalla json
+   * contenuto nella risposta http. 
+   */
+  private Function<HttpResponse, List<PerseoContract>> buildPerseoContracts() {
+    return new Function<HttpResponse, List<PerseoContract>>() {
       @Override
       public List<PerseoContract> apply(WS.HttpResponse response) {
         if (!response.success()) {
@@ -159,7 +208,7 @@ public class ContractPerseoConsumer {
           throw new ApiRequestException(error);
         }
       }
-    }, MoreExecutors.directExecutor());
+    };
   }
 
   /**
@@ -253,13 +302,35 @@ public class ContractPerseoConsumer {
 
   }
 
+  /**
+   * Il contratti relativi alla persona con quel perseoId prelevati dall'anagrafica
+   * e trasformati in contratti di ePAS.
+   *
+   * @return lista dei contratti
+   */
+  public List<Contract> fetchRegistryContractsByRegistry(final Long perseoId, final Person person) {
+
+    List<PerseoContract> perseoContracts = Lists.<PerseoContract>newArrayList();
+    try {
+      perseoContracts = perseoContractsByPerson(perseoId).get();
+    } catch (InterruptedException | ExecutionException ex) {
+      String error = String.format("Impossibile recuperare il contratto con id %d da Perseo - %s",
+          perseoId, ex.getMessage());
+      log.error(error);
+      throw new ApiRequestException(error);
+    }
+
+    return perseoContracts.stream().map(perseoContract -> {
+      return epasConverter(perseoContract, person);
+    }).collect(Collectors.toList());      
+  }
 
   /**
    * Il contratto con quel perseoId.
    *
    * @return contratto contratto
    */
-  public Optional<Contract> perseoContractPerseoId(Long contractPerseoId, Person person) {
+  public Optional<Contract> perseoContractPerseoId(String contractPerseoId, Person person) {
 
     PerseoContract perseoContract = null;
     try {
@@ -293,7 +364,7 @@ public class ContractPerseoConsumer {
     for (IWrapperPerson wrPerson : wrapperedPeople) {
       if (wrPerson.getCurrentContract().isPresent() && wrPerson.getValue().perseoId != null) {
         activeSynchronizedEpas
-            .put(wrPerson.getValue().perseoId, wrPerson.getCurrentContract().get());
+        .put(wrPerson.getValue().perseoId, wrPerson.getCurrentContract().get());
       }
     }
     return activeSynchronizedEpas;

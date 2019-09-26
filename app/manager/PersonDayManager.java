@@ -130,6 +130,18 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
+  
+  /**
+   * 
+   * @param personDay il personDay su cui cercare le assenze
+   * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
+   */
+  public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
+    
+    return personDay.absences.stream()
+        .noneMatch(abs -> !abs.absenceType.reperibilityCompatible);
+
+  }
 
   /**
    * 

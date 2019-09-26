@@ -7,8 +7,8 @@
 	#{secure.check 'Absences.addAttach'}
     	#{tabItem id:'attach', title:'Allegato' /}
   	#{/secure.check}
-  	#{secure.check 'Absences.overtimeMission', target:absence.absenceType}
-  		#{tabItem id:'overtimeMission', title:'Ore in più in missione' /}
+  	#{secure.check 'Absences.overtimeAbsence', target:absence.absenceType}
+  		#{tabItem id:'overtimeAbsence', title:'Ore in più per assenza' /}
   	#{/secure.check}
   #{tabItem id:'deleteAbs', title:'Elimina' /}
 #{/tabList}
@@ -78,16 +78,15 @@
 	  #{/if}  
   #{/tabContentItem} 
   #{/secure.check}
-  #{secure.check 'Absences.overtimeMission', target:absence.absenceType}
-  #{tabContentItem id:'overtimeMission'}
+  #{secure.check 'Absences.overtimeAbsence', target:absence.absenceType}
+  #{tabContentItem id:'overtimeAbsence'}
 	  <div class="alert alert-info center">
 		   <p>In caso di preventiva documentazione, è possibile aggiungere all'assenza
 		   con codice ${absence.absenceType.code} del <strong>${absence.personDay.date.format()}</strong>
-		   le ore di straordinario in missione,
-		   specificando nei campi sottostanti la quantità oraria e la motivazione. 
+		   le ore di straordinario durante l'assenza, specificando nei campi sottostanti la quantità oraria. 
 	       </p>	       
 	  </div>
-	  #{form action:@Absences.overtimeMission(), method:'POST', autocomplete:false,
+	  #{form action:@Absences.overtimeAbsence(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#absenceData', enctype:'multipart/form-data'}
 		    #{if absence.persistent}
