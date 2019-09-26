@@ -27,6 +27,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +61,7 @@ import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
 import models.dto.TimeTableDto;
+import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
@@ -1017,9 +1019,9 @@ public class Competences extends Controller {
   public static void configureShiftTimeTable() {
 
     List<Office> officeList = officeDao.getAllOffices();    
-
+    List<CalculationType> calculationTypes = Arrays.asList(CalculationType.values());
     TimeTableDto timeTable = new TimeTableDto();
-    render(timeTable, officeList);
+    render(timeTable, officeList, calculationTypes);
 
   }
 
@@ -1028,14 +1030,15 @@ public class Competences extends Controller {
    * @param timeTable la timetable da creare
    * @param officeId l'id della sede a cui associare la nuova timetable
    */
-  public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId) {
+  public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId, 
+      CalculationType calculationType) {
     if (Validation.hasErrors()) {
       response.status = 400;
       List<Office> officeList = officeDao.getAllOffices();
-      render("@configureShiftTimeTable", timeTable, officeList);
+      render("@configureShiftTimeTable", timeTable, officeList, calculationType);
     }
     Office office = officeDao.getOfficeById(officeId);
-    competenceManager.createShiftTimeTable(timeTable, office);
+    competenceManager.createShiftTimeTable(timeTable, office, calculationType);
     flash.success("Creata nuova timetable");
     manageCompetenceCode();
   }
@@ -1044,7 +1047,7 @@ public class Competences extends Controller {
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
    * @param shiftCategoryId l'id del servzio da configurare
    */
-  public static void configureShift(Long shiftCategoryId, int step, 
+  public static void configureShift(Long shiftCategoryId, int step,   
       @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
@@ -1058,7 +1061,6 @@ public class Competences extends Controller {
       breakInRange = false;
       List<ShiftTimeTableDto>  dtoList = competenceManager
           .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
-
       step++;
       render(dtoList, cat, type, step, breakInRange, enableExitTolerance);
     }
@@ -1068,8 +1070,9 @@ public class Competences extends Controller {
         flash.error("selezionare una timetable!");
         List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-
-        render("@configureShift", dtoList, cat, type, step, breakInRange, enableExitTolerance);
+        
+        render("@configureShift", dtoList, cat, type, step, 
+            breakInRange, enableExitTolerance);
       }
       //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
       //all'utente di validare la attività e la timetable associata.

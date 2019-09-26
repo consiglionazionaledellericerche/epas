@@ -91,6 +91,8 @@ from=Da
 to=A
 recoveryDate=Da recuperare entro
 
+calculationType=Tipo di conteggio dei turni
+
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
 calendar.removeApprovation= Rimuovi approvazione
@@ -819,6 +821,9 @@ AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
+
+CalculationType.standard_CNR=Calcolo standard CNR
+CalculationType.percentage=Calcolo percentuale (es.:INAF)
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
