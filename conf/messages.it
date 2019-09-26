@@ -820,6 +820,7 @@ AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 
+
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
 ChartTypes.COLUMNS= Grafico a colonne
