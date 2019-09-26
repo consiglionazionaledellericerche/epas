@@ -2348,7 +2348,9 @@ when
         "rest.Absences.checkAbsence",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
 
        ), target == null, granted == false)
 then
@@ -2367,7 +2369,9 @@ when
         "rest.Absences.checkAbsence",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
 
        ), target == $o, granted == false)
 then
@@ -2518,16 +2522,30 @@ end
 /*******************************************************************************
  * Azioni via REST per PERSONDAY READER
  ******************************************************************************/
- 
 rule managePersonDay
 when
- AccountRole(this in (AccountRole.PERSONDAY_READER)) 
+ $uro: UsersRolesOffices(role.name == "personDayReader")
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
+        "rest.PersonDays.getMonthSituation"
 
        ), target == null, granted == false)
 then
  $c.grant();
 end
+ 
+rule managePersonDayInOffice
+when
+ $uro: UsersRolesOffices(role.name == "personDayReader")
+ $o: Office() from $uro.office
+ $c: PermissionCheck(action in (
+
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
+
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
