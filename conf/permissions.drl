@@ -586,13 +586,13 @@ end
 
 rule showAbsenceRequest
 when 
-  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR)
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
+  || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
 end
-
 
 rule personInCharge
 when
@@ -766,12 +766,9 @@ when
     || action.startsWith("Administration.")
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
-    || action.startsWith("Competences.")
-    || action.startsWith("MealTickets.")
     || action.startsWith("PrintTags.")
     || action.startsWith("PersonMonths.")
     || action.startsWith("Stampings.")
-    || action.startsWith("UploadSituation.")
     || action.startsWith("Vacations."))
 then
  $c.revoke();
@@ -802,6 +799,7 @@ when
     "BadgeSystems.list",
     "BadgeSystems.personBadges",
     "Certifications.certifications",
+    "Certifications.sendPartialCertification",
     "Charts.checkLastYearAbsences",
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
@@ -827,7 +825,6 @@ when
     "ContractualClauses.list",
     "ContractualClauses.show",
     "Institutes.list",
-
     "MonthRecaps.customRecap",
     "MonthRecaps.showRecaps",
     "PersonDays.personDayHistory",
@@ -1134,6 +1131,12 @@ when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
+ 		
+ 		/* Permesso per vedere la lista delle richieste di assenza*/
+ 		"AbsenceRequests.vacationsToApprove",
+ 		"AbsenceRequests.compensatoryRestsToApprove",
+ 		"AbsenceRequests.listToApprove",
+ 		
 
         /* Vecchio permesso viewPerson */
         //"Persons.list",
@@ -1343,7 +1346,7 @@ when
      	"AbsenceGroups.delete",
      	"Absences.addAttach",
      	"Absences.removeAttach",
-     	"Absences.overtimeMission",
+     	"Absences.overtimeAbsence",
 
         "Stampings.insert",
         "Stampings.insertOffsite",
@@ -1409,6 +1412,7 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.sendPartialCertification",
         "Certifications.clearCacheValues",
         "Certifications.personStatus",
         "Certifications.process",
@@ -1481,7 +1485,7 @@ when
         /* Vecchio permesso editPersonDay */
      	"Absences.addAttach",
      	"Absences.removeAttach",
-     	"Absences.overtimeMission",
+     	"Absences.overtimeAbsence",
 
        	"Stampings.insert",
        	"Stampings.insertOffsite",
@@ -1546,6 +1550,7 @@ when
         "UploadSituation.performCheckData",
 
         "Certifications.certifications",
+        "Certifications.sendPartialCertification",
         "Certifications.clearCacheValues",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
@@ -1653,6 +1658,16 @@ when
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
     	"Persons.showCurrentVacation",
+
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+    	
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
@@ -1709,6 +1724,16 @@ when
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
     	"Persons.showCurrentVacation",
+
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+    	
      	"Configurations.personShow",
      	"Configurations.personEdit",
      	"Configurations.personUpdate",
@@ -1892,14 +1917,32 @@ then
  $c.grant();
 end
 
-/******************************************************************
- * Azioni per utente employee abilitato alla assenza per telelavoro
- ******************************************************************/
+/***********************************************************************************
+ * Azioni per utente employee abilitato alla assenza per assistenza parenti disabili
+ ***********************************************************************************/
 rule Disabled_person
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"
+    ), granted == false, target == null)
+then
+ $c.grant();
+end
+
+/***************************************************************************
+ * Azioni per utente employee abilitato alla assenza per diritto allo studio
+ ***************************************************************************/
+rule Right_to_study_person
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -1977,6 +2020,19 @@ then
  $c.grant();
 end
 
+/************************************************************************************
+ * Un dipendente può autocertificare le proprie assenze per diritto allo studio se...
+ ************************************************************************************/
+rule employeeCanInsertAbsencesRightToStudy
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
 /*********************************************************************************************
  * Un dipendente può autocertificare le proprie assenze per permesso dipendente disabile se...
  *********************************************************************************************/
@@ -2026,7 +2082,7 @@ then
 end
 
 /*******************************************************************************
- * L'impiegato può modificare/salvare una determinata assenza per telelavoro se:
+ * L'impiegato può modificare/salvare una determinata assenza per legge 104 se:
  *******************************************************************************/
 rule EmployeeCanEditDisabledPersonAbsence
 when
@@ -2034,6 +2090,22 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeDisabledPersonCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/****************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per diritto allo studio se:
+ ****************************************************************************************/
+rule EmployeeCanEditRightToStudyAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeRightToStudyCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
@@ -2208,13 +2280,14 @@ then
 end
 
 /**************************************************************************************************
- * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione
+ * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione 
+ * così come per il 105BP che ha lo stesso comportamento dei codici giornalieri di missione.
  **************************************************************************************************/
 rule overtimeInMission
 when
  UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $abt: AbsenceType(code == "92" || code == "92E") 
- $c: PermissionCheck(action == "Absences.overtimeMission", target == $abt, granted == false )
+ $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP') 
+ $c: PermissionCheck(action == "Absences.overtimeAbsence", target == $abt, granted == false )
 then
  $c.grant();
 end

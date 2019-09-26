@@ -48,6 +48,7 @@ administrator= Amministratore
 adminPassword= Password Amministratore
 adminPasswordRetype= Reinserire Password
 
+Administration.generalSetting.table= Impostazioni generali di sistema
 Administration.playConfiguration.table= Parametri di Configurazione Play! framework
 Administration.jvmConfiguration.table= Parametri Jvm
 Administration.runtimeData.table= Valori di Runtime
@@ -148,6 +149,8 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+contract.perseoId =Identificato contratto in Anagrafica
+sourceDateRecoveryDay = Data inizializzazione riposi compensativi
 
 contractualClause =Istituto contrattuale
 contractualClause.name =nome
@@ -248,6 +251,8 @@ dateTo=Fino Al
 day= Giorno (se presente)
 deliveryDate=Consegnato il
 
+dateVariation= Data Variazione
+
 DEL= Eliminazione
 
 domain= Dominio
@@ -270,6 +275,12 @@ endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. D
 firstDay= Giorno inizio contratto
 
 forceInsert= Forza Inserimento
+
+generalSetting =Impostazioni generali di sistema
+generalSetting.syncBadgesEnabled =Sincronizzazione badge
+generalSetting.syncOfficesEnabled =Sincronizzazione uffici
+generalSetting.syncPersonsEnabled =Sincronizzazione persone
+generalSetting.onlyMealTicket =Invio solo dei buoni pasto
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -704,6 +715,7 @@ AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
 AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
 Administration.internalSearch=Ricerca
 Administration.adjustSeats=Rimodula sedi
+Administration.generalSetting= Informazioni Applicazione
 Administration.playConfiguration= Informazioni Applicazione
 Administration.utilities= Utilities
 BadgeReaders.list= Sorgenti Timbrature
@@ -917,6 +929,7 @@ OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con c
 MATERNITY_PERIOD=Periodo Maternità
 TELEWORK=Telelavoro
 DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
+RIGHT_TO_STUDY=Permessi per diritto allo studio
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

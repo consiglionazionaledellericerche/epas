@@ -9,7 +9,6 @@ import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.UserDao;
 import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -20,12 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
+import manager.PersonManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
-import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
-import manager.services.absences.model.VacationSituation;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -36,8 +34,6 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import models.absences.GroupAbsenceType;
-import models.absences.definitions.DefaultGroup;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import play.data.validation.Equals;
@@ -59,6 +55,8 @@ public class Persons extends Controller {
 
   @Inject
   static UserManager userManager;
+  @Inject
+  static PersonManager personManager;
   @Inject
   static EmailManager emailManager;
   @Inject
@@ -126,7 +124,7 @@ public class Persons extends Controller {
 
     render(person, contract);
   }
-
+ 
   /**
    * metodo che salva la persona inserita con il suo contratto.
    *
@@ -150,6 +148,12 @@ public class Persons extends Controller {
     person.surname = WordUtils.capitalizeFully(person.surname);
 
     person.user = userManager.createUser(person);
+    
+    //Se il campo eppn è vuoto viene calcolato euristicamente...
+    if (person.email != null && person.eppn == null) {
+      person.eppn = personManager.eppn(person.user.username, person.email);
+    }
+    
     person.save();
 
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
@@ -500,6 +504,5 @@ public class Persons extends Controller {
 
     children(child.person.id);
   }
-
 
 }

@@ -70,12 +70,6 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<Person> persons = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<ConfGeneral> confGeneral = Lists.newArrayList();
-
-  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<ConfYear> confYear = Lists.newArrayList();
-
-  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Configuration> configurations = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})

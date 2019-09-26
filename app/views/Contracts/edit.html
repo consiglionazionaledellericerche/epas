@@ -26,7 +26,7 @@
   
   #{if wrappedContract.value.isTemporaryMissing && wrappedContract.value.endDate == null}
     #{alert color:'danger'}
-      <p>Il contratto selezionato è stato automaticamente importato dai sistemi centrali CNR e 
+      <p>Il contratto selezionato è stato automaticamente importato dall'anagrafica dell'Ente e 
       risulta essere della tipologia Tempo Determinato. Per completare la configurazione
       occorre specificare opportunamente la data di fine rapporto specificando il campo <strong>Data Fine</strong></p> 
     #{/alert}
@@ -58,6 +58,12 @@
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
 	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
 	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updatePersonId'}
+	    		#{f.input 'perseoId', label:'contract.perseoId', value:perseoId /}
+	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.date 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format() /}
+	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
 	    	<div class="alert alert-danger">
@@ -66,7 +72,7 @@
 	    	#{/ifError}
 
 				#{secure.check 'Contracts.update'}
-	    	<div class="text-center">
+	    		<div class="text-center">
 	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
 				</div>
 				#{/secure.check}
@@ -80,7 +86,13 @@
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
-			#{/secure.check}				
+			#{/secure.check}
+			#{secure.check 'Contracts.updatePersonId'}
+				#{f.simpleView 'perseoId', label:'contract.perseoId', value:perseoId, hidden:true /}
+			#{/secure.check}
+			#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.simpleView 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format(), hidden:true /}
+	    	#{/secure.check}
 			<input type="hidden" name="confirmed" value="true" />
 			
 			#{recomputeRecap.show recomputeRecap:recomputeRecap /}

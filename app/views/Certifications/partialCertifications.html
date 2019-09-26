@@ -1,0 +1,39 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio buoni pasto'  /}
+
+<div class="container">
+  #{title title:'ePAS - Supporto per Invio informazioni di fine mese', administration:true /}
+</div>
+
+<div class="container">
+
+  #{panel title:'Creazione file per invio delle informazioni di fine mese', color:'primary'}
+
+  #{alert color:'info'}
+  <p>Sarà generato un file .csv contenenti le informazioni da inviare a fine mese della sede selezionata.</p>  
+  #{/alert}
+
+	#{b.link @sendPartialCertification(office.id, validYear, validMonth), color:'warning', fa:'cloud-upload'}
+        <span class="text-default">Genera file .CSV per i buoni pasto</span>
+    #{/b.link}
+    <ul class="list-group">
+
+    #{list people, as:'person' }
+
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-xs-3">
+            <strong>${person.fullname}</strong>
+            <br><em>matricola:</em> ${person.number}
+          </div>
+
+        </div>
+      </li>
+    
+    #{/list}
+  </ul>
+  
+  #{/panel}
+
+</div>
