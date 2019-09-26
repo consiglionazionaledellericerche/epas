@@ -51,6 +51,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.dto.TimeTableDto;
+import models.enumerate.CalculationType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -787,6 +788,7 @@ public class CompetenceManager {
         dto.isOfficeTimeTable = false;
       }
       dto.id = shiftTimeTable.id;
+      dto.calculationType = shiftTimeTable.calculationType.getName();
       dto.endAfternoon = shiftTimeTable.endAfternoon.toString(stamping_format);
       dto.endAfternoonLunchTime = shiftTimeTable.endAfternoonLunchTime.toString(stamping_format);
       dto.endMorning = shiftTimeTable.endMorning.toString(stamping_format);
@@ -856,10 +858,12 @@ public class CompetenceManager {
    * @param timeTable il dto da cui creare la ShiftTimeTable
    * @param office la sede a cui associare la timeTable
    */
-  public void createShiftTimeTable(TimeTableDto timeTable, Office office) {
+  public void createShiftTimeTable(TimeTableDto timeTable, Office office, 
+      CalculationType calculationType) {
 
     ShiftTimeTable stt = new ShiftTimeTable();
     stt.office = office;
+    stt.calculationType = calculationType;
     stt.paidMinutes = timeTable.paidMinutes;
     stt.totalWorkMinutes = timeTable.totalWorkMinutes;
     stt.startMorning = normalize(timeTable.startMorning);
