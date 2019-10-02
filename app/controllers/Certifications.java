@@ -116,7 +116,7 @@ public class Certifications extends Controller {
       // rimarrebbe l'url nella barra degli indirizzi, un eventuale refresh ne causerebbe il reinvio
       // TODO trovare una soluzione più elegante
       final String commandKey = String.format(PROCESS_COMMAND_KEY, officeId, year, month);
-      
+      Boolean process = (Boolean) Cache.get(commandKey);
       Cache.safeDelete(commandKey);
 
       flash.clear();  //non avendo per adesso un meccanismo di redirect pulisco il flash...
@@ -153,7 +153,7 @@ public class Certifications extends Controller {
             + "Effettuare lo stralcio sul server di Attestati", validMonth, validYear);
         render(office, validYear, validMonth);
       }
-      Boolean process = (Boolean) Cache.get(commandKey);
+      
       final Set<String> matricoleEpas = people.stream().map(person -> person.number)
           .collect(Collectors.toSet());
 
@@ -359,6 +359,7 @@ public class Certifications extends Controller {
     }
 
     render("@personStatus", personCertData, stepSize, person);
+    
   }
   
   /**
