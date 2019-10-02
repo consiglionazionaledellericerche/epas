@@ -60,6 +60,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
+import models.dto.OrganizationTimeTable;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;
@@ -1016,12 +1017,33 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable() {
+  public static void configureShiftTimeTable(int step, int slot, 
+      CalculationType calculationType, Long officeId) {
+    if (step == 0) {
+      step++;
+      List<Office> officeList = officeDao.getAllOffices();    
+      List<CalculationType> calculationTypes = Arrays.asList(CalculationType.values());
+      
+      render(officeList, calculationTypes, step);
+    }
+    
+    if (step == 1) {
+      step++;
+      
+      render(step);
+    }
+    
+    if (step == 2) {
+      List<OrganizationTimeTable> list = Lists.newArrayList();
+      for (int i = 0; i < slot; i++) {
+        OrganizationTimeTable ott = new OrganizationTimeTable();
+        list.add(ott);
+      }
+      step++;
+      render(list);
+    }
 
-    List<Office> officeList = officeDao.getAllOffices();    
-    List<CalculationType> calculationTypes = Arrays.asList(CalculationType.values());
-    TimeTableDto timeTable = new TimeTableDto();
-    render(timeTable, officeList, calculationTypes);
+    
 
   }
 
