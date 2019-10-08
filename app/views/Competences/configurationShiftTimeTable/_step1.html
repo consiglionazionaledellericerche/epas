@@ -1,0 +1,12 @@
+#{panel title:'(1) Seleziona la sede e il tipo di calcolo', color:'primary'}
+<div class="col-sm-6"></div>
+  		 #{select 'officeId', class:'form-control', id:'office'}
+		  		#{list items:officeList, as:'office'}
+		    		#{option office.id}${office.name}#{/option}
+	  			#{/list}
+		 #{/select}
+	 
+
+	#{f.selectEnum 'calculationType', id:'calculationType', items:calculationTypes, 
+		value:calculationType, byEquals:false /}
+#{/panel}

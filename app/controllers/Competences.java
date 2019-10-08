@@ -64,6 +64,7 @@ import models.dto.OrganizationTimeTable;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
 import play.data.validation.Required;
@@ -1018,7 +1019,7 @@ public class Competences extends Controller {
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
   public static void configureShiftTimeTable(int step, int slot, 
-      CalculationType calculationType, Long officeId) {
+      CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;
       List<Office> officeList = officeDao.getAllOffices();    
@@ -1028,19 +1029,29 @@ public class Competences extends Controller {
     }
     
     if (step == 1) {
-      step++;
-      
-      render(step);
+      step++;      
+      render(list, step, officeId, calculationType, slot);
     }
     
     if (step == 2) {
-      List<OrganizationTimeTable> list = Lists.newArrayList();
+      list = Lists.newArrayList();
       for (int i = 0; i < slot; i++) {
         OrganizationTimeTable ott = new OrganizationTimeTable();
+        ott.numberSlot = i+1;
+        ott.isMealActive = false;
         list.add(ott);
       }
       step++;
-      render(list);
+      render(officeId, calculationType, slot, step, list);
+    }
+    
+    for (OrganizationTimeTable ott : list) {
+      LocalTime begin = new LocalTime(ott.beginSlot);
+      LocalTime end = new LocalTime(ott.endSlot);
+      if (ott.isMealActive) {
+        LocalTime beginMeal = new LocalTime(ott.beginMealSlot);
+        LocalTime endMeal = new LocalTime(ott.endMealSlot);
+      }
     }
 
     
