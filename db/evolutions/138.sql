@@ -3,5 +3,51 @@
 ALTER TABLE shift_time_table ADD COLUMN calculation_type TEXT;
 UPDATE shift_time_table SET calculation_type = 'standard_CNR';
 
+CREATE TABLE organization_shift_time_table(
+	id BIGSERIAL PRIMARY KEY,
+	office_id BIGINT NOT NULL,
+	calculation_type TEXT,
+	created_at TIMESTAMP WITHOUT TIME ZONE,
+	updated_at TIMESTAMP WITHOUT TIME ZONE,
+	FOREIGN KEY (office_id) REFERENCES office (id),
+	version INT DEFAULT 0);
+
+CREATE TABLE organization_shift_time_table_history(
+	id BIGINT NOT NULL,
+	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
+    _revision_type SMALLINT NOT NULL,
+	office_id BIGINT,
+	calculation_type TEXT,
+	PRIMARY KEY (id, _revision, _revision_type)
+);
+
+CREATE TABLE organization_shift_slot(
+	id BIGSERIAL PRIMARY KEY,
+	shift_time_table_id BIGINT NOT NULL,
+	begin_slot TIMESTAMP NOT NULL,
+	end_slot TIMESTAMP NOT NULL,
+	begin_meal_slot TIMESTAMP,
+	end_meal_slot TIMESTAMP,
+	minutes_slot INTEGER,
+	minutes_paid INTEGER,
+	created_at TIMESTAMP WITHOUT TIME ZONE,
+	updated_at TIMESTAMP WITHOUT TIME ZONE,
+	FOREIGN KEY (shift_time_table_id) REFERENCES organization_shift_time_table(id),
+	version INT DEFAULT 0
+	);
+
+CREATE TABLE organization_shift_slot_history(
+	id BIGINT NOT NULL,
+	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
+    _revision_type SMALLINT NOT NULL,
+    begin_slot TIMESTAMP,
+	end_slot TIMESTAMP,
+	begin_meal_slot TIMESTAMP,
+	end_meal_slot TIMESTAMP,
+	minutes_slot INTEGER,
+	minutes_paid INTEGER,
+	PRIMARY KEY (id, _revision, _revision_type)
+    );
+
 # --- !Downs
 -- non è necessaria una down
