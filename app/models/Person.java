@@ -28,6 +28,7 @@ import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.enumerate.CertificationType;
 import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -299,7 +300,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se la persona contiene il parametro di configurazione specificato con il valore
-   * indicato
+   *     indicato.
    */
   public boolean checkConf(EpasParam param, String value) {
     return personConfigurations.stream().filter(conf -> conf.epasParam == param
@@ -312,13 +313,19 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    *
    * @param readablePartial La 'data' da verificare
    * @return true se la data passata come parametro è successiva all'ultimo mese sul quale sono
-   * stati inviati gli attestai per la persona interessata
+   *     stati inviati gli attestai per la persona interessata.
    */
   public boolean checkLastCertificationDate(final ReadablePartial readablePartial) {
 
-    final Optional<Certification> ultimo = certifications.stream().max(Certification.comparator());
+    //Gli attestati relativi ai MEAL Ticket vengono ignorati perchè vengono 
+    //salvati i Certification relativi su ePAS anche se non stati effettivamente inviati
+    //ad attestati.
+    final Optional<Certification> ultimo = certifications.stream()
+        .filter(c -> c.certificationType != CertificationType.MEAL)
+        .max(Certification.comparator());
     if (ultimo.isPresent()) {
-      return ultimo.get().getYearMonth().isBefore(readablePartial);
+      return ultimo.get().getYearMonth().isBefore(readablePartial) 
+          || ultimo.get().attestatiId == null;
     }
     // Se non c'è nessun mese presente considero che la condizione sia sempre vera
     return true;
