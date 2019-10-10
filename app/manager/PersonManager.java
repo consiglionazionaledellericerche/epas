@@ -18,6 +18,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import lombok.val;
+import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -29,6 +31,7 @@ import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
+@Slf4j
 public class PersonManager {
 
   private final ContractDao contractDao;
@@ -325,15 +328,23 @@ public class PersonManager {
    * Per esempio se l'username è giuseppe.verdi e l'mail è g.verdi@iit.cnr.it
    * il campo ePPN viene impostato a giuseppe.verdi@cnr.it
   */ 
-  public String eppn(String username, String email) {
+  public static String eppn(String username, String email) {
     Verify.verifyNotNull(username);
     Verify.verifyNotNull(email);
-    if (email.split("\\.").length > 2) {
-      val emailTokens = email.split("\\.");
-      return username + "@" + "" + emailTokens[emailTokens.length - 2] + "." 
-          + emailTokens[emailTokens.length - 1];
-    } 
-    return null;
+    
+    val emailParts = email.split("@");
+    if (emailParts.length < 2) {
+      log.warn("Impossibile calcolare il campo eppn per username = {} e email = {}. "
+          + "Email non valida.", username, email);
+      return null;
+    }
+    var domain = emailParts[1];
+    if (domain.split("\\.").length > 2) {
+      val domainTokens = domain.split("\\.");
+      domain = String.format("%s.%s",
+          domainTokens[domainTokens.length - 2], domainTokens[domainTokens.length - 1]);
+    }
+    return String.format("%s@%s", username, domain);
   }
 
 }
