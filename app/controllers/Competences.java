@@ -49,6 +49,8 @@ import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
 import models.Office;
+import models.OrganizationShiftSlot;
+import models.OrganizationShiftTimeTable;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonReperibility;
@@ -519,7 +521,7 @@ public class Competences extends Controller {
    * @param month il mese
    */
   public static void editCompetence(long personId, long competenceCodeId, int year, int month) {
-    
+
     Person person = personDao.getPersonById(personId);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
     Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code);
@@ -527,7 +529,7 @@ public class Competences extends Controller {
     if (comp.isPresent()) {
       competence = comp.get();
     }
-    
+
     notFoundIfNull(code);
     notFoundIfNull(person);
     Office office = person.office;
@@ -548,7 +550,7 @@ public class Competences extends Controller {
   public static void saveCompetence(Integer valueApproved, @Required Competence competence) {
 
     notFoundIfNull(competence);
-    
+
     Office office = competence.person.office;
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -648,7 +650,7 @@ public class Competences extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     Set<Office> set = Sets.newHashSet();
     set.add(office);
 
@@ -1024,38 +1026,60 @@ public class Competences extends Controller {
       step++;
       List<Office> officeList = officeDao.getAllOffices();    
       List<CalculationType> calculationTypes = Arrays.asList(CalculationType.values());
-      
+
       render(officeList, calculationTypes, step);
     }
-    
+
     if (step == 1) {
       step++;      
       render(list, step, officeId, calculationType, slot);
     }
-    
+
     if (step == 2) {
       list = Lists.newArrayList();
       for (int i = 0; i < slot; i++) {
         OrganizationTimeTable ott = new OrganizationTimeTable();
         ott.numberSlot = i+1;
+
         ott.isMealActive = false;
+
+
         list.add(ott);
       }
       step++;
       render(officeId, calculationType, slot, step, list);
     }
-    
+    Office office = officeDao.getOfficeById(officeId);
+    if (office == null) {
+      flash.error("La sede selezionata con id %s non esiste!", officeId);
+      render();
+    }
+    OrganizationShiftTimeTable shiftTimeTable = new OrganizationShiftTimeTable();
+    shiftTimeTable.calculationType = calculationType;
+    shiftTimeTable.office = office;
+    shiftTimeTable.save();
     for (OrganizationTimeTable ott : list) {
+      OrganizationShiftSlot shiftSlot = new OrganizationShiftSlot();      
       LocalTime begin = new LocalTime(ott.beginSlot);
       LocalTime end = new LocalTime(ott.endSlot);
+      shiftSlot.beginSlot = begin;
+      shiftSlot.endSlot = end;
+      LocalTime beginMeal = null;
+      LocalTime endMeal = null;
       if (ott.isMealActive) {
-        LocalTime beginMeal = new LocalTime(ott.beginMealSlot);
-        LocalTime endMeal = new LocalTime(ott.endMealSlot);
+        beginMeal = new LocalTime(ott.beginMealSlot);
+        endMeal = new LocalTime(ott.endMealSlot);
       }
+      shiftSlot.beginMealSlot = beginMeal;
+      shiftSlot.endMealSlot = endMeal;
+      shiftSlot.minutesPaid = ott.minutesPaid;
+      shiftSlot.minutesSlot = ott.minutesSlot;
+      shiftSlot.shiftTimeTable = shiftTimeTable;
+      shiftSlot.save();
     }
 
-    
-
+    flash.success("Inserita nuova timetable");
+    manageCompetenceCode();
   }
 
   /**
@@ -1098,12 +1122,12 @@ public class Competences extends Controller {
       render(dtoList, cat, type, step, breakInRange, enableExitTolerance);
     }
     if (step == 1) {
-      
+
       if (shift == null) {
         flash.error("selezionare una timetable!");
         List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
-        
+
         render("@configureShift", dtoList, cat, type, step, 
             breakInRange, enableExitTolerance);
       }
@@ -1120,7 +1144,7 @@ public class Competences extends Controller {
           .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
         //ritornare un'informazione per far visualizzare diversamente la costruzione della form
         breakInRange = true;
-        
+
       }
 
       render(stt, step, type, cat, breakInRange, enableExitTolerance);
@@ -1132,14 +1156,14 @@ public class Competences extends Controller {
           || type.entranceTolerance > type.entranceMaxTolerance 
           || type.exitTolerance > type.exitMaxTolerance) {
         flash.error("Le soglie minime non possono essere superiori a quelle massime");
-        
+
         render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
       }
-      
+
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
       List<ShiftType> list = Lists.newArrayList();
       list.add(type);
-      
+
       Cache.safeAdd(key, list, "10mn");
       List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
       if (list2 == null) {
@@ -1279,7 +1303,7 @@ public class Competences extends Controller {
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
     }
-    
+
     if (!person.isPersistent()) {
       Validation.addError("person", "selezionare una persona!");
     }
@@ -1358,7 +1382,7 @@ public class Competences extends Controller {
     activateServices(cat.office.id);
 
   }
-  
+
   /**
    * genera la form di assegnamento delle persone al servizio di reperibilità.
    * @param reperibilityTypeId l'id del servizio di reperibilità
@@ -1369,12 +1393,12 @@ public class Competences extends Controller {
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
         .filter(pr -> pr.startDate != null 
-            && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
     render(people, type, date);
   }
-  
+
   /**
    * ritorna la form di gestione del personale afferente all'attività di reperibilità.
    * @param reperibilityTypeId l'id dell'attività di reperibilità
@@ -1389,9 +1413,9 @@ public class Competences extends Controller {
     rules.checkIfPermitted(type.office);
     List<PersonReperibility> people = type.personReperibilities.stream()
         .filter(pr -> pr.startDate != null 
-            && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
-    
+
     if (Validation.hasErrors()) {
       response.status = 400;     
       LocalDate date = LocalDate.now();
@@ -1400,7 +1424,7 @@ public class Competences extends Controller {
     type.save();
     List<PersonReperibility> personAssociated = 
         reperibilityDao.byOffice(type.office, LocalDate.now());
-    
+
     List<CompetenceCode> codeList = Lists.newArrayList();
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
@@ -1410,10 +1434,10 @@ public class Competences extends Controller {
             .noneMatch(d -> d.person.equals(e.person))))        
         .map(pcc -> pcc.person).distinct()
         .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
-    
+
     render(available, type);
   }
-  
+
   /**
    * impone una data di terminazione nell'associazione tra persona e attività.
    * 
@@ -1443,7 +1467,7 @@ public class Competences extends Controller {
         per.person.fullName(), per.personReperibilityType.description, per.endDate);
     manageReperibility(per.personReperibilityType.id);
   }
-  
+
   /**
    * salva l'associazione persona-attività di reperibilità.
    * @param type l'attività di reperibilità
