@@ -17,8 +17,8 @@
 	  </div>	  
 </div>
 
-#{f.booleanRadio 'ott['+ott_index+'].isMealActive', value:ott.isMealActive, id:ott_index /}
-<div class="ott-${ott_index}" id="meal-panel-ott[${ott_index}].isMealActive" #{if !ott.isMealActive} style="display: none" #{/if}>
+#{f.booleanRadio 'ott['+ott_index+'].isMealActive', value:ott.isMealActive, class:'ott-'+ott_index /}
+<div class="ott-${ott_index}" id="meal-panel-ott-${ott_index}" #{if !ott.isMealActive} style="display: none" #{/if}>
 <div class="row">
 	  <div class="col-sm-1"></div>
 	  <div class="col-sm-5">
@@ -50,14 +50,10 @@
 
 #{set 'moreScripts'}
   <script type="text/javascript">
-	$(document).ready(function() {
-					
+	$(document).ready(function() {					
 		$("input[type=radio]").change(function(){
-				jQuery( "#meal-panel-"+this.class ).toggle();	
-			
-			
+			$("#meal-panel-" + this.getAttribute("class")).toggle();	
 		});
-		       
 	 });
-	</script>	
+	</script>
 #{/set}
