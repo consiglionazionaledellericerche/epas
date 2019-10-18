@@ -64,7 +64,10 @@
 	    <td>
 	      #{ifnot ignore}
 	      #{if dayRecap.mealTicket.equals('NO')}
-	      ${dayRecap.mealTicket}
+	        ${dayRecap.mealTicket}
+	      #{/if}
+	      #{if dayRecap.mealTicket.equals('YES') && dayRecap.personDay.isHoliday}
+	        SI
 	      #{/if}
 	      #{/ifnot}
 	    </td>
