@@ -86,7 +86,7 @@ public class AbsenceRequestDao extends DaoBase {
       conditions.and(absenceRequest.flowEnded.eq(true));
     }
     return getQueryFactory().selectFrom(absenceRequest)
-        .where(conditions).fetch();
+        .where(conditions).orderBy(absenceRequest.startAt.desc()).fetch();
   }
 
 
