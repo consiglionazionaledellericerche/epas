@@ -1,5 +1,7 @@
 package models;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
@@ -13,15 +15,23 @@ import models.base.BaseModel;
  * Nuova gestione degli slot dei turni associati.
  */
 @Audited
+@Entity
 public class OrganizationShiftSlot extends BaseModel{
 
+  private static final long serialVersionUID = 2019_10_28_1039L;
+  
   @NotNull
+  @Column(columnDefinition = "VARCHAR")
   public LocalTime beginSlot;
+  
   @NotNull
+  @Column(columnDefinition = "VARCHAR")
   public LocalTime endSlot;
   
+  @Column(columnDefinition = "VARCHAR")
   public LocalTime beginMealSlot;
   
+  @Column(columnDefinition = "VARCHAR")
   public LocalTime endMealSlot;
   
   public Integer minutesSlot;
@@ -29,6 +39,6 @@ public class OrganizationShiftSlot extends BaseModel{
   public Integer minutesPaid;
   
   @ManyToOne
-  @JoinColumn(name = "competence_code_group_id")
+  @JoinColumn(name = "shift_time_table_id")
   public OrganizationShiftTimeTable shiftTimeTable;
 }

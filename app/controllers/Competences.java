@@ -1026,7 +1026,6 @@ public class Competences extends Controller {
       step++;
       List<Office> officeList = officeDao.getAllOffices();    
       List<CalculationType> calculationTypes = Arrays.asList(CalculationType.values());
-
       render(officeList, calculationTypes, step);
     }
 
@@ -1040,10 +1039,7 @@ public class Competences extends Controller {
       for (int i = 0; i < slot; i++) {
         OrganizationTimeTable ott = new OrganizationTimeTable();
         ott.numberSlot = i+1;
-
         ott.isMealActive = false;
-
-
         list.add(ott);
       }
       step++;
