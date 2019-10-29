@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
+import manager.ShiftOrganizationManager;
 import manager.competences.ShiftTimeTableDto;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
@@ -114,6 +116,8 @@ public class Competences extends Controller {
   private static PersonMonthRecapDao pmrDao;
   @Inject
   private static ShiftDao shiftDao;
+  @Inject
+  private static ShiftOrganizationManager shiftOrganizationManager;
 
 
   /**
@@ -1031,14 +1035,18 @@ public class Competences extends Controller {
 
     if (step == 1) {
       step++;      
+      slot = 2;
       render(list, step, officeId, calculationType, slot);
     }
 
     if (step == 2) {
+      if (slot < 2) {
+        Validation.addError("slot", "Non si può definire un turno con meno di due slot");
+        render(list, step, officeId, calculationType, slot);
+      }
       list = Lists.newArrayList();
       for (int i = 0; i < slot; i++) {
         OrganizationTimeTable ott = new OrganizationTimeTable();
-        ott.numberSlot = i+1;
         ott.isMealActive = false;
         list.add(ott);
       }
@@ -1050,31 +1058,14 @@ public class Competences extends Controller {
       flash.error("La sede selezionata con id %s non esiste!", officeId);
       render();
     }
-    OrganizationShiftTimeTable shiftTimeTable = new OrganizationShiftTimeTable();
-    shiftTimeTable.calculationType = calculationType;
-    shiftTimeTable.office = office;
-    shiftTimeTable.save();
-    for (OrganizationTimeTable ott : list) {
-      OrganizationShiftSlot shiftSlot = new OrganizationShiftSlot();      
-      LocalTime begin = new LocalTime(ott.beginSlot);
-      LocalTime end = new LocalTime(ott.endSlot);
-      shiftSlot.beginSlot = begin;
-      shiftSlot.endSlot = end;
-      LocalTime beginMeal = null;
-      LocalTime endMeal = null;
-      if (ott.isMealActive) {
-        beginMeal = new LocalTime(ott.beginMealSlot);
-        endMeal = new LocalTime(ott.endMealSlot);
-      }
-      shiftSlot.beginMealSlot = beginMeal;
-      shiftSlot.endMealSlot = endMeal;
-      shiftSlot.minutesPaid = ott.minutesPaid;
-      shiftSlot.minutesSlot = ott.minutesSlot;
-      shiftSlot.shiftTimeTable = shiftTimeTable;
-      shiftSlot.save();
+    String result = shiftOrganizationManager
+        .generateTimeTableAndSlot(list, office, calculationType);
+    if (Strings.isNullOrEmpty(result)) {
+      flash.success("Inserita nuova timetable");
+    } else {
+      flash.error("Errore nella creazione della timetable: %s", result);
     }
-
-    flash.success("Inserita nuova timetable");
+    
     manageCompetenceCode();
   }
 
