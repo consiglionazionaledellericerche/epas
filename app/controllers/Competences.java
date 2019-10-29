@@ -1024,7 +1024,7 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable(int step, int slot, 
+  public static void configureShiftTimeTable(int step, int slot, String name,
       CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;
@@ -1036,13 +1036,13 @@ public class Competences extends Controller {
     if (step == 1) {
       step++;      
       slot = 2;
-      render(list, step, officeId, calculationType, slot);
+      render(list, step, officeId, calculationType, slot, name);
     }
 
     if (step == 2) {
       if (slot < 2) {
         Validation.addError("slot", "Non si può definire un turno con meno di due slot");
-        render(list, step, officeId, calculationType, slot);
+        render(list, step, officeId, calculationType, slot, name);
       }
       list = Lists.newArrayList();
       for (int i = 0; i < slot; i++) {
@@ -1051,7 +1051,7 @@ public class Competences extends Controller {
         list.add(ott);
       }
       step++;
-      render(officeId, calculationType, slot, step, list);
+      render(officeId, calculationType, slot, step, list, name);
     }
     Office office = officeDao.getOfficeById(officeId);
     if (office == null) {
@@ -1059,7 +1059,7 @@ public class Competences extends Controller {
       render();
     }
     String result = shiftOrganizationManager
-        .generateTimeTableAndSlot(list, office, calculationType);
+        .generateTimeTableAndSlot(list, office, calculationType, name);
     if (Strings.isNullOrEmpty(result)) {
       flash.success("Inserita nuova timetable");
     } else {

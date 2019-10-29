@@ -5,6 +5,7 @@ UPDATE shift_time_table SET calculation_type = 'standard_CNR';
 
 CREATE TABLE organization_shift_time_table(
 	id BIGSERIAL PRIMARY KEY,
+	name TEXT,
 	office_id BIGINT NOT NULL,
 	calculation_type TEXT,
 	created_at TIMESTAMP WITHOUT TIME ZONE,
@@ -16,6 +17,7 @@ CREATE TABLE organization_shift_time_table_history(
 	id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
+    name TEXT,
 	office_id BIGINT,
 	calculation_type TEXT,
 	PRIMARY KEY (id, _revision, _revision_type)
