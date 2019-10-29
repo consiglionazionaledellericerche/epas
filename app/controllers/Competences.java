@@ -13,6 +13,7 @@ import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
+import dao.OrganizationShiftTimeTableDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonReperibilityDayDao;
@@ -118,6 +119,8 @@ public class Competences extends Controller {
   private static ShiftDao shiftDao;
   @Inject
   private static ShiftOrganizationManager shiftOrganizationManager;
+  @Inject
+  private static OrganizationShiftTimeTableDao shiftTimeTableDao;
 
 
   /**
@@ -1105,8 +1108,10 @@ public class Competences extends Controller {
       breakInRange = false;
       List<ShiftTimeTableDto>  dtoList = competenceManager
           .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
+      List<OrganizationShiftTimeTable> timeTableList = 
+          shiftTimeTableDao.getAllFromOffice(cat.office);
       step++;
-      render(dtoList, cat, type, step, breakInRange, enableExitTolerance);
+      render(dtoList, cat, type, step, breakInRange, enableExitTolerance, timeTableList);
     }
     if (step == 1) {
 
