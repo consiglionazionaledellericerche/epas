@@ -22,6 +22,7 @@ import play.data.validation.Required;
 @Entity
 public class OrganizationShiftTimeTable extends BaseModel{
 
+  public String name;
   
   @OneToMany(mappedBy= "shiftTimeTable", fetch = FetchType.LAZY)
   public Set<OrganizationShiftSlot> organizationShiftSlot;

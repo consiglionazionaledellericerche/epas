@@ -1,7 +1,7 @@
 #{panel title:'(3) Definisci le fasce di turno', color:'primary'}
 
 <div id="timeTableData">
-
+#{f.hidden 'name' /}
 #{list items:list, as:'ott'}
 #{alert color:'info'}
 	Slot di Turno ${ott_index - 1}

@@ -36,11 +36,12 @@ public class ShiftOrganizationManager {
   }
   
   public String generateTimeTableAndSlot(List<OrganizationTimeTable> list, 
-      Office office, CalculationType calculationType) {
+      Office office, CalculationType calculationType, String name) {
     String result = "";
     OrganizationShiftTimeTable shiftTimeTable = null;
-    try {
+    try {      
       shiftTimeTable = new OrganizationShiftTimeTable();
+      shiftTimeTable.name = name;
       shiftTimeTable.calculationType = calculationType;
       shiftTimeTable.office = office;
       shiftTimeTable.save();
