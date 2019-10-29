@@ -3,12 +3,10 @@
 #{set title: 'ePAS - Nuova timetable' /}
 
 <div class="container">
-
-#{form @Competences.configureShiftTimeTable(), class:'form-horizontal', method: 'POST'}
+#{title title:('Definisci una nuova time table per i turni ') /}
+#{form @Competences.configureShiftTimeTable(), class:'form-horizontal'}
   #{f.hidden 'step', value:step /}
-  <div class="col-sm-4"></div>
-  
-  
+    
   	#{if step == 1}  
   	
 		#{include './configurationShiftTimeTable/_step1.html' /}		

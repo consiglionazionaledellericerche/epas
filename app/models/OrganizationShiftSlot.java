@@ -1,5 +1,6 @@
 package models;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -29,9 +30,11 @@ public class OrganizationShiftSlot extends BaseModel{
   public LocalTime endSlot;
   
   @Column(columnDefinition = "VARCHAR")
+  @Nullable
   public LocalTime beginMealSlot;
   
   @Column(columnDefinition = "VARCHAR")
+  @Nullable
   public LocalTime endMealSlot;
   
   public Integer minutesSlot;
