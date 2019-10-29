@@ -7,6 +7,13 @@
 			
 		#{/alert}	
 		
+		#{tabList}
+  			#{tabItem id:'standard', title:'Timetable standard', active:true /}
+  			#{tabItem id:'organization', title:'Timetable esterne' /}
+  		#{/tabList}
+		
+		#{tabContent}
+		#{tabContentItem id:'standard', active:true}
 		<table class="table table-hover table-striped table-bordered">
 		<tr>
 			<th>Seleziona</th>
@@ -53,3 +60,27 @@
 		</tr>
 		#{/list}
 		</table>
+		
+		#{/tabContentItem}
+		#{tabContentItem id:'standard'}
+			<table class="table table-hover table-striped table-bordered">
+			<tr>
+				<th>Seleziona</th>
+				<th>Metodologia di calcolo</th>
+				<th>Inizio primo slot</th>
+				<th>Fine primo slot</th>
+				<th>Inizio secondo slot</th>
+				<th>Fine secondo slot</th>
+				<th>Inizio turno notturno</th>
+				<th>Fine turno notturno</th>
+				<th>Info aggiuntive</th>	
+			</tr>
+			#{list items:timeTableList, as:'key'}
+				
+				
+				
+			#{/list}
+			
+			</table>
+		#{/tabContentItem}
+		#{/tabContent}
