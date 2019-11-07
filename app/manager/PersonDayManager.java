@@ -1284,31 +1284,6 @@ public class PersonDayManager {
     return number;
   }
 
-
-  /**
-   * Il numero di buoni pasto da restituire all'interno della lista di person day passata come
-   * parametro.
-   */
-  public int numberOfMealTicketToRender(List<PersonDay> personDays) {
-    int ticketTorender = 0;
-    for (PersonDay pd : personDays) {
-
-      if (!pd.isTicketAvailable) {
-        //i giorni festivi e oggi
-        if (pd.isHoliday || pd.isToday()) {
-          continue;
-        }
-        //i giorni futuri in cui non ho assenze
-        if (pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty()) {
-          continue;
-        }
-        ticketTorender++;
-      }
-    }
-
-    return ticketTorender;
-  }
-
   /**
    * Se la persona è in missione nel giorno.
    *
