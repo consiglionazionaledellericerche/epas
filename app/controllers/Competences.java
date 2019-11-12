@@ -29,7 +29,9 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1094,7 +1096,7 @@ public class Competences extends Controller {
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
    * @param shiftCategoryId l'id del servzio da configurare
    */
-  public static void configureShift(Long shiftCategoryId, int step,   
+  public static void configureShift(Long shiftCategoryId, int step, Long organizationShift,  
       @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
@@ -1115,7 +1117,7 @@ public class Competences extends Controller {
     }
     if (step == 1) {
 
-      if (shift == null) {
+      if (shift == null && organizationShift == null) {
         flash.error("selezionare una timetable!");
         List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
@@ -1125,21 +1127,29 @@ public class Competences extends Controller {
       }
       //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
       //all'utente di validare la attività e la timetable associata.
-      List<ShiftTimeTable> list2 = Lists.newArrayList();
-      ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
-      list2.add(stt);
-      step++;
-      Cache.safeAdd(key2, list2, "10mn");
+      
+      Collection collection = new ArrayList<>();       
+      if (shift != null) {
+        ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
+        collection.add(stt);
+        
+        if (Range.closed(stt.startMorning, stt.endMorning)
+            .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
+          //ritornare un'informazione per far visualizzare diversamente la costruzione della form
+          breakInRange = true;
+
+        }
+      } else {
+        Optional<OrganizationShiftTimeTable> ostt = shiftTimeTableDao.getById(organizationShift);
+        if (ostt.isPresent()) {
+          collection.add(ostt.get());
+                    
+        }        
+      }  
+      Cache.safeAdd(key2, collection, "10mn");
+      step++;      
       enableExitTolerance = false;
-
-      if (Range.closed(stt.startMorning, stt.endMorning)
-          .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
-        //ritornare un'informazione per far visualizzare diversamente la costruzione della form
-        breakInRange = true;
-
-      }
-
-      render(stt, step, type, cat, breakInRange, enableExitTolerance);
+      render(step, type, cat, breakInRange, enableExitTolerance);
 
     }
     if (step == 2) {
@@ -1157,6 +1167,7 @@ public class Competences extends Controller {
       list.add(type);
 
       Cache.safeAdd(key, list, "10mn");
+      Collection collection = Cache.get(key2, List.class);
       List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
       if (list2 == null) {
         flash.error("Scaduta sessione di creazione dell'attività di turno.");

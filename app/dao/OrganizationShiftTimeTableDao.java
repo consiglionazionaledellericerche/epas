@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
@@ -29,5 +30,20 @@ public class OrganizationShiftTimeTableDao extends DaoBase {
     return getQueryFactory()
         .selectFrom(timeTable)
         .where(timeTable.office.eq(office)).fetch();
+  }
+  
+  /**
+   * Metodo che ritorna la timetable esterna associata all'id.
+   * @param id l'identificativo sul database della timetable esterna
+   * @return l'optional contenente, se esiste, la timetable esterna associata all'identificativo 
+   *     passato come parametro.
+   */
+  public Optional<OrganizationShiftTimeTable> getById(Long id) {
+    final QOrganizationShiftTimeTable ostt = 
+        QOrganizationShiftTimeTable.organizationShiftTimeTable;
+    final OrganizationShiftTimeTable query = 
+        getQueryFactory().selectFrom(ostt).where(ostt.id.eq(id)).fetchOne();
+    
+    return Optional.fromNullable(query);
   }
 }
