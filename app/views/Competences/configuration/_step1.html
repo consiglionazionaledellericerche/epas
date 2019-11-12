@@ -66,12 +66,14 @@
 			<table class="table table-hover table-striped table-bordered">
 			<tr>
 				<th>Seleziona</th>
+				<th>Nome</th>
 				<th>Metodologia di calcolo</th>
 				<th>Info aggiuntive</th>	
 			</tr>
 			#{list items:timeTableList, as:'key'}
 				<tr>
-					<td><input type="radio" name="shift" value="${key.id}"></td>
+					<td><input type="radio" name="organizationShift" value="${key.id}"></td>
+					<td>${key.name}</td>
 					<td>${key.calculationType}</td>
 					<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
 		 	  			</i>
