@@ -1106,7 +1106,7 @@ public class Competences extends Controller {
         + cat.description + Security.getUser().get().username;
     final String internal = TIME_TABLE_STEP 
         + cat.description + Security.getUser().get().username;
-    final String external = TIME_TABLE_STEP 
+    final String external = EXTERNAL_TIME_TABLE_STEP 
         + cat.description + Security.getUser().get().username;
     if (step == 0) {
       // ritorno il dto per creare l'attività
@@ -1177,7 +1177,7 @@ public class Competences extends Controller {
         render(cat, type, step, breakInRange);
       }
       step++;
-      if (!internalTimeTable.isEmpty()) {
+      if (internalTimeTable != null) {
         ShiftTimeTable stt = internalTimeTable.get(0);
         Cache.safeAdd(internal, internalTimeTable, "10mn");
         render(cat, type, step, stt, breakInRange);
