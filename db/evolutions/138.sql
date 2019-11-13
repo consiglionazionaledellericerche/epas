@@ -23,6 +23,10 @@ CREATE TABLE organization_shift_time_table_history(
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 
+ALTER TABLE shift_type ADD COLUMN organization_shift_time_table_id BIGINT;
+ALTER TABLE shift_type_history ADD COLUMN organization_shift_time_table_id BIGINT;
+ALTER TABLE shift_type ADD FOREIGN KEY (organization_shift_time_table_id) REFERENCES organization_shift_time_table(id);
+
 CREATE TABLE organization_shift_slot(
 	id BIGSERIAL PRIMARY KEY,
 	shift_time_table_id BIGINT NOT NULL,

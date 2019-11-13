@@ -43,6 +43,8 @@ public class QOrganizationShiftTimeTable extends EntityPathBase<OrganizationShif
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Integer> version = _super.version;
 

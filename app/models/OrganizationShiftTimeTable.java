@@ -1,5 +1,7 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,4 +37,7 @@ public class OrganizationShiftTimeTable extends BaseModel{
   @Enumerated(EnumType.STRING)
   @Column(name = "calculation_type")
   public CalculationType calculationType;
+  
+  @OneToMany(mappedBy = "shiftTimeTable")
+  public List<ShiftType> shiftTypes = new ArrayList<>();
 }
