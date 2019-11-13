@@ -1,5 +1,6 @@
 package controllers;
 
+import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.CompetenceCode;
+import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonShiftDay;
@@ -139,11 +141,19 @@ public class Calendar extends Controller {
         }
         index++;
       }
-      List<ShiftSlot> slotList = shiftManager2.getSlotsFromTimeTable(activity.get().shiftTimeTable);
+      List<ShiftSlot> slotList = null;
+      List<OrganizationShiftSlot> organizationSlotList = null;
+      if (activity.get().shiftTimeTable != null) {
+        slotList = shiftManager2.getSlotsFromTimeTable(activity.get().shiftTimeTable);
+      } else {
+        organizationSlotList = 
+            Lists.newArrayList(activity.get().organizaionShiftTimeTable.organizationShiftSlot);
+      }
+      
       shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
       jolly.sort(Comparator.comparing(ShiftEvent::getTitle));
 
-      render(shiftWorkers, jolly, slotList);
+      render(shiftWorkers, jolly, slotList, organizationSlotList);
     }
   }
 

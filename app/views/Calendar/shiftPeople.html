@@ -34,6 +34,7 @@
 </ul>
 <h4>&{'shiftSlot'}</h4>
 <hr>
+#{if slotList != null }
 #{list items:slotList, as:'shiftSlot'}
 <div class="radio">
   <label>
@@ -42,3 +43,14 @@
   </label>
 </div>
 #{/list}
+#{/if}
+#{else}
+#{list items:organizationSlotList, as:'slot'}
+<div class="radio">
+  <label>
+    <input type="radio" name="slot" id="slot" value="${slot}">
+    ${slot.beginSlot.format()} - ${slot.endSlot.format()}
+  </label>
+</div>
+#{/list}
+#{/else}
