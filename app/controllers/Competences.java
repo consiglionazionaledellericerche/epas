@@ -1163,7 +1163,7 @@ public class Competences extends Controller {
 
         render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
       }
-
+      step++;
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
       List<ShiftType> list = Lists.newArrayList();
       list.add(type);
@@ -1176,7 +1176,7 @@ public class Competences extends Controller {
         step = 0;
         render(cat, type, step, breakInRange);
       }
-      step++;
+      
       if (internalTimeTable != null) {
         ShiftTimeTable stt = internalTimeTable.get(0);
         Cache.safeAdd(internal, internalTimeTable, "10mn");
@@ -1192,10 +1192,14 @@ public class Competences extends Controller {
       List<ShiftType> list = Cache.get(key, List.class);      
       List<ShiftTimeTable> internalList = Cache.get(internal, List.class);
       List<OrganizationShiftTimeTable> externalList = Cache.get(external, List.class);
-      if (list == null || internalList == null || externalList == null) {
+      if (list == null && internalList == null && externalList == null) {
         flash.error("Scaduta sessione di creazione dell'attività di turno.");
         step = 0;
-        render(cat, type, step, breakInRange, enableExitTolerance);
+        List<ShiftTimeTableDto>  dtoList = competenceManager
+            .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
+        List<OrganizationShiftTimeTable> timeTableList = 
+            shiftTimeTableDao.getAllFromOffice(cat.office);
+        render(cat, type, step, breakInRange, enableExitTolerance, dtoList, timeTableList);
       }
       ShiftType service = list.get(0);
       ShiftTimeTable stt = null;
