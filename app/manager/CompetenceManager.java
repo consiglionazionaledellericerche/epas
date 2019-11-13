@@ -854,10 +854,9 @@ public class CompetenceManager {
       } 
     }
     if (ostt.isPresent()) {
-      st.organizaionShiftTimeTable = ostt.get();
+      st.organizaionShiftTimeTable = ostt.get();      
     }
   
-
     st.save();
   }
 
