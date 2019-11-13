@@ -26,7 +26,7 @@ public class OrganizationShiftTimeTable extends BaseModel{
 
   public String name;
   
-  @OneToMany(mappedBy= "shiftTimeTable", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy= "shiftTimeTable", fetch = FetchType.EAGER)
   public Set<OrganizationShiftSlot> organizationShiftSlot;
   
   @ManyToOne(fetch = FetchType.LAZY)
