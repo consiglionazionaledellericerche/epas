@@ -86,6 +86,7 @@ public class Competences extends Controller {
 
   private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
   private static final String TIME_TABLE_STEP = "time";
+  private static final String EXTERNAL_TIME_TABLE_STEP = "externalTime";
 
   @Inject
   private static CompetenceRecapFactory competenceRecapFactory;
@@ -1103,7 +1104,9 @@ public class Competences extends Controller {
     rules.checkIfPermitted(cat.office);
     final String key = SHIFT_TYPE_SERVICE_STEP 
         + cat.description + Security.getUser().get().username;
-    final String key2 = TIME_TABLE_STEP 
+    final String internal = TIME_TABLE_STEP 
+        + cat.description + Security.getUser().get().username;
+    final String external = TIME_TABLE_STEP 
         + cat.description + Security.getUser().get().username;
     if (step == 0) {
       // ritorno il dto per creare l'attività
@@ -1125,28 +1128,27 @@ public class Competences extends Controller {
         render("@configureShift", dtoList, cat, type, step, 
             breakInRange, enableExitTolerance);
       }
-      //metto in cache anche il dto della timetable e ritorno entrambi i dto per chiedere conferma 
-      //all'utente di validare la attività e la timetable associata.
-      
-      Collection collection = new ArrayList<>();       
+
+      List<ShiftTimeTable> internalList = Lists.newArrayList();
+      List<OrganizationShiftTimeTable> externalList = Lists.newArrayList();
+            
       if (shift != null) {
         ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
-        collection.add(stt);
-        
+        internalList.add(stt);
+        Cache.safeAdd(internal, internalList, "10mn");
         if (Range.closed(stt.startMorning, stt.endMorning)
             .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
           //ritornare un'informazione per far visualizzare diversamente la costruzione della form
           breakInRange = true;
-
         }
       } else {
         Optional<OrganizationShiftTimeTable> ostt = shiftTimeTableDao.getById(organizationShift);
         if (ostt.isPresent()) {
-          collection.add(ostt.get());
-                    
+          externalList.add(ostt.get());
+          Cache.safeAdd(external, externalList, "10mn");     
         }        
       }  
-      Cache.safeAdd(key2, collection, "10mn");
+      
       step++;      
       enableExitTolerance = false;
       render(step, type, cat, breakInRange, enableExitTolerance);
@@ -1167,32 +1169,47 @@ public class Competences extends Controller {
       list.add(type);
 
       Cache.safeAdd(key, list, "10mn");
-      Collection collection = Cache.get(key2, List.class);
-      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
-      if (list2 == null) {
+      List<OrganizationShiftTimeTable> externalTimeTable = Cache.get(external, ArrayList.class);
+      List<ShiftTimeTable> internalTimeTable = Cache.get(internal, List.class);
+      if (internalTimeTable == null && externalTimeTable == null) {
         flash.error("Scaduta sessione di creazione dell'attività di turno.");
         step = 0;
         render(cat, type, step, breakInRange);
       }
       step++;
-      ShiftTimeTable stt = list2.get(0);
-      Cache.safeAdd(key2, list2, "10mn");
-
-      render(cat, type, step, stt, breakInRange); 
-
+      if (!internalTimeTable.isEmpty()) {
+        ShiftTimeTable stt = internalTimeTable.get(0);
+        Cache.safeAdd(internal, internalTimeTable, "10mn");
+        render(cat, type, step, stt, breakInRange);
+      } else {
+        OrganizationShiftTimeTable ostt = externalTimeTable.get(0);
+        Cache.safeAdd(external, externalTimeTable, "10mn");
+        render(cat, type, step, ostt, breakInRange);
+      }
     }
     if (step == 3) {
       //effettuo la creazione dell'attività 
       List<ShiftType> list = Cache.get(key, List.class);      
-      List<ShiftTimeTable> list2 = Cache.get(key2, List.class);
-      if (list == null || list2 == null) {
+      List<ShiftTimeTable> internalList = Cache.get(internal, List.class);
+      List<OrganizationShiftTimeTable> externalList = Cache.get(external, List.class);
+      if (list == null || internalList == null || externalList == null) {
         flash.error("Scaduta sessione di creazione dell'attività di turno.");
         step = 0;
         render(cat, type, step, breakInRange, enableExitTolerance);
       }
       ShiftType service = list.get(0);
-      ShiftTimeTable stt = list2.get(0);
-      competenceManager.persistShiftType(service, stt, cat);
+      ShiftTimeTable stt = null;
+      OrganizationShiftTimeTable ostt = null;
+      if (internalList != null) {
+        stt = internalList.get(0);
+        competenceManager.persistShiftType(service, Optional.fromNullable(stt), 
+            Optional.<OrganizationShiftTimeTable>absent(), cat);
+      } else {
+        ostt = externalList.get(0);
+        competenceManager.persistShiftType(service, Optional.<ShiftTimeTable>absent(), 
+            Optional.fromNullable(ostt), cat);
+      }
+      
       Cache.clear();
       flash.success("Attività salvata correttamente!");
       activateServices(cat.office.id);

@@ -39,6 +39,7 @@ import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
+import models.OrganizationShiftTimeTable;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
@@ -817,38 +818,45 @@ public class CompetenceManager {
    * @param stt la shifttimetable associata all'attività di turno
    * @param cat il turno a cui associare l'attività
    */
-  public void persistShiftType(ShiftType service, ShiftTimeTable stt, ShiftCategories cat) {
+  public void persistShiftType(ShiftType service, Optional<ShiftTimeTable> stt, 
+      Optional<OrganizationShiftTimeTable> ostt, ShiftCategories cat) {
     ShiftType st = new ShiftType();    
 
     st.description = service.description;
     st.type = service.type;
-    st.shiftTimeTable = stt;
     st.shiftCategories = cat;
-    if (Range.closed(stt.startMorning, stt.endMorning)
-        .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
-      st.breakInShift = service.breakInShift;
-      st.breakMaxInShift = service.breakMaxInShift;      
-      st.exitTolerance = service.exitTolerance;
-      st.exitMaxTolerance = service.exitMaxTolerance;      
-      st.entranceMaxTolerance = service.entranceMaxTolerance;
-      st.entranceTolerance = service.entranceTolerance;
-      st.maxToleranceAllowed = service.maxToleranceAllowed;
-
-    } else {
-
-      if (service.exitTolerance != 0 || service.exitMaxTolerance != 0) {
-        st.exitMaxTolerance = service.exitMaxTolerance;
+    if (stt.isPresent()) {
+      st.shiftTimeTable = stt.get();
+      if (Range.closed(stt.get().startMorning, stt.get().endMorning)
+          .encloses(Range.closed(stt.get().startMorningLunchTime, stt.get().endMorningLunchTime))) {
+        st.breakInShift = service.breakInShift;
+        st.breakMaxInShift = service.breakMaxInShift;      
         st.exitTolerance = service.exitTolerance;
-        st.maxToleranceAllowed = 2;
+        st.exitMaxTolerance = service.exitMaxTolerance;      
+        st.entranceMaxTolerance = service.entranceMaxTolerance;
+        st.entranceTolerance = service.entranceTolerance;
+        st.maxToleranceAllowed = service.maxToleranceAllowed;
+
       } else {
-        st.exitTolerance = 0;
-        st.exitMaxTolerance = 0;
-        st.maxToleranceAllowed = 1;
-      }      
-      st.breakInShift = service.breakMaxInShift;
-      st.entranceTolerance = service.entranceMaxTolerance;
-      st.entranceMaxTolerance = service.entranceMaxTolerance;
-    }   
+
+        if (service.exitTolerance != 0 || service.exitMaxTolerance != 0) {
+          st.exitMaxTolerance = service.exitMaxTolerance;
+          st.exitTolerance = service.exitTolerance;
+          st.maxToleranceAllowed = 2;
+        } else {
+          st.exitTolerance = 0;
+          st.exitMaxTolerance = 0;
+          st.maxToleranceAllowed = 1;
+        }      
+        st.breakInShift = service.breakMaxInShift;
+        st.entranceTolerance = service.entranceMaxTolerance;
+        st.entranceMaxTolerance = service.entranceMaxTolerance;
+      } 
+    }
+    if (ostt.isPresent()) {
+      st.organizaionShiftTimeTable = ostt.get();
+    }
+  
 
     st.save();
   }

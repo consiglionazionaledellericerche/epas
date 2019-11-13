@@ -52,6 +52,8 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public final SetPath<models.ShiftTypeMonth, QShiftTypeMonth> monthsStatus = this.<models.ShiftTypeMonth, QShiftTypeMonth>createSet("monthsStatus", models.ShiftTypeMonth.class, QShiftTypeMonth.class, PathInits.DIRECT2);
 
+    public final QOrganizationShiftTimeTable organizaionShiftTimeTable;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -88,6 +90,7 @@ public class QShiftType extends EntityPathBase<ShiftType> {
 
     public QShiftType(Class<? extends ShiftType> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.organizaionShiftTimeTable = inits.isInitialized("organizaionShiftTimeTable") ? new QOrganizationShiftTimeTable(forProperty("organizaionShiftTimeTable"), inits.get("organizaionShiftTimeTable")) : null;
         this.shiftCategories = inits.isInitialized("shiftCategories") ? new QShiftCategories(forProperty("shiftCategories"), inits.get("shiftCategories")) : null;
         this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable"), inits.get("shiftTimeTable")) : null;
     }

@@ -85,6 +85,11 @@ public class ShiftType extends BaseModel {
   @JoinColumn(name = "shift_time_table_id")
   public ShiftTimeTable shiftTimeTable;
 
+  @NotAudited
+  @ManyToOne
+  @JoinColumn(name = "organization_shift_time_table_id")
+  public OrganizationShiftTimeTable organizaionShiftTimeTable;
+  
   //@Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "shift_categories_id")
