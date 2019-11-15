@@ -252,7 +252,7 @@ public class ShiftManager2 {
     if (!personShiftDay.shiftType.allowUnpairSlots) {
       for (PersonShiftDay registeredDay : list) {
         //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-        if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
+        if (registeredDay.organizationShiftSlot == personShiftDay.organizationShiftSlot) {
           return Optional.of(Messages
               .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
         }
@@ -260,7 +260,7 @@ public class ShiftManager2 {
     } else {
       long count = 1;
       long sum = list.stream()
-          .filter(psd -> psd.shiftSlot == personShiftDay.shiftSlot).count();
+          .filter(psd -> psd.organizationShiftSlot == personShiftDay.organizationShiftSlot).count();
       if (sum + count > MAX_QUANTITY_IN_SLOT) {
         return Optional.of(Messages.get("shift.maxQuantityInSlot", personShiftDay.shiftType.type));
       }

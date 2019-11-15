@@ -29,6 +29,7 @@ ALTER TABLE shift_type ADD FOREIGN KEY (organization_shift_time_table_id) REFERE
 
 CREATE TABLE organization_shift_slot(
 	id BIGSERIAL PRIMARY KEY,
+	name TEXT, 
 	shift_time_table_id BIGINT NOT NULL,
 	begin_slot VARCHAR(64) NOT NULL,
 	end_slot VARCHAR(64) NOT NULL,
@@ -46,6 +47,7 @@ CREATE TABLE organization_shift_slot_history(
 	id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
+    name TEXT,
     shift_time_table_id BIGINT,
     begin_slot VARCHAR(64),
 	end_slot VARCHAR(64),
@@ -55,6 +57,12 @@ CREATE TABLE organization_shift_slot_history(
 	minutes_paid INTEGER,
 	PRIMARY KEY (id, _revision, _revision_type)
     );
+    
+
+ALTER TABLE person_shift_days ADD COLUMN organization_shift_slot_id BIGINT REFERENCES organization_shift_slot(id);
+ALTER TABLE person_shift_days_history ADD COLUMN organization_shift_slot_id BIGINT;
+
+
 
 # --- !Downs
 -- non è necessaria una down

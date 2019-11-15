@@ -8,7 +8,9 @@ import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
 import models.Office;
+import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
+import models.query.QOrganizationShiftSlot;
 import models.query.QOrganizationShiftTimeTable;
 
 public class OrganizationShiftTimeTableDao extends DaoBase {
@@ -44,6 +46,18 @@ public class OrganizationShiftTimeTableDao extends DaoBase {
     final OrganizationShiftTimeTable query = 
         getQueryFactory().selectFrom(ostt).where(ostt.id.eq(id)).fetchOne();
     
+    return Optional.fromNullable(query);
+  }
+  
+  
+  /*************************************************************************************************
+   * Parte relativa a query su OrganizationShiftSlot              
+   *************************************************************************************************/
+  
+  public Optional<OrganizationShiftSlot> getByNameAndPrefix(String str, String prefix) {
+    final QOrganizationShiftSlot oss = QOrganizationShiftSlot.organizationShiftSlot;
+    final OrganizationShiftSlot query = getQueryFactory()
+        .selectFrom(oss).where(oss.name.contains(str).and(oss.name.startsWith(prefix))).fetchFirst();
     return Optional.fromNullable(query);
   }
 }
