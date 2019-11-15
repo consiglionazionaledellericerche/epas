@@ -5,9 +5,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalTime;
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import models.base.BaseModel;
 
 /**
@@ -20,6 +23,18 @@ import models.base.BaseModel;
 public class OrganizationShiftSlot extends BaseModel{
 
   private static final long serialVersionUID = 2019_10_28_1039L;
+  
+  
+  public String name;
+  
+  @Transient
+  public String getName() {
+    if (Strings.isNullOrEmpty(this.name)) {
+      return String.format("%s - %s", this.beginSlot, this.endSlot);
+    } else {
+      return name;
+    }
+  }
   
   @NotNull
   @Column(columnDefinition = "VARCHAR")

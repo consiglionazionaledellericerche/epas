@@ -1,10 +1,11 @@
 package it.cnr.iit.epas;
 
+import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import dao.OrganizationShiftTimeTableDao;
 import dao.PersonDao;
 
 import injection.StaticInject;
@@ -17,7 +18,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
-
+import models.OrganizationShiftSlot;
 import models.Person;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
@@ -44,6 +45,9 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 
   @Inject
   private static PersonDao personDao;
+  
+  @Inject
+  private static OrganizationShiftTimeTableDao slotDao;
 
   /**
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
@@ -93,8 +97,19 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
           // read and validate the shift slot (MORNING/AFTERNOON)
           String shiftSlotDesc = jsonObject.get("shiftSlot").getAsString();
           log.debug("Leggo dal json shiftSlotDesc={}", shiftSlotDesc);
-
-          ShiftSlot shiftSlot = ShiftSlot.getEnum(shiftSlotDesc);
+          /**
+           * Aggiunto questo pezzo per continuare a far funzionare la comunicazione con SISTORG
+           * dopo la modifica del modello relativo ai turni per renderlo generico.
+           */
+          OrganizationShiftSlot shiftSlot = null;
+          Optional<OrganizationShiftSlot> slot = slotDao.getByNameAndPrefix(shiftSlotDesc, "IIT");
+          if (slot.isPresent()) {
+            shiftSlot = slot.get();
+          }
+          //ShiftSlot shiftSlot = ShiftSlot.getEnum(shiftSlotDesc);
+          /**
+           * Fine modifica
+           */
           log.debug("Cerca e controlla shiftSlot={}", shiftSlot);
           if (shiftSlot == null) {
             throw new IllegalArgumentException(

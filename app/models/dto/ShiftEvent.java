@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+import models.OrganizationShiftSlot;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class ShiftEvent {
   // CAMPI CUSTOM
   private Long personShiftDayId;
   private Long personId;
-  private ShiftSlot shiftSlot;
+  private OrganizationShiftSlot shiftSlot;
   private EventColor eventColor;
   private List<String> troubles;
   private String email;

@@ -44,6 +44,8 @@ public class QOrganizationShiftSlot extends EntityPathBase<OrganizationShiftSlot
 
     public final NumberPath<Integer> minutesSlot = createNumber("minutesSlot", Integer.class);
 
+    public final StringPath name = createString("name");
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

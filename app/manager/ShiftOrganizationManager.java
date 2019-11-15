@@ -12,6 +12,7 @@ import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.Person;
 import models.PersonShiftDay;
+import models.ShiftTimeTable;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.dto.OrganizationTimeTable;
@@ -79,6 +80,19 @@ public class ShiftOrganizationManager {
     
     return result;
   }
-  
+
+  /**
+   * 
+   * @param shiftTimeTable la timetable da trasformare
+   * @return il nome della timetable trasformata secondo la nuova modellazione.
+   */
+  public String transformTimeTableName(ShiftTimeTable shiftTimeTable) {
+    if (shiftTimeTable.shiftTypes.stream().anyMatch(e -> e.shiftCategories.office.codeId.equals("223400"))) {
+      return String.format("IIT - %s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
+          shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
+    }
+    return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
+        shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
+  }
   
 }
