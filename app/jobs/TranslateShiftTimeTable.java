@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import javax.inject.Inject;
 import org.joda.time.LocalTime;
+import lombok.extern.slf4j.Slf4j;
 import manager.ShiftOrganizationManager;
 import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
@@ -13,6 +14,7 @@ import play.jobs.OnApplicationStart;
 import models.enumerate.*;
 
 @OnApplicationStart(async = true)
+@Slf4j
 public class TranslateShiftTimeTable extends Job<Void> {
 
 
@@ -22,6 +24,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
   @Override
   public void doJob() {
     final List<ShiftTimeTable> list = ShiftTimeTable.findAll();
+    log.info("Inizio procedura trasformazione timetable");
     for (ShiftTimeTable tt : list) {
       
       OrganizationShiftTimeTable ostt = new OrganizationShiftTimeTable();
@@ -29,6 +32,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
       ostt.office = tt.office;
       ostt.name = manager.transformTimeTableName(tt);
       ostt.save();
+      log.info("Salvata timetable {}", ostt.name);
       OrganizationShiftSlot slotMorning = new OrganizationShiftSlot();
       OrganizationShiftSlot slotAfternoon = new OrganizationShiftSlot();
       OrganizationShiftSlot slotEvening = new OrganizationShiftSlot();
@@ -45,6 +49,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
       slotMorning.minutesSlot = tt.totalWorkMinutes/2;
       slotMorning.shiftTimeTable = ostt;
       slotMorning.save();
+      log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
 
       if (ostt.name.contains("IIT")) {
         slotMorning.name = "IIT - "+ShiftSlot.AFTERNOON.toString();
@@ -59,21 +64,27 @@ public class TranslateShiftTimeTable extends Job<Void> {
       slotAfternoon.minutesSlot = tt.totalWorkMinutes/2;
       slotAfternoon.shiftTimeTable = ostt;
       slotAfternoon.save();
-
+      log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+      
       if (ostt.name.contains("IIT")) {
         slotMorning.name = "IIT - "+ShiftSlot.EVENING.toString();
       } else {
         slotMorning.name = ShiftSlot.EVENING.toString();
       } 
-      slotEvening.beginSlot = tt.startEvening;
-      slotEvening.endSlot = tt.endEvening;
-      slotEvening.beginMealSlot = tt.startEveningLunchTime;
-      slotEvening.endMealSlot = tt.endEveningLunchTime;
-      slotEvening.minutesPaid = tt.paidMinutes;
-      slotEvening.minutesSlot = tt.totalWorkMinutes/2;
-      slotEvening.shiftTimeTable = ostt;
-      slotEvening.save();
+      if (tt.startEvening != null && tt.endEvening != null) {
+        slotEvening.beginSlot = tt.startEvening;
+        slotEvening.endSlot = tt.endEvening;
+        slotEvening.beginMealSlot = tt.startEveningLunchTime;
+        slotEvening.endMealSlot = tt.endEveningLunchTime;
+        slotEvening.minutesPaid = tt.paidMinutes;
+        slotEvening.minutesSlot = tt.totalWorkMinutes/2;
+        slotEvening.shiftTimeTable = ostt;
+        slotEvening.save();
+        log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+      }
+      
     }
+    log.info("Terminata procedura");
   }
 
 
