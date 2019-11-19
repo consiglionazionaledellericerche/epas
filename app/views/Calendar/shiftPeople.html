@@ -45,11 +45,11 @@
 #{/list}
 #{/if}
 #{else}
-#{list items:organizationSlotList, as:'slot'}
+#{list items:organizationSlotList, as:'organizationShiftslot'}
 <div class="radio">
   <label>
-    <input type="radio" name="slot" id="slot" value="${slot}">
-    ${slot.beginSlot.format()} - ${slot.endSlot.format()}
+    <input type="radio" name="organizationShiftslot" id="organizationShiftslot" value="${organizationShiftslot.id}">
+    ${organizationShiftslot.beginSlot.format()} - ${organizationShiftslot.endSlot.format()}
   </label>
 </div>
 #{/list}
