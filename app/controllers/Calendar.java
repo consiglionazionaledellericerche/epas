@@ -247,7 +247,7 @@ public class Calendar extends Controller {
     return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
         .map(shiftDay -> {
           final ShiftEvent event = ShiftEvent.builder()
-              .shiftSlot(shiftDay.organizationShiftSlot)
+              .organizationShiftslot(shiftDay.organizationShiftSlot)
               .personShiftDayId(shiftDay.id)
               .title(person.fullName())
               .start(shiftDay.date.toLocalDateTime(shiftDay.slotBegin()))
@@ -401,7 +401,8 @@ public class Calendar extends Controller {
    * @param shiftSlot lo slot di turno (mattina/pomeriggio)
    * @param activityId l'id dell'attività su cui inserire il turnista
    */
-  public static void newShift(long personId, LocalDate date, OrganizationShiftSlot shiftSlot, long activityId) {
+  public static void newShift(long personId, LocalDate date, 
+      OrganizationShiftSlot organizationShiftslot, long activityId) {
 
     final PNotifyObject message;
     Optional<ShiftType> activity = shiftDao.getShiftTypeById(activityId);
@@ -414,19 +415,15 @@ public class Calendar extends Controller {
         PersonShiftDay personShiftDay = new PersonShiftDay();
         personShiftDay.date = date;
         personShiftDay.shiftType = activity.get();
-        if (shiftSlot != null) {
-          personShiftDay.organizationShiftSlot = shiftSlot;
-        } else {
-          //Come la gestiamo? occorre una nuova relazione con 
-        }
-        
+        personShiftDay.organizationShiftSlot = organizationShiftslot;
+ 
         personShiftDay.personShift = shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
         Optional<String> error;
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
         } else {
-          if (shiftSlot == null) {
+          if (organizationShiftslot == null) {
             error = Optional.of(Messages.get("shift.notSlotSpecified"));
           } else {
             error = Optional.of(Messages.get("validation.invalid"));

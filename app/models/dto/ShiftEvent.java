@@ -43,7 +43,7 @@ public class ShiftEvent {
   // CAMPI CUSTOM
   private Long personShiftDayId;
   private Long personId;
-  private OrganizationShiftSlot shiftSlot;
+  private OrganizationShiftSlot organizationShiftslot;
   private EventColor eventColor;
   private List<String> troubles;
   private String email;
