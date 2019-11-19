@@ -6,7 +6,7 @@ UPDATE shift_time_table SET calculation_type = 'standard_CNR';
 CREATE TABLE organization_shift_time_table(
 	id BIGSERIAL PRIMARY KEY,
 	name TEXT,
-	office_id BIGINT NOT NULL,
+	office_id BIGINT,
 	calculation_type TEXT,
 	created_at TIMESTAMP WITHOUT TIME ZONE,
 	updated_at TIMESTAMP WITHOUT TIME ZONE,
