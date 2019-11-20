@@ -246,12 +246,21 @@ public class Calendar extends Controller {
 
     return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
         .map(shiftDay -> {
+          LocalTime begin = null;
+          LocalTime finish = null;
+          if (shiftDay.organizationShiftSlot != null) {
+            begin = shiftDay.organizationShiftSlot.beginSlot;
+            finish = shiftDay.organizationShiftSlot.endSlot;
+          } else {
+            begin = shiftDay.slotBegin();
+            finish = shiftDay.slotEnd();
+          }
           final ShiftEvent event = ShiftEvent.builder()
               .organizationShiftslot(shiftDay.organizationShiftSlot)
               .personShiftDayId(shiftDay.id)
               .title(person.fullName())
-              .start(shiftDay.date.toLocalDateTime(shiftDay.slotBegin()))
-              .end(shiftDay.date.toLocalDateTime(shiftDay.slotEnd()))
+              .start(shiftDay.date.toLocalDateTime(begin))
+              .end(shiftDay.date.toLocalDateTime(finish))
               .durationEditable(false)
               .color(color.backgroundColor)
               .textColor(color.textColor)

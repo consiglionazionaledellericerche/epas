@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import org.hibernate.envers.Audited;
 import models.base.BaseModel;
 /**
@@ -40,4 +41,12 @@ public class OrganizationShiftTimeTable extends BaseModel{
   
   @OneToMany(mappedBy = "shiftTimeTable")
   public List<ShiftType> shiftTypes = new ArrayList<>();
+  
+  
+  @Transient
+  public long slotCount() {
+    long slots = this.organizationShiftSlot.stream()
+        .filter(s -> s.beginSlot != null && s.endSlot != null).count();
+    return slots;
+  }
 }
