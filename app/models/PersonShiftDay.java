@@ -31,10 +31,14 @@ public class PersonShiftDay extends BaseModel {
   private static final long serialVersionUID = -2441219908198684741L;
 
   // morning or afternoon slot
-  @Transient
-  public ShiftSlot getShiftSlot() {
-    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
-  }
+  @Column(name = "shift_slot")
+  @Enumerated(EnumType.STRING)
+  public ShiftSlot shiftSlot;
+  
+//  @Transient
+//  public ShiftSlot getShiftSlot() {
+//    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
+//  }
 
   @Required
   @ManyToOne
@@ -67,7 +71,7 @@ public class PersonShiftDay extends BaseModel {
 
   @Transient
   public LocalTime slotBegin() {
-    switch (getShiftSlot()) {
+    switch (shiftSlot) {
       case MORNING:
         return shiftType.shiftTimeTable.startMorning;
       case AFTERNOON:
@@ -81,7 +85,7 @@ public class PersonShiftDay extends BaseModel {
 
   @Transient
   public LocalTime slotEnd() {
-    switch (getShiftSlot()) {
+    switch (shiftSlot) {
       case MORNING:
         return shiftType.shiftTimeTable.endMorning;
       case AFTERNOON:
@@ -95,7 +99,7 @@ public class PersonShiftDay extends BaseModel {
 
   @Transient
   public LocalTime lunchTimeBegin() {
-    switch (getShiftSlot()) {
+    switch (shiftSlot) {
       case MORNING:
         return shiftType.shiftTimeTable.startMorningLunchTime;
       case AFTERNOON:
@@ -109,7 +113,7 @@ public class PersonShiftDay extends BaseModel {
 
   @Transient
   public LocalTime lunchTimeEnd() {
-    switch (getShiftSlot()) {
+    switch (shiftSlot) {
       case MORNING:
         return shiftType.shiftTimeTable.endMorningLunchTime;
       case AFTERNOON:

@@ -1,5 +1,6 @@
 package models.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.joda.time.LocalDateTime;
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)
+
 public class ShiftEvent {
 
   // Campi di default dell'eventObject fullcalendar
@@ -43,6 +45,7 @@ public class ShiftEvent {
   // CAMPI CUSTOM
   private Long personShiftDayId;
   private Long personId;
+  @JsonIgnore
   private OrganizationShiftSlot organizationShiftslot;
   private EventColor eventColor;
   private List<String> troubles;
