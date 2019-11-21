@@ -653,10 +653,10 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
   
   A_103("103", "Telelavoro",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_103BP("103BP", "Telelavoro buono pasto",
-      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, true, true,
+      false, ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, true,
       0, null, Sets.newHashSet(), null, null, false),
   
   A_71("71", "permesso sindacale 1 ora",
