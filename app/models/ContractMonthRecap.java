@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -57,6 +58,7 @@ public class ContractMonthRecap extends BaseModel {
   @Column(name = "s_bp_consegnati")
   public int buoniPastoConsegnatiNelMese = 0;
 
+  @Getter
   @Column(name = "s_bd_usati")
   public int buoniPastoUsatiNelMese = 0;
 
@@ -183,6 +185,9 @@ public class ContractMonthRecap extends BaseModel {
             + this.straordinariMinutiS3Print;
   }
 
+  /**
+   * Stringa di descrizione del contratto. 
+   */
   @Transient
   public String getContractDescription() {
     LocalDate beginMonth = new LocalDate(this.year, this.month, 1);
@@ -204,6 +209,9 @@ public class ContractMonthRecap extends BaseModel {
     return this.progressivoFinalePositivoMese;
   }
 
+  /**
+   * Verifica se è l'ultimo mese prima della scadenza del contratto.
+   */
   @Transient
   public boolean expireInMonth() {
     if (this.contract.endDate != null 
