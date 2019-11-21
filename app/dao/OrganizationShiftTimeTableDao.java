@@ -49,6 +49,21 @@ public class OrganizationShiftTimeTableDao extends DaoBase {
     return Optional.fromNullable(query);
   }
   
+  /**
+   * Metodo che ritorna la timetable esterna associata al nome se esiste.
+   * @param name la stringa contenente il nome da cercare
+   * @return l'optional contenente, se esiste, la timetable esterna associata al nome
+   *     passato come parametro.
+   */
+  public Optional<OrganizationShiftTimeTable> getByName(String name) {
+    final QOrganizationShiftTimeTable ostt = 
+        QOrganizationShiftTimeTable.organizationShiftTimeTable;
+    final OrganizationShiftTimeTable query = 
+        getQueryFactory().selectFrom(ostt).where(ostt.name.equalsIgnoreCase(name)).fetchOne();
+    
+    return Optional.fromNullable(query);
+  }
+  
   
   /*************************************************************************************************
    * Parte relativa a query su OrganizationShiftSlot              
