@@ -361,9 +361,17 @@ public class ShiftManager2 {
       // Nelle date passate posso effettuare i controlli sul tempo a lavoro
       if (personShiftDay.date.isBefore(today)) {
 
-        final LocalTime slotBegin = personShiftDay.slotBegin();
-        final LocalTime slotEnd = personShiftDay.slotEnd();
+        final LocalTime slotBegin;
+        final LocalTime slotEnd;
 
+        if (personShiftDay.organizationShiftSlot != null) {
+          slotBegin = personShiftDay.organizationShiftSlot.beginSlot;
+          slotEnd = personShiftDay.organizationShiftSlot.endSlot;
+          
+        } else {
+          slotBegin = personShiftDay.slotBegin();
+          slotEnd = personShiftDay.slotEnd();
+        }
         // 2. Controlli sulle timbrature...
 
         List<PairStamping> validPairStampings = personDayManager
