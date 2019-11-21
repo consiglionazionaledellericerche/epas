@@ -2286,7 +2286,7 @@ end
 rule overtimeInMission
 when
  UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP' || code == '92RE') 
+ $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP' || code == '92RE' || code == '103' || code == '103BP') 
  $c: PermissionCheck(action == "Absences.overtimeAbsence", target == $abt, granted == false )
 then
  $c.grant();
