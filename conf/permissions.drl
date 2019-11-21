@@ -2286,7 +2286,7 @@ end
 rule overtimeInMission
 when
  UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP') 
+ $abt: AbsenceType(code == "92" || code == "92E" || code == '105BP' || code == '92RE') 
  $c: PermissionCheck(action == "Absences.overtimeAbsence", target == $abt, granted == false )
 then
  $c.grant();
@@ -2348,7 +2348,9 @@ when
         "rest.Absences.checkAbsence",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
 
        ), target == null, granted == false)
 then
@@ -2367,7 +2369,9 @@ when
         "rest.Absences.checkAbsence",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
 
        ), target == $o, granted == false)
 then
@@ -2514,3 +2518,34 @@ when
 then
   $c.grant();
 end
+
+/*******************************************************************************
+ * Azioni via REST per PERSONDAY READER
+ ******************************************************************************/
+rule managePersonDay
+when
+ $uro: UsersRolesOffices(role.name == "personDayReader")
+ $c: PermissionCheck(action in (
+
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+ 
+rule managePersonDayInOffice
+when
+ $uro: UsersRolesOffices(role.name == "personDayReader")
+ $o: Office() from $uro.office
+ $c: PermissionCheck(action in (
+
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation"
+
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+

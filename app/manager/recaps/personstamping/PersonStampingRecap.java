@@ -46,8 +46,6 @@ public class PersonStampingRecap {
 
   //Informazioni sul mese
   public int numberOfCompensatoryRestUntilToday = 0;
-  public int numberOfMealTicketToRender = 0;
-  public int numberOfMealTicketToUse = 0;
   public int basedWorkingDays = 0;
   public int totalWorkingTime = 0;
   public int positiveResidualInMonth = 0;
@@ -71,6 +69,11 @@ public class PersonStampingRecap {
   //Template
   public int numberOfInOut = 0;
 
+  public int getNumberOfMealTicketToUse() {
+    return contractMonths.stream()
+        .map(cm -> cm.getValue().getBuoniPastoUsatiNelMese()).reduce(Integer::sum).orElse(0);
+  }
+  
   /**
    * Costruisce l'oggetto contenente tutte le informazioni da renderizzare nella pagina tabellone
    * timbrature.
@@ -116,9 +119,6 @@ public class PersonStampingRecap {
     //******************************************************************************************
     List<Contract> monthContracts = 
         wrapperFactory.create(person).orderedMonthContracts(year, month);
-
-    this.numberOfMealTicketToUse = personDayManager.numberOfMealTicketToUse(personDays);
-    this.numberOfMealTicketToRender = personDayManager.numberOfMealTicketToRender(personDays);
 
     for (Contract contract : monthContracts) {
       Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
