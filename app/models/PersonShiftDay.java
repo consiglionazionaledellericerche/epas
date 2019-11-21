@@ -40,7 +40,7 @@ public class PersonShiftDay extends BaseModel {
 //    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
 //  }
 
-  @Required
+  //@Required
   @ManyToOne
   public OrganizationShiftSlot organizationShiftSlot;
   

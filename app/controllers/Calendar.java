@@ -410,7 +410,7 @@ public class Calendar extends Controller {
    * @param shiftSlot lo slot di turno (mattina/pomeriggio)
    * @param activityId l'id dell'attività su cui inserire il turnista
    */
-  public static void newShift(long personId, LocalDate date, 
+  public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot, 
       OrganizationShiftSlot organizationShiftslot, long activityId) {
 
     final PNotifyObject message;
@@ -424,7 +424,11 @@ public class Calendar extends Controller {
         PersonShiftDay personShiftDay = new PersonShiftDay();
         personShiftDay.date = date;
         personShiftDay.shiftType = activity.get();
-        personShiftDay.organizationShiftSlot = organizationShiftslot;
+        if (organizationShiftslot.isPersistent()) {
+          personShiftDay.organizationShiftSlot = organizationShiftslot;
+        } else {
+          personShiftDay.shiftSlot = shiftSlot;
+        }        
  
         personShiftDay.personShift = shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
@@ -432,7 +436,7 @@ public class Calendar extends Controller {
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
         } else {
-          if (organizationShiftslot == null) {
+          if (!organizationShiftslot.isPersistent() && shiftSlot == null) {
             error = Optional.of(Messages.get("shift.notSlotSpecified"));
           } else {
             error = Optional.of(Messages.get("validation.invalid"));
