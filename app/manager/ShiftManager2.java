@@ -253,16 +253,30 @@ public class ShiftManager2 {
     //Controllo se è abilitata la disparità di slot nell'attività di turno
     if (!personShiftDay.shiftType.allowUnpairSlots) {
       for (PersonShiftDay registeredDay : list) {
-        //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-        if (registeredDay.organizationShiftSlot == personShiftDay.organizationShiftSlot) {
-          return Optional.of(Messages
-              .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
+        if (personShiftDay.shiftType.organizaionShiftTimeTable != null) {
+          //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
+          if (registeredDay.organizationShiftSlot == personShiftDay.organizationShiftSlot) {
+            return Optional.of(Messages
+                .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
+          }
+        } else {
+          if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
+            return Optional.of(Messages
+                .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
+          }
         }
+       
       }
     } else {
       long count = 1;
-      long sum = list.stream()
-          .filter(psd -> psd.organizationShiftSlot == personShiftDay.organizationShiftSlot).count();
+      long sum = 0;
+      if (personShiftDay.shiftType.organizaionShiftTimeTable != null) {
+        sum = list.stream()
+            .filter(psd -> psd.organizationShiftSlot == personShiftDay.organizationShiftSlot).count();
+      } else {
+        sum = list.stream().filter(psd -> psd.shiftSlot == personShiftDay.shiftSlot).count();
+      }
+      
       if (sum + count > MAX_QUANTITY_IN_SLOT) {
         return Optional.of(Messages.get("shift.maxQuantityInSlot", personShiftDay.shiftType.type));
       }
@@ -521,8 +535,13 @@ public class ShiftManager2 {
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
     // 1. Controllo che siano coperti tutti gli slot
-    //int slotNumber = activity.shiftTimeTable.slotCount();
-    long slotNumber = activity.organizaionShiftTimeTable.slotCount();
+
+    long slotNumber = 0;
+    if (activity.organizaionShiftTimeTable != null) {
+      slotNumber = activity.organizaionShiftTimeTable.slotCount();
+    } else {
+      slotNumber = activity.shiftTimeTable.slotCount();
+    }     
 
     if (slotNumber > shifts.size()) {
       shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
