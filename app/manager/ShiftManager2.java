@@ -430,13 +430,22 @@ public class ShiftManager2 {
            *  L'unico modo per capire se la pausa pranzo è contenuta nel turno è guardare 
            *  la timetable associata all'attività
            */
-          final LocalTime lunchBreakStart = personShiftDay.lunchTimeBegin();
-          final LocalTime lunchBreakEnd = personShiftDay.lunchTimeEnd();
-
-          if (Range.open(slotBegin, slotEnd)
-              .encloses(Range.closed(lunchBreakStart, lunchBreakEnd))) {
-            rangeSet.add(Range.closed(lunchBreakStart,lunchBreakEnd));
-          }    
+          final LocalTime lunchBreakStart;
+          final LocalTime lunchBreakEnd;
+          if (personShiftDay.organizationShiftSlot != null) {
+            lunchBreakStart = personShiftDay.organizationShiftSlot.beginMealSlot;
+            lunchBreakEnd = personShiftDay.organizationShiftSlot.endMealSlot;
+          } else {
+            lunchBreakStart = personShiftDay.lunchTimeBegin();
+            lunchBreakEnd = personShiftDay.lunchTimeEnd();
+          }
+          
+          if (lunchBreakStart != null && lunchBreakEnd != null) {
+            if (Range.open(slotBegin, slotEnd)
+                .encloses(Range.closed(lunchBreakStart, lunchBreakEnd))) {
+              rangeSet.add(Range.closed(lunchBreakStart,lunchBreakEnd));
+            }
+          }              
 
           // Conteggio dei minuti di pausa fatti durante il turno
           Iterator<Range<LocalTime>> iterator = rangeSet.asRanges().iterator();
