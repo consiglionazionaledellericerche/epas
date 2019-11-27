@@ -23,6 +23,21 @@
 </ul>
 <br>
 #{/if}
+
+#{if nightShifts != null }
+<h3>Ore di turno notturno valide</h3>
+<ul class="list-group">
+  #{list nightShifts.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-danger#{/else}">
+    ${_.getKey().fullname} <span class="label label-danger pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{/if}
+
 #{if shiftTypeMonth?.approved}
 <div>
   <em class="text-muted">&{'calendar.competencesApproved'}</em>
