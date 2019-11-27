@@ -1,5 +1,19 @@
 # --- !Ups
 
+ALTER TABLE general_setting ADD COLUMN start_daily_shift TEXT;
+ALTER TABLE general_setting ADD COLUMN end_daily_shift TEXT;
+ALTER TABLE general_setting ADD COLUMN start_nightly_shift TEXT;
+ALTER TABLE general_setting ADD COLUMN end_nightly_shift TEXT;
+
+ALTER TABLE general_setting_history ADD COLUMN start_daily_shift TEXT;
+ALTER TABLE general_setting_history ADD COLUMN end_daily_shift TEXT;
+ALTER TABLE general_setting_history ADD COLUMN start_nightly_shift TEXT;
+ALTER TABLE general_setting_history ADD COLUMN end_nightly_shift TEXT;
+
+UPDATE general_setting SET start_daily_shift = '6:00', 
+	end_daily_shift = '19:00', start_nightly_shift = '19:00', 
+	end_nightly_shift = '6:00';
+	
 ALTER TABLE shift_time_table ADD COLUMN calculation_type TEXT;
 UPDATE shift_time_table SET calculation_type = 'standard_CNR';
 

@@ -283,6 +283,10 @@ generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
 generalSetting.onlyMealTicket =Invio solo dei buoni pasto
+generalSetting.startDailyShift =Inizio fascia per turno diurno
+generalSetting.endDailyShift =Fine fascia per turno diurno
+generalSetting.startNightlyShift =Inizio fascia per turno notturno
+generalSetting.endNightlyShift =Fine fascia per turno notturno
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
