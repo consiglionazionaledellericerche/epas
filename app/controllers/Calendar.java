@@ -71,7 +71,14 @@ public class Calendar extends Controller {
   @Inject
   static CompetenceCodeDao competenceCodeDao;
 
-  private static String nighCode = "T3";
+  private static String holidayCode = "T3";
+  private static String nightCode = "T2";
+  
+  public enum ShiftPeriod {
+    daily,
+    nightly,
+    holiday;
+  }
   
   /**
    * ritorna alla view le info necessarie per creare il calendario.
@@ -499,26 +506,42 @@ public class Calendar extends Controller {
       ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
-          .calculateActivityShiftCompetences(shiftType, start, end, false);
+          .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.daily);
       Map<Person, Integer> holidayShifts = null;
+      Map<Person, Integer> nightShifts = null;
       Set<Person> people = shiftsCalculatedCompetences.keySet();
-      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(nighCode);
+      //Controllo se ci sono turni festivi assegnati...
+      CompetenceCode holiday = competenceCodeDao.getCompetenceCodeByCode(holidayCode);
       List<PersonCompetenceCodes> list = people.stream()
           .flatMap(p -> p.personCompetenceCodes.stream()
-              .filter(c -> c.competenceCode.equals(code) 
+              .filter(c -> c.competenceCode.equals(holiday) 
+                  && !c.beginDate.isAfter(start)))
+          .collect(Collectors.toList());
+      
+      //Controllo se ci sono turni notturni assegnati...
+      CompetenceCode night = competenceCodeDao.getCompetenceCodeByCode(nightCode);
+      List<PersonCompetenceCodes> nightList = people.stream()
+          .flatMap(p -> p.personCompetenceCodes.stream()
+              .filter(c -> c.competenceCode.equals(night) 
                   && !c.beginDate.isAfter(start)))
           .collect(Collectors.toList());
       
       if (!list.isEmpty()) {
         holidayShifts = 
-            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, true);
+            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
+      }
+      
+      if (!nightList.isEmpty()) {
+        nightShifts =
+            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.nightly);
       }
       
 
       final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao
           .byShiftTypeAndDate(shiftType, start).orNull();
 
-      render(shiftsCalculatedCompetences, holidayShifts, shiftTypeMonth, shiftType, start);
+      render(shiftsCalculatedCompetences, nightShifts, 
+          holidayShifts, shiftTypeMonth, shiftType, start);
     }
   }
 
@@ -591,22 +614,29 @@ public class Calendar extends Controller {
 
     final Map<Person, Integer> shiftsCalculatedCompetences = new HashMap<>();
     final Map<Person, Integer> holidayShiftsCalculatedCompetences = new HashMap<>();
+    final Map<Person, Integer> nightlyShiftsCalculatedCompetences = new HashMap<>();
     final Map<Person, List<ShiftTroubles>> peopleTrouble = new HashMap<>();
 
     people.forEach(person -> {
       int competences = 0;
+      //turno diurno
       competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person,
-          monthbegin, lastDay, false);
+          monthbegin, lastDay, ShiftPeriod.daily);
       shiftsCalculatedCompetences.put(person, competences);
+      //turno festivo
       competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person, 
-          monthbegin, lastDay, true);
+          monthbegin, lastDay, ShiftPeriod.holiday);
       holidayShiftsCalculatedCompetences.put(person, competences);
+      //turno notturno
+      competences = shiftManager2.calculatePersonShiftCompetencesInPeriod(shiftType, person, 
+          monthbegin, lastDay, ShiftPeriod.nightly);
+      nightlyShiftsCalculatedCompetences.put(person, competences);
       List<ShiftTroubles> shiftsTroubles = 
           shiftManager2.allValidShifts(shiftType, person, monthbegin, monthEnd);
       peopleTrouble.put(person, shiftsTroubles);
     });
 
-    render(shiftTypeMonth, shiftsCalculatedCompetences, 
+    render(shiftTypeMonth, shiftsCalculatedCompetences, nightlyShiftsCalculatedCompetences, 
         holidayShiftsCalculatedCompetences, peopleTrouble);
   }
 
