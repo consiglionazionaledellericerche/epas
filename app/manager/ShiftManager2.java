@@ -654,9 +654,7 @@ public class ShiftManager2 {
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to, ShiftPeriod type) {
-
-    // TODO: 08/06/17 Sicuramente vanno differenziati per tipo di competenza.....
-    // c'è sono da capire qual'è la discriminante
+    
     int shiftCompetences = 0;
 
     int paidMinutes = 0;
@@ -667,19 +665,37 @@ public class ShiftManager2 {
     final List<PersonShiftDay> shifts = personShiftDayDao
         .byTypeInPeriod(from, to, activity, Optional.of(person));
     List<PersonShiftDay> list = Lists.newArrayList();
+    //Cerco gli intervalli orari per stabilire a quale competenza assegnare la quantità di ore di turno
+    Optional<TimeInterval> timeInterval = null;
+    TimeInterval daily = null;
+    TimeInterval night = null; 
+    GeneralSetting setting = generalSettingDao.generalSetting();
+    if (setting != null) {
+      //Costruisco l'intervallo temporale per il turno diurno e il turno notturno
+      daily = new TimeInterval(convertFromString(setting.startDailyShift), 
+          convertFromString(setting.endDailyShift));
+      night = new TimeInterval(convertFromString(setting.startNightlyShift), 
+          convertFromString(setting.endNightlyShift));//TODO: che dobbiamo fare?
+    } else {
+      log.warn("Manca il general setting relativo all'ente. Occore definirlo!!!");
+      return 0;
+    }
     //Proviamo a filtrarli...
     switch (type) {
       case daily:
+        timeInterval = Optional.fromNullable(daily);
         list = shifts.stream().filter(day -> { 
           return !personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
         break;
       case nightly:
+        timeInterval = Optional.fromNullable(night);
         list = shifts.stream().filter(day -> { 
           return !personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
         break;
       case holiday:
+        timeInterval = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
           return personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
@@ -687,17 +703,7 @@ public class ShiftManager2 {
       default:
         break;
     }
-    GeneralSetting setting = generalSettingDao.generalSetting();
-    if (setting == null) {
-      //TODO: che dobbiamo fare?
-    }
-    //Costruisco l'intervallo temporale per il turno diurno e il turno notturno
-    TimeInterval day = new TimeInterval(convertFromString(setting.startDailyShift), 
-        convertFromString(setting.endDailyShift));
-    TimeInterval night = new TimeInterval(convertFromString(setting.startNightlyShift), 
-        convertFromString(setting.endNightlyShift));
 
-    
     // I conteggi funzionano nel caso lo stato dei turni sia aggiornato
     for (PersonShiftDay shift : list) {
       // Nessun errore sul turno
@@ -710,18 +716,16 @@ public class ShiftManager2 {
           } else {
             PersonDay pd = personDayManager
                 .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
-            shiftCompetences += quantityCountForShift(shift, pd);
+            
+            shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
           }
         } else {
           shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
         }
-
-
         log.info("Competenza calcolata sul turno di {}-{}: {}", 
             person.fullName(), shift.date, shiftCompetences 
             - (shift.exceededThresholds * SIXTY_MINUTES));
       }
-
     }
 
     return shiftCompetences;
@@ -732,9 +736,11 @@ public class ShiftManager2 {
    * Metodo che ritorna la quantità di minuti lavorata all'interno della fascia di turno.
    * @param psd il personShiftDday del giorno
    * @param pd il personDay del giorno
+   * @param timeInterval (optional) l'intervallo in cui cercare il turno di un certo tipo
    * @return la quantità in minuti lavorata all'interno della fascia oraria di turno.
    */
-  private int quantityCountForShift(PersonShiftDay psd, PersonDay pd) {
+  private int quantityCountForShift(PersonShiftDay psd, PersonDay pd, 
+      Optional<TimeInterval> timeInterval) {
     int timeIntersection = 0;
     TimeInterval interval = null;
     List<PairStamping> pairList = personDayManager.getValidPairStampings(pd.stampings);
@@ -744,13 +750,18 @@ public class ShiftManager2 {
           new TimeInterval(pair.first.date.toLocalTime(), 
               pair.second.date.toLocalTime()));
       if (interval != null) {
-        timeIntersection += interval.minutesInInterval();
+        if (timeInterval.isPresent()) {
+          TimeInterval intersection = DateUtility.intervalIntersection(timeInterval.get(), interval);
+          timeIntersection += intersection.minutesInInterval();
+        } else {
+          timeIntersection += interval.minutesInInterval();
+        }        
       }
     }    
 
     return timeIntersection;
   }
-  
+
   /**
    * Metodo che converte un'orario in formato stringa in un orario in formato LocalTime.
    * @param str la stringa da convertire
@@ -892,7 +903,7 @@ public class ShiftManager2 {
 
       calculatedCompetences = totalHolidayPeopleCompetences.get(person);
       saveCompetence(person, shiftTypeMonth, holidayCode, calculatedCompetences);
-      
+
       calculatedCompetences = totalNightlyPeopleCompetences.get(person);
       saveCompetence(person, shiftTypeMonth, nightCode, calculatedCompetences);
 
