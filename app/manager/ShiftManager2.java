@@ -427,8 +427,8 @@ public class ShiftManager2 {
           // Soglia di uscita
           final LocalTime exitStamping = shiftPairs.get(shiftPairs.size() - 1).second.date
               .toLocalTime();
-          final LocalTime exitMaxThreshold = slotEnd.minusMinutes(shiftType.entranceMaxTolerance);
-          final LocalTime exitThreshold = slotEnd.minusMinutes(shiftType.entranceTolerance);
+          final LocalTime exitMaxThreshold = slotEnd.minusMinutes(shiftType.exitMaxTolerance);
+          final LocalTime exitThreshold = slotEnd.minusMinutes(shiftType.exitTolerance);
 
           // Uscita fuori dalla tolleranza massima (turno non valido)
           if (exitStamping.isBefore(exitMaxThreshold)) {
@@ -708,15 +708,16 @@ public class ShiftManager2 {
     for (PersonShiftDay shift : list) {
       // Nessun errore sul turno
       if (!shift.hasOneOfErrors(ShiftTroubles.invalidatingTroubles())) {
+        PersonDay pd = personDayManager
+            .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
         if (shift.organizationShiftSlot != null) {
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.standard_CNR)) {
-            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
+            shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
-          } else {
-            PersonDay pd = personDayManager
-                .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
-            
+//            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
+//                - (shift.exceededThresholds * SIXTY_MINUTES);
+          } else {            
             shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
           }
         } else {
@@ -760,6 +761,23 @@ public class ShiftManager2 {
     }    
 
     return timeIntersection;
+  }
+  
+  /**
+   * Metodo che ritorna la quantità di minuti da pagare in un certo slot (diurno/notturno).
+   * @param pd il personday di un certo giorno
+   * @param psd il personshiftday di un certo giorno
+   * @param interval l'eventuale intervallo di validità dello slot (diurno/notturno)
+   * @return la quantità in minuti da pagare nello specifico slot di turno.
+   */
+  private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, Optional<TimeInterval> interval) {
+    if (interval.isPresent()) {
+      int quantity = quantityCountForShift(psd, pd, interval);
+      if (quantity < psd.organizationShiftSlot.minutesPaid) {
+        return quantity;
+      }
+    }
+    return psd.organizationShiftSlot.minutesPaid;
   }
 
   /**
