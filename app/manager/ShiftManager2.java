@@ -49,6 +49,7 @@ import models.User;
 import models.enumerate.CalculationType;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -667,15 +668,19 @@ public class ShiftManager2 {
     List<PersonShiftDay> list = Lists.newArrayList();
     //Cerco gli intervalli orari per stabilire a quale competenza assegnare la quantità di ore di turno
     Optional<TimeInterval> timeInterval = null;
+    Optional<TimeInterval> timeInterval2 = null;
     TimeInterval daily = null;
-    TimeInterval night = null; 
+    TimeInterval night = null;
+    TimeInterval beforeDawn = null;
     GeneralSetting setting = generalSettingDao.generalSetting();
     if (setting != null) {
       //Costruisco l'intervallo temporale per il turno diurno e il turno notturno
       daily = new TimeInterval(convertFromString(setting.startDailyShift), 
           convertFromString(setting.endDailyShift));
+      
       night = new TimeInterval(convertFromString(setting.startNightlyShift), 
-          convertFromString(setting.endNightlyShift));//TODO: che dobbiamo fare?
+          new LocalTime(23,59));
+      beforeDawn = new TimeInterval(new LocalTime(0,0), convertFromString(setting.endNightlyShift));
     } else {
       log.warn("Manca il general setting relativo all'ente. Occore definirlo!!!");
       return 0;
@@ -684,18 +689,21 @@ public class ShiftManager2 {
     switch (type) {
       case daily:
         timeInterval = Optional.fromNullable(daily);
+        timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
           return !personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
         break;
       case nightly:
         timeInterval = Optional.fromNullable(night);
+        timeInterval2 = Optional.fromNullable(beforeDawn);
         list = shifts.stream().filter(day -> { 
           return !personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
         break;
       case holiday:
         timeInterval = Optional.<TimeInterval>absent();
+        timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
           return personDayManager.isHoliday(day.personShift.person, day.date);
         }).collect(Collectors.toList());
@@ -715,6 +723,9 @@ public class ShiftManager2 {
               .equals(CalculationType.standard_CNR)) {
             shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
+            if (timeInterval2.isPresent()) {
+              shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval2);
+            }
 //            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
 //                - (shift.exceededThresholds * SIXTY_MINUTES);
           } else {            
@@ -753,6 +764,9 @@ public class ShiftManager2 {
       if (interval != null) {
         if (timeInterval.isPresent()) {
           TimeInterval intersection = DateUtility.intervalIntersection(timeInterval.get(), interval);
+          if (intersection == null) {
+            return 0;
+          }
           timeIntersection += intersection.minutesInInterval();
         } else {
           timeIntersection += interval.minutesInInterval();
