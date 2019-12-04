@@ -49,7 +49,7 @@ CREATE TABLE organization_shift_slot(
 	end_slot VARCHAR(64) NOT NULL,
 	begin_meal_slot VARCHAR(64),
 	end_meal_slot VARCHAR(64),
-	minutes_slot INTEGER,
+	payment_type TEXT,
 	minutes_paid INTEGER,
 	created_at TIMESTAMP WITHOUT TIME ZONE,
 	updated_at TIMESTAMP WITHOUT TIME ZONE,
@@ -67,7 +67,7 @@ CREATE TABLE organization_shift_slot_history(
 	end_slot VARCHAR(64),
 	begin_meal_slot VARCHAR(64),
 	end_meal_slot VARCHAR(64),
-	minutes_slot INTEGER,
+	payment_type TEXT,
 	minutes_paid INTEGER,
 	PRIMARY KEY (id, _revision, _revision_type)
     );

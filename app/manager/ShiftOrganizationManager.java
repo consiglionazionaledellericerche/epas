@@ -70,7 +70,7 @@ public class ShiftOrganizationManager {
         shiftSlot.beginMealSlot = beginMeal;
         shiftSlot.endMealSlot = endMeal;
         shiftSlot.minutesPaid = ott.minutesPaid;
-        shiftSlot.minutesSlot = ott.minutesSlot;
+        shiftSlot.paymentType = ott.paymentType;
         shiftSlot.shiftTimeTable = shiftTimeTable;
         shiftSlot.save();
       }

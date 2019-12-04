@@ -70,6 +70,7 @@ import models.User;
 import models.dto.OrganizationTimeTable;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
+import models.enumerate.PaymentType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
@@ -1056,8 +1057,9 @@ public class Competences extends Controller {
         ott.isMealActive = false;
         list.add(ott);
       }
+      List<PaymentType> paymentTypes = Arrays.asList(PaymentType.values());
       step++;
-      render(officeId, calculationType, slot, step, list, name);
+      render(officeId, calculationType, slot, step, list, name, paymentTypes);
     }
     Office office = officeDao.getOfficeById(officeId);
     if (office == null) {
