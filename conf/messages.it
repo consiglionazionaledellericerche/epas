@@ -92,6 +92,7 @@ to=A
 recoveryDate=Da recuperare entro
 
 calculationType=Tipo di conteggio dei turni
+paymentType=Tipo di pagamento
 
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
@@ -861,6 +862,7 @@ AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)
 
+
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
 ChartTypes.COLUMNS= Grafico a colonne
@@ -878,6 +880,9 @@ LimitUnit.month =Mese
 
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
+
+PaymentType.T1 = Pagamento tutto imputato su competenza turno diurno
+PaymentType.T2 = Pagamento tutto imputato su competenza turno notturno
 
 reperibility.personInactive = Persona non attiva sulla reperibilità
 reperibility.alreadyInReperibility = Già in reperibilità per l'attività %s

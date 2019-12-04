@@ -3,6 +3,8 @@ package models;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
@@ -12,6 +14,9 @@ import org.joda.time.LocalTime;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import models.base.BaseModel;
+import models.enumerate.CalculationType;
+import models.enumerate.PaymentType;
+import play.data.validation.Required;
 
 /**
  * 
@@ -52,7 +57,9 @@ public class OrganizationShiftSlot extends BaseModel{
   @Nullable
   public LocalTime endMealSlot;
   
-  public Integer minutesSlot;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "payment_type")
+  public PaymentType paymentType;;
  
   public Integer minutesPaid;
   

@@ -53,7 +53,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.beginMealSlot = tt.startMorningLunchTime;
         slotMorning.endMealSlot = tt.endMorningLunchTime;
         slotMorning.minutesPaid = tt.paidMinutes;
-        slotMorning.minutesSlot = tt.totalWorkMinutes/2;
+        slotMorning.paymentType = PaymentType.T1;
         slotMorning.shiftTimeTable = ostt;
         slotMorning.save();
         log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
@@ -68,7 +68,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotAfternoon.beginMealSlot = tt.startAfternoonLunchTime;
         slotAfternoon.endMealSlot = tt.endAfternoonLunchTime;
         slotAfternoon.minutesPaid = tt.paidMinutes;
-        slotAfternoon.minutesSlot = tt.totalWorkMinutes/2;
+        slotMorning.paymentType = PaymentType.T1;
         slotAfternoon.shiftTimeTable = ostt;
         slotAfternoon.save();
         log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
@@ -84,7 +84,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
           slotEvening.beginMealSlot = tt.startEveningLunchTime;
           slotEvening.endMealSlot = tt.endEveningLunchTime;
           slotEvening.minutesPaid = tt.paidMinutes;
-          slotEvening.minutesSlot = tt.totalWorkMinutes/2;
+          slotMorning.paymentType = PaymentType.T1;
           slotEvening.shiftTimeTable = ostt;
           slotEvening.save();
           log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
