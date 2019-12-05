@@ -9,7 +9,7 @@ package models.enumerate;
 public enum PaymentType {
 
   T1("T1", "Calcolo tutto con turno diurno"),
-  T2("T2", "Calcolo tutto con turno notturno");
+  SPLIT_CALCULATION("SPLIT_CALCULATION", "Calcolo sulla base delle fasce di turno");
   
   public String name;
   public String description;

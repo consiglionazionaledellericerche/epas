@@ -853,8 +853,15 @@ public class CompetenceManager {
         st.entranceMaxTolerance = service.entranceMaxTolerance;
       } 
     }
-    if (ostt.isPresent()) {
-      st.organizaionShiftTimeTable = ostt.get();      
+    if (ostt.isPresent()) {      
+      st.organizaionShiftTimeTable = ostt.get();   
+      st.breakInShift = service.breakInShift;
+      st.breakMaxInShift = service.breakMaxInShift;      
+      st.exitTolerance = service.exitTolerance;
+      st.exitMaxTolerance = service.exitMaxTolerance;      
+      st.entranceMaxTolerance = service.entranceMaxTolerance;
+      st.entranceTolerance = service.entranceTolerance;
+      st.maxToleranceAllowed = service.maxToleranceAllowed;
     }
   
     st.save();

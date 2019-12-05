@@ -47,6 +47,7 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.User;
 import models.enumerate.CalculationType;
+import models.enumerate.PaymentType;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
 import org.joda.time.Interval;
@@ -720,7 +721,7 @@ public class ShiftManager2 {
             .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
         if (shift.organizationShiftSlot != null) {
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
-              .equals(CalculationType.standard_CNR)) {
+              .equals(CalculationType.percentage)) {
             shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
             if (timeInterval2.isPresent()) {
@@ -728,8 +729,14 @@ public class ShiftManager2 {
             }
 //            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
 //                - (shift.exceededThresholds * SIXTY_MINUTES);
-          } else {            
-            shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
+          } else {    
+            if (shift.organizationShiftSlot.paymentType == PaymentType.SPLIT_CALCULATION) {
+              shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
+            } else {
+              shiftCompetences += shift.organizationShiftSlot.minutesPaid 
+                  - (shift.exceededThresholds * SIXTY_MINUTES);
+            }
+            
           }
         } else {
           shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
