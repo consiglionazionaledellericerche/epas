@@ -1458,7 +1458,15 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
   
   A_62("62", "distacco sindacale",
-      true, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null, false),
+  
+  A_62A("62A", "aspettativa sindacale non retribuita",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null, false),
+  
+  A_62D("62D", "perm. sind. cumul. sotto forma distac.",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
   
   A_50("50", "aspettativa per ricongiungimento familiare all'estero",
