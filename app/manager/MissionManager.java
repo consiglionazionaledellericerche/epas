@@ -522,7 +522,7 @@ public class MissionManager {
       result = atomicRemoval(abs, result);
       final User currentUser = Security.getUser().get();
       notificationManager.notificationAbsencePolicy(currentUser, 
-          abs, group, false, true, false);
+          abs, group, false, false, true);
       log.info(LOG_PREFIX + "Rimossa assenza {} del {} per {}.", 
           abs.absenceType.code, abs.personDay.date, abs.personDay.person.getFullname());
 
