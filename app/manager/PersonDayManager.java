@@ -484,11 +484,15 @@ public class PersonDayManager {
       } else {
         if (missingTime < 0) {
           personDay.setTimeAtWork(personDay.getTimeAtWork());
+          
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
           personDay.setTimeAtWork(computedTimeAtWork + missingTime);
+          personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
+              .get().getAbsenceType().timeForMealTicket;
         }        
-      }            
+      }
+      
     }
 
     //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro

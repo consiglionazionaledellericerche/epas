@@ -398,7 +398,7 @@ public enum DefaultAbsenceType {
   
   A_91CE("91", "Riposo compensativo per chiusura ente", false, 
       ImmutableSet.of(JustifiedTypeName.recover_time), 0,
-      false, false, 0, null, Sets.newHashSet(), null, null, true),
+      false, false, 0, null, Sets.newHashSet(), null, new LocalDate(2020,1,1), true),
 
 
   A_PB("PB", "Permesso breve 36 ore anno",

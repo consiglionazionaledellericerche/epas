@@ -20,7 +20,7 @@ import org.assertj.core.util.Lists;
  */
 public enum DefaultTakable {
 
-  T_18(AmountType.units, 
+  T_18(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_18, 
           DefaultAbsenceType.A_18M,
           DefaultAbsenceType.A_18P,
