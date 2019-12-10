@@ -56,7 +56,7 @@ public class OfficeDao extends DaoBase {
 
     final QOffice office = QOffice.office;
 
-    return getQueryFactory().selectFrom(office).fetch();
+    return getQueryFactory().selectFrom(office).where(office.endDate.isNull()).fetch();
   }
 
   
