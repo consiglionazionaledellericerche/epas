@@ -33,14 +33,14 @@
 </div>
 </div>
 
-#{if calculationType.equals(models.enumerate.CalculationType.standard_CNR)}
+
 <div class="row">
 	<div class="col-sm-offset-4"></div>
 	#{f.input 'list['+ott_index+'].minutesPaid', value:ott.minutesPaid, type:'number' /}
 	#{f.selectEnum 'list['+ott_index+'].paymentType', items:paymentTypes, value:ott.paymentType, class:'ott-'+ott_index /}
 	
 </div>
-#{/if}
+
 #{/list}
 
 
