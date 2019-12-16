@@ -25,6 +25,7 @@ import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import lombok.extern.slf4j.Slf4j;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -53,10 +54,12 @@ import models.PersonCompetenceCodes;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.PersonShift;
+import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.ShiftTypeMonth;
 import models.TotalOvertime;
 import models.User;
 import models.dto.TimeTableDto;
@@ -71,6 +74,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 @With({Resecure.class})
+@Slf4j
 public class Competences extends Controller {
 
   private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
@@ -976,16 +980,41 @@ public class Competences extends Controller {
       activateServices(cat.office.id);
     }
     List<ShiftType> shiftTypeList = shiftDao.getTypesByCategory(cat);
-    if (!shiftTypeList.isEmpty()) {
-      cat.disabled = true;
-      cat.save();
-      flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
-          + "importanti presenti in altre tabelle");
-
-    } else {
+    List<ShiftType> toDelete = Lists.newArrayList();
+    for (ShiftType type : shiftTypeList) {
+      if (!type.monthsStatus.isEmpty()) {
+        long count = type.monthsStatus.stream().filter(st -> st.approved).count();
+        if (count > 0) {
+          cat.disabled = true;
+          cat.save();          
+        } else {
+          toDelete.add(type);
+          log.info("Elinino i person_shift_days relativi a {}", type.type);
+          for (PersonShiftDay psd : type.personShiftDays) {
+            psd.delete();
+          }
+          type.monthsStatus.stream().map(st -> st.delete());  
+          log.info("Elimino i gli shift_type_month relativi a {}", type.type);
+        }        
+      }       
+      if (toDelete.contains(type)) {
+        log.info("Elimino le relazioni tra persone e shift_type");        
+        for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
+          psst.delete();
+        }
+        log.info("Elimino lo shift_type {}", type.type);
+        type.delete();
+      }
+      
+    }
+    if (toDelete.size() == shiftTypeList.size()) {
       cat.delete();
       flash.success("Servizio rimosso con successo");
-    }
+    } else {
+      flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
+          + "importanti presenti in altre tabelle");
+    }   
+    
     activateServices(cat.office.id);
   }
 
