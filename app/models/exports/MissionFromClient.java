@@ -1,5 +1,8 @@
 package models.exports;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import models.Person;
 import org.joda.time.LocalDateTime;
@@ -9,7 +12,10 @@ import org.joda.time.LocalDateTime;
  *
  * @author dario
  */
+@Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class MissionFromClient {
 
   public String tipoMissione;
