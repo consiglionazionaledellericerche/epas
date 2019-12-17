@@ -55,9 +55,16 @@
 
         </li>
         #{list institute.seats, as:'seat'}
+        #{if seat.endDate != null}
+        <li class="list-group-item  list-group-item-danger">
+          #{include './_office.html' /}
+        </li>
+        #{/if}
+        #{else} 
         <li class="list-group-item  list-group-item-bianco">
           #{include './_office.html' /}
         </li>
+        #{/else}
         #{/list}
       </ul>
 
