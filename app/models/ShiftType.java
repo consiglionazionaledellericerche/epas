@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -91,6 +92,7 @@ public class ShiftType extends BaseModel {
   public ShiftCategories shiftCategories;
 
   @OneToMany(mappedBy = "shiftType", cascade = CascadeType.REMOVE)
+  @OrderBy("yearMonth DESC")
   public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
 
   @Override
