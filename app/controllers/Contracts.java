@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
@@ -37,6 +38,7 @@ import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
@@ -76,6 +78,8 @@ public class Contracts extends Controller {
   static ICertificationService certService;
   @Inject
   static AbsenceService absenceService;
+  @Inject
+  static PersonDayDao personDayDao;
 
   /**
    * I contratti del dipendente.
@@ -284,9 +288,19 @@ public class Contracts extends Controller {
     if (!confirmed) {
       render("@delete", contract);
     }
+    List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, 
+        contract.beginDate, Optional.fromNullable(contract.endDate));
 
-    contract.delete();
-    flash.success(Web.msgDeleted(Contract.class));
+    long count = pdList.stream().filter(pd -> pd.absences.isEmpty()).count();
+    if (pdList.size() == 0 || count == pdList.size()) {
+      contract.delete();
+      flash.success(Web.msgDeleted(Contract.class));
+    } else {
+      flash.error("Non è possibile cancellare il contratto di %s perchè sono già presenti giornate"
+          + " ad esso collegate contenenti assenze! Rimuoverle prima di eliminare il contratto", 
+          contract.person.fullName());
+    }    
+
     Persons.edit(contract.person.id);
   }
 
