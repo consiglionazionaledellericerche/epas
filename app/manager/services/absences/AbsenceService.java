@@ -11,6 +11,7 @@ import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.SecureManager;
@@ -643,6 +644,7 @@ public class AbsenceService {
     return insertReport;
   }
 
+  @ToString
   public static class InsertReport {
 
     public List<CriticalError> criticalErrors = Lists.newArrayList();
