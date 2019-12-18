@@ -1,0 +1,60 @@
+#{panel title:'(3) Definisci le fasce di turno', color:'primary'}
+
+<div id="timeTableData">
+#{f.hidden 'name' /}
+#{list items:list, as:'ott'}
+#{alert color:'info'}
+	Slot di Turno ${ott_index - 1}
+#{/alert}
+#{f.hidden 'index', value: ott_index - 1 /}
+#{f.hidden 'officeId', value: officeId /}
+#{f.hidden 'calculationType', value: calculationType /}
+
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'list['+ott_index+'].beginSlot', value:ott.beginSlot, type:text, required:'true' /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'list['+ott_index+'].endSlot', value:ott.endSlot, type:text, required:'true' /}
+	  </div>	  
+</div>
+
+#{f.booleanRadio 'list['+ott_index+'].isMealActive', value:ott.isMealActive, class:'ott-'+ott_index /}
+<div class="ott-${ott_index}" id="meal-panel-ott-${ott_index}" #{if !ott.isMealActive} style="display: none" #{/if}>
+<div class="row">
+	  <div class="col-sm-1"></div>
+	  <div class="col-sm-5">
+	  #{f.input 'list['+ott_index+'].beginMealSlot', value:ott.beginMealSlot, type:text /}
+	  </div>
+	  <div class="col-sm-5">
+	  #{f.input 'list['+ott_index+'].endMealSlot', value:ott.endMealSlot, type:text /}
+	  </div>	  
+</div>
+</div>
+
+
+<div class="row">
+	<div class="col-sm-offset-4"></div>
+	#{f.input 'list['+ott_index+'].minutesPaid', value:ott.minutesPaid, type:'number' /}
+	#{f.selectEnum 'list['+ott_index+'].paymentType', items:paymentTypes, value:ott.paymentType, class:'ott-'+ott_index /}
+	
+</div>
+
+#{/list}
+
+
+
+</div>
+#{/panel}
+
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {					
+		$("input[type=radio]").change(function(){
+			$("#meal-panel-" + this.getAttribute("class")).toggle();	
+		});
+	 });
+	</script>
+#{/set}

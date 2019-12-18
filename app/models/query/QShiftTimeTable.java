@@ -26,6 +26,8 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final EnumPath<models.enumerate.CalculationType> calculationType = createEnum("calculationType", models.enumerate.CalculationType.class);
+
     public final TimePath<org.joda.time.LocalTime> endAfternoon = createTime("endAfternoon", org.joda.time.LocalTime.class);
 
     public final TimePath<org.joda.time.LocalTime> endAfternoonLunchTime = createTime("endAfternoonLunchTime", org.joda.time.LocalTime.class);

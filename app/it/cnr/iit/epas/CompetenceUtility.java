@@ -312,21 +312,21 @@ public class CompetenceUtility {
 
       // legge l'orario di inizio e fine turno da rispettare (mattina o pomeriggio)
       LocalTime startShift =
-          (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING))
+          (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
               ? personShiftDay.shiftType.shiftTimeTable.startMorning
               : personShiftDay.shiftType.shiftTimeTable.startAfternoon;
       LocalTime endShift =
-          (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING))
+          (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
               ? personShiftDay.shiftType.shiftTimeTable.endMorning
               : personShiftDay.shiftType.shiftTimeTable.endAfternoon;
 
       // legge l'orario di inizio e fine pausa pranzo del turno
       LocalTime startLunchTime =
-          (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING))
+          (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
               ? personShiftDay.shiftType.shiftTimeTable.startMorningLunchTime
               : personShiftDay.shiftType.shiftTimeTable.startAfternoonLunchTime;
       LocalTime endLunchTime =
-          (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING))
+          (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
               ? personShiftDay.shiftType.shiftTimeTable.endMorningLunchTime
               : personShiftDay.shiftType.shiftTimeTable.endAfternoonLunchTime;
 

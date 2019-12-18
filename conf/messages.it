@@ -91,6 +91,9 @@ from=Da
 to=A
 recoveryDate=Da recuperare entro
 
+calculationType=Tipo di conteggio dei turni
+paymentType=Tipo di pagamento
+
 calendar.competencesApproved = Le competenze per questo mese sono state approvate
 calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
 calendar.removeApprovation= Rimuovi approvazione
@@ -281,6 +284,10 @@ generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
 generalSetting.onlyMealTicket =Invio solo dei buoni pasto
+generalSetting.startDailyShift =Inizio fascia per turno diurno
+generalSetting.endDailyShift =Fine fascia per turno diurno
+generalSetting.startNightlyShift =Inizio fascia per turno notturno
+generalSetting.endNightlyShift =Fine fascia per turno notturno
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -313,6 +320,38 @@ link.zoneLinked =Zona di arrivo
 logout= Esci
 lunchPauseEnd= Fine pausa pranzo
 lunchPauseStart= Inizio pausa pranzo
+
+list[1].beginSlot=Inizio turno
+list[1].endSlot=Fine turno
+list[1].isMealActive=Pausa pranzo attiva
+list[1].beginMealSlot=Inizio pausa pranzo
+list[1].endMealSlot=Fine pausa pranzo
+list[1].paymentType=Modalità di pagamento
+list[1].minutesPaid=Minuti pagati
+
+list[2].beginSlot=Inizio turno
+list[2].endSlot=Fine turno
+list[2].isMealActive=Pausa pranzo attiva
+list[2].beginMealSlot=Inizio pausa pranzo
+list[2].endMealSlot=Fine pausa pranzo
+list[2].paymentType=Modalità di pagamento
+list[2].minutesPaid=Minuti pagati
+
+list[3].beginSlot=Inizio turno
+list[3].endSlot=Fine turno
+list[3].isMealActive=Pausa pranzo attiva
+list[3].beginMealSlot=Inizio pausa pranzo
+list[3].endMealSlot=Fine pausa pranzo
+list[3].paymentType=Modalità di pagamento
+list[3].minutesPaid=Minuti pagati
+
+list[4].beginSlot=Inizio turno
+list[4].endSlot=Fine turno
+list[4].isMealActive=Pausa pranzo attiva
+list[4].beginMealSlot=Inizio pausa pranzo
+list[4].endMealSlot=Fine pausa pranzo
+list[4].paymentType=Modalità di pagamento
+list[4].minutesPaid=Minuti pagati
 
 manageNoOwnerUsers= Gestione Utenti di Sistema/Orfani
 manageUsers= Gestione Utenti
@@ -821,6 +860,9 @@ AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 
+CalculationType.standard_CNR=Calcolo standard CNR
+CalculationType.percentage=Calcolo percentuale (es.:INAF)
+
 
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
@@ -839,6 +881,9 @@ LimitUnit.month =Mese
 
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
+
+PaymentType.T1 = Pagamento tutto imputato su competenza turno diurno
+PaymentType.SPLIT_CALCULATION = Pagamento splittato in base alla fascia
 
 reperibility.personInactive = Persona non attiva sulla reperibilità
 reperibility.alreadyInReperibility = Già in reperibilità per l'attività %s

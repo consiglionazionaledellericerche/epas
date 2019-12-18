@@ -36,12 +36,12 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final QOrganizationShiftSlot organizationShiftSlot;
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final QPersonShift personShift;
-
-    public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
 
     public final QShiftType shiftType;
 
@@ -68,6 +68,7 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
 
     public QPersonShiftDay(Class<? extends PersonShiftDay> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.organizationShiftSlot = inits.isInitialized("organizationShiftSlot") ? new QOrganizationShiftSlot(forProperty("organizationShiftSlot"), inits.get("organizationShiftSlot")) : null;
         this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;
         this.shiftType = inits.isInitialized("shiftType") ? new QShiftType(forProperty("shiftType"), inits.get("shiftType")) : null;
     }
