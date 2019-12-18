@@ -76,6 +76,8 @@ public class WorkingTimeType extends BaseModel {
   @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
   @OrderBy("dayOfWeek")
   public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
+  
+  public boolean enableAdjustmentForQuantity = true;
 
   @Override
   public String toString() {
