@@ -1,7 +1,10 @@
 $(document).ready(function() {
   // Salva il valore del radiobutton in modo da poterlo risettare ad ogni reload
+  $(document.body).on('change', 'input[name="organizationShiftslot"]', function(e) {
+    localStorage.setItem('organizationShiftslot', $(this).val());
+  });
   $(document.body).on('change', 'input[name="shiftSlot"]', function(e) {
-    localStorage.setItem('shiftSlot', $(this).val());
+	localStorage.setItem('shiftSlot', $(this).val());
   });
   // Calendario dei turni
   $('[data-calendar]', this).each(function() {
@@ -209,6 +212,7 @@ $(document).ready(function() {
       data['eventReceive'] = function(event) {
         var url = $this.data('calendar-external-drop');
         // Recupero il valore del radiobutton relativo allo slot per passarlo al controller
+        var organizationShiftslot = $('input[name="organizationShiftslot"]:checked').val();
         var shiftSlot = $('input[name="shiftSlot"]:checked').val();
         // Recupero il valore dell'attuale ShiftType selezionato dalla select
         var activity = $('#activity').val();
@@ -219,6 +223,7 @@ $(document).ready(function() {
             personId: event.personId,
             date: event.start.format($dateFormat),
             shiftSlot: shiftSlot,
+            'organizationShiftslot.id': organizationShiftslot,
             activityId: activity
           },
           error: function(response) {
@@ -261,9 +266,14 @@ $(document).ajaxStop(function() {
     }
   });
   // Recupera il valore dal LocalStorage del browser
-  var radioValue = localStorage.getItem('shiftSlot');
+  var radioValue = localStorage.getItem('organizationShiftslot');
   // Imposta il valore del radioButton corrispondente
-  $('input[name="shiftSlot"][value=' + radioValue + ']').prop("checked", true);
+  $('input[name="organizationShiftslot"][value=' + radioValue + ']').prop("checked", true);
+  
+//Recupera il valore dal LocalStorage del browser
+  var radioValue2 = localStorage.getItem('shiftSlot');
+  // Imposta il valore del radioButton corrispondente
+  $('input[name="shiftSlot"][value=' + radioValue2 + ']').prop("checked", true);
 });
 
 function getCurrentViewDate(input) {

@@ -76,7 +76,8 @@ public class ShiftDao extends DaoBase {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
     return getQueryFactory().selectFrom(psd)
         .where(psd.date.between(begin, to)
-            .and(psd.shiftType.eq(type))).orderBy(psd.shiftSlot.asc(), psd.date.asc())
+            .and(psd.shiftType.eq(type))).orderBy(psd.organizationShiftSlot.name.asc(), 
+                psd.date.asc())
         .fetch();
   }
 
@@ -92,7 +93,7 @@ public class ShiftDao extends DaoBase {
         .where(psd.date.between(begin, to)
             .and(psd.shiftType.eq(type))
             .and(psd.personShift.person.eq(person)))
-        .orderBy(psd.shiftSlot.asc(), psd.date.asc())
+        .orderBy(psd.organizationShiftSlot.name.asc(), psd.date.asc())
         .fetch();
   }
 

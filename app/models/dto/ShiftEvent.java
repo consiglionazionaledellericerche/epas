@@ -1,10 +1,12 @@
 package models.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+import models.OrganizationShiftSlot;
 import models.enumerate.EventColor;
 import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDateTime;
@@ -16,6 +18,7 @@ import org.joda.time.LocalDateTime;
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)
+
 public class ShiftEvent {
 
   // Campi di default dell'eventObject fullcalendar
@@ -42,7 +45,8 @@ public class ShiftEvent {
   // CAMPI CUSTOM
   private Long personShiftDayId;
   private Long personId;
-  private ShiftSlot shiftSlot;
+  @JsonIgnore
+  private OrganizationShiftSlot organizationShiftslot;
   private EventColor eventColor;
   private List<String> troubles;
   private String email;

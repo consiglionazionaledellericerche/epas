@@ -1,5 +1,6 @@
 package models.exports;
 
+import models.OrganizationShiftSlot;
 import models.Person;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
@@ -19,13 +20,13 @@ public class ShiftPeriod {
   public final boolean cancelled;
   public Person person;
   public LocalDate end;
-  public ShiftSlot shiftSlot;
+  public OrganizationShiftSlot shiftSlot;
   public LocalTime startSlot;
   public LocalTime endSlot;
 
   public ShiftPeriod(
       Person person, LocalDate start, LocalDate end, ShiftType shiftType,
-      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+      boolean cancelled, OrganizationShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -37,7 +38,7 @@ public class ShiftPeriod {
   }
 
   public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType,
-      boolean cancelled, ShiftSlot shiftSlot) {
+      boolean cancelled, OrganizationShiftSlot shiftSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -48,7 +49,7 @@ public class ShiftPeriod {
 
   // for periods of 1 day where end date is null
   public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType,
-      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+      boolean cancelled, OrganizationShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.shiftType = shiftType;

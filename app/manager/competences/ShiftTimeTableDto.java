@@ -8,6 +8,7 @@ package manager.competences;
 public class ShiftTimeTableDto {
 
   public long id;
+  public String calculationType;
   public String startMorning;
   public String endMorning;
   public String startAfternoon;
