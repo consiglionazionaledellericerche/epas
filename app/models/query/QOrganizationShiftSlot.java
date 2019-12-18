@@ -42,9 +42,9 @@ public class QOrganizationShiftSlot extends EntityPathBase<OrganizationShiftSlot
 
     public final NumberPath<Integer> minutesPaid = createNumber("minutesPaid", Integer.class);
 
-    public final NumberPath<Integer> minutesSlot = createNumber("minutesSlot", Integer.class);
-
     public final StringPath name = createString("name");
+
+    public final EnumPath<models.enumerate.PaymentType> paymentType = createEnum("paymentType", models.enumerate.PaymentType.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

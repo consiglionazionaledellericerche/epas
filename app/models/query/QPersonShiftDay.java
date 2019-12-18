@@ -43,6 +43,8 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
 
     public final QPersonShift personShift;
 
+    public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
+
     public final QShiftType shiftType;
 
     public final SetPath<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble> troubles = this.<models.PersonShiftDayInTrouble, QPersonShiftDayInTrouble>createSet("troubles", models.PersonShiftDayInTrouble.class, QPersonShiftDayInTrouble.class, PathInits.DIRECT2);
