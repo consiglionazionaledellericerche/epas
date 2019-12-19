@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
@@ -85,12 +86,18 @@ public class ShiftType extends BaseModel {
   @JoinColumn(name = "shift_time_table_id")
   public ShiftTimeTable shiftTimeTable;
 
+  @NotAudited
+  @ManyToOne
+  @JoinColumn(name = "organization_shift_time_table_id")
+  public OrganizationShiftTimeTable organizaionShiftTimeTable;
+  
   //@Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "shift_categories_id")
   public ShiftCategories shiftCategories;
 
   @OneToMany(mappedBy = "shiftType", cascade = CascadeType.REMOVE)
+  @OrderBy("yearMonth DESC")
   public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
 
   @Override

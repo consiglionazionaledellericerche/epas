@@ -10,9 +10,17 @@
   
   #{accordionGroup 'info'}
     #{accordionItem 'orario', parent:'info', title:'Informazioni', open:true}
+      #{if office.endDate != null}
+      <div class="alert alert-danger" role="alert">
+    	La sede <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong> è chiusa.
+      </div>
+      #{/if}
+      
+      #{else}    
   	  <div class="alert alert-success" role="alert">
     	Modifica i dati di <strong>${office.name}</strong> appartenente a <strong>${office.institute.name}</strong>
       </div>
+      #{/else}
 		#{form action:@save(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }
 			
@@ -25,6 +33,10 @@
 	        #{f.input 'office.address'/}
 	        #{secure.check 'Office.updateBeginDate'}
 	        	#{f.date 'office.beginDate' /}
+	        	#{f.date 'office.endDate' /}
+	        #{/secure.check}
+	        #{secure.check 'Office.updatePerseoId'}
+	        	#{f.input 'office.perseoId' /}
 	        #{/secure.check}
 	        #{f.booleanRadio 'office.headQuarter'/}
 	        

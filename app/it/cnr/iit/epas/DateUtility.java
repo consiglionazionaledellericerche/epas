@@ -168,7 +168,7 @@ public class DateUtility {
   }
 
   /**
-   * L'intervallo contenente l'intersezione fra inter1 e inter2.
+   * L'intervallo di date contenente l'intersezione fra inter1 e inter2.
    * @param inter1 primo intervallo
    * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
@@ -226,6 +226,47 @@ public class DateUtility {
     return days;
 
   }
+  
+  /**
+   * L'intervallo orario contenente l'intersezione fra inter1 e inter2.
+   * @param inter1 primo intervallo
+   * @param inter2 secondo intervallo
+   * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
+   *         intersezione vuota.
+   */
+  public static TimeInterval intervalIntersection(final TimeInterval inter1, 
+      final TimeInterval inter2) {
+  
+    if (inter1 == null || inter2 == null) {
+      return null;
+    }
+    
+    // un intervallo contenuto nell'altro
+    if (isIntervalIntoAnother(inter1, inter2)) {
+      return new TimeInterval(inter1.getBegin(), inter1.getEnd());
+    }
+
+    if (isIntervalIntoAnother(inter2, inter1)) {
+      return new TimeInterval(inter2.getBegin(), inter2.getEnd());
+    }
+
+    TimeInterval copy1 = new TimeInterval(inter1.getBegin(), inter1.getEnd());
+    TimeInterval copy2 = new TimeInterval(inter2.getBegin(), inter2.getEnd());
+
+    // ordino
+    if (!inter1.getBegin().isBefore(inter2.getBegin())) {
+      TimeInterval aux = new TimeInterval(inter1.getBegin(), inter1.getEnd());
+      copy1 = inter2;
+      copy2 = aux;
+    }
+ 
+    // fine di inter1 si interseca con inizio di inter2
+    if (copy1.getEnd().isBefore(copy2.getBegin())) {
+      return null;
+    } else {
+      return new TimeInterval(copy2.getBegin(), copy1.getEnd());
+    }
+  }
 
   /**
    * Conta il numero di mesi appartenenti all'intervallo, estremi compresi.
@@ -237,12 +278,27 @@ public class DateUtility {
   }
 
   /**
-   * Se il primo intervallo è contenuto nel secondo intervallo.
+   * Se il primo intervallo di date è contenuto nel secondo intervallo.
    * @param first  il primo intervallo
    * @param second il secondo intervallo
-   * @return se il primo interllallo è contenuto nel secondo intervallo.
+   * @return se il primo intervallo di date è contenuto nel secondo intervallo.
    */
   public static boolean isIntervalIntoAnother(final DateInterval first, final DateInterval second) {
+
+    if (first.getBegin().isBefore(second.getBegin()) 
+        || first.getEnd().isAfter(second.getEnd())) {
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Se il primo intervallo di orari è contenuto nel secondo intervallo.
+   * @param first  il primo intervallo
+   * @param second il secondo intervallo
+   * @return se il primo intervallo di orari è contenuto nel secondo intervallo.
+   */
+  public static boolean isIntervalIntoAnother(final TimeInterval first, final TimeInterval second) {
 
     if (first.getBegin().isBefore(second.getBegin()) 
         || first.getEnd().isAfter(second.getEnd())) {
