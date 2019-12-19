@@ -485,9 +485,12 @@ public class MissionManager {
                 
         absence.save();
         
-        final User currentUser = Security.getUser().get();
-        notificationManager.notificationAbsencePolicy(currentUser, 
-            absence, group, true, false, false);
+        final Optional<User> currentUser = Security.getUser();
+        if (currentUser.isPresent()) {
+          notificationManager.notificationAbsencePolicy(currentUser.get(), 
+              absence, group, true, false, false);  
+        }
+
         log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", absence.absenceType.code, 
             absence.personDay.date, absence.personDay.person.fullName());
 
