@@ -1,6 +1,6 @@
 <h4>
   #{secure.link @Offices.edit(seat.id),target:seat,fa:'cogs',class:'list-group-item-heading'}
-    ${seat.name}
+    ${seat.name} #{if seat.endDate != null} (CHIUSA) #{/if}
   #{/secure.link}
 </h4>
 

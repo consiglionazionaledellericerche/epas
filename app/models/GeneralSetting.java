@@ -1,9 +1,11 @@
 package models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalTime;
 
 @ToString
 @Entity
@@ -25,4 +27,15 @@ public class GeneralSetting extends BaseModel {
   public boolean onlyMealTicket = false;
 
   // Fine parametri gestione invio dati a fine mese
+  
+  // Parametri gestione codici di competenza turno
+  
+  public String startDailyShift = "6:00";
+  
+  public String endDailyShift = "19:00";
+  
+  public String startNightlyShift = "19:00";
+  
+  public String endNightlyShift = "6:00";
+  // Fine parametri gestione codici di competenza turno
 }

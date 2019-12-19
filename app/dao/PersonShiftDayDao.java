@@ -7,6 +7,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonShift;
 import models.PersonShiftDay;
@@ -74,12 +75,12 @@ public class PersonShiftDayDao extends DaoBase {
    * 'shiftSlot'.
    */
   public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
-      ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
+      ShiftType shiftType, LocalDate date, OrganizationShiftSlot shiftSlot) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
     return getQueryFactory().selectFrom(personShiftDay).where(personShiftDay.date.eq(date)
         .and(personShiftDay.shiftType.eq(shiftType)
-            .and(personShiftDay.shiftSlot.eq(shiftSlot))))
+            .and(personShiftDay.organizationShiftSlot.eq(shiftSlot))))
         .fetchFirst();
   }
 

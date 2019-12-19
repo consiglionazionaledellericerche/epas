@@ -10,3 +10,4 @@ SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, name  FROM roles WHERE name
 
 # ---!Downs
 --Non è necessaria una down
+

@@ -27,4 +27,18 @@
         #{/b.buttons}
   	#{/form}
   #{/accordionItem}
+    #{accordionItem 'shiftTimeTable', parent:'generalSetting', title:'Orari per attribuzione codici di turno', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Specifica gli orari di inizio e fine delle fasce per i codici di turno #{/alert}
+		#{f.input 'generalSetting.startDailyShift', type:text /}
+		#{f.input 'generalSetting.endDailyShift', type:text /}
+		#{f.input 'generalSetting.startNightlyShift', type:text /}
+		#{f.input 'generalSetting.endNightlyShift', type:text /}
+  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
 #{/accordionGroup}

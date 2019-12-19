@@ -34,6 +34,7 @@
 		#{alert color:'info'}
 			<strong>Configurazione timetable (2)</strong>
 		#{/alert}
+		#{if stt != null}
 		<div class="row">
 			
 	  		<div class="col-sm-6">
@@ -88,3 +89,28 @@
 			#{f.view 'Fine pausa pranzo turno notturno', value:stt.endEveningLunchTime /}
 			</div>
 		</div>
+		#{/if}
+		#{else}
+		
+		#{list items:ostt.organizationShiftSlot, as:'slot'}
+		<div class="row">
+			
+	  		<div class="col-sm-6">
+				#{f.view 'Inizio slot', value:slot.beginSlot /}
+			</div>
+	  		<div class="col-sm-6">
+				#{f.view 'Fine slot', value:slot.endSlot /}
+			</div>
+			#{if slot.beginMealSlot != null}
+			<div class="col-sm-6">
+				#{f.view 'Inizio pranzo slot', value:slot.beginMealSlot /}
+			</div>			
+			#{/if}
+			#{if slot.endMealSlot != null}
+			<div class="col-sm-6">
+				#{f.view 'Fine pranzo slot', value:slot.endMealSlot /}
+			</div>
+			#{/if}
+		</div>
+		#{/list}
+		#{/else}
