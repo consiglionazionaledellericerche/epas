@@ -14,6 +14,7 @@ import manager.configurations.ConfigurationManager;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
 
@@ -27,6 +28,8 @@ import org.joda.time.LocalDate;
  */
 public class H2Examples {
 
+  public final static long DEFAULT_PERSON_QUALIFICATION = 4L;
+  
   private final H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport;
   private final ConfigurationManager configurationManager;
   private final ContractManager contractManager;
@@ -82,6 +85,7 @@ public class H2Examples {
     person.surname = "Surname " + username;
     person.user = user;
     person.office = office;
+    person.qualification = Qualification.findById(DEFAULT_PERSON_QUALIFICATION);
     person.save();
     configurationManager.updateConfigurations(person);
     return person;
