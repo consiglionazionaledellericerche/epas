@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import lombok.ToString;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.errors.ErrorsBox;
 
@@ -18,6 +18,7 @@ import models.absences.GroupAbsenceType;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
+@ToString
 public class PeriodChain {
   
   public Person person;

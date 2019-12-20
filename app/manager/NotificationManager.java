@@ -124,7 +124,7 @@ public class NotificationManager {
   private void notifyAbsence(Absence absence, User currentUser, Crud operation) {
     Verify.verifyNotNull(absence);
     final Person person = absence.personDay.person;
-    final String template;
+    String template;
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova assenza: %s - %s";
     } else if (Crud.UPDATE == operation) {
@@ -137,9 +137,11 @@ public class NotificationManager {
     String modifier = "";
     if (currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
       modifier = currentUser.username;
+      template = template + String.format(" di %s", person.fullName());
     } else {
       modifier = person.fullName();
     }
+    
     final String message = String.format(template, modifier,
         absence.personDay.date.toString(DF), absence.absenceType.code);
     //controllare se dalla configurazione è possibile notificare le assenze da flusso 
