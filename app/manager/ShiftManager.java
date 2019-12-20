@@ -690,11 +690,11 @@ public class ShiftManager {
     for (PersonShiftDay psd : personShiftDays) {
 
       LocalTime startShift =
-          (psd.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
+          (psd.shiftSlot.equals(ShiftSlot.MORNING))
               ? psd.shiftType.shiftTimeTable.startMorning
               : psd.shiftType.shiftTimeTable.startAfternoon;
       LocalTime endShift =
-          (psd.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
+          (psd.shiftSlot.equals(ShiftSlot.MORNING))
               ? psd.shiftType.shiftTimeTable.endMorning
               : psd.shiftType.shiftTimeTable.endAfternoon;
 
@@ -705,7 +705,7 @@ public class ShiftManager {
         shiftPeriod =
             new ShiftPeriod(
                 psd.personShift.person, psd.date, psd.date, psd.shiftType,
-                false, psd.organizationShiftSlot, startShift, endShift);
+                false, psd.shiftSlot, startShift, endShift);
         shiftPeriods.add(shiftPeriod);
         log.debug("\nCreato nuovo shiftPeriod, person={}, start={}, end={}, type={}, fascia={}, "
                 + "orario={} - {}",
@@ -835,7 +835,7 @@ public class ShiftManager {
           }
           personShiftDay.date = day;
           personShiftDay.shiftType = shiftType;
-          personShiftDay.organizationShiftSlot = shiftPeriod.shiftSlot;
+          personShiftDay.shiftSlot = shiftPeriod.shiftSlot;
           personShiftDay.personShift = personShift;
 
           personShiftDay.save();
