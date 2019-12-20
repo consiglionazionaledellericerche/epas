@@ -46,9 +46,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
   @Inject
   private static PersonDao personDao;
   
-  @Inject
-  private static OrganizationShiftTimeTableDao slotDao;
-
+  
   /**
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
@@ -97,19 +95,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
           // read and validate the shift slot (MORNING/AFTERNOON)
           String shiftSlotDesc = jsonObject.get("shiftSlot").getAsString();
           log.debug("Leggo dal json shiftSlotDesc={}", shiftSlotDesc);
-          /**
-           * Aggiunto questo pezzo per continuare a far funzionare la comunicazione con SISTORG
-           * dopo la modifica del modello relativo ai turni per renderlo generico.
-           */
-          OrganizationShiftSlot shiftSlot = null;
-          Optional<OrganizationShiftSlot> slot = slotDao.getByNameAndPrefix(shiftSlotDesc, "IIT");
-          if (slot.isPresent()) {
-            shiftSlot = slot.get();
-          }
-          //ShiftSlot shiftSlot = ShiftSlot.getEnum(shiftSlotDesc);
-          /**
-           * Fine modifica
-           */
+          
+          ShiftSlot shiftSlot = ShiftSlot.getEnum(shiftSlotDesc);
           log.debug("Cerca e controlla shiftSlot={}", shiftSlot);
           if (shiftSlot == null) {
             throw new IllegalArgumentException(

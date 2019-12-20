@@ -75,12 +75,12 @@ public class PersonShiftDayDao extends DaoBase {
    * 'shiftSlot'.
    */
   public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
-      ShiftType shiftType, LocalDate date, OrganizationShiftSlot shiftSlot) {
+      ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 
     return getQueryFactory().selectFrom(personShiftDay).where(personShiftDay.date.eq(date)
         .and(personShiftDay.shiftType.eq(shiftType)
-            .and(personShiftDay.organizationShiftSlot.eq(shiftSlot))))
+            .and(personShiftDay.shiftSlot.eq(shiftSlot))))
         .fetchFirst();
   }
 
