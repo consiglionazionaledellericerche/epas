@@ -32,6 +32,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
 
     public final BooleanPath disabled = createBoolean("disabled");
 
+    public final BooleanPath enableAdjustmentForQuantity = createBoolean("enableAdjustmentForQuantity");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
