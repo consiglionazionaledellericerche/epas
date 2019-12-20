@@ -24,6 +24,7 @@ import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
+import models.Badge;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -274,6 +275,10 @@ public class Persons extends Controller {
 
     for (Contract c : person.contracts) {
       c.delete();
+    }
+    
+    for (Badge b : person.badges) {
+      b.delete();
     }
 
     JPAPlugin.closeTx(false);
