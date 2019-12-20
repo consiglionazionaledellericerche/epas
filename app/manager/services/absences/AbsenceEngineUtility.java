@@ -543,7 +543,7 @@ public class AbsenceEngineUtility {
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;
         
-        if (workTimeAdjustment) {
+        if (workTimeAdjustment && cwtt.workingTimeType.enableAdjustmentForQuantity) {
           //Adeguamento sull'incidenza del tipo orario
           cwttAssigned = (cwttAssigned * cwtt.getWorkingTimeType().percentEuristic()) / 100;
         }

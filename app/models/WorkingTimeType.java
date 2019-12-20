@@ -160,9 +160,9 @@ public class WorkingTimeType extends BaseModel {
     int totalDays = 0;
     for (WorkingTimeTypeDay workingTimeTypeDay : this.workingTimeTypeDays) {
       if (!workingTimeTypeDay.holiday) {
-        totalMinutes += workingTimeTypeDay.workingTime;
-        totalDays++;
+        totalMinutes += workingTimeTypeDay.workingTime;        
       }
+      totalDays++;
     }
     if (totalDays == 0) {
       return 100;
