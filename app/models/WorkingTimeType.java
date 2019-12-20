@@ -76,6 +76,8 @@ public class WorkingTimeType extends BaseModel {
   @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
   @OrderBy("dayOfWeek")
   public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
+  
+  public boolean enableAdjustmentForQuantity = true;
 
   @Override
   public String toString() {
@@ -158,9 +160,9 @@ public class WorkingTimeType extends BaseModel {
     int totalDays = 0;
     for (WorkingTimeTypeDay workingTimeTypeDay : this.workingTimeTypeDays) {
       if (!workingTimeTypeDay.holiday) {
-        totalMinutes += workingTimeTypeDay.workingTime;
-        totalDays++;
+        totalMinutes += workingTimeTypeDay.workingTime;        
       }
+      totalDays++;
     }
     if (totalDays == 0) {
       return 100;
