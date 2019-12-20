@@ -23,6 +23,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final StringPath endDailyShift = createString("endDailyShift");
+
+    public final StringPath endNightlyShift = createString("endNightlyShift");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
@@ -33,6 +37,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final StringPath startDailyShift = createString("startDailyShift");
+
+    public final StringPath startNightlyShift = createString("startNightlyShift");
 
     public final BooleanPath syncBadgesEnabled = createBoolean("syncBadgesEnabled");
 

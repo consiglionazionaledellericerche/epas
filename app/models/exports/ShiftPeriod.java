@@ -20,13 +20,13 @@ public class ShiftPeriod {
   public final boolean cancelled;
   public Person person;
   public LocalDate end;
-  public OrganizationShiftSlot shiftSlot;
+  public ShiftSlot shiftSlot;
   public LocalTime startSlot;
   public LocalTime endSlot;
 
   public ShiftPeriod(
       Person person, LocalDate start, LocalDate end, ShiftType shiftType,
-      boolean cancelled, OrganizationShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -38,7 +38,7 @@ public class ShiftPeriod {
   }
 
   public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType,
-      boolean cancelled, OrganizationShiftSlot shiftSlot) {
+      boolean cancelled, ShiftSlot shiftSlot) {
     this.person = person;
     this.start = start;
     this.end = end;
@@ -49,7 +49,7 @@ public class ShiftPeriod {
 
   // for periods of 1 day where end date is null
   public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType,
-      boolean cancelled, OrganizationShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
+      boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
     this.person = person;
     this.start = start;
     this.shiftType = shiftType;
