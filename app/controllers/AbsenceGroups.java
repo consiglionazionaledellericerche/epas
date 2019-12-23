@@ -1383,7 +1383,7 @@ public class AbsenceGroups extends Controller {
         IWrapperPerson wrPerson = wrapperFactory.create(person);
         Optional<Contract> contract = wrPerson.getCurrentContract();
         if (contract.isPresent()) {
-          contract.get().sourceDateRecoveryDay = updateFrom;
+          contract.get().sourceDateRecoveryDay = absence.getAbsenceDate();
           contract.get().sourceRecoveryDayUsed ++;
           contract.get().save();
         }
