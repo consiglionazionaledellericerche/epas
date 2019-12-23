@@ -814,7 +814,7 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
   
   A_OAM("OAM", "Ore aggiuntive in ore e minuti",
-      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, true,
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes_limit), 0, false, true,
       0, null, Sets.newHashSet(), new LocalDate(2019,2,1), null, false),
   A_OA1("OA1", "ore aggiuntive 1",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,

@@ -240,7 +240,8 @@ public class AbsenceForm {
   }
   
   public boolean hasHourMinutesChoice() {
-    return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes);
+    return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes)
+        || justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes_limit);
   }
   
   public boolean hasToChoice() {
