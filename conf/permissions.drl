@@ -505,6 +505,9 @@ when
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
+		/* Richieste di straordinario */
+		"CompetenceRequests.overtimes",
+		"CompetenceRequests.list",
 		
      	/* Ferie */
      	"Vacations.show",
@@ -1061,8 +1064,7 @@ when
 		"AbsenceRequests.list",
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		
+		"AbsenceRequests.compensatoryRestsToApprove",		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",

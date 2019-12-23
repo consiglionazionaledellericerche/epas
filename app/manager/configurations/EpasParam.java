@@ -333,6 +333,18 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  /**
+   * Attivazione o meno delle richieste di straordinario
+   */
+  ENABLE_OVERTIME_FLOWS(
+      "enable_overtime_flows",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   SEND_FLOWS_NOTIFICATION("send_flows_notification",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.GENERAL,
@@ -463,6 +475,32 @@ public enum EpasParam {
    */
   COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
       "compensatory_rest_manager_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte del 
+   * responsabile di sede.
+   */
+  OVERTIME_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "overtime_request_iv_viii_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte dell'eventuale
+   * responsabile del gruppo di lavoro.
+   */
+  OVERTIME_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "overtime_request_iv_viii_manager_approval_required",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

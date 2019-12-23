@@ -22,6 +22,12 @@
 
     *{ items }*
     <ul class="dropdown-menu">
+    
+      #{secure.li @CompetenceRequests.overtimes()}
+        <i class="fa fa-money" aria-hidden="true"></i>
+      #{/secure.li}
+    
+      <li class="divider"></li>
 
       #{secure.li @AbsenceRequests.vacations()}
         <i class="fa fa-plane" aria-hidden="true"></i>

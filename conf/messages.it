@@ -803,6 +803,8 @@ AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 
+CompetenceRequests.overtime =Mie richieste di straordinari
+
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
