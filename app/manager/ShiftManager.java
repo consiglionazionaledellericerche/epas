@@ -170,7 +170,7 @@ public class ShiftManager {
 
       // legge gli orari del turno a seconda dello slot  associato
       // in quel giorno (mattina, pomeriggio)
-      if (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name())) {
+      if (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) {
         startShift = morningStartShift;
         endShift = morningEndShift;
         startLunchTime = startMorningLunch;
@@ -1257,12 +1257,12 @@ public class ShiftManager {
       String currShift = personShiftDay.shiftType.type;
 
       if (!shiftCalendar.contains(currShift, day)) {
-        shift = (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
+        shift = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING))
             ? new Sd(person, null) : new Sd(null, person);
         shiftCalendar.put(currShift, day, shift);
       } else {
         shift = shiftCalendar.get(currShift, day);
-        if (personShiftDay.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name())) {
+        if (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) {
           log.debug("Completo turno di {} con la mattina di {}", day, person);
           shift.mattina = person;
         } else {
@@ -1409,10 +1409,10 @@ public class ShiftManager {
     for (PersonShiftDay psd : personShiftDays) {
 
       LocalTime startShift =
-          (psd.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
+          (psd.shiftSlot.equals(ShiftSlot.MORNING))
               ? psd.shiftType.shiftTimeTable.startMorning
               : psd.shiftType.shiftTimeTable.startAfternoon;
-      LocalTime endShift = (psd.organizationShiftSlot.name.equals(ShiftSlot.MORNING.name()))
+      LocalTime endShift = (psd.shiftSlot.equals(ShiftSlot.MORNING))
           ? psd.shiftType.shiftTimeTable.endMorning
           : psd.shiftType.shiftTimeTable.endAfternoon;
 
