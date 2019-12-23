@@ -304,9 +304,11 @@ public class Calendar extends Controller {
   private static List<ShiftEvent> absenceEvents(Person person, LocalDate start, LocalDate end) {
 
     final List<JustifiedTypeName> types = ImmutableList
-        .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
+        .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day, 
+            JustifiedTypeName.complete_day_and_add_overtime);
 
-    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types);
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
+        Optional.<Boolean>absent());
     List<ShiftEvent> events = new ArrayList<>();
     ShiftEvent event = null;
 

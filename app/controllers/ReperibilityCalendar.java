@@ -419,9 +419,11 @@ public class ReperibilityCalendar extends Controller {
       LocalDate start, LocalDate end) {
 
     final List<JustifiedTypeName> types = ImmutableList
-        .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day);
+        .of(JustifiedTypeName.all_day, JustifiedTypeName.assign_all_day, 
+            JustifiedTypeName.complete_day_and_add_overtime);
 
-    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types);
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
+        Optional.fromNullable(false));
     List<ReperibilityEvent> events = new ArrayList<>();
     ReperibilityEvent event = null;
 
