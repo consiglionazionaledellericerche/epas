@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import models.Person;
+import models.flows.CompetenceRequest;
 import models.flows.enumerate.CompetenceRequestType;
 
 public class CompetenceRequestManager {
@@ -19,5 +20,7 @@ public class CompetenceRequestManager {
     boolean administrativeApprovalRequired;    
   }
   
-  
+  public void configure(CompetenceRequest competenceRequest) {
+    
+  }
 }
