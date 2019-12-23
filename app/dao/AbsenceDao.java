@@ -341,15 +341,20 @@ public class AbsenceDao extends DaoBase {
    * @return la lista di assenze filtrata per persona, data inizio, data fine.
    */
   public List<Absence> filteredByTypes(Person person, LocalDate start, LocalDate end,
-      Collection<JustifiedTypeName> types) {
+      Collection<JustifiedTypeName> types, Optional<Boolean> compatibleReperibility) {
     final QAbsence absence = QAbsence.absence;
     final QPersonDay personDay = QPersonDay.personDay;
 
+    BooleanBuilder condition = new BooleanBuilder();
+    if (compatibleReperibility.isPresent()) {
+      condition.and(absence.absenceType.reperibilityCompatible.isFalse());
+    }
     return  getQueryFactory().selectFrom(absence)
         .leftJoin(absence.personDay, personDay).fetchJoin()
         .where(personDay.person.eq(person)
             .and(personDay.date.between(start, end))
-            .and(absence.justifiedType.name.in(types)))
+            .and(absence.justifiedType.name.in(types))
+            .and(condition))
         .orderBy(personDay.date.asc()).fetch();
 
   }
