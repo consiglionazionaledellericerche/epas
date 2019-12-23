@@ -21,7 +21,7 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-
+import org.joda.time.DateTimeConstants;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -162,7 +162,11 @@ public class WorkingTimeType extends BaseModel {
       if (!workingTimeTypeDay.holiday) {
         totalMinutes += workingTimeTypeDay.workingTime;        
       }
-      totalDays++;
+      if (workingTimeTypeDay.dayOfWeek != DateTimeConstants.SATURDAY 
+          && workingTimeTypeDay.dayOfWeek != DateTimeConstants.SUNDAY) {
+        totalDays++;
+      }
+      
     }
     if (totalDays == 0) {
       return 100;
