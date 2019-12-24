@@ -15,6 +15,7 @@ public class CompetenceRequestManager {
   public class CompetenceRequestConfiguration {
     final Person person;
     final CompetenceRequestType type;
+    boolean employeeApprovalRequired;
     boolean officeHeadApprovalRequired;
     boolean managerApprovalRequired;
     boolean administrativeApprovalRequired;    

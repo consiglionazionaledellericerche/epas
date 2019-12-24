@@ -486,8 +486,8 @@ public enum EpasParam {
    * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte del 
    * responsabile di sede.
    */
-  OVERTIME_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "overtime_request_iv_viii_office_head_approval_required",
+  OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "overtime_request_office_head_approval_required",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
@@ -499,8 +499,20 @@ public enum EpasParam {
    * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte dell'eventuale
    * responsabile del gruppo di lavoro.
    */
-  OVERTIME_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
-      "overtime_request_iv_viii_manager_approval_required",
+  OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED(
+      "overtime_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte di un impiegato.
+   */
+  OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED(
+      "overtime_request_employee_approval_required",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
