@@ -40,6 +40,40 @@ AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
 AbsenceRequestType.VACATION_REQUEST=Ferie
 AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
 
+competenceRequest =richiesta di competenza
+
+competenceRequest.endTo =Fine
+competenceRequest.note =Note informative
+competenceRequest.person =Dipendente
+competenceRequest.startAt =Inizio
+competenceRequest.type =Tipologia
+competenceRequest.employeeApproved =Approvazione dipendente
+competenceRequest.officeHeadApproved =Approvazione responsabile di sede
+competenceRequest.managerApproved =Approvazione responsabile di gruppo
+competenceRequest.administrativeApproved =Approvazione del amministrativo
+competenceRequest.employeeApprovalRequired =Richiesta approvazione del dipendente
+competenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+competenceRequest.approval=Approva
+competenceRequest.disapproval=Disapprova
+
+CompetenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+CompetenceRequestEventType.EMPLOYEE_APPROVAL=Richiesta approvata dal dipendente
+CompetenceRequestEventType.EMPLOYEE_REFUSAL=Richiesta respinta dal dipendente
+CompetenceRequestEventType.MANAGER_APPROVAL=Richiesta approvata dal responsabile del gruppo di lavoro
+CompetenceRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile del gruppo di lavoro
+CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL=Richiesta approvata dall'amministratore del personale
+CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+CompetenceRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede
+CompetenceRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+CompetenceRequestEventType.COMPLETE=Richiesta completata
+CompetenceRequestEventType.DELETE=Richiesta cancellata
+CompetenceRequestEventType.EXPIRING=Richiesta scaduta
+
+CompetenceRequestType.OVERTIME =Straordinari
+
+
 activity =Attività di turno
 ADD= Inserimento
 

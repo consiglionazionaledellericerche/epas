@@ -319,7 +319,7 @@ public enum EpasParam {
       Office.class),
   
   //#######################################
-  // FLOWS PARAMS
+  // FLOWS PARAMS ABSENCES
 
   /**
    * Attivazione o meno della richieste di assenza generico.
@@ -333,17 +333,6 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
-  /**
-   * Attivazione o meno delle richieste di straordinario
-   */
-  ENABLE_OVERTIME_FLOWS(
-      "enable_overtime_flows",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
   
   SEND_FLOWS_NOTIFICATION("send_flows_notification",
       EpasParamCategory.FLOWS,
@@ -482,6 +471,21 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  //#####################################################################
+  //FLOWS PARAMS COMPETENCES
+  
+  /**
+   * Attivazione o meno delle richieste di straordinario
+   */
+  ENABLE_OVERTIME_FLOWS(
+      "enable_overtime_flows",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+   
   /**
    * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte del 
    * responsabile di sede.
