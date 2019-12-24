@@ -1,8 +1,10 @@
 package models.flows.enumerate;
 
-public enum OvertimeRequestEventType {
+public enum CompetenceRequestEventType {
 
   STARTING_APPROVAL_FLOW,
+  EMPLOYEE_APPROVAL,
+  EMPLOYEE_REFUSAL,
   MANAGER_APPROVAL,
   MANAGER_REFUSAL,
   ADMINISTRATIVE_APPROVAL,
