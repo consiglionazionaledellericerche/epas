@@ -67,6 +67,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -1289,7 +1290,8 @@ public class AbsenceGroups extends Controller {
     List<IWrapperPerson> people = Lists.newArrayList();
     Map<String, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
 
-    int year = LocalDate.now().getYear();
+    int year = LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY ? 
+        LocalDate.now().getYear() - 1 : LocalDate.now().getYear();
 
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
@@ -1338,9 +1340,12 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-
+    int year = LocalDate.now().getYear();
+    if (LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY) {
+      year = year - 1;
+    }
     CertificationYearSituation yearSituation = absenceCertificationService
-        .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
+        .buildCertificationYearSituation(person, year, false);
 
     if (yearSituation == null) {
       flash.error("Impossibile recuperare la situazione del dipendente"
