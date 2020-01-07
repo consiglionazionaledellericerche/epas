@@ -121,7 +121,7 @@ public class AbsenceCertificationService {
     CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
-        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
+        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);        
         cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
         Cache.add(crKey(person, year), cruscottoCurrent);
       } catch (Exception ex) {
