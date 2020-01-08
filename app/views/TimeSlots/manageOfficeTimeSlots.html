@@ -1,0 +1,178 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione fasce orarie di lavoro'  /}
+
+<div class="container">
+  #{title title:'Gestione delle fasce orarie di lavoro' /}
+</div>
+
+#{set _activeAction:'manageOfficeTimeSlots' /}
+#{include './timeSlotTabs.html' /}
+ 
+<div class="container">
+	 
+	  #{panel title:'Tipi Orario Particolari per ' + office.name}
+	  
+	   <!-- Nuovo -->
+	   #{secure.check 'TimeSlots.blank'}
+	   <div class="text-center">
+     	<a class="btn btn-success" href="@{TimeSlots.blank(officeId:office.id)}">
+     		<span class="glyphicon glyphicon-plus"></span> Crea nuova fascia oraria per ${office.name}
+		 	</a>
+	   </div>
+       #{/secure.check}
+
+        #{tabList}
+  				#{tabItem id:'attive', title:'Attive', active:true /}
+  				#{tabItem id:'inattive', title:'Disattivate' /}
+		#{/tabList}
+		<br>
+		#{tabContent}
+  		  #{tabContentItem id:'attive', active:true}
+
+	        #{if tsAllowedEnabled.empty}
+	        <div class="alert alert-info">
+	          Non è presente alcuna fascia oraria particolare attiva per <strong>${office.name}</strong>
+	        </div>
+	        #{/if}
+	        #{else}
+
+			    <table class="table table-condensed table-hover">
+			        <tr class="warning">
+			          <th>Descrizione</th>
+			          <th class="center">Contratti attivi<br>attualmente associati</th>
+			          <th class="center">Periodi associati<br>a contratti attivi</th> 
+			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			          #{secure.check 'TimeSlots.changeTimeSlotToAll'}
+			          <th class="center">Cambia orario<br>a tutti</th>
+			          #{/secure.check}
+			        </tr>
+				    #{list items:tsAllowedEnabled, as:'ts'}
+				      <tr>
+				        <td>
+	          			  ${ts.value.label}
+				        </td>
+				        
+				        <!-- contratti attualmente attivi con ts -->
+				        <td  class="center">
+				          <a href="@{TimeSlots.showContracts(ts.value.id, office.id)}" data-async-modal="#defaultModal">
+				            ${ts.getAssociatedActiveContract(office).size()}
+				    	  </a>    
+				    	  #{if ts.getAssociatedActiveContract(office).size() == 0 }
+				    	    #{secure.check 'TimeSlots.toogle'}
+				    	    <a href="@{TimeSlots.toogle(ts.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva fascia oraria non associata ad alcun contratto attivo" class="fa fa-power-off"></i>
+				    	    </a>
+				    	    #{/secure.check}
+				    	  #{/if }
+				        </td>
+				        
+				        <!-- periodi associati a contratti attualmente attivi con ts -->
+				        <td class="center">
+			                <a href="@{TimeSlots.showContractMandatoryTimeSlot(ts.value.id, office.id)}" data-async-modal="#defaultModal">
+			                  ${ts.getAssociatedPeriodInActiveContract(office).size()}
+			                </a>
+				        </td>
+				        
+				        <!-- contratti associati con ts (storico) -->
+				        <td class="center">
+				          ${ts.getAssociatedContract().size()}
+				          #{if ts.getAssociatedContract().size() == 0 }
+				            #{secure.check 'TimeSlots.toogle'}
+				    	    <a href="@{TimeSlots.delete(ts.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" 
+				    	      	title="Elimina fascia oraria non associata ad alcun contratto" class="fa fa-trash-o"></i>
+				    	    </a>
+				    	    #{/secure.check}
+				    	  #{/if}
+				    	</td>
+				    	#{secure.check 'TimeSlots.changeTimeSlotToAll'}
+                        <td class="center">
+							Cambia
+                        <!-- 
+                          <a href="@{TimeSlots.changeTimeSlotToAll(ts.value.id, office.id)}" data-async-modal="#defaultModal">                          
+                          </a>
+ 						-->                          
+                        </td>
+                        #{/secure.check}
+				      </tr>	
+				    #{/list}
+				</table>
+
+		    #{/else}	
+		#{/tabContentItem}
+  		
+  		#{tabContentItem id:'inattive'}
+		
+		    #{if tsAllowedDisabled.empty}
+	        <div class="alert alert-info">
+	          Non è presente alcuna fascia oraria particolare disattivata per <strong>${office.name}</strong>
+	        </div>
+	        #{/if}
+			#{else}
+	
+			    <table class="table table-condensed table-hover">
+			        <tr class="warning">
+			          <th>Descrizione</th>
+			          <th class="center">Sede</th>
+			          <th class="center">Riattiva</th>
+			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			        </tr>
+				    #{list items:tsAllowedDisabled, as:'ts'}
+				      <tr>
+	
+				        <td>
+						    ${ts.value.label}			    
+				        </td>
+	
+				        <td class="center">${ts.value.office.name}</td>
+	
+				        <td class="center">
+				          <a href="@{TimeSlots.toogle(ts.value.id)}">
+				    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
+				    	  </a>
+				        </td>
+	
+				        <td  class="center">
+				          ${ts.getAssociatedContract().size()}
+				          #{if ts.getAssociatedContract().size() == 0 }
+				    	    <a href="@{TimeSlots.delete(ts.value.id)}">
+				    	      <i data-toggle="tooltip" data-placement="bottom" 
+				    	      	title="Elimina fascia oraria non associata ad alcun contratto" class="fa fa-trash-o"></i>
+				    	    </a>
+				    	  #{/if}
+				    	</td>
+				      </tr>	
+				    #{/list}
+				</table>
+			#{/else}	
+		  #{/tabContentItem}
+		#{/tabContent}
+				
+	  #{/panel}
+		
+	
+	
+	  #{panel title:'Guida alla modifica delle fasce orarie'}
+	  
+			<p><strong>Modifica di una fascia oraria esistente</strong></p>
+			Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta
+			delle fasce orarie.
+			In caso di necessità seguire la seguente procedura:
+			<ul>
+			 <li>Individuare la fascia oraria da modificare (es <em>08:00 - 14:00</em>)</li>
+			 <li>Creare una nuova fascia oraria con le modifiche opportune rispetto alla fascia oraria 
+			   da modificare (es <em>08:30 - 14:30</em>)</li>
+			 <li>Cambiare la fascia oraria <em>08:00 - 14:00</em> a tutti impostando come nuovo 
+			 valore <em>08:30 - 14:30</em> a partire dalla data desiderata.</li>
+			</ul>
+			
+			<p><strong>Eliminare o disabilitare le fasce orarie</strong></p>
+			E' possibile eliminare o disabilitare le fasce di orario che non si vuole più associare ad alcun dipendente.<br>
+			<strong>Eliminare:</strong> La procedura di eliminazione permette di eliminare le fasce orarie 
+			create in modo erroneo oppure mai utilizzati in alcun contratto presente in ePAS (anche terminato).<br>
+			<strong>Disabilitare:</strong> La procedura di disabilita permette di nascondere 
+			le fasce orarie usate in passato e che non si vogliono più associare ad alcun dipendente.
+	 #{/panel}
+ 
+ </div>

@@ -7,6 +7,7 @@ import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
+import dao.wrapper.IWrapperTimeSlot;
 import dao.wrapper.IWrapperWorkingTimeType;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.TimeSlot;
 import models.WorkingTimeType;
 
 public class WrapperModelFunctionFactory {
@@ -36,6 +38,16 @@ public class WrapperModelFunctionFactory {
     };
   }
 
+  public Function<TimeSlot, IWrapperTimeSlot> timeSlot() {
+    return new Function<TimeSlot, IWrapperTimeSlot>() {
+
+      @Override
+      public IWrapperTimeSlot apply(TimeSlot input) {
+        return factory.create(input);
+      }
+    };
+  }
+  
   public Function<Person, IWrapperPerson> person() {
     return new Function<Person, IWrapperPerson>() {
 
