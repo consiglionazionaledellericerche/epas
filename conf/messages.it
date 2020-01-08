@@ -203,6 +203,9 @@ ContractStampProfile= Periodo Presenza Automatica
 ContractWorkingTimeType=Periodo Tipo Orario
 contractWorkingTimeType=Periodo Tipo Orario
 
+ContractMandatoryTimeSlot=Fascia oraria obbligatoria
+contractMandatoryTimeSlot=Fascia oraria obbligatoria
+
 crud.cancel=Indietro
 crud.cancelled=Operazione annullata.
 crud.created=&{%s} creato con successo
@@ -228,9 +231,20 @@ cwtt.beginDate= Data Inizio
 cwtt.endDate= Data Fine
 cwtt.workingTimeType= Tipo Orario
 
+cmts.beginDate= Data Inizio
+cmts.endDate= Data Fine
+cmts.timeSlot= Fascia oraria
+
 vp.beginDate= Data Inizio
 vp.endDate= Data Fine
 vp.vacationCode=Piano Ferie
+
+timeSlot=Fascia oraria
+timeSlot.beginSlot=orario di inizio
+timeSlot.endSlot=orario di fine
+timeSlot.office=Ufficio
+timeSlot.description=descrizione
+timeSlot.disable=Disabilitato
 
 VacationCode.CODE_28_4= 28+4
 VacationCode.CODE_26_4= 26+4
@@ -780,6 +794,7 @@ Contracts.personContracts= Dati Contrattuali
 Contracts.updateContractStampProfile= Presenza Automatica
 Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
+Contracts.updateContractMandatoryTimeSlot= Fascia oraria obbligatoria
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
 
@@ -848,6 +863,7 @@ Shift.handleShifts =Gestisci turni
 Calendar.show =Gestisci turni
 ReperibilityCalendar.show =Gestisci reperibilità
 Shift.personalShift =Visualizza turno
+TimeSlots.manageTimeSlots= Fasce orarie di lavoro
 
 ########################
 # Enumerati

@@ -34,6 +34,7 @@ import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceService;
 
 import models.Contract;
+import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -390,6 +391,96 @@ public class Contracts extends Controller {
       flash.success(Web.msgSaved(ContractWorkingTimeType.class));
 
       updateContractWorkingTimeType(contract.id);
+    }
+
+  }
+
+  /**
+   * Crud gestione periodi fascia oraria obbligatoria.
+   *
+   * @param id contratto
+   */
+  public static void updateContractMandatoryTimeSlot(Long id) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    ContractMandatoryTimeSlot cmts = new ContractMandatoryTimeSlot();
+    cmts.contract = contract;
+
+    render(wrappedContract, contract, cmts);
+  }
+
+  /**
+   * Salva il nuovo periodo di fascia di orario obbligatorio.
+   *
+   * @param cmts nuovo periodo di fascia oraria obbligatoria.
+   * @param confirmed se conferma ricevuta.
+   */
+  public static void saveContractMandatoryTimeSlot(ContractMandatoryTimeSlot cmts, boolean confirmed) {
+
+    // IMPORTANTE!!! Rimosso @Valid da cmts ed effettuata la validazione mancante a mano.
+    // Perchè si comprometteva il funzionamento dell drools. Issue #166
+
+    notFoundIfNull(cmts);
+    notFoundIfNull(cmts.contract);
+    notFoundIfNull(cmts.timeSlot);
+    Verify.verify(cmts.contract.isPersistent());
+    Verify.verify(cmts.timeSlot.isPersistent());
+
+    rules.checkIfPermitted(cmts.contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(cmts.contract);
+    Contract contract = cmts.contract;
+
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(cmts.beginDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("cmts.beginDate", "deve appartenere al contratto");
+      }
+      if (cmts.endDate != null && !DateUtility.isDateIntoInterval(cmts.endDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("cmts.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+
+      render("@updateContractMandatoryTimeSlot", cmts, contract);
+    }
+
+    rules.checkIfPermitted(cmts.timeSlot.office);
+
+    //riepilogo delle modifiche
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cmts, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+
+    if (!confirmed) {
+      confirmed = true;
+      render("@updateContractMandatoryTimeSlot", contract, cmts, confirmed, recomputeRecap);
+    } else {
+
+      periodManager.updatePeriods(cmts, true);
+      contract = contractDao.getContractById(contract.id);
+      contract.person.refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(ContractMandatoryTimeSlot.class));
+
+      updateContractMandatoryTimeSlot(contract.id);
     }
 
   }

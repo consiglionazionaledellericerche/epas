@@ -2,29 +2,23 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import models.Contract;
+import models.ContractMandatoryTimeSlot;
 import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.VacationCode;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.db.jpa.JPA;
 
 
@@ -388,6 +382,25 @@ public class ContractManager {
    */
   public final void cleanMealTicketInitialization(final Contract contract) {
     contract.sourceDateMealTicket = contract.sourceDateResidual;
+  }
+
+  /**
+   * Il ContractMandatoryTimeSlot associato ad un contratto in una specifica data.
+   *
+   * @param contract il contratto di cui prelevare il ContractMandatoryTimeSlot
+   * @param date     la data in cui controllare il ContractMandatoryTimeSlot
+   * @return il ContractMandatoryTimeSlot di un contratto ad una data specifica
+   */
+  public final Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlotFromDate(
+      final Contract contract, final LocalDate date) {
+
+    for (ContractMandatoryTimeSlot cmts : contract.contractMandatoryTimeSlots) {
+      if (DateUtility.isDateIntoInterval(date, new DateInterval(cmts.beginDate, cmts.endDate))) {
+        return Optional.of(cmts);
+      }
+    }
+
+    return Optional.absent();
   }
 
 }
