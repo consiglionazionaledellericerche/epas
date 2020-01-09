@@ -1,6 +1,7 @@
 package controllers;
 
 import javax.inject.Inject;
+import org.joda.time.LocalDateTime;
 import com.google.common.base.Verify;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -9,6 +10,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.flows.CompetenceRequestManager;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.mvc.Controller;
@@ -27,6 +29,8 @@ public class CompetenceRequests extends Controller{
 
   @Inject
   static PersonDao personDao;
+  @Inject
+  static CompetenceRequestManager competenceRequestManager;
   @Inject
   static SecurityRules rules;
   @Inject
@@ -57,5 +61,10 @@ public class CompetenceRequests extends Controller{
       return;
     }
     val person = currentUser.person;
+    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
+    log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
+        type, person, fromDate);
+    
+    val config = competenceRequestManager.getConfiguration(type, person);
   }
 }

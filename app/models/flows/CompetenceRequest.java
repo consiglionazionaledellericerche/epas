@@ -2,6 +2,8 @@ package models.flows;
 
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -13,9 +15,15 @@ import org.joda.time.LocalDateTime;
 import com.beust.jcommander.internal.Lists;
 import models.Person;
 import models.base.MutableModel;
+import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
 
 public class CompetenceRequest extends MutableModel {
+  
+  @Required
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  public CompetenceRequestType type;
 
   @Required
   @NotNull
@@ -26,6 +34,26 @@ public class CompetenceRequest extends MutableModel {
    * Descrizione della richiesta
    */
   public String note;
+  
+  /**
+   * L'eventuale valore da salvare
+   */
+  public Integer value;
+  
+  /**
+   * L'eventuale anno in cui salvare la competenza
+   */
+  public Integer year;
+  
+  /**
+   * L'eventuale mese in cui salvare la competenza
+   */
+  public Integer month;
+  
+  /**
+   * L'eventuale data da cambiare
+   */
+  public LocalDate dateToChange;
   
   /**
    * Data e ora di inizio.
@@ -110,6 +138,21 @@ public class CompetenceRequest extends MutableModel {
         && (managerApproved == null || !managerApprovalRequired)
         && (administrativeApproved == null || !administrativeApprovalRequired)
         && (employeeApproved == null || !employeeApprovalRequired);
+  }
+  
+  /**
+   * Un flusso è completato se tutte le approvazioni richieste sono state
+   * impostate.
+   * 
+   * @return true se è completato, false altrimenti.
+   */
+  public boolean isFullyApproved() {
+    return (!this.managerApprovalRequired || this.isManagerApproved()) 
+        && (!this.administrativeApprovalRequired 
+            || this.isAdministrativeApproved())
+        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
+        && (!this.employeeApprovalRequired
+            || this.isEmployeeApproved());
   }
   
 }

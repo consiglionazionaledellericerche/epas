@@ -25,6 +25,7 @@ import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.mail.EmailException;
@@ -351,6 +352,9 @@ public class NotificationManager {
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////
+  // Notifiche per absence request
+  /////////////////////////////////////////////////////////////////////////////////////////
   /**
    * Notifica che una richiesta di assenza è stata rifiutata da uno degli 
    * approvatori del flusso.
@@ -603,6 +607,35 @@ public class NotificationManager {
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////
+  // Notifiche per competence request
+  //////////////////////////////////////////////////////////////////////////////////////////
+  
+  /**
+   * Notifica che una richiesta di assenza è stata rifiutata da uno degli 
+   * approvatori del flusso.
+   * 
+   * @param absenceRequest la richiesta di assenza
+   * @param refuser la persona che ha rifiutato la richiesta di assenza.
+   */
+  public void notificationCompetenceRequestRefused(
+      CompetenceRequest competenceRequest, Person refuser) {
+
+    Verify.verifyNotNull(competenceRequest);
+    Verify.verifyNotNull(refuser);
+
+    final String message = 
+        String.format("La richiesta di tipo \"%s\" per il %s "
+            + "è stata rifiutata da %s",
+            TemplateExtensions.label(competenceRequest.type),
+                TemplateExtensions.format(competenceRequest.startAt),
+                    refuser.getFullname());
+
+    Notification.builder().destination(competenceRequest.person.user).message(message)
+    .subject(NotificationSubject.ABSENCE_REQUEST, competenceRequest.id).create();
+
   }
 
   /**
