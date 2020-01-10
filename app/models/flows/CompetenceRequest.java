@@ -2,11 +2,13 @@ package models.flows;
 
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import org.hibernate.envers.NotAudited;
@@ -18,6 +20,8 @@ import models.base.MutableModel;
 import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
 
+@Entity
+@Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {
   
   @Required
