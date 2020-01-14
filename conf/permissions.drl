@@ -2343,6 +2343,7 @@ when
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
+        "rest.Persons.peopleList",
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
@@ -2528,7 +2529,8 @@ when
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList"
 
        ), target == null, granted == false)
 then
@@ -2542,7 +2544,8 @@ when
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList"
 
        ), target == $o, granted == false)
 then
