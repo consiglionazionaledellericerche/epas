@@ -158,4 +158,18 @@ public class CompetenceRequestDao extends DaoBase {
     }
   }
 
+  public List<CompetenceRequest> toApproveResults(List<UsersRolesOffices> roleList,
+      LocalDateTime fromDate, Optional<Object> absent, CompetenceRequestType type,
+      List<Group> groups, Person person) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List<CompetenceRequest> totallyApproved(List<UsersRolesOffices> roleList,
+      LocalDateTime fromDate, Optional<Object> absent, CompetenceRequestType type,
+      List<Group> groups, Person person) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }
