@@ -101,7 +101,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @return la lista di tutti i flussi attivi da approvare.
    */
   public List<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
@@ -116,13 +116,15 @@ public class AbsenceRequestDao extends DaoBase {
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    conditions.and(absenceRequest.startAt.after(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType)
-            .and(absenceRequest.flowStarted.isTrue())
-            .and(absenceRequest.flowEnded.isFalse()));
+    if (fromDate.isPresent()) {
+      conditions.and(absenceRequest.startAt.after(fromDate.get()));
+    }
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
-    }
+    }   
+    conditions.and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
 
     List<AbsenceRequest> results = new ArrayList<>();
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
@@ -147,7 +149,7 @@ public class AbsenceRequestDao extends DaoBase {
    * Lista delle AbsenceRequest da Approvare come responsabile di sede.
    */
   private List<AbsenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
@@ -158,13 +160,16 @@ public class AbsenceRequestDao extends DaoBase {
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    conditions.and(absenceRequest.startAt.after(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType)
-            .and(absenceRequest.flowStarted.isTrue())
-            .and(absenceRequest.flowEnded.isFalse()));
+    if (fromDate.isPresent()) {
+      conditions.and(absenceRequest.startAt.after(fromDate.get()));
+    }
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
-    }
+    }    
+    conditions.and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
+
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = seatSupervisorQuery(officeList, conditions, signer);
