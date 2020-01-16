@@ -173,7 +173,7 @@ public class AbsenceRequests extends Controller {
     List<AbsenceRequest> results = absenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
     List<AbsenceRequest> myResults =
-        absenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
+        absenceRequestDao.toApproveResults(roleList, Optional.absent(), Optional.absent(),
             type, groups, person);
     List<AbsenceRequest> approvedResults =
         absenceRequestDao
