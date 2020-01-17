@@ -1,5 +1,6 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ import models.flows.enumerate.CompetenceRequestType;
 import models.flows.query.QAbsenceRequest;
 import models.flows.query.QCompetenceRequest;
 import models.flows.query.QGroup;
+import models.query.QOffice;
 import models.query.QPerson;
 
 public class CompetenceRequestDao extends DaoBase {
@@ -159,17 +161,172 @@ public class CompetenceRequestDao extends DaoBase {
   }
 
   public List<CompetenceRequest> toApproveResults(List<UsersRolesOffices> roleList,
-      LocalDateTime fromDate, Optional<Object> absent, CompetenceRequestType type,
-      List<Group> groups, Person person) {
-    // TODO Auto-generated method stub
-    return null;
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
+      List<Group> groups, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    if (roleList.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
+    conditions.and(competenceRequest.startAt.after(fromDate))
+        .and(competenceRequest.type.eq(type)
+            .and(competenceRequest.flowStarted.isTrue())
+            .and(competenceRequest.flowEnded.isFalse()));
+    if (toDate.isPresent()) {
+      conditions.and(competenceRequest.endTo.before(toDate.get()));
+    }
+
+    List<CompetenceRequest> results = new ArrayList<>();
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results.addAll(
+          toApproveResultsAsSeatSuperVisor(
+              roleList, fromDate, toDate, type, groups, signer));
+    }
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
+      conditions = managerQuery(officeList, conditions, signer);
+      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+          .join(competenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions))
+          .fetch();
+      results.addAll(queryResults);
+    }
+    return results;
   }
 
   public List<CompetenceRequest> totallyApproved(List<UsersRolesOffices> roleList,
-      LocalDateTime fromDate, Optional<Object> absent, CompetenceRequestType type,
-      List<Group> groups, Person person) {
-    // TODO Auto-generated method stub
-    return null;
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
+      List<Group> groups, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+    List<CompetenceRequest> results = new ArrayList<>();
+    JPQLQuery<CompetenceRequest> query;
+    List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
+    conditions.and(competenceRequest.startAt.after(fromDate))
+        .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
+            .and(competenceRequest.person.office.in(officeList)));
+
+    if (toDate.isPresent()) {
+      conditions.and(competenceRequest.endTo.before(toDate.get()));
+    }
+
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      results
+          .addAll(totallyApprovedAsSuperVisor(
+              roleList, fromDate, toDate, type, groups, signer));
+    }
+
+    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      conditions.and(competenceRequest.managerApprovalRequired.isTrue())
+          .and(competenceRequest.managerApproved.isNotNull())
+          .and(person.office.in(officeList));
+      query = getQueryFactory().selectFrom(competenceRequest)
+          .join(competenceRequest.person, person)
+          .join(person.groups, group)
+          .where(group.manager.eq(signer).and(conditions));
+    } else {
+      query = getQueryFactory()
+          .selectFrom(competenceRequest).where(conditions);
+    }
+    results.addAll(query.fetch());
+    return results;
+  }
+  
+  private List<CompetenceRequest> totallyApprovedAsSuperVisor(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      CompetenceRequestType competenceRequestType, List<Group> groups, Person signer) {
+    Preconditions.checkNotNull(fromDate);
+
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPerson person = QPerson.person;
+    final QOffice office = QOffice.office;
+    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    BooleanBuilder conditions = new BooleanBuilder();
+    conditions.and(competenceRequest.startAt.after(fromDate))
+        .and(competenceRequest.type.eq(competenceRequestType).and(competenceRequest.flowEnded.isTrue())
+            .and(competenceRequest.person.office.eq(signer.office)));
+
+    if (toDate.isPresent()) {
+      conditions.and(competenceRequest.endTo.before(toDate.get()));
+    }
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      conditions.and(
+          competenceRequest.officeHeadApprovalRequired.isTrue())
+          .and(competenceRequest.officeHeadApproved.isNotNull())
+          .and(person.office.in(officeList));
+      return getQueryFactory().selectFrom(competenceRequest)
+          .join(competenceRequest.person, person)
+          .join(person.office, office)
+          .where(office.in(uros.stream().map(
+              userRoleOffices -> userRoleOffices.office)
+              .collect(Collectors.toSet())).and(conditions))
+          .fetch();
+    } else {
+      return Lists.newArrayList();
+    }
+
+  }
+  
+  /**
+   * Lista delle CompetenceRequest da Approvare come responsabile di sede.
+   */
+  private List<CompetenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      CompetenceRequestType competenceRequestType, List<Group> groups, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
+    conditions.and(competenceRequest.startAt.after(fromDate))
+        .and(competenceRequest.type.eq(competenceRequestType)
+            .and(competenceRequest.flowStarted.isTrue())
+            .and(competenceRequest.flowEnded.isFalse()));
+    if (toDate.isPresent()) {
+      conditions.and(competenceRequest.endTo.before(toDate.get()));
+    }
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+      conditions = seatSupervisorQuery(officeList, conditions, signer);
+      return getQueryFactory().selectFrom(competenceRequest).where(conditions).fetch();
+    } else {
+      return Lists.newArrayList();
+    }
+
+  }
+  
+  private BooleanBuilder seatSupervisorQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    condition.and(absenceRequest.person.office.in(officeList))
+        .andAnyOf(absenceRequest.officeHeadApprovalForManagerRequired.isTrue(),
+            absenceRequest.managerApprovalRequired.isTrue()
+                .and(absenceRequest.managerApproved.isNotNull()), 
+                    absenceRequest.officeHeadApprovalRequired.isTrue()
+                    .and(absenceRequest.officeHeadApproved.isNull()));
+    return condition;
+  }
+  
+  private BooleanBuilder managerQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    condition.and(absenceRequest.managerApprovalRequired.isTrue())
+        .and(absenceRequest.managerApproved.isNull())
+        .and(absenceRequest.person.office.in(officeList));
+    return condition;
+
   }
 
 }

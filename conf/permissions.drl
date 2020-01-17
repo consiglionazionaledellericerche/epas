@@ -35,6 +35,7 @@ import models.ReperibilityTypeMonth;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
+import models.flows.CompetenceRequest;
 
 import security.PermissionCheck;
 
@@ -508,6 +509,7 @@ when
 		/* Richieste di straordinario */
 		"CompetenceRequests.overtimes",
 		"CompetenceRequests.list",
+		"CompetenceRequests.blank",
 		
      	/* Ferie */
      	"Vacations.show",
@@ -577,6 +579,16 @@ then
   $c.grant();
 end
 
+rule EmployCanEditOrDeleteCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
 rule EmployCanDeleteSpecificAbsenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
@@ -587,12 +599,32 @@ then
   $c.grant();
 end
 
+rule EmployCanDeleteSpecificCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false,
+  		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
+  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$ar, granted == false)
+then
+  $c.grant();
+end
+
 rule showAbsenceRequest
 when 
   UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
   || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showCompetenceRequest
+when 
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
+  || role.name == Role.PERSONNEL_ADMIN)
+  $ar: CompetenceRequest(person != currentOperator.person, flowEnded == true)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
 end

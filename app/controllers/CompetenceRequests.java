@@ -2,7 +2,9 @@ package controllers;
 
 import java.util.List;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import dao.CompetenceRequestDao;
@@ -15,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.flows.CompetenceRequestManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
+import models.Person;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
@@ -53,6 +58,8 @@ public class CompetenceRequests extends Controller{
   static CompetenceRequestDao competenceRequestDao;
   @Inject
   static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static PersonStampingRecapFactory stampingsRecapFactory;
   
   
   
@@ -120,5 +127,53 @@ public class CompetenceRequests extends Controller{
     val onlyOwn = false;
 
     render(config, results, type, onlyOwn, approvedResults, myResults);
+  }
+  
+  public static void blank(Optional<Long> personId, LocalDate from, CompetenceRequestType type) {
+    Verify.verifyNotNull(type);
+    Person person;
+    if (personId.isPresent()) {
+      rules.check("CompetenceRequests.blank4OtherPerson");
+      person = personDao.getPersonById(personId.get());
+    } else {
+      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+        person = Security.getUser().get().person;
+      } else {
+        flash.error("L'utente corrente non ha associato una persona.");
+        list(type);
+        return;
+      }
+    }
+    notFoundIfNull(person);
+    
+    val configurationProblems = competenceRequestManager.checkconfiguration(type, person);
+    if (!configurationProblems.isEmpty()) {
+      flash.error(Joiner.on(" ").join(configurationProblems));
+      list(type);
+      return;
+    }
+    
+    val competenceRequest = new CompetenceRequest();
+    competenceRequest.type = type;
+    competenceRequest.person = person;
+    PersonStampingRecap psDto = null;
+    if (type.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      psDto = stampingsRecapFactory.create(person,
+          from.getYear(), from.getMonthOfYear(), true);  
+    }
+    competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
+    render("@edit", psDto, competenceRequest);
+  }
+  
+  public static void edit(CompetenceRequest competenceRequest) {
+    
+  }
+  
+  public static void delete(long id) {
+    
+  }
+  
+  public static void show(long id, CompetenceRequestType type) {
+    
   }
 }

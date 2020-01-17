@@ -837,7 +837,10 @@ AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 
-CompetenceRequests.overtime =Mie richieste di straordinari
+CompetenceRequests.overtimes =Mie richieste di straordinari
+CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
+CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
+CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
 
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
@@ -1018,6 +1021,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
+ENABLE_OVERTIME_FLOWS =Flusso di richiesta competenza attivato
 
 VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
 VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 
@@ -1031,6 +1035,9 @@ COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazion
 COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
 
+OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
+OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
+OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi

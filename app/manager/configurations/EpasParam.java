@@ -508,7 +508,7 @@ public enum EpasParam {
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
+      EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
@@ -520,7 +520,7 @@ public enum EpasParam {
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
+      EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class)
 
