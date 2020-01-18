@@ -12,6 +12,7 @@ import dao.GroupDao;
 import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.Web;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
@@ -20,11 +21,14 @@ import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
+import models.User;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -170,10 +174,22 @@ public class CompetenceRequests extends Controller{
   }
   
   public static void delete(long id) {
-    
+	  CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+	    notFoundIfNull(competenceRequest);
+	    rules.checkIfPermitted(competenceRequest);
+	    competenceRequestManager.executeEvent(
+	    		competenceRequest, Security.getUser().get().person,
+	        CompetenceRequestEventType.DELETE, Optional.absent());
+	    flash.success(Web.msgDeleted(AbsenceRequest.class));
+	    list(competenceRequest.type);
   }
   
   public static void show(long id, CompetenceRequestType type) {
-    
+	  CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+	    notFoundIfNull(competenceRequest);
+	    rules.checkIfPermitted(competenceRequest);
+	    User user = Security.getUser().get();
+	    boolean disapproval = false;
+	    render(competenceRequest, type, user, disapproval);
   }
 }
