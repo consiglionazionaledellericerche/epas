@@ -192,7 +192,11 @@ public class RequestInit extends Controller {
         "Charts.exportTimesheetSituation",
         "AbsenceGroups.absenceTroubles",
         "Stampings.stampingsByAdmin",
-        "PrintTags.listPersonForPrintTags");
+        "PrintTags.listPersonForPrintTags",
+        "CompetenceRequests.blank",
+        "CompetenceRequests.edit",
+        "CompetenceRequests.show",
+        "CompetenceRequests.list");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(

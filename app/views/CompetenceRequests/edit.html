@@ -3,6 +3,8 @@
 #{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceRequest.type.toString() + 'S') /}
 #{set title:('ePAS - ' + competenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + competenceRequest.type.label()) /}
 
+#{switcher year:true, month:true /}
+
 #{set breadcrumbs:[(competenceRequestTypeLabel):@CompetenceRequests.list(competenceRequest.type), ('Modifica'):null] /}
 
 <div class="container">

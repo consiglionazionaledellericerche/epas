@@ -1,0 +1,32 @@
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>
+Nel menu in alto seleziona <strong>l'anno e il mese</strong> per cui vuoi richiedere gli straordinari.
+Qui sotto compila il form per inviare una richiesta di ${competenceRequest.type.label()}
+Specificando la <strong>quantità di ore</strong> che intendi richiedere come straordinario.<br>  
+</p>
+#{/alert}
+</div>
+
+#{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'competenceRequest.id' /}
+	#{f.hidden 'competenceRequest.person.id' /}
+	#{f.hidden 'competenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'competenceRequest.startAt', value:competenceRequest.startAt?.format() /}
+	#{f.hidden 'competenceRequest.endTo', value:competenceRequest.endTo?.format() /}
+	#{f.hidden 'competenceRequest.note' /}
+      
+            
+	#{b.buttons center:true}
+		 #{b.link @list(competenceRequest.type), color:'default', title:'Indietro' /}
+		 #{if insertable && insertReport.howManySuccess() > 0}
+         #{b.submit 'Inserisci'/}
+         #{/if}
+         #{else}
+         #{b.submit 'Inserisci', disabled:true /}
+         #{/else}
+    #{/b.buttons}
+#{/form}	  

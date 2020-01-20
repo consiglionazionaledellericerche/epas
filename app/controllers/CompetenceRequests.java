@@ -30,6 +30,8 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -64,17 +66,17 @@ public class CompetenceRequests extends Controller{
   static UsersRolesOfficesDao uroDao;
   @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
-  
-  
-  
+
+
+
   public static void overtimes() {
     list(CompetenceRequestType.OVERTIME_REQUEST);
   }
-  
+
   public static void overtimesToApprove() {
     listToApprove(CompetenceRequestType.OVERTIME_REQUEST);
   }
-  
+
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
    * @param type
@@ -93,7 +95,7 @@ public class CompetenceRequests extends Controller{
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
         type, person, fromDate);
-    
+
     val config = competenceRequestManager.getConfiguration(type, person);
     List<CompetenceRequest> myResults = competenceRequestDao
         .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
@@ -104,7 +106,7 @@ public class CompetenceRequests extends Controller{
 
     render(config, myResults, type, onlyOwn, persist, closed);
   }
-  
+
   /**
    * Lista delle richieste di assenza da approvare da parte dell'utente corrente.
    *
@@ -126,13 +128,13 @@ public class CompetenceRequests extends Controller{
             type, groups, person);
     List<CompetenceRequest> approvedResults =
         competenceRequestDao
-            .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
+        .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
 
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
-  
+
   public static void blank(Optional<Long> personId, LocalDate from, CompetenceRequestType type) {
     Verify.verifyNotNull(type);
     Person person;
@@ -149,47 +151,89 @@ public class CompetenceRequests extends Controller{
       }
     }
     notFoundIfNull(person);
-    
+
     val configurationProblems = competenceRequestManager.checkconfiguration(type, person);
     if (!configurationProblems.isEmpty()) {
       flash.error(Joiner.on(" ").join(configurationProblems));
       list(type);
       return;
     }
-    
+
     val competenceRequest = new CompetenceRequest();
     competenceRequest.type = type;
     competenceRequest.person = person;
     PersonStampingRecap psDto = null;
     if (type.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      if (from == null) {
+        from = LocalDate.now().minusMonths(1);
+      }
       psDto = stampingsRecapFactory.create(person,
           from.getYear(), from.getMonthOfYear(), true);  
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
     render("@edit", psDto, competenceRequest);
   }
-  
+
   public static void edit(CompetenceRequest competenceRequest) {
-    
+
   }
-  
+
+  public static void save(@Required @Valid CompetenceRequest competenceRequest, boolean persist) {
+    log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
+
+    if (!Security.getUser().get().person.equals(competenceRequest.person)) {
+      rules.check("CompetenceRequests.blank4OtherPerson");
+    } else {
+      competenceRequest.person = Security.getUser().get().person;
+    }
+
+    notFoundIfNull(competenceRequest.person);
+    competenceRequestManager.configure(competenceRequest);
+
+    if (competenceRequest.endTo == null) {
+      competenceRequest.endTo = competenceRequest.startAt;
+    }
+
+    boolean isNewRequest = !competenceRequest.isPersistent();
+    competenceRequest.save();
+
+    //Avvia il flusso se necessario.
+    if (isNewRequest || !competenceRequest.flowStarted) {
+      competenceRequestManager.executeEvent(
+          competenceRequest, competenceRequest.person,
+          CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+
+      //invio la notifica al primo che deve validare la mia richiesta 
+      notificationManager
+      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+      // invio anche la mail
+      notificationManager
+      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+
+
+    }
+    flash.success("Operazione effettuata correttamente");
+
+    CompetenceRequests.list(competenceRequest.type);
+  }
+
   public static void delete(long id) {
-	  CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
-	    notFoundIfNull(competenceRequest);
-	    rules.checkIfPermitted(competenceRequest);
-	    competenceRequestManager.executeEvent(
-	    		competenceRequest, Security.getUser().get().person,
-	        CompetenceRequestEventType.DELETE, Optional.absent());
-	    flash.success(Web.msgDeleted(AbsenceRequest.class));
-	    list(competenceRequest.type);
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    rules.checkIfPermitted(competenceRequest);
+    competenceRequestManager.executeEvent(
+        competenceRequest, Security.getUser().get().person,
+        CompetenceRequestEventType.DELETE, Optional.absent());
+    flash.success(Web.msgDeleted(AbsenceRequest.class));
+    list(competenceRequest.type);
   }
-  
+
   public static void show(long id, CompetenceRequestType type) {
-	  CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
-	    notFoundIfNull(competenceRequest);
-	    rules.checkIfPermitted(competenceRequest);
-	    User user = Security.getUser().get();
-	    boolean disapproval = false;
-	    render(competenceRequest, type, user, disapproval);
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    rules.checkIfPermitted(competenceRequest);
+    User user = Security.getUser().get();
+    boolean disapproval = false;
+    render(competenceRequest, type, user, disapproval);
   }
 }

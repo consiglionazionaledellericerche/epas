@@ -647,4 +647,16 @@ public class NotificationManager {
     sendEmailAbsenceRequestConfirmation(absenceRequest);
     
   }
+
+  public void notificationCompetenceRequestPolicy(User user, CompetenceRequest competenceRequest,
+      boolean b) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void sendEmailCompetenceRequestPolicy(User user, CompetenceRequest competenceRequest,
+      boolean b) {
+    // TODO Auto-generated method stub
+    
+  }
 }
