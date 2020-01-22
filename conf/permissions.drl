@@ -471,6 +471,17 @@ then
 $c.grant();
 end
 
+rule isEmployeeForCompetenceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $cr: CompetenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.show"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
@@ -513,6 +524,7 @@ when
 		"CompetenceRequests.edit",
 		"CompetenceRequests.save",
 		"CompetenceRequests.delete",
+		"CompetenceRequests.show",
 		
      	/* Ferie */
      	"Vacations.show",
