@@ -2,6 +2,7 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import models.Competence;
 import models.Person;
 import models.Stamping;
 import models.absences.Absence;
@@ -35,6 +36,10 @@ public enum NotificationSubject {
    * Notifiche relative alle assenze inserite o modificate
    */
   ABSENCE,
+  /*
+   * Notifiche relative alle competenze inserite o modificate
+   */
+  COMPETENCE,
   /*
    * Notifiche per i flussi di lavoro sulle assenze 
    */
@@ -88,6 +93,16 @@ public enum NotificationSubject {
         params.put("year", absence.personDay.date.getYear());
         params.put("personId", absence.personDay.person.id);
         return toUrl("Stampings.personStamping", params);
+      case COMPETENCE:
+        final Competence competence = Competence.findById(referenceId);
+        if (competence == null) {
+          return null;
+        }
+        params.put("month", competence.month);
+        params.put("year", competence.year);
+        params.put("officeId", competence.person.office.id);
+        params.put("competenceCodeId", competence.competenceCode.id);
+        return toUrl("Competences.showCompetences", params);
       case ABSENCE_REQUEST:
         final AbsenceRequest absenceRequest = AbsenceRequest.findById(referenceId);
         params.put("id", absenceRequest.id);

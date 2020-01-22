@@ -242,6 +242,23 @@ public class CompetenceRequestDao extends DaoBase {
     return results;
   }
   
+  /**
+   * Ritorna la lista delle richieste di competenza non ancora validate che presentano date di
+   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta d'assenza da
+   * validare.
+   *
+   * @param request la richiesta di competenza da far validare
+   * @return la lista delle richieste di competenza che hanno parametri che non permettono la corretta
+   *     creazione della richiesta di competenza passata come parametro.
+   */
+  public List<CompetenceRequest> existingCompetenceRequests(CompetenceRequest request) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    return getQueryFactory().selectFrom(competenceRequest)
+        .where(competenceRequest.person.eq(request.person)
+            .and(competenceRequest.flowEnded.eq(false)))
+        .fetch();
+  }
+  
   private List<CompetenceRequest> totallyApprovedAsSuperVisor(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       CompetenceRequestType competenceRequestType, List<Group> groups, Person signer) {

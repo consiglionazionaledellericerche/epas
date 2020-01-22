@@ -18,6 +18,7 @@ import lombok.val;
 import manager.SecureManager;
 import models.Office;
 import models.User;
+import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -109,6 +110,17 @@ public class RequestInit extends Controller {
         session.put("personSelected", personId);
       }
     }
+    
+    // CompetenceRequestType init /////////////////////////////////////////////////
+    CompetenceRequestType type = null;
+    if (params.get("type") != null) {
+      type = CompetenceRequestType.valueOf(params.get("type"));
+    } else if (session.get("type") != null) {
+      type = CompetenceRequestType.valueOf(session.get("type"));      
+    } else {      
+      type = CompetenceRequestType.OVERTIME_REQUEST;
+      session.put("type", CompetenceRequestType.OVERTIME_REQUEST);
+    }
 
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
@@ -147,13 +159,13 @@ public class RequestInit extends Controller {
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
 
-    computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
-    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
+    computeActionSelected(currentUser, offices, year, month, day, personId, officeId, type);
+    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId, type));
   }
 
   private static void computeActionSelected(
       User user, Set<Office> offices, Integer year, Integer month, Integer day, 
-      Long personId, Long officeId) {
+      Long personId, Long officeId, CompetenceRequestType type) {
 
     final String currentAction = Http.Request.current().action;
 
@@ -390,13 +402,16 @@ public class RequestInit extends Controller {
     public final Integer day;
     public final Long personId;
     public final Long officeId;
+    public final CompetenceRequestType type;
 
-    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId) {
+    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId,
+        CompetenceRequestType type) {
       this.year = year;
       this.month = month;
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
+      this.type = type;
     }
 
     /**

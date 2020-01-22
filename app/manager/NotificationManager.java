@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.GroupDao;
 import dao.RoleDao;
 import dao.absences.AbsenceComponentDao;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.Competence;
+import models.CompetenceCode;
 import models.Notification;
 import models.Person;
 import models.Role;
@@ -28,9 +32,11 @@ import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.Play;
 import play.i18n.Messages;
 import play.libs.Mail;
@@ -43,6 +49,8 @@ import play.libs.Mail;
  */
 @Slf4j
 public class NotificationManager {
+  
+  
 
   private SecureManager secureManager;
   private RoleDao roleDao;
@@ -50,6 +58,8 @@ public class NotificationManager {
   private AbsenceComponentDao componentDao;
   private GroupDao groupDao;
   private ConfigurationManager configurationManager;
+  private CompetenceDao competenceDao;
+  private CompetenceCodeDao competenceCodeDao;
 
   /**
    * Default constructor.
@@ -57,15 +67,19 @@ public class NotificationManager {
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao, 
-      ConfigurationManager configurationManager) {
+      ConfigurationManager configurationManager, CompetenceDao competenceDao,
+      CompetenceCodeDao competenceCodeDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
     this.componentDao = componentDao;
     this.groupDao = groupDao;
     this.configurationManager = configurationManager;
+    this.competenceDao = competenceDao;
+    this.competenceCodeDao = competenceCodeDao;
   }
 
+  private static final String OVERTIME = "S1";
   private static final String DTF = "dd/MM/YYYY - HH:mm";
   private static final String DF = "dd/MM/YYYY";
 
@@ -634,7 +648,7 @@ public class NotificationManager {
                     refuser.getFullname());
 
     Notification.builder().destination(competenceRequest.person.user).message(message)
-    .subject(NotificationSubject.ABSENCE_REQUEST, competenceRequest.id).create();
+    .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
 
   }
 
@@ -648,15 +662,270 @@ public class NotificationManager {
     
   }
 
-  public void notificationCompetenceRequestPolicy(User user, CompetenceRequest competenceRequest,
-      boolean b) {
-    // TODO Auto-generated method stub
+  public void notificationCompetenceRequestPolicy(User currentUser, CompetenceRequest competenceRequest,
+      boolean insert) {
+    if (currentUser.isSystemUser()) {
+      return;
+    }
+    if (insert) {
+      notifyCompetenceRequest(competenceRequest, Crud.CREATE);
+      return;
+    }    
+  }
+
+  public void sendEmailCompetenceRequestPolicy(User currentUser, CompetenceRequest competenceRequest,
+      boolean insert) {
+    if (currentUser.isSystemUser()) {
+      return;
+    }
+    if (insert) {
+      sendEmailCompetenceRequest(competenceRequest);
+    }    
+  }
+  
+  private void sendEmailCompetenceRequest(CompetenceRequest competenceRequest) {
+    Verify.verifyNotNull(competenceRequest);
+    final Person person = competenceRequest.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    final Role roleDestination = getProperRole(competenceRequest); 
+    if (roleDestination == null) {
+      log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
+          + "{} di tipo {} con date {}, {}", 
+          competenceRequest.person, competenceRequest.type, competenceRequest.startAt, competenceRequest.endTo);
+      return;
+    }
+    person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
+        .map(uro -> uro.user).forEach(user -> {
+          //Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+          if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+            Optional<Group> group = 
+                groupDao.checkManagerPerson(user.person, person);
+            if (!group.isPresent()) {
+              return;
+            }
+            if (!group.get().sendFlowsEmail) {
+              log.info("Non verrà inviata la mail al responsabile del gruppo {} "
+                  + "poichè l'invio è stato disattivato.", 
+                  user.person.fullName());
+              return;
+            }            
+          }
+          try {
+            simpleEmail.addTo(user.person.email);
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          simpleEmail.setSubject("ePas Approvazione flusso");
+          val mailBody = createCompetenceRequestEmail(competenceRequest, user);
+          try {
+            simpleEmail.setMsg(mailBody);
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          Mail.send(simpleEmail);
+          log.info("Inviata email per richiesta di flusso richiesta: {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}", 
+              competenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+        });
     
   }
 
-  public void sendEmailCompetenceRequestPolicy(User user, CompetenceRequest competenceRequest,
-      boolean b) {
-    // TODO Auto-generated method stub
+  private String createCompetenceRequestEmail(CompetenceRequest competenceRequest, User user) {
+    final String dateFormatter = "dd/MM/YYYY";
+    String requestType = "";
+    if (competenceRequest.type == CompetenceRequestType.OVERTIME_REQUEST) {
+      requestType = Messages.get("CompetenceRequestType.OVERTIME");
+    }
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", user.person.fullName()));
+    message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
+        competenceRequest.person.fullName()));
+    message.append(String.format("\r\n per una competenza di tipo: %s", requestType));
+    if (competenceRequest.startAt.isEqual(competenceRequest.endTo)) {
+      message.append(String.format("\r\n per il giorno: %s", 
+          competenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+    } else {
+      message.append(String.format("\r\n dal: %s", 
+          competenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+      message.append(String.format("  al: %s", 
+          competenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+    }
+    String baseUrl = BASE_URL;
+    if (!baseUrl.endsWith("/")) {
+      baseUrl = baseUrl + "/";
+    }
+
+    baseUrl = baseUrl + PATH + "?id=" + competenceRequest.id + "&type=" + competenceRequest.type;
+
+    message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
+
+    return message.toString();
+  }
+
+  /**
+   * Il metodo che si occupa di generare la corretta notifica al giusto utente.
+   * @param competenceRequest la richiesta da notificare
+   * @param operation l'operazione da notificare
+   */
+  private void notifyCompetenceRequest(CompetenceRequest competenceRequest, Crud operation) {
+    Verify.verifyNotNull(competenceRequest);
+    final Person person = competenceRequest.person;
+    final String template;
+    if (Crud.CREATE == operation) {
+      template = "%s ha inserito una nuova richiesta di: %s";
+    } else if (Crud.UPDATE == operation) {
+      template = "%s ha modificato una richiesta di: %s";
+    } else if (Crud.DELETE == operation) {
+      template = "%s ha eliminato una richiesta di: %s";
+    } else {
+      template = null;
+    }
+    final String message = 
+        String.format(template, person.fullName(), competenceRequest.startAt.toString(DF));
+
+    //se il flusso è terminato notifico a chi ha fatto la richiesta...
+    if (competenceRequest.isFullyApproved()) {
+      Notification.builder().destination(person.user).message(message)
+      .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+      //...e all'amministratore del personale
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(OVERTIME);
+      Optional<Competence> competence = competenceDao
+          .getCompetence(person, competenceRequest.year, competenceRequest.month, code);
+      if (competence.isPresent()) {
+        notificationCompetencePolicy(person.user, competence.get(), true, false, false);
+      }
+      
+    }
+    final Role roleDestination = getProperRole(competenceRequest); 
+    if (roleDestination == null) {
+      log.info("Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
+          + "{} di tipo {} con date {}, {}", 
+          competenceRequest.person, competenceRequest.type, competenceRequest.startAt, competenceRequest.endTo);
+      return;
+    }
+    List<User> users = person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
+        .map(uro -> uro.user).collect(Collectors.toList());
+    if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+      List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+      for (User user : users) {
+        for (Group group : groups) {
+          if (group.manager.equals(user.person) && group.people.contains(person)) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+          }
+        }
+      }
+      return;
+    } else {
+      users.forEach(user -> {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+      });
+    }
     
+  }
+
+  /**
+   * 
+   * @param competenceRequest la richiesta di competenza.
+   * @return il ruolo corretto per l'approvazione della richiesta.
+   */
+  private Role getProperRole(CompetenceRequest competenceRequest) {
+    Role role = null;
+
+    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null) {
+      role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    }
+    if (competenceRequest.administrativeApprovalRequired 
+        && competenceRequest.administrativeApproved == null
+        && (competenceRequest.managerApproved != null || !competenceRequest.managerApprovalRequired)) {
+      role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+    }
+    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null 
+        && ((!competenceRequest.managerApprovalRequired 
+            && !competenceRequest.administrativeApprovalRequired) 
+            || (competenceRequest.managerApproved != null 
+            && !competenceRequest.administrativeApprovalRequired)
+            || (competenceRequest.managerApproved != null 
+            && competenceRequest.administrativeApproved != null)
+            || (!competenceRequest.managerApprovalRequired 
+                && competenceRequest.administrativeApproved != null))        
+        ) {
+      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    }
+    return role;
+  }
+  
+  /**
+   * Le politiche di notifica riguardo l'inserimento di competenze.
+   * @param currentUser utente che esegue la richiesta
+   * @param competenze competenza inserita
+   */
+  public void notificationCompetencePolicy(User currentUser, Competence competence, 
+      boolean insert, boolean update, boolean delete) {
+
+    //Se l'user che ha fatto l'inserimento è utente di sistema esco
+    if (currentUser.isSystemUser() && !currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
+      return;
+    }
+
+    //Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
+    if (currentUser.person != null 
+        && secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+      return;
+    }
+
+    if (competence.competenceCode.code.equals(OVERTIME)) {
+      if (insert) {
+        notifyCompetence(competence, currentUser, NotificationManager.Crud.CREATE);
+        return;
+      }
+      if (update) {
+        notifyCompetence(competence, currentUser, NotificationManager.Crud.UPDATE);
+        return;
+      }
+      if (delete) {
+        notifyCompetence(competence, currentUser, NotificationManager.Crud.DELETE);
+        return;
+      }
+
+    }
+  }
+  
+  /**
+   * Gestore delle notifiche per le assenze.
+   */
+  private void notifyCompetence(Competence competence, User currentUser, Crud operation) {
+    Verify.verifyNotNull(competence);
+    final Person person = competence.person;
+    String template;
+    if (Crud.CREATE == operation) {
+      template = "%s ha inserito una nuova: %s - %s";
+    } else if (Crud.UPDATE == operation) {
+      template = "%s ha modificato una: %s - %s";
+    } else if (Crud.DELETE == operation) {
+      template = "%s ha eliminato una: %s - %s";
+    } else {
+      template = null;
+    }
+    String modifier = person.fullName();
+    YearMonth yearMonth = new YearMonth(competence.year, competence.month);
+    final String message = String.format(template, modifier,
+        yearMonth.toString(DF), competence.competenceCode.code);
+    //controllare se dalla configurazione è possibile notificare le assenze da flusso 
+    val config = configurationManager
+        .configValue(person.office, EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+    if (config.equals(Boolean.FALSE)) {
+      return;
+    }
+    person.office.usersRolesOffices.stream()
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.COMPETENCE, competence.id).create();
+        });
   }
 }

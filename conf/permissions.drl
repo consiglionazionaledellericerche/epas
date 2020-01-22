@@ -510,6 +510,9 @@ when
 		"CompetenceRequests.overtimes",
 		"CompetenceRequests.list",
 		"CompetenceRequests.blank",
+		"CompetenceRequests.edit",
+		"CompetenceRequests.save",
+		"CompetenceRequests.delete",
 		
      	/* Ferie */
      	"Vacations.show",
@@ -566,7 +569,7 @@ when
 
        ), target == null, granted == false)
 then
- $c.grant();
+  $c.grant();
 end
 
 rule EmployCanEditOrDeleteAbsenceRequest
@@ -586,6 +589,7 @@ when
   $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
     "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
 then
+  System.out.println("Sono nella EmployCanEditOrDeleteCompetenceRequest");
   $c.grant();
 end
 

@@ -416,7 +416,7 @@ public class CompetenceRequestManager {
         .build();
     event.save();
 
-    log.info("Costruito evento per richiesta di assenza {}", event);
+    log.info("Costruito evento per {}", event.competenceRequest.type);
     competenceRequest.save();
     checkAndCompleteFlow(competenceRequest);
     return Optional.absent();
@@ -430,7 +430,7 @@ public class CompetenceRequestManager {
    *     dell'inserimento assenza.
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
    */
-  public Optional<InsertReport> checkAndCompleteFlow(CompetenceRequest competenceRequest) {
+  public Optional<Competence> checkAndCompleteFlow(CompetenceRequest competenceRequest) {
     if (competenceRequest.isFullyApproved() && !competenceRequest.flowEnded) {
       return Optional.of(completeFlow(competenceRequest));
     }
@@ -444,15 +444,16 @@ public class CompetenceRequestManager {
    *     dati per l'inserimento. 
    * @return il report con i codici di assenza inseriti.
    */
-  private InsertReport completeFlow(CompetenceRequest competenceRequest) {
+  private Competence completeFlow(CompetenceRequest competenceRequest) {
 
     competenceRequest.flowEnded = true;
     competenceRequest.save();
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
-          
+    CompetenceCode code = null;
+    Optional<Competence> competence = Optional.absent();
     if (competenceRequest.type == CompetenceRequestType.OVERTIME_REQUEST) {
-      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(DAILY_OVERTIME);      
-      Optional<Competence> competence = competenceDao.getCompetence(competenceRequest.person, 
+      code = competenceCodeDao.getCompetenceCodeByCode(DAILY_OVERTIME);      
+      competence = competenceDao.getCompetence(competenceRequest.person, 
           competenceRequest.year, competenceRequest.month, code);
       if (!competence.isPresent()) {
         return null;
@@ -461,12 +462,18 @@ public class CompetenceRequestManager {
       consistencyManager.updatePersonSituation(competenceRequest.person.id,
           new LocalDate(competenceRequest.year, competenceRequest.month, 1));
     }
-    
 
-    //notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
-    //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
-    
-    //TODO: sistemare il ritorno e soprattutto cosa ritornare al chiamante
+    return competence.get();
+  }
+  
+  public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {
+    List<CompetenceRequest> existingList = competenceRequestDao.existingCompetenceRequests(competenceRequest);
+    for (CompetenceRequest request : existingList) {
+      if (request.month == competenceRequest.month 
+          && request.year == competenceRequest.year && request.type == competenceRequest.type) {
+        return request;
+      }
+    }
     return null;
   }
 

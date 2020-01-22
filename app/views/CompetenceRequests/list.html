@@ -33,7 +33,8 @@
   
   	#{tabContentItem id:'attivo', active:true}
   	#{b.buttons center:true}
-  		<a class="btn btn-success" href="@{CompetenceRequests.blank('person':person, 'type':type)}">
+  		<a class="btn btn-success" href="@{CompetenceRequests.blank('person':person, 
+  		'year':currentData.year, 'month':currentData.month, 'type':type)}">
     		<i class="fa fa-plus"></i> &{'CompetenceRequestType.' + type + '.blank'}
   		</a>
   	#{/b.buttons}

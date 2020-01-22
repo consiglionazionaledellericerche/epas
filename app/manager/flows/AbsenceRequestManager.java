@@ -501,9 +501,6 @@ public class AbsenceRequestManager {
       
     }
 
-    //notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
-    //  Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
-
     return insertReport;
   }
 

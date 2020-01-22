@@ -159,4 +159,9 @@ public class CompetenceRequest extends MutableModel {
             || this.isEmployeeApproved());
   }
   
+  @Transient
+  public CompetenceRequestEvent actualEvent() {
+    return this.events.get(0);
+  }
+  
 }

@@ -130,7 +130,7 @@ public class Certifications extends Controller {
       renderArgs.put("currentData", new CurrentData(validYear, validMonth,
           Integer.parseInt(session.get("daySelected")),
           Long.parseLong(session.get("personSelected")),
-          office.id));
+          office.id, null));
       // ##########################################################################
 
 

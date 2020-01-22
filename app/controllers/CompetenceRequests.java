@@ -4,6 +4,7 @@ import java.util.List;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
@@ -32,6 +33,7 @@ import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -135,7 +137,7 @@ public class CompetenceRequests extends Controller{
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
-  public static void blank(Optional<Long> personId, LocalDate from, CompetenceRequestType type) {
+  public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType type) {
     Verify.verifyNotNull(type);
     Person person;
     if (personId.isPresent()) {
@@ -163,31 +165,70 @@ public class CompetenceRequests extends Controller{
     competenceRequest.type = type;
     competenceRequest.person = person;
     PersonStampingRecap psDto = null;
+    boolean isOvertime = false;
     if (type.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      if (from == null) {
-        from = LocalDate.now().minusMonths(1);
-      }
+      isOvertime = true;
+//      if (year == null || month == null) {
+//        year = LocalDate.now().getYear();
+//        month = LocalDate.now().getMonthOfYear();
+//      }
       psDto = stampingsRecapFactory.create(person,
-          from.getYear(), from.getMonthOfYear(), true);  
+          year, month, true);  
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
-    render("@edit", psDto, competenceRequest);
+    render("@edit", psDto, competenceRequest, isOvertime, type, year, month);
   }
 
-  public static void edit(CompetenceRequest competenceRequest) {
+  public static void edit(CompetenceRequest competenceRequest, int year, int month) {
 
+    rules.checkIfPermitted(competenceRequest);
+    boolean insertable = true;
+    
+  //verifico che non esista già una richiesta (non rifiutata) 
+    //di assenza che interessa i giorni richiesti
+    
+    
+   
+    render(competenceRequest, insertable);
+    
   }
 
-  public static void save(@Required @Valid CompetenceRequest competenceRequest, boolean persist) {
+  public static void save(@Required @Valid CompetenceRequest competenceRequest, 
+      Integer value, int year, int month) {
     log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
 
     if (!Security.getUser().get().person.equals(competenceRequest.person)) {
       rules.check("CompetenceRequests.blank4OtherPerson");
-    } else {
-      competenceRequest.person = Security.getUser().get().person;
-    }
+    } 
 
     notFoundIfNull(competenceRequest.person);
+        
+    competenceRequest.year = year;
+    competenceRequest.month = month;    
+    competenceRequest.startAt = LocalDateTime.now();
+        
+    CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
+    if (existing != null) {
+      Validation.addError("competenceRequest.value", "Esiste già una richiesta di questo tipo per questo anno/mese");
+      response.status = 400;      
+      render("@edit", competenceRequest, existing);
+    }
+    if (!competenceRequest.person.checkLastCertificationDate(
+        new YearMonth(competenceRequest.year,
+            competenceRequest.month))) {
+      Validation.addError("competenceRequest.value",
+          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
+      response.status = 400;      
+      render("@edit", competenceRequest);
+    }
+    
+//    if (Validation.hasErrors()) {
+//      response.status = 400;      
+//      flash.error(Web.msgHasErrors());
+//      render("@edit", competenceRequest);
+//      return;
+//    }
+//    
     competenceRequestManager.configure(competenceRequest);
 
     if (competenceRequest.endTo == null) {
