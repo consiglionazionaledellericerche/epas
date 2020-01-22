@@ -687,7 +687,7 @@ then
 end
 
 /*
- * L'amministratore del personale può modificare una determinata timbratura se:
+ * L'amministratore del personale può modificare una determinata assenza se:
  */
 rule AdminCanEditAbsence
 when
@@ -2347,11 +2347,14 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-
+		"manager.AbsenceManager.saveAbsences",
+		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        
+        "rest.v2.PersonDays.getDaySituation"        
 
        ), target == null, granted == false)
 then
@@ -2368,12 +2371,15 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-
+		"manager.AbsenceManager.saveAbsences",
+		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
 
+		"rest.v2.PersonDays.getDaySituation"
+		
        ), target == $o, granted == false)
 then
  $c.grant();
