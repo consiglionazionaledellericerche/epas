@@ -21,15 +21,15 @@ public class WorkingTimeTypeAdjust extends Job<Void>{
   public void doJob() {
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
-      if (wtt.description.contains(MATERNITA) || wtt.description.contains(MATERNITA_ACCENTO) 
+      if ((wtt.description.contains(MATERNITA) || wtt.description.contains(MATERNITA_ACCENTO) 
           || wtt.description.contains(MATERNITA_LOWER_CASE) 
           || wtt.description.contains(MATERNITA_LOWER_CASE_ACCENTO)
           || wtt.description.contains(ALLATTAMENTO)
-          || wtt.description.contains(ALLATTAMENTO_LOWER_CASE)) {
+          || wtt.description.contains(ALLATTAMENTO_LOWER_CASE)) &&
+          wtt.enableAdjustmentForQuantity == true) {
         wtt.enableAdjustmentForQuantity = false;
-        log.info("Messo a true il campo enableAdjustmentForQuantity per l'orario %s della sede %s", wtt.description, wtt.office);
-      } else {
-        wtt.enableAdjustmentForQuantity = true;
+        log.info("Messo a false il campo enableAdjustmentForQuantity per l'orario {} della sede {}", 
+            wtt.description, wtt.office);
       }
       wtt.save();
     }
