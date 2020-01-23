@@ -52,6 +52,16 @@
       		<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
     	#{/if}
       #{/secure.li}
+      
+      <li class="divider"></li>
+      
+      #{secure.li @CompetenceRequests.overtimesToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+       	#{if templateUtility.overtimeRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
+    	#{/if} 
+      #{/secure.li}
+      
             
 
     </ul>

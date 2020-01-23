@@ -112,14 +112,14 @@ public class RequestInit extends Controller {
     }
     
     // CompetenceRequestType init /////////////////////////////////////////////////
-    CompetenceRequestType type = null;
-    if (params.get("type") != null) {
-      type = CompetenceRequestType.valueOf(params.get("type"));
-    } else if (session.get("type") != null) {
-      type = CompetenceRequestType.valueOf(session.get("type"));      
+    CompetenceRequestType competenceType = null;
+    if (params.get("competenceType") != null) {
+      competenceType = CompetenceRequestType.valueOf(params.get("competenceType"));
+    } else if (session.get("competenceType") != null) {
+      competenceType = CompetenceRequestType.valueOf(session.get("competenceType"));      
     } else {      
-      type = CompetenceRequestType.OVERTIME_REQUEST;
-      session.put("type", CompetenceRequestType.OVERTIME_REQUEST);
+      competenceType = CompetenceRequestType.OVERTIME_REQUEST;
+      session.put("competenceType", CompetenceRequestType.OVERTIME_REQUEST);
     }
 
     // Popolamento del dropdown degli anni
@@ -159,8 +159,8 @@ public class RequestInit extends Controller {
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
 
-    computeActionSelected(currentUser, offices, year, month, day, personId, officeId, type);
-    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId, type));
+    computeActionSelected(currentUser, offices, year, month, day, personId, officeId, competenceType);
+    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId, competenceType));
   }
 
   private static void computeActionSelected(

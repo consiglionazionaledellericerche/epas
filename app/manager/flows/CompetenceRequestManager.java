@@ -39,6 +39,7 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.Role;
+import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -475,6 +476,78 @@ public class CompetenceRequestManager {
       }
     }
     return null;
+  }
+  
+  /**
+   * Approvazione richiesta competenza da parte del responsabile di gruppo.
+   * @param id id della richiesta di competenza.
+   */
+  public void managerApproval(long id, User user) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        competenceRequest, currentPerson, 
+        CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di gruppo {}.",
+        competenceRequest, currentPerson.getFullname());
+    
+    notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
+  }
+  
+  /**
+   * Approvazione richiesta competenza da parte del responsabile di sede.
+   * @param id id della richiesta di competenza.
+   */
+  public void officeHeadApproval(long id, User user) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null) {
+      executeEvent(competenceRequest, currentPerson, 
+          CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+      log.info("{} approvata dal responsabile di sede {} nelle veci del responsabile di gruppo.",
+          competenceRequest, currentPerson.getFullname());
+    }
+    executeEvent(
+        competenceRequest, currentPerson, 
+        CompetenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.",
+        competenceRequest, currentPerson.getFullname());   
+    notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
+
+  }
+  
+  /**
+   * Metodo che permette la disapprovazione della richiesta.
+   * @param id l'identificativo della richiesta di competenza
+   */
+  public void managerDisapproval(long id, String reason) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        competenceRequest, currentPerson, 
+        CompetenceRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di gruppo {}.",
+        competenceRequest, currentPerson.getFullname());
+
+  }
+
+  /**
+   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * @param id id della richiesta di assenza.
+   */
+  public void officeHeadDisapproval(long id, String reason) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(
+        competenceRequest, currentPerson, 
+        CompetenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di sede {}.",
+        competenceRequest, currentPerson.getFullname());   
+
   }
 
 }

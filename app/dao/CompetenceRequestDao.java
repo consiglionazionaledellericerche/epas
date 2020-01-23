@@ -327,21 +327,20 @@ public class CompetenceRequestDao extends DaoBase {
   }
   
   private BooleanBuilder seatSupervisorQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    condition.and(absenceRequest.person.office.in(officeList))
-        .andAnyOf(absenceRequest.officeHeadApprovalForManagerRequired.isTrue(),
-            absenceRequest.managerApprovalRequired.isTrue()
-                .and(absenceRequest.managerApproved.isNotNull()), 
-                    absenceRequest.officeHeadApprovalRequired.isTrue()
-                    .and(absenceRequest.officeHeadApproved.isNull()));
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.person.office.in(officeList))
+        .andAnyOf(competenceRequest.managerApprovalRequired.isTrue()
+                .and(competenceRequest.managerApproved.isNotNull()), 
+                competenceRequest.officeHeadApprovalRequired.isTrue()
+                    .and(competenceRequest.officeHeadApproved.isNull()));
     return condition;
   }
   
   private BooleanBuilder managerQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    condition.and(absenceRequest.managerApprovalRequired.isTrue())
-        .and(absenceRequest.managerApproved.isNull())
-        .and(absenceRequest.person.office.in(officeList));
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.managerApprovalRequired.isTrue())
+        .and(competenceRequest.managerApproved.isNull())
+        .and(competenceRequest.person.office.in(officeList));
     return condition;
 
   }

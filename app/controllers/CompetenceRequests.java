@@ -22,6 +22,7 @@ import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
+import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
@@ -276,5 +277,50 @@ public class CompetenceRequests extends Controller{
     User user = Security.getUser().get();
     boolean disapproval = false;
     render(competenceRequest, type, user, disapproval);
+  }
+  
+  public static void approval(long id) {
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    User user = Security.getUser().get();
+    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
+        && user.hasRoles(Role.GROUP_MANAGER)) {
+      //caso di approvazione da parte del responsabile di gruppo.
+      competenceRequestManager.managerApproval(id, user);
+      if (user.usersRolesOffices.stream()
+          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
+          && competenceRequest.officeHeadApprovalRequired) {
+        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
+        competenceRequestManager.officeHeadApproval(id, user);
+      }
+    }
+    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      //caso di approvazione da parte del responsabile di sede
+      competenceRequestManager.officeHeadApproval(id, user);
+    }
+  }
+  
+  public static void disapproval(long id, boolean disapproval, String reason) {
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    User user = Security.getUser().get();
+    if (!disapproval) {
+      disapproval = true;
+      render(competenceRequest, disapproval);
+    }
+    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
+        && user.hasRoles(Role.GROUP_MANAGER)) {
+      //caso di approvazione da parte del responsabile di gruppo.
+      competenceRequestManager.managerDisapproval(id, reason);
+      flash.error("Richiesta respinta");
+      render("@show", competenceRequest, user);
+    }
+    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      //caso di approvazione da parte del responsabile di sede
+      competenceRequestManager.officeHeadDisapproval(id, reason);
+      flash.error("Richiesta respinta");
+      render("@show", competenceRequest, user);
+    }
+    render("@show", competenceRequest, user);
   }
 }

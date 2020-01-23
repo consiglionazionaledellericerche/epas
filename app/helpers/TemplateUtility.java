@@ -12,6 +12,7 @@ import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
+import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
 import dao.GroupDao;
 import dao.MemoizedCollection;
@@ -59,8 +60,10 @@ import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
@@ -98,6 +101,7 @@ public class TemplateUtility {
   private final AbsenceRequestDao absenceRequestDao;
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
+  private final CompetenceRequestDao competenceRequestDao;
   
    
   
@@ -116,7 +120,7 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao, GroupDao groupDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao, CompetenceRequestDao competenceRequestDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -137,6 +141,7 @@ public class TemplateUtility {
     this.absenceRequestDao = absenceRequestDao;
     this.uroDao = uroDao;
     this.groupDao = groupDao;
+    this.competenceRequestDao = competenceRequestDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -196,6 +201,20 @@ public class TemplateUtility {
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
+    return results.size();
+  }
+  
+  public final int overtimeRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, groups, user.person);
     return results.size();
   }
 
