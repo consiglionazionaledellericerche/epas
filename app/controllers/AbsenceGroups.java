@@ -107,8 +107,6 @@ public class AbsenceGroups extends Controller {
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
   @Inject
-  private static NotificationManager notificationManager;
-  @Inject
   private static AbsenceCertificationService absenceCertificationService;
   @Inject
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
@@ -649,37 +647,7 @@ public class AbsenceGroups extends Controller {
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
         absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
-    //Persistenza
-    if (!insertReport.absencesToPersist.isEmpty()) {
-      for (Absence absence : insertReport.absencesToPersist) {
-        PersonDay personDay = personDayManager
-            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-        absence.personDay = personDay;
-        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
-
-          absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
-        }
-        personDay.absences.add(absence);
-        rules.checkIfPermitted(absence);
-        absence.save();
-        personDay.save();
-
-        notificationManager.notificationAbsencePolicy(Security.getUser().get(),
-            absence, groupAbsenceType, true, false, false);
-
-      }
-      if (!insertReport.reperibilityShiftDate().isEmpty()) {
-        absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
-            person.fullName(), insertReport.reperibilityShiftDate());
-      }
-      JPA.em().flush();
-      consistencyManager.updatePersonSituation(person.id, from);
-      flash.success("Codici di assenza inseriti.");
-
-    }
-
-    //String referer = request.headers.get("referer").value();
+    absenceManager.saveAbsences(insertReport, person, from, recoveryDate, justifiedType, groupAbsenceType);
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();

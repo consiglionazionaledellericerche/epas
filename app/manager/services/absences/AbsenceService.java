@@ -14,6 +14,9 @@ import java.util.List;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
+import manager.ConsistencyManager;
+import manager.NotificationManager;
+import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -35,6 +38,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
+import models.PersonDay;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
@@ -49,6 +53,8 @@ import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import play.cache.Cache;
+import play.db.jpa.JPA;
+import security.SecurityRules;
 
 /**
  * Interfaccia epas per il componente assenze. le richieste via form.
@@ -66,7 +72,7 @@ public class AbsenceService {
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
   private final ConfigurationManager configurationManager;
-
+  
   /**
    * Costruttore injection.
    *
@@ -208,6 +214,8 @@ public class AbsenceService {
         absenceComponentDao, absenceEngineUtility);
   }
 
+
+    
   /**
    * Effettua la simulazione dell'inserimento. Genera il report di inserimento.
    *
