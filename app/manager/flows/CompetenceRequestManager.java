@@ -351,8 +351,8 @@ public class CompetenceRequestManager {
 
     val problem = checkCompetenceRequestEvent(competenceRequest, person, eventType);
     if (problem.isPresent()) {
-      log.warn("Impossibile inserire la richiesta di assenza {}. Problema: {}", 
-          competenceRequest, problem.get());
+      log.warn("Impossibile inserire la richiesta di {}. Problema: {}", 
+          competenceRequest.type, problem.get());
       return problem;
     }
 
@@ -431,11 +431,11 @@ public class CompetenceRequestManager {
    *     dell'inserimento assenza.
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
    */
-  public Optional<Competence> checkAndCompleteFlow(CompetenceRequest competenceRequest) {
+  public boolean checkAndCompleteFlow(CompetenceRequest competenceRequest) {
     if (competenceRequest.isFullyApproved() && !competenceRequest.flowEnded) {
-      return Optional.of(completeFlow(competenceRequest));
+      return completeFlow(competenceRequest);
     }
-    return Optional.absent();
+    return false;
   }
   
   /**
@@ -445,7 +445,7 @@ public class CompetenceRequestManager {
    *     dati per l'inserimento. 
    * @return il report con i codici di assenza inseriti.
    */
-  private Competence completeFlow(CompetenceRequest competenceRequest) {
+  private boolean completeFlow(CompetenceRequest competenceRequest) {
 
     competenceRequest.flowEnded = true;
     competenceRequest.save();
@@ -467,7 +467,7 @@ public class CompetenceRequestManager {
           new LocalDate(competenceRequest.year, competenceRequest.month, 1));
     }
 
-    return comp;
+    return true;
   }
   
   public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {

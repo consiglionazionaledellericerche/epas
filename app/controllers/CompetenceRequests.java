@@ -185,11 +185,6 @@ public class CompetenceRequests extends Controller{
     rules.checkIfPermitted(competenceRequest);
     boolean insertable = true;
     
-  //verifico che non esista già una richiesta (non rifiutata) 
-    //di assenza che interessa i giorni richiesti
-    
-    
-   
     render(competenceRequest, insertable);
     
   }

@@ -72,6 +72,7 @@ CompetenceRequestEventType.DELETE=Richiesta cancellata
 CompetenceRequestEventType.EXPIRING=Richiesta scaduta
 
 CompetenceRequestType.OVERTIME =Straordinari
+CompetenceRequestType.OVERTIME_REQUEST_TO_APPROVE =Richieste di straordinari
 competenceRequest.value =Ore di straordinario da richiedere
 
 

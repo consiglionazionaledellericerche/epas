@@ -524,6 +524,7 @@ when
 		"CompetenceRequests.save",
 		"CompetenceRequests.delete",
 		"CompetenceRequests.show",
+		"CompetenceRequests.overtimes",
 		
      	/* Ferie */
      	"Vacations.show",
@@ -2637,6 +2638,20 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta straordinari
+ */
+rule isCompetenceFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.enabled", granted == false, target == null)
 then
   $c.grant();
 end

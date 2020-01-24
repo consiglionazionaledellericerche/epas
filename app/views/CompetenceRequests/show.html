@@ -14,7 +14,7 @@
 
 <div class="container">
 
-#{title title: 'Richiesta per il/i giorno/i '+ competenceRequest.startAt.toLocalDate().format() + ' - ' + competenceRequest.endTo.toLocalDate().format() /}
+#{title title: 'Richiesta di '+ competenceRequest.value + ' ore per ' + templateUtility.monthName(competenceRequest.month) + ' ' + competenceRequest.year /}
 
 <br>
  #{alert color:'info'}

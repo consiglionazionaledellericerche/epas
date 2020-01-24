@@ -4,8 +4,9 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -35,8 +36,9 @@
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
 								
-				<td>#{f.value 'item.startAt', value:config.allDay ? item.startAtAsDate().format() : item.startAt.format() /}</td>	    
-				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
+				<td>#{f.value 'item.year', value:item.year /}</td>	    
+				<td>#{f.value 'item.month', value:item.month /}</td>
+				<td>#{f.value 'item.value', value:item.value /}</td>
 				
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>

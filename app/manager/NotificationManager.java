@@ -85,6 +85,7 @@ public class NotificationManager {
 
   private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
   private static final String PATH = "absencerequests/show";
+  private static final String OVERTIME_PATH = "competencerequests/show";
 
 
   /**
@@ -794,7 +795,7 @@ public class NotificationManager {
       baseUrl = baseUrl + "/";
     }
 
-    baseUrl = baseUrl + PATH + "?id=" + competenceRequest.id + "&type=" + competenceRequest.type;
+    baseUrl = baseUrl + OVERTIME_PATH + "?id=" + competenceRequest.id + "&type=" + competenceRequest.type;
 
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
