@@ -46,7 +46,7 @@
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
-	<td>#{f.value 'item.description', value:item.description /}</td>
+	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
 </tr>
 #{/list}
 </table>

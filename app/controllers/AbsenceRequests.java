@@ -37,6 +37,7 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
@@ -476,7 +477,8 @@ public class AbsenceRequests extends Controller {
         && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       absenceRequestManager.officeHeadApproval(id, user);
     }
-    notificationManager.sendEmailToUser(absenceRequest);
+    notificationManager.sendEmailToUser(Optional.of(absenceRequest), 
+        Optional.<CompetenceRequest>absent());
     flash.success("Operazione conclusa correttamente");
     AbsenceRequests.listToApprove(absenceRequest.type);
 

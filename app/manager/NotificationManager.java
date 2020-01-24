@@ -656,9 +656,47 @@ public class NotificationManager {
    * Metodo void che chiama il metodo privato che invia la mail al richiedente l'assenza.
    * @param absenceRequest la richiesta d'assenza con tutti i parametri.
    */
-  public void sendEmailToUser(AbsenceRequest absenceRequest) {
+  public void sendEmailToUser(Optional<AbsenceRequest> absenceRequest, 
+      Optional<CompetenceRequest> competenceRequest) {
+    if (absenceRequest.isPresent()) {
+      sendEmailAbsenceRequestConfirmation(absenceRequest.get());
+    }
+    if (competenceRequest.isPresent()) {
+      sendEmailCompetenceRequestConfirmation(competenceRequest.get());
+    }
+    
+  }
 
-    sendEmailAbsenceRequestConfirmation(absenceRequest);
+  private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest) {
+    Verify.verifyNotNull(competenceRequest);
+    final Person person = competenceRequest.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    try {
+      simpleEmail.addTo(person.email);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    String requestType = "";
+    if (competenceRequest.type == CompetenceRequestType.OVERTIME_REQUEST) {
+      requestType = Messages.get("CompetenceRequestType.OVERTIME_REQUEST");
+    } 
+    simpleEmail.setSubject("ePas Approvazione flusso");
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", person.fullName()));
+    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s",
+        requestType));
+    message.append(String.format("\r\n per i giorni %s - %s", 
+        competenceRequest.startAt.toLocalDate(), competenceRequest.endTo.toLocalDate()));
+    val mailBody = message.toString();
+    try {
+      simpleEmail.setMsg(mailBody);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    Mail.send(simpleEmail);
+    log.info("Inviata email per approvazione di flusso richiesta: {}. "
+        + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}", 
+        competenceRequest, person.email, simpleEmail.getSubject(), mailBody);
     
   }
 

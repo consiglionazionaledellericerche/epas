@@ -452,19 +452,22 @@ public class CompetenceRequestManager {
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
     CompetenceCode code = null;
     Optional<Competence> competence = Optional.absent();
+    Competence comp = null;
     if (competenceRequest.type == CompetenceRequestType.OVERTIME_REQUEST) {
       code = competenceCodeDao.getCompetenceCodeByCode(DAILY_OVERTIME);      
       competence = competenceDao.getCompetence(competenceRequest.person, 
           competenceRequest.year, competenceRequest.month, code);
       if (!competence.isPresent()) {
-        return null;
-      }
-      competenceManager.saveCompetence(competence.get(), competenceRequest.value);
+        comp = new Competence(competenceRequest.person, code, competenceRequest.month, competenceRequest.year);
+      } else {
+        comp = competence.get();
+      }       
+      competenceManager.saveCompetence(comp, competenceRequest.value);
       consistencyManager.updatePersonSituation(competenceRequest.person.id,
           new LocalDate(competenceRequest.year, competenceRequest.month, 1));
     }
 
-    return competence.get();
+    return comp;
   }
   
   public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {

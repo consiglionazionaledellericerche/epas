@@ -298,6 +298,10 @@ public class CompetenceRequests extends Controller{
       //caso di approvazione da parte del responsabile di sede
       competenceRequestManager.officeHeadApproval(id, user);
     }
+    notificationManager.sendEmailToUser(Optional.<AbsenceRequest>absent(), 
+        Optional.of(competenceRequest));
+    flash.success("Operazione conclusa correttamente");
+    CompetenceRequests.listToApprove(competenceRequest.type);
   }
   
   public static void disapproval(long id, boolean disapproval, String reason) {

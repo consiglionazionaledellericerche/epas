@@ -839,6 +839,7 @@ AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 
 CompetenceRequests.overtimes =Mie richieste di straordinari
+CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
 CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
 CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
 CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
