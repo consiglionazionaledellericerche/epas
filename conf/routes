@@ -73,6 +73,12 @@ GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 
 GET     /rest/persons/{email}/{action}          rest.Persons.{action}
 
+*       /rest/v2/{controller}/{action}/{<[a-z0-9]+>id} rest.v2.{controller}.{action}
+*       /rest/v2/{controller}/{action}             rest.v2.{controller}.{action}
+
+#Questi due endpoint potrebbero essere rimossi e utilizzare le rotte corrispondenti
+*       /rest/absences/checkAbsenceByPerseoId             rest.Absences.checkAbsence
+*       /rest/absences/insertAbsenceByPerseoId             rest.Absences.insertAbsence
 
 *       /rest/{controller}/{action}/{<[a-z0-9]+>id} rest.{controller}.{action}
 *       /rest/{controller}/{action}             rest.{controller}.{action}
