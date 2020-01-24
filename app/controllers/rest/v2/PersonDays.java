@@ -40,12 +40,12 @@ public class PersonDays extends Controller {
    * Nel caso venga passato sia eppn che email la precedenza nella ricerca della persona va al campo eppn.
    */
   @BasicAuth
-  public static void getDaySituation(String email, String eppn, LocalDate date) {
+  public static void getDaySituation(String email, String eppn, Long personPersoId, LocalDate date) {
     log.debug("getDaySituation -> email={}, eppn={}, date={}", email, date);
     if ((email == null && eppn == null) || date == null) {
       notFound();
     }
-    Optional<Person> person = personDao.byEppnOrEmail(eppn, email);
+    Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPersoId);
 
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente in ePAS la "
