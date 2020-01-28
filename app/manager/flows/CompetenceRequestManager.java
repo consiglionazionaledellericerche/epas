@@ -53,6 +53,7 @@ import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
 @Slf4j
 public class CompetenceRequestManager {
@@ -458,15 +459,17 @@ public class CompetenceRequestManager {
       competence = competenceDao.getCompetence(competenceRequest.person, 
           competenceRequest.year, competenceRequest.month, code);
       if (!competence.isPresent()) {
-        comp = new Competence(competenceRequest.person, code, competenceRequest.month, competenceRequest.year);
+        comp = new Competence(competenceRequest.person, code, competenceRequest.year, competenceRequest.month);
       } else {
         comp = competence.get();
       }       
       competenceManager.saveCompetence(comp, competenceRequest.value);
+      
       consistencyManager.updatePersonSituation(competenceRequest.person.id,
           new LocalDate(competenceRequest.year, competenceRequest.month, 1));
+      
     }
-
+    
     return true;
   }
   
