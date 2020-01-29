@@ -1119,7 +1119,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 180, false, false,
       0, null, Sets.newHashSet(), null, null,false),
   A_95057E("95057E", "perm. funz. pubb. O. E. com. e Un.com. 7 h",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, true,
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
   A_95057P("95057P", "perm.f unz. pubb. Pres. Cons. comun. 7 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 420, false, false,
