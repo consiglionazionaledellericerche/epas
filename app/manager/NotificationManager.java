@@ -196,7 +196,13 @@ public class NotificationManager {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
       }
-      notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false, false);
+      if (!absence.isEmpty()) {
+        notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false, false);  
+      } else {
+        log.warn("Nessuna assenza inserita e da notificare per la richiesta di assenza {}", absenceRequest);
+        return;
+      }
+      
     }
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
