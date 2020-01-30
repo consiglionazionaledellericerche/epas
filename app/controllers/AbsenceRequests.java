@@ -442,42 +442,17 @@ public class AbsenceRequests extends Controller {
   public static void approval(long id) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    notFoundIfNull(absenceRequest);
     User user = Security.getUser().get();
-    //verifico se posso inserire l'assenza
-    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER)
-        && absenceRequest.person.equals(user.person)) {
-      absenceRequestManager.managerSelfApproval(id, user);
-      flash.success("Operazione conclusa correttamente");
-      AbsenceRequests.listToApprove(absenceRequest.type);
+    
+    boolean approved = absenceRequestManager.approval(absenceRequest, user);
+
+    if (approved) {
+      notificationManager.sendEmailToUser(absenceRequest);
+      flash.success("Operazione conclusa correttamente");      
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      absenceRequestManager.managerApproval(id, user);
-      if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
-          && absenceRequest.officeHeadApprovalRequired) {
-        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-        absenceRequestManager.officeHeadApproval(id, user);
-      }
-    }
-    if (absenceRequest.administrativeApprovalRequired
-        && absenceRequest.administrativeApproved == null
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
-      //caso di approvazione da parte dell'amministratore del personale
-      absenceRequestManager.personnelAdministratorApproval(id, user);
-    }
-    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      absenceRequestManager.officeHeadApproval(id, user);
-    }
-    if (absenceRequest.officeHeadApprovalForManagerRequired
-        && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      absenceRequestManager.officeHeadApproval(id, user);
-    }
-    notificationManager.sendEmailToUser(absenceRequest);
-    flash.success("Operazione conclusa correttamente");
     AbsenceRequests.listToApprove(absenceRequest.type);
 
   }
