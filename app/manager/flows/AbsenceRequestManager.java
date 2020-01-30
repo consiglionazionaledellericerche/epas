@@ -381,6 +381,7 @@ public class AbsenceRequestManager {
       case MANAGER_REFUSAL:
         //si riparte dall'inizio del flusso.
         //resetFlow(absenceRequest);
+        //Impostato a true per evitare di completare il flusso inserendo l'assenza
         absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
@@ -392,6 +393,7 @@ public class AbsenceRequestManager {
       case ADMINISTRATIVE_REFUSAL:
         //si riparte dall'inizio del flusso.
         //resetFlow(absenceRequest);
+        //Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
         absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
@@ -403,6 +405,7 @@ public class AbsenceRequestManager {
       case OFFICE_HEAD_REFUSAL:
         //si riparte dall'inizio del flusso.
         //resetFlow(absenceRequest);
+        //Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
         absenceRequest.flowEnded = true;
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
@@ -412,6 +415,7 @@ public class AbsenceRequestManager {
         break;
 
       case DELETE:
+        //Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza        
         absenceRequest.flowEnded = true;
         break;
       case EPAS_REFUSAL:
@@ -609,6 +613,52 @@ public class AbsenceRequestManager {
         absenceRequest, currentPerson.getFullname());
   }
 
+  /**
+   * Esegue l'approvazione del flusso controllando i vari casi possibili.
+   * @param id id della richiesta di assenza
+   * @param user l'utente che sta approvando il flusso
+   * @return true se il flusso è stato approvato correttamente, false altrimenti
+   */
+  public boolean approval(AbsenceRequest absenceRequest, User user) {
+
+    //verifico se posso inserire l'assenza
+    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER)
+        && absenceRequest.person.equals(user.person)) {
+      managerSelfApproval(absenceRequest.id, user);
+      return true;
+    }
+    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
+        && user.hasRoles(Role.GROUP_MANAGER)) {
+      //caso di approvazione da parte del responsabile di gruppo.
+      managerApproval(absenceRequest.id, user);
+      if (user.usersRolesOffices.stream()
+          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
+          && absenceRequest.officeHeadApprovalRequired) {
+        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
+        officeHeadApproval(absenceRequest.id, user);
+      }
+      return true;
+    }
+    if (absenceRequest.administrativeApprovalRequired
+        && absenceRequest.administrativeApproved == null
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+      //caso di approvazione da parte dell'amministratore del personale
+      personnelAdministratorApproval(absenceRequest.id, user);
+      return true;
+    }
+    if (absenceRequest.officeHeadApprovalForManagerRequired
+        && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      officeHeadApproval(absenceRequest.id, user);
+      return true;
+    }
+    if (!absenceRequest.isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      //caso di approvazione da parte del responsabile di sede
+      officeHeadApproval(absenceRequest.id, user);
+      return true;
+    }
+    return false;
+  }
+  
   /**
    * Approvazione della richiesta d'assenza da parte del manager per se stesso in 
    *    caso di approvazione senza passare dal responsabile di sede.
