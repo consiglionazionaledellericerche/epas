@@ -84,8 +84,8 @@ public class CompetenceRequests extends Controller{
    * Lista delle richieste di straordinario dell'utente corrente.
    * @param type
    */
-  public static void list(CompetenceRequestType type) {
-    Verify.verifyNotNull(type);
+  public static void list(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
 
     val currentUser = Security.getUser().get();
     if (currentUser.person == null) {
@@ -97,17 +97,17 @@ public class CompetenceRequests extends Controller{
     val person = currentUser.person;
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
-        type, person, fromDate);
+        competenceType, person, fromDate);
 
-    val config = competenceRequestManager.getConfiguration(type, person);
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     List<CompetenceRequest> myResults = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, true);
     List<CompetenceRequest> closed = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, false);
     val onlyOwn = true;
     boolean persist = false;
 
-    render(config, myResults, type, onlyOwn, persist, closed);
+    render(config, myResults, competenceType, onlyOwn, persist, closed);
   }
 
   /**
@@ -138,8 +138,8 @@ public class CompetenceRequests extends Controller{
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
-  public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType type) {
-    Verify.verifyNotNull(type);
+  public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
     Person person;
     if (personId.isPresent()) {
       rules.check("CompetenceRequests.blank4OtherPerson");
@@ -149,25 +149,25 @@ public class CompetenceRequests extends Controller{
         person = Security.getUser().get().person;
       } else {
         flash.error("L'utente corrente non ha associato una persona.");
-        list(type);
+        list(competenceType);
         return;
       }
     }
     notFoundIfNull(person);
 
-    val configurationProblems = competenceRequestManager.checkconfiguration(type, person);
+    val configurationProblems = competenceRequestManager.checkconfiguration(competenceType, person);
     if (!configurationProblems.isEmpty()) {
       flash.error(Joiner.on(" ").join(configurationProblems));
-      list(type);
+      list(competenceType);
       return;
     }
 
     val competenceRequest = new CompetenceRequest();
-    competenceRequest.type = type;
+    competenceRequest.type = competenceType;
     competenceRequest.person = person;
     PersonStampingRecap psDto = null;
     boolean isOvertime = false;
-    if (type.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+    if (competenceType.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       isOvertime = true;
 //      if (year == null || month == null) {
 //        year = LocalDate.now().getYear();
@@ -177,7 +177,7 @@ public class CompetenceRequests extends Controller{
           year, month, true);  
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
-    render("@edit", psDto, competenceRequest, isOvertime, type, year, month);
+    render("@edit", psDto, competenceRequest, isOvertime, competenceType, year, month);
   }
 
   public static void edit(CompetenceRequest competenceRequest, int year, int month) {

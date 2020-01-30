@@ -402,16 +402,16 @@ public class RequestInit extends Controller {
     public final Integer day;
     public final Long personId;
     public final Long officeId;
-    public final CompetenceRequestType type;
+    public final CompetenceRequestType competenceType;
 
     CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId,
-        CompetenceRequestType type) {
+        CompetenceRequestType competenceType) {
       this.year = year;
       this.month = month;
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
-      this.type = type;
+      this.competenceType = competenceType;
     }
 
     /**

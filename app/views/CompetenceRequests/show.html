@@ -2,7 +2,7 @@
 #{set header:'navbar' /}
 #{set competenceRequestTypeLabel: 'Visualizza flusso' /}
 #{set title:('ePAS - ' + competenceRequestTypeLabel) /}
-
+#{switcher year:true, month:true, competenceType:true /}
 #{if competenceRequest.person != user.person }
 #{set breadcrumbs:['Richieste competenza':@CompetenceRequests.listToApprove(competenceRequest.type), ('Visualizza'):null] /}
 #{/if}
