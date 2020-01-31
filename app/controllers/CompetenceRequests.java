@@ -18,6 +18,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -69,8 +70,7 @@ public class CompetenceRequests extends Controller{
   static UsersRolesOfficesDao uroDao;
   @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
-
-
+  
 
   public static void overtimes() {
     list(CompetenceRequestType.OVERTIME_REQUEST);
@@ -134,8 +134,9 @@ public class CompetenceRequests extends Controller{
         .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-
-    render(config, results, type, onlyOwn, approvedResults, myResults);
+    boolean overtimesQuantityEnabled = (Boolean)configurationManager
+        .configValue(person.office, EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
+    render(config, results, type, onlyOwn, approvedResults, myResults, overtimesQuantityEnabled);
   }
 
   public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType competenceType) {
@@ -274,9 +275,13 @@ public class CompetenceRequests extends Controller{
     render(competenceRequest, type, user, disapproval);
   }
   
-  public static void approval(long id) {
+  public static void approval(long id, boolean approval) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     User user = Security.getUser().get();
+    if (!approval) {
+      approval = true;
+      render(competenceRequest, approval);
+    }
     if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       //caso di approvazione da parte del responsabile di gruppo.

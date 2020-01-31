@@ -82,7 +82,8 @@ public class CompetenceRequestManager {
     boolean employeeApprovalRequired;
     boolean officeHeadApprovalRequired;
     boolean managerApprovalRequired;
-    boolean administrativeApprovalRequired;    
+    boolean administrativeApprovalRequired; 
+    boolean overtimesQuantityEnabled;
   }
 
   @Inject
@@ -219,7 +220,7 @@ public class CompetenceRequestManager {
                 LocalDate.now());  
       }
     }
-
+    
     return competenceRequestConfiguration;
   }
   

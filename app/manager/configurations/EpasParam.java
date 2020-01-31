@@ -479,7 +479,19 @@ public enum EpasParam {
    */
   ENABLE_OVERTIME_FLOWS(
       "enable_overtime_flows",
-      EpasParamCategory.FLOWS,
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Attivazione della possibilità per il dipendente di richiedere le ore di straordinario
+   */
+  ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY(
+      "enable_employee_request_overtime_quantity",
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
@@ -492,7 +504,7 @@ public enum EpasParam {
    */
   OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED(
       "overtime_request_office_head_approval_required",
-      EpasParamCategory.FLOWS,
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
@@ -505,7 +517,7 @@ public enum EpasParam {
    */
   OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED(
       "overtime_request_manager_approval_required",
-      EpasParamCategory.FLOWS,
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
@@ -517,7 +529,7 @@ public enum EpasParam {
    */
   OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED(
       "overtime_request_employee_approval_required",
-      EpasParamCategory.FLOWS,
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
@@ -560,7 +572,7 @@ public enum EpasParam {
   }
 
   public enum EpasParamCategory {
-    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS
+    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
   }
 
   public enum EpasParamTimeType {

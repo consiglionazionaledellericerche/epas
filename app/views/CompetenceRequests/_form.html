@@ -53,9 +53,9 @@ Specificando la <strong>quantità di ore</strong> che intendi richiedere come st
 			#{/list}
 	</div>
 	#{/if}
-
+	#{secure.check 'CompetenceRequests.overtimesQuantityEnabled'}
 	#{f.input 'competenceRequest.value', type:'number', required:true /}
-	
+	#{/secure.check}
 	#{f.input 'competenceRequest.note', required:true /}
            
 	#{b.buttons center:true}

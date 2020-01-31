@@ -2670,6 +2670,17 @@ then
   $c.grant();
 end
 
+rule isOvertimeQuantityForEmployeeEnabled
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.overtimesQuantityEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
 /*******************************************************************************
  * Azioni via REST per PERSONDAY READER
  ******************************************************************************/

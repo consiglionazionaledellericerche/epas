@@ -43,7 +43,7 @@ AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
 competenceRequest =richiesta di competenza
 
 competenceRequest.endTo =Fine
-competenceRequest.note =Note informative
+competenceRequest.note =Testo della richiesta
 competenceRequest.person =Dipendente
 competenceRequest.startAt =Inizio
 competenceRequest.type =Tipologia
@@ -1041,6 +1041,7 @@ COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta appro
 OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
 OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
 OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
+ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di richiedere le ore di straordinario
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
