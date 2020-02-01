@@ -66,7 +66,7 @@
 				<td>
 				#{secure.check 'CompetenceRequests.approval', target: item }
 				#{if overtimesQuantityEnabled}
-					<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}">
+					<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id, true)}">
 				#{/if}
 				#{else}
 					<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
