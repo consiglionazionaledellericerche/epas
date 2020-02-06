@@ -59,7 +59,7 @@ public enum DefaultAbsenceType {
   A_18PM("18PM", 
       "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), null, null, false),
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false),
   A_18PH7("18P", 
       "Permesso provvisorio assistenza parenti/affini disabili L. 104/92 completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
@@ -105,7 +105,7 @@ public enum DefaultAbsenceType {
   A_182PM("182PM", 
       "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), null, null, false),
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false),
   A_182PH7("182P", 
       "Permesso provvisorio assistenza secondo parenti/affini disabili L. 104/92 "
       + "completamento giornata",
@@ -151,7 +151,7 @@ public enum DefaultAbsenceType {
       0, null, Sets.newHashSet(), null, null, false),
   A_19PM("19PM", "Permesso provvisorio per dipendente disabile L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), null, null, false),
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false),
   A_19PH7("19P", "Permesso provvisorio per dipendente disabile L. 104/92 completamento giornata",
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false),
@@ -536,6 +536,49 @@ public enum DefaultAbsenceType {
       + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
       0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false),
   A_243U("243U", "Astensione facoltativa post partum non retrib. terzo figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
+      0, null, Sets.newHashSet(), null, null, false),
+  
+  A_234("234", "Astensione facoltativa post partum 100% quarto figlio intera giornata",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+      0, null, Sets.newHashSet(), null, null, false),
+  A_234M("234M", "Astensione facoltativa post partum 100% quarto figlio in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)),
+      null, null, false),
+  A_234H7("234H7", "Astensione facoltativa post partum 100% quarto figlio completamento giornata",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false),
+  A_234U("234U", "Astensione facoltativa post partum 100% quarto figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+      0, null, Sets.newHashSet(), null, null, false),
+
+  A_254("254", "Astensione facoltativa post partum 30% quarto figlio intera giornata",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false,
+      0, null, Sets.newHashSet(), null, null, false),
+  A_254M("254M", "Astensione facoltativa post partum 30% quarto figlio in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)),
+      null, null, false),
+  A_254H7("254H7", "Astensione facoltativa post partum 30% quarto figlio completamento giornata",
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false),
+  A_254U("254U", "Astensione facoltativa post partum 30% quarto figlio intera giornata "
+      + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, false,
+      0, null, Sets.newHashSet(), null, null, false),
+
+  A_244("244", "Astensione facoltativa post partum non retrib. quarto figlio intera giornata",
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+      0, null, Sets.newHashSet(), null, null, false),
+
+  A_244M("244M", "Astensione facoltativa post partum non retrib. quarto figlio in ore e minuti",
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)),
+      null, null, false),
+  A_244H7("244H7", "Astensione facoltativa post partum non retrib. quarto figlio completamento "
+      + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false,
+      0, JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false),
+  A_244U("244U", "Astensione facoltativa post partum non retrib. quarto figlio intera giornata "
       + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
       
