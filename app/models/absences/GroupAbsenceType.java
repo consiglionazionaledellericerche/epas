@@ -131,7 +131,11 @@ public class GroupAbsenceType extends BaseModel {
     child2_3_12(2, 3, 12),
     
     child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), 
-    child3_3_12(3, 3, 12);
+    child3_3_12(3, 3, 12),
+    
+    child4_0_3(4, 0, 3), child4_0_6(4, 0, 6), child4_0_12(4, 0, 12), child4_6_12(4, 6, 12), 
+    child4_3_12(4, 3, 12);
+    
     
     
     public Integer childNumber;
