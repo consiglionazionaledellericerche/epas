@@ -158,7 +158,17 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_253H7)),
   C_243(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_243M), 
-      ImmutableSet.of(DefaultAbsenceType.A_243H7));
+      ImmutableSet.of(DefaultAbsenceType.A_243H7)),
+  
+  C_234(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_234M), 
+      ImmutableSet.of(DefaultAbsenceType.A_234H7)),
+  C_254(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254M), 
+      ImmutableSet.of(DefaultAbsenceType.A_254H7)),
+  C_244(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_244M), 
+      ImmutableSet.of(DefaultAbsenceType.A_244H7));
   
   public AmountType amountType;
   public Set<DefaultAbsenceType> complationCodes;

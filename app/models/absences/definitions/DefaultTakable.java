@@ -260,6 +260,32 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_243M, 
           DefaultAbsenceType.A_243U), 
       150, null),
+  
+  T_234(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_234, 
+          DefaultAbsenceType.A_234M, 
+          DefaultAbsenceType.A_234U), 
+      ImmutableSet.of(DefaultAbsenceType.A_234, 
+          DefaultAbsenceType.A_234M, 
+          DefaultAbsenceType.A_234U), 30, null),
+
+  T_254(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254, 
+          DefaultAbsenceType.A_254M, 
+          DefaultAbsenceType.A_254U), 
+      ImmutableSet.of(DefaultAbsenceType.A_254, 
+          DefaultAbsenceType.A_254M, 
+          DefaultAbsenceType.A_254U), 
+      150, null),
+
+  T_244(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_244, 
+          DefaultAbsenceType.A_244M, 
+          DefaultAbsenceType.A_244U), 
+      ImmutableSet.of(DefaultAbsenceType.A_244, 
+          DefaultAbsenceType.A_244M, 
+          DefaultAbsenceType.A_244U), 
+      150, null),
 
   T_25P(AmountType.units,                             //se fosse primo figlio mettere: 
       ImmutableSet.of(DefaultAbsenceType.A_25P,       //23 23M 25 25M 25P 25PM
