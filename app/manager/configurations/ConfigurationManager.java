@@ -8,6 +8,7 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -37,12 +38,14 @@ public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
   private final PeriodManager periodManager;
+  private final PersonDao personDao;
 
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager) {
+      PeriodManager periodManager, PersonDao personDao) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
+    this.personDao = personDao;
   }
 
   /**
@@ -637,6 +640,14 @@ public class ConfigurationManager {
     for (Office office : offices) {
       log.debug("Fix parametri di configurazione della sede {}", office);
       updateConfigurations(office);
+    }
+  }
+  
+  public void updatePeopleConfigurations() {
+    List<Person> people = personDao.peopleWithoutConfiguration();
+    for (Person person: people) {
+      log.debug("Fix parametri di configurazione della persona {}", person.fullName());
+      updateConfigurations(person);
     }
   }
 

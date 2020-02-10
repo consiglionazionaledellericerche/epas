@@ -859,6 +859,11 @@ public class Administration extends Controller {
     configurationManager.updateAllOfficesConfigurations();
     renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
   }
+  
+  public static void updatePeopleConfigurations() {
+    configurationManager.updatePeopleConfigurations();
+    renderText("Aggiornati i parametri di configurazione di tutte le persone.");
+  }
 
 
   /**
