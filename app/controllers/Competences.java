@@ -1060,7 +1060,7 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable(int step, int slot, String name,
+  public static void configureShiftTimeTable(int step, int slot, boolean considerEverySlot, String name,
       CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;

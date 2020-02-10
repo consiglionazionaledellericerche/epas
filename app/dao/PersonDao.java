@@ -1018,6 +1018,13 @@ public final class PersonDao extends DaoBase {
             person.id.in(trAutocertEnabled))
         .distinct().fetch();
   }
+  
+  public List<Person> peopleWithoutConfiguration() {
+    final QPerson person = QPerson.person;
+    return getQueryFactory()
+        .selectFrom(person).where(person.personConfigurations.isEmpty()).fetch();   
+    
+  }
 
   /**
    * Dto contenente le sole informazioni della persona richieste dalla select nel template menu.
