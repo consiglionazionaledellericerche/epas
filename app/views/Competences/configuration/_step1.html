@@ -68,6 +68,8 @@
 				<th>Seleziona</th>
 				<th>Nome</th>
 				<th>Metodologia di calcolo</th>
+				<th>Considera tutti gli slot completi <br> 
+				per pagamento</th>
 				<th>Info aggiuntive</th>	
 			</tr>
 			#{list items:timeTableList, as:'key'}
@@ -75,6 +77,7 @@
 					<td><input type="radio" name="organizationShift" value="${key.id}"></td>
 					<td>${key.name}</td>
 					<td>${key.calculationType}</td>
+					<td>${key.considerEverySlot}</td>
 					<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
 		 	  			</i> 
 		 	  		</td>

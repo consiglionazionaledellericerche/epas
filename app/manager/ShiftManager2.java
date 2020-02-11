@@ -543,19 +543,21 @@ public class ShiftManager2 {
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
     // 1. Controllo che siano coperti tutti gli slot
+    if (activity.organizaionShiftTimeTable.considerEverySlot) {
+      long slotNumber = 0;
+      if (activity.organizaionShiftTimeTable != null) {
+        slotNumber = activity.organizaionShiftTimeTable.slotCount();
+      } else {
+        slotNumber = activity.shiftTimeTable.slotCount();
+      }     
 
-    long slotNumber = 0;
-    if (activity.organizaionShiftTimeTable != null) {
-      slotNumber = activity.organizaionShiftTimeTable.slotCount();
-    } else {
-      slotNumber = activity.shiftTimeTable.slotCount();
-    }     
-
-    if (slotNumber > shifts.size()) {
-      shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    } else {
-      shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      if (slotNumber > shifts.size()) {
+        shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      } else {
+        shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      }
     }
+    
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
     // invalidare a causa degli altri turni non rispettati
