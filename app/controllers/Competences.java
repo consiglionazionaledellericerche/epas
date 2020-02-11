@@ -1088,7 +1088,7 @@ public class Competences extends Controller {
       }
       List<PaymentType> paymentTypes = Arrays.asList(PaymentType.values());
       step++;
-      render(officeId, calculationType, slot, step, list, name, paymentTypes);
+      render(officeId, calculationType, slot, step, list, name, paymentTypes, considerEverySlot);
     }
     Office office = officeDao.getOfficeById(officeId);
     if (office == null) {
@@ -1096,7 +1096,7 @@ public class Competences extends Controller {
       render();
     }
     String result = shiftOrganizationManager
-        .generateTimeTableAndSlot(list, office, calculationType, name);
+        .generateTimeTableAndSlot(list, office, calculationType, name, considerEverySlot);
     if (Strings.isNullOrEmpty(result)) {
       flash.success("Inserita nuova timetable");
     } else {
