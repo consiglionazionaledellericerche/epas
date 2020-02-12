@@ -1060,7 +1060,7 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable(int step, int slot, String name,
+  public static void configureShiftTimeTable(int step, int slot, boolean considerEverySlot, String name,
       CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;
@@ -1088,7 +1088,7 @@ public class Competences extends Controller {
       }
       List<PaymentType> paymentTypes = Arrays.asList(PaymentType.values());
       step++;
-      render(officeId, calculationType, slot, step, list, name, paymentTypes);
+      render(officeId, calculationType, slot, step, list, name, paymentTypes, considerEverySlot);
     }
     Office office = officeDao.getOfficeById(officeId);
     if (office == null) {
@@ -1096,7 +1096,7 @@ public class Competences extends Controller {
       render();
     }
     String result = shiftOrganizationManager
-        .generateTimeTableAndSlot(list, office, calculationType, name);
+        .generateTimeTableAndSlot(list, office, calculationType, name, considerEverySlot);
     if (Strings.isNullOrEmpty(result)) {
       flash.success("Inserita nuova timetable");
     } else {

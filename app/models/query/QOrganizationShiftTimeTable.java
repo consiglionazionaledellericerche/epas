@@ -28,6 +28,8 @@ public class QOrganizationShiftTimeTable extends EntityPathBase<OrganizationShif
 
     public final EnumPath<models.enumerate.CalculationType> calculationType = createEnum("calculationType", models.enumerate.CalculationType.class);
 
+    public final BooleanPath considerEverySlot = createBoolean("considerEverySlot");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
