@@ -471,6 +471,28 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dal campo eppn o dal campo email.
+   * Il campo eppn viene usato come prioritario se passato, poi viene
+   * utilizzato il campo email se passato, infine il campo perseoId. 
+   *
+   * @param eppn il campo eppn associato alla persona.
+   * @param email il campo eppn associato alla persona.
+   * @param perseoId il campo perseoId associato alla persona.
+   * @return la persona se esiste associata al parametro eppn.
+   */
+  public Optional<Person> byEppnOrEmailOrPerseoId(String eppn, String email, Long perseoId) {
+    if (eppn == null && email == null && perseoId == null) {
+      return Optional.absent();
+    }
+    if (eppn != null) {
+      return byEppn(eppn);
+    } else if (email != null) {
+      return byEmail(email);  
+    }
+    return Optional.fromNullable(getPersonByPerseoId(perseoId));
+  }
+  
+  /**
    * Persona (se esiste) a partire dal perseoId.
    *
    * @param perseoId l'id della persona sull'applicazione perseo.

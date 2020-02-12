@@ -101,7 +101,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @return la lista di tutti i flussi attivi da approvare.
    */
   public List<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
 
@@ -116,13 +116,15 @@ public class AbsenceRequestDao extends DaoBase {
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    conditions.and(absenceRequest.startAt.after(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType)
-            .and(absenceRequest.flowStarted.isTrue())
-            .and(absenceRequest.flowEnded.isFalse()));
+    if (fromDate.isPresent()) {
+      conditions.and(absenceRequest.startAt.after(fromDate.get()));
+    }
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
-    }
+    }   
+    conditions.and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
 
     List<AbsenceRequest> results = new ArrayList<>();
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
@@ -147,24 +149,26 @@ public class AbsenceRequestDao extends DaoBase {
    * Lista delle AbsenceRequest da Approvare come responsabile di sede.
    */
   private List<AbsenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
-        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
-    conditions.and(absenceRequest.startAt.after(fromDate))
-        .and(absenceRequest.type.eq(absenceRequestType)
-            .and(absenceRequest.flowStarted.isTrue())
-            .and(absenceRequest.flowEnded.isFalse()));
+    if (fromDate.isPresent()) {
+      conditions.and(absenceRequest.startAt.after(fromDate.get()));
+    }
     if (toDate.isPresent()) {
       conditions.and(absenceRequest.endTo.before(toDate.get()));
-    }
+    }    
+    conditions.and(absenceRequest.type.eq(absenceRequestType)
+            .and(absenceRequest.flowStarted.isTrue())
+            .and(absenceRequest.flowEnded.isFalse()));
+
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = seatSupervisorQuery(officeList, conditions, signer);
@@ -359,11 +363,19 @@ public class AbsenceRequestDao extends DaoBase {
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.person.office.in(officeList))
-        .andAnyOf(absenceRequest.officeHeadApprovalForManagerRequired.isTrue(),
+        .andAnyOf(
+            //per i manager è richiesta solo l'approvazione da parte del responsabile di sede
+            absenceRequest.officeHeadApprovalForManagerRequired.isTrue().and(absenceRequest.officeHeadApproved.isNull()),
+            
+            //questo è il caso della doppia approvazione in cui il manager ha già approvato 
             absenceRequest.managerApprovalRequired.isTrue()
-                .and(absenceRequest.managerApproved.isNotNull()), 
-                    absenceRequest.officeHeadApprovalRequired.isTrue()
-                    .and(absenceRequest.officeHeadApproved.isNull()));
+              .and(absenceRequest.managerApproved.isNotNull())
+              .and(absenceRequest.officeHeadApprovalRequired.isTrue()).and(absenceRequest.officeHeadApproved.isNull()),
+
+            //questo è il caso in cui è necessaria solo l'approvazione del responsabile di sede
+            absenceRequest.officeHeadApprovalRequired.isTrue()
+                .and(absenceRequest.officeHeadApproved.isNull())
+                .and(absenceRequest.managerApprovalRequired.isFalse()));
 
     return condition;
 

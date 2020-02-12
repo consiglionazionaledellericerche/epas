@@ -196,7 +196,13 @@ public class NotificationManager {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
       }
-      notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false, false);
+      if (!absence.isEmpty()) {
+        notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false, false);  
+      } else {
+        log.warn("Nessuna assenza inserita e da notificare per la richiesta di assenza {}", absenceRequest);
+        return;
+      }
+      
     }
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
@@ -209,7 +215,9 @@ public class NotificationManager {
         .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
     if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+      log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
       List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+      log.info("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
           if (group.manager.equals(user.person) && group.people.contains(person)) {
@@ -482,7 +490,7 @@ public class NotificationManager {
 
     Verify.verifyNotNull(absenceRequest);
     final Person person = absenceRequest.person;
-    SimpleEmail simpleEmail = new SimpleEmail();
+
     final Role roleDestination = getProperRole(absenceRequest); 
     if (roleDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
@@ -493,6 +501,7 @@ public class NotificationManager {
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).forEach(user -> {
+          SimpleEmail simpleEmail = new SimpleEmail();
           //Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
           if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
             Optional<Group> group = 
