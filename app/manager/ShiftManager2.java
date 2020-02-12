@@ -543,19 +543,21 @@ public class ShiftManager2 {
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
     // 1. Controllo che siano coperti tutti gli slot
+    if (activity.organizaionShiftTimeTable.considerEverySlot) {
+      long slotNumber = 0;
+      if (activity.organizaionShiftTimeTable != null) {
+        slotNumber = activity.organizaionShiftTimeTable.slotCount();
+      } else {
+        slotNumber = activity.shiftTimeTable.slotCount();
+      }     
 
-    long slotNumber = 0;
-    if (activity.organizaionShiftTimeTable != null) {
-      slotNumber = activity.organizaionShiftTimeTable.slotCount();
-    } else {
-      slotNumber = activity.shiftTimeTable.slotCount();
-    }     
-
-    if (slotNumber > shifts.size()) {
-      shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    } else {
-      shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      if (slotNumber > shifts.size()) {
+        shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      } else {
+        shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      }
     }
+    
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
     // invalidare a causa degli altri turni non rispettati
@@ -722,8 +724,12 @@ public class ShiftManager2 {
         if (shift.organizationShiftSlot != null) {
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.percentage)) {
-            shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
+            int quantity = isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
+            if (quantity < 0) {
+              quantity = 0;
+            }
+            shiftCompetences = shiftCompetences + quantity;
             if (timeInterval2.isPresent()) {
               shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval2);
             }
@@ -794,6 +800,9 @@ public class ShiftManager2 {
   private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, Optional<TimeInterval> interval) {
     if (interval.isPresent()) {
       int quantity = quantityCountForShift(psd, pd, interval);
+      if (quantity < 0) {
+        return 0;
+      }
       if (quantity < psd.organizationShiftSlot.minutesPaid) {
         return quantity;
       }
