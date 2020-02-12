@@ -175,10 +175,8 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
-
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
     return results.size();
   }
   
@@ -195,9 +193,8 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.VACATION_REQUEST, groups, user.person);
+        .toApproveResults(roleList, Optional.absent(),Optional.absent(), 
+            AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
     return results.size();
   }

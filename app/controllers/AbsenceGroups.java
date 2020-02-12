@@ -67,6 +67,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -105,8 +106,6 @@ public class AbsenceGroups extends Controller {
   private static QualificationDao qualificationDao;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
-  @Inject
-  private static NotificationManager notificationManager;
   @Inject
   private static AbsenceCertificationService absenceCertificationService;
   @Inject
@@ -648,37 +647,7 @@ public class AbsenceGroups extends Controller {
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
         absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
-    //Persistenza
-    if (!insertReport.absencesToPersist.isEmpty()) {
-      for (Absence absence : insertReport.absencesToPersist) {
-        PersonDay personDay = personDayManager
-            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-        absence.personDay = personDay;
-        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
-
-          absence = absenceManager.handleRecoveryAbsence(absence, person, recoveryDate);
-        }
-        personDay.absences.add(absence);
-        rules.checkIfPermitted(absence);
-        absence.save();
-        personDay.save();
-
-        notificationManager.notificationAbsencePolicy(Security.getUser().get(),
-            absence, groupAbsenceType, true, false, false);
-
-      }
-      if (!insertReport.reperibilityShiftDate().isEmpty()) {
-        absenceManager.sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
-            person.fullName(), insertReport.reperibilityShiftDate());
-      }
-      JPA.em().flush();
-      consistencyManager.updatePersonSituation(person.id, from);
-      flash.success("Codici di assenza inseriti.");
-
-    }
-
-    //String referer = request.headers.get("referer").value();
+    absenceManager.saveAbsences(insertReport, person, from, recoveryDate, justifiedType, groupAbsenceType);
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
@@ -1289,7 +1258,8 @@ public class AbsenceGroups extends Controller {
     List<IWrapperPerson> people = Lists.newArrayList();
     Map<String, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
 
-    int year = LocalDate.now().getYear();
+    int year = LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY ? 
+        LocalDate.now().getYear() - 1 : LocalDate.now().getYear();
 
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
@@ -1338,9 +1308,12 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
-
+    int year = LocalDate.now().getYear();
+    if (LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY) {
+      year = year - 1;
+    }
     CertificationYearSituation yearSituation = absenceCertificationService
-        .buildCertificationYearSituation(person, LocalDate.now().getYear(), false);
+        .buildCertificationYearSituation(person, year, false);
 
     if (yearSituation == null) {
       flash.error("Impossibile recuperare la situazione del dipendente"

@@ -765,7 +765,6 @@ public class Contracts extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
           hoursLastYear, minutesLastYear, hoursCurrentYear, minutesCurrentYear,
           sourceDateResidual);
@@ -857,7 +856,6 @@ public class Contracts extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice, 
           sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed, 
           sourceDateVacation);
@@ -927,6 +925,7 @@ public class Contracts extends Controller {
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
 
+    log.info("saveMealTicketSourceContract, contratto inizializzato {}", wrContract.initializationMissing());
     if (sourceDateMealTicket != null) {
       validation.future(sourceDateMealTicket.toDate(), 
           wrContract.dateForMealInitialization().minusDays(1).toDate())

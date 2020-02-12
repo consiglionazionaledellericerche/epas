@@ -86,8 +86,10 @@ public class StampingsFromClient extends Controller {
 
 
   /**
+   * @deprecated utilizzare rest.Absences.insertAbsence
    * Inserimento di assenza con ricalcolo.
    */
+  @Deprecated
   @BasicAuth
   public static void absence(AbsenceFromClient body) {
 
@@ -111,8 +113,10 @@ public class StampingsFromClient extends Controller {
   }
 
   /**
+   * @deprecated utilizzare rest.Absences.insertAbsence
    * Inserimento di assenza senza ricalcolo.
    */
+  @Deprecated
   @BasicAuth
   public static void absenceNotRecompute(AbsenceFromClient body) {
 

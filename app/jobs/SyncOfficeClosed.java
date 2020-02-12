@@ -11,6 +11,7 @@ import dao.PersonDao;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
@@ -23,6 +24,13 @@ public class SyncOfficeClosed extends Job<Void>{
   
   @Override
   public void doJob() {
+    
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
+    
     int count = 0;
     List<Office> list = Office.findAll();
     List<Office> offices = null;

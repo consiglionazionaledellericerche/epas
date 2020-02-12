@@ -586,9 +586,18 @@ end
 
 rule showAbsenceRequest
 when 
-  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
-  || role.name == Role.PERSONNEL_ADMIN)
-  $ar: AbsenceRequest(person != currentOperator.person, flowEnded == true)
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
+  $ar: AbsenceRequest(person != currentOperator.person)
+  $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showAbsenceRequest_forGroupManager
+when 
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $p: Person() from currentOperator.person
+  $ar: AbsenceRequest(person != currentOperator.person && $p.personsInCharge contains person)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
@@ -687,7 +696,7 @@ then
 end
 
 /*
- * L'amministratore del personale può modificare una determinata timbratura se:
+ * L'amministratore del personale può modificare una determinata assenza se:
  */
 rule AdminCanEditAbsence
 when
@@ -1104,19 +1113,28 @@ then
  $c.grant();
 end
 
-
-
-rule RoleSeatSuperVisor_forFlows
+rule RoleSeatSuperVisor_showForFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ar: AbsenceRequest((officeHeadApprovalRequired == true && officeHeadApproved == null && flowEnded == false) 
- 		|| (officeHeadApprovalForManagerRequired == true && flowEnded == false))
+ $ar: AbsenceRequest()
+ $c: PermissionCheck(action in (
+		"AbsenceRequests.show"
+		), target == $ar, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_editAndApprovalForFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ar: AbsenceRequest(flowEnded == false)
  $c: PermissionCheck(action in (
 		"AbsenceRequests.edit",
-		"AbsenceRequests.show",
+		"AbsenceRequests.save",
 		"AbsenceRequests.approval",
-		"AbsenceRequests.disapproval"
+		"AbsenceRequests.disapproval"		
 		), target == $ar, granted == false)
 then
  $c.grant();
@@ -2348,14 +2366,18 @@ when
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
+        "rest.Persons.peopleList",
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-
+		"manager.AbsenceManager.saveAbsences",
+		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        
+        "rest.v2.PersonDays.getDaySituation"        
 
        ), target == null, granted == false)
 then
@@ -2372,12 +2394,15 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-
+		"manager.AbsenceManager.saveAbsences",
+		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
 
+		"rest.v2.PersonDays.getDaySituation"
+		
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -2533,7 +2558,8 @@ when
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList"
 
        ), target == null, granted == false)
 then
@@ -2547,7 +2573,8 @@ when
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation"
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList"
 
        ), target == $o, granted == false)
 then

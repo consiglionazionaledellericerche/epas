@@ -362,4 +362,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return user.hasRoles(Role.SEAT_SUPERVISOR);
   }
 
+  public List<Person> getPersonsInCharge() {
+    return groupsPeople.stream().flatMap(g -> g.people.stream()).collect(Collectors.toList());
+  }
 }
