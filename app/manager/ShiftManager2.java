@@ -724,8 +724,12 @@ public class ShiftManager2 {
         if (shift.organizationShiftSlot != null) {
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.percentage)) {
-            shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
+            int quantity = isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
+            if (quantity < 0) {
+              quantity = 0;
+            }
+            shiftCompetences = shiftCompetences + quantity;
             if (timeInterval2.isPresent()) {
               shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval2);
             }
@@ -796,6 +800,9 @@ public class ShiftManager2 {
   private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, Optional<TimeInterval> interval) {
     if (interval.isPresent()) {
       int quantity = quantityCountForShift(psd, pd, interval);
+      if (quantity < 0) {
+        return 0;
+      }
       if (quantity < psd.organizationShiftSlot.minutesPaid) {
         return quantity;
       }
