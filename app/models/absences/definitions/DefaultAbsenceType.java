@@ -67,7 +67,7 @@ public enum DefaultAbsenceType {
   
   A_182M("182M", "Permesso assistenza secondo parenti/affini disabili L. 104/92 in ore e minuti",
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false,
-      0, null, Sets.newHashSet(), null, null, false),
+      0, null, Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false),
   A_182("182", "Permesso assistenza secondo parenti/affini disabili L. 104/92 intera giornata",
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
