@@ -92,6 +92,9 @@
 			#{f.input 'type.type' /}
 			#{f.input 'type.description' /}
 			#{f.booleanRadio 'type.allowUnpairSlots', popover:true /}
+			#{if type.organizaionShiftTimeTable != null }
+				#{f.booleanRadio 'considerEverySlot', value:type.organizaionShiftTimeTable.considerEverySlot, popover:true /}
+			#{/if}
 			#{/alert}
 			#{alert color: 'danger'}
 			
