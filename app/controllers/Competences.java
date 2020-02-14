@@ -1301,7 +1301,12 @@ public class Competences extends Controller {
    * modifica i parametri dell'attività passata tramite id.
    * @param type l'attività di cui si vogliono modificare i parametri
    */
-  public static void editActivity(ShiftType type) {
+  public static void editActivity(ShiftType type, boolean considerEverySlot) {
+    if (type.organizaionShiftTimeTable != null) {
+      OrganizationShiftTimeTable ott = type.organizaionShiftTimeTable;
+      ott.considerEverySlot = considerEverySlot;
+      ott.save();
+    }
     type.save();
     flash.success("Modificati parametri per l'attività: %s", type.description);
     manageShiftType(type.id);
