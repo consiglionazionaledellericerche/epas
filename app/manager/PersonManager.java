@@ -196,7 +196,7 @@ public class PersonManager {
         && !newerContract.sourceDateRecoveryDay.isBefore(begin)
         && !newerContract.sourceDateRecoveryDay.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed + absenceDao
-          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay, end, "91").size();
+          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay.plusDays(1), end, "91").size();
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
