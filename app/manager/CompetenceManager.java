@@ -364,7 +364,7 @@ public class CompetenceManager {
             return result;
           }
         }
-        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+        if (sum - comp.valueApproved + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overGroupLimit");
           return result;
         }
