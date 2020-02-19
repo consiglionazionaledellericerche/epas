@@ -364,7 +364,7 @@ public class CompetenceManager {
             return result;
           }
         }
-        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+        if (sum - comp.valueApproved + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overGroupLimit");
           return result;
         }
@@ -478,7 +478,7 @@ public class CompetenceManager {
         comp.month, groupCodes, comp.person.office, false);
     int peopleSum = peopleMonthList.stream()
         .filter(competence -> competence.id != comp.id).mapToInt(i -> i.valueApproved).sum();
-    if (peopleSum + value > maxDays) {
+    if (peopleSum - comp.valueApproved + value > maxDays) {
       return false;
     }
     return true;
