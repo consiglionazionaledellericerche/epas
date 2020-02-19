@@ -969,7 +969,7 @@ DAY_OF_PATRON=Festa del Patrono
 HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
 WORK_INTERVAL_MISSION_DAY=Intervallo di attività lavorativa in sede per giorni missione
 LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
-WORK_INTERVAL=Intervallo apertura / chiusura istituto
+WORK_INTERVAL=Intervallo apertura / chiusura struttura
 
 OFF_SITE_STAMPING=Inserimento timbratura lavoro fuori sede
 OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con convenzione
