@@ -53,7 +53,8 @@ public class TimeSlotDao extends DaoBase {
     final QTimeSlot ts = QTimeSlot.timeSlot;
     return getQueryFactory()
         .selectFrom(ts)
-        .where(ts.office.eq(office).and(ts.disabled.eq(false))).fetch();
+        .where(ts.office.isNull().or(ts.office.eq(office))
+            .and(ts.disabled.eq(false))).fetch();
   }
   
   /**

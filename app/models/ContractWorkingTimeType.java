@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Getter;
-
+import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
@@ -20,6 +20,7 @@ import play.data.validation.Required;
  *
  * @author alessandro
  */
+@ToString
 @Entity
 @Table(name = "contracts_working_time_types")
 public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {

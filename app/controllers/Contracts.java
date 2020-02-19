@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-
+import com.google.common.collect.Lists;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -20,11 +20,10 @@ import helpers.Web;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 
 import javax.inject.Inject;
-
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ContractManager;
@@ -44,7 +43,6 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
 
-import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -294,7 +292,6 @@ public class Contracts extends Controller {
 
     long count = pdList.stream().filter(pd -> pd.absences.isEmpty()).count();
     if (pdList.size() == 0 || count == pdList.size()) {
-      contract.delete();
       flash.success(Web.msgDeleted(Contract.class));
     } else {
       flash.error("Non è possibile cancellare il contratto di %s perchè sono già presenti giornate"
@@ -400,7 +397,7 @@ public class Contracts extends Controller {
    *
    * @param id contratto
    */
-  public static void updateContractMandatoryTimeSlot(Long id) {
+  public static void updateContractMandatoryTimeSlot(Long id, ContractMandatoryTimeSlot cmts) {
 
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
@@ -409,10 +406,12 @@ public class Contracts extends Controller {
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
-    ContractMandatoryTimeSlot cmts = new ContractMandatoryTimeSlot();
+    if (cmts == null) {
+      cmts = new ContractMandatoryTimeSlot();
+    }
     cmts.contract = contract;
 
-    render(wrappedContract, contract, cmts);
+    render("@updateContractMandatoryTimeSlot", wrappedContract, contract, cmts);
   }
 
   /**
@@ -449,28 +448,39 @@ public class Contracts extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      response.status = 400;
-
       render("@updateContractMandatoryTimeSlot", cmts, contract);
     }
 
     rules.checkIfPermitted(cmts.timeSlot.office);
 
-    //riepilogo delle modifiche
-    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cmts, false);
+    val currentPeriods = cmts.getOwner().periods(cmts.getType());
+    if (cmts.isPersistent()) {
+      currentPeriods.remove(cmts);
+    }
+    
+    if (periodManager.isOverlapped(cmts, currentPeriods)) {
+      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, impossibile aggiungerlo", cmts.getLabel());
+      response.status = 400;
+      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", cmts.getLabel());
+      render("@updateContractMandatoryTimeSlot", cmts, contract);      
+    }
+
+    val periodRecaps = Lists.newArrayList(currentPeriods);
+    cmts.setRecomputeFrom(cmts.beginDate);   
+    periodRecaps.add(cmts);
+    
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
             periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
-
+    
     if (!confirmed) {
       confirmed = true;
       render("@updateContractMandatoryTimeSlot", contract, cmts, confirmed, recomputeRecap);
     } else {
-
-      periodManager.updatePeriods(cmts, true);
+      cmts.save();
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
       if (recomputeRecap.needRecomputation) {
@@ -479,12 +489,48 @@ public class Contracts extends Controller {
       }
 
       flash.success(Web.msgSaved(ContractMandatoryTimeSlot.class));
-
-      updateContractMandatoryTimeSlot(contract.id);
+      updateContractMandatoryTimeSlot(contract.id, null);
     }
 
   }
 
+  /**
+   * Cancella una fascia oraria di presenza obbligatoria.
+   * @param id id della fascia oraria da cancellare
+   * @param confirmed se è confirmed lo cancella altrimenti mostra una pagina di
+   *    riepilogo e conferma.
+   */
+  public void deleteContractMandatoryTimeSlot(Long id, boolean confirmed) {
+    ContractMandatoryTimeSlot cmts = ContractMandatoryTimeSlot.findById(id);
+
+    notFoundIfNull(cmts);
+
+    rules.checkIfPermitted(cmts.contract.person.office);
+
+    boolean deletion = true;
+    val contract = cmts.contract;
+    if (!confirmed) {
+      IWrapperContract wrappedContract = wrapperFactory.create(cmts.contract);
+      val currentPeriods = cmts.getOwner().periods(cmts.getType());
+      val periodRecaps = Lists.newArrayList(currentPeriods);
+
+      periodRecaps.remove(cmts);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(cmts.beginDate,
+              Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+              periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+      recomputeRecap.recomputeFrom = cmts.beginDate;
+      periodManager.setDays(recomputeRecap);
+      confirmed = true;
+      render("@updateContractMandatoryTimeSlot", cmts, contract, deletion, recomputeRecap);
+    } else {
+      cmts.delete();
+      flash.success(Web.msgDeleted(ContractMandatoryTimeSlot.class));
+    }
+    updateContractMandatoryTimeSlot(cmts.contract.id, null);
+
+  }
+  
   /**
    * Crud gestione periodi ferie.
    *
