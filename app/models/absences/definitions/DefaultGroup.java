@@ -298,7 +298,11 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year,
       DefaultTakable.T_43, null, null, false, false),
   
-
+  G_20("20 - Congedo/permesso DPR 1026 Art. 20",
+      "",
+      DefaultCategoryType.ALTRI_CODICI, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.year,
+      DefaultTakable.T_20, DefaultComplation.C_20, null, false, false),
   
   G_ALTRI_CODICI("Altri Codici", 
       "", 
