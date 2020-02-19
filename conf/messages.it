@@ -118,7 +118,7 @@ personChildren=Figlio Dipendente
 codeBlock=Codice Blocco
 
 code=Codice
-
+competence.reason =Motivazione
 valueApproved= Valore per competenza
 codeListIds =Codici di competenza abilitati
 competenceCode.code= Codice Competenza
