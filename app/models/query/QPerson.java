@@ -99,6 +99,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.PersonShift, QPersonShift> personShifts = this.<models.PersonShift, QPersonShift>createList("personShifts", models.PersonShift.class, QPersonShift.class, PathInits.DIRECT2);
 
+    public final ListPath<Person, QPerson> personsInCharge = this.<Person, QPerson>createList("personsInCharge", Person.class, QPerson.class, PathInits.DIRECT2);
+
     public final QQualification qualification;
 
     public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> reperibilities = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("reperibilities", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);

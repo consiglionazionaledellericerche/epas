@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -9,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.GroupManager;
+import models.GeneralSetting;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -35,6 +37,8 @@ public class Groups extends Controller {
   private static GroupManager groupManager;
   @Inject
   private static PersonDao personDao;
+  @Inject
+  private static GeneralSettingDao settingDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -66,7 +70,7 @@ public class Groups extends Controller {
   public static void deleteGroup(long groupId) {
     final Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.manager.office);
+    rules.checkIfPermitted(group.office);
 
     //elimino il ruolo di manager
     if (!groupManager.deleteManager(group)) {
@@ -125,7 +129,14 @@ public class Groups extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+    List<Person> peopleForGroups = null;
+    GeneralSetting settings = settingDao.generalSetting();
+    if (settings.handleGroupsByInstitute) {
+      peopleForGroups = personDao.byInstitute(office.institute);
+    } else {
+      peopleForGroups = personDao.byOffice(office);
+    }
+    
     render("@edit", office, peopleForGroups);
   }
   
