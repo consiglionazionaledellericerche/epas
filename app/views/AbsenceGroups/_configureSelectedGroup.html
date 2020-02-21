@@ -53,6 +53,7 @@
      #{/if}
      
      #{if absenceForm.absenceTypeSelected || !absenceForm.hasAbsenceTypeChoice() }
+       #{secure.check 'Certifications.certifications'}
        #{f.checkbox 'forceInsert', value:forceInsert /}
        #{if forceInsert}
          #{alert color:'warning'}
@@ -60,6 +61,7 @@
            non verrà effettuato alcun tipo di controllo.</p>
          #{/alert}
        #{/if}
+       #{/secure.check}
      #{/if}
          
 	#{/form}
