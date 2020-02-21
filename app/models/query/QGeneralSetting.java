@@ -30,6 +30,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath handleGroupsByInstitute = createBoolean("handleGroupsByInstitute");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
