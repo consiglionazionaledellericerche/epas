@@ -1319,15 +1319,20 @@ public class Competences extends Controller {
    * @param type l'attovità di turno
    */
   public static void deleteActivity(ShiftType type) {
-    log.debug("Eccoci");
+    
     rules.checkIfPermitted(type.shiftCategories.office);
+    if (!type.personShiftDays.isEmpty()) {
+      flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
+          + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", type.type);
+      manageShiftType(type.id);
+    }
     if (!type.personShiftShiftTypes.isEmpty()) {
       log.debug("L'attività {} è ancora referenziata a qualche persona");
       type.personShiftShiftTypes.stream().forEach(psst -> psst.delete());
       
     }
     type.delete();
-    log.debug("Eliminata attività {}", type.type);
+    log.info("Eliminata attività {}", type.type);
     flash.success("Attività %s eliminata", type.type);
     activateServices(type.shiftCategories.office.id);
 
