@@ -13,6 +13,7 @@ public class PersonDayDto {
   private int differenza;
   private int progressivo;
   private boolean buonoPasto;
+  private boolean giornoLavorativo;
   @Builder.Default
   private List<StampingDto> timbrature = Lists.newArrayList();
   @Builder.Default
