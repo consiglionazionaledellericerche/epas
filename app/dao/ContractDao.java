@@ -10,11 +10,14 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.val;
 import models.Contract;
+import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
 import models.Office;
 import models.Person;
 import models.query.QContract;
+import models.query.QContractMandatoryTimeSlot;
 import models.query.QContractStampProfile;
 import org.joda.time.LocalDate;
 
@@ -109,6 +112,31 @@ public class ContractDao extends DaoBase {
     return null;
   }
 
+  /**
+   * Se presente preleva l'eventuale fascia di presenza obbligatoria di una persona 
+   * in una data indicata.
+   * 
+   * @param date la data in cui cercare la fascia obbligatoria
+   * @param person la persona di cui cercare la fascia obbligatoria
+   * @return la fascia oraria obbligatoria se presente, Optional.absent() altrimenti.
+   */
+  public Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlot(LocalDate date, Person person) {
+    QContract contract = QContract.contract;
+    QContractMandatoryTimeSlot contractMandatoryTimeSlot = QContractMandatoryTimeSlot.contractMandatoryTimeSlot;
+    
+    val cmts = getQueryFactory().selectFrom(contractMandatoryTimeSlot).join(contractMandatoryTimeSlot.contract, contract)
+        .where(
+            contract.person.eq(person), contract.beginDate.before(date).or(contract.beginDate.eq(date)),
+            contract.endContract.isNull().or(contract.endContract.after(date).or(contract.endContract.eq(date))),
+            contract.endDate.isNull().or(contract.endDate.after(date).or(contract.endDate.eq(date))),
+            contractMandatoryTimeSlot.beginDate.before(date).or(contractMandatoryTimeSlot.beginDate.eq(date)),
+            contractMandatoryTimeSlot.endDate.isNull()
+              .or(contractMandatoryTimeSlot.endDate.after(date))
+              .or(contractMandatoryTimeSlot.endDate.eq(date)))
+        .fetchOne();
+    return Optional.fromNullable(cmts);
+  }
+  
   /**
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
    * passati come parametro e ordinati per data inizio del contractStampProfile La funzione permette
