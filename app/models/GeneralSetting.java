@@ -38,4 +38,10 @@ public class GeneralSetting extends BaseModel {
   
   public String endNightlyShift = "6:00";
   // Fine parametri gestione codici di competenza turno
+  
+  // Parametri gestione gruppi
+  
+  public boolean handleGroupsByInstitute = true;
+  
+  // Fine parametri gestione gruppi
 }
