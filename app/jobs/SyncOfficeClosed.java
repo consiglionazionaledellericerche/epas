@@ -38,7 +38,7 @@ public class SyncOfficeClosed extends Job<Void>{
       if (office.endDate != null) {
         continue;
       }
-      log.info("Analizzo la sede: {}", office.name);
+      log.debug("Analizzo la sede: {}", office.name);
       offices = Lists.newArrayList();
       offices.add(office);
       List<Person> people = personDao.listFetched(Optional.<String>absent(),

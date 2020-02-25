@@ -75,7 +75,7 @@ public class Zones extends Controller {
     if (link == null) {
       link = new ZoneToZones();
     }
-    log.info("Link = {}", link);
+    log.debug("Link = {}", link);
     List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(reader);
     render(zones, link, reader, list);
   }

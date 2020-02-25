@@ -524,7 +524,7 @@ public class AbsenceGroups extends Controller {
     for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
       for (AbsenceType abt : group.takableAbsenceBehaviour.takableCodes) {
         if (abt.defaultTakableGroup() == null) {
-          log.info("Il defaultTakable è null per {}", abt.code);
+          log.debug("Il defaultTakable è null per {}", abt.code);
           abt.defaultTakableGroup();
         }
       }
@@ -997,7 +997,7 @@ public class AbsenceGroups extends Controller {
     for (Absence absence : absences) {
       if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
         notPermitted.add(absence);
-        log.info("{} is: {}, permitted: {}", absence.toString(),
+        log.debug("{} is: {}, permitted: {}", absence.toString(),
             absence.justifiedType, absence.absenceType.justifiedTypesPermitted);
       }
       if (absence.absenceType.isExpired()) {

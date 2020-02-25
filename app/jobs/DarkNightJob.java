@@ -61,7 +61,7 @@ public class DarkNightJob extends Job {
     LocalDate end = LocalDate.now().minusDays(1);
 
     if (!weekEnd.contains(LocalDate.now().getDayOfWeek())) {
-      log.info("Inizia la parte di invio email...");
+      log.debug("Inizia la parte di invio email...");
 
       personDayInTroubleManager.sendTroubleEmails(personDao.eligiblesForSendingAlerts(),
           begin, end, ImmutableList.of(Troubles.UNCOUPLED_WORKING));

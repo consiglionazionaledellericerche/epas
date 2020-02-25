@@ -1006,20 +1006,20 @@ public class Competences extends Controller {
           cat.save();          
         } else {
           toDelete.add(type);
-          log.info("Elinino i person_shift_days relativi a {}", type.type);
+          log.debug("Elinino i person_shift_days relativi a {}", type.type);
           for (PersonShiftDay psd : type.personShiftDays) {
             psd.delete();
           }
           type.monthsStatus.stream().map(st -> st.delete());  
-          log.info("Elimino i gli shift_type_month relativi a {}", type.type);
+          log.debug("Elimino i gli shift_type_month relativi a {}", type.type);
         }        
       }       
       if (toDelete.contains(type)) {
-        log.info("Elimino le relazioni tra persone e shift_type");        
+        log.debug("Elimino le relazioni tra persone e shift_type");        
         for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
           psst.delete();
         }
-        log.info("Elimino lo shift_type {}", type.type);
+        log.debug("Elimino lo shift_type {}", type.type);
         type.delete();
       }
       
