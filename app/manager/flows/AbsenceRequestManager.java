@@ -467,7 +467,7 @@ public class AbsenceRequestManager {
 
     absenceRequest.flowEnded = true;
     absenceRequest.save();
-    log.info("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
+    log.debug("Flusso relativo a {} terminato. Inserimento in corso delle assenze.", absenceRequest);
     GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
     AbsenceType absenceType = null;
     AbsenceForm absenceForm =

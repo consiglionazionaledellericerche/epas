@@ -644,7 +644,7 @@ public class CompetenceManager {
             // esiste un solo personcompetencecodes 
             if (!pccRecent.beginDate.isAfter(date) 
                 && (pccRecent.endDate == null || pccRecent.endDate.isAfter(date))) {
-              log.info("Si intende creare un personCompetenceCode sovrascrivendo "
+              log.debug("Si intende creare un personCompetenceCode sovrascrivendo "
                   + "la data di inizio di uno già esistente.");
             } else if (pccRecent.beginDate.isAfter(date)) {
               updatePersonCompetenceCode(pccRecent, Optional.fromNullable(date), 
@@ -1022,7 +1022,7 @@ public class CompetenceManager {
     PersonShift personShift = null;
     personShift = personShiftDayDao.getPersonShiftByPerson(person, date);
     if (personShift != null) {
-      log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+      log.debug("L'utente {} è già presente in tabella person_shift", person.fullName());
 
     } else {
       personShift = new PersonShift();

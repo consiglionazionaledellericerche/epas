@@ -557,7 +557,7 @@ public class Synchronizations extends Controller {
     for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
       if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
 
-        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
+        log.debug("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
             perseoPerson.fullName(), perseoPerson.number,
             perseoPerson.qualification, perseoPerson.perseoId);
 
