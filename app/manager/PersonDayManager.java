@@ -67,7 +67,6 @@ public class PersonDayManager {
   private final ContractDao contractDao;
   private final AbsenceComponentDao absenceComponentDao;
   
-  
   /**
    * Costruttore.
    *
@@ -1605,10 +1604,32 @@ public class PersonDayManager {
         log.trace("Le timbrature di {} del giorno {} necessitano di controlli sulla fascia obbligatoria", 
             personDay.person, personDay.date);
 
-        val shortPermission = buildShortPermissionAbsence(personDay, mandatoryTimeSlot.get().timeSlot);
+        //I turni non sono sottoposti a vincoli di fascia obbligatoria nei giorni in cui sono in turno
+        boolean inShift = personShiftDayDao.getPersonShiftDay(personDay.person, personDay.date).isPresent();
+
+        //Se sono presenti assenze giornalieri la fascia obbigatoria non deve essere rispettata anche in
+        //presenta di timbrature
+        boolean isAllDayAbsencePresent = isAllDayAbsences(personDay); 
 
         val previousShortPermission = 
-            personDay.absences.stream().filter(a -> a.absenceType.code.equals("PB")).findFirst();
+            personDay.absences.stream().filter(a -> a.absenceType.code.equals("PB")).findFirst();        
+        
+        if (inShift || isAllDayAbsencePresent) {
+          if (previousShortPermission.isPresent()) {            
+            previousShortPermission.get().delete();
+            log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti assenze giornaliere "
+                + "oppure il dipendente è in turno.",
+                previousShortPermission.get().justifiedMinutes, personDay.date, personDay.person.getFullname());
+            return;
+          } else {
+            log.debug("Le timbrature di {} del giorno {} NON necessitano di controlli sulla fascia obbligatoria poichè "
+                + "sono presenti assenze giornaliere oppure il dipendente è in turno.",
+                personDay.person, personDay.date);
+            return;
+          }
+        }
+
+        val shortPermission = buildShortPermissionAbsence(personDay, mandatoryTimeSlot.get().timeSlot);
 
         if (!shortPermission.isPresent() && !previousShortPermission.isPresent()) {
           return;
@@ -1622,9 +1643,9 @@ public class PersonDayManager {
         }
 
         if (!shortPermission.isPresent() && previousShortPermission.isPresent()) {
+          previousShortPermission.get().delete();
           log.info("Rimosso permesso breve di {} minuti nel giorno {} per {}",
               previousShortPermission.get().justifiedMinutes, personDay.date, personDay.person.getFullname());          
-          previousShortPermission.get().delete();
           return;
         }
        
