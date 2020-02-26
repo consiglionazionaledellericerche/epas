@@ -4,6 +4,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.google.inject.Inject;
 
 import dao.PersonDayDao;
@@ -130,14 +133,14 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
-  
+
   /**
    * 
    * @param personDay il personDay su cui cercare le assenze
    * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
    */
   public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
-    
+
     return personDay.absences.stream()
         .noneMatch(abs -> !abs.absenceType.reperibilityCompatible);
 
@@ -441,7 +444,7 @@ public class PersonDayManager {
     List<ZoneToZones> link = personDay.person.getZones();
 
     if (!link.isEmpty() && validPairs.size() > 1) {      
-      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
+      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs, startWork, endWork);
 
     }
     personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
@@ -484,7 +487,7 @@ public class PersonDayManager {
       } else {
         if (missingTime < 0) {
           personDay.setTimeAtWork(personDay.getTimeAtWork());
-          
+
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
           personDay.setTimeAtWork(computedTimeAtWork + missingTime);
@@ -494,7 +497,7 @@ public class PersonDayManager {
           }          
         }        
       }
-      
+
     }
 
     //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
@@ -637,28 +640,33 @@ public class PersonDayManager {
    * @return il quantitativo che viene giustificato timbrando uscita/ingresso su zone 
    *     appartenenti a un link.
    */
-  private int justifiedTimeBetweenZones(List<PairStamping> validPairs) {
+  private int justifiedTimeBetweenZones(List<PairStamping> validPairs, LocalTime startWork, LocalTime endWork) {
+    
     int timeToJustify = 0;
-    PairStamping pair = validPairs.get(0);
-    for (int i = 1; i < validPairs.size(); i++) {
-      PairStamping next = validPairs.get(i);
-      if (next != null && stampingsBetweenZones(pair, next)) {
-
+    PairStamping temp = null;
+    for (PairStamping validPair : validPairs) {
+      if (temp != null && stampingsBetweenZones(temp, validPair)) {
         Optional<ZoneToZones> zoneToZones = 
-            zoneDao.getByLinkNames(pair.second.stampingZone, next.first.stampingZone);
+            zoneDao.getByLinkNames(temp.second.stampingZone, validPair.first.stampingZone);
         if (zoneToZones.isPresent()) {
-          if (isTimeInDelay(pair, next, zoneToZones)) {
-            timeToJustify +=  
-                (DateUtility.toMinute(next.first.date) 
-                    - DateUtility.toMinute(pair.second.date));
-          } else {
-            timeToJustify += zoneToZones.get().delay;
-          }
 
+          Range<LocalTime> range = Range.closed(temp.second.date.toLocalTime(), 
+              validPair.first.date.toLocalTime());
+          if (range.lowerEndpoint().isBefore(startWork) && !range.upperEndpoint().isBefore(startWork)) {
+            range.span(Range.closed(startWork, validPair.first.date.toLocalTime()));
+          }
+          if (isTimeInDelay(temp, validPair, zoneToZones)) {
+            timeToJustify =   
+                (DateUtility.toMinute(range.upperEndpoint()) 
+                    - DateUtility.toMinute(range.lowerEndpoint()));
+          } else {
+            timeToJustify = zoneToZones.get().delay;
+          }             
         }
       }
-      pair = next;
+      temp = validPair;
     }
+
     return timeToJustify;
   }
 
@@ -1044,10 +1052,10 @@ public class PersonDayManager {
         serviceStampings.add(stamping);
         continue;
       }
-//      if (stamping.stampType == StampTypes.TUNNEL) {
-//        tunnelStampings.add(stamping);
-//        continue;
-//      }
+      //      if (stamping.stampType == StampTypes.TUNNEL) {
+      //        tunnelStampings.add(stamping);
+      //        continue;
+      //      }
       //cerca l'entrata
       if (stampEnter == null) {
         if (stamping.isIn()) {
@@ -1106,33 +1114,33 @@ public class PersonDayManager {
         stamping.valid = false;
       }
     }
-    
+
     //(2a) scarto le stamping di tunnel di timbratura che non appartengono ad alcuna coppia valida
-//    List<Stamping> tunnelStampingsToCheck = Lists.newArrayList();
-//    for (Stamping stamping : tunnelStampings) {
-//      boolean belongToValidPairNotTunnel = false;
-//      boolean belongToValidPairTunnel = false;
-//      for (PairStamping validPair : validPairs) {
-//        LocalDateTime outTime = validPair.second.date;
-//        LocalDateTime inTime = validPair.first.date;
-//        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-//          if (validPair.second.stampType == StampTypes.TUNNEL
-//              || validPair.first.stampType == StampTypes.TUNNEL) {
-//            belongToValidPairTunnel = true;
-//          } else {
-//            belongToValidPairNotTunnel = true;
-//          }
-//          break;
-//        }
-//      }
-//      if (belongToValidPairNotTunnel) {
-//        tunnelStampingsToCheck.add(stamping);
-//      } else if (belongToValidPairTunnel) {
-//        stamping.valid = true;         //capire se è corretto...
-//      } else {
-//        stamping.valid = false;
-//      }
-//    }
+    //    List<Stamping> tunnelStampingsToCheck = Lists.newArrayList();
+    //    for (Stamping stamping : tunnelStampings) {
+    //      boolean belongToValidPairNotTunnel = false;
+    //      boolean belongToValidPairTunnel = false;
+    //      for (PairStamping validPair : validPairs) {
+    //        LocalDateTime outTime = validPair.second.date;
+    //        LocalDateTime inTime = validPair.first.date;
+    //        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
+    //          if (validPair.second.stampType == StampTypes.TUNNEL
+    //              || validPair.first.stampType == StampTypes.TUNNEL) {
+    //            belongToValidPairTunnel = true;
+    //          } else {
+    //            belongToValidPairNotTunnel = true;
+    //          }
+    //          break;
+    //        }
+    //      }
+    //      if (belongToValidPairNotTunnel) {
+    //        tunnelStampingsToCheck.add(stamping);
+    //      } else if (belongToValidPairTunnel) {
+    //        stamping.valid = true;         //capire se è corretto...
+    //      } else {
+    //        stamping.valid = false;
+    //      }
+    //    }
 
     //(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
     for (PairStamping validPair : validPairs) {
@@ -1174,44 +1182,44 @@ public class PersonDayManager {
       }
     }
     //(3a) aggrego le stampings del tunnel per coppie valide ed eseguo il check di coppia valida
-//    for (PairStamping validPair : validPairs) {
-//      LocalDateTime outTime = validPair.second.date;
-//      LocalDateTime inTime = validPair.first.date;
-//      List<Stamping> tunnelStampingsInSinglePair = tunnelStampingsToCheck.stream()
-//          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
-//          .collect(Collectors.toList());
-//      //check
-//      Stamping tunnelExit = null;
-//      for (Stamping stamping : tunnelStampingsInSinglePair) {
-//        //cerca l'uscita di tunnel
-//        if (tunnelExit == null) {
-//          if (stamping.isOut()) {
-//            tunnelExit = stamping;
-//            continue;
-//          }
-//          if (stamping.isIn()) {
-//            //una entrata di tunnel prima di una uscita da tunnel e' come se non esistesse
-//            stamping.valid = false;
-//            continue;
-//          }
-//        }
-//        //cerca l'entrata nel tunnel
-//        if (tunnelExit != null) {
-//          if (stamping.isIn()) {
-//            stamping.valid = true;
-//            tunnelExit.valid = true;
-//            tunnelExit = null;
-//            continue;
-//          }
-//          //trovo una seconda uscita da tunnel, butto via la prima
-//          if (stamping.isOut()) {
-//            tunnelExit.valid = false;
-//            tunnelExit = stamping;
-//            continue;
-//          }
-//        }
-//      }
-//    }
+    //    for (PairStamping validPair : validPairs) {
+    //      LocalDateTime outTime = validPair.second.date;
+    //      LocalDateTime inTime = validPair.first.date;
+    //      List<Stamping> tunnelStampingsInSinglePair = tunnelStampingsToCheck.stream()
+    //          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+    //          .collect(Collectors.toList());
+    //      //check
+    //      Stamping tunnelExit = null;
+    //      for (Stamping stamping : tunnelStampingsInSinglePair) {
+    //        //cerca l'uscita di tunnel
+    //        if (tunnelExit == null) {
+    //          if (stamping.isOut()) {
+    //            tunnelExit = stamping;
+    //            continue;
+    //          }
+    //          if (stamping.isIn()) {
+    //            //una entrata di tunnel prima di una uscita da tunnel e' come se non esistesse
+    //            stamping.valid = false;
+    //            continue;
+    //          }
+    //        }
+    //        //cerca l'entrata nel tunnel
+    //        if (tunnelExit != null) {
+    //          if (stamping.isIn()) {
+    //            stamping.valid = true;
+    //            tunnelExit.valid = true;
+    //            tunnelExit = null;
+    //            continue;
+    //          }
+    //          //trovo una seconda uscita da tunnel, butto via la prima
+    //          if (stamping.isOut()) {
+    //            tunnelExit.valid = false;
+    //            tunnelExit = stamping;
+    //            continue;
+    //          }
+    //        }
+    //      }
+    //    }
 
     return validPairs;
   }
@@ -1394,10 +1402,11 @@ public class PersonDayManager {
   public int workingMinutes(List<PairStamping> validPairs,
       LocalTime start, LocalTime end) {
 
-    int workingMinutes = 0;
-
+    int workingMinutes = 0;    
+    
     //Per ogni coppia valida butto via il tempo oltre la fascia.
     for (PairStamping validPair : validPairs) {
+      
       LocalTime consideredStart = new LocalTime(validPair.first.date);
       LocalTime consideredEnd = new LocalTime(validPair.second.date);
       if (consideredEnd.isBefore(start)) {
@@ -1412,9 +1421,10 @@ public class PersonDayManager {
       if (consideredEnd.isAfter(end) && !validPair.second.isOffSiteWork()) {
         consideredEnd = end;
       }
-      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
-    }
+      
+      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);      
 
+    }
     return workingMinutes;
 
   }
