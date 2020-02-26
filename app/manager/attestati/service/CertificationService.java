@@ -528,8 +528,6 @@ public class CertificationService implements ICertificationService {
   private Map<String, Certification> absences(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
-    //log.info("Persona {}", person);
-
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
     if (absences.isEmpty()) {
@@ -715,7 +713,7 @@ public class CertificationService implements ICertificationService {
     PeriodoDipendente periodoDipendente = certificationsComunication
         .getPeriodoDipendente(statoAttestatoMese.id);
 
-    log.info(periodoDipendente.toString());
+    log.debug(periodoDipendente.toString());
 
     //scarico il cruscotto
     CruscottoDipendente cruscottoDipendente = certificationsComunication

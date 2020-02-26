@@ -548,7 +548,7 @@ public class ShiftManager2 {
     if (activity.organizaionShiftTimeTable != null) {
       slotNumber = activity.organizaionShiftTimeTable.slotCount();
       if (activity.organizaionShiftTimeTable.considerEverySlot) {
-        log.info("Non controllo che gli slot siano tutti coperti per assegnare il turno valido");
+        log.debug("Non controllo che gli slot siano tutti coperti per assegnare il turno valido");
       } else {
         if (slotNumber > shifts.size()) {
           shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));

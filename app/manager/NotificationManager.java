@@ -217,7 +217,7 @@ public class NotificationManager {
     if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
       List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
-      log.info("Gruppi da controllare {}", groups);
+      log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
           if (group.manager.equals(user.person) && group.people.contains(person)) {

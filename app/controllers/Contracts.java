@@ -834,7 +834,7 @@ public class Contracts extends Controller {
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
 
-    log.info("saveMealTicketSourceContract, contratto inizializzato {}", wrContract.initializationMissing());
+    log.debug("saveMealTicketSourceContract, contratto inizializzato {}", wrContract.initializationMissing());
     if (sourceDateMealTicket != null) {
       validation.future(sourceDateMealTicket.toDate(), 
           wrContract.dateForMealInitialization().minusDays(1).toDate())

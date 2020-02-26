@@ -154,7 +154,7 @@ public class Vacations extends Controller {
               year, vacationGroup, Optional.absent(), true);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
-          log.info("");
+          log.info("Impossibile creare la situazione delle ferie di {}", person.getFullname());
         }
 
       }
