@@ -56,7 +56,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.paymentType = PaymentType.T1;
         slotMorning.shiftTimeTable = ostt;
         slotMorning.save();
-        log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
 
         if (ostt.name.contains("IIT")) {
           slotMorning.name = "IIT - "+ShiftSlot.AFTERNOON.toString();
@@ -71,7 +71,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.paymentType = PaymentType.T1;
         slotAfternoon.shiftTimeTable = ostt;
         slotAfternoon.save();
-        log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
         
         if (ostt.name.contains("IIT")) {
           slotMorning.name = "IIT - "+ShiftSlot.EVENING.toString();
@@ -87,7 +87,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
           slotMorning.paymentType = PaymentType.T1;
           slotEvening.shiftTimeTable = ostt;
           slotEvening.save();
-          log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+          log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
         }
       }
       

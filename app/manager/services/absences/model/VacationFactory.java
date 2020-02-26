@@ -491,7 +491,7 @@ public class VacationFactory {
       VacationPeriod vacationPeriod, Set<AbsenceType> takableCodes, Set<AbsenceType> takenCodes) {
     
     if (yearProgression == null) {
-      log.info("La yearProgression è null...");
+      log.debug("La yearProgression è null...");
       return Lists.newArrayList();
     }
     

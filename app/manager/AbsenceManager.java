@@ -285,7 +285,7 @@ public class AbsenceManager {
     Preconditions.checkNotNull(file);
     Preconditions.checkNotNull(mealTicket);
 
-    log.info("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
+    log.debug("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
             + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", person.fullName(), absenceType.code,
         dateFrom, dateTo.or(dateFrom), mealTicket.orNull(), file.orNull(), justifiedMinutes.orNull());
 
