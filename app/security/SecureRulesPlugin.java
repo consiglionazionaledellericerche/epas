@@ -60,7 +60,6 @@ public class SecureRulesPlugin extends PlayPlugin {
   }
 
   private void loadRules(byte[] rulesContent) {
-    // LOG.info("(re)loading drools.");
 
     // Configure the drools compiler to use Janino, instead of JDT, with the
     // Play classloader, so that compilation will load model classes from

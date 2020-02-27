@@ -506,6 +506,7 @@ public class Competences extends Controller {
   }
 
   /**
+   * Ritorna la form di inserimento della competenza alla persona.
    * @param personId l'id della persona
    * @param competenceId l'id della competenza
    * @param month        il mese
@@ -902,7 +903,7 @@ public class Competences extends Controller {
   }
 
   /**
-   * 
+   * Salva il servizio di turno.
    * @param cat il servizio per turno
    * @param office la sede a cui si vuole collegare il servizio
    *     metodo che persiste il servizio associandolo alla sede.
@@ -1006,23 +1007,23 @@ public class Competences extends Controller {
           cat.save();          
         } else {
           toDelete.add(type);
-          log.info("Elinino i person_shift_days relativi a {}", type.type);
+          log.debug("Elinino i person_shift_days relativi a {}", type.type);
           for (PersonShiftDay psd : type.personShiftDays) {
             psd.delete();
           }
           type.monthsStatus.stream().map(st -> st.delete());  
-          log.info("Elimino i gli shift_type_month relativi a {}", type.type);
+          log.debug("Elimino i gli shift_type_month relativi a {}", type.type);
         }        
       }       
       if (toDelete.contains(type)) {
-        log.info("Elimino le relazioni tra persone e shift_type");        
+        log.debug("Elimino le relazioni tra persone e shift_type");        
         for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
           psst.delete();
         }
-        log.info("Elimino lo shift_type {}", type.type);
+        log.debug("Elimino lo shift_type {}", type.type);
         type.delete();
       }
-      
+
     }
     if (toDelete.size() == shiftTypeList.size()) {
       cat.delete();
@@ -1031,7 +1032,7 @@ public class Competences extends Controller {
       flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
           + "importanti presenti in altre tabelle");
     }   
-    
+
     activateServices(cat.office.id);
   }
 
@@ -1060,7 +1061,8 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable(int step, int slot, boolean considerEverySlot, String name,
+  public static void configureShiftTimeTable(int step, int slot, 
+      boolean considerEverySlot, String name,
       CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;
@@ -1102,7 +1104,7 @@ public class Competences extends Controller {
     } else {
       flash.error("Errore nella creazione della timetable: %s", result);
     }
-    
+
     manageCompetenceCode();
   }
 
@@ -1162,7 +1164,7 @@ public class Competences extends Controller {
 
       List<ShiftTimeTable> internalList = Lists.newArrayList();
       List<OrganizationShiftTimeTable> externalList = Lists.newArrayList();
-            
+
       if (shift != null) {
         ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
         internalList.add(stt);
@@ -1179,7 +1181,7 @@ public class Competences extends Controller {
           Cache.safeAdd(external, externalList, "10mn");     
         }        
       }  
-      
+
       step++;      
       enableExitTolerance = false;
       render(step, type, cat, breakInRange, enableExitTolerance);
@@ -1207,7 +1209,7 @@ public class Competences extends Controller {
         step = 0;
         render(cat, type, step, breakInRange);
       }
-      
+
       if (internalTimeTable != null) {
         ShiftTimeTable stt = internalTimeTable.get(0);
         Cache.safeAdd(internal, internalTimeTable, "10mn");
@@ -1244,7 +1246,7 @@ public class Competences extends Controller {
         competenceManager.persistShiftType(service, Optional.<ShiftTimeTable>absent(), 
             Optional.fromNullable(ostt), cat);
       }
-      
+
       Cache.clear();
       flash.success("Attività salvata correttamente!");
       activateServices(cat.office.id);
@@ -1310,6 +1312,30 @@ public class Competences extends Controller {
     type.save();
     flash.success("Modificati parametri per l'attività: %s", type.description);
     manageShiftType(type.id);
+  }
+
+  /**
+   * Elimina l'attività di turno passata come parametro.
+   * @param type l'attovità di turno
+   */
+  public static void deleteActivity(ShiftType type) {
+    
+    rules.checkIfPermitted(type.shiftCategories.office);
+    if (!type.personShiftDays.isEmpty()) {
+      flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
+          + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", type.type);
+      manageShiftType(type.id);
+    }
+    if (!type.personShiftShiftTypes.isEmpty()) {
+      log.debug("L'attività {} è ancora referenziata a qualche persona");
+      type.personShiftShiftTypes.stream().forEach(psst -> psst.delete());
+      
+    }
+    type.delete();
+    log.info("Eliminata attività {}", type.type);
+    flash.success("Attività %s eliminata", type.type);
+    activateServices(type.shiftCategories.office.id);
+
   }
 
 

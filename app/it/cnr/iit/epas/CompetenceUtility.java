@@ -246,7 +246,7 @@ public class CompetenceUtility {
       if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
         //if (!person.isHoliday(personReperibilityDay.date)) {
         if (!personDayManager.isHoliday(person, personReperibilityDay.date)) {
-          log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
+          log.debug("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
               + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
           noStampingDays =
@@ -259,7 +259,7 @@ public class CompetenceUtility {
         // check for the stampings in working days
         if (!personDayManager.isHoliday(person, personReperibilityDay.date)
             && personDay.get().stampings.isEmpty()) {
-          log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
+          log.debug("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
               + "giorno {}", person.name, person.surname, personDay.get().date);
 
           noStampingDays =
@@ -273,7 +273,7 @@ public class CompetenceUtility {
         if (!personDay.get().absences.isEmpty()) {
           for (Absence absence : personDay.get().absences) {
             if (absence.justifiedType.name == JustifiedTypeName.all_day) {
-              log.info("La reperibilita' di {} {} e' incompatibile con la sua assenza nel "
+              log.debug("La reperibilita' di {} {} e' incompatibile con la sua assenza nel "
                   + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
               absenceDays =
@@ -347,7 +347,7 @@ public class CompetenceUtility {
 
         if (!personDayManager.isHoliday(person, personShiftDay.date)
             && personShiftDay.date.isBefore(LocalDate.now())) {
-          log.info("Il turno di {} {} e' incompatibile con la sua mancata timbratura nel giorno"
+          log.debug("Il turno di {} {} e' incompatibile con la sua mancata timbratura nel giorno"
               + " {} (personDay == null)", person.name, person.surname, personShiftDay.date);
 
           noStampingDays =
@@ -369,7 +369,7 @@ public class CompetenceUtility {
           // check no stampings
           //-----------------------------
           if (personDay.get().stampings.isEmpty()) {
-            log.info("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel giorno"
+            log.debug("Il turno di {} {} e' incompatibile con la sue mancate timbrature nel giorno"
                 + " {}", person.name, person.surname, personDay.get().date);
 
             noStampingDays =
@@ -421,7 +421,7 @@ public class CompetenceUtility {
               // se e' vuota => manca qualche timbratura
             } else if (pairStampings.isEmpty()) {
 
-              log.info("Il turno di {} {} e' incompatibile con la sue  timbrature disallineate nel"
+              log.debug("Il turno di {} {} e' incompatibile con la sue  timbrature disallineate nel"
                   + " giorno {}", person.name, person.surname, personDay.get().date);
 
               badStampingDays =
@@ -485,7 +485,7 @@ public class CompetenceUtility {
 
                 String stampings = "";
 
-                log.info("Il turno di {} nel giorno {} non e' stato completato o c'e' stata una "
+                log.debug("Il turno di {} nel giorno {} non e' stato completato o c'e' stata una "
                         + "uscita fuori pausa pranzo - orario {}",
                     person, personDay.get().date, strStamp);
                 log.debug("Esamino le coppie di timbrature");
@@ -792,7 +792,7 @@ public class CompetenceUtility {
 
                 if (lackOfMinutes > twoHoursinMinutes) {
 
-                  log.info("Il turno di {} {} nel giorno {} non e' stato completato - "
+                  log.debug("Il turno di {} {} nel giorno {} non e' stato completato - "
                           + "timbrature: {}",
                       person.name, person.surname, personDay.get().date, stampings);
 
@@ -809,11 +809,11 @@ public class CompetenceUtility {
                 } else if (lackOfMinutes != 0) {
                   label = (inTolleranceLimit) ? thIncompleteTime : thWarnStampings;
 
-                  log.info("Il turno di {} {} nel giorno {} non e'stato completato per meno di "
+                  log.debug("Il turno di {} {} nel giorno {} non e'stato completato per meno di "
                           + "2 ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
                       person.name, person.surname, personDay.get().date, lackOfMinutes,
                       lackOfTime, stampings);
-                  log.info("Timbrature nella tolleranza dei 15 min. = {}", inTolleranceLimit);
+                  log.debug("Timbrature nella tolleranza dei 15 min. = {}", inTolleranceLimit);
 
                   badStampingDays = (inconsistentAbsenceTable.contains(person, label))
                       ? inconsistentAbsenceTable.get(person, label) : new ArrayList<String>();
@@ -844,7 +844,7 @@ public class CompetenceUtility {
             if (absence.justifiedType.name == JustifiedTypeName.all_day) {
 
               if (absence.absenceType.code.equals("92")) {
-                log.info("Il turno di {} {} e' coincidente con una missione il giorno {}",
+                log.debug("Il turno di {} {} e' coincidente con una missione il giorno {}",
                     person.name, person.surname, personShiftDay.date);
 
                 absenceDays =
