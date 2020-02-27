@@ -292,6 +292,7 @@ public class Contracts extends Controller {
 
     long count = pdList.stream().filter(pd -> pd.absences.isEmpty()).count();
     if (pdList.size() == 0 || count == pdList.size()) {
+      contract.delete();
       flash.success(Web.msgDeleted(Contract.class));
     } else {
       flash.error("Non è possibile cancellare il contratto di %s perchè sono già presenti giornate"
