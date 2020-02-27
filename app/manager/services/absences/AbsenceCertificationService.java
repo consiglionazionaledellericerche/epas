@@ -731,7 +731,7 @@ public class AbsenceCertificationService {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
         Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
         if (!type.isPresent()) {
-          log.info("Un codice utilizzato su attestati non è presente su ePAS {}", code);
+          log.debug("Un codice utilizzato su attestati non è presente su ePAS {}", code);
           continue;
         }
 
@@ -857,7 +857,7 @@ public class AbsenceCertificationService {
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
           if (type.get().justifiedTypesPermitted.size() != 1) {
-            log.info("Impossibile importare una assenza senza justified univoco o definito {}", 
+            log.debug("Impossibile importare una assenza senza justified univoco o definito {}", 
                 type.get().code);
             continue;
           }

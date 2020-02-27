@@ -93,7 +93,7 @@ public class Calendar extends Controller {
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
     final List<ShiftType> activities = shiftManager2.getUserActivities();
-    log.info("userActivities.size() = {}", activities.size());
+    log.debug("userActivities.size() = {}", activities.size());
     
     final ShiftType activitySelected = activity.id != null 
         ? activity : activities.size() > 0 ?  activities.get(0) : null;

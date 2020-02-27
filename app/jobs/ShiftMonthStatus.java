@@ -37,7 +37,7 @@ public class ShiftMonthStatus extends Job<Void> {
             .min(Comparator.comparing(shift -> shift.date))
             .map(personShiftDay -> personShiftDay.date);
         if (!oldestShift.isPresent()) {
-          log.info("activita {} senza personShiftDays, monthStatus non creato.", activity);
+          log.debug("attività {} senza personShiftDays, monthStatus non creato.", activity);
           return;
         }
         YearMonth month = new YearMonth(oldestShift.get());
