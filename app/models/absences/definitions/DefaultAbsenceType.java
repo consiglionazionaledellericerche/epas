@@ -19,8 +19,8 @@ import org.joda.time.LocalDate;
  */
 public enum DefaultAbsenceType {
   
-  A_covid19("covid19", "Permesso per gestione corona virus",
-      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
+  A_COVID19("COVID19", "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti",
+      false, ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false),
 
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti",
