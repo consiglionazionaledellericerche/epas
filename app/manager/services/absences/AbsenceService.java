@@ -506,7 +506,7 @@ public class AbsenceService {
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
-    log.info("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}",
+    log.debug("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}",
         readOnly, groupsPermitted);
     if (readOnly) {
       return groupsPermitted;
@@ -533,7 +533,7 @@ public class AbsenceService {
     final boolean officeWriteAdmin = secureManager
         .officesWriteAllowed(currentUser).contains(person.office);
 
-    log.info("officeWriteAdmin = {}, officeWriteAllowed = {}",
+    log.debug("officeWriteAdmin = {}, officeWriteAllowed = {}",
         officeWriteAdmin, secureManager.officesWriteAllowed(currentUser));
 
     //Utente di sistema o amministratore della persona
@@ -551,7 +551,7 @@ public class AbsenceService {
     //Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
 
-      log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
+      log.debug("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       //vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
 
@@ -583,7 +583,7 @@ public class AbsenceService {
         groupsPermitted.add(rightToStudy);        
       }
 
-      log.info("groupPermitted = {}", groupsPermitted);
+      log.debug("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }
 
@@ -836,7 +836,7 @@ public class AbsenceService {
         //Tutto correttamente cachato.
         return situation;
       } else {
-        log.info("La situazione di {} non era cachata", contract.person.fullName());
+        log.debug("La situazione di {} non era cachata", contract.person.fullName());
       }
     }
     PeriodChain periodChain = residual(contract.person, vacationGroup, date);
@@ -867,21 +867,6 @@ public class AbsenceService {
       Cache.set(permissionsKey, situation.permissionsCached);
     }
 
-    //    try {
-    //      CruscottoDipendente cruscottoDipendente = certService
-    //        .getCruscottoDipendente(person, year);
-    //      CertificationYearSituation yearSituation = 
-    //          new CertificationYearSituation(absenceComponentDao, person, cruscottoDipendente);
-    //      comparedVacation.certLastYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_PRECEDENTE);
-    //      comparedVacation.certCurrentYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_CORRENTE);
-    //      comparedVacation.certPermission = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.PERMESSI_LEGGE);
-    //      
-    //    } catch (Exception e) {
-    //      log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
-    //    }
     return situation;
 
   }
@@ -944,7 +929,7 @@ public class AbsenceService {
     } else {
       //La data che passo deve essere una data contenuta nell'anno.
       if (residualDate.get().getYear() != year) {
-        log.info("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
+        log.debug("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
         return null;
       }
       return residualDate.get();

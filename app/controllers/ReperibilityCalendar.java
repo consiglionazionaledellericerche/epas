@@ -87,7 +87,7 @@ public class ReperibilityCalendar extends Controller {
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
     if (reperibilities.isEmpty()) {
-      log.info("Richiesta visualizzazione reperibilità ma nessun servizio di "
+      log.debug("Richiesta visualizzazione reperibilità ma nessun servizio di "
           + "reperibilità presente");
       flash.error("Nessun tipo di reperibilità presente");
       Application.index();
