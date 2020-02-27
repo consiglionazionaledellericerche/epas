@@ -413,7 +413,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_419, DefaultAbsenceType.A_62,
-          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D),
+          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_covid19),
       ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -455,7 +455,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_419, DefaultAbsenceType.A_62,
-          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D),
+          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_covid19),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 

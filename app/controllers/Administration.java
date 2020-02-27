@@ -202,11 +202,11 @@ public class Administration extends Controller {
 
       Absence abs = val.value;
       long id = val.value.personDay.id;
-      log.info("Id del personDay = {}", id);
+      log.debug("Id del personDay = {}", id);
       PersonDay pd = personDayDao.getPersonDayById(id);
       if (pd != null) {
         if (pd.absences.contains(abs)) {
-          log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
+          log.debug("l'assenza {} è già nel personday, non la inserisco", abs.id);
           continue;
         }
         pd.save();
@@ -549,7 +549,7 @@ public class Administration extends Controller {
     List<PersonReperibility> list = PersonReperibility.findAll();
     List<PersonReperibility> repList = null;
     log.info("Inizio la normalizzazione delle date...");
-    log.info("Creo la mappa persona-personreperibility");
+    log.debug("Creo la mappa persona-personreperibility");
     for (PersonReperibility pr : list) {
       if (pr.startDate != null && pr.endDate == null) {
         if (!map.containsKey(pr.person)) {
@@ -561,15 +561,15 @@ public class Administration extends Controller {
         map.put(pr.person, repList);
       }      
     }
-    log.info("Valuto la mappa per controllare le date dei personreperibilities");
+    log.debug("Valuto la mappa per controllare le date dei personreperibilities");
     for (Map.Entry<Person, List<PersonReperibility>> entry : map.entrySet()) {
 
       if (entry.getValue().size() > 1) {
         List<PersonReperibility> multipleReps = entry.getValue();
-        log.info("Ordino le person reperibilities");
+        log.debug("Ordino le person reperibilities");
         Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);       
         PersonReperibility pr = null;
-        log.info("Controllo le personreperibilities");
+        log.debug("Controllo le personreperibilities");
         for (PersonReperibility rep : multipleReps) {
           if (pr == null) {
             pr = rep;
@@ -582,10 +582,10 @@ public class Administration extends Controller {
               log.warn("Sono nel caso di due person reperibilities con data fine nulla "
                   + "per lo stesso tipo");
               if (rep.startDate.isBefore(pr.startDate)) {
-                log.info("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
+                log.debug("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
                 pr.delete();                
               } else {
-                log.info("Cancello quello più futuro di {} con data {}", 
+                log.debug("Cancello quello più futuro di {} con data {}", 
                     rep.person, rep.startDate);
                 rep.delete();
               }
@@ -607,10 +607,10 @@ public class Administration extends Controller {
    */
   public static void normalizationShifts() {
     List<PersonShiftShiftType> psstList = PersonShiftShiftType.findAll();
-    log.info("Recupero tutte le associazioni tra persone e attività di turno.");
+    log.debug("Recupero tutte le associazioni tra persone e attività di turno.");
     for (PersonShiftShiftType psst : psstList) {
       if (psst.beginDate == null && psst.endDate == null) {
-        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
+        log.debug("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
             psst.personShift.person.fullName(), psst.shiftType.description);
         psst.delete();
       }

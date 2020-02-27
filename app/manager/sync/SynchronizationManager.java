@@ -64,7 +64,7 @@ public class SynchronizationManager {
    * @param office l'ufficio di cui sincronizzare le persone.
    */
   public SyncResult syncPeopleInOffice(Office office, boolean alsoContracts) {
-    log.info("Sincronizzazione delle persone presenti nell'ufficio {}.",
+    log.debug("Sincronizzazione delle persone presenti nell'ufficio {}.",
         office.getName());
     val result = new SyncResult();
 
@@ -103,7 +103,7 @@ public class SynchronizationManager {
       }
     }
 
-    log.info("Terminata la sincronizzazione delle persone presenti nell'ufficio {}.",
+    log.debug("Terminata la sincronizzazione delle persone presenti nell'ufficio {}.",
         office.getName());
     return result;
   }
@@ -113,7 +113,7 @@ public class SynchronizationManager {
    * Se la persona è presente in ePAS gli cambia l'assegnazione della sede.
    */
   public SyncResult createOrTransferPerson(Person perseoPerson, Office office) {
-    log.info("Persona {} (matricola:{} perseoId:{}) non associata in ePAS all'ufficio {}.",
+    log.debug("Persona {} (matricola:{} perseoId:{}) non associata in ePAS all'ufficio {}.",
         perseoPerson.fullName(), perseoPerson.number,
         perseoPerson.perseoId, office.getName());
 

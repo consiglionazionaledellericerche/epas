@@ -52,7 +52,7 @@ public class CertificationManager {
       PrintWriter pw = new PrintWriter(new File(file.getAbsolutePath()));
       StringBuilder sb = new StringBuilder();
       for (Person person : people) {
-        log.info("Controllo la situazione dei buoni pasto per {}", person.getFullname());
+        log.debug("Controllo la situazione dei buoni pasto per {}", person.getFullname());
         val mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
             .getPersonDayInMonth(person, new YearMonth(year, month)));
         if (mealTicket > 0) {
@@ -65,9 +65,9 @@ public class CertificationManager {
           sb.append(yearMonth);
           sb.append("\r\n");
         } else {
-          log.info("Non ci sono buoni da inserire in questo mese per {}", person.getFullname());
+          log.debug("Non ci sono buoni da inserire in questo mese per {}", person.getFullname());
         }   
-        log.info("Inseriti {} buoni per {}", mealTicket, person.getFullname());
+        log.debug("Inseriti {} buoni per {}", mealTicket, person.getFullname());
       }
       pw.write(sb.toString());
       pw.close();

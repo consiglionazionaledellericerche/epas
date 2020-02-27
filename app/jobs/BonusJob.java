@@ -42,7 +42,7 @@ public class BonusJob extends Job {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
-    log.info("Start Job bonus");
+    log.debug("Start Job bonus");
 
     
     YearMonth yearMonth = YearMonth.now().minusMonths(1);
@@ -57,6 +57,6 @@ public class BonusJob extends Job {
     });
     
 
-    log.info("End Job bonus");
+    log.debug("End Job bonus");
   }
 }
