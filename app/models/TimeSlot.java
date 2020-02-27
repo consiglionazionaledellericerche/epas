@@ -43,7 +43,7 @@ public class TimeSlot extends BaseModel {
 
   @Getter
   @Column
-  @Unique("office")
+  @Unique("office,beginSlot,endSlot")
   public String description;
   
   @Unique("office,beginSlot,endSlot")
@@ -67,8 +67,10 @@ public class TimeSlot extends BaseModel {
   @Transient
   public String getLabel() {
     DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
-    return Strings.isNullOrEmpty(description) 
-        ? String.format("%s - %s", dtf.print(beginSlot), dtf.print(endSlot)) : description;
+    return Strings.isNullOrEmpty(description) ?  
+        String.format("%s - %s", dtf.print(beginSlot), dtf.print(endSlot)) 
+          : 
+        String.format("%s (%s - %s)", description, dtf.print(beginSlot), dtf.print(endSlot));
   }
 
   @Override
