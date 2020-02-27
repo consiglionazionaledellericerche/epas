@@ -84,16 +84,28 @@ public class TimeSlots extends Controller {
     render(timeSlot, officeId);
   }
   
+  /**
+   * Salvataggio delle fascie oraria obbligatorie.
+   * 
+   * @param timeSlot la fascia oraria da salvare
+   */
   public static void save(@Valid TimeSlot timeSlot) {
-    
+    notFoundIfNull(timeSlot);
+
+    if (timeSlot.office != null) {
+      rules.checkIfPermitted(timeSlot.office);
+    } else {
+      rules.checkAction("TimeSlots.savePredefined");
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}",timeSlot,
           validation.errorsMap());
-        render("@blank", timeSlot);
+      Long officeId = timeSlot.office != null ? timeSlot.office.id : null;
+      render("@blank", timeSlot, officeId);
     } else {
       timeSlot.save();
-      log.info("Creata nuova fascia di orario {}", timeSlot.getLabel());
+      log.info("Creata nuova fascia di orario {}, office = {}", timeSlot.getLabel(), timeSlot.office);
     }
     manageTimeSlots(timeSlot.office != null ? timeSlot.office.id : null);
   }
@@ -156,7 +168,13 @@ public class TimeSlots extends Controller {
     notFoundIfNull(id);
     val timeSlot = timeSlotDao.byId(id).orNull();
     notFoundIfNull(timeSlot);
-
+    
+    if (timeSlot.office != null) {
+      rules.checkIfPermitted(timeSlot.office);
+    } else {
+      rules.checkAction("TimeSlots.deletePredefined");
+    }
+    
     //elimino la sorgente se non è associata ad alcun gruppo.
     if (timeSlot.contractMandatoryTimeSlots.isEmpty()) {
       timeSlot.delete();
@@ -180,6 +198,13 @@ public class TimeSlots extends Controller {
     notFoundIfNull(id);
     val timeSlot = timeSlotDao.byId(id).orNull();
     notFoundIfNull(timeSlot);
+    
+    if (timeSlot.office != null) {
+      rules.checkIfPermitted(timeSlot.office);
+    } else {
+      rules.checkAction("TimeSlots.tooglePredefined");
+    }
+    
     timeSlot.disabled = !timeSlot.disabled;
     timeSlot.save();
 

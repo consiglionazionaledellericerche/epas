@@ -24,8 +24,8 @@
 		#{if officeId}
 			#{f.hidden 'timeSlot.office.id', value:officeId /}
 		#{/if}
-		#{f.input 'timeSlot.beginSlot', required:true /}
-		#{f.input 'timeSlot.endSlot', required:true /}
+		#{f.input 'timeSlot.beginSlot', required:true, placeholder:'hh:mm' /}
+		#{f.input 'timeSlot.endSlot', required:true, placeholder:'hh:mm' /}
   	   	#{f.input 'timeSlot.description' /}
   	   
   	   <!--bottoni -->
