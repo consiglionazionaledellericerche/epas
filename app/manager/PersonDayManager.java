@@ -1655,7 +1655,7 @@ public class PersonDayManager {
           val newShortPermission = previousShortPermission.get().<Absence>merge();
           newShortPermission.justifiedMinutes = shortPermission.get().justifiedMinutes;
           newShortPermission.save();
-          log.debug("Aggiornato permesso breve esistente del giorno {} di {}, aggiornato da {} a {} minuti", 
+          log.debug("Permesso breve esistente nel giorno {} per {}, aggiornato da {} a {} minuti", 
               personDay.date, personDay.person.getFullname(),
               previousShortPermission.get().justifiedMinutes, shortPermission.get().justifiedMinutes);
         }
