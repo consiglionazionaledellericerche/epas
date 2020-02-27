@@ -39,13 +39,14 @@ public class ShiftOrganizationManager {
   }
   
   public String generateTimeTableAndSlot(List<OrganizationTimeTable> list, 
-      Office office, CalculationType calculationType, String name) {
+      Office office, CalculationType calculationType, String name, boolean considerEverySlot) {
     String result = "";
     OrganizationShiftTimeTable shiftTimeTable = null;
     try {      
       shiftTimeTable = new OrganizationShiftTimeTable();
       shiftTimeTable.name = name;
       shiftTimeTable.calculationType = calculationType;
+      shiftTimeTable.considerEverySlot = considerEverySlot;
       shiftTimeTable.office = office;
       shiftTimeTable.save();
     } catch(Exception e) {

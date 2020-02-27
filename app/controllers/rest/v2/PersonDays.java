@@ -74,6 +74,7 @@ public class PersonDays extends Controller {
           .differenza(pd.difference)
           .progressivo(pd.progressive)
           .tempoLavoro(pd.timeAtWork)
+          .giornoLavorativo(!pd.isHoliday)
           .build();
     if (pd.absences != null && pd.absences.size() > 0) {
       for (Absence abs : pd.absences) {

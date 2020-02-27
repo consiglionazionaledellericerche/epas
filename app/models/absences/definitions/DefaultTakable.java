@@ -65,6 +65,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_19P, DefaultAbsenceType.A_19PM), 
       3, null),
 
+  T_20(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_20M),
+      ImmutableSet.of(DefaultAbsenceType.A_20M),
+      -1, null),
+  
   T_26(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 

@@ -42,6 +42,8 @@ public class OrganizationShiftTimeTable extends BaseModel{
   @OneToMany(mappedBy = "shiftTimeTable")
   public List<ShiftType> shiftTypes = new ArrayList<>();
   
+  public boolean considerEverySlot = true;
+  
   
   @Transient
   public long slotCount() {
