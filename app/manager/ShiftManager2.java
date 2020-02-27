@@ -547,15 +547,24 @@ public class ShiftManager2 {
     long slotNumber = 0;
     if (activity.organizaionShiftTimeTable != null) {
       slotNumber = activity.organizaionShiftTimeTable.slotCount();
+      if (activity.organizaionShiftTimeTable.considerEverySlot) {
+        log.info("Non controllo che gli slot siano tutti coperti per assegnare il turno valido");
+      } else {
+        if (slotNumber > shifts.size()) {
+          shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+        } else {
+          shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+        }
+
+      }
     } else {
       slotNumber = activity.shiftTimeTable.slotCount();
+      if (slotNumber > shifts.size()) {
+        shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      } else {
+        shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+      }
     }     
-
-    if (slotNumber > shifts.size()) {
-      shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    } else {
-      shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-    }
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
     // invalidare a causa degli altri turni non rispettati
@@ -656,7 +665,7 @@ public class ShiftManager2 {
    */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to, ShiftPeriod type) {
-    
+
     int shiftCompetences = 0;
 
     int paidMinutes = 0;
@@ -678,7 +687,7 @@ public class ShiftManager2 {
       //Costruisco l'intervallo temporale per il turno diurno e il turno notturno
       daily = new TimeInterval(convertFromString(setting.startDailyShift), 
           convertFromString(setting.endDailyShift));
-      
+
       night = new TimeInterval(convertFromString(setting.startNightlyShift), 
           new LocalTime(23,59));
       beforeDawn = new TimeInterval(new LocalTime(0,0), convertFromString(setting.endNightlyShift));
@@ -722,13 +731,17 @@ public class ShiftManager2 {
         if (shift.organizationShiftSlot != null) {
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.percentage)) {
-            shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval)
+            int quantity = isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
+            if (quantity < 0) {
+              quantity = 0;
+            }
+            shiftCompetences = shiftCompetences + quantity;
             if (timeInterval2.isPresent()) {
               shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval2);
             }
-//            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
-//                - (shift.exceededThresholds * SIXTY_MINUTES);
+            //            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
+            //                - (shift.exceededThresholds * SIXTY_MINUTES);
           } else {    
             if (shift.organizationShiftSlot.paymentType == PaymentType.SPLIT_CALCULATION) {
               shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
@@ -736,7 +749,7 @@ public class ShiftManager2 {
               shiftCompetences += shift.organizationShiftSlot.minutesPaid 
                   - (shift.exceededThresholds * SIXTY_MINUTES);
             }
-            
+
           }
         } else {
           shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
@@ -783,7 +796,7 @@ public class ShiftManager2 {
 
     return timeIntersection;
   }
-  
+
   /**
    * Metodo che ritorna la quantità di minuti da pagare in un certo slot (diurno/notturno).
    * @param pd il personday di un certo giorno
@@ -794,6 +807,9 @@ public class ShiftManager2 {
   private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, Optional<TimeInterval> interval) {
     if (interval.isPresent()) {
       int quantity = quantityCountForShift(psd, pd, interval);
+      if (quantity < 0) {
+        return 0;
+      }
       if (quantity < psd.organizationShiftSlot.minutesPaid) {
         return quantity;
       }
@@ -940,11 +956,15 @@ public class ShiftManager2 {
       saveCompetence(person, shiftTypeMonth, shiftCode, calculatedCompetences);
       // Verifico che per le person coinvolte ci siano o no eventuali residui dai mesi precedenti
 
-      calculatedCompetences = totalHolidayPeopleCompetences.get(person);
-      saveCompetence(person, shiftTypeMonth, holidayCode, calculatedCompetences);
+      if (person.personCompetenceCodes.stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode))) {
+        calculatedCompetences = totalHolidayPeopleCompetences.get(person);
+        saveCompetence(person, shiftTypeMonth, holidayCode, calculatedCompetences);
+      }
+      if (person.personCompetenceCodes.stream().anyMatch(pcc -> pcc.competenceCode.equals(nightCode))) {
+        calculatedCompetences = totalNightlyPeopleCompetences.get(person);
+        saveCompetence(person, shiftTypeMonth, nightCode, calculatedCompetences);
+      }
 
-      calculatedCompetences = totalNightlyPeopleCompetences.get(person);
-      saveCompetence(person, shiftTypeMonth, nightCode, calculatedCompetences);
 
     });
 
