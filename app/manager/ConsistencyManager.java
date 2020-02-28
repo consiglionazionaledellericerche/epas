@@ -440,7 +440,7 @@ public class ConsistencyManager {
    
     personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
     
-    personDayManager.handleShortPermission(pd);
+    personDayManager.checkAndManageMandatoryTimeSlot(pd.getValue());
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {

@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuova Fascia Orario di lavoro'  /}
+
+#{set breadcrumbs:['Fasce orarie predefinite':@TimeSlots.manageTimeSlots(), ('Nuova fascia orario di lavoro'):null]/}
+ 
+<div class="container">
+
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Creazione Nuova fascia orario di lavoro' /}
+
+#{panel title:'Fasce orarie predefinite', color:'primary'}
+
+  <div class="col-md-10 col-md-offset-1">
+     
+     #{alert color:'info'}
+      <p>Seleziona le informazioni della fascia di orario di lavoro da creare</p>
+     #{/alert}
+     
+     <!-- Switcher horizontal / vertical -->
+     #{form action:@TimeSlots.save(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+		#{if officeId}
+			#{f.hidden 'timeSlot.office.id', value:officeId /}
+		#{/if}
+		#{f.input 'timeSlot.beginSlot', required:true, placeholder:'hh:mm' /}
+		#{f.input 'timeSlot.endSlot', required:true, placeholder:'hh:mm' /}
+  	   	#{f.input 'timeSlot.description' /}
+  	   
+  	   <!--bottoni -->
+	   #{b.buttons center:true}   
+	     #{b.submit 'Crea'/}
+	   #{/b.buttons}
+  	    
+	 #{/form}
+	 	 
+ </div> 
+</div>
+#{/panel}

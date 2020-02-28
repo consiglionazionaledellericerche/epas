@@ -29,6 +29,8 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
+    public final SetPath<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot> contractMandatoryTimeSlots = this.<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot>createSet("contractMandatoryTimeSlots", models.ContractMandatoryTimeSlot.class, QContractMandatoryTimeSlot.class, PathInits.DIRECT2);
+
     public final ListPath<models.ContractMonthRecap, QContractMonthRecap> contractMonthRecaps = this.<models.ContractMonthRecap, QContractMonthRecap>createList("contractMonthRecaps", models.ContractMonthRecap.class, QContractMonthRecap.class, PathInits.DIRECT2);
 
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
