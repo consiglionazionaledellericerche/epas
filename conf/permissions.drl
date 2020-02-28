@@ -827,6 +827,7 @@ when
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
     "Contracts.updateContractWorkingTimeType",
+    "Contracts.updateContractMandatoryTimeSlot",
     "Contracts.initializationsStatus",
     "Contracts.initializationsVacation",
     "Contracts.initializationsMeal",
@@ -856,7 +857,14 @@ when
     "WorkingTimes.showContract",
     "WorkingTimes.showContractWorkingTimeType",
     "WorkingTimes.showHorizontal",
-    "WorkingTimes.showWorkingTimeType"),  granted == false)
+    "WorkingTimes.showWorkingTimeType",
+    
+    "TimeSlots.manageTimeSlots",
+    "TimeSlots.manageOfficeTimeSlots",
+ 	"TimeSlots.showContracts",
+    "TimeSlots.showContractMandatoryTimeSlot"
+        
+    ),  granted == false)
 then
   $c.grant();
 end
@@ -1242,7 +1250,16 @@ when
         "WorkingTimes.showWorkingTimeType",
         "WorkingTimes.showContractWorkingTimeType",
         "WorkingTimes.showContract",
-        "WorkingTimes.showHorizontal"
+        "WorkingTimes.showHorizontal",
+        
+        "TimeSlots.manageTimeSlots",
+        "TimeSlots.manageOfficeTimeSlots",
+        "TimeSlots.blank",
+        "TimeSlots.save",
+        "TimeSlots.delete",
+        "TimeSlots.toogle",
+ 		"TimeSlots.showContracts",
+        "TimeSlots.showContractMandatoryTimeSlot"        
 
         ), target == null, granted == false)
 then
@@ -1316,7 +1333,16 @@ when
         "WorkingTimes.showContractWorkingTimeType",
         "WorkingTimes.showContract",
         "WorkingTimes.showHorizontal",
-        "WorkingTimes.insertVerticalWorkingTime"
+        "WorkingTimes.insertVerticalWorkingTime",
+        
+        "TimeSlots.manageTimeSlots",
+        "TimeSlots.manageOfficeTimeSlots",
+        "TimeSlots.blank",
+        "TimeSlots.save",
+        "TimeSlots.delete",
+        "TimeSlots.toogle",
+        "TimeSlots.showContracts",
+        "TimeSlots.showContractMandatoryTimeSlot"
 
        ), target == $o, granted == false)
 then
@@ -1713,6 +1739,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractMandatoryTimeSlot",
+        "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
 		"Persons.children",
@@ -1778,6 +1806,8 @@ when
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractMandatoryTimeSlot",
+        "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
 		"Persons.children",

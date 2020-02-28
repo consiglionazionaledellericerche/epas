@@ -16,16 +16,14 @@ import play.data.validation.Required;
 
 
 /**
- * Un periodo contrattuale.
+ * Un periodo di fascia oraria di presenza obbligatoria.
  *
- * @author alessandro
+ * @author cristian
  */
 @ToString
 @Entity
-@Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
-
-  private static final long serialVersionUID = 3730183716240278997L;
+@Table(name = "contract_mandatory_time_slots")
+public class ContractMandatoryTimeSlot extends PropertyInPeriod implements IPropertyInPeriod {
 
   @Getter
   @Required
@@ -35,18 +33,18 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @Getter
   @Required
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "working_time_type_id")
-  public WorkingTimeType workingTimeType;
+  @ManyToOne
+  @JoinColumn(name = "time_slot_id")
+  public TimeSlot timeSlot;
 
   @Override
   public Object getValue() {
-    return this.workingTimeType;
+    return this.timeSlot;
   }
 
   @Override
   public void setValue(Object value) {
-    this.workingTimeType = (WorkingTimeType)value;
+    this.timeSlot = (TimeSlot)value;
   }
 
   public IPropertiesInPeriodOwner getOwner() {
@@ -59,8 +57,8 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    if (otherValue instanceof WorkingTimeType) {
-      return this.getValue().equals(((WorkingTimeType)otherValue));
+    if (otherValue instanceof TimeSlot) {
+      return this.getValue().equals(((TimeSlot)otherValue));
     }
     return false;
   }
@@ -77,8 +75,7 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   
   @Override
   public String getLabel() {
-    return this.workingTimeType.description;
+    return this.timeSlot.getLabel();
   }
-
 
 }

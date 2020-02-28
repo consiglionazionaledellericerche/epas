@@ -108,6 +108,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OrderBy("beginDate")
   public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
+  @Getter
+  @NotAudited
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @OrderBy("beginDate")
+  public Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
+  
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
@@ -173,13 +179,16 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     if (type.equals(VacationPeriod.class)) {
       return Sets.newHashSet(vacationPeriods);
     }
+    if (type.equals(ContractMandatoryTimeSlot.class)) {
+      return Sets.newHashSet(contractMandatoryTimeSlots);
+    }
     return null;
   }
 
   @Override
   public Collection<Object> types() {
     return ImmutableSet.of(ContractWorkingTimeType.class, ContractStampProfile.class,
-        VacationPeriod.class);
+        VacationPeriod.class, ContractMandatoryTimeSlot.class);
   }
 
   @Override

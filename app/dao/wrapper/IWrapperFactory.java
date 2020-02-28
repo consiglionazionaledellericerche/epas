@@ -7,6 +7,7 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.TimeSlot;
 import models.WorkingTimeType;
 
 /**
@@ -21,6 +22,8 @@ public interface IWrapperFactory {
   IWrapperContract create(Contract contract);
 
   IWrapperWorkingTimeType create(WorkingTimeType wtt);
+  
+  IWrapperTimeSlot create(TimeSlot ts);
 
   IWrapperCompetenceCode create(CompetenceCode cc);
 

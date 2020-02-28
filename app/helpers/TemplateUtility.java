@@ -23,6 +23,7 @@ import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.ShiftDao;
+import dao.TimeSlotDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
@@ -48,6 +49,7 @@ import models.Office;
 import models.Person;
 import models.Qualification;
 import models.Role;
+import models.TimeSlot;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
@@ -98,7 +100,7 @@ public class TemplateUtility {
   private final AbsenceRequestDao absenceRequestDao;
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
-  
+  private final TimeSlotDao timeSlotDao;
    
   
   /**
@@ -116,7 +118,7 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao, GroupDao groupDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -137,6 +139,7 @@ public class TemplateUtility {
     this.absenceRequestDao = absenceRequestDao;
     this.uroDao = uroDao;
     this.groupDao = groupDao;
+    this.timeSlotDao = timeSlotDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -291,6 +294,10 @@ public class TemplateUtility {
     return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
   }
 
+  public List<TimeSlot> getEnabledTimeSlotsForOffice(Office office) {
+    return timeSlotDao.getEnabledTimeSlotsForOffice(office);
+  }
+  
   public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }

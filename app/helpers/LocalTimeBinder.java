@@ -25,7 +25,7 @@ public class LocalTimeBinder implements TypeBinder<LocalTime> {
     try {
       return LocalTime.parse(value, dtf);
     } catch (Exception ignored) {
-      log.error("Exception during LocalDate binding", ignored);
+      log.info("Exception during LocalDate binding, value = {}", value);
     }
     return new LocalTime(TIME_BINDER.bind(name, annotations, value, actualClass, genericType));
   }
