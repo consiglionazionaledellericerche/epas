@@ -2581,10 +2581,11 @@ end
  ******************************************************************************/
 rule managePersonDay
 when
- $uro: UsersRolesOffices(role.name == "personDayReader")
+ $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
+        "rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList"
 
@@ -2595,10 +2596,11 @@ end
  
 rule managePersonDayInOffice
 when
- $uro: UsersRolesOffices(role.name == "personDayReader")
+ $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $o: Office() from $uro.office
  $c: PermissionCheck(action in (
 
+		"rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList"
@@ -2608,3 +2610,24 @@ then
  $c.grant();
 end
 
+/*******************************************************************************
+ * Azioni via REST leggere le informazioni delle presenze/assenze del personale
+ ******************************************************************************/
+
+rule AccountRole_PersonDaysReader
+when
+ AccountRole(this in (AccountRole.PERSON_DAYS_READER)) 
+ $c: PermissionCheck(action in (
+
+		"rest.v2.PersonDays.getDaySituation",
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList",
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.checkAbsence",
+        "rest.Absences.checkAbsenceByPerseoId"
+       ), granted == false)
+then
+ $c.grant();
+end
