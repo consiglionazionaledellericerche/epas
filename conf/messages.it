@@ -877,6 +877,7 @@ AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
+AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
 
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)
