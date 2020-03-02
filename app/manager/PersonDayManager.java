@@ -661,11 +661,11 @@ public class PersonDayManager {
             range.span(Range.closed(startWork, validPair.first.date.toLocalTime()));
           }
           if (isTimeInDelay(temp, validPair, zoneToZones)) {
-            timeToJustify =   
+            timeToJustify = timeToJustify +  
                 (DateUtility.toMinute(range.upperEndpoint()) 
                     - DateUtility.toMinute(range.lowerEndpoint()));
           } else {
-            timeToJustify = zoneToZones.get().delay;
+            timeToJustify = timeToJustify + zoneToZones.get().delay;
           }             
         }
       }
