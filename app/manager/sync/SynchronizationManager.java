@@ -268,7 +268,12 @@ public class SynchronizationManager {
       syncResult.add(String.format("Assegnato il campo perseoId %s a %s", 
           epasPerson.perseoId, epasPerson.getFullname()));
     }
-    
+    if (epasPerson.qualification == null 
+        || !epasPerson.qualification.equals(registryPerson.qualification)) {
+      epasPerson.qualification = registryPerson.qualification;
+      syncResult.add(String.format("Cambiata qualifica a %s per %s", 
+          epasPerson.qualification, epasPerson.getFullname()));
+    }
     if (!syncResult.getMessages().isEmpty()) {
       epasPerson.save();
     }
