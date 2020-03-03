@@ -1602,7 +1602,7 @@ public class PersonDayManager {
     new Job<Void>() {
       @Override
       public void doJob() {
-        val mandatoryTimeSlot = contractDao.getContractMandatoryTimeSlot(personDay.date, personDay.person);
+        val mandatoryTimeSlot = contractDao.getContractMandatoryTimeSlot(personDay.date, personDay.person.id);
         if (!mandatoryTimeSlot.isPresent()) {
           log.trace("Le timbrature di {} del giorno {} NON necessitano di controlli sulla fascia obbligatoria",
               personDay.person, personDay.date);
