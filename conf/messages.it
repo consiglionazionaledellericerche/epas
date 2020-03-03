@@ -510,7 +510,7 @@ person.birthday=Data di nascita
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
-person.perseoId=Perseo id
+person.perseoId=Id Anagrafica esterna
 person.eppn=Eppn (Per login Shibboleth)
 person.isPersonInCharge= Responsabile gruppo di lavoro
 person.name=Nome
@@ -1054,8 +1054,8 @@ onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a l
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
-person.eppn.popover= Inserire la propria email cnr Es:mario.rossi@cnr.it
-person.perseoId.popover= Il perseoId è utilizzato per il collegamento tra utente e perseo Es:4200
+person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
+person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
