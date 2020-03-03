@@ -77,7 +77,6 @@ public class PeriodManager {
     }
     Collections.sort(originals);
 
-    log.info("originals periods = {}", originals);
     DateInterval periodInterval =
         new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate());
     List<IPropertyInPeriod> periodList = Lists.newArrayList();

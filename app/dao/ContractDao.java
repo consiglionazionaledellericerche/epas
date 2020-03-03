@@ -120,10 +120,10 @@ public class ContractDao extends DaoBase {
    * @param person la persona di cui cercare la fascia obbligatoria
    * @return la fascia oraria obbligatoria se presente, Optional.absent() altrimenti.
    */
-  public Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlot(LocalDate date, Person person) {
+  public Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlot(LocalDate date, Long personId) {
     QContract contract = QContract.contract;
     QContractMandatoryTimeSlot contractMandatoryTimeSlot = QContractMandatoryTimeSlot.contractMandatoryTimeSlot;
-    
+    Person person = Person.findById(personId);
     val cmts = getQueryFactory().selectFrom(contractMandatoryTimeSlot).join(contractMandatoryTimeSlot.contract, contract)
         .where(
             contract.person.eq(person), contract.beginDate.before(date).or(contract.beginDate.eq(date)),
