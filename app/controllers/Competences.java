@@ -653,7 +653,8 @@ public class Competences extends Controller {
   public static void exportCompetences(Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted();
-    render(office);
+    List<CompetenceCodeGroup> list = competenceCodeDao.getAllGroups();
+    render(office, list);
   }
 
   /**
@@ -662,7 +663,8 @@ public class Competences extends Controller {
    *
    * @param year anno
    */
-  public static void getOvertimeInYear(int year, Long officeId) throws IOException {
+  public static void getOvertimeInYear(int year, int month, Long officeId, 
+      CompetenceCodeGroup group) throws IOException {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -674,8 +676,8 @@ public class Competences extends Controller {
         .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"),
             Optional.fromNullable(""),
             set,
-            false, new LocalDate(year, 1, 1),
-            new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
+            false, new LocalDate(year, month, 1),
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
             Optional.<Person>absent()).list();
 
     FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
