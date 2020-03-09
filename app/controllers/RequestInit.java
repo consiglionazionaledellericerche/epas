@@ -172,7 +172,7 @@ public class RequestInit extends Controller {
         "Competences.competences",
         "Competences.enabledCompetences",
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear",
+        "Competences.getCompetenceGroupInYearMonth",
         "Stampings.personStamping",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",

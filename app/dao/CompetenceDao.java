@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import models.Competence;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonHourForOvertime;
@@ -215,6 +216,19 @@ public class CompetenceDao extends DaoBase {
     return getQueryFactory().selectFrom(competence)
         .where(condition).fetch();
   }
+  
+  private List<Competence> competenceFromGroupInMonth(Person person, Integer year, 
+      Integer month, CompetenceCodeGroup group) {
+    final QCompetence competence = QCompetence.competence;
+    final BooleanBuilder condition = new BooleanBuilder();
+    
+    condition.and(competence.year.eq(year))
+        .and(competence.person.eq(person))
+        .and(competence.month.eq(month))
+        .and(competence.competenceCode.competenceCodeGroup.eq(group))
+        .and(competence.valueApproved.gt(0));
+    return getQueryFactory().selectFrom(competence).where(condition).fetch();
+  }
 
   /**
    * metodo di utilità per il controller UploadSituation.
@@ -222,13 +236,29 @@ public class CompetenceDao extends DaoBase {
    * @return la lista delle competenze del dipendente in questione per quel mese in quell'anno
    */
   public List<Competence> getCompetenceInMonthForUploadSituation(
-      Person person, Integer year, Integer month) {
-    List<Competence> competenceList = getAllCompetenceForPerson(person, year, month);
-
-    log.trace("Per la persona {} trovate {} competenze approvate nei mesi di {}/{}",
-        person.getFullname(), competenceList.size(), month, year);
+      Person person, Integer year, Integer month, Optional<CompetenceCodeGroup> group) {
+    List<Competence> competenceList = null;
+    if (group.isPresent()) {
+      competenceList = getAllCompetenceFromGroupForPerson(person, group, year, month);
+    } else {
+      competenceList = getAllCompetenceForPerson(person, year, month);
+    }
 
     return competenceList;
+  }
+
+  /**
+   * 
+   * @param person
+   * @param group
+   * @param year
+   * @param month
+   * @return
+   */
+  private List<Competence> getAllCompetenceFromGroupForPerson(Person person,
+      Optional<CompetenceCodeGroup> group, Integer year, Integer month) {
+
+    return competenceFromGroupInMonth(person, year, month, group.get());
   }
 
   /**

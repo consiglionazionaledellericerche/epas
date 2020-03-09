@@ -30,6 +30,7 @@ import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.Certification;
 import models.Competence;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
@@ -594,7 +595,8 @@ public class CertificationService implements ICertificationService {
       Map<String, Certification> certifications) {
 
     List<Competence> competences = competenceDao
-        .getCompetenceInMonthForUploadSituation(person, year, month);
+        .getCompetenceInMonthForUploadSituation(person, year, month, 
+            Optional.<CompetenceCodeGroup>absent());
 
     for (Competence competence : competences) {
       Certification certification = new Certification();
