@@ -678,7 +678,8 @@ public class Competences extends Controller {
 
     FileInputStream inputStream = competenceManager
         .getCompetenceGroupInYearMonth(year, month, personList, group);
-    renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() + year + month + ".csv");
+    renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() 
+        + DateUtility.fromIntToStringMonth(month) + year + ".csv");
   }
 
   /**
