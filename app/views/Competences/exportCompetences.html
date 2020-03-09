@@ -2,6 +2,8 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Esporta competenze'  /}
 
+#{switcher year:true, month:true /}
+
 <div class="container">
 
 #{title title:'Esporta Competenze' /}
@@ -18,9 +20,10 @@
 
 <div class="col-sm-3"></div>
 <div class="col-sm-6">
-		#{form @Competences.getOvertimeInYear(), class:'form-inline'}
+		#{form @Competences.getCompetenceGroupInYearMonth(), class:'form-inline'}
 	  		#{f.hidden 'officeId', value:office.id /}
-
+			#{f.hidden 'year', value:year /}
+    		#{f.hidden 'month', value:month /}
 	  		#{f.selectModel 'group', items:list, label:'Gruppo', required:true /}
       		
        		<input class="btn btn-primary" type="submit" value="Esporta"/>

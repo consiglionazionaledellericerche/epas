@@ -24,6 +24,7 @@ import javax.persistence.EntityManager;
 import manager.configurations.EpasParam;
 import models.BadgeReader;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Contract;
 import models.Institute;
 import models.Office;
@@ -241,6 +242,45 @@ public final class PersonDao extends DaoBase {
     return ModelQuery.wrap(personQuery(name, offices, onlyTechnician,
         Optional.fromNullable(start), Optional.fromNullable(end), true,
         Optional.fromNullable(competenceCode), personInCharge, false), person);
+
+  }
+  
+  /**
+   * 
+   * @param group
+   * @param name
+   * @param offices
+   * @param onlyTechnician
+   * @param start
+   * @param end
+   * @param personInCharge
+   * @return
+   */
+  public List<Person> listForCompetenceGroup(CompetenceCodeGroup group, 
+      Set<Office> offices, boolean onlyTechnician,
+      LocalDate start, LocalDate end) {
+    
+    Preconditions.checkState(!offices.isEmpty());
+    Preconditions.checkNotNull(group);
+    
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+    
+    final BooleanBuilder condition = new BooleanBuilder();
+    
+    final JPQLQuery<Person> query = getQueryFactory()
+        .selectFrom(person)
+        .leftJoin(person.contracts, contract)
+        .leftJoin(person.qualification).fetchJoin()
+        .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes);
+    
+    filterOffices(condition, offices);
+    filterOnlyTechnician(condition, onlyTechnician);
+    filterContract(condition, Optional.fromNullable(start), Optional.fromNullable(end));
+
+    filterCompetenceCodeGroupEnabled(condition, Optional.fromNullable(group), start);
+    
+    return query.where(condition).fetch();
 
   }
 
@@ -775,6 +815,22 @@ public final class PersonDao extends DaoBase {
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
       condition.and(pcc.competenceCode.eq(compCode.get())).and(pcc.beginDate.loe(date)
           .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull()));
+    }
+  }
+  
+  /**
+   * Filtro su codice competenza abilitato appartenente a gruppo.
+   * @param condition la condition che mi porto dietro da altre restrizioni
+   * @param group il gruppo da controllare
+   * @param date la data da cui cercare
+   */
+  private void filterCompetenceCodeGroupEnabled (BooleanBuilder condition,
+      Optional<CompetenceCodeGroup> group, LocalDate date) {
+    if (group.isPresent()) {
+      final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+        condition.and(pcc.competenceCode.in(group.get().competenceCodes)
+            .and(pcc.beginDate.loe(date)
+                .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())));
     }
   }
 

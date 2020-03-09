@@ -1179,7 +1179,7 @@ when
 
         /* Vecchio permesso viewCompetence */
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear",
+        "Competences.getCompetenceGroupInYearMonth",
         "Competences.approvedCompetenceInYear",
 
         /* Vecchio permesso viewOffice
