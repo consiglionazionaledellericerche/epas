@@ -37,6 +37,7 @@ public class HistoryViews {
   private static final CtClass[] NO_ARGS = {};
   private static final Map<String, Class<?>> map = Maps.newHashMap();
 
+  @SuppressWarnings("unchecked")
   static <T> Class<? extends T> compose(Class<T> orig) throws Exception {
 
     final ClassPool pool = ClassPool.getDefault();
@@ -112,7 +113,7 @@ public class HistoryViews {
       }
       cls.addMethod(ctMethod);
     }
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     Class result = cls.toClass();
     cls.detach();
     return result;

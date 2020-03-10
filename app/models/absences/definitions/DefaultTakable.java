@@ -99,6 +99,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_89M, DefaultAbsenceType.A_99), 
       ImmutableSet.of(DefaultAbsenceType.A_89M, DefaultAbsenceType.A_99), 
       9000, TakeAmountAdjustment.workingTimePercent),
+  
+  T_COVID19(AmountType.units, 
+	      ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
+	      ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
+	      -1, null),
 
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
