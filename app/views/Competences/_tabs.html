@@ -5,7 +5,7 @@
     #{secure.li @Competences.enabledCompetences(currentData.year, currentData.month, currentData.officeId) /}
     #{secure.li @Competences.totalOvertimeHours(currentData.year, currentData.officeId) /}
     #{secure.li @Competences.approvedCompetenceInYear(currentData.year, false, currentData.officeId) /}
-    #{secure.li @Competences.exportCompetences(currentData.officeId) /}
+    #{secure.li @Competences.exportCompetences(currentData.officeId, currentData.year, currentData.month) /}
   </ul>
 </div>
 </div>
