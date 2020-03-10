@@ -527,6 +527,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_26_DIPENDENTI.name()).get();
     final GroupAbsenceType rightToStudy = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
+    final GroupAbsenceType covid19 = absenceComponentDao
+    	.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -544,6 +546,7 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsence);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
+      groupsPermitted.remove(covid19);
       //groupsPermitted.remove(telework);
       return groupsPermitted;
     }
@@ -582,6 +585,10 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person, EpasParam.RIGHT_TO_STUDY)) {
         groupsPermitted.add(rightToStudy);        
       }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
+          groupsPermitted.add(covid19);        
+        }
 
       log.debug("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
