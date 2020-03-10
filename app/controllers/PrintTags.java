@@ -9,9 +9,11 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
 import dao.wrapper.IWrapperFactory;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.PrintTagsManager;
 import manager.SecureManager;
@@ -94,7 +96,13 @@ public class PrintTags extends Controller {
       List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
       if (includeStampingDetails) {
         historyStampingsList = printTagsManager.getHistoricalList(psDto);
-      }        
+      }
+      val stampingOwnersInDays = 
+          printTagsManager.getStampingOwnerInDays(p, YearMonth.of(year, month));
+      log.debug("Trovati {} utenti diversi che hanno inserito/timbrature nel mese {}/{} "
+          + "per {}", 
+          stampingOwnersInDays.keySet().size(), month, year, person.getFullname());
+
       List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
       PrintTagsInfo info = PrintTagsInfo.builder()
           .psDto(psDto)
@@ -102,6 +110,7 @@ public class PrintTags extends Controller {
           .includeStampingDetails(includeStampingDetails)
           .offSiteWorkingTempList(offSiteWorkingTemp)
           .historyStampingsList(historyStampingsList)
+          .stampingOwnersInDays(stampingOwnersInDays)
           .build();
       log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
       dtoList.add(info);
