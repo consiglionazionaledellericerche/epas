@@ -269,7 +269,7 @@ public final class PersonDao extends DaoBase {
     final BooleanBuilder condition = new BooleanBuilder();
     
     final JPQLQuery<Person> query = getQueryFactory()
-        .selectFrom(person)
+        .selectFrom(person).distinct()
         .leftJoin(person.contracts, contract)
         .leftJoin(person.qualification).fetchJoin()
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes);
