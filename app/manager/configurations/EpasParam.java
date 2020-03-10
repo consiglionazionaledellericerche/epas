@@ -98,6 +98,15 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  COVID_19("covid_19",
+
+	      EpasParamCategory.GENERAL,
+	      EpasParamTimeType.GENERAL,
+	      EpasParamValueType.BOOLEAN,
+	      EpasParamValueType.formatValue(false),
+	      Lists.<RecomputationType>newArrayList(),
+	      Person.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,

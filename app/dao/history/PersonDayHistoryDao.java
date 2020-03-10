@@ -44,6 +44,22 @@ public class PersonDayHistoryDao {
   }
 
   @SuppressWarnings("unchecked")
+  public List<HistoryValue<Stamping>> stampingsAtCreation(long personDayId) {
+    final AuditQuery query = auditReader.get().createQuery()
+        //Vengono prelevate solo le revisioni delle entity non cancellate
+        //tramite il terzo parametro a false del metodo forRevisionsOfEntity
+        .forRevisionsOfEntity(Stamping.class, false, false)
+        .add(AuditEntity.relatedId("personDay").eq(personDayId))
+        .add(AuditEntity.revisionType().eq(RevisionType.ADD))
+        .addOrder(AuditEntity.property("id").asc())
+        .addOrder(AuditEntity.revisionNumber().asc());
+
+    return FluentIterable.from(query.getResultList())
+        .transform(HistoryValue.fromTuple(Stamping.class))
+        .toList();
+  }
+  
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> absences(long personDayId) {
     final AuditQuery query = auditReader.get().createQuery()
         .forRevisionsOfEntity(Absence.class, false, true)

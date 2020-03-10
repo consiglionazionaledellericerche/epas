@@ -63,7 +63,8 @@ public enum DefaultCategoryType {
       20, DefaultTab.LEGGE_104_DIPENDENTI),
   STUDIO_DIPENDENTI("Permesso studio", 19, DefaultTab.STUDIO_DIPENDENTI),
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI),
-  CODICI_AUTOMATICI("Codici Automatici", 20, DefaultTab.AUTOMATICI);
+  COVID_19("Emergenza Covid-19", 21, DefaultTab.COVID19),
+  CODICI_AUTOMATICI("Codici Automatici", 22, DefaultTab.AUTOMATICI);
 
   public String description;
   public int priority;
