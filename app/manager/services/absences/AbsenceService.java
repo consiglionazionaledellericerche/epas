@@ -523,6 +523,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
     final GroupAbsenceType covid19 = absenceComponentDao
     	.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
+    final GroupAbsenceType additionalHours = absenceComponentDao
+    		.groupAbsenceTypeByName(DefaultGroup.G_OA.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -582,7 +584,11 @@ public class AbsenceService {
       
       if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
           groupsPermitted.add(covid19);        
-        }
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.ADDITIONAL_HOURS)) {
+          groupsPermitted.add(additionalHours);        
+      }
 
       log.debug("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;

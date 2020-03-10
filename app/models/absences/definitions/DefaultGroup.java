@@ -494,7 +494,11 @@ public enum DefaultGroup {
   }
   
   public static List<String> employeeCovid19Codes() {
-	  return getCodes(DefaultGroup.G_COVID19);
+	return getCodes(DefaultGroup.G_COVID19);
+  }
+  
+  public static List<String> employeeAdditionalHoursCodes() {
+	  return getCodes(DefaultGroup.G_OA);
   }
     
   private static List<String> getCodes(DefaultGroup defaultGroup) {
