@@ -650,10 +650,11 @@ public class Competences extends Controller {
   /**
    * Report. Esporta in formato .csv la situazione annuale degli straordinari
    */
-  public static void exportCompetences(Long officeId) {
+  public static void exportCompetences(Long officeId, int year, int month) {
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted();
-    render(office);
+    List<CompetenceCodeGroup> list = competenceCodeDao.getAllGroups();
+    render(office, list, year, month);
   }
 
   /**
@@ -662,7 +663,8 @@ public class Competences extends Controller {
    *
    * @param year anno
    */
-  public static void getOvertimeInYear(int year, Long officeId) throws IOException {
+  public static void getCompetenceGroupInYearMonth(int year, int month, Long officeId, 
+      CompetenceCodeGroup group) throws IOException {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -671,15 +673,13 @@ public class Competences extends Controller {
     set.add(office);
 
     List<Person> personList = personDao
-        .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"),
-            Optional.fromNullable(""),
-            set,
-            false, new LocalDate(year, 1, 1),
-            new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
-            Optional.<Person>absent()).list();
+        .listForCompetenceGroup(group, set, false, new LocalDate(year, month, 1), 
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 
-    FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
-    renderBinary(inputStream, "straordinari" + year + ".csv");
+    FileInputStream inputStream = competenceManager
+        .getCompetenceGroupInYearMonth(year, month, personList, group);
+    renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() 
+        + DateUtility.fromIntToStringMonth(month) + year + ".csv");
   }
 
   /**

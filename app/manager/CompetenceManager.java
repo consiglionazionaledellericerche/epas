@@ -36,6 +36,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -253,33 +254,27 @@ public class CompetenceManager {
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
    *     personList nell'anno year.
    */
-  public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException {
+  public FileInputStream getCompetenceGroupInYearMonth(int year, int month,
+      List<Person> personList, CompetenceCodeGroup group) throws IOException {
     FileInputStream inputStream = null;
-    File tempFile = File.createTempFile("straordinari" + year, ".csv");
+    File tempFile = File.createTempFile(group.label + '_' + DateUtility.fromIntToStringMonth(month) 
+        + '_' + year, ".csv");
     inputStream = new FileInputStream(tempFile);
     FileWriter writer = new FileWriter(tempFile, true);
     BufferedWriter out = new BufferedWriter(writer);
-    out.write("Cognome Nome,Totale straordinari" + ' ' + year);
-    out.newLine();
-    List<CompetenceCode> codeList = Lists.newArrayList();
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("S1"));
+    
+    out.write("Cognome Nome,Codice competenza,Quantità" + ' ' 
+        + DateUtility.fromIntToStringMonth(month) + ' ' + year);
+    out.newLine();    
     for (Person p : personList) {
-      Long totale = null;
-      Optional<Integer> result =
-          competenceDao.valueOvertimeApprovedByMonthAndYear(
-              year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList);
-      if (result.isPresent()) {
-        totale = result.get().longValue();
-      }
-
-      log.debug("Totale per {} vale {}", p.getFullname(), totale);
-      out.write(p.surname + ' ' + p.name + ',');
-      if (totale != null) {
-        out.append(totale.toString());
-      } else {
-        out.append("0");
-      }
-      out.newLine();
+      
+      List<Competence> competenceList = competenceDao
+          .getCompetenceInMonthForUploadSituation(p, year, month, Optional.fromNullable(group));
+      for (Competence comp : competenceList) {
+        out.write(p.surname + ' ' + p.name + ',' + comp.competenceCode 
+            + ',' + comp.valueApproved);        
+        out.newLine();
+      }      
     }
     out.close();
     return inputStream;

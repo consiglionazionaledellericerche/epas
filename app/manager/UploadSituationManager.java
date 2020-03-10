@@ -15,6 +15,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 
 import models.Competence;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
@@ -73,7 +74,8 @@ public class UploadSituationManager {
       }
       //la parte delle competenze
       List<Competence> competenceList = competenceDao
-          .getCompetenceInMonthForUploadSituation(person, year, month);
+          .getCompetenceInMonthForUploadSituation(person, year, month, 
+              Optional.<CompetenceCodeGroup>absent());
       for (Competence comp : competenceList) {
         body = body + person.number + " C " + comp.competenceCode.code + " " 
             + comp.valueApproved + " \r\n";
