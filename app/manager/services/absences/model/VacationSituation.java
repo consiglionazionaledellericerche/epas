@@ -418,10 +418,11 @@ public class VacationSituation {
   /**
    * Versione cachata del riepilogo.
    * @author alessandro
-   *
    */
   public static class VacationSummaryCached implements Serializable {
-    
+
+    private static final long serialVersionUID = -8968069510648138668L;
+
     public boolean exists = true;
     public TypeSummary type;
     public int year;

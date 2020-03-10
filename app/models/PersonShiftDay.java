@@ -21,7 +21,6 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.data.validation.Required;
-import play.db.jpa.JPABase;
 
 @Entity
 @Audited
@@ -135,18 +134,6 @@ public class PersonShiftDay extends BaseModel {
     return troubles.stream().anyMatch(trouble -> {
       return shiftTroubles.contains(trouble.cause);
     });
-  }
-
-  @Override
-  @Deprecated
-  public <T extends JPABase> T save() {
-    return super.save();
-  }
-  
-  @Override
-  @Deprecated
-  public <T extends JPABase> T delete() {
-    return super.delete();
   }
 
 }

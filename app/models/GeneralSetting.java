@@ -1,11 +1,9 @@
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalTime;
 
 @ToString
 @Entity

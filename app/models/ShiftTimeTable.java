@@ -14,7 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
 import models.enumerate.CalculationType;
-import models.enumerate.LimitUnit;
 import org.joda.time.LocalTime;
 
 @Entity

@@ -361,9 +361,6 @@ public class Calendar extends Controller {
     final PNotifyObject message;
     final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
-    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
-        .shiftType, newDate).orNull();
-
     if (shift == null) {
       message = PNotifyObject.builder()
           .title("Error")
@@ -372,6 +369,9 @@ public class Calendar extends Controller {
           .type("error").build();
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
+      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
+          .shiftType, newDate).orNull();
+
       if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
         shift.date = newDate;
 

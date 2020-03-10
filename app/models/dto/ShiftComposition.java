@@ -1,6 +1,5 @@
 package models.dto;
 
-import lombok.Builder;
 import lombok.Data;
 import manager.services.shift.configuration.OrganizationShiftConfiguration;
 
