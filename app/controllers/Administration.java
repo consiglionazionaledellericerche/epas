@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.internal.Messages;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;

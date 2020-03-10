@@ -1,18 +1,12 @@
 package models;
 
 import helpers.validators.LocalDatePast;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 

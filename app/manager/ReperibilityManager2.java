@@ -1,21 +1,15 @@
 package manager;
 
 import com.google.common.base.Optional;
-
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-
-import controllers.ReperibilityCalendar;
 import controllers.Security;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
-import dao.ReperibilityTypeMonthDao;
 import dao.history.HistoricalDao;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,11 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -35,21 +26,14 @@ import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
 import models.Role;
-import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.User;
 import models.dto.HolidaysReperibilityDto;
 import models.dto.WorkDaysReperibilityDto;
-import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.i18n.Messages;
 
 /**

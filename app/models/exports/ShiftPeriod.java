@@ -1,10 +1,8 @@
 package models.exports;
 
-import models.OrganizationShiftSlot;
 import models.Person;
 import models.ShiftType;
 import models.enumerate.ShiftSlot;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 

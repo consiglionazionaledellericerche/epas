@@ -2,18 +2,10 @@ package models.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import lombok.Builder;
 import lombok.Data;
-
-import models.dto.ShiftEvent.ShiftEventBuilder;
 import models.enumerate.EventColor;
-import models.enumerate.ShiftSlot;
-
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
-import java.util.List;
 
 @Data
 @Builder

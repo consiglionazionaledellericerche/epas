@@ -33,7 +33,6 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
-import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceCertificationService;
 import manager.services.absences.AbsenceForm;

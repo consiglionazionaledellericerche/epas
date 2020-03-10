@@ -23,7 +23,9 @@ import models.enumerate.CalculationType;
 import play.data.validation.Required;
 @Audited
 @Entity
-public class OrganizationShiftTimeTable extends BaseModel{
+public class OrganizationShiftTimeTable extends BaseModel {
+
+  private static final long serialVersionUID = 8292047096977861290L;
 
   public String name;
   

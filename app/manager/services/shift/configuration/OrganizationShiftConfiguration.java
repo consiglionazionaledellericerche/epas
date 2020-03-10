@@ -1,13 +1,12 @@
 package manager.services.shift.configuration;
 
-import java.util.List;
-import org.joda.time.LocalTime;
 import com.google.common.collect.Lists;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.TimeInterval;
+import java.util.List;
 import manager.services.PairStamping;
-import models.CompetenceCode;
 import models.dto.ShiftComposition;
+import org.joda.time.LocalTime;
 
 public enum OrganizationShiftConfiguration {
 

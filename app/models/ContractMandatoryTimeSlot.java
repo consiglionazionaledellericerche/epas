@@ -1,17 +1,14 @@
 package models;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import lombok.Getter;
 import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
-
 import play.data.validation.Required;
 
 
@@ -24,6 +21,8 @@ import play.data.validation.Required;
 @Entity
 @Table(name = "contract_mandatory_time_slots")
 public class ContractMandatoryTimeSlot extends PropertyInPeriod implements IPropertyInPeriod {
+
+  private static final long serialVersionUID = 98286759517639967L;
 
   @Getter
   @Required

@@ -1,17 +1,13 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import models.base.BaseModel;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 

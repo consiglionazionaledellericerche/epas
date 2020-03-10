@@ -22,7 +22,6 @@ import org.joda.time.YearMonth;
 
 import play.data.validation.Max;
 import play.data.validation.Min;
-import play.data.validation.Required;
 
 @Entity
 @Audited

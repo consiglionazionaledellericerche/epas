@@ -1,19 +1,18 @@
 package jobs;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import javax.inject.Inject;
-import org.joda.time.LocalTime;
 import com.google.common.base.Optional;
 import dao.OrganizationShiftTimeTableDao;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftOrganizationManager;
 import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.ShiftTimeTable;
+import models.enumerate.PaymentType;
+import models.enumerate.ShiftSlot;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import models.enumerate.*;
 
 @OnApplicationStart(async = true)
 @Slf4j

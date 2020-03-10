@@ -3,7 +3,6 @@ package controllers.rest;
 import cnr.sync.dto.CompetenceDto;
 import cnr.sync.dto.DayRecap;
 import cnr.sync.dto.SimplePersonDto;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
@@ -17,26 +16,18 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-
 import helpers.JsonResponse;
-
 import it.cnr.iit.epas.DateInterval;
-import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
-
 import models.Competence;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.User;
-import models.absences.Absence;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
