@@ -32,6 +32,7 @@ public enum DefaultTab {
   TELELAVORO("Telelavoro", 12),
   LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13),
+  COVID19("Emergenza covid-19", 14),
   AUTOMATICI("Codici Automatici", 11);
   
   public String description;

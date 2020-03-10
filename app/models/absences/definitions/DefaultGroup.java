@@ -99,6 +99,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, 
       DefaultTakable.T_STUDIO, DefaultComplation.C_STUDIO, null, false, true),
   
+  G_COVID19("COVID19 - Codice emergenza Covid-19", 
+	      "", 
+	      DefaultCategoryType.COVID_19, 1,
+	      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+	      DefaultTakable.T_COVID19, null, null, false, true),
+  
   G_0("0 - Assemblea", 
       "", 
       DefaultCategoryType.ALTRI_CODICI, 0,
@@ -485,6 +491,10 @@ public enum DefaultGroup {
   
   public static List<String> employeeRightToStudyCodes() {
     return getCodes(DefaultGroup.G_STUDIO_DIPENDENTI);
+  }
+  
+  public static List<String> employeeCovid19Codes() {
+	  return getCodes(DefaultGroup.G_COVID19);
   }
     
   private static List<String> getCodes(DefaultGroup defaultGroup) {
