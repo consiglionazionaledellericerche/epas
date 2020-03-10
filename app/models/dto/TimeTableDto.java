@@ -1,7 +1,5 @@
 package models.dto;
 
-import org.joda.time.LocalTime;
-
 import play.data.validation.Required;
 
 public class TimeTableDto {

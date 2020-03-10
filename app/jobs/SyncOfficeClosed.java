@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
-import org.testng.collections.Sets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import dao.PersonDao;

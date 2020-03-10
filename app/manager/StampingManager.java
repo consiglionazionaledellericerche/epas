@@ -3,24 +3,16 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
-
 import controllers.Security;
-import controllers.Stampings;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
-import helpers.Web;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
+import lombok.extern.slf4j.Slf4j;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -33,7 +25,6 @@ import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
 import play.i18n.Messages;
 
 @Slf4j

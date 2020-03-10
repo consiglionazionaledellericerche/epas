@@ -1,11 +1,7 @@
 package manager;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import lombok.extern.slf4j.Slf4j;
-import manager.competences.ShiftTimeTableDto;
 import models.CompetenceCode;
 import models.Office;
 import models.OrganizationShiftSlot;
@@ -17,6 +13,8 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.dto.OrganizationTimeTable;
 import models.enumerate.CalculationType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 @Slf4j
 public class ShiftOrganizationManager {

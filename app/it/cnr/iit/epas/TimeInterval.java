@@ -1,7 +1,6 @@
 package it.cnr.iit.epas;
 
 import org.joda.time.Hours;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.Minutes;
 import com.google.common.base.Optional;

@@ -1,18 +1,12 @@
 package manager;
 
 import com.google.common.collect.Lists;
-
 import dao.history.HistoryValue;
 import dao.history.StampingHistoryDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
-import manager.charts.ChartsManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
-
 import models.Stamping;
 import models.dto.OffSiteWorkingTemp;
 import org.slf4j.Logger;
