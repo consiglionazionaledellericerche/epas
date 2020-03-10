@@ -50,7 +50,6 @@ import models.enumerate.CalculationType;
 import models.enumerate.PaymentType;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;

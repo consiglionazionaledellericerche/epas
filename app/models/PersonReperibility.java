@@ -1,30 +1,21 @@
 package models;
 
+import com.google.common.collect.Range;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import com.google.common.collect.Range;
-
 import lombok.ToString;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
-import play.data.validation.Unique;
 
 
 /**

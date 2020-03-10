@@ -19,7 +19,9 @@ import org.joda.time.LocalDate;
  *
  */
 public class CertificationYearSituation implements Serializable {
-  
+
+  private static final long serialVersionUID = -8220636622879573718L;
+
   public int year;
   
   public LocalDate beginDate;
@@ -118,6 +120,8 @@ public class CertificationYearSituation implements Serializable {
    *
    */
   public static class AbsenceSituation implements Serializable {
+
+    private static final long serialVersionUID = -4945653666009422856L;
 
     public AbsenceSituationType type;
     

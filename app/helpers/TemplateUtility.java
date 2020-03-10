@@ -64,7 +64,6 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 

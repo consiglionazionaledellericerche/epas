@@ -1,5 +1,6 @@
 package models;
 
+import com.google.common.base.Strings;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,14 +10,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import models.base.BaseModel;
+import models.enumerate.PaymentType;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalTime;
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import models.base.BaseModel;
-import models.enumerate.CalculationType;
-import models.enumerate.PaymentType;
-import play.data.validation.Required;
 
 /**
  * 

@@ -3,23 +3,16 @@ package dao.wrapper;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.ContractDao;
-import dao.TimeSlotDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import manager.ContractManager;
-
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.TimeSlot;
-import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
 
 
 /**

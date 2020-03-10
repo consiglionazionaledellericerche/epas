@@ -1,17 +1,13 @@
 package manager;
 
-import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
 import edu.emory.mathcs.backport.java.util.Collections;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
@@ -21,9 +17,7 @@ import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
-import org.threeten.bp.Period;
 import play.db.jpa.JPA;
 
 /**

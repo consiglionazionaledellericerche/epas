@@ -30,6 +30,8 @@ import org.testng.collections.Sets;
 @ToString
 public class CruscottoDipendente implements Serializable {
 
+  private static final long serialVersionUID = -6418362704585669629L;
+
   public int annoSituazione;                          //2017
   
   public PeriodoDipendenteDettagli dipendente;        //stessi dett. dipendente in PeriodoDipendente
@@ -37,15 +39,18 @@ public class CruscottoDipendente implements Serializable {
   public SituazioneParametriControllo[] situazioneParametriControllo;
 
   public static class SituazioneDipendenteCompetenze implements Serializable {
+
+    private static final long serialVersionUID = 6065731174487090789L;
     
   }
   
   @ToString
   public static class SituazioneDipendenteAssenze implements Serializable {
-    
+
+    private static final long serialVersionUID = 7053353712364241891L;
+
     //public int dipendente.id;
     //public int dipendente.matricola;
-    
     public int anno;                                    //2017
     public SituazioneCodiceAssenza codice;
     
@@ -68,6 +73,9 @@ public class CruscottoDipendente implements Serializable {
    
     @ToString
     public static class SituazioneCodiceAssenza implements Serializable {
+
+      private static final long serialVersionUID = -3194575384371417800L;
+
       public int id;                                    //255
       public String codice;                             //92
       public String tipoCodice;                         //ASS       sempre ASS...
@@ -113,6 +121,8 @@ public class CruscottoDipendente implements Serializable {
   }
 
   public static class SituazioneParametriControllo implements Serializable {
+
+    private static final long serialVersionUID = -5572951752025385326L;
 
     public int id;
     public String descrizione;

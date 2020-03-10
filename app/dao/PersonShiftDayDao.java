@@ -7,7 +7,6 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonShift;
 import models.PersonShiftDay;

@@ -3,7 +3,6 @@ package cnr.sync.dto.v2;
 import lombok.Builder;
 import lombok.Data;
 import models.absences.Absence;
-import models.absences.JustifiedType;
 import org.joda.time.LocalDate;
 
 /**

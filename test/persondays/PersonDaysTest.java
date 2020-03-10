@@ -3,28 +3,22 @@ package persondays;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import dao.ZoneDao;
 import injection.StaticInject;
 import java.util.List;
-
 import lombok.val;
-
 import manager.PersonDayManager;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
-
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.StampTypes;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.junit.Test;
-
 import play.test.UnitTest;
 
 @StaticInject
