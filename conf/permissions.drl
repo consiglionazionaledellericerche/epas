@@ -1949,68 +1949,21 @@ then
  $c.grant();
 end
 
-/******************************************************************
- * Azioni per utente employee abilitato alla assenza per telelavoro
- ******************************************************************/
-rule Tele_Working
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.TELEWORK, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in (
-    "AbsenceGroups.insert",
-    "AbsenceGroups.edit",
-    "AbsenceGroups.delete",
-    "AbsenceGroups.save"
-    ), granted == false, target == null)
-then
- $c.grant();
-end
 
-/***********************************************************************************
- * Azioni per utente employee abilitato alla assenza per assistenza parenti disabili
- ***********************************************************************************/
-rule Disabled_person
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in (
-    "AbsenceGroups.insert",
-    "AbsenceGroups.edit",
-    "AbsenceGroups.delete",
-    "AbsenceGroups.save"
-    ), granted == false, target == null)
-then
- $c.grant();
-end
 
-/***************************************************************************
- * Azioni per utente employee abilitato alla assenza per diritto allo studio
- ***************************************************************************/
-rule Right_to_study_person
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in (
-    "AbsenceGroups.insert",
-    "AbsenceGroups.edit",
-    "AbsenceGroups.delete",
-    "AbsenceGroups.save"
-    ), granted == false, target == null)
-then
- $c.grant();
-end
 
-/**************************************************************************
- * Azioni per utente employee abilitato alla assenza per emergenza COVID-19
- **************************************************************************/
-rule Covid19_person
+/**************************************
+ * Azioni per utente employee abilitato
+ **************************************/
+rule Absences_person
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.COVID_19, fieldValue == true) from $p.personConfigurations
+ PersonConfiguration(epasParam == EpasParam.ADDITIONAL_HOURS
+ 				|| epasParam == EpasParam.COVID_19
+ 				|| epasParam == EpasParam.RIGHT_TO_STUDY
+ 				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
+ 				|| epasParam == EpasParam.TELEWORK && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -2075,53 +2028,19 @@ then
  $c.grant();
 end
 
-/***************************************************************************
- * Un dipendente può autocertificare le proprie assenze per telelavoro se...
- ***************************************************************************/
-rule employeeCanInsertAbsencesTeleworking
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.TELEWORK, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
-then
- $c.grant();
-end
 
-/************************************************************************************
- * Un dipendente può autocertificare le proprie assenze per diritto allo studio se...
- ************************************************************************************/
-rule employeeCanInsertAbsencesRightToStudy
+/************************************************************
+ * Un dipendente può autocertificare le proprie assenze se...
+ ************************************************************/
+rule employeeCanInsertAbsences
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.RIGHT_TO_STUDY, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
-then
- $c.grant();
-end
-
-/*********************************************************************************************
- * Un dipendente può autocertificare le proprie assenze per permesso dipendente disabile se...
- *********************************************************************************************/
-rule employeeCanInsertAbsencesDisabledPerson
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
- $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
-then
- $c.grant();
-end
-
-/**********************************************************************************
- * Un dipendente può autocertificare le proprie assenze per emergenza COVID19 se...
- **********************************************************************************/
-rule employeeCanInsertAbsencesCovid19
-when
- $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
- $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.COVID_19, fieldValue == true) from $p.personConfigurations
+ PersonConfiguration(epasParam == EpasParam.COVID_19 
+ 				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
+ 				|| epasParam == EpasParam.RIGHT_TO_STUDY
+ 				|| epasParam == EpasParam.TELEWORK
+ 				|| epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
@@ -2203,6 +2122,22 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.COVID_19, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeCovid19Codes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/***********************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per ore aggiuntive se:
+ ***********************************************************************************/
+rule EmployeeCanEditAdditionalHourAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.ADDITIONAL_HOURS, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeAdditionalHoursCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))

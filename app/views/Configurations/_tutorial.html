@@ -193,6 +193,13 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ADDITIONAL_HOURS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi alle ore aggiuntive effettuate presso strutture terze e di cui il CNR non è tenuto a 
+      corrispondere emolumenti.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLED_PERSON_PERMISSION) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente il codice di assenza per legge 104 per dipendente disabile (19).
