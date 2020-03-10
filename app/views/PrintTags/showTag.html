@@ -202,6 +202,23 @@
   </table>
   #{/ifnot}
 
+ <table>
+ <caption style="margin-top: 2em; font-weight:bold">Chi ha inserito le timbrature nei giorni</caption>
+ 	<tr>
+ 		<th>Lettore badge e/o utente</th>
+ 		<th style="text-align:center">Numero di giorni</th>
+ 		<th>Dettaglio giorni</th>
+ 		
+ 	</tr>
+ 	#{list dto.stampingOwnersInDays.keySet(), as:'stampingOwner'}
+ 	  <tr>
+ 	    <td>${stampingOwner.getLabel()}</td>
+ 	    <td style="text-align:center">${dto.stampingOwnersInDays.get(stampingOwner).size()}</td>
+ 	    <td>${dto.stampingOwnersInDays.get(stampingOwner)*.dayOfMonth()*.get().sort()}</td>
+ 	  </tr>
+ 	#{/list}
+ 	
+ </table>
   #{ifnot dto.psDto.absenceList.isEmpty()}
   *{Significato codici assenza}*
   <br>

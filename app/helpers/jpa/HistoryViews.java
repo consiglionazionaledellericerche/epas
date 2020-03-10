@@ -1,12 +1,10 @@
 package helpers.jpa;
 
 import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,18 +14,6 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-
-import models.base.HistoryValueFrom;
-
-import org.apache.commons.lang.WordUtils;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import play.Play;
-import play.classloading.ApplicationClasses.ApplicationClass;
-
 import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -36,6 +22,14 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
+import models.base.HistoryValueFrom;
+import org.apache.commons.lang.WordUtils;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import play.Play;
+import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class HistoryViews {
 
@@ -43,6 +37,7 @@ public class HistoryViews {
   private static final CtClass[] NO_ARGS = {};
   private static final Map<String, Class<?>> map = Maps.newHashMap();
 
+  @SuppressWarnings("unchecked")
   static <T> Class<? extends T> compose(Class<T> orig) throws Exception {
 
     final ClassPool pool = ClassPool.getDefault();
@@ -118,7 +113,7 @@ public class HistoryViews {
       }
       cls.addMethod(ctMethod);
     }
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     Class result = cls.toClass();
     cls.detach();
     return result;
@@ -146,15 +141,13 @@ public class HistoryViews {
     try {
       cons = model.getDeclaredConstructor(new Class<?>[]{cls, cls,
         LocalDateTime.class});
-    } catch (SecurityException se) {
-      throw Throwables.propagate(se);
     } catch (NoSuchMethodException ex) {
-      throw Throwables.propagate(ex);
+      throw new RuntimeException(ex);
     }
     try {
       return cons.newInstance(current, history, revisionDateTime);
     } catch (Exception ex) {
-      throw Throwables.propagate(ex);
+      throw new RuntimeException(ex);
     }
   }
 
