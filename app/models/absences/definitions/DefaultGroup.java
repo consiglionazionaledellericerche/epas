@@ -18,9 +18,9 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.month, 
       DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
-  G_18_DIPENDENTI("18 - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese", 
+  G_18_PARENTI_DIPENDENTI("18 - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese", 
 	      "", 
-	      DefaultCategoryType.L_104_DIPENDENTI, 2,
+	      DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2,
 	      GroupAbsenceTypePattern.programmed, PeriodType.month, 
 	      DefaultTakable.T_18, DefaultComplation.C_18, null, false, false),
   G_18P("18P - Permesso provv. assistenza parenti/affini disabili L. 104/92 tre giorni mese",
@@ -485,7 +485,7 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.TELELAVORO);
   }
   public static List<String> employeeDisabledRelativeCodes() {
-	return getCodes(DefaultGroup.G_18_DIPENDENTI);
+	return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
   }
   public static List<String> employeeDisabledPersonCodes() {
     List<String> g19 = getCodes(DefaultGroup.G_19_DIPENDENTI);
