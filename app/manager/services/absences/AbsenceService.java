@@ -526,7 +526,7 @@ public class AbsenceService {
     final GroupAbsenceType additionalHours = absenceComponentDao
     		.groupAbsenceTypeByName(DefaultGroup.G_OA.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
-    		.groupAbsenceTypeByName(DefaultGroup.G_18_DIPENDENTI.name()).get();
+    		.groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
