@@ -31,6 +31,7 @@ public enum DefaultTab {
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11),
   TELELAVORO("Telelavoro", 12),
   LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
+  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 8),
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13),
   COVID19("Emergenza covid-19", 14),
   AUTOMATICI("Codici Automatici", 11);

@@ -61,10 +61,12 @@ public enum DefaultCategoryType {
   TELELAVORO("Telelavoro", 20, DefaultTab.TELELAVORO),
   L_104_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili dipendenti", 
       20, DefaultTab.LEGGE_104_DIPENDENTI),
+  L_104_PARENTI_DIPENDENTI("Disabilità legge 104/92 - Tre giorni mensili parenti dipendenti", 
+	      21, DefaultTab.LEGGE_104_PARENTI_DIPENDENTI),
   STUDIO_DIPENDENTI("Permesso studio", 19, DefaultTab.STUDIO_DIPENDENTI),
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI),
-  COVID_19("Emergenza Covid-19", 21, DefaultTab.COVID19),
-  CODICI_AUTOMATICI("Codici Automatici", 22, DefaultTab.AUTOMATICI);
+  COVID_19("Emergenza Covid-19", 22, DefaultTab.COVID19),
+  CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;
   public int priority;

@@ -205,6 +205,12 @@
       autonomamente il codice di assenza per legge 104 per dipendente disabile (19).
 	  </p> 
     #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLED_RELATIVE_PERMISSION) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza per legge 104 per parente disabile del dipendente (18).
+	  </p> 
+    #{/if}
 	
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
