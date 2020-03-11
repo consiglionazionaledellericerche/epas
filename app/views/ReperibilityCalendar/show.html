@@ -21,6 +21,15 @@
         #{/form}
     </div>
 </div>
+<!-- Generatore calendario di reperibilità -->
+<div class="row"></div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-5">
+          <a href="@{exportMonthAsPDF(reperibilitySelected.id)}" >
+           <i class="fa fa-calendar fa-2x" aria-hidden="true">  Stampa calendario</i> 
+          </a>
+    </div>
+</div>
 <!-- Menu laterale-->
 <div class="col-md-2 well well-lg" data-render-load="@{reperibilityPeople()}"></div>
 
