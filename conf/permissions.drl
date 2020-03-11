@@ -1963,6 +1963,7 @@ when
  				|| epasParam == EpasParam.COVID_19
  				|| epasParam == EpasParam.RIGHT_TO_STUDY
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
+ 				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
  				|| epasParam == EpasParam.TELEWORK && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
@@ -2038,6 +2039,7 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.COVID_19 
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
+ 				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
  				|| epasParam == EpasParam.RIGHT_TO_STUDY
  				|| epasParam == EpasParam.TELEWORK
  				|| epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true) from $p.personConfigurations
@@ -2090,6 +2092,22 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeDisabledPersonCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/***************************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per legge 104 per parente disabile se:
+ ***************************************************************************************************/
+rule EmployeeCanEditDisabledRelativeAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.DISABLED_PERSON_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeDisabledRelativeCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))

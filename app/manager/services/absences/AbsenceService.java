@@ -525,6 +525,8 @@ public class AbsenceService {
     	.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
     final GroupAbsenceType additionalHours = absenceComponentDao
     		.groupAbsenceTypeByName(DefaultGroup.G_OA.name()).get();
+    final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
+    		.groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -543,6 +545,7 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
       groupsPermitted.remove(covid19);
+      groupsPermitted.remove(disabledRelativeAbsence);
       //groupsPermitted.remove(telework);
       return groupsPermitted;
     }
@@ -583,11 +586,15 @@ public class AbsenceService {
       }
       
       if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
-          groupsPermitted.add(covid19);        
+        groupsPermitted.add(covid19);        
       }
       
       if ((Boolean) confManager.configValue(person, EpasParam.ADDITIONAL_HOURS)) {
-          groupsPermitted.add(additionalHours);        
+        groupsPermitted.add(additionalHours);        
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_RELATIVE_PERMISSION)) {
+        groupsPermitted.add(disabledRelativeAbsence);        
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);
