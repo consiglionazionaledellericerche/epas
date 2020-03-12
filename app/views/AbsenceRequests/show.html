@@ -25,6 +25,10 @@
  
  	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
 	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	#{if absenceRequest.note != null}
+	<div class="col-sm-11"><strong>#{f.view 'absenceRequest.note', value:absenceRequest.note /}</strong></div>
+	#{/if}
+
 </div>	
 <table class="table table-striped">
 <tr>
