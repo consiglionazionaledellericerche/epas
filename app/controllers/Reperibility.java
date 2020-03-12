@@ -16,7 +16,8 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
-
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
@@ -38,10 +39,12 @@ import manager.ReperibilityManager;
 
 import models.Competence;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.exports.AbsenceReperibilityPeriod;
@@ -91,6 +94,10 @@ public class Reperibility extends Controller {
   private static CompetenceCodeDao competenceCodeDao;
   @Inject
   private static CompetenceDao competenceDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
   /**
    * Restituisce la lista dei reperibili attivi al momento di un determinato tipo.
@@ -549,10 +556,20 @@ public class Reperibility extends Controller {
     final String thAbs = Messages.get("PDFReport.thAbsences");
     final String description = reperibilityType.description;
     final String supervisor =
-        reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+        reperibilityType.supervisor.getFullname();
+	String seatSupervisor = "";
+	Office office = reperibilityType.office;
+	List<User> directors = uroDao
+			.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+	if (!directors.isEmpty()) {
+		seatSupervisor = directors.get(0).person.getFullname();
+	} else {
+		seatSupervisor = "responsabile di sede non configurato";
+	}
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
-        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, supervisor);
+        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, 
+        supervisor, seatSupervisor, office);
   }
 
   /**

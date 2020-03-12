@@ -520,39 +520,4 @@ public class ReperibilityManager2 {
 		return str;
 	}
 
-	public ReperibilityDto getMonthSituation(LocalDate monthbegin, LocalDate monthEnd, 
-			LocalDate lastDay, PersonReperibilityType reperibility) {
-		
-		List<WorkDaysReperibilityDto> listWorkdaysRep = Lists.newArrayList();
-		List<HolidaysReperibilityDto> listHolidaysRep = Lists.newArrayList();
-		final List<Person> people = involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
-
-		CompetenceCode workDayReperibility = 
-				competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
-		CompetenceCode holidayReperibility = 
-				competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
-		people.forEach(person -> {
-			WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
-
-			dto.person = person;
-			dto.workdaysReperibility = calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
-					monthbegin, lastDay, workDayReperibility);
-			dto.workdaysPeriods = getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, false);
-			HolidaysReperibilityDto dtoHoliday = new HolidaysReperibilityDto();
-			dtoHoliday.person = person;
-			dtoHoliday.holidaysReperibility = calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
-					monthbegin, lastDay, holidayReperibility);
-			dtoHoliday.holidaysPeriods = getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, true);
-
-			listWorkdaysRep.add(dto);
-			listHolidaysRep.add(dtoHoliday);
-
-		});
-		final ReperibilityDto reperibilityDto = ReperibilityDto.builder()
-				.listHolidaysRep(listHolidaysRep)
-				.listWorkdaysRep(listWorkdaysRep)
-				.build();
-		return reperibilityDto;
-	}
-
 }

@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.ReperibilityManager2;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
@@ -574,7 +575,7 @@ public class ReperibilityCalendar extends Controller {
 			listWorkdaysRep.add(dto);
 			listHolidaysRep.add(dtoHoliday);
 		});
-		ReperibilityDto reperibilityDto = reperibilityManager2.getMonthSituation(monthbegin, monthEnd, lastDay, reperibility);
+		
 		//TODO: nella render ritornare una lista di dto alla vista
 		render(reperibilityTypeMonth, listWorkdaysRep, listHolidaysRep);
 
@@ -633,57 +634,4 @@ public class ReperibilityCalendar extends Controller {
 		redirect(Router.reverse("ReperibilityCalendar.show", args).url);
 	}
 
-	/**
-	 * Controller che genera la pagina da esportare in PDF con il calendario della reperibilità.
-	 * @param reperibilityId l'identificativo di reperibilità
-	 * @param date la data in cui si fa la richiesta
-	 */
-	public static void exportMonthAsPDF(long reperibilityId) {
-		
-		LocalDate date = LocalDate.now();
-		PersonReperibilityType reperibility = 
-				reperibilityDao.getPersonReperibilityTypeById(reperibilityId);
-		notFoundIfNull(reperibility);
-		rules.checkIfPermitted(reperibility);
-		final YearMonth monthToApprove = new YearMonth(date);
-
-		final Optional<ReperibilityTypeMonth> monthStatus = 
-				reperibilityTypeMonthDao.byReperibilityTypeAndDate(reperibility, date);
-		final ReperibilityTypeMonth reperibilityTypeMonth;
-		if (monthStatus.isPresent()) {
-			reperibilityTypeMonth = monthStatus.get();
-		} else {
-			reperibilityTypeMonth = new ReperibilityTypeMonth();
-			reperibilityTypeMonth.personReperibilityType = reperibility;
-			reperibilityTypeMonth.yearMonth = monthToApprove;
-			reperibilityTypeMonth.save();
-		}
-		final LocalDate monthbegin = monthToApprove.toLocalDate(1);
-		final LocalDate monthEnd = monthbegin.dayOfMonth().withMaximumValue();
-		final LocalDate today = LocalDate.now();
-
-		final LocalDate lastDay;
-
-		if (monthEnd.isAfter(today)) {
-			lastDay = today;
-		} else {
-			lastDay = monthEnd;
-		}
-		ReperibilityDto reperibilityDto = reperibilityManager2
-				.getMonthSituation(monthbegin, monthEnd, lastDay, reperibility);
-		
-		List<WorkDaysReperibilityDto> listWorkdaysRep = reperibilityDto.getListWorkdaysRep();
-		List<HolidaysReperibilityDto> listHolidaysRep = reperibilityDto.getListHolidaysRep();
-		String supervisor = reperibility.supervisor.getFullname();
-		String seatSupervisor = "";
-		List<User> directors = uroDao
-				.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), reperibility.office);
-		if (!directors.isEmpty()) {
-			seatSupervisor = directors.get(0).person.getFullname();
-		} else {
-			seatSupervisor = "responsabile di sede non configurato";
-		}
-		
-		renderPDF(reperibilityTypeMonth, listWorkdaysRep, listHolidaysRep, supervisor, seatSupervisor, today);
-	}
 }
