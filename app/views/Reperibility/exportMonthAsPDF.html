@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>Istituto di Informatica e Telematica - Reperibilità di ${month} ${year}</title>
+	<title>${office.name} - Reperibilità di ${month} ${year}</title>
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/sistorgReportPDF.css'}" type="text/css" />
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/reperibilityPDF.css'}" type="text/css" />
 </head>
@@ -50,7 +50,7 @@
 
 <div class="firma dir">
 	<strong>Il Direttore</strong> <br />
-	Dott. Marco Conti
+	Dott. ${seatSupervisor}
 </div>
 
 <div class="firma resp">
