@@ -1,16 +1,21 @@
 package manager.flows;
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import controllers.Security;
 import dao.AbsenceRequestDao;
 import dao.GroupDao;
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +32,8 @@ import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibilityDay;
+import models.PersonShiftDay;
 import models.Role;
 import models.User;
 import models.absences.Absence;
@@ -40,6 +47,9 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import play.db.jpa.JPA;
 
 /**
@@ -63,6 +73,8 @@ public class AbsenceRequestManager {
   private ConsistencyManager consistencyManager;
   private AbsenceRequestDao absenceRequestDao;
   private GroupDao groupDao;
+  private PersonReperibilityDayDao personReperibilityDayDao;
+  private PersonShiftDayDao personShiftDayDao;
 
   @Data
   @RequiredArgsConstructor
@@ -90,7 +102,8 @@ public class AbsenceRequestManager {
       AbsenceService absenceService, AbsenceManager absenceManager, 
       AbsenceComponentDao absenceDao, PersonDayManager personDayManager, 
       ConsistencyManager consistencyManager, AbsenceRequestDao absenceRequestDao, 
-      GroupDao groupDao) {
+      GroupDao groupDao, PersonReperibilityDayDao personReperibilityDayDao, 
+      PersonShiftDayDao personShiftDayDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -102,6 +115,8 @@ public class AbsenceRequestManager {
     this.consistencyManager = consistencyManager;
     this.absenceRequestDao = absenceRequestDao;
     this.groupDao = groupDao;
+    this.personReperibilityDayDao = personReperibilityDayDao;
+    this.personShiftDayDao = personShiftDayDao;
   }
 
   private static final String FERIE_CNR = "FERIE_CNR";
@@ -725,4 +740,59 @@ public class AbsenceRequestManager {
     return null;  
   }
   
+  /**
+   * 
+   * @param person la persona da cercare
+   * @param date la data su cui verificare la presenza di turno/reperibilità
+   * @return true se la persona è in turno/reperibilità nella data, false altrimenti.
+   */
+  private boolean checkIfAbsenceInShiftOrReperibility(Person person, LocalDate date) {
+	//controllo se la persona è in reperibilità
+	Optional<PersonReperibilityDay> prd =
+	        personReperibilityDayDao.getPersonReperibilityDay(person, date);
+	    //controllo se la persona è in turno
+	Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(person, date);
+	return psd.isPresent() || prd.isPresent();
+  }
+  
+  /**
+   * 
+   * @param absenceRequest la richiesta di assenza
+   * @return la lista di date in cui è presente una reperibilità o un turno e su cui 
+   *     si vuole inserire un'assenza.
+   */
+  public List<LocalDate> getTroubleDays(AbsenceRequest absenceRequest) {
+	  LocalDate temp = absenceRequest.startAtAsDate();
+	  Map<LocalDate, Boolean> map = Maps.newHashMap();
+	  List<LocalDate> troubleDays = Lists.newArrayList();
+	  while (!temp.isAfter(absenceRequest.endToAsDate())) {
+	  	if (checkIfAbsenceInShiftOrReperibility(absenceRequest.person, temp)) {
+	   		map.put(temp, new Boolean(true));
+	   	} else {
+	   		map.put(temp, new Boolean(false));
+	   	}
+	   	temp = temp.plusDays(1);
+	   }
+	  for (Map.Entry<LocalDate,Boolean> entry : map.entrySet()) {
+	   	if (true == entry.getValue().booleanValue()) {
+	   		troubleDays.add(entry.getKey());
+	   	}
+	  }
+	  return troubleDays;
+  }
+  
+  /**
+   * 
+   * @param troubleDays la lista di date che generano problemi tra turni/reperibilità e assenze
+   * @return la stringa da inserire nelle note della richiesta di assenza contenente le date in cui, 
+   *     inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
+   */
+  public String generateNoteForShiftOrReperibility(List<LocalDate> troubleDays) {
+	  DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/YYYY");
+	  String string = "Evidenziati giorni con reperibilità/turno nelle date di: ";
+	  for (LocalDate date : troubleDays) {
+		  string = string + date.toString(dtf) + " ";
+	  }
+	  return string;
+  }
 }
