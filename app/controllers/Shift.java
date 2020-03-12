@@ -11,7 +11,9 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
+import dao.RoleDao;
 import dao.ShiftDao;
+import dao.UsersRolesOfficesDao;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,9 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager;
 import manager.ShiftManager2;
 import models.Competence;
+import models.Office;
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
+import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -75,6 +79,10 @@ public class Shift extends Controller {
   private static ShiftManager2 shiftManager2;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
 
   /**
@@ -352,11 +360,20 @@ public class Shift extends Controller {
 
     LocalDate today = new LocalDate();
     String shiftDesc = shiftCategory.description;
-    String supervisor =
-        shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+    final String supervisor = shiftCategory.supervisor.getFullname();
+    	String seatSupervisor = "";
+    	Office office = shiftCategory.office;
+    	List<User> directors = uroDao
+    			.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    	if (!directors.isEmpty()) {
+    		seatSupervisor = directors.get(0).person.getFullname();
+    	} else {
+    		seatSupervisor = "responsabile di sede non configurato";
+    	}
+    
 
     renderPDF(options, today, firstOfMonth, totalShiftInfo, personsShiftInconsistentAbsences,
-        thInconsistence, thShift, shiftDesc, supervisor);
+        thInconsistence, thShift, shiftDesc, supervisor, seatSupervisor);
   }
 
 

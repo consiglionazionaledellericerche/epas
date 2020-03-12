@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>Istituto di Informatica e Telematica - Turni di ${month} ${year}</title>
+	<title>${office.name} - Turni di ${month} ${year}</title>
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/sistorgReportPDF.css'}" type="text/css" charset="utf-8">
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/shiftPDF.css'}" type="text/css" charset="utf-8">
 </head>
@@ -51,7 +51,7 @@
 </div>
 <div class="firma dir">
 	<strong>Il Direttore</strong> <br />
-	Dott. Marco Conti
+	Dott. ${seatSupervisor}
 </div>
 
 <div class="firma resp">
