@@ -1,5 +1,6 @@
 package controllers;
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -14,6 +15,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.Web;
 import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -390,6 +393,12 @@ public class AbsenceRequests extends Controller {
     }
 
     boolean isNewRequest = !absenceRequest.isPersistent();
+    List<LocalDate> troubleDays = absenceRequestManager.getTroubleDays(absenceRequest);
+    if (!troubleDays.isEmpty()) {
+    	absenceRequest.note = absenceRequestManager
+    			.generateNoteForShiftOrReperibility(troubleDays);
+    }
+        
     absenceRequest.save();
 
     //Avvia il flusso se necessario.
