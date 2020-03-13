@@ -249,6 +249,7 @@
       <th>Tempo R.</th>
       <th>Dal</th>
       <th>Al</th>
+      <th>Comp. reper.</th>
      </tr>
     </thead>
     <tbody> 
@@ -275,6 +276,7 @@
         <td>${absenceType.replacingTime}</td>
         <td>${absenceType.validFrom?.format()}</td>
         <td>${absenceType.validTo?.format()}</td>
+        <td>${absenceType.reperibilityCompatible}</td>
       </tr>
       #{/if}
      #{/list}
@@ -296,6 +298,7 @@
       <th>Tempo R.</th>
       <th>Dal</th>
       <th>Al</th>
+      <th>Comp. reper.</th>
      </tr>
     </thead>
     <tbody> 
@@ -319,6 +322,7 @@
         <td>${absenceType.replacingTime}</td>
         <td>${absenceType.validFrom?.format()}</td>
         <td>${absenceType.validTo?.format()}</td>
+        <td>${absenceType.reperibilityCompatible}</td>
       </tr>
       #{/if}
      #{/list}
