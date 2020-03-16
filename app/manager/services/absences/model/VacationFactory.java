@@ -476,7 +476,10 @@ public class VacationFactory {
           Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
 
           subPeriod.initialization = subPeriod.splittedWith.initialization;
-          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount());
+          //I valori dei giorni di assenza nel periodo sono già stati moltiplicati per
+          //100 quindi è necessario diverli prima di ripassarli al metodo che li 
+          //imposta nel subPeriod.
+          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount() / 100);
         }
       }
       if (splittedWith != null) {
