@@ -1,5 +1,9 @@
 package controllers;
 
+import java.util.List;
+import javax.inject.Inject;
+import org.apache.commons.lang.WordUtils;
+import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
@@ -13,8 +17,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
-import java.util.List;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
@@ -35,8 +37,6 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-import org.apache.commons.lang.WordUtils;
-import org.joda.time.LocalDate;
 import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -86,7 +86,7 @@ public class Persons extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
-  
+
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -105,15 +105,16 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(office);
 
-    List<Person> simplePersonList = personDao.listFetched(Optional.fromNullable(name),
-        ImmutableSet.of(office), false, null, null, false).list();
+    List<Person> simplePersonList = personDao
+        .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, null, null, false)
+        .list();
 
-    List<IWrapperPerson> personList = FluentIterable.from(simplePersonList)
-        .transform(wrapperFunctionFactory.person()).toList();
+    List<IWrapperPerson> personList =
+        FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
 
     render(personList, office);
   }
-  
+
 
   /**
    * metodo che gestisce la pagina di inserimento persona.
@@ -125,7 +126,7 @@ public class Persons extends Controller {
 
     render(person, contract);
   }
- 
+
   /**
    * metodo che salva la persona inserita con il suo contratto.
    *
@@ -149,12 +150,12 @@ public class Persons extends Controller {
     person.surname = WordUtils.capitalizeFully(person.surname);
 
     person.user = userManager.createUser(person);
-    
-    //Se il campo eppn è vuoto viene calcolato euristicamente...
+
+    // Se il campo eppn è vuoto viene calcolato euristicamente...
     if (person.email != null && person.eppn == null) {
       person.eppn = personManager.eppn(person.user.username, person.email);
     }
-    
+
     person.save();
 
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
@@ -179,7 +180,7 @@ public class Persons extends Controller {
     JPA.em().flush();
     JPA.em().clear();
 
-    //La ricomputazione nel caso di creazione persona viene fatta alla fine.
+    // La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
     person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     person.save();
@@ -276,7 +277,7 @@ public class Persons extends Controller {
     for (Contract c : person.contracts) {
       c.delete();
     }
-    
+
     for (Badge b : person.badges) {
       b.delete();
     }
@@ -364,9 +365,8 @@ public class Persons extends Controller {
    * @param confermaPassword ripeti
    */
   public static void savePassword(@Required String vecchiaPassword,
-      @MinSize(5) @Required String nuovaPassword,
-      @Required @Equals(value = "nuovaPassword", message = "Le password non corrispondono")
-          String confermaPassword) {
+      @MinSize(5) @Required String nuovaPassword, @Required @Equals(value = "nuovaPassword",
+          message = "Le password non corrispondono") String confermaPassword) {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori riportati");
@@ -446,7 +446,7 @@ public class Persons extends Controller {
     child.delete();
     JPA.em().flush();
 
-    //Scan degli errori sulle assenze
+    // Scan degli errori sulle assenze
     LocalDate eldest = child.bornDate;
     person.refresh();
     for (PersonChildren otherChild : child.person.personChildren) {
@@ -494,14 +494,6 @@ public class Persons extends Controller {
     JPA.em().flush();
     child.person.refresh();
 
-    //Scan degli errori sulle assenze
-    LocalDate eldest = child.bornDate;
-    for (PersonChildren otherChild : child.person.personChildren) {
-      if (eldest.isAfter(otherChild.bornDate)) {
-        eldest = otherChild.bornDate;
-      }
-    }
-    absenceService.scanner(child.person, eldest);
 
     log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", child.name, child.surname,
         child.person);
