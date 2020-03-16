@@ -361,15 +361,15 @@ public class Shift extends Controller {
     LocalDate today = new LocalDate();
     String shiftDesc = shiftCategory.description;
     final String supervisor = shiftCategory.supervisor.getFullname();
-    	String seatSupervisor = "";
-    	Office office = shiftCategory.office;
-    	List<User> directors = uroDao
-    			.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
-    	if (!directors.isEmpty()) {
-    		seatSupervisor = directors.get(0).person.getFullname();
-    	} else {
-    		seatSupervisor = "responsabile di sede non configurato";
-    	}
+    String seatSupervisor = "";
+    Office office = shiftCategory.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
     
 
     renderPDF(options, today, firstOfMonth, totalShiftInfo, personsShiftInconsistentAbsences,

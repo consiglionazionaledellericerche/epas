@@ -1257,8 +1257,8 @@ public class AbsenceGroups extends Controller {
     List<IWrapperPerson> people = Lists.newArrayList();
     Map<String, Optional<CertificationYearSituation>> certificationsSummary = Maps.newHashMap();
 
-    int year = LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY ? 
-        LocalDate.now().getYear() - 1 : LocalDate.now().getYear();
+    int year = LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY 
+        ? LocalDate.now().getYear() - 1 : LocalDate.now().getYear();
 
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
@@ -1356,7 +1356,7 @@ public class AbsenceGroups extends Controller {
         Optional<Contract> contract = wrPerson.getCurrentContract();
         if (contract.isPresent()) {
           contract.get().sourceDateRecoveryDay = absence.getAbsenceDate();
-          contract.get().sourceRecoveryDayUsed ++;
+          contract.get().sourceRecoveryDayUsed++;
           contract.get().save();
         }
       }

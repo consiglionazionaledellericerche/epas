@@ -557,15 +557,15 @@ public class Reperibility extends Controller {
     final String description = reperibilityType.description;
     final String supervisor =
         reperibilityType.supervisor.getFullname();
-	String seatSupervisor = "";
-	Office office = reperibilityType.office;
-	List<User> directors = uroDao
-			.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
-	if (!directors.isEmpty()) {
-		seatSupervisor = directors.get(0).person.getFullname();
-	} else {
-		seatSupervisor = "responsabile di sede non configurato";
-	}
+    String seatSupervisor = "";
+    Office office = reperibilityType.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
         inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, 

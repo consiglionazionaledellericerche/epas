@@ -56,7 +56,7 @@ public class OrganizationShiftSlot extends BaseModel{
   
   @Enumerated(EnumType.STRING)
   @Column(name = "payment_type")
-  public PaymentType paymentType;;
+  public PaymentType paymentType;
  
   public Integer minutesPaid;
   
