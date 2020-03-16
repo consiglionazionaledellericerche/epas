@@ -657,13 +657,14 @@ public class PersonDayManager {
 
           Range<LocalTime> range = Range.closed(temp.second.date.toLocalTime(), 
               validPair.first.date.toLocalTime());
-          if (range.lowerEndpoint().isBefore(startWork) && !range.upperEndpoint().isBefore(startWork)) {
+          if (range.lowerEndpoint().isBefore(startWork) 
+              && !range.upperEndpoint().isBefore(startWork)) {
             range.span(Range.closed(startWork, validPair.first.date.toLocalTime()));
           }
           if (isTimeInDelay(temp, validPair, zoneToZones)) {
-            timeToJustify = timeToJustify +  
-                (DateUtility.toMinute(range.upperEndpoint()) 
-                    - DateUtility.toMinute(range.lowerEndpoint()));
+            timeToJustify = timeToJustify 
+                + (DateUtility.toMinute(range.upperEndpoint()) 
+                - DateUtility.toMinute(range.lowerEndpoint()));
           } else {
             timeToJustify = timeToJustify + zoneToZones.get().delay;
           }             

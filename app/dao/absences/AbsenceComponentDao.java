@@ -499,12 +499,13 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(absence.personDay).fetchJoin()
         .where(absence.personDay.person.eq(person)
             .and(conditions)).distinct().fetch();
-    //comparatore per ovviare al problema della orderby che non funziona in questo caso con il querydsl nuovo
-    Comparator<Absence> absenceComparator
-    = Comparator.comparing(
-        Absence::getPersonDay, (s1, s2) -> {
-          return s2.date.compareTo(s1.date);
-        });
+    //comparatore per ovviare al problema della orderby che non funziona in questo 
+    //caso con il querydsl nuovo
+    Comparator<Absence> absenceComparator = 
+        Comparator.comparing(
+            Absence::getPersonDay, (s1, s2) -> {
+              return s2.date.compareTo(s1.date);
+            });
     return absences.stream().sorted(absenceComparator).collect(Collectors.toList());
   }
 

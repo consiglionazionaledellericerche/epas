@@ -300,8 +300,8 @@ public class MissionManager {
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     List<LocalDate> dates = datesToCompute(body);
     //lista assenze da rimuovere
@@ -381,8 +381,8 @@ public class MissionManager {
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     if (!performDeleteMission(missions, group)) {
       return false;
@@ -432,8 +432,8 @@ public class MissionManager {
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         mission = absenceTypeDao.getAbsenceTypeByCode("92E").get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     int quantity = 0;
     if (hours != null && minutes != null) {

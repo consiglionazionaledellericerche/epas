@@ -25,11 +25,11 @@ public class WorkingTimeTypeAdjust extends Job<Void>{
           || wtt.description.contains(MATERNITA_LOWER_CASE) 
           || wtt.description.contains(MATERNITA_LOWER_CASE_ACCENTO)
           || wtt.description.contains(ALLATTAMENTO)
-          || wtt.description.contains(ALLATTAMENTO_LOWER_CASE)) &&
-          wtt.enableAdjustmentForQuantity == true) {
+          || wtt.description.contains(ALLATTAMENTO_LOWER_CASE)) 
+          && wtt.enableAdjustmentForQuantity == true) {
         wtt.enableAdjustmentForQuantity = false;
-        log.info("Messo a false il campo enableAdjustmentForQuantity per l'orario {} della sede {}", 
-            wtt.description, wtt.office);
+        log.info("Messo a false il campo enableAdjustmentForQuantity per l'orario {} "
+            + "della sede {}", wtt.description, wtt.office);
       }
       wtt.save();
     }
