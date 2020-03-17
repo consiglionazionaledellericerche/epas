@@ -16,7 +16,7 @@ import play.test.UnitTest;
 @StaticInject
 public class MissionManagerTest extends UnitTest {
 
-  private final static String PERSON_NUMBER = "9802";
+  private static final String PERSON_NUMBER = "9802";
   @Inject
   private static MissionManager missionManager;
 

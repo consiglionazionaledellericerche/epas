@@ -824,13 +824,13 @@ public final class PersonDao extends DaoBase {
    * @param group il gruppo da controllare
    * @param date la data da cui cercare
    */
-  private void filterCompetenceCodeGroupEnabled (BooleanBuilder condition,
+  private void filterCompetenceCodeGroupEnabled(BooleanBuilder condition,
       Optional<CompetenceCodeGroup> group, LocalDate date) {
     if (group.isPresent()) {
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-        condition.and(pcc.competenceCode.in(group.get().competenceCodes)
-            .and(pcc.beginDate.loe(date)
-                .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())));
+      condition.and(pcc.competenceCode.in(group.get().competenceCodes)
+          .and(pcc.beginDate.loe(date)
+          .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())));
     }
   }
 

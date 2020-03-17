@@ -66,8 +66,8 @@ public class TimeSlot extends BaseModel {
   @Transient
   public String getLabel() {
     DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
-    return Strings.isNullOrEmpty(description) ?  
-        String.format("%s - %s", dtf.print(beginSlot), dtf.print(endSlot)) 
+    return Strings.isNullOrEmpty(description)
+        ? String.format("%s - %s", dtf.print(beginSlot), dtf.print(endSlot)) 
           : 
         String.format("%s (%s - %s)", description, dtf.print(beginSlot), dtf.print(endSlot));
   }
