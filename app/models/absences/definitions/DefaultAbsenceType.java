@@ -726,6 +726,18 @@ public enum DefaultAbsenceType {
   A_143("143", "malattia terzo figlio non retribuita", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(),
       new LocalDate(1990, 1, 1), new LocalDate(2008, 12, 31), false),
+  
+  A_124("124", "malattia quarto figlio/a <= 3 anni retribuita 100%", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
+      null, false),
+
+  A_134("134", "malattia quarto figlio/a > 3 anni senza retr.", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
+      null, false),
+
+  A_144("144", "malattia quarto figlio non retribuita", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(),
+      new LocalDate(1990, 1, 1), new LocalDate(2008, 12, 31), false),
 
   // Altri codici
 
