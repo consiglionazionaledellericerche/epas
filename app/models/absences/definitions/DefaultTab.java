@@ -21,12 +21,16 @@ public enum DefaultTab {
   ALTRI_CODICI("Altri Codici", 7),
 
   // Per dipendenti
-  LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9), FERIE_DIPENDENTI("Ferie e Permessi",
-      10), RIPOSI_DIPENDENTI("Riposo Compensativo", 11), TELELAVORO("Telelavoro",
-          12), LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13), LEGGE_104_PARENTI_DIPENDENTI(
-              "L. 104 parenti dipendenti", 8), STUDIO_DIPENDENTI("Diritto allo studio dipendenti",
-                  13), COVID19("Emergenza covid-19", 14), ORE_AGGIUNTIVE_DIPENDENTI(
-                      "Ore aggiuntive dipendenti", 15), AUTOMATICI("Codici Automatici", 11);
+  LAVORO_FUORI_SEDE("Lavoro Fuori Sede", 9), 
+  FERIE_DIPENDENTI("Ferie e Permessi", 10), 
+  RIPOSI_DIPENDENTI("Riposo Compensativo", 11), 
+  TELELAVORO("Telelavoro", 12), 
+  LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
+  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 8), 
+  STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
+  COVID19("Emergenza covid-19", 14), 
+  ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
+  AUTOMATICI("Codici Automatici", 11);
 
   public String description;
   public int priority;
