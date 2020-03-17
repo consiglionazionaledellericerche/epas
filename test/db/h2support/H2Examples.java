@@ -2,22 +2,17 @@ package db.h2support;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import db.h2support.base.H2WorkingTimeTypeSupport;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
-
 import java.util.UUID;
-
 import manager.ContractManager;
 import manager.configurations.ConfigurationManager;
-
 import models.Contract;
 import models.Office;
 import models.Person;
 import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -28,7 +23,7 @@ import org.joda.time.LocalDate;
  */
 public class H2Examples {
 
-  public final static long DEFAULT_PERSON_QUALIFICATION = 4L;
+  public static final long DEFAULT_PERSON_QUALIFICATION = 4L;
   
   private final H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport;
   private final ConfigurationManager configurationManager;

@@ -367,9 +367,10 @@ public class Absences extends Controller {
     class DateComparator implements Comparator<Absence> {
       @Override
       public int compare(Absence a, Absence b) {
-          return a.personDay.date.compareTo(b.personDay.date);
+        return a.personDay.date.compareTo(b.personDay.date);
       }
     }
+    
     List<Absence> missioni = Lists.newArrayList();
     List<Absence> ferie = Lists.newArrayList();
     List<Absence> riposiCompensativi = Lists.newArrayList();

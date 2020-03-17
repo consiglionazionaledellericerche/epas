@@ -12,15 +12,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
-import org.hibernate.envers.Audited;
 import models.base.BaseModel;
+import models.enumerate.CalculationType;
+import org.hibernate.envers.Audited;
+import play.data.validation.Required;
+
 /**
+ * Nuova relazione tra timetable delle organizzazioni e sedi.
  * 
  * @author dario
- * Nuova relazione tra timetable delle organizzazioni e sedi.
  */
-import models.enumerate.CalculationType;
-import play.data.validation.Required;
 @Audited
 @Entity
 public class OrganizationShiftTimeTable extends BaseModel {
@@ -29,7 +30,7 @@ public class OrganizationShiftTimeTable extends BaseModel {
 
   public String name;
   
-  @OneToMany(mappedBy= "shiftTimeTable", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "shiftTimeTable", fetch = FetchType.EAGER)
   public Set<OrganizationShiftSlot> organizationShiftSlot;
   
   @ManyToOne(fetch = FetchType.LAZY)

@@ -158,6 +158,7 @@ public class AbsenceManager {
       consistencyManager.updatePersonSituation(person.id, from);
     }
   }
+  
   /**
    * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data
    * specificata. Se voglio inserire un riposo compensativo per il mese successivo a oggi considero
