@@ -359,6 +359,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
       ImmutableSet.of(DefaultAbsenceType.A_123, DefaultAbsenceType.A_133, DefaultAbsenceType.A_143),
       -1, null),
+  T_MALATTIA_FIGLIO_4(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_124, DefaultAbsenceType.A_134, DefaultAbsenceType.A_144),
+      ImmutableSet.of(DefaultAbsenceType.A_124, DefaultAbsenceType.A_134, DefaultAbsenceType.A_144),
+      -1, null),
+  
   T_441(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_441),
       ImmutableSet.of(DefaultAbsenceType.A_441),
