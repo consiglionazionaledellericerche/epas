@@ -248,6 +248,10 @@ public class ShiftManager2 {
         .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
             && !pcc.beginDate.isAfter(personShiftDay.date));
 
+    /**
+     * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
+     * e non FESTIVO
+     */
     if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date) 
         && !isHolidayShiftEnabled) {
       return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
