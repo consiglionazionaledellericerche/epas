@@ -26,7 +26,7 @@ import play.db.jpa.JPA;
  * @author alessandro
  *
  */
-@Slf4j
+
 public class PeriodManager {
 
   @Inject

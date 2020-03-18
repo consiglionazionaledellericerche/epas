@@ -16,20 +16,8 @@ import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
-@Slf4j
-public class ShiftOrganizationManager {
 
-  private void recalculate(PersonShiftDay personShiftDay) {
-    
-  }
-  
-  private void saveCompetence(Person person, ShiftTypeMonth shiftTypeMonth, 
-      CompetenceCode shiftCode, Integer calculatedCompetences) {    
-  }
-  
-  public void checkShiftValid(PersonShiftDay personShiftDay) {
-    
-  }
+public class ShiftOrganizationManager {
   
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to, boolean holiday) {

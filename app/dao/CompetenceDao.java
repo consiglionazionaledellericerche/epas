@@ -30,7 +30,7 @@ import org.joda.time.LocalDate;
 /**
  * @author dario
  */
-@Slf4j
+
 public class CompetenceDao extends DaoBase {
 
 
