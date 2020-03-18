@@ -1,9 +1,10 @@
 package models.absences.definitions;
 
-import java.util.List;
-import org.assertj.core.util.Lists;
 import com.google.common.base.Optional;
+import java.util.List;
 import models.absences.CategoryTab;
+import org.assertj.core.util.Lists;
+
 
 /**
  * Tab di default.
