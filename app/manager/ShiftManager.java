@@ -70,8 +70,6 @@ public class ShiftManager {
     private boolean stampingOk;     // se ci sono problemi sulle timbrature
     private int workedTime;      // minuti lavorati in turno
     private int lackOfTime;      // minuti mancanti al completamento del turno
-    private boolean inTolerance;  // esistenza di timbrature fuori della tolleranza
-    private String stampings;    // lista delle timbrature
 
   }
 
@@ -123,9 +121,6 @@ public class ShiftManager {
   private PersonMonthRecapDao personMonthRecapDao;
   @Inject
   private IWrapperFactory wrapperFactory;
-
-  private static String[] colors = {"#fcf8e3", "#1fa789", "#36b719", "#ca0b3d", "pink", "dark-blue",
-      "cyano"};
 
 
   /**
@@ -671,9 +666,6 @@ public class ShiftManager {
 
     wp.lackOfTime = lackOfMinutes;
     wp.workedTime = workingMinutes;
-    wp.inTolerance = inTolleranceLimit;
-    wp.stampings = stampings;
-
     return wp;
   }
 

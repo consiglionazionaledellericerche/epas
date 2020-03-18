@@ -2029,7 +2029,6 @@ then
  $c.grant();
 end
 
-
 /************************************************************
  * Un dipendente può autocertificare le proprie assenze se...
  ************************************************************/
@@ -2037,16 +2036,17 @@ rule employeeCanInsertAbsences
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.COVID_19 
- 				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
- 				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
- 				|| epasParam == EpasParam.RIGHT_TO_STUDY
- 				|| epasParam == EpasParam.TELEWORK
- 				|| epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true) from $p.personConfigurations
+ PersonConfiguration((epasParam == EpasParam.COVID_19 && fieldValue == true)
+ 				|| (epasParam == EpasParam.DISABLED_PERSON_PERMISSION && fieldValue == true)
+ 				|| (epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION && fieldValue == true)
+ 				|| (epasParam == EpasParam.RIGHT_TO_STUDY && fieldValue == true)
+ 				|| (epasParam == EpasParam.TELEWORK && fieldValue == true)
+ 				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
 end
+
 
 /*****************************************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per lavoro fuori sede in convenzione se:
