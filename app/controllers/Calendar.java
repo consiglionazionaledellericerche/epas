@@ -507,6 +507,13 @@ public class Calendar extends Controller {
     if (activity.isPresent()) {
       ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
+      /*
+       * INSERIRE UN PARAMETRO NEI GENERAL SETTINGS CHE CHIEDE COME CONSIDERARE IL SABATO!
+       */
+      /**
+       * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
+       * e non FESTIVO
+       */
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
           .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.daily);
       Map<Person, Integer> holidayShifts = null;
@@ -527,7 +534,10 @@ public class Calendar extends Controller {
               .filter(c -> c.competenceCode.equals(night) 
                   && !c.beginDate.isAfter(start)))
           .collect(Collectors.toList());
-      
+      /**
+       * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
+       * e non FESTIVO 
+       */
       if (!list.isEmpty()) {
         holidayShifts = 
             shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
