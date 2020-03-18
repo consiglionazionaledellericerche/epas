@@ -1,13 +1,15 @@
 package models.absences.definitions;
 
+import com.google.common.base.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.assertj.core.util.Lists;
-import com.google.common.base.Optional;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.GroupAbsenceType.PeriodType;
+import org.assertj.core.util.Lists;
+
+
 
 public enum DefaultGroup {
 
@@ -394,6 +396,9 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
   }
 
+  /**
+   * Ritorna la lista di codici da considerare per gli impiegati con 104.
+   */
   public static List<String> employeeDisabledPersonCodes() {
     List<String> g19 = getCodes(DefaultGroup.G_19_DIPENDENTI);
     List<String> g26 = getCodes(DefaultGroup.G_26_DIPENDENTI);
