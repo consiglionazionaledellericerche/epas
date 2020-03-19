@@ -42,4 +42,10 @@ public class GeneralSetting extends BaseModel {
   public boolean handleGroupsByInstitute = true;
   
   // Fine parametri gestione gruppi
+  
+  // Parametri gestione giorni di turno
+  
+  public boolean saturdayHolidayShift = true;
+  
+  // Fine parametri gestione giorni di turno
 }

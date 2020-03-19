@@ -249,13 +249,27 @@ public class ShiftManager2 {
             && !pcc.beginDate.isAfter(personShiftDay.date));
 
     /**
-     * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
+     * FIXED: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
      * e non FESTIVO
      */
-    if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date) 
-        && !isHolidayShiftEnabled) {
-      return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+    GeneralSetting setting = generalSettingDao.generalSetting();
+    if (setting != null) {
+      if (setting.saturdayHolidayShift) {
+        if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date, true) 
+            && !isHolidayShiftEnabled) {
+          return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+        }
+      } else {
+        if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date, false) 
+            && !isHolidayShiftEnabled) {
+          return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+        }
+      }
+    } else {
+      log.warn("Non sono correttamente configurati i parametri generali. "
+          + "Controllo sul sabato festivo/feriale non praticabile");
     }
+    
 
     List<PersonShiftDay> list = personShiftDayDao
         .byTypeInPeriod(personShiftDay.date, personShiftDay.date,
@@ -694,6 +708,7 @@ public class ShiftManager2 {
       night = new TimeInterval(convertFromString(setting.startNightlyShift), 
           new LocalTime(23,59));
       beforeDawn = new TimeInterval(new LocalTime(0,0), convertFromString(setting.endNightlyShift));
+      
     } else {
       log.warn("Manca il general setting relativo all'ente. Occore definirlo!!!");
       return 0;
@@ -703,23 +718,41 @@ public class ShiftManager2 {
       case daily:
         timeInterval = Optional.fromNullable(daily);
         timeInterval2 = Optional.<TimeInterval>absent();
-        list = shifts.stream().filter(day -> { 
-          return !personDayManager.isHoliday(day.personShift.person, day.date);
-        }).collect(Collectors.toList());
+        if (setting.saturdayHolidayShift) {
+          list = shifts.stream().filter(day -> { 
+            return !personDayManager.isHoliday(day.personShift.person, day.date, true);
+          }).collect(Collectors.toList());
+        } else {
+          list = shifts.stream().filter(day -> { 
+            return !personDayManager.isHoliday(day.personShift.person, day.date, false);
+          }).collect(Collectors.toList());
+        }        
         break;
       case nightly:
         timeInterval = Optional.fromNullable(night);
         timeInterval2 = Optional.fromNullable(beforeDawn);
-        list = shifts.stream().filter(day -> { 
-          return !personDayManager.isHoliday(day.personShift.person, day.date);
-        }).collect(Collectors.toList());
+        if (setting.saturdayHolidayShift) {
+          list = shifts.stream().filter(day -> { 
+            return !personDayManager.isHoliday(day.personShift.person, day.date, true);
+          }).collect(Collectors.toList());
+        } else {
+          list = shifts.stream().filter(day -> { 
+            return !personDayManager.isHoliday(day.personShift.person, day.date, false);
+          }).collect(Collectors.toList());
+        }        
         break;
       case holiday:
         timeInterval = Optional.<TimeInterval>absent();
         timeInterval2 = Optional.<TimeInterval>absent();
-        list = shifts.stream().filter(day -> { 
-          return personDayManager.isHoliday(day.personShift.person, day.date);
-        }).collect(Collectors.toList());
+        if (setting.saturdayHolidayShift) {
+          list = shifts.stream().filter(day -> { 
+            return personDayManager.isHoliday(day.personShift.person, day.date, true);
+          }).collect(Collectors.toList());
+        } else {
+          list = shifts.stream().filter(day -> { 
+            return personDayManager.isHoliday(day.personShift.person, day.date, false);
+          }).collect(Collectors.toList());
+        }        
         break;
       default:
         break;
