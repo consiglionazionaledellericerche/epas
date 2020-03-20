@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
+import dao.GeneralSettingDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import helpers.Web;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.CompetenceCode;
+import models.GeneralSetting;
 import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonCompetenceCodes;
@@ -70,6 +72,8 @@ public class Calendar extends Controller {
   static ShiftTypeMonthDao shiftTypeMonthDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   private static String holidayCode = "T3";
   private static String nightCode = "T2";
@@ -507,13 +511,7 @@ public class Calendar extends Controller {
     if (activity.isPresent()) {
       ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
-      /*
-       * INSERIRE UN PARAMETRO NEI GENERAL SETTINGS CHE CHIEDE COME CONSIDERARE IL SABATO!
-       */
-      /**
-       * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
-       * e non FESTIVO
-       */
+      
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
           .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.daily);
       Map<Person, Integer> holidayShifts = null;
@@ -534,10 +532,7 @@ public class Calendar extends Controller {
               .filter(c -> c.competenceCode.equals(night) 
                   && !c.beginDate.isAfter(start)))
           .collect(Collectors.toList());
-      /**
-       * TODO: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
-       * e non FESTIVO 
-       */
+
       if (!list.isEmpty()) {
         holidayShifts = 
             shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);

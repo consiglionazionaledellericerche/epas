@@ -52,4 +52,16 @@
         #{/b.buttons}
   	#{/form}
   #{/accordionItem}
+    #{accordionItem 'saturdayHolidayShift', parent:'generalSetting', title:'Gestione sabato per i turni', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Specifica se considerare il sabato come festivo . #{/alert}
+		#{f.booleanRadio 'generalSetting.saturdayHolidayShift' /}
+  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
+    
 #{/accordionGroup}
