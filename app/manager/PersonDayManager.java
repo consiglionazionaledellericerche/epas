@@ -1412,12 +1412,7 @@ public class PersonDayManager {
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
-    GeneralSetting setting = generalSettingDao.generalSetting();
-    if (setting.saturdayHolidayShift) {
-      return isHoliday(person, date, true);
-    } else {
-      return isHoliday(person, date, false);
-    }
+    return isHoliday(person, date, true);
 
   }
 

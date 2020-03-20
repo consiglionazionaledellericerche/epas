@@ -248,10 +248,6 @@ public class ShiftManager2 {
         .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
             && !pcc.beginDate.isAfter(personShiftDay.date));
 
-    /**
-     * FIXED: aggiungere qui il controllo per il LAMMA secondo cui il sabato è FERIALE
-     * e non FESTIVO
-     */
     GeneralSetting setting = generalSettingDao.generalSetting();
     if (setting != null) {
       if (setting.saturdayHolidayShift) {
@@ -984,7 +980,6 @@ public class ShiftManager2 {
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
     CompetenceCode nightCode = competenceCodeDao.getCompetenceCodeByCode(codShiftNight);
     CompetenceCode holidayCode = competenceCodeDao.getCompetenceCodeByCode(codShiftHolyday);
-
 
     involvedShiftPeople.forEach(person -> {
       Integer calculatedCompetences = null;
