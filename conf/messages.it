@@ -303,6 +303,7 @@ generalSetting.endDailyShift =Fine fascia per turno diurno
 generalSetting.startNightlyShift =Inizio fascia per turno notturno
 generalSetting.endNightlyShift =Fine fascia per turno notturno
 generalSetting.handleGroupsByInstitute =Gestisci i gruppi per istituto
+generalSetting.saturdayHolidayShift =Sabato da considerare festivo
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite

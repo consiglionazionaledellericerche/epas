@@ -40,6 +40,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final BooleanPath saturdayHolidayShift = createBoolean("saturdayHolidayShift");
+
     public final StringPath startDailyShift = createString("startDailyShift");
 
     public final StringPath startNightlyShift = createString("startNightlyShift");

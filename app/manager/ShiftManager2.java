@@ -248,10 +248,20 @@ public class ShiftManager2 {
         .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
             && !pcc.beginDate.isAfter(personShiftDay.date));
 
-    if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date) 
-        && !isHolidayShiftEnabled) {
-      return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+    GeneralSetting setting = generalSettingDao.generalSetting();
+    if (setting != null) {
+      if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date, 
+          setting.saturdayHolidayShift) && !isHolidayShiftEnabled) {          
+        return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+      } else {
+        return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
+      }
+
+    } else {
+      log.warn("Non sono correttamente configurati i parametri generali. "
+          + "Controllo sul sabato festivo/feriale non praticabile");
     }
+
 
     List<PersonShiftDay> list = personShiftDayDao
         .byTypeInPeriod(personShiftDay.date, personShiftDay.date,
@@ -690,6 +700,7 @@ public class ShiftManager2 {
       night = new TimeInterval(convertFromString(setting.startNightlyShift), 
           new LocalTime(23,59));
       beforeDawn = new TimeInterval(new LocalTime(0,0), convertFromString(setting.endNightlyShift));
+
     } else {
       log.warn("Manca il general setting relativo all'ente. Occore definirlo!!!");
       return 0;
@@ -700,22 +711,28 @@ public class ShiftManager2 {
         timeInterval = Optional.fromNullable(daily);
         timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
-          return !personDayManager.isHoliday(day.personShift.person, day.date);
+          return !personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
         }).collect(Collectors.toList());
+
         break;
       case nightly:
         timeInterval = Optional.fromNullable(night);
         timeInterval2 = Optional.fromNullable(beforeDawn);
         list = shifts.stream().filter(day -> { 
-          return !personDayManager.isHoliday(day.personShift.person, day.date);
+          return !personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
         }).collect(Collectors.toList());
+
         break;
       case holiday:
         timeInterval = Optional.<TimeInterval>absent();
         timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
-          return personDayManager.isHoliday(day.personShift.person, day.date);
+          return personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
         }).collect(Collectors.toList());
+
         break;
       default:
         break;
@@ -920,34 +937,33 @@ public class ShiftManager2 {
 
     // Recupero tutte le attività approvate in quel mese
     shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
-        .forEach(monthStatus -> {
-          // Per ogni attività calcolo le competenze di ogni persona coinvolta
-          involvedShiftPeople.forEach(person -> {
-            int activityCompetence = 0;
-            //Cerco le competenze di turno diurno...
-            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-                person, monthBegin, lastDay, ShiftPeriod.daily);
-            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
-            // quale ha svolto i turni
-            totalPeopleCompetences.merge(person, activityCompetence, 
-                (previousValue, newValue) -> newValue + previousValue);
-            //Cerco le competenze di turno festivo...
-            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-                person, monthBegin, lastDay, ShiftPeriod.holiday);
-            totalHolidayPeopleCompetences.merge(person, activityCompetence, 
-                (previousValue, newValue) -> newValue + previousValue);
-            //Cerco le competenze di turno notturno...
-            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType, 
-                person, monthBegin, lastDay, ShiftPeriod.nightly);
-            totalNightlyPeopleCompetences.merge(person, activityCompetence, 
-                (previousValue, newValue) -> newValue + previousValue);
-          });
-        });
+    .forEach(monthStatus -> {
+      // Per ogni attività calcolo le competenze di ogni persona coinvolta
+      involvedShiftPeople.forEach(person -> {
+        int activityCompetence = 0;
+        //Cerco le competenze di turno diurno...
+        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+            person, monthBegin, lastDay, ShiftPeriod.daily);
+        // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+        // quale ha svolto i turni
+        totalPeopleCompetences.merge(person, activityCompetence, 
+            (previousValue, newValue) -> newValue + previousValue);
+        //Cerco le competenze di turno festivo...
+        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+            person, monthBegin, lastDay, ShiftPeriod.holiday);
+        totalHolidayPeopleCompetences.merge(person, activityCompetence, 
+            (previousValue, newValue) -> newValue + previousValue);
+        //Cerco le competenze di turno notturno...
+        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType, 
+            person, monthBegin, lastDay, ShiftPeriod.nightly);
+        totalNightlyPeopleCompetences.merge(person, activityCompetence, 
+            (previousValue, newValue) -> newValue + previousValue);
+      });
+    });
     //Assegno i codici di competenza per andare ad assegnare le competenze corrette
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
     CompetenceCode nightCode = competenceCodeDao.getCompetenceCodeByCode(codShiftNight);
     CompetenceCode holidayCode = competenceCodeDao.getCompetenceCodeByCode(codShiftHolyday);
-
 
     involvedShiftPeople.forEach(person -> {
       Integer calculatedCompetences = null;
@@ -1048,15 +1064,15 @@ public class ShiftManager2 {
        *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
        */
       HistoricalDao.lastRevisionsOf(PersonShiftDay.class, personShiftDay.id)
-          .stream().limit(1).map(historyValue -> {
-            PersonShiftDay pd = (PersonShiftDay) historyValue.value;
-            return pd.date;
-          }).filter(Objects::nonNull).distinct()
-          .forEach(localDate -> {
-            if (!localDate.equals(personShiftDay.date)) {
-              checkShiftDayValid(localDate, shiftType);
-            }
-          });
+      .stream().limit(1).map(historyValue -> {
+        PersonShiftDay pd = (PersonShiftDay) historyValue.value;
+        return pd.date;
+      }).filter(Objects::nonNull).distinct()
+      .forEach(localDate -> {
+        if (!localDate.equals(personShiftDay.date)) {
+          checkShiftDayValid(localDate, shiftType);
+        }
+      });
 
       // Aggiornamento del relativo ShiftTypeMonth (per incrementare il campo version)
       ShiftTypeMonth newStatus = shiftType.monthStatusByDate(personShiftDay.date)
