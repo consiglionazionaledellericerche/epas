@@ -710,41 +710,29 @@ public class ShiftManager2 {
       case daily:
         timeInterval = Optional.fromNullable(daily);
         timeInterval2 = Optional.<TimeInterval>absent();
-        if (setting.saturdayHolidayShift) {
-          list = shifts.stream().filter(day -> { 
-            return !personDayManager.isHoliday(day.personShift.person, day.date, true);
-          }).collect(Collectors.toList());
-        } else {
-          list = shifts.stream().filter(day -> { 
-            return !personDayManager.isHoliday(day.personShift.person, day.date, false);
-          }).collect(Collectors.toList());
-        }        
+        list = shifts.stream().filter(day -> { 
+          return !personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
+        }).collect(Collectors.toList());
+
         break;
       case nightly:
         timeInterval = Optional.fromNullable(night);
         timeInterval2 = Optional.fromNullable(beforeDawn);
-        if (setting.saturdayHolidayShift) {
-          list = shifts.stream().filter(day -> { 
-            return !personDayManager.isHoliday(day.personShift.person, day.date, true);
-          }).collect(Collectors.toList());
-        } else {
-          list = shifts.stream().filter(day -> { 
-            return !personDayManager.isHoliday(day.personShift.person, day.date, false);
-          }).collect(Collectors.toList());
-        }        
+        list = shifts.stream().filter(day -> { 
+          return !personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
+        }).collect(Collectors.toList());
+
         break;
       case holiday:
         timeInterval = Optional.<TimeInterval>absent();
         timeInterval2 = Optional.<TimeInterval>absent();
-        if (setting.saturdayHolidayShift) {
-          list = shifts.stream().filter(day -> { 
-            return personDayManager.isHoliday(day.personShift.person, day.date, true);
-          }).collect(Collectors.toList());
-        } else {
-          list = shifts.stream().filter(day -> { 
-            return personDayManager.isHoliday(day.personShift.person, day.date, false);
-          }).collect(Collectors.toList());
-        }        
+        list = shifts.stream().filter(day -> { 
+          return personDayManager.isHoliday(day.personShift.person, day.date, 
+              setting.saturdayHolidayShift);
+        }).collect(Collectors.toList());
+
         break;
       default:
         break;
