@@ -47,5 +47,7 @@ public class GeneralSetting extends BaseModel {
   
   public boolean saturdayHolidayShift = true;
   
+  public boolean roundingShiftQuantity = false;
+  
   // Fine parametri gestione giorni di turno
 }
