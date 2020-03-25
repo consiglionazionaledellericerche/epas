@@ -50,6 +50,7 @@ import models.enumerate.CalculationType;
 import models.enumerate.PaymentType;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -253,9 +254,7 @@ public class ShiftManager2 {
       if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date, 
           setting.saturdayHolidayShift) && !isHolidayShiftEnabled) {          
         return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
-      } else {
-        return Optional.of(Messages.get("shift.holidayShiftNotEnabled"));
-      }
+      } 
 
     } else {
       log.warn("Non sono correttamente configurati i parametri generali. "
@@ -289,7 +288,8 @@ public class ShiftManager2 {
       long sum = 0;
       if (personShiftDay.shiftType.organizaionShiftTimeTable != null) {
         sum = list.stream()
-            .filter(psd -> psd.organizationShiftSlot == personShiftDay.organizationShiftSlot).count();
+            .filter(psd -> psd.organizationShiftSlot 
+                == personShiftDay.organizationShiftSlot).count();
       } else {
         sum = list.stream().filter(psd -> psd.shiftSlot == personShiftDay.shiftSlot).count();
       }
@@ -551,29 +551,30 @@ public class ShiftManager2 {
     log.debug("Ricalcolo del giorno di turno {} - {}", activity, date);
     List<PersonShiftDay> shifts = shiftDao.getShiftDaysByPeriodAndType(date, date, activity);
 
-    // 1. Controllo che siano coperti tutti gli slot
-
-    long slotNumber = 0;
-    if (activity.organizaionShiftTimeTable != null) {
-      slotNumber = activity.organizaionShiftTimeTable.slotCount();
-      if (activity.organizaionShiftTimeTable.considerEverySlot) {
-        log.debug("Non controllo che gli slot siano tutti coperti per assegnare il turno valido");
-      } else {
+    // 1. Controllo che siano coperti tutti gli slot solo se stiamo sulla configurazione CNR 
+    // o in una configurazione non CNR ma in cui gli slot devono essere tutti coperti
+    if (activity.shiftTimeTable != null || (activity.organizaionShiftTimeTable != null 
+        && activity.organizaionShiftTimeTable.considerEverySlot)) {
+      long slotNumber = 0;
+      if (activity.organizaionShiftTimeTable != null) {
+        slotNumber = activity.organizaionShiftTimeTable.slotCount();
         if (slotNumber > shifts.size()) {
           shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
         } else {
           shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
         }
 
-      }
-    } else {
-      slotNumber = activity.shiftTimeTable.slotCount();
-      if (slotNumber > shifts.size()) {
-        shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
       } else {
-        shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
-      }
-    }     
+        slotNumber = activity.shiftTimeTable.slotCount();
+        if (slotNumber > shifts.size()) {
+          shifts.forEach(shift -> setShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+        } else {
+          shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
+        }
+      }  
+    }
+
+
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
     // invalidare a causa degli altri turni non rispettati
@@ -665,6 +666,7 @@ public class ShiftManager2 {
 
 
   /**
+   * Metodo che calcola i minuti di turno maturati in base ai turni effettuati nel periodo.
    * @param activity attività di turno
    * @param person Persona sulla quale effettuare i calcoli
    * @param from data iniziale
@@ -685,7 +687,8 @@ public class ShiftManager2 {
     final List<PersonShiftDay> shifts = personShiftDayDao
         .byTypeInPeriod(from, to, activity, Optional.of(person));
     List<PersonShiftDay> list = Lists.newArrayList();
-    //Cerco gli intervalli orari per stabilire a quale competenza assegnare la quantità di ore di turno
+    //Cerco gli intervalli orari per stabilire a quale competenza assegnare la quantità 
+    //di ore di turno
     Optional<TimeInterval> timeInterval = null;
     Optional<TimeInterval> timeInterval2 = null;
     TimeInterval daily = null;
@@ -745,6 +748,7 @@ public class ShiftManager2 {
         PersonDay pd = personDayManager
             .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
         if (shift.organizationShiftSlot != null) {
+
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.percentage)) {
             int quantity = isIntervalTotallyInSlot(pd, shift, timeInterval)
@@ -756,8 +760,7 @@ public class ShiftManager2 {
             if (timeInterval2.isPresent()) {
               shiftCompetences += isIntervalTotallyInSlot(pd, shift, timeInterval2);
             }
-            //            shiftCompetences += shift.organizationShiftSlot.minutesPaid 
-            //                - (shift.exceededThresholds * SIXTY_MINUTES);
+
           } else {    
             if (shift.organizationShiftSlot.paymentType == PaymentType.SPLIT_CALCULATION) {
               shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
@@ -765,7 +768,6 @@ public class ShiftManager2 {
               shiftCompetences += shift.organizationShiftSlot.minutesPaid 
                   - (shift.exceededThresholds * SIXTY_MINUTES);
             }
-
           }
         } else {
           shiftCompetences += paidMinutes - (shift.exceededThresholds * SIXTY_MINUTES);
@@ -776,9 +778,31 @@ public class ShiftManager2 {
       }
     }
 
+    if (setting.roundingShiftQuantity) {
+      shiftCompetences = roundingShift(shiftCompetences);
+    } 
     return shiftCompetences;
   }
 
+  /**
+   * Metodo di utilità che arrotonda il quantitativo di ore di turno all'ora superiore
+   * o inferiore a seconda che la divisione % 60 del quantitativo sia maggiore o minore di mezz'ora.
+   * @param shiftCompetence la quantità di ore di turno (in minuti)
+   * @return l'arrotondamento all'ora superiore o inferiore della quantità in minuti 
+   *     di ore di turno.
+   */
+  private int roundingShift(int shiftCompetence) {
+    if (shiftCompetence == 0) {
+      return 0;
+    }
+    if (shiftCompetence % 60 > DateTimeConstants.MINUTES_PER_HOUR / 2) {
+      shiftCompetence = shiftCompetence 
+          + (DateTimeConstants.MINUTES_PER_HOUR - shiftCompetence % 60);
+    } else {
+      shiftCompetence = shiftCompetence - shiftCompetence % 60;
+    }
+    return shiftCompetence;
+  }
 
   /**
    * Metodo che ritorna la quantità di minuti lavorata all'interno della fascia di turno.

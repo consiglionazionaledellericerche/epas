@@ -1,7 +1,7 @@
 # --- !Ups
 
-ALTER TABLE general_setting ADD COLUMN rounding_shift_quantity BOOLEAN;
-ALTER TABLE general_setting_history ADD COLUMN rounding_shift_quantity BOOLEAN;
+ALTER TABLE general_setting ADD COLUMN rounding_shift_quantity BOOLEAN DEFAULT FALSE;
+ALTER TABLE general_setting_history ADD COLUMN rounding_shift_quantity BOOLEAN DEFAULT FALSE;
 
 # --- !Downs
 
