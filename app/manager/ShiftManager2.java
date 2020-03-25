@@ -83,6 +83,19 @@ public class ShiftManager2 {
   private final GeneralSettingDao generalSettingDao;
 
 
+  /**
+   * Injector.
+   * @param personDayManager il personDayManager
+   * @param personShiftDayDao il dao sul personShiftDay
+   * @param personDayDao il dao sul personDay
+   * @param shiftDao il dao sui turni
+   * @param competenceUtility il manager per le competenze
+   * @param competenceCodeDao il dao per i competenceCode
+   * @param competenceDao il dao per le competenze
+   * @param personMonthRecapDao il dao sui residui mensili
+   * @param shiftTypeMonthDao il dao sulle attribuzioni mensili dei turni
+   * @param generalSettingDao il dao sui parametri generali
+   */
   @Inject
   public ShiftManager2(PersonDayManager personDayManager, PersonShiftDayDao personShiftDayDao,
       PersonDayDao personDayDao, ShiftDao shiftDao, CompetenceUtility competenceUtility,
@@ -101,6 +114,7 @@ public class ShiftManager2 {
   }
 
   /**
+   * Metodo che ritorna la lista delle attività associate all'utente che ne fa richiesta.
    * @return la lista delle attività associate all'utente che ne fa richiesta.
    */
   public List<ShiftType> getUserActivities() {
@@ -206,7 +220,7 @@ public class ShiftManager2 {
    */
   public Optional<String> shiftPermitted(PersonShiftDay personShiftDay) {
 
-    /**
+    /*
      * 0. Verificare se la persona è segnata in quell'attività in quel giorno
      *    return shift.personInactive
      * 1. La Persona non deve essere già in un turno per quel giorno
@@ -271,12 +285,12 @@ public class ShiftManager2 {
       for (PersonShiftDay registeredDay : list) {
         if (personShiftDay.shiftType.organizaionShiftTimeTable != null) {
           //controlla che il turno in quello slot sia già stato assegnato ad un'altra persona
-          if (registeredDay.organizationShiftSlot == personShiftDay.organizationShiftSlot) {
+          if (registeredDay.organizationShiftSlot.equals(personShiftDay.organizationShiftSlot)) {
             return Optional.of(Messages
                 .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
           }
         } else {
-          if (registeredDay.shiftSlot == personShiftDay.shiftSlot) {
+          if (registeredDay.shiftSlot.equals(personShiftDay.shiftSlot)) {
             return Optional.of(Messages
                 .get("shift.slotAlreadyAssigned", registeredDay.personShift.person.fullName()));
           }
@@ -288,10 +302,10 @@ public class ShiftManager2 {
       long sum = 0;
       if (personShiftDay.shiftType.organizaionShiftTimeTable != null) {
         sum = list.stream()
-            .filter(psd -> psd.organizationShiftSlot 
-                == personShiftDay.organizationShiftSlot).count();
+            .filter(psd -> psd.organizationShiftSlot
+                .equals(personShiftDay.organizationShiftSlot)).count();
       } else {
-        sum = list.stream().filter(psd -> psd.shiftSlot == personShiftDay.shiftSlot).count();
+        sum = list.stream().filter(psd -> psd.shiftSlot.equals(personShiftDay.shiftSlot)).count();
       }
 
       if (sum + count > MAX_QUANTITY_IN_SLOT) {
@@ -653,6 +667,7 @@ public class ShiftManager2 {
   }
 
   /**
+   * Metodo che ritorna la lista delle persone coinvolte nei turni in un determinato periodo.
    * @param activity attività di turno
    * @param from data di inizio
    * @param to data di fine
@@ -823,7 +838,8 @@ public class ShiftManager2 {
               pair.second.date.toLocalTime()));
       if (interval != null) {
         if (timeInterval.isPresent()) {
-          TimeInterval intersection = DateUtility.intervalIntersection(timeInterval.get(), interval);
+          TimeInterval intersection = 
+              DateUtility.intervalIntersection(timeInterval.get(), interval);
           if (intersection == null) {
             return 0;
           }
@@ -844,7 +860,8 @@ public class ShiftManager2 {
    * @param interval l'eventuale intervallo di validità dello slot (diurno/notturno)
    * @return la quantità in minuti da pagare nello specifico slot di turno.
    */
-  private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, Optional<TimeInterval> interval) {
+  private int isIntervalTotallyInSlot(PersonDay pd, PersonShiftDay psd, 
+      Optional<TimeInterval> interval) {
     if (interval.isPresent()) {
       int quantity = quantityCountForShift(psd, pd, interval);
       if (quantity < 0) {
@@ -870,6 +887,8 @@ public class ShiftManager2 {
   }
 
   /**
+   * Metodo che ritorna la lista degli ShiftTroubles appartenenti a una persona sull'attività
+   * di turno in un certo periodo.
    * @param activity attività di turno
    * @param person Persona
    * @param from data iniziale
@@ -889,6 +908,8 @@ public class ShiftManager2 {
   }
 
   /**
+   * Metodo che restituisce il residuo della competenza turno, se ne è avanzato, 
+   * dal mese precedente.
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
    * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
@@ -910,6 +931,8 @@ public class ShiftManager2 {
   }
 
   /**
+   * Metodo che ritorna la lista di tutte le persone abilitate sull'attività nell'intervallo
+   * di tempo specificato.
    * @param activity attività di turno
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
@@ -961,29 +984,29 @@ public class ShiftManager2 {
 
     // Recupero tutte le attività approvate in quel mese
     shiftTypeMonthDao.approvedInMonthRelatedWith(shiftTypeMonth.yearMonth, involvedShiftPeople)
-    .forEach(monthStatus -> {
-      // Per ogni attività calcolo le competenze di ogni persona coinvolta
-      involvedShiftPeople.forEach(person -> {
-        int activityCompetence = 0;
-        //Cerco le competenze di turno diurno...
-        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-            person, monthBegin, lastDay, ShiftPeriod.daily);
-        // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
-        // quale ha svolto i turni
-        totalPeopleCompetences.merge(person, activityCompetence, 
-            (previousValue, newValue) -> newValue + previousValue);
-        //Cerco le competenze di turno festivo...
-        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
-            person, monthBegin, lastDay, ShiftPeriod.holiday);
-        totalHolidayPeopleCompetences.merge(person, activityCompetence, 
-            (previousValue, newValue) -> newValue + previousValue);
-        //Cerco le competenze di turno notturno...
-        activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType, 
-            person, monthBegin, lastDay, ShiftPeriod.nightly);
-        totalNightlyPeopleCompetences.merge(person, activityCompetence, 
-            (previousValue, newValue) -> newValue + previousValue);
-      });
-    });
+        .forEach(monthStatus -> {
+          // Per ogni attività calcolo le competenze di ogni persona coinvolta
+          involvedShiftPeople.forEach(person -> {
+            int activityCompetence = 0;
+            //Cerco le competenze di turno diurno...
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, lastDay, ShiftPeriod.daily);
+            // Somma algebrica delle competenze delle persone derivanti da ogni attività sulla
+            // quale ha svolto i turni
+            totalPeopleCompetences.merge(person, activityCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+            //Cerco le competenze di turno festivo...
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType,
+                person, monthBegin, lastDay, ShiftPeriod.holiday);
+            totalHolidayPeopleCompetences.merge(person, activityCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+            //Cerco le competenze di turno notturno...
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.shiftType, 
+                person, monthBegin, lastDay, ShiftPeriod.nightly);
+            totalNightlyPeopleCompetences.merge(person, activityCompetence, 
+                (previousValue, newValue) -> newValue + previousValue);
+          });
+        });
     //Assegno i codici di competenza per andare ad assegnare le competenze corrette
     CompetenceCode shiftCode = competenceCodeDao.getCompetenceCodeByCode(codShift);
     CompetenceCode nightCode = competenceCodeDao.getCompetenceCodeByCode(codShiftNight);
@@ -1012,7 +1035,7 @@ public class ShiftManager2 {
   }
 
   /**
-   * 
+   * Metodo che salva la quantità di ore di turno.
    * @param person il dipendente per cui si vuole salvare la competenza
    * @param shiftTypeMonth il pregresso se presente con l'informazione se è già stato approvato 
    *     o meno
@@ -1088,15 +1111,15 @@ public class ShiftManager2 {
        *  sul giorno precedente (spostamento di un turno da un giorno all'altro)
        */
       HistoricalDao.lastRevisionsOf(PersonShiftDay.class, personShiftDay.id)
-      .stream().limit(1).map(historyValue -> {
-        PersonShiftDay pd = (PersonShiftDay) historyValue.value;
-        return pd.date;
-      }).filter(Objects::nonNull).distinct()
-      .forEach(localDate -> {
-        if (!localDate.equals(personShiftDay.date)) {
-          checkShiftDayValid(localDate, shiftType);
-        }
-      });
+          .stream().limit(1).map(historyValue -> {
+            PersonShiftDay pd = (PersonShiftDay) historyValue.value;
+            return pd.date;
+          }).filter(Objects::nonNull).distinct()
+          .forEach(localDate -> {
+            if (!localDate.equals(personShiftDay.date)) {
+              checkShiftDayValid(localDate, shiftType);
+            }
+          });
 
       // Aggiornamento del relativo ShiftTypeMonth (per incrementare il campo version)
       ShiftTypeMonth newStatus = shiftType.monthStatusByDate(personShiftDay.date)
