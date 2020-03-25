@@ -253,7 +253,10 @@ public class Shift extends Controller {
   public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
 //    int year = params.get("year", Integer.class);
 //    int month = params.get("month", Integer.class);
-//    Long shiftCategoryId = params.get("type", Long.class);
+    if (shiftCategoryId == null) {
+      shiftCategoryId = params.get("type", Long.class);
+    }
+    
 
     log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
         shiftCategoryId, year, month);
@@ -373,7 +376,7 @@ public class Shift extends Controller {
     
 
     renderPDF(options, today, firstOfMonth, totalShiftInfo, personsShiftInconsistentAbsences,
-        thInconsistence, thShift, shiftDesc, supervisor, seatSupervisor);
+        thInconsistence, thShift, shiftDesc, supervisor, seatSupervisor, office);
   }
 
 
