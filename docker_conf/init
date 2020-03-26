@@ -178,6 +178,24 @@ else
   sed 's#{{OIL_CATEGORIES_DEFAULT}}#'"${OIL_CATEGORIES_DEFAULT}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${REPORT_TO}" ]; then
+  sed -n '/REPORT_TO/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{REPORT_TO}}#'"${REPORT_TO}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${REPORT_FROM}" ]; then
+  sed -n '/REPORT_FROM/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{REPORT_FROM}}#'"${REPORT_FROM}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+if [ -z "${REPORT_SUBJECT}" ]; then
+  sed -n '/REPORT_SUBJECT/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{REPORT_SUBJECT}}#'"${REPORT_SUBJECT}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${ANAGRAFICA_BASE}" ]; then
   sed -n '/ANAGRAFICA_BASE/!p' -i ${APP_HOME}/conf/prod.conf
 else
