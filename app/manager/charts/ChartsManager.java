@@ -511,9 +511,9 @@ public class ChartsManager {
       personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
           .collect(Collectors.toList());
     } else {
-      personList = personDao
-          .list(Optional.absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
-          .list();
+      personList = personDao.list(
+          Optional.<String>absent(), offices, false, beginDate, 
+          endDate, true).list();
     }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ZipOutputStream zos = new ZipOutputStream(out);
