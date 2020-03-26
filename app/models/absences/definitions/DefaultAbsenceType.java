@@ -1064,9 +1064,18 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
       true /* festivo capire */, false, 0, null,
       Sets.newHashSet(), null, null, false),
+  
+  A_55("55", "aspett. per funzioni pubbliche", false,
+      ImmutableSet.of(JustifiedTypeName.all_day),
+      0, true, false, 0,
+      null, Sets.newHashSet(), null, null, false),
   A_58("58", "aspett. per funz. pubb. non retr.", false,
       ImmutableSet.of(JustifiedTypeName.all_day),
       0, true /* festivo capire */, false, 0,
+      null, Sets.newHashSet(), null, null, false),
+  A_58U("58U", "aspett. non retr. funz. supp. uff. O.D.P.", false,
+      ImmutableSet.of(JustifiedTypeName.all_day),
+      0, true, false, 0,
       null, Sets.newHashSet(), null, null, false),
 
   A_95046("95046", "perm. funz. pubb. giunte provin. 6 h", false,
