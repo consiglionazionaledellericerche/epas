@@ -146,6 +146,7 @@ public enum DefaultComplation {
   C_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24M), 
       ImmutableSet.of(DefaultAbsenceType.A_24H7)),
+ 
   
   C_25P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25PM), 
