@@ -428,6 +428,10 @@ public enum DefaultAbsenceType {
       + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 
       0, true, false, 0, null, Sets.newHashSet(), null, null, false),
 
+  A_COVID50("COVID50", "Congedo parentale straordinario per un massimo di  15 gg. lavorativi.", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
+      null, false), 
+  
   A_25("25", "Astensione facoltativa post partum 30% primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false), 
