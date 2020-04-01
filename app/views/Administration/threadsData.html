@@ -1,0 +1,29 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Dati thread' /}
+
+#{include './_nav.html' /}
+
+<div class="container">
+  <table datatable class="table table-bordered table-hover">
+    <caption><h2>&{actionSelected+'.table'}</h2></caption>
+    <thead>
+	  <tr>
+		<th>id</th>
+	    <th>name</th>
+	    <th>state</th>
+	    <th>dump</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  #{list threadsData, as: 'threadData'}
+	    <tr>
+	      <td>${threadData.getThreadId()}</td>
+	      <td>${threadData.getThreadName()}</td>
+	      <td>${threadData.getThreadState()}</td>
+	      <td><pre>${threadData.toString()}</pre></td>	      
+	    </tr>
+	  #{/list}
+	</tbody>
+  </table>
+</div>
