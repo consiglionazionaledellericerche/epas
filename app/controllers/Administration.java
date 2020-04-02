@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +45,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -398,17 +400,29 @@ public class Administration extends Controller {
 
     final int mb = 1024 * 1024;
     final Runtime runtime = Runtime.getRuntime();
+    val load = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 
-    final Set<Entry<String, String>> entries = ImmutableMap.of(
+    final Set<Entry<String, String>> entrySet = ImmutableMap.of(
         "Available Processors", String.format("%s", runtime.availableProcessors()),
         "Used Memory", String.format("%s Mb", (runtime.totalMemory() - runtime.freeMemory()) / mb),
         "Free Memory", String.format("%s Mb", runtime.freeMemory() / mb),
         "Max Memory", String.format("%s Mb", runtime.maxMemory() / mb),
         "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
-
+    
+    final Set<Entry<String, String>> entries = Sets.newHashSet(entrySet);
+    entries.add(new SimpleEntry<String, String>("Load", String.format("%s", load)));
     render("@data", entries);
   }
 
+  /**
+   * Mostra le informazioni su thread correnti.
+   */
+  public static void threadsData() {
+    val threads = ManagementFactory.getThreadMXBean();
+    val threadsData = threads.dumpAllThreads(true, true);
+    render("@threadsData", threadsData);
+  }
+  
   /**
    * Render del modale per l'aggiunta di un nuovo parametro di configurazione.
    */

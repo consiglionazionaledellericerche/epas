@@ -2,22 +2,8 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Dati applicazione' /}
 
-<div id="container-nav-tabs" class="container">
-  <ul class="nav nav-tabs">
-	<li#{if actionSelected.equals("Administration.generalSetting")} class="active"#{set editable:true /}#{/if}>
-      <a href="@{Administration.generalSetting()}">Impostazioni generali</a>
-    </li>  
-    <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{set editable:true /}#{/if}>
-      <a href="@{Administration.playConfiguration()}">Play!</a>
-    </li>
-    <li#{if actionSelected.equals("Administration.jvmConfiguration")} class="active"#{/if}>
-      <a href="@{Administration.jvmConfiguration()}">Jvm</a>
-    </li>
-    <li#{if actionSelected.equals("Administration.runtimeData")} class="active"#{/if}>
-      <a href="@{Administration.runtimeData()}">Runtime</a>
-    </li>
-  </ul>
-</div>
+#{include './_nav.html' /}
+
 <br>
 <div class="container">
   #{if !actionSelected.equals("Administration.generalSetting")}   
