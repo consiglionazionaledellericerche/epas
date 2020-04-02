@@ -18,11 +18,13 @@ import dao.WorkingTimeTypeDao;
 import dao.ZoneDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateUtility;
-import lombok.val;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -33,8 +35,8 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
-import models.TimeSlot;
 import models.Stamping.WayType;
+import models.TimeSlot;
 import models.WorkingTimeTypeDay;
 import models.ZoneToZones;
 import models.absences.Absence;
@@ -43,7 +45,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
-
 import org.assertj.core.util.Strings;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -51,10 +52,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import play.jobs.Job;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 
 @Slf4j
@@ -68,7 +66,7 @@ public class PersonDayManager {
   private final ZoneDao zoneDao;
   private final ContractDao contractDao;
   private final AbsenceComponentDao absenceComponentDao;
-  private final GeneralSettingDao generalSettingDao;
+
 
   /**
    * Costruttore.
@@ -81,8 +79,7 @@ public class PersonDayManager {
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
       PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao,
-      AbsenceComponentDao absenceComponentDao, ContractDao contractDao, 
-      GeneralSettingDao generalSettingDao) {
+      AbsenceComponentDao absenceComponentDao, ContractDao contractDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
@@ -92,7 +89,6 @@ public class PersonDayManager {
     this.zoneDao = zoneDao;
     this.absenceComponentDao = absenceComponentDao;
     this.contractDao = contractDao;
-    this.generalSettingDao = generalSettingDao;
   }
 
   /**
@@ -646,13 +642,17 @@ public class PersonDayManager {
     return personDay;
   }
 
+
   /**
-   * 
-   * @param validPairs la lista di coppie di timbrature valide 
+   * Metodo che controlla il tempo giustificato dalle zone di timbratura.
+   * @param validPairs la lista di coppie di timbrature valide
+   * @param startWork l'orario di inizio lavoro in sede
+   * @param endWork l'orario di fine lavoro in sede
    * @return il quantitativo che viene giustificato timbrando uscita/ingresso su zone 
    *     appartenenti a un link.
    */
-  private int justifiedTimeBetweenZones(List<PairStamping> validPairs, LocalTime startWork, LocalTime endWork) {
+  private int justifiedTimeBetweenZones(List<PairStamping> validPairs, 
+      LocalTime startWork, LocalTime endWork) {
 
     int timeToJustify = 0;
     PairStamping temp = null;
@@ -974,7 +974,7 @@ public class PersonDayManager {
   }
 
   /**
-   * 
+   * Metodo che controlla se il giorno è valido rispetto a tempo a lavoro, festivo...
    * @param personDay il personDay relativo alla persona e al giorno di interesse
    * @param pd il wrapper contenente i metodi di utilità
    * @return true se è un giorno valido rispetto a tempo a lavoro, festivo, assenze ecc...
@@ -1302,7 +1302,11 @@ public class PersonDayManager {
     return coupleOfStampings;
   }
 
+
   /**
+   * Metodo di utilità che determina la quantità di tempo a lavoro in eccesso nel caso 
+   * una persona sia in turno.
+   * @param pd il personDay da controllare
    * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno.
    */
   public int getExceedInShift(PersonDay pd) {
@@ -1365,7 +1369,8 @@ public class PersonDayManager {
         consideredEnd = end;
       }
 
-      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);      
+      workingMinutes += DateUtility.toMinute(consideredEnd) 
+          - DateUtility.toMinute(consideredStart);      
 
     }
     return workingMinutes;
@@ -1463,7 +1468,8 @@ public class PersonDayManager {
     }
     final List<Stamping> orderedStampings = ImmutableList
         .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
-    List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
+    List<PairStamping> pairStampings = computeValidPairStampingsForPresence(orderedStampings);
+    //List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
     boolean enough = false;
     int timeInSeat = 0;
     //int timeOffSeat = 0;
@@ -1484,6 +1490,62 @@ public class PersonDayManager {
       enough = true;
     }
     return enough;
+  }
+
+  /**
+   * Metodo usato per calcolare quanto tempo è stato lavorato in sede dai dipendenti IV-VIII.
+   * @param orderedStampings la lista ordinata delle timbrature
+   * @return la lista delle coppie valide di timbratura che servono per determinare il tempo 
+   *     lavorato in sede.
+   */
+  private List<PairStamping> computeValidPairStampingsForPresence(List<Stamping> orderedStampings) {
+    
+    if (orderedStampings.isEmpty()) {
+      return Lists.newArrayList();
+    }
+    boolean serviceStamping = false;
+    Stamping stampEnter = null;
+    List<PairStamping> pairStampings = Lists.newArrayList();
+    for (Stamping stamping : orderedStampings) {
+
+      if (stampEnter == null) {
+        if (stamping.isIn()) {
+          if ((stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO && serviceStamping) 
+              || (stamping.stampType == null && !serviceStamping)) {
+            stampEnter = stamping;
+            continue;
+          }
+
+        }
+        if (stamping.isOut()) {
+          //una uscita prima di una entrata e' come se non esistesse          
+          continue;
+        }
+
+      }
+      //cerca l'uscita
+      if (stampEnter != null) {
+        if (stamping.isOut()) {
+          if (!serviceStamping && stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO) {
+            serviceStamping = true;
+          }
+          PairStamping pair = new PairStamping(stampEnter, stamping);
+          pairStampings.add(pair);
+
+          stampEnter = null;
+          if (stamping.stampType == null) {
+            serviceStamping = false;
+          }
+          continue;
+        }
+        //trovo un secondo ingresso, butto via il primo
+        if (stamping.isIn()) {          
+          stampEnter = stamping;
+        }
+      }
+      
+    }
+    return pairStampings;
   }
 
   /**
