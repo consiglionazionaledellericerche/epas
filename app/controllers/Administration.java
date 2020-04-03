@@ -192,7 +192,7 @@ public class Administration extends Controller {
   }
 
   /**
-   * 
+   * Metodo che resetta i codici 92H.
    */
   public static void reset92H() {
     List<HistoryValue<Absence>> allAbsences = historyDao.oldMissions();
@@ -431,6 +431,7 @@ public class Administration extends Controller {
   }
 
   /**
+   * Metodo che permette di salvare la configurazione.
    * @param name     Nome del parametro
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
@@ -866,7 +867,8 @@ public class Administration extends Controller {
 
 
   /**
-   * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
+   * Aggiorna la configurazione di tutti gli uffici.
+   * @see: manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
     configurationManager.updateAllOfficesConfigurations();

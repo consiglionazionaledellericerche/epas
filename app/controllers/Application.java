@@ -2,11 +2,8 @@ package controllers;
 
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
-
 import javax.inject.Inject;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -19,12 +16,18 @@ public class Application extends Controller {
   @Inject
   static IWrapperFactory wrapperFactory;
 
+  /**
+   * Ritorna l'index per amministratore.
+   */
   public static void indexAdmin() {
     Logger.debug("chiamato metodo indexAdmin dell'Application controller");
     render();
 
   }
 
+  /**
+   * Ritorna l'index in base al ruolo.
+   */
   public static void index() {
 
     //Utenti di sistema (developer,admin)
