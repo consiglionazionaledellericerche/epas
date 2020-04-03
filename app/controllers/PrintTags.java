@@ -21,6 +21,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.Stamping;
 import models.dto.OffSiteWorkingTemp;
 import models.dto.PrintTagsInfo;
@@ -104,6 +105,7 @@ public class PrintTags extends Controller {
           stampingOwnersInDays.keySet().size(), month, year, person.getFullname());
 
       List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
+      List<PersonDay> holidaysInShift = printTagsManager.getHolidaysInShift(psDto);
       PrintTagsInfo info = PrintTagsInfo.builder()
           .psDto(psDto)
           .person(p)
@@ -111,6 +113,7 @@ public class PrintTags extends Controller {
           .offSiteWorkingTempList(offSiteWorkingTemp)
           .historyStampingsList(historyStampingsList)
           .stampingOwnersInDays(stampingOwnersInDays)
+          .holidaysInShift(holidaysInShift)
           .build();
       log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
       dtoList.add(info);

@@ -219,6 +219,30 @@
  	#{/list}
  	
  </table>
+ 
+  #{ifnot dto.holidaysInShift.isEmpty()}
+  <table>
+ 	<caption style="margin-top: 2em; font-weight:bold">Giorni festivi lavorati in turno</caption>
+ 	<tr>
+ 		<th>Giorno</th>
+ 		<th style="text-align:center">Ore lavorate</th> 		
+ 		
+ 	</tr>
+ 	#{list dto.holidaysInShift, as:'day'}
+ 	  <tr>
+ 	    <td>${day.date}</td>
+ 	    <td style="text-align:center">${day.timeAtWork != 0 ? day.timeAtWork.printHourMinute() : day.stampingsTime.printHourMinute()}</td> 	    
+ 	  </tr>
+ 	#{/list}
+ 	
+ </table>
+  
+  
+  
+  #{/ifnot}
+ 
+ 
+ 
   #{ifnot dto.psDto.absenceList.isEmpty()}
   *{Significato codici assenza}*
   <br>
