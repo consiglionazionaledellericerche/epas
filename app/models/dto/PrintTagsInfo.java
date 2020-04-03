@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import manager.recaps.personstamping.PersonStampingRecap;
 import models.Person;
+import models.PersonDay;
 import models.Stamping;
 import models.User;
 import org.assertj.core.util.Lists;
@@ -32,5 +33,8 @@ public class PrintTagsInfo {
   
   @Builder.Default
   public Map<User, Set<LocalDate>> stampingOwnersInDays = Maps.newHashMap();
+  
+  @Builder.Default
+  public List<PersonDay> holidaysInShift = Lists.newArrayList();
   
 }

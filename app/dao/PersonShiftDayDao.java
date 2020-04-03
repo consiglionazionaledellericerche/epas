@@ -31,9 +31,13 @@ public class PersonShiftDayDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+
   /**
+   * Il giorno di turno della persona person nella data date se esiste.
+   * @param person la persona per cui cercare il turno
+   * @param date la data in cui cercare il turno
    * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in
-   * turno Null altrimenti.
+   *     turno Null altrimenti.
    */
   public Optional<PersonShiftDay> getPersonShiftDay(Person person, LocalDate date) {
     final QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
@@ -46,9 +50,16 @@ public class PersonShiftDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+
   /**
+   * La lista dei giorni di turno nel periodo compreso tra from e to per l'attività type per la 
+   * persona person (opzionale).
+   * @param from la data da cui cercare i giorni di turno
+   * @param to la data fino a cui cercare i giorni di tunro
+   * @param type l'attività su cui cercare i turni
+   * @param person la persona per cui cercare i turni
    * @return la lista dei personShiftDay presenti nel periodo compreso tra 'from' e 'to' aventi lo
-   * shiftType 'type'. Se specificato filtra sulla persona richiesta.
+   *     shiftType 'type'. Se specificato filtra sulla persona richiesta.
    */
   public List<PersonShiftDay> byTypeInPeriod(
       LocalDate from, LocalDate to, ShiftType type, Optional<Person> person) {
@@ -67,11 +78,14 @@ public class PersonShiftDayDao extends DaoBase {
         .where(condition).orderBy(personShiftDay.date.asc()).fetch();
   }
 
+
   /**
-   * Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
-   *
+   *  Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
+   * @param shiftType l'attività su cui cercare il giorno di turno
+   * @param date la data su cui cercare il giorno di turno
+   * @param shiftSlot lo slot di turno
    * @return il personShiftDay relativo al tipo 'shiftType' nel giorno 'date' con lo slot
-   * 'shiftSlot'.
+   *     'shiftSlot'.
    */
   public PersonShiftDay getPersonShiftDayByTypeDateAndSlot(
       ShiftType shiftType, LocalDate date, ShiftSlot shiftSlot) {
@@ -98,6 +112,7 @@ public class PersonShiftDayDao extends DaoBase {
   }
 
   /**
+   * Metodo che ritorna la lista dei personShift disabilitati.
    * @return la lista dei personShift disabilitati.
    */
   public List<PersonShift> getDisabled() {
@@ -106,7 +121,7 @@ public class PersonShiftDayDao extends DaoBase {
   }
 
   /**
-   * Tutti i PersonReperibilityType.
+   * Tutti gli ShiftCategories.
    *
    * @return la lista di tutti i PersonReperibilityType presenti sul db.
    */
@@ -143,6 +158,12 @@ public class PersonShiftDayDao extends DaoBase {
         .fetchFirst());
   }
 
+  /**
+   * Il conteggio dei personShiftDay nel giorno date per la persona person.
+   * @param person la persona per cui cercare i turni
+   * @param date la data in cui cercare i turni
+   * @return il numero di personShiftDay.
+   */
   public long countByPersonAndDate(Person person, LocalDate date) {
 
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
@@ -150,10 +171,30 @@ public class PersonShiftDayDao extends DaoBase {
         .where(shiftDay.personShift.person.eq(person).and(shiftDay.date.eq(date))).fetchCount();
   }
 
+  /**
+   * La lista dei personShiftDay nel giorno date per l'attività activity.
+   * @param date il giorno in cui cercare
+   * @param activity l'attività di turno su cui cercare
+   * @return la lista dei personShiftDay.
+   */
   public List<PersonShiftDay> listByDateAndActivity(LocalDate date, ShiftType activity) {
     final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
     return getQueryFactory().selectFrom(shiftDay)
         .where(shiftDay.date.eq(date).and(shiftDay.shiftType.eq(activity))).fetch();
+  }
+  
+  /**
+   * La lista dei giorni di turno per una persona in un periodo.
+   * @param from la data da cui cercare i giorni di turno
+   * @param to la data fino a cui cercare i giorni di turno
+   * @return La lista dei giorni di turno per una persona in un periodo.
+   */
+  public List<PersonShiftDay> listByPeriod(Person person, LocalDate from, LocalDate to) {
+    final QPersonShiftDay shiftDay = QPersonShiftDay.personShiftDay;
+    return getQueryFactory().selectFrom(shiftDay)
+        .where(shiftDay.personShift.person.eq(person)
+            .and(shiftDay.date.goe(from).and(shiftDay.date.loe(to))))
+        .orderBy(shiftDay.date.asc()).fetch();
   }
 
 }
