@@ -8,7 +8,7 @@ public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaAssenza(Certification certification) {
-    codiceSede = Integer.parseInt(certification.person.office.codeId);
+    codiceSede = certification.person.office.codeId;
     anno = certification.year;
     mese = certification.month;
 
