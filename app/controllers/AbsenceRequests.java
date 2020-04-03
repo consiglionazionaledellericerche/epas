@@ -1,10 +1,5 @@
 package controllers;
 
-import java.util.List;
-import javax.inject.Inject;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -20,8 +15,10 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.Web;
-import lombok.val;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
@@ -45,6 +42,9 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -225,12 +225,12 @@ public class AbsenceRequests extends Controller {
     // extra info per richiesta riposo compensativo o ferie
     int compensatoryRestAvailable = 0;
     List<VacationSituation> vacationSituations = Lists.newArrayList();
-    boolean showVacationPeriods = false;
-    boolean retroactiveAbsence = false;
+
     boolean handleCompensatoryRestSituation = false;
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
+
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
           LocalDate.now().getMonthOfYear(), true);
@@ -250,7 +250,8 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
-
+    boolean showVacationPeriods = false;
+    boolean retroactiveAbsence = false;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
     GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
