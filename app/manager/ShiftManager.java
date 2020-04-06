@@ -671,6 +671,7 @@ public class ShiftManager {
 
 
   /**
+   * La lista dei periodi di turno lavorati.
    * @param personShiftDays lista dei giorni di turno di un certo tipo.
    * @return la lista dei periodi di turno lavorati.
    */
@@ -717,6 +718,7 @@ public class ShiftManager {
 
 
   /**
+   * La lista dei periodi di turno lavorati.
    * @param personShiftCancelled lista dei turni cancellati.
    * @return la lista dei periodi di turno lavorati.
    */

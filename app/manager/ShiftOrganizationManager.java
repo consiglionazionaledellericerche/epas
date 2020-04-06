@@ -24,6 +24,15 @@ public class ShiftOrganizationManager {
     return 0;
   }
   
+  /**
+   * Ritorna una stringa contenente un eventuale errore in creazione di time table e slot.
+   * @param list la lista di oggetti che compongono l'organizationTimeTable
+   * @param office la sede
+   * @param calculationType il tipo di calcolo della timetable
+   * @param name il nome
+   * @param considerEverySlot se bisogna considerare tutti gli slot per assegnare il turno
+   * @return la stringa contenente eventuali errori in creazione.
+   */
   public String generateTimeTableAndSlot(List<OrganizationTimeTable> list, 
       Office office, CalculationType calculationType, String name, boolean considerEverySlot) {
     String result = "";
@@ -35,7 +44,7 @@ public class ShiftOrganizationManager {
       shiftTimeTable.considerEverySlot = considerEverySlot;
       shiftTimeTable.office = office;
       shiftTimeTable.save();
-    } catch(Exception e) {
+    } catch (Exception e) {
       result = "Errore in creazione della timetable";
     }
     try {
@@ -69,17 +78,19 @@ public class ShiftOrganizationManager {
   }
 
   /**
-   * 
+   * Ritorna il nome della timetable trasformata secondo la nuova modellazione.
    * @param shiftTimeTable la timetable da trasformare
    * @return il nome della timetable trasformata secondo la nuova modellazione.
    */
   public String transformTimeTableName(ShiftTimeTable shiftTimeTable) {
-    if (shiftTimeTable.shiftTypes.stream().anyMatch(e -> e.shiftCategories.office.codeId.equals("223400"))) {
-      return String.format("IIT - %s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
+    if (shiftTimeTable.shiftTypes.stream()
+        .anyMatch(e -> e.shiftCategories.office.codeId.equals("223400"))) {
+      return String.format("IIT - %s - %s / %s - %s", 
+          shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
           shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
     }
-    return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
-        shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
+    return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, 
+        shiftTimeTable.endMorning, shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
   }
   
 }

@@ -2,28 +2,22 @@ package jobs;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import dao.AbsenceDao;
-
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import manager.recaps.charts.RenderResult;
 import manager.recaps.charts.ResultFromFile;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.enumerate.CheckType;
-
 import org.joda.time.LocalDate;
-
 import play.jobs.Job;
 
 /**
+ * Job che sistema assenze varie.
  * @author daniele
  * @since 05/07/16.
  */
@@ -47,7 +41,7 @@ public class ChartJob extends Job<List<RenderResult>> {
   }
 
   /**
-   *
+   * La lista di renderResult  delle assenze parsate dallo schedone delle assenze annuali.
    * @return La lista delle assenze parsate dallo schedone delle assenze annuali.
    */
   public List<RenderResult> doJobWithResult() {

@@ -11,8 +11,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.base.IPropertiesInPeriodOwner;
@@ -27,6 +27,7 @@ import play.db.jpa.JPA;
  *
  */
 
+@Slf4j
 public class PeriodManager {
 
   @Inject
@@ -41,7 +42,8 @@ public class PeriodManager {
    * @param persist true persiste la nuova lista di periodi.
    * @return la nuova lista dei periodi
    */
-  public final List<IPropertyInPeriod> updatePeriods(IPropertyInPeriod propertyInPeriod, boolean persist) {
+  public final List<IPropertyInPeriod> updatePeriods(
+      IPropertyInPeriod propertyInPeriod, boolean persist) {
     return updatePeriods(propertyInPeriod, persist, true);
   }
 
@@ -51,7 +53,7 @@ public class PeriodManager {
    * @param propertyInPeriod il periodo da inserire (ex.ContractWorkingTimeType)
    * @param persist true persiste la nuova lista di periodi.
    * @param validateAllPeriodCovered se impostata a true controlla che tutto il periodo dell'owner
-   *    del propertyInPeriod sia coperto.
+   *     del propertyInPeriod sia coperto.
    * @return la nuova lista dei periodi
    */
   public final List<IPropertyInPeriod> updatePeriods(
@@ -156,7 +158,7 @@ public class PeriodManager {
         periodRemoved._delete();
       }
       if (propertyInPeriod.getType().equals(EpasParam.WORKING_OFF_SITE)) {
-        
+        log.debug("...");
       }
       for (IPropertyInPeriod periodInsert : periodList) {
         periodInsert._save();
@@ -170,8 +172,14 @@ public class PeriodManager {
 
   }
   
-  
-  public final boolean isOverlapped(IPropertyInPeriod period, Collection<IPropertyInPeriod> currentPeriods) {
+  /**
+   * true se il periodo si sovrappone a quelli esistenti, false altrimenti.
+   * @param period il periodo da analizzare
+   * @param currentPeriods i periodi presenti sul db
+   * @return true se il periodo si sovrappone a quelli esistenti, false altrimenti.
+   */
+  public final boolean isOverlapped(IPropertyInPeriod period, 
+      Collection<IPropertyInPeriod> currentPeriods) {
     Range<LocalDate> periodRange;
     if (period.calculatedEnd() != null) {
       periodRange = Range.closed(period.getBeginDate(), period.calculatedEnd());
@@ -199,7 +207,7 @@ public class PeriodManager {
    * presenti nei periodi passati. 
    * @param periods i periodi di cui prelevare data iniziale e finale
    * @return un DateInterval composto con data iniziale più piccola dei vari 
-   *    periodi e data finale più grande dei vari periodi
+   *     periodi e data finale più grande dei vari periodi
    */
   private final Optional<DateInterval> getDateIntervalPeriod(List<IPropertyInPeriod> periods) {
     //Costruzione intervallo covered
@@ -419,6 +427,10 @@ public class PeriodManager {
     return recomputeRecap;
   }
 
+  /**
+   * Assegna i giorni su cui far valere il periodo.
+   * @param recomputeRecap il recomputeRecap contenente i riepiloghi
+   */
   public void setDays(RecomputeRecap recomputeRecap) {
     if (recomputeRecap.recomputeFrom != null
         && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {

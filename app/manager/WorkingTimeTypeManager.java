@@ -2,16 +2,12 @@ package manager;
 
 import com.google.common.base.Verify;
 import com.google.gdata.util.common.base.Preconditions;
-
 import controllers.WorkingTimes;
-
 import java.util.List;
-
 import models.Office;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.dto.VerticalWorkingTime;
-
 import org.joda.time.DateTimeConstants;
 
 public class WorkingTimeTypeManager {
