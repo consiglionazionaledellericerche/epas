@@ -19,8 +19,8 @@ import helpers.JsonResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
 import models.Contract;
@@ -111,8 +111,8 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void insertAbsence(
-      String eppn, String email, Long personPerseoId, String absenceCode, LocalDate begin, LocalDate end, 
-      Integer hours, Integer minutes) {
+      String eppn, String email, Long personPerseoId, String absenceCode, LocalDate begin, 
+      LocalDate end, Integer hours, Integer minutes) {
     Person person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
@@ -145,7 +145,8 @@ public class Absences extends Controller {
         aar.absenceCode = templateRow.absence.absenceType.code;
         aar.isOk = templateRow.absenceErrors.isEmpty();
         aar.reason = Joiner.on(", ").join(
-            templateRow.absenceErrors.stream().map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
+            templateRow.absenceErrors.stream()
+            .map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
         list.add(aar);
       });
 
@@ -163,15 +164,16 @@ public class Absences extends Controller {
   /**
    * Verifica se è possibile prendere il tipo di assenza passato nel periodo indicato.
    * La persona viene individuata tramite il suo indirizzo email.
-   * 
    * Il campo eppn se passato viene usato come preferenziale per cercare la persona. 
    * 
    * @param eppn eppn della persona di cui inserire l'assenza
    * @param email email della persona di cui inserire l'assenza
+   * @param personPerseoId l'identificativo della persona per cui inserire l'assenza
    * @param absenceCode il codice dell'assenza
    * @param begin la data di inizio del periodo
    * @param end la data di fine del periodo
-   * @param justifiedMinutes (opzionale) i minuti giustificati in caso di assenza oraria
+   * @param hours le eventuali ore d'assenza 
+   * @param minutes gli eventuali minuti di assenza
    */
   @BasicAuth
   public static void checkAbsence(String eppn, String email, Long personPerseoId,
@@ -206,8 +208,8 @@ public class Absences extends Controller {
       }
       val justifiedType = absenceType.get().justifiedTypesPermitted.iterator().next();
       val groupAbsenceType = absenceType.get().defaultTakableGroup(); 
-      val report = absenceService.insert(person.get(), groupAbsenceType, begin, end, absenceType.get(),
-          justifiedType, hours, minutes, false, absenceManager);
+      val report = absenceService.insert(person.get(), groupAbsenceType, begin, end, 
+          absenceType.get(), justifiedType, hours, minutes, false, absenceManager);
 
       List<AbsenceAddedRest> list = Lists.newArrayList();
 
@@ -217,7 +219,8 @@ public class Absences extends Controller {
         aar.absenceCode = templateRow.absence.absenceType.code;
         aar.isOk = templateRow.absenceErrors.isEmpty();
         aar.reason = Joiner.on(", ").join(
-            templateRow.absenceErrors.stream().map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
+            templateRow.absenceErrors.stream()
+            .map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
         list.add(aar);
       });
 

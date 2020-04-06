@@ -35,12 +35,14 @@ public class PersonDays extends Controller {
   private static SecurityRules rules;
 
   /**
-   * Metodo rest che ritorna la situazione della persona (passata per email o eppn) in un giorno specifico
-   * (date).
-   * Nel caso venga passato sia eppn che email la precedenza nella ricerca della persona va al campo eppn.
+   * Metodo rest che ritorna la situazione della persona (passata per email o eppn) in un giorno 
+   * specifico (date).
+   * Nel caso venga passato sia eppn che email la precedenza nella ricerca della persona va al 
+   * campo eppn.
    */
   @BasicAuth
-  public static void getDaySituation(String email, String eppn, Long personPersoId, LocalDate date) {
+  public static void getDaySituation(String email, String eppn, 
+      Long personPersoId, LocalDate date) {
     log.debug("getDaySituation -> email={}, eppn={}, date={}", email, date);
     if ((email == null && eppn == null) || date == null) {
       notFound();
@@ -64,8 +66,9 @@ public class PersonDays extends Controller {
   }
 
   /**
+   * Ritorna il dto generato a partire dal person day passato come parametro.
    * @return il personDayDTO costruito sulla base del personDay passato come 
-   *    parametro da ritornare alle funzioni rest.
+   *     parametro da ritornare alle funzioni rest.
    */
   private static PersonDayDto generateDayDTO(PersonDay pd) {
     PersonDayDto pdDto = 

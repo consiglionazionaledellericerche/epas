@@ -34,6 +34,7 @@ public class BadgeSystemDao extends DaoBase {
   }
 
   /**
+   * Ritorna il gruppo badge relativo all'id passato.
    * @return il badge system associato al codice passato come parametro.
    */
   public BadgeSystem byId(Long id) {
@@ -45,6 +46,7 @@ public class BadgeSystemDao extends DaoBase {
   }
 
   /**
+   * Ritorna il gruppo badge associato al nome passato.
    * @return il badge system con quel nome.
    */
   public BadgeSystem byName(String name) {
@@ -55,6 +57,13 @@ public class BadgeSystemDao extends DaoBase {
         .where(badgeSystem.name.eq(name)).fetchOne();
   }
 
+  /**
+   * Ritorna il gruppo badge con nome (opzionale) e appartenente al lettore
+   * badge passati.
+   * @param name il nome del gruppo badge
+   * @param badgeReader il lettore badge
+   * @return il gruppo badge relativo a nome e lettore badge passati.
+   */
   public SimpleResults<BadgeSystem> badgeSystems(Optional<String> name,
       Optional<BadgeReader> badgeReader) {
 
