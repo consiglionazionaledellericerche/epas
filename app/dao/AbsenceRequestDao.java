@@ -359,18 +359,29 @@ public class AbsenceRequestDao extends DaoBase {
 
   }
 
-  private BooleanBuilder seatSupervisorQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
+  /**
+   * Ritorna le condizioni con l'aggiunta di quelle relative al responsabile di sede.
+   * @param officeList la lista delle sedi
+   * @param condition le condizioni pregresse
+   * @param signer colui che deve firmare la richiesta
+   * @return le condizioni per determinare se il responsabile di sede è coinvolto nell'approvazione
+   *     delle ferie.
+   */
+  private BooleanBuilder seatSupervisorQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
 
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.person.office.in(officeList))
         .andAnyOf(
             //per i manager è richiesta solo l'approvazione da parte del responsabile di sede
-            absenceRequest.officeHeadApprovalForManagerRequired.isTrue().and(absenceRequest.officeHeadApproved.isNull()),
+            absenceRequest.officeHeadApprovalForManagerRequired.isTrue()
+            .and(absenceRequest.officeHeadApproved.isNull()),
             
             //questo è il caso della doppia approvazione in cui il manager ha già approvato 
             absenceRequest.managerApprovalRequired.isTrue()
               .and(absenceRequest.managerApproved.isNotNull())
-              .and(absenceRequest.officeHeadApprovalRequired.isTrue()).and(absenceRequest.officeHeadApproved.isNull()),
+              .and(absenceRequest.officeHeadApprovalRequired.isTrue())
+              .and(absenceRequest.officeHeadApproved.isNull()),
 
             //questo è il caso in cui è necessaria solo l'approvazione del responsabile di sede
             absenceRequest.officeHeadApprovalRequired.isTrue()
@@ -383,7 +394,15 @@ public class AbsenceRequestDao extends DaoBase {
   }
 
 
-  private BooleanBuilder managerQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
+  /**
+   * Ritorna le condizioni di firma delle richieste da parte del responsabile di gruppo.
+   * @param officeList la lista delle sedi
+   * @param condition le condizioni precedenti
+   * @param signer il firmatario della richiesta
+   * @return le condizioni di firma delle richieste da parte del responsabile di gruppo.
+   */
+  private BooleanBuilder managerQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     condition.and(absenceRequest.managerApprovalRequired.isTrue())
         .and(absenceRequest.managerApproved.isNull())

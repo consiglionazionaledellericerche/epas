@@ -80,7 +80,7 @@ public class PersonDays extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
 
-    /**
+    /*
      * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante
      * la drools (probabilmente scritta male, da capire meglio).
      * Adesso viene bypassato col controllo sopra...però è veramente orrendo
@@ -107,6 +107,7 @@ public class PersonDays extends Controller {
 
 
   /**
+   * Metodo che costruisce il dto sulla base del personDay passato come parametro.
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
    *     alle funzioni rest.
    */
@@ -130,6 +131,7 @@ public class PersonDays extends Controller {
   }
 
   /**
+   * Metodo che genera il dto sulla base del contractMonthRecap passato come parametro.
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
    *     parametro da ritornare alle funzioni rest.
    */

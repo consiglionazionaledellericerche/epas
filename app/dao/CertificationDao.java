@@ -24,6 +24,7 @@ public class CertificationDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista di certificazioni della persona nell'anno/mese.
    * @param person la persona di cui cercare le certificazioni.
    * @param year l'anno delle certificazioni.
    * @param month il mese delle certificazioni.
@@ -42,6 +43,7 @@ public class CertificationDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista delle certificazioni della persona nell'anno/mese per il tipo type.
    * @param person la persona di cui cercare le certificazioni.
    * @param year l'anno delle certificazioni.
    * @param month il mese delle certificazioni.
