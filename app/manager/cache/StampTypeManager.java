@@ -24,6 +24,7 @@ public class StampTypeManager {
   }
 
   /**
+   * Lo stampModificationType relativo al codice passato.
    * @return lo stampModificationType relativo al codice code passato come parametro.
    */
   private StampModificationType getStampModificationTypeByCode(

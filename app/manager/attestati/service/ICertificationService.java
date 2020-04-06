@@ -2,11 +2,9 @@ package manager.attestati.service;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
-
 import models.Certification;
 import models.Office;
 import models.Person;

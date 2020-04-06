@@ -1,11 +1,9 @@
 package manager.configurations;
 
 import lombok.Data;
-
 import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;

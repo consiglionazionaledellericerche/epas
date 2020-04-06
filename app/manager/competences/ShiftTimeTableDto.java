@@ -1,7 +1,7 @@
 package manager.competences;
 
 /**
- * 
+ * Dto per le timetable dei turni.
  * @author dario
  *
  */
