@@ -6,21 +6,15 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.OvertimesManager;
-
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -29,10 +23,8 @@ import models.PersonHourForOvertime;
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;

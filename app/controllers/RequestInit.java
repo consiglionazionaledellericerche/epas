@@ -27,9 +27,7 @@ import play.mvc.Router;
 import play.mvc.With;
 
 
-/**
- * @author cristian.
- */
+
 @With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 

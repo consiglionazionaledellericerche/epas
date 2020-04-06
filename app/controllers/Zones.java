@@ -2,23 +2,17 @@ package controllers;
 
 import dao.BadgeReaderDao;
 import dao.ZoneDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import models.BadgeReader;
 import models.Zone;
 import models.ZoneToZones;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
