@@ -1,7 +1,6 @@
 package manager.recaps.charts;
 
 import models.enumerate.CheckType;
-
 import org.joda.time.LocalDate;
 
 /**
