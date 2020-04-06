@@ -57,6 +57,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
+   * Ritorna la lista dei badge reader.
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -70,6 +71,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
+   * Render delle informazioni sul badgereader.
    * @param id identificativo del lettore badge.
    */
   public static void show(Long id) {
@@ -79,6 +81,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
+   * Render della pagina di modifica del lettore badge.
    * @param id identificativo del lettore badge.
    */
   public static void edit(Long id) {
@@ -101,6 +104,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
+   * Cancella il badge reader.
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
@@ -128,6 +132,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
+   * Permette l'edit delle informazioni sul badge reader.
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeReader badgeReader, @Valid Office owner) {
@@ -150,6 +155,7 @@ public class BadgeReaders extends Controller {
 
 
   /**
+   * Permette il cambio della password per l'utente badge reader.
    * @param user Utente a cui modificare la password.
    * @param newPass nuova password da associare al lettore.
    */
@@ -176,6 +182,7 @@ public class BadgeReaders extends Controller {
   }
 
   /**
+   * Permette il salvataggio del badge reader.
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */

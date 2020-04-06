@@ -1,24 +1,16 @@
 package controllers;
 
 import dao.AbsenceDao;
-
 import it.cnr.iit.epas.JsonPersonEmailBinder;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceFromJsonManager;
-
 import models.exports.FrequentAbsenceCode;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-
 import org.joda.time.LocalDate;
-
 import play.data.binding.As;
 import play.mvc.Controller;
 

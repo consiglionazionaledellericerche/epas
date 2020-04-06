@@ -464,8 +464,8 @@ public class Absences extends Controller {
   }
 
   /**
-   * @param year Render della pagina absencePerPerson.html che riassume le assenze annuali di una
-   *             persona
+   * Metodo che ritorna le assenze nell'anno per una persona.
+   * @param year l'anno di riferimento
    */
 
   public static void absencesPerPerson(Integer year) {

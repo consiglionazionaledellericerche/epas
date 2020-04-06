@@ -646,7 +646,8 @@ public class AbsenceGroups extends Controller {
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
         absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
-    absenceManager.saveAbsences(insertReport, person, from, recoveryDate, justifiedType, groupAbsenceType);
+    absenceManager.saveAbsences(insertReport, person, from, recoveryDate, 
+        justifiedType, groupAbsenceType);
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
@@ -1146,9 +1147,9 @@ public class AbsenceGroups extends Controller {
       if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), yearInterval)) {
         continue;
       }
-      IWrapperPerson wPerson = wrapperFactory.create(absence.personDay.person);
+      IWrapperPerson wrapperPerson = wrapperFactory.create(absence.personDay.person);
 
-      Optional<Contract> contract = wPerson.getCurrentContract();
+      Optional<Contract> contract = wrapperPerson.getCurrentContract();
       if (!contract.isPresent()) {
         continue;
       }
@@ -1164,9 +1165,9 @@ public class AbsenceGroups extends Controller {
         continue;
       }
 
-      IWrapperPersonDay wPersonDay = wrapperFactory.create(absence.personDay);
+      IWrapperPersonDay wrapperPersonDay = wrapperFactory.create(absence.personDay);
 
-      Optional<WorkingTimeTypeDay> wttd = wPersonDay.getWorkingTimeTypeDay();
+      Optional<WorkingTimeTypeDay> wttd = wrapperPersonDay.getWorkingTimeTypeDay();
 
       if (!wttd.isPresent()) {
         continue;
@@ -1210,9 +1211,9 @@ public class AbsenceGroups extends Controller {
     if (!toUpdate.isEmpty()) {
       for (Person person : toUpdate) {
         JPAPlugin.startTx(false);
-        IWrapperPerson wPerson = wrapperFactory.create(person);
+        IWrapperPerson wrapperPerson = wrapperFactory.create(person);
 
-        Optional<Contract> contract = wPerson.getCurrentContract();
+        Optional<Contract> contract = wrapperPerson.getCurrentContract();
         if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
           beginCalculation = contract.get().beginDate;
         } else {
@@ -1225,9 +1226,9 @@ public class AbsenceGroups extends Controller {
       }
       for (Person person : toScan) {
         JPAPlugin.startTx(false);
-        IWrapperPerson wPerson = wrapperFactory.create(person);
+        IWrapperPerson wrapperPerson = wrapperFactory.create(person);
 
-        Optional<Contract> contract = wPerson.getCurrentContract();
+        Optional<Contract> contract = wrapperPerson.getCurrentContract();
         if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
           beginCalculation = contract.get().beginDate;
         } else {
@@ -1333,7 +1334,8 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.office);
     LocalDate updateFrom = LocalDate.now();
-    LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
+    LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue()
+        .dayOfMonth().withMinimumValue();
     List<Absence> absences = absenceCertificationService.absencesToPersist(person, year);
     absences.sort(Comparator.comparing(Absence::getAbsenceDate));
 

@@ -10,8 +10,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
 import models.Office;
@@ -37,6 +37,11 @@ public class TimeSlots extends Controller {
   @Inject
   private static IWrapperFactory wrapperFactory;
 
+  /**
+   * Permette la gestione delle fasce orarie appartenenti alla sede con identificativo
+   * officeId.
+   * @param officeId l'identificativo della sede
+   */
   public static void manageTimeSlots(Long officeId) {
     
     if (officeId == null) {
@@ -54,7 +59,7 @@ public class TimeSlots extends Controller {
   
   /**
    * Interfaccia di gestione delle fasce orarie associate da un ufficio.
-   * @param officeId
+   * @param officeId l'identificativo della sede
    */
   public static void manageOfficeTimeSlots(Long officeId) {
     
@@ -103,7 +108,8 @@ public class TimeSlots extends Controller {
       render("@blank", timeSlot, officeId);
     } else {
       timeSlot.save();
-      log.info("Creata nuova fascia di orario {}, office = {}", timeSlot.getLabel(), timeSlot.office);
+      log.info("Creata nuova fascia di orario {}, office = {}", 
+          timeSlot.getLabel(), timeSlot.office);
     }
     manageTimeSlots(timeSlot.office != null ? timeSlot.office.id : null);
   }
@@ -133,7 +139,8 @@ public class TimeSlots extends Controller {
   }
 
   /**
-   * Mostra i periodi con quella fascia di orario di lavoro appartenenti a contratti attualmente attivi.
+   * Mostra i periodi con quella fascia di orario di lavoro appartenenti a contratti 
+   * attualmente attivi.
    * @param tsId id della fascia di lavoro
    * @param officeId sede
    */
@@ -160,7 +167,7 @@ public class TimeSlots extends Controller {
   /**
    * Cancellazione di una fascia oraria.
    * 
-   * @param id
+   * @param id l'identificativo della fascia oraria da cancellare
    */
   public static void delete(Long id) {
     notFoundIfNull(id);
@@ -190,7 +197,7 @@ public class TimeSlots extends Controller {
 
   /**
    * Abilita/Disabilita un fascia oraria.
-   * @param id
+   * @param id l'identificativo della fascia oraria da abilitare/disabilitare
    */
   public static void toogle(Long id) {
     notFoundIfNull(id);
