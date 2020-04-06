@@ -1,11 +1,12 @@
 package manager;
 
-import java.util.List;
-import javax.inject.Inject;
+
 import com.google.common.base.Optional;
 import dao.GroupDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Role;
@@ -19,6 +20,12 @@ public class GroupManager {
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
 
+  /**
+   * Injection.
+   * @param roleDao il dao sui ruoli
+   * @param uroDao il dao sugli usersRolesOffices
+   * @param groupDao il dao sui gruppi
+   */
   @Inject
   public GroupManager(RoleDao roleDao, UsersRolesOfficesDao uroDao, GroupDao groupDao) {
     this.roleDao = roleDao;

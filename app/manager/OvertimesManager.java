@@ -25,6 +25,11 @@ public class OvertimesManager {
   }
 
   /**
+   * Ritorna la tabella contenente le associazioni persona-reason competenza-codice.
+   * @param body l'oggetto contenente la lista di persone
+   * @param code il codice di competenza
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
    * @return la tabella contenente la struttura di persona-reason della competenza-codice
    *        competenza.
    */
@@ -52,7 +57,12 @@ public class OvertimesManager {
     return overtimesMonth;
   }
 
-
+  /**
+   * Assegna la quantità di straordinari richiesti nell'anno/mese.
+   * @param body la lista dei personsCompetences
+   * @param year l'anno 
+   * @param month il mese
+   */
   public void setRequestedOvertime(PersonsCompetences body, int year, int month) {
     for (Competence competence : body.competences) {
       Optional<Competence> oldCompetence =

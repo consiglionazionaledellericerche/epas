@@ -70,7 +70,7 @@ public class BadgeManager {
         }
       }
     } catch (Exception ignored) {
-
+      log.info("Exception: {}", ignored);
     }
   }
 

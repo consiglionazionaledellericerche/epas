@@ -4,31 +4,23 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
-
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import play.jobs.Job;

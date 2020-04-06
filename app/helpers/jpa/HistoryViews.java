@@ -134,6 +134,7 @@ public class HistoryViews {
     return result;
   }
 
+
   public static <T> T historicalViewOf(Class<T> cls, T current, T history,
       LocalDateTime revisionDateTime) {
     final Class<? extends T> model = historicalModel(cls);
@@ -179,6 +180,7 @@ public class HistoryViews {
           // return new File(cname).toURL();
           return new URL("file:/ApplicationClassesClasspath/" + cname);
         } catch (MalformedURLException ex) {
+          log.error("Exception: {}", ex);
         }
       }
       return null;

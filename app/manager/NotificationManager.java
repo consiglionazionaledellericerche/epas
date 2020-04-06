@@ -1,10 +1,5 @@
 package manager;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
@@ -13,8 +8,10 @@ import dao.GroupDao;
 import dao.RoleDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
-import lombok.val;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Notification;
@@ -32,6 +29,9 @@ import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;
 import play.libs.Mail;
@@ -684,8 +684,8 @@ public class NotificationManager {
     message
         .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", date, type));
     message.append(String.format("\r\n per il servizio %s", service));
-    message.append(String.format(
-        "\r\n Verificare la compatibilità delle date delle assenze con la schedulazione del dipendente nel servizio"));
+    message.append(String.format("\r\n Verificare la compatibilità delle date delle assenze con "
+        + "la schedulazione del dipendente nel servizio"));
     val mailBody = message.toString();
     try {
       simpleEmail.setMsg(mailBody);
@@ -693,9 +693,9 @@ public class NotificationManager {
       e.printStackTrace();
     }
     Mail.send(simpleEmail);
-    log.info(
-        "Inviata email al responsabile/gestore per informazione giorni di reperibilità/turno concomitanti "
-            + "coi giorni di richiesta: {}. " + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+    log.info("Inviata email al responsabile/gestore per informazione giorni di reperibilità/turno "
+        + "concomitanti coi giorni di richiesta: {}. " 
+        + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
         absenceRequest, receiver.email, simpleEmail.getSubject(), mailBody);
   }
 }

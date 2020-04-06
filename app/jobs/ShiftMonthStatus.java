@@ -3,7 +3,6 @@ package jobs;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import models.ShiftType;
 import models.ShiftTypeMonth;

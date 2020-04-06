@@ -1,22 +1,14 @@
 package jobs;
 
 import com.google.common.base.Optional;
-
 import dao.CompetenceCodeDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.CompetenceManager;
-
 import models.CompetenceCode;
 import models.enumerate.LimitType;
-
 import org.joda.time.YearMonth;
-
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;

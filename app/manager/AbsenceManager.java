@@ -1,15 +1,5 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -26,6 +16,9 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -46,6 +39,10 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
@@ -127,8 +124,17 @@ public class AbsenceManager {
     this.rules = rules;
   }
 
-  public void saveAbsences(InsertReport insertReport, Person person, LocalDate from, LocalDate recoveryDate, 
-      JustifiedType justifiedType, GroupAbsenceType groupAbsenceType) {
+  /**
+   * Salva l'assenza.
+   * @param insertReport il report di inserimento assenza
+   * @param person la persona per cui salvare l'assenza
+   * @param from la data da cui salvare
+   * @param recoveryDate se esiste una data entro cui occorre recuperare l'assenza (es.:91CE)
+   * @param justifiedType il tipo di giustificazione
+   * @param groupAbsenceType il gruppo di appartenenza dell'assenza
+   */
+  public void saveAbsences(InsertReport insertReport, Person person, LocalDate from, 
+      LocalDate recoveryDate, JustifiedType justifiedType, GroupAbsenceType groupAbsenceType) {
     
     //Persistenza
     if (!insertReport.absencesToPersist.isEmpty()) {
@@ -287,8 +293,9 @@ public class AbsenceManager {
     Preconditions.checkNotNull(mealTicket);
 
     log.debug("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
-            + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", person.fullName(), absenceType.code,
-        dateFrom, dateTo.or(dateFrom), mealTicket.orNull(), file.orNull(), justifiedMinutes.orNull());
+            + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", 
+            person.fullName(), absenceType.code, dateFrom, dateTo.or(dateFrom), mealTicket.orNull(),
+            file.orNull(), justifiedMinutes.orNull());
 
     AbsenceInsertReport air = new AbsenceInsertReport();
 

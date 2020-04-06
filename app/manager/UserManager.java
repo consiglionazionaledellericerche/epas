@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import play.libs.Codec;
 
 /**
+ * Manager per user.
  * @author daniele
  * @since 13/10/15.
  */
@@ -93,6 +94,11 @@ public class UserManager {
     return username;
   }
 
+  /**
+   * Crea l'utente.
+   * @param person la persona per cui creare l'utente
+   * @return l'utente creato.
+   */
   public User createUser(final Person person) {
 
     User user = new User();

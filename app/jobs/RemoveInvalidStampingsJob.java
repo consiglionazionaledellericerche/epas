@@ -1,22 +1,14 @@
 package jobs;
 
 import com.google.common.base.Optional;
-
 import dao.PersonDayDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
-
 import models.Person;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
