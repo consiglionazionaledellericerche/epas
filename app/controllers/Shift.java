@@ -251,8 +251,8 @@ public class Shift extends Controller {
    */
   //@BasicAuth
   public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
-//    int year = params.get("year", Integer.class);
-//    int month = params.get("month", Integer.class);
+    //    int year = params.get("year", Integer.class);
+    //    int month = params.get("month", Integer.class);
     if (shiftCategoryId == null) {
       shiftCategoryId = params.get("type", Long.class);
     }
@@ -278,10 +278,7 @@ public class Shift extends Controller {
         TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(),
             nullSafeStringComparator);
 
-    // Contains the number of the effective hours of worked shifts
-    Table<Person, String, Integer> totalPersonShiftWorkedTime =
-        TreeBasedTable.<Person, String, Integer>create(
-            Person.personComparator(), nullSafeStringComparator);
+
 
     ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
     if (shiftCategory == null) {
@@ -290,6 +287,10 @@ public class Shift extends Controller {
 
     log.debug("shiftCategory = {}", shiftCategory);
 
+    // Contains the number of the effective hours of worked shifts
+    Table<Person, String, Integer> totalPersonShiftWorkedTime =
+        TreeBasedTable.<Person, String, Integer>create(
+            Person.personComparator(), nullSafeStringComparator);
     // Legge i turni associati alla categoria (es: A, B)
     List<ShiftType> shiftTypes = shiftDao.getTypesByCategory(shiftCategory);
     
@@ -449,14 +450,14 @@ public class Shift extends Controller {
             new LocalDate(yearTo, monthTo, dayTo));
     List<Person> personList = people.stream()
         .<Person>map(psst -> psst.personShift.person).collect(Collectors.toList());
-//    List<Person> personList =
-//        JPA.em().createQuery(
-//            "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
-//                + "WHERE psst.shiftType.type = :type "
-//                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
-//                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
-//            .setParameter("type", type)
-//            .getResultList();
+    //    List<Person> personList =
+    //        JPA.em().createQuery(
+    //          "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
+    //                + "WHERE psst.shiftType.type = :type "
+    //                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
+    //                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
+    //            .setParameter("type", type)
+    //            .getResultList();
     
 
     log.debug("Shift personList called, found {} shift person", personList.size());

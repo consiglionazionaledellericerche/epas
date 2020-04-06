@@ -4,28 +4,19 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-
 import dao.OfficeDao;
 import dao.PersonDao;
-
 import java.util.HashSet;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
-/**
- * @author cristian
- */
+
 @Slf4j
 @With(Resecure.class)
 public class JsonExport extends Controller {
@@ -36,6 +27,9 @@ public class JsonExport extends Controller {
   private static PersonDao personDao;
 
   // TODO per il momento il ruolo developer è l'unico a poter utilizzare questo metodo
+  /**
+   * Ritorna il json contenente la lista delle persone attive.
+   */
   public static void activePersons() {
 
     List<Office> offices = officeDao.getAllOffices();

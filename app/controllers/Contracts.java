@@ -15,23 +15,18 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.Web;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
-
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceService;
-
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
@@ -42,15 +37,12 @@ import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -421,7 +413,8 @@ public class Contracts extends Controller {
    * @param cmts nuovo periodo di fascia oraria obbligatoria.
    * @param confirmed se conferma ricevuta.
    */
-  public static void saveContractMandatoryTimeSlot(ContractMandatoryTimeSlot cmts, boolean confirmed) {
+  public static void saveContractMandatoryTimeSlot(
+      ContractMandatoryTimeSlot cmts, boolean confirmed) {
 
     // IMPORTANTE!!! Rimosso @Valid da cmts ed effettuata la validazione mancante a mano.
     // Perchè si comprometteva il funzionamento dell drools. Issue #166
@@ -460,9 +453,11 @@ public class Contracts extends Controller {
     }
     
     if (periodManager.isOverlapped(cmts, currentPeriods)) {
-      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, impossibile aggiungerlo", cmts.getLabel());
+      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, "
+          + "impossibile aggiungerlo", cmts.getLabel());
       response.status = 400;
-      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", cmts.getLabel());
+      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", 
+          cmts.getLabel());
       render("@updateContractMandatoryTimeSlot", cmts, contract);      
     }
 
@@ -499,7 +494,7 @@ public class Contracts extends Controller {
    * Cancella una fascia oraria di presenza obbligatoria.
    * @param id id della fascia oraria da cancellare
    * @param confirmed se è confirmed lo cancella altrimenti mostra una pagina di
-   *    riepilogo e conferma.
+   *     riepilogo e conferma.
    */
   public void deleteContractMandatoryTimeSlot(Long id, boolean confirmed) {
     ContractMandatoryTimeSlot cmts = ContractMandatoryTimeSlot.findById(id);
@@ -972,7 +967,8 @@ public class Contracts extends Controller {
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
 
-    log.debug("saveMealTicketSourceContract, contratto inizializzato {}", wrContract.initializationMissing());
+    log.debug("saveMealTicketSourceContract, contratto inizializzato {}", 
+        wrContract.initializationMissing());
     if (sourceDateMealTicket != null) {
       validation.future(sourceDateMealTicket.toDate(), 
           wrContract.dateForMealInitialization().minusDays(1).toDate())

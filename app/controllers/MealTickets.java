@@ -5,37 +5,29 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import manager.ConsistencyManager;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -44,7 +36,6 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -132,8 +123,9 @@ public class MealTickets extends Controller {
 
   /**
    * Form di inserimento buoni pasto e riepilogo degli ultimi blocchi inseriti.
-   *
-   * @param personId persona
+   * @param contractId l'id del contratto di cui vedere i buoni inseriti
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
    */
   public static void personMealTickets(Long contractId, Integer year, Integer month) {
     
@@ -245,7 +237,7 @@ public class MealTickets extends Controller {
   /**
    * Aggiunta di un blocchetto alla persona.
    *
-   * @param personId         persona.
+   * @param contractId       contratto.
    * @param codeBlock        codice blocco.
    * @param ticketNumberFrom dal codice
    * @param ticketNumberTo   al codice

@@ -2,14 +2,11 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-
 import helpers.jpa.ModelQuery.SimpleResults;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,29 +15,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.SecureManager;
 import manager.charts.ChartsManager;
 import manager.recaps.charts.RenderResult;
-
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.exports.PersonOvertime;
-
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
-
-import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 
@@ -64,6 +53,13 @@ public class Charts extends Controller {
   @Inject
   static CompetenceCodeDao competenceCodeDao;
 
+  /**
+   * Ritorna la pagina del confronto tra straordinari e residui positivi per le persone appartenenti
+   * all'ufficio con identificativo officeId nell'anno year e nel mese month.
+   * @param year l'anno da considerare
+   * @param month il mese da considerare
+   * @param officeId l'identificativo della sede da controllare
+   */
   public static void overtimeOnPositiveResidual(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -182,7 +178,7 @@ public class Charts extends Controller {
         Optional.<String>absent(),
         secureManager.officesReadAllowed(Security.getUser().get()),
         true, new LocalDate(year, 1, 1), LocalDate.now(), true).list();
-    Logger.debug("Esporto dati per %s persone", personList.size());
+    log.debug("Esporto dati per %s persone", personList.size());
     FileInputStream inputStream = chartsManager.export(year, personList);
 
     renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi" + year + ".csv");
