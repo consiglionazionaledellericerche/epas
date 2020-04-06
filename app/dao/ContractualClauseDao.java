@@ -27,7 +27,7 @@ public class ContractualClauseDao extends DaoBase {
    * Lista degli istituti contrattuali.
    *
    * @param onlyEnabled se non presente o uguale a false mostra solo gli istituti contrattuali
-   * attivi alla data corrente.
+   *     attivi alla data corrente.
    * @return la lista degli istituti contrattuali.
    */
   public List<ContractualClause> all(Optional<Boolean> onlyEnabled) {

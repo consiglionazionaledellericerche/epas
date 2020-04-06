@@ -15,6 +15,7 @@ import org.joda.time.YearMonth;
 public interface IWrapperOffice extends IWrapperModel<Office> {
 
   /**
+   * La data di creazione della sede.
    * @return la data di installazione della sede.
    */
   LocalDate initDate();

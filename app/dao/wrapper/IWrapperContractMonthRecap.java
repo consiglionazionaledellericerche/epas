@@ -1,7 +1,6 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-
 import models.ContractMonthRecap;
 
 /**

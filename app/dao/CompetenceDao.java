@@ -27,9 +27,7 @@ import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
 
-/**
- * @author dario
- */
+
 
 public class CompetenceDao extends DaoBase {
 
@@ -41,6 +39,7 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La competenza con id passato come parametro.
    * @return la competenza relativa all'id passato come parametro.
    */
   public Competence getCompetenceById(Long id) {
@@ -69,8 +68,9 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La lista delle competenze per persona (opzionale), anno, mese (opzionale) e lista di codici.
    * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year e
-   * al mese month per la persona person.
+   *     al mese month per la persona person.
    */
   public List<Competence> getCompetences(
       Optional<Person> person, Integer year, Optional<Integer> month, List<CompetenceCode> codes) {
@@ -92,8 +92,9 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La competenza (se esiste) per persona, anno, mese, codice di competenza.
    * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la
-   * persona person.
+   *     persona person.
    */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
@@ -162,8 +163,10 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La quantità di ore approvate di straordinario nell'anno, mese (opzionale), persona (opzionale)
+   * e lista di codici di competenza.
    * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di
-   * straordinario (sommando i codici S1 S2 e S3).
+   *     straordinario (sommando i codici S1 S2 e S3).
    */
   public Optional<Integer> valueOvertimeApprovedByMonthAndYear(
       Integer year, Optional<Integer> month, Optional<Person> person,
@@ -191,14 +194,23 @@ public class CompetenceDao extends DaoBase {
 
 
   /**
+   * La lista di competenze per persona, anno, mese.
    * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che
-   * abbiano un valore approvato > 0.
+   *     abbiano un valore approvato > 0.
    */
   public List<Competence> getAllCompetenceForPerson(Person person, Integer year, Integer month) {
     return competenceInMonth(person, year, month, Optional.<List<String>>absent());
   }
 
 
+  /**
+   * La lista di competenze per persona, anno, mese, lista di codici (opzionale).
+   * @param person la persona per cui si cercano le competenze approvate
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param codes (opzionale) la lista di codici
+   * @return la lista di competenze approvate per persona, anno, mese, lista di codici
+   */
   public List<Competence> competenceInMonth(
       Person person, Integer year, Integer month, Optional<List<String>> codes) {
 
@@ -248,12 +260,12 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param person
-   * @param group
-   * @param year
-   * @param month
-   * @return
+   * La lista di competenze per persona, gruppo di codici (opzionale), anno, mese.
+   * @param person la persona di cui si cerca la lista di competenze
+   * @param group il gruppo di codici di competenza
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @return la lista di competenze per persona, gruppo di codici (opzionale), anno, mese.
    */
   private List<Competence> getAllCompetenceFromGroupForPerson(Person person,
       Optional<CompetenceCodeGroup> group, Integer year, Integer month) {
@@ -262,8 +274,9 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La lista di competenze relative alla reperibilità nell'anno, mese, e codice.
    * @return la lista di competenze relative all'anno year, al mese month e al codice code di
-   * persone che hanno reperibilità di tipo type associata.
+   *     persone che hanno reperibilità di tipo type associata.
    */
   public List<Competence> getCompetenceInReperibility(
       PersonReperibilityType type, int year, int month, CompetenceCode code) {
@@ -285,6 +298,7 @@ public class CompetenceDao extends DaoBase {
 
 
   /**
+   * L'ultima competenza assegnata di un certo tipo nell'anno, mese per una persona.
    * @return l'ultima competenza assegnata din un certo typo in un determinato anno.
    */
   public Competence getLastPersonCompetenceInYear(
@@ -303,6 +317,7 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La lista di competenze per un certo codice di competenza.
    * @param code il codice competenza da cercare
    * @return la lista di tutte le competenze che contengono quel codice competenza.
    */
@@ -313,6 +328,7 @@ public class CompetenceDao extends DaoBase {
 
 
   /**
+   * La lista di quantitativi di straordinario assegnati per la sede nell'anno.
    * @return dei quantitativi di straordinario assegnati per l'ufficio office nell'anno year.
    */
   public List<TotalOvertime> getTotalOvertime(Integer year, Office office) {
@@ -324,6 +340,7 @@ public class CompetenceDao extends DaoBase {
   }
 
   /**
+   * La quantità di ore di straordinario per la persona passata come parametro.
    * @return il personHourForOvertime relativo alla persona person passata come parametro.
    */
   public PersonHourForOvertime getPersonHourForOvertime(Person person) {

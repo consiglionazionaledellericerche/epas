@@ -23,6 +23,8 @@ public class VacationPeriodDao extends DaoBase {
   }
 
   /**
+   * La lista dei vacationPeriod associati al contratto passato come parametro.
+   * @param contract il contratto su cui cercare
    * @return la lista dei vacationPeriod associati al contratto passato come parametro.
    */
   public List<VacationPeriod> getVacationPeriodByContract(Contract contract) {

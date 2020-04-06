@@ -3,12 +3,12 @@ package dao.wrapper;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import models.ContractMonthRecap;
-
 import org.joda.time.YearMonth;
 
 /**
+ * Implementazione contractMonthRecap.
+ * 
  * @author alessandro.
  */
 public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
