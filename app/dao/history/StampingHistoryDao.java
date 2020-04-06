@@ -3,16 +3,15 @@ package dao.history;
 import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
 import java.util.List;
-
 import models.Stamping;
-
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 
 /**
+ * Dao sullo storico delle timbrature.
+ * 
  * @author marco
  */
 public class StampingHistoryDao {
@@ -24,6 +23,11 @@ public class StampingHistoryDao {
     this.auditReader = auditReader;
   }
 
+  /**
+   * La lista delle revisioni sulla timbratura con id passato.
+   * @param stampingId l'identificativo della timbratura
+   * @return la lista delle revisioni sulla timbratura con id passato.
+   */
   @SuppressWarnings("unchecked")
   public List<HistoryValue<Stamping>> stampings(long stampingId) {
 

@@ -1,7 +1,6 @@
 package helpers.deserializers;
 
 import com.google.common.io.ByteSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -47,6 +46,11 @@ public class InlineStreamHandler extends URLStreamHandler {
   private final byte[] data;
   private final String type;
 
+  /**
+   * Costruttore.
+   * @param data array di dati
+   * @param type il tipo
+   */
   public InlineStreamHandler(byte[] data, String type) {
     super();
     this.data = data;

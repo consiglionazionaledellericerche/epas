@@ -18,6 +18,7 @@ public class PersonShiftDayInTroubleDao extends DaoBase {
   }
 
   /**
+   * Il personShiftDayDao, se esiste, relativo ai parametri passati al metodo.
    * @param pd il personShiftDay per cui si ricerca il trouble
    * @param trouble la causa per cui si ricerca il trouble
    * @return il personShiftDayInTrouble, se esiste, relativo ai parametri passati al metodo.

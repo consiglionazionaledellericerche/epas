@@ -25,7 +25,7 @@ public class TimeVariationDao extends DaoBase {
    * @param begin la data di inizio da cui cercare
    * @param end la data di fine da cui cercare
    * @return la lista delle variazioni temporali assegnate alla persona per recuperare i riposi
-   * compensativi per chiusura ente nell'intervallo temporale specificato.
+   *     compensativi per chiusura ente nell'intervallo temporale specificato.
    */
   public List<TimeVariation> getByPersonAndPeriod(Person person, LocalDate begin, LocalDate end) {
     final QTimeVariation timeVariation = QTimeVariation.timeVariation1;

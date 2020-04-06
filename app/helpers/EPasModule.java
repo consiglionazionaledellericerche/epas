@@ -11,6 +11,10 @@ import play.Play;
 @AutoRegister
 public class EPasModule extends AbstractModule {
 
+  /**
+   * L'istanza attiva.
+   * @return l'informazione su quale sia l'istanza attiva.
+   */
   @Provides
   @Named("app.instance")
   public String getAppInstance() {

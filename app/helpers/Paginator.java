@@ -13,6 +13,8 @@ import play.mvc.Scope;
 import play.mvc.Scope.Params;
 
 /**
+ * Paginatore.
+ * 
  * @author marco
  */
 public class Paginator {
@@ -30,6 +32,10 @@ public class Paginator {
   private final Map<String, Object> params;
   private final String action;
 
+  /**
+   * Costruisce un paginatore a partire dai risultati di una query.
+   * @param results i risultati di una query.
+   */
   public Paginator(QueryResults<?> results) {
     // this.results = results;
     size = results.getResults().size();
@@ -69,6 +75,11 @@ public class Paginator {
     return urlFor(current + 1);
   }
 
+  /**
+   * L'url della pagina.
+   * @param page il numero della pagina
+   * @return la stringa per l'url della pagina
+   */
   public String urlFor(int page) {
     Preconditions.checkArgument(page >= 0);
     params.put("page", Integer.toString(page));

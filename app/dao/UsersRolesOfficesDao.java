@@ -50,6 +50,10 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * L'userRoleOffice associato ai parametri passati.
+   * @param user l'utente
+   * @param role il ruolo
+   * @param office la sede
    * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {
@@ -63,6 +67,8 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti gli userRoleOffice legati all'utente passato.
+   * @param user l'utente
    * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
    */
   public List<UsersRolesOffices> getUsersRolesOfficesByUser(User user) {
@@ -114,6 +120,7 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * Il conteggio di quanti sono gli utenti con ruolo role già presenti nel db.
    * @param role il ruolo da ricercare negli Uro
    * @return quanti sono gli utenti con ruolo role già inseriti nel db.
    */

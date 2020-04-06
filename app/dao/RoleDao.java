@@ -22,6 +22,8 @@ public class RoleDao extends DaoBase {
   }
 
   /**
+   * Il ruolo identificato dall'id passato come parametro.
+   * @param id l'identificativo del ruolo
    * @return il ruolo identificato dall'id passato come parametro.
    */
   public Role getRoleById(Long id) {
@@ -32,6 +34,8 @@ public class RoleDao extends DaoBase {
   }
 
   /**
+   * Il ruolo identificato dal nome passato come parametro.
+   * @name il nome del ruolo
    * @return il ruolo identificato dal nome passato come parametro.
    */
   public Role getRoleByName(String name) {
@@ -42,6 +46,7 @@ public class RoleDao extends DaoBase {
   }
 
   /**
+   * La lista dei ruoli disponibili.
    * @return Tutti i ruoli disponibili.
    */
   public List<Role> getAll() {

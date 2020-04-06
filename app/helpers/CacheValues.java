@@ -10,27 +10,21 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import dao.PersonDao;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.OauthToken;
 import manager.attestati.service.PersonCertData;
-
 import models.Office;
 import models.Person;
-
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -38,6 +32,7 @@ import org.joda.time.YearMonth;
 
 
 /**
+ * Impostazioni di cache.
  * @author daniele
  * @since 28/11/16.
  */

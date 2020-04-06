@@ -78,8 +78,8 @@ public class WorkingTimeTypeDao extends DaoBase {
   /**
    * WorkingTimeType by id.
    *
-   * @param id id
-   * @return wtt
+   * @param id identificativo dell'orario di lavoro
+   * @return l'orario di lavoro con id id.
    */
   public WorkingTimeType getWorkingTimeTypeById(Long id) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
@@ -89,6 +89,7 @@ public class WorkingTimeTypeDao extends DaoBase {
 
 
   /**
+   * La lista degli orari di lavoro di default.
    * @return la lista degli orari di lavoro presenti di default sul database.
    */
   public List<WorkingTimeType> getDefaultWorkingTimeType() {
@@ -97,9 +98,6 @@ public class WorkingTimeTypeDao extends DaoBase {
         .where(wtt.office.isNull()).orderBy(wtt.description.asc()).fetch();
   }
 
-  /**
-   * @return il tipo di orario di lavoro utilizzato in date.
-   */
 
   /**
    * Il tipo orario per la persona attivo nel giorno.

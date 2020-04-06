@@ -507,6 +507,11 @@ public class TemplateUtility {
   }
 
 
+  /**
+   * La lista dei gruppi badge per sede.
+   * @param office la sede di riferimento
+   * @return la lista dei gruppi badge per sede.
+   */
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -574,6 +579,12 @@ public class TemplateUtility {
     return false;
   }
 
+  /**
+   * Se l'assenza è prendibile, false altrimenti.
+   * @param absenceType il tipo di assenza
+   * @param group il gruppo di tipi di assenza
+   * @return se l'assenza è prendibile, false altrimenti
+   */
   public boolean isTakableOnly(AbsenceType absenceType, GroupAbsenceType group) {
     if (group.takableAbsenceBehaviour != null
         && group.takableAbsenceBehaviour.takableCodes.contains(absenceType)

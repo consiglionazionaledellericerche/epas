@@ -20,6 +20,7 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * La lista dei collegamenti tra zone che inviano timbrature allo stesso client.
    * @param reader il client che recupera le timbrature
    * @return la lista dei collegamenti tra zone che inviano le timbrature allo stesso client.
    */
@@ -32,6 +33,7 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * Il collegamento caratterizzato dall'id passato come parametro.
    * @param id l'identificativo del collegamento
    * @return il collegamento, se esiste, caratterizzato dall'id passato come parametro.
    */
@@ -41,6 +43,7 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * Il collegamento, se esiste, tra due zone di timbratura.
    * @param name1 il nome della prima zona
    * @param name2 il nome della seconda zona
    * @return il link, se esiste, tra le zone passate come parametro.
