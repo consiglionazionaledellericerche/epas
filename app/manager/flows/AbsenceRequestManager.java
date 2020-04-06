@@ -1,13 +1,7 @@
 package manager.flows;
 
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
-import org.apache.commons.compress.utils.Lists;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
+
 import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
@@ -21,11 +15,14 @@ import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
@@ -50,6 +47,11 @@ import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import org.apache.commons.compress.utils.Lists;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import play.db.jpa.JPA;
 
 /**
@@ -609,7 +611,7 @@ public class AbsenceRequestManager {
   /**
    * Esegue l'approvazione del flusso controllando i vari casi possibili.
    * 
-   * @param id id della richiesta di assenza
+   * @param absenceRequest id della richiesta di assenza
    * @param user l'utente che sta approvando il flusso
    * @return true se il flusso è stato approvato correttamente, false altrimenti
    */
@@ -721,7 +723,7 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * 
+   * true se la persona è in turno/reperibilità nella data, false altrimenti.
    * @param person la persona da cercare
    * @param date la data su cui verificare la presenza di turno/reperibilità
    * @return true se la persona è in turno/reperibilità nella data, false altrimenti.
@@ -736,7 +738,8 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * 
+   * la lista di date in cui è presente una reperibilità o un turno e su cui si vuole
+   *         inserire un'assenza.
    * @param absenceRequest la richiesta di assenza
    * @return la lista di date in cui è presente una reperibilità o un turno e su cui si vuole
    *         inserire un'assenza.
@@ -762,7 +765,8 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * 
+   * la stringa da inserire nelle note della richiesta di assenza contenente le date in cui,
+   *         inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
    * @param troubleDays la lista di date che generano problemi tra turni/reperibilità e assenze
    * @return la stringa da inserire nelle note della richiesta di assenza contenente le date in cui,
    *         inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
