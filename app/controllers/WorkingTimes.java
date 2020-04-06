@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -13,23 +12,16 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperWorkingTimeType;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.ValidationHelper;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.WorkingTimeTypeManager;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -39,16 +31,13 @@ import models.WorkingTimeTypeDay;
 import models.dto.HorizontalWorkingTime;
 import models.dto.VerticalWorkingTime;
 import models.enumerate.WorkingTimeTypePattern;
-
 import org.joda.time.LocalDate;
-
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})

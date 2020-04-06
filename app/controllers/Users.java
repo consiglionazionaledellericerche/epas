@@ -68,6 +68,10 @@ public class Users extends Controller {
     render(results, name);
   }
 
+  /**
+   * Lista degli utenti "orfani".
+   * @param name il nome che può servire come restrizione nella ricerca degli utenti
+   */
   public static void noOwnerUsers(
       @As(binder = NullStringBinder.class) String name) {
 
@@ -77,6 +81,10 @@ public class Users extends Controller {
     render(results, name);
   }
 
+  /**
+   * Permette di editare gli accountRoles (ruoli di sistema).
+   * @param userId l'id dell'user da editare
+   */
   public static void editAccountRoles(Long userId) {
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
@@ -84,6 +92,11 @@ public class Users extends Controller {
     render(user);
   }
 
+  /**
+   * Permette di salvare gli accountRoles (ruoli di sistema) ad un utente.
+   * @param userId l'utente cui associare i nuovi ruoli
+   * @param roles i ruoli da associare
+   */
   public static void saveAccountRoles(Long userId, List<AccountRole> roles) {
 
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
@@ -100,6 +113,10 @@ public class Users extends Controller {
     edit(user.id);
   }
 
+  /**
+   * Aggiunge il ruolo all'utente.
+   * @param userId l'utente a cui aggiungere il ruolo
+   */
   public static void addRole(Long userId) {
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
@@ -107,6 +124,10 @@ public class Users extends Controller {
     render(user);
   }
 
+  /**
+   * Salva il ruolo per l'utente sulla sede.
+   * @param userRoleOffice l'oggetto userRoleOffice da salvare
+   */
   public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
 
     if (Validation.hasErrors()) {
@@ -125,6 +146,10 @@ public class Users extends Controller {
     edit(user.id);
   }
 
+  /**
+   * Rimuove il ruolo.
+   * @param uroId l'identificativo dell'userRoleOffice da eliminare
+   */
   public static void removeRole(Long uroId) {
 
     final UsersRolesOffices uro = uroDao.getById(uroId);
@@ -141,6 +166,10 @@ public class Users extends Controller {
     edit(uro.user.id);
   }
 
+  /**
+   * Mostra le caratteristiche dell'utente.
+   * @param userId l'identificativo dell'utente da mostrare
+   */
   public static void show(Long userId) {
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
@@ -148,6 +177,10 @@ public class Users extends Controller {
     render(user);
   }
 
+  /**
+   * Permette l'edit dell'utente.
+   * @param userId l'identificativo dell'utente da editare
+   */
   public static void edit(Long userId) {
     final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
     notFoundIfNull(user);
@@ -160,6 +193,12 @@ public class Users extends Controller {
     render("@edit");
   }
 
+  /**
+   * Salva l'utente con la nuova password.
+   * @param user l'utente da salvare
+   * @param password la password da salvare
+   * @param confirmPassword la password da confermare
+   */
   public static void save(@Required @Valid User user, String password,
       @Equals("password") String confirmPassword) {
 

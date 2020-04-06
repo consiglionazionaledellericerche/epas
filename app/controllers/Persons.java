@@ -1,9 +1,6 @@
 package controllers;
 
-import java.util.List;
-import javax.inject.Inject;
-import org.apache.commons.lang.WordUtils;
-import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
@@ -17,6 +14,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
@@ -37,6 +36,8 @@ import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import org.apache.commons.lang.WordUtils;
+import org.joda.time.LocalDate;
 import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;

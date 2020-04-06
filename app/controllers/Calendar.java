@@ -49,11 +49,7 @@ import play.mvc.Router;
 import play.mvc.With;
 import security.SecurityRules;
 
-/**
- * @author arianna
- * @author daniele
- * @since 15/05/17.
- */
+
 @Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
@@ -299,6 +295,7 @@ public class Calendar extends Controller {
 
 
   /**
+   * Ritorna lista di DTO contenenti le assenze di una persona nell'intervallo specificato.
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -318,7 +315,7 @@ public class Calendar extends Controller {
 
     for (Absence abs : absences) {
 
-      /**
+      /*
        * Per quanto riguarda gli eventi 'allDay':
        *
        * La convenzione del fullcalendar è quella di avere il parametro end = null
@@ -534,13 +531,13 @@ public class Calendar extends Controller {
           .collect(Collectors.toList());
 
       if (!list.isEmpty()) {
-        holidayShifts = 
-            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
+        holidayShifts = shiftManager2
+            .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
       }
       
       if (!nightList.isEmpty()) {
-        nightShifts =
-            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.nightly);
+        nightShifts = shiftManager2
+            .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.nightly);
       }
       
 
@@ -554,6 +551,7 @@ public class Calendar extends Controller {
 
 
   /**
+   * True se l'attività è modificabile, false altrimenti.
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.

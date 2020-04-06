@@ -49,6 +49,9 @@ public class Clocks extends Controller {
   @Inject
   static ConsistencyManager consistencyManager;
 
+  /**
+   * Mostra la pagina di inizio della timbratura web.
+   */
   @NoCheck
   public static void show() {
     LocalDate data = new LocalDate();
@@ -75,6 +78,11 @@ public class Clocks extends Controller {
     render(data, personList);
   }
 
+  /**
+   * Mostra la pagina di login per la timbratura web.
+   * @param person la persona che intende loggarsi
+   * @param password la password con cui intende loggarsi
+   */
   @NoCheck
   public static void clockLogin(Person person, String password) {
 
@@ -113,6 +121,9 @@ public class Clocks extends Controller {
     }
   }
 
+  /**
+   * Ritorna la situazione giornaliera della persona loggata.
+   */
   public static void daySituation() {
     // Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
@@ -144,6 +155,7 @@ public class Clocks extends Controller {
   }
 
   /**
+   * Ritorna la form di inserimento della timbratura.
    * @param wayType verso timbratura.
    */
   public static void webStamping(@Required WayType wayType) {
@@ -159,6 +171,7 @@ public class Clocks extends Controller {
   }
 
   /**
+   * Inserisce la timbratura.
    * @param way       verso timbratura
    * @param stampType Causale timbratura
    * @param note      eventuali note.

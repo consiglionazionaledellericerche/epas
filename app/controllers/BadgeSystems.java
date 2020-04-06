@@ -53,6 +53,7 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Ritorna la lista dei gruppi badge.
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -65,6 +66,7 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Ritorna le informazioni del gruppo badge.
    * @param id identificativo del gruppo badge.
    */
   public static void show(Long id) {
@@ -74,6 +76,7 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Permette la modifica del gruppo badge.
    * @param id identificativo del gruppo badge.
    */
   public static void edit(Long id) {
@@ -98,6 +101,7 @@ public class BadgeSystems extends Controller {
 
 
   /**
+   * Permette l'aggiornamento delle info sul gruppo badge.
    * @param badgeSystem l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeSystem badgeSystem) {
@@ -118,6 +122,7 @@ public class BadgeSystems extends Controller {
 
 
   /**
+   * Salva il gruppo badge.
    * @param badgeSystem badgeSystem da salvare.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
@@ -137,6 +142,7 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Cancella il gruppo badge.
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
@@ -155,6 +161,10 @@ public class BadgeSystems extends Controller {
     edit(badgeSystem.id);
   }
 
+  /**
+   * Permette l'apertura della pagina per il salvataggio dei badge sul gruppo.
+   * @param badgeSystemId l'identificativo del gruppo badge
+   */
   public static void joinBadges(Long badgeSystemId) {
 
     final BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
@@ -162,7 +172,7 @@ public class BadgeSystems extends Controller {
 
     rules.checkIfPermitted(badgeSystem.office);
 
-    /**
+    /*
      * Dato che nell'edit della singola persona non viene inibito per nessuno l'inserimento dei
      * badge, anche qui recupero la lista completa del personale dell'ufficio.
      * Decidere se c'è la necessità di impedirlo per qualcuno e uniformare questa decisione sia
@@ -175,6 +185,10 @@ public class BadgeSystems extends Controller {
     render("@joinBadges", badgeSystem, officePeople);
   }
 
+  /**
+   * Permette la join del badge alla persona.
+   * @param personId l'identificativo della persona
+   */
   public static void joinBadgesPerson(Long personId) {
 
     final Person person = personDao.getPersonById(personId);
@@ -192,6 +206,13 @@ public class BadgeSystems extends Controller {
 
   }
 
+  /**
+   * Salva il badge alla persona nel gruppo badge.
+   * @param badgeSystem il gruppo badge
+   * @param code il numero del badge
+   * @param person la persona cui salvare il badge
+   * @param personFixed se è fixata la persona
+   */
   public static void saveBadges(
       @Valid BadgeSystem badgeSystem, @Required String code, @Valid Person person,
       boolean personFixed) {
@@ -308,6 +329,10 @@ public class BadgeSystems extends Controller {
     edit(badgeSystem.id);
   }
 
+  /**
+   * Render dei badge della persona.
+   * @param personId l'id della persona
+   */
   public static void personBadges(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -317,6 +342,10 @@ public class BadgeSystems extends Controller {
     render(person);
   }
 
+  /**
+   * Permette la cancellazione di un badge.
+   * @param badgeId identificativo del badge
+   */
   public static void deleteBadgePerson(Long badgeId) {
 
     final Badge badge = badgeDao.byId(badgeId);
@@ -328,6 +357,12 @@ public class BadgeSystems extends Controller {
     render("@delete", badge, personFixed, confirmed);
   }
 
+  /**
+   * Cancella il badge.
+   * @param badgeId l'identificativo del badge da cancellare
+   * @param confirmed se è confermata la cancellazione
+   * @param personFixed se la persona è fixata
+   */
   public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
 
     final Badge badge = badgeDao.byId(badgeId);

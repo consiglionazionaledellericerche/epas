@@ -1319,7 +1319,8 @@ public class Competences extends Controller {
     rules.checkIfPermitted(type.shiftCategories.office);
     if (!type.personShiftDays.isEmpty()) {
       flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
-          + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", type.type);
+          + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", 
+          type.type);
       manageShiftType(type.id);
     }
     if (!type.personShiftShiftTypes.isEmpty()) {

@@ -3,24 +3,18 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.net.MediaType;
 import com.google.gson.GsonBuilder;
-
 import controllers.Resecure.NoCheck;
-
 import dao.UserDao;
-
 import helpers.OilConfig;
 import helpers.Web;
 import helpers.deserializers.ImageToByteArrayDeserializer;
-
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Map;
-
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
 import models.exports.ReportData;
-
 import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;

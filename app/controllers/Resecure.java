@@ -41,6 +41,12 @@ public class Resecure extends Controller {
     rules.checkIfPermitted();
   }
 
+  /**
+   * True se si può eseguire l'azione sull'istanza, false altrimenti.
+   * @param action l'azione da eseguire
+   * @param instance l'oggetto su cui eseguirla
+   * @return se è possibile eseguire l'azione action sull'istanza instance.
+   */
   public static boolean check(String action, Object instance) {
     if (instance != null) {
       return session.contains("username") && rules.check(action, instance);

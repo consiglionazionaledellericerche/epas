@@ -435,7 +435,7 @@ public class ReperibilityCalendar extends Controller {
 
     for (Absence abs : absences) {
 
-      /**
+      /*
        * Per quanto riguarda gli eventi 'allDay':
        *
        * La convenzione del fullcalendar è quella di avere il parametro end = null
