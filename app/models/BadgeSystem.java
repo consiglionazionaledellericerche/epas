@@ -2,23 +2,17 @@ package models;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import net.sf.oval.constraint.NotNull;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 import play.data.validation.Unique;
 

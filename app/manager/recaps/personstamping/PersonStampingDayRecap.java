@@ -3,21 +3,16 @@ package manager.recaps.personstamping;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.PersonDayManager;
 import manager.cache.StampTypeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
-
 import models.Contract;
 import models.PersonDay;
 import models.StampModificationType;
@@ -25,7 +20,6 @@ import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
-
 import org.joda.time.LocalDateTime;
 
 /**

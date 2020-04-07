@@ -10,16 +10,14 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
 import models.base.MutableModel;
 import models.enumerate.AttachmentType;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 
 /**
+ * Oggetto che modella gli allegati.
  * @author daniele
  * @since 06/10/16.
  */

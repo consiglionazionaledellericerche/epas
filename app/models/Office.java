@@ -157,10 +157,12 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * True se l'ufficio contiene il parametro di configurazione con il valore indicato,
+   * false altrimenti.
    * @param param Parametro di configurazione da controllare.
    * @param value valore atteso
    * @return true se l'ufficio contiene il parametro di configurazione specificato con il valore
-   *        indicato
+   *     indicato.
    */
   public boolean checkConf(EpasParam param, String value) {
     return configurations.stream().anyMatch(conf -> conf.epasParam == param

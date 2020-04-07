@@ -26,6 +26,11 @@ public class PersonDayInTrouble extends BaseModel {
   @JoinColumn(updatable = false)
   public PersonDay personDay;
 
+  /**
+   * Costruttore.
+   * @param pd il personday
+   * @param cause la causa del trouble
+   */
   public PersonDayInTrouble(PersonDay pd, Troubles cause) {
     this.personDay = pd;
     this.cause = cause;

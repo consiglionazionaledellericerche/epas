@@ -2,17 +2,12 @@ package models;
 
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import net.sf.oval.constraint.MinLength;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 
 

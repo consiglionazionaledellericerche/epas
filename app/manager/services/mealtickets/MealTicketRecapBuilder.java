@@ -2,13 +2,10 @@ package manager.services.mealtickets;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
 
 /**

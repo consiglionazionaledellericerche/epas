@@ -16,19 +16,23 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalTime;
 
 /**
- * 
- * @author dario
  * Nuova gestione degli slot dei turni associati.
+ * @author dario
+ * 
  */
 @Audited
 @Entity
-public class OrganizationShiftSlot extends BaseModel{
+public class OrganizationShiftSlot extends BaseModel {
 
   private static final long serialVersionUID = 2019_10_28_1039L;
   
   
   public String name;
   
+  /**
+   * Ritorna il nome dello slot formato attraverso inizio e fine dell'orario.
+   * @return il nome dello slot.
+   */
   @Transient
   public String getName() {
     if (Strings.isNullOrEmpty(this.name)) {

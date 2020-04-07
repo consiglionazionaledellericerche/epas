@@ -2,17 +2,12 @@ package manager.recaps.troubles;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import dao.PersonDayInTroubleDao;
-
 import java.util.List;
-
 import manager.PersonManager;
-
 import models.Person;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -34,6 +29,14 @@ public class PersonTroublesInMonthRecap {
   public int holidayWorkingTimeNotAccepted = 0;
   public int holidayWorkingTimeAccepted = 0;
 
+  /**
+   * Costruttore.
+   * @param personDayInTroubleDao dao sui persondayInTrouble
+   * @param personManager manager coi metodi sulla persona
+   * @param person la persona
+   * @param monthBegin la data di inizio del mese
+   * @param monthEnd la data di fine del mese
+   */
   public PersonTroublesInMonthRecap(
       PersonDayInTroubleDao personDayInTroubleDao, PersonManager personManager,
       Person person, LocalDate monthBegin, LocalDate monthEnd) {

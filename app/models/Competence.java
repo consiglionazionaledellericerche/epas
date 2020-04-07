@@ -47,6 +47,13 @@ public class Competence extends BaseModel {
   public String reason;
 
 
+  /**
+   * Costruttore.
+   * @param person la persona
+   * @param competenceCode il codice di competenza
+   * @param year l'anno
+   * @param month il mese
+   */
   public Competence(
       Person person, CompetenceCode competenceCode, int year, int month) {
     this.person = person;
@@ -55,6 +62,15 @@ public class Competence extends BaseModel {
     this.month = month;
   }
 
+  /**
+   * Costruttore.
+   * @param person la persona
+   * @param competenceCode il codice di competenza
+   * @param year l'anno
+   * @param month il mese
+   * @param value la quantità
+   * @param reason la motivazione
+   */
   public Competence(
       Person person, CompetenceCode competenceCode, int year, int month, int value, String reason) {
     this.person = person;

@@ -1,13 +1,11 @@
 package models;
 
 import com.google.common.collect.Range;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;

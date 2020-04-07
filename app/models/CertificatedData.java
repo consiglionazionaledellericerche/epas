@@ -5,11 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 
 
@@ -58,6 +55,14 @@ public class CertificatedData extends BaseModel {
   @Column(name = "is_ok")
   public boolean isOk = false;
 
+  /**
+   * Costruttore.
+   * @param person la persona
+   * @param cognomeNome la stringa contenente cognome/nome
+   * @param matricola la matricola
+   * @param year l'anno
+   * @param month il mese
+   */
   public CertificatedData(
       Person person, String cognomeNome, String matricola, Integer year, Integer month) {
     this.year = year;

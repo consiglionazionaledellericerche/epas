@@ -2,19 +2,14 @@ package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -64,6 +59,7 @@ public class MealTicketRecap {
   }
 
   /**
+   * La lista dei blocchetti consegnati prima dell'inizializzazione, se presente.
    * @return la lista dei blocchi consegnati precedentemente all'inizializzazione se presente.
    */
   public List<BlockMealTicket> getBlockPreviousInitialization() {
