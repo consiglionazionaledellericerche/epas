@@ -116,7 +116,7 @@ public class AbsenceType extends BaseModel {
   public String documentation; 
   
   /**
-   * per il controllo della prendibilità della reperibilità sul giorno di assenza
+   * per il controllo della prendibilità della reperibilità sul giorno di assenza.
    */
   @Column(name = "reperibility_compatible")
   public boolean reperibilityCompatible;
@@ -445,6 +445,12 @@ public class AbsenceType extends BaseModel {
     return Optional.absent();
   }
   
+  /**
+   * Controlla se due interi sono uguali.
+   * @param a intero
+   * @param b intero
+   * @return true se due interi sono uguali, false altrimenti.
+   */
   public static boolean safeEqual(Integer a, Integer b) {
     if (a == null && b == null) {
       return true;

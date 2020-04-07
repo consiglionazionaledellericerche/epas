@@ -34,6 +34,10 @@ public class AbsenceTypeJustifiedBehaviour extends BaseModel {
   @Column
   public Integer data;
   
+  /**
+   * Stampa la quantità di ore e minuti giustificata.
+   * @return la stringa in cui stampare la quantità di ore e minuti giustificata.
+   */
   public String printData() {
     if (justifiedBehaviour.name.equals(JustifiedBehaviourName.minimumTime) 
         || justifiedBehaviour.name.equals(JustifiedBehaviourName.maximumTime)) {

@@ -15,5 +15,5 @@ public class ReperibilityDto {
 
   private List<WorkDaysReperibilityDto> listWorkdaysRep;
   private List<HolidaysReperibilityDto> listHolidaysRep;
-	
+  
 }

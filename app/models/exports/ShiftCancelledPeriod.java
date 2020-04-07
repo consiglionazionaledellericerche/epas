@@ -2,9 +2,7 @@ package models.exports;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-
 import models.ShiftType;
-
 import org.joda.time.LocalDate;
 
 /**

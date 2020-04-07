@@ -2,18 +2,14 @@ package models.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import models.absences.definitions.DefaultTab;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 
 @Audited

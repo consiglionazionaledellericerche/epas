@@ -1,7 +1,6 @@
 package models.enumerate;
 
 import com.google.common.collect.Range;
-
 import models.Qualification;
 
 public enum QualificationMapping {

@@ -1,7 +1,6 @@
 package models.enumerate;
 
 import com.google.common.collect.Lists;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +35,7 @@ public enum ShiftTroubles {
   FUTURE_DAY;
 
   /**
+   * La lista degli errori specifici per un singolo turno.
    * @return la lista degli errori che sono specifici di un singolo turno (non include quelli
    *        derivanti dai controlli sul giorno di turno).
    */
@@ -55,6 +55,7 @@ public enum ShiftTroubles {
   }
 
   /**
+   * La lista degli errori che invalidano il turno.
    * @return la lista degli errori che invalidano il turno.
    */
   public static List<ShiftTroubles> invalidatingTroubles() {
@@ -72,6 +73,7 @@ public enum ShiftTroubles {
   }
   
   /**
+   * La lista degli warning sul turno.
    * @return la lista degli errori che invalidano il turno.
    */
   public static List<ShiftTroubles> warningTroubles() {
