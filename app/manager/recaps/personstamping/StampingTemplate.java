@@ -1,15 +1,11 @@
 package manager.recaps.personstamping;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import manager.cache.StampTypeManager;
-
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 

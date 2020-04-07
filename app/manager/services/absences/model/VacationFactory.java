@@ -4,18 +4,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.model.YearProgression.YearPortion;
-
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -27,12 +24,9 @@ import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public class VacationFactory {

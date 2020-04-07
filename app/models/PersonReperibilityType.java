@@ -63,7 +63,11 @@ public class PersonReperibilityType extends BaseModel {
     return this.description;
   }
   
-  
+  /**
+   * Ritorna l'oggetto che contiene l'approvazione della reperibilità alla data.
+   * @param date la data da considerare
+   * @return l'oggetto che contiene l'approvazione della reperibilità se esistente.
+   */
   @Transient
   public Optional<ReperibilityTypeMonth> monthStatusByDate(LocalDate date) {
     final YearMonth requestedMonth = new YearMonth(date);
@@ -72,6 +76,11 @@ public class PersonReperibilityType extends BaseModel {
             .yearMonth.equals(requestedMonth)).findFirst();
   }
 
+  /**
+   * Controlla se la reperibilità è stata approvata alla data passata come parametro.
+   * @param date la data da verificare
+   * @return true se la reperibilità è stata approvata alla data date, false altrimenti.
+   */
   @Transient
   public boolean approvedOn(LocalDate date) {
     Optional<ReperibilityTypeMonth> monthStatus = monthStatusByDate(date);

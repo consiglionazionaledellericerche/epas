@@ -54,6 +54,11 @@ public class PersonReperibility extends BaseModel {
 
   public String note;
 
+  /**
+   * il range di date di validità dell'appartenenza di una persona al servizio di reperibilità.
+   * @return il range di date di validità dell'appartenenza di una persona al servizio di 
+   *     reperibilità.
+   */
   @Transient
   public Range<LocalDate> dateRange() {
     if (startDate == null && endDate == null) {

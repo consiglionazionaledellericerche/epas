@@ -3,19 +3,14 @@ package manager.services.absences.errors;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.services.absences.errors.CriticalError.CriticalProblem;
-
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
-
 import org.joda.time.LocalDate;
 
 @Slf4j
@@ -104,6 +99,12 @@ public class ErrorsBox {
     log.trace("Aggiunto errore critico alla mappa {}", criticalProblem);
   }
   
+  /**
+   * Verifica che un certo absenceProblem sia contenuto nella mappa absenceErrorsSuperMap.
+   * @param absenceProblem l'oggetto contenente il tipo di problema sull'assenza
+   * @return true se quel problema è contenuto nella mappa absenceErrorsSuperMap, 
+   *     false altrimenti.
+   */
   public boolean containsAbsenceProblem(AbsenceProblem absenceProblem) {
     for (Map<AbsenceProblem, AbsenceError>  map : absenceErrorsSuperMap.values()) {
       if (map.containsKey(absenceProblem)) {

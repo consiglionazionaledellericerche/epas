@@ -3,7 +3,6 @@ package models;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,20 +13,16 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import models.absences.Absence;
 import models.base.BaseModel;
 import models.enumerate.Troubles;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 
@@ -194,6 +189,7 @@ public class PersonDay extends BaseModel {
   }
 
   /**
+   * Controlla se la data del personDay è passata rispetto a LocalDate.now().
    * @return true se la data del personDay è passata, false altrimenti.
    */
   public boolean isPast() {
@@ -201,6 +197,7 @@ public class PersonDay extends BaseModel {
   }
 
   /**
+   * Controlla se la data del personDay è futura rispetto a LocalDate.now().
    * @return true se la data del personDay è futura, false altrimenti.
    */
   public boolean isFuture() {

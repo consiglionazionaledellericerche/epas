@@ -3,12 +3,10 @@ package models;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,14 +23,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
 import models.base.BaseModel;
 import models.enumerate.AccountRole;
-
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -86,6 +81,10 @@ public class User extends BaseModel {
   @JoinColumn(name = "office_owner_id")
   public Office owner;
 
+  /**
+   * Ritorna il badgeReader associato all'utente se ne ha almeno uno associato.
+   * @return il badgeReader associato all'utente se ne ha almeno uno associato.
+   */
   @Transient
   public BadgeReader getBadgeReader() {
     if (badgeReaders.size() > 0) {
@@ -132,6 +131,8 @@ public class User extends BaseModel {
   }
 
   /**
+   * True se l'utente ha almeno uno dei ruoli passati tra i parametri,
+   * false altrimenti.
    * @param args Stringhe corrispondenti ai ruoli da verificare.
    * @return true se contiene almeno uno dei ruoli specificati.
    */

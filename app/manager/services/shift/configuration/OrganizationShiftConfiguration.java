@@ -10,12 +10,18 @@ import org.joda.time.LocalTime;
 
 public enum OrganizationShiftConfiguration {
 
-  INAF_MORNING(new LocalTime(6,0), new LocalTime(14,0), CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
-  INAF_EVENING(new LocalTime(14,0), new LocalTime(22,0), CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
-  INAF_NIGHT(new LocalTime(22,0), new LocalTime(6,0), CompetenceCodeDefinition.NIGHT_SHIFT, false),
-  INAF_MORNING_HOLIDAY(new LocalTime(6,0), new LocalTime(14,0), CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
-  INAF_EVENING_HOLIDAY(new LocalTime(14,0), new LocalTime(22,0), CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
-  INAF_NIGHT_HOLIDAY(new LocalTime(22,0), new LocalTime(6,0), CompetenceCodeDefinition.HOLIDAY_SHIFT, true);
+  INAF_MORNING(new LocalTime(6,0), new LocalTime(14,0), 
+      CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
+  INAF_EVENING(new LocalTime(14,0), new LocalTime(22,0), 
+      CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
+  INAF_NIGHT(new LocalTime(22,0), new LocalTime(6,0), 
+      CompetenceCodeDefinition.NIGHT_SHIFT, false),
+  INAF_MORNING_HOLIDAY(new LocalTime(6,0), new LocalTime(14,0), 
+      CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
+  INAF_EVENING_HOLIDAY(new LocalTime(14,0), new LocalTime(22,0), 
+      CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
+  INAF_NIGHT_HOLIDAY(new LocalTime(22,0), new LocalTime(6,0), 
+      CompetenceCodeDefinition.HOLIDAY_SHIFT, true);
   
   public LocalTime beginSlot;
   public LocalTime endSlot;
@@ -30,6 +36,11 @@ public enum OrganizationShiftConfiguration {
     this.workingDay = workingDay;
   }
   
+  /**
+   * la lista di oggetti ShiftComposition che determina la composizione del turno.
+   * @param validPairs la lista di coppie di timbrature valide
+   * @return la lista di oggetti ShiftComposition che determina la composizione del turno.
+   */
   public List<ShiftComposition> getShiftComposition(List<PairStamping> validPairs) {
     // per ogni coppia di timbrature valida devo controllare in quale slot sta e per quanti minuti
     List<ShiftComposition> list = Lists.newArrayList();

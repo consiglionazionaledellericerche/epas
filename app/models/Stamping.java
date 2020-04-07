@@ -1,9 +1,7 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-
 import it.cnr.iit.epas.NullStringBinder;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,14 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
 import models.base.BaseModel;
 import models.enumerate.StampTypes;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.data.binding.As;
 import play.data.validation.Required;
 

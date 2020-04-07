@@ -5,18 +5,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneDipendenteAssenze;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneParametriControllo;
@@ -28,7 +24,6 @@ import manager.services.absences.certifications.CertificationYearSituation.Absen
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -38,10 +33,8 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.cache.Cache;
 
 /**

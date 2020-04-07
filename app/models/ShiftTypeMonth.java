@@ -12,6 +12,7 @@ import org.joda.time.YearMonth;
 import play.data.validation.Required;
 
 /**
+ * Oggetto che contiene l'approvazione delle ore di turno.
  * @author daniele
  * @since 09/06/17.
  */

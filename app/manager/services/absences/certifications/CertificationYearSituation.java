@@ -2,15 +2,12 @@ package manager.services.absences.certifications;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import models.absences.Absence;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 
 /**

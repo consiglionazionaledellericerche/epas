@@ -1,7 +1,6 @@
 package manager.services.absences.model;
 
 import lombok.Builder;
-
 import models.absences.Absence;
 import models.absences.AmountType;
 

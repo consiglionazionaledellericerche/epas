@@ -1,9 +1,7 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-
 import java.util.Comparator;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,15 +10,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
-
 import models.base.BaseModel;
 import models.enumerate.CertificationType;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 
 
