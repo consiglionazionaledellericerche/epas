@@ -11,8 +11,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -40,6 +40,7 @@ public class StampingManager {
   private final IWrapperFactory wrapperFactory;
 
   /**
+   * Injection.
    * @param personDayDao il dao per cercare i personday
    * @param personDao il dao per cercare le persone
    * @param personDayManager il manager per lavorare sui personday
@@ -267,6 +268,8 @@ public class StampingManager {
   }
 
   /**
+   * Controlla se lo stamptype è da inserire tra quelli per la timbratura fuori sede, 
+   * false altrimenti.
    * @param stamping la timbratura da controllare
    * @param user l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura

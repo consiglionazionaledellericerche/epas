@@ -3,6 +3,7 @@ package models.enumerate;
 import models.absences.AbsenceType;
 
 /**
+ * Enumerato per il mapping del tipo assenza.
  * @author cristian
  */
 public enum AbsenceTypeMapping {

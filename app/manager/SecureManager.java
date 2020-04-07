@@ -3,10 +3,8 @@ package manager;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import models.Office;
 import models.Role;
 import models.User;
@@ -14,6 +12,9 @@ import models.User;
 public class SecureManager {
 
   /**
+   * La lista degli uffici permessi per l'utente user passato.
+   * @param user l'utente 
+   * @param rolesNames la lista dei ruoli
    * @return la lista degli uffici permessi per l'utente user passato come parametro.
    */
   private Set<Office> getOfficeAllowed(User user, ImmutableList<String> rolesNames) {
@@ -73,6 +74,11 @@ public class SecureManager {
 
   }
 
+  /**
+   * l'insieme degli uffici su cui user è Amm. tecnico.
+   * @param user l'utente per cui si cercano gli uffici su cui è Amm. Tecnico
+   * @return l'insieme degli uffici su cui user è Amm. tecnico.
+   */
   public Set<Office> officesTechnicalAdminAllowed(User user) {
     ImmutableList<String> roles = ImmutableList.of(Role.TECHNICAL_ADMIN);
 

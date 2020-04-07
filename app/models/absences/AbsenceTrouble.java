@@ -6,11 +6,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import lombok.Builder;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 
 @Builder

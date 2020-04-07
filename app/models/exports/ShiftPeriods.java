@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * La lista dei periodi di turno.
  * @author arianna
  */
 public class ShiftPeriods {

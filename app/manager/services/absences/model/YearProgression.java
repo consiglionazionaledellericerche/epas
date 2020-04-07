@@ -1,9 +1,7 @@
 package manager.services.absences.model;
 
 import com.google.common.collect.ImmutableList;
-
 import java.util.List;
-
 import models.enumerate.VacationCode;
 
 public enum YearProgression {
@@ -186,6 +184,12 @@ public enum YearProgression {
     public final int days;
     public final int amount;
     
+    /**
+     * Costruttore.
+     * @param from giorno di inizio
+     * @param to giorno di fine
+     * @param amount quantità di giorni
+     */
     public YearPortion(int from, int to, int amount) {
       this.from = from;
       this.to = to;
@@ -194,6 +198,11 @@ public enum YearProgression {
     }
   }
   
+  /**
+   * Ritorna la progressione dei giorni di ferie in base al vacationCode.
+   * @param vacationCode il vacationCode da considerare
+   * @return la progressione dei giorni di ferie in base al vacationCode.
+   */
   public static YearProgression whichVacationProgression(VacationCode vacationCode) {
     for (YearProgression yearProgression : YearProgression.values()) {
       if (yearProgression.total == vacationCode.vacations) {
@@ -203,6 +212,11 @@ public enum YearProgression {
     return null; //throw new IllegalStateException();
   }
   
+  /**
+   * Ritorna la progressione dei giorni di ex P.L. in base al vacationCode.
+   * @param vacationCode il vacationCode da considerare
+   * @return la progressione dei giorni di ex P.L. in base al vacationCode.
+   */
   public static YearProgression whichPermissionProgression(VacationCode vacationCode) {
     for (YearProgression yearProgression : YearProgression.values()) {
       if (yearProgression.total == vacationCode.permissions) {

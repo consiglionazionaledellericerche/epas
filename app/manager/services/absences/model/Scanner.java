@@ -3,18 +3,14 @@ package manager.services.absences.model;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
-
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
@@ -28,9 +24,7 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
 @Slf4j

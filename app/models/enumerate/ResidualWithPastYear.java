@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per la gestione dei residui dell'anno passato.
  * @author dario
  */
 public enum ResidualWithPastYear {

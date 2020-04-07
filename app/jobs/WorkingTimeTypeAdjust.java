@@ -8,7 +8,7 @@ import play.jobs.OnApplicationStart;
 
 @OnApplicationStart(async = true)
 @Slf4j
-public class WorkingTimeTypeAdjust extends Job<Void>{
+public class WorkingTimeTypeAdjust extends Job<Void> {
 
   private final String MATERNITA = "Maternita";
   private final String MATERNITA_ACCENTO = "Maternità";

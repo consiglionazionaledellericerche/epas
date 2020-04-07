@@ -1,7 +1,6 @@
 package helpers.validators;
 
 import org.joda.time.LocalDate;
-
 import play.data.validation.Check;
 
 public class LocalDatePast extends Check {

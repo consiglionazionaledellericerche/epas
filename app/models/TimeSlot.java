@@ -63,6 +63,9 @@ public class TimeSlot extends BaseModel {
   @Column(name = "disabled")
   public boolean disabled = false;
 
+  /**
+   * Ritorna la denominazione del timeSlot.
+   */
   @Transient
   public String getLabel() {
     DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");

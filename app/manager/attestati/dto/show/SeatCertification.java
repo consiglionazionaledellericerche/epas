@@ -2,7 +2,6 @@ package manager.attestati.dto.show;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 /**

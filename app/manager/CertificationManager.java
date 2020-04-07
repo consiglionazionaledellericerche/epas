@@ -6,8 +6,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Person;
 import org.joda.time.YearMonth;
 

@@ -1,9 +1,7 @@
 package manager;
 
 import com.google.common.collect.Iterables;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.PersonShiftDay;
 import models.PersonShiftDayInTrouble;
 import models.enumerate.ShiftTroubles;

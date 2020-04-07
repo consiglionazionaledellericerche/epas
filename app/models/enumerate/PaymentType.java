@@ -3,8 +3,8 @@ package models.enumerate;
 /**
  * Enumerato per la definizione del tipo di pagamento del turno.
  * @author dario
- *      enumerato che serve a stabilire se pagare tutto il turno con una certa tipologia o con un'altra
- *      se questo ricade in parte in una fascia e in parte in un'altra.
+ *     enumerato che serve a stabilire se pagare tutto il turno con una certa tipologia o con 
+ *     un'altra se questo ricade in parte in una fascia e in parte in un'altra.
  */
 public enum PaymentType {
 

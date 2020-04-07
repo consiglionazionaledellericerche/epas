@@ -12,6 +12,8 @@ import play.PlayPlugin;
 import play.inject.BeanSource;
 
 /**
+ * Plugin di injection.
+ * 
  * @author marco
  *
  */

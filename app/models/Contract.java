@@ -196,6 +196,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return computeEnd(endDate, endContract);
   }
 
+  /**
+   * Ritorna la data di fine contratto.
+   * @param endDate la data di terminazione contratto (per T.D.)
+   * @param endContract la data di fine esperienza (per T.I. -> pensione)
+   * @return la data di fine contratto.
+   */
   public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
     if (endContract != null) {
       return endContract;
@@ -203,6 +209,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return endDate;
   }
 
+  /**
+   * true se il contratto è correttamente sincronizzato, false altrimenti.
+   * @return true se il contratto è correttamente sincronizzato, false altrimenti.
+   */
   @Transient
   public boolean isProperSynchronized() {
     if (calculatedEnd() == null || !calculatedEnd().isBefore(LocalDate.now())) {

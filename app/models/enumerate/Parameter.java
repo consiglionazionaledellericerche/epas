@@ -54,6 +54,11 @@ public enum Parameter {
     this.defaultValue = defaultValue;
   }
 
+  /**
+   * Ritorna il parametro con la descrizione passata.
+   * @param description la descrizione del parametro
+   * @return il parametro con la descrizione passata in firma al metodo.
+   */
   public static Parameter getByDescription(String description) {
     for (Parameter param : values()) {
       if (param.description.equalsIgnoreCase(description)) {
@@ -71,6 +76,10 @@ public enum Parameter {
     return this.type.equals("yearly");
   }
 
+  /**
+   * Il valore di default del parametro.
+   * @return il valore di default del parametro.
+   */
   public String getDefaultValue() {
 
     //mettere qui i valori del file configurazioni quando ci sarà...

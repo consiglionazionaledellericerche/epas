@@ -1,7 +1,6 @@
 package manager.attestati.dto.internal.clean;
 
 import lombok.Builder;
-
 import org.joda.time.LocalDate;
 
 /**

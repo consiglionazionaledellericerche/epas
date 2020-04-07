@@ -1,9 +1,9 @@
-package manager.recaps.trainingHours;
+package manager.recaps.traininghours;
 
 import org.joda.time.LocalDate;
 
 /**
- * 
+ * Recap giorno e ora.
  * @author dario
  *
  */

@@ -4,9 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-
 import java.util.List;
-
 import play.data.validation.Error;
 
 
@@ -19,6 +17,11 @@ import play.data.validation.Error;
 public class ValidationHelper {
   //FIXME implementare la validazione nei modali oppure rimuovere i modali per le form
 
+  /**
+   * La stringa contenente gli errori segnalati.
+   * @param errors la lista degli errori
+   * @return la stringa contenente gli errori passati come parametro.
+   */
   public static String errorsMessages(List<Error> errors) {
 
     return FluentIterable.from(errors).filter(new Predicate<Error>() {
@@ -28,6 +31,7 @@ public class ValidationHelper {
       }
     }).transform(errorToString.ISTANCE).join(Joiner.on(";  "));
   }
+
 
   public enum errorToString implements Function<Error, String> {
     ISTANCE;

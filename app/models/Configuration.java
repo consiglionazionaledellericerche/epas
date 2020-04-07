@@ -8,12 +8,9 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import manager.configurations.EpasParam;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
-
 import org.hibernate.envers.Audited;
 
 

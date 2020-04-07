@@ -29,6 +29,11 @@ public class PersonMonthRecapDao extends DaoBase {
   }
 
   /**
+   * La lista dei personMonthRecap relativi ai parametri passati.
+   * @param person la persona per cui cercare i riepiloghi
+   * @param year l'anno da cercare
+   * @param month (opzionale) il mese da cercare
+   * @param hoursApproved(opzionale) se sono stati approvati
    * @return la lista di personMonthRecap relativa all'anno year per la persona person.
    */
   public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person,
@@ -52,6 +57,8 @@ public class PersonMonthRecapDao extends DaoBase {
   }
 
   /**
+   * Il personMonthRecap con id passato al metodo
+   * @param id l'identificativo del personMonthRecap
    * @return il personMonthRecap relativo all'id passato come parametro.
    */
   public PersonMonthRecap getPersonMonthRecapById(Long id) {
@@ -61,7 +68,15 @@ public class PersonMonthRecapDao extends DaoBase {
         .fetchOne();
   }
 
-
+  /**
+   * La lista dei personMonthRecap appartenenti ai criteri del metodo.
+   * @param person la persona di cui cercare i riepiloghi
+   * @param year l'anno da cercare
+   * @param month il mese da cercare
+   * @param begin la data da cui cercare
+   * @param end la data fino a cui cercare
+   * @return la lista dei personMonthRecap appartenenti ai criteri del metodo.
+   */
   public List<PersonMonthRecap> getPersonMonthRecaps(
       Person person, Integer year, Integer month, LocalDate begin, LocalDate end) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
@@ -76,8 +91,12 @@ public class PersonMonthRecapDao extends DaoBase {
   }
 
   /**
+   * La lista dei personmonthrecap delle persone appartenenti alla sede nell'anno/mese.
+   * @param year l'anno da cercare
+   * @param month il mese da cercare
+   * @office la sede su cui cercare
    * @return la lista dei personMonthRecap di tutte le persone che appartengono all'ufficio office
-   * nell'anno year e nel mese month passati come parametro.
+   *     nell'anno year e nel mese month passati come parametro.
    */
   public List<PersonMonthRecap> getPeopleMonthRecaps(Integer year, Integer month, Office office) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
@@ -90,6 +109,10 @@ public class PersonMonthRecapDao extends DaoBase {
 
 
   /**
+   * Il personMonthRecap, se esiste, per la persona nell'anno/mese.
+   * @param person la persona di cui cercare il pmr
+   * @year l'anno da cercare
+   * @month il mese da cercare
    * @return il personMonthRecap, se esiste, relativo ai parametri passati come riferimento.
    */
   public Optional<PersonMonthRecap> getPersonMonthRecapByPersonYearAndMonth(
@@ -108,6 +131,7 @@ public class PersonMonthRecapDao extends DaoBase {
   /* *****************************************************************************************/
 
   /**
+   * Il certificato (vecchia modalità) con id passato come parametro.
    * @return il certificatedData relativo all'id passato come parametro.
    */
   public CertificatedData getCertificatedDataById(Long id) {
@@ -118,6 +142,7 @@ public class PersonMonthRecapDao extends DaoBase {
 
 
   /**
+   * Il certificato (vecchia modalità) della persona nell'anno/mese.
    * @return il certificatedData relativo alla persona 'person' per il mese 'month' e l'anno 'year'.
    */
   public CertificatedData getPersonCertificatedData(Person person, Integer month, Integer year) {

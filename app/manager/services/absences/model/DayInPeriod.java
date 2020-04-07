@@ -1,14 +1,10 @@
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import manager.services.absences.errors.AbsenceError;
-
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
@@ -16,7 +12,6 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
-
 import org.joda.time.LocalDate;
 
 @Getter

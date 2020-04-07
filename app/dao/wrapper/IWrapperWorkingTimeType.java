@@ -1,7 +1,6 @@
 package dao.wrapper;
 
 import java.util.List;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;

@@ -29,14 +29,19 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
+   * La lista delle qualifiche a seconda dei parametri passati.
+   * @param qualification (opzionale) la qualifica da cercare
+   * @param idQualification (opzionale) l'id della qualifica da cercare
+   * @param findAll se voglio cercare tutti
    * @return la lista di qualifiche a seconda dei parametri passati: nel caso in cui il booleano sia
-   * "true" viene ritornata l'intera lista di qualifiche. Nel caso sia presente la qualifica che si
-   * vuole ritornare, viene ritornata sempre una lista, ma con un solo elemento, corrispondente al
-   * criterio di ricerca. Nel caso invece in cui si voglia una lista di elementi sulla base dell'id,
-   * si controllerà il parametro idQualification, se presente, che determinerà una lista di un solo
-   * elemento corrispondente ai criteri di ricerca. Ritorna null nel caso in cui non dovesse essere
-   * soddisfatta alcuna delle opzioni di chiamata.
+   *     "true" viene ritornata l'intera lista di qualifiche. Nel caso sia presente la qualifica 
+   *     che si vuole ritornare, viene ritornata sempre una lista, ma con un solo elemento, 
+   *     corrispondente al criterio di ricerca. Nel caso invece in cui si voglia una lista di 
+   *     elementi sulla base dell'id, si controllerà il parametro idQualification, se presente, 
+   *     che determinerà una lista di un solo elemento corrispondente ai criteri di ricerca. 
+   *     Ritorna null nel caso che non dovesse essere soddisfatta alcuna delle opzioni di chiamata.
    */
+   
   public List<Qualification> getQualification(
       Optional<Integer> qualification, Optional<Long> idQualification, boolean findAll) {
     final BooleanBuilder condition = new BooleanBuilder();
@@ -60,6 +65,7 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
+   * La qualifica, se esiste, del livello passato come parametro.
    * @param qualification il livello della qualifica da cercare.
    * @return la qualificica corrispondente al livello indicato.
    */
@@ -76,6 +82,7 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
+   * Ritorna tutte le qualifiche presenti sul db.
    * @return tutte le qualifiche presenti nel sistema.
    */
   public List<Qualification> findAll() {
@@ -84,6 +91,7 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
+   * Ritorna la mappa di intero/qualifica.
    * @return Tutte le qualifiche epas come mappa qualification.qualification -> qualification.
    */
   public Map<Integer, Qualification> allQualificationMap() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * I periodi di reperibilità.
  * @author cristian
  */
 public class ReperibilityPeriods {

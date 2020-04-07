@@ -127,6 +127,7 @@ public class AbsenceDao extends DaoBase {
 
 
   /**
+   * Ritorna la lista delle assenze nel periodo.
    * @param person la persona di cui cercare le assenze.
    * @param begin la data di inizio da cui cercare le assenze (compresa)
    * @param end la data di fine fino a cui cercare le assenze (compresa
@@ -148,9 +149,11 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
-   * @return il quantitativo di assenze presenti in un certo periodo temporale delimitato da begin e
-   * end che non appartengono alla lista di codici passata come parametro nella lista di stringhe
+   * Quante assenze fatte nel periodo temporale tra begin e end appartenenti alla lista di codici
    * absenceCode.
+   * @return il quantitativo di assenze presenti in un certo periodo temporale delimitato da begin e
+   *     end che non appartengono alla lista di codici passata come parametro nella lista di 
+   *     stringhe absenceCode.
    */
   public Long howManyAbsenceInPeriodNotInList(
       LocalDate begin, LocalDate end, List<String> absenceCode) {
@@ -168,6 +171,7 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * La lista delle assenze per persona e data.
    * @param person La persona della quale recuperare le assenze
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -193,8 +197,9 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista delle assenze NON a uso interno.
    * @return la lista delle assenze contenenti un tipo di assenza con uso interno = false relative a
-   * una persona nel periodo compreso tra begin e end ordinate per per data.
+   *     una persona nel periodo compreso tra begin e end ordinate per per data.
    */
   public List<Absence> getAbsenceWithNotInternalUseInMonth(
       Person person, LocalDate begin, LocalDate end) {
@@ -236,7 +241,7 @@ public class AbsenceDao extends DaoBase {
    * person in modo da non effettuare ulteriori select.
    *
    * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla
-   * persona relativa a questo personMonth.
+   *     persona relativa a questo personMonth.
    */
   public List<Absence> getAbsencesNotInternalUseInMonth(
       Person person, Integer year, Integer month) {
@@ -247,8 +252,9 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista delle assenze per persona nel periodo.
    * @return la lista di assenze effettuate dalle persone presenti nella lista personList nel
-   * periodo temporale compreso tra from e to.
+   *     periodo temporale compreso tra from e to.
    */
   public List<Absence> getAbsenceForPersonListInPeriod(
       List<Person> personList, LocalDate from, LocalDate to) {
@@ -263,8 +269,9 @@ public class AbsenceDao extends DaoBase {
 
 
   /**
+   * Ritorna la lista delle assenze nell'intervallo di tempo relative al tipo ab.
    * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo
-   * temporale inter.
+   *     temporale inter.
    */
   public List<Absence> getAbsenceDays(DateInterval inter, Contract contract, AbsenceType ab) {
 
@@ -285,8 +292,9 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * Ritorna le assenze frequenti nel periodo da from a to.
    * @return la lista dei frequentAbsenceCode, ovvero dei codici di assenza più frequentemente usati
-   * nel periodo compreso tra 'dateFrom' e 'dateTo'.
+   *     nel periodo compreso tra 'dateFrom' e 'dateTo'.
    */
   public List<FrequentAbsenceCode> getFrequentAbsenceCodeForAbsenceFromJson(
       LocalDate dateFrom, LocalDate dateTo) {
@@ -325,6 +333,7 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * Ritorna le assenze della persona nell'anno.
    * @return la lista delle assenze effettuate dalla persona nell'anno.
    */
   public List<Absence> getYearlyAbsence(Person person, int year) {

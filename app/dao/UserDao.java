@@ -36,6 +36,9 @@ public class UserDao extends DaoBase {
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   /**
+   * L'user identificato dall'id passato come parametro.
+   * @param id l'identificativo dell'utente
+   * @param password (opzionale) la password dell'utente
    * @return lo user  identificato dall'id passato come parametro.
    */
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
@@ -50,6 +53,8 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * L'utente cui il token appartiene.
+   * @param recoveryToken la stringa con il token per ricreare la password
    * @return l'user corrispondente al recoveryToken inviato per il recovery della password.
    */
   public User getUserByRecoveryToken(String recoveryToken) {
@@ -59,6 +64,9 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * L'user corrispondente all'username e alla password (opzionale) passati.
+   * @param username l'username dell'utente
+   * @param password (opzionale) la password dell'utente
    * @return l'user corrispondente a username e password passati come parametro.
    */
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
@@ -93,6 +101,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * La lista degli utenti per sede.
    * @param name Filtro sul nome
    * @param offices Gli uffici che hanno qualche tipo di relazione con gli user restituiti
    * @param onlyEnable filtra solo sugli utenti abilitati
@@ -126,6 +135,8 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * la lista degli utenti "orfani".
+   * @param name (opzionale) l'eventuale nome su cui fare la restrizione di ricerca
    * @return La lista degli utenti senza legami con una sede.
    */
   public SimpleResults<User> noOwnerUsers(Optional<String> name) {

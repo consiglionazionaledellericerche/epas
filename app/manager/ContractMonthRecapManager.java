@@ -3,27 +3,21 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import manager.cache.CompetenceCodeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -33,7 +27,6 @@ import models.PersonDay;
 import models.TimeVariation;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
-
 import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;

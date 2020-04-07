@@ -1,13 +1,11 @@
 package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
-
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
-
 import org.joda.time.LocalDate;
 
 

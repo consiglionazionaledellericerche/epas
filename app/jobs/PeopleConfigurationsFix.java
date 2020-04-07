@@ -1,15 +1,10 @@
 package jobs;
 
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
-
 import models.Person;
-
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;

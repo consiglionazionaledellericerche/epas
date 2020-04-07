@@ -43,6 +43,11 @@ public class Badge extends BaseModel {
   @JoinColumn(name = "badge_system_id")
   public BadgeSystem badgeSystem;
 
+  
+  /**
+   * Assegna code come numero del badge.
+   * @param code il numero del badge
+   */
   public void setCode(String code) {
     try {
       this.code = String.valueOf(Integer.valueOf(code));

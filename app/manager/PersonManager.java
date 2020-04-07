@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
-import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -196,7 +196,8 @@ public class PersonManager {
         && !newerContract.sourceDateRecoveryDay.isBefore(begin)
         && !newerContract.sourceDateRecoveryDay.isAfter(end)) {
       return newerContract.sourceRecoveryDayUsed + absenceDao
-          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay.plusDays(1), end, "91").size();
+          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay.plusDays(1), end, "91")
+      .size();
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();

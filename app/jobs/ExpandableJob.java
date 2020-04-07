@@ -1,19 +1,12 @@
 package jobs;
 
 import com.google.common.collect.ImmutableList;
-
 import dao.PersonDao;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.PersonDayInTroubleManager;
-
 import models.enumerate.Troubles;
-
 import org.joda.time.LocalDate;
-
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;

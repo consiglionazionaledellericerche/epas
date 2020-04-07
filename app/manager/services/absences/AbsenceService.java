@@ -1,8 +1,5 @@
 package manager.services.absences;
 
-import java.util.List;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
@@ -13,6 +10,7 @@ import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateUtility;
+import java.util.List;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
@@ -48,6 +46,8 @@ import models.absences.InitializationGroup;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import play.cache.Cache;
 
 /**
@@ -462,6 +462,7 @@ public class AbsenceService {
   }
 
   /**
+   * Ritorna la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    * @return la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    */
   public List<GroupAbsenceType> groupsPermittedFlow() {
@@ -800,7 +801,6 @@ public class AbsenceService {
    * @param vacationGroup injected
    * @param residualDate data per maturazione giorni
    * @param cache se prelevare i dati dalla cache
-   * @param vacationsService per costruire il vecchio ripilogo da confrontare col nuovo
    * @return situazione
    */
   public VacationSituation buildVacationSituation(Contract contract, int year,
@@ -829,9 +829,9 @@ public class AbsenceService {
       situation.permissionsCached = (VacationSummaryCached) Cache.get(permissionsKey);
       if (situation.lastYearCached != null // && situation.lastYearCached.date.isEqual(date)
           && situation.currentYearCached != null // &&
-                                                 // situation.currentYearCached.date.isEqual(date)
+          // situation.currentYearCached.date.isEqual(date)
           && situation.permissionsCached != null // &&
-                                                 // situation.permissionsCached.date.isEqual(date)
+      // situation.permissionsCached.date.isEqual(date)
       ) {
         // Tutto correttamente cachato.
         return situation;

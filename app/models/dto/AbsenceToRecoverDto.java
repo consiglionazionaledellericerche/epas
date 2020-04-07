@@ -1,7 +1,6 @@
 package models.dto;
 
 import models.absences.Absence;
-
 import org.joda.time.LocalDate;
 
 public class AbsenceToRecoverDto {

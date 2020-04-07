@@ -1,9 +1,7 @@
 package manager.services.absences.errors;
 
 import java.util.Set;
-
 import lombok.Builder;
-
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 

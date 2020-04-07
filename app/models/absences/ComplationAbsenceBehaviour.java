@@ -2,9 +2,7 @@ package models.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,13 +14,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-
 import lombok.Getter;
-
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultComplation;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 
 @Audited

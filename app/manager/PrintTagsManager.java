@@ -36,6 +36,14 @@ public class PrintTagsManager {
   private final PersonDao personDao;
   private final PersonShiftDayDao personShiftDayDao;
 
+  /**
+   * Injection.
+   * @param stampingHistoryDao il dao dello storico delle timbrature
+   * @param personDayHistoryDao il dao dello storico dei personday
+   * @param personDayDao il dao dei personday
+   * @param personDao il dao delle persone
+   * @param personShiftDayDao il dao dei giorni di turno
+   */
   @Inject
   public PrintTagsManager(
       StampingHistoryDao stampingHistoryDao, PersonDayHistoryDao personDayHistoryDao,

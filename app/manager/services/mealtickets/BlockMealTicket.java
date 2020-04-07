@@ -2,17 +2,13 @@ package manager.services.mealtickets;
 
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-
 import models.Contract;
 import models.MealTicket;
 import models.Person;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -82,6 +78,7 @@ public class BlockMealTicket {
   }
 
   /**
+   * Il giorno di scadenza del blocchetto.
    * @return il giorno di scadenza dei buoni appartenenti al blocchetto.
    */
   public LocalDate getExpireDate() {
@@ -92,6 +89,7 @@ public class BlockMealTicket {
   }
 
   /**
+   * L'amministratore che ha fatto l'inserimento del blocchetto.
    * @return l'amministratore assegnatario del blocchetto.
    */
   public Person getAdmin() {
@@ -102,6 +100,7 @@ public class BlockMealTicket {
   }
 
   /**
+   * La data di consegna del blocchetto (inserimento in ePAS).
    * @return la data di consegna (inserimento ePAS) del blocchetto.
    */
   public LocalDate getReceivedDate() {
@@ -112,6 +111,7 @@ public class BlockMealTicket {
   }
 
   /**
+   * Il primo numero dei buoni del blocco.
    * @return il primo number del blocco.
    */
   public int getFirst() {
@@ -119,6 +119,7 @@ public class BlockMealTicket {
   }
 
   /**
+   * L'ultimo numero dei buoni del blocco.
    * @return l'ultimo number del blocco.
    */
   public int getLast() {

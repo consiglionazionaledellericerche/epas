@@ -2,18 +2,13 @@ package manager.attestati.dto.internal;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.ToString;
-
 import manager.attestati.dto.internal.PeriodoDipendente.PeriodoDipendenteDettagli;
-
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;

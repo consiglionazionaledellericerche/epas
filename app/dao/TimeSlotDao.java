@@ -26,6 +26,11 @@ public class TimeSlotDao extends DaoBase {
     this.contractDao = contractDao;
   }
 
+  /**
+   * Il timeslot con id passato come parametro.
+   * @param id l'id del timeslot
+   * @return il timeSlot, se esiste, con id passato come parametro.
+   */
   public Optional<TimeSlot> byId(long id) {
     final QTimeSlot ts = QTimeSlot.timeSlot;
     return Optional.fromNullable(getQueryFactory()

@@ -1,15 +1,12 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-
 import models.Contract;
 import models.PersonDay;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
 
-/**
- * @author alessandro
- */
+
 public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
 
   /**
