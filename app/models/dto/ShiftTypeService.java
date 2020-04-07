@@ -2,7 +2,6 @@ package models.dto;
 
 import models.ShiftTimeTable;
 import models.ShiftType.ToleranceType;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;

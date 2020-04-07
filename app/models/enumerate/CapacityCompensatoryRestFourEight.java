@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per la gestione dei riposi compensativi IV-VIII.
  * @author dario
  */
 public enum CapacityCompensatoryRestFourEight {

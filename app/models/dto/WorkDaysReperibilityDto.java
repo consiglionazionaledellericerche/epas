@@ -1,11 +1,8 @@
 package models.dto;
 
 import com.google.common.collect.Range;
-
 import java.util.List;
-
 import models.Person;
-
 import org.joda.time.LocalDate;
 
 public class WorkDaysReperibilityDto {

@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per il tipo di allegato.
  * @author daniele
  * @since 06/10/16.
  */

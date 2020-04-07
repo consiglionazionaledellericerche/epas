@@ -1,16 +1,12 @@
 package models.base;
 
 import it.cnr.iit.epas.DateInterval;
-
 import java.util.Comparator;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
