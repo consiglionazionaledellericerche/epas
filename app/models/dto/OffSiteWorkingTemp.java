@@ -1,7 +1,7 @@
 package models.dto;
 
-import org.joda.time.LocalDate;
 import models.Stamping;
+import org.joda.time.LocalDate;
 
 public class OffSiteWorkingTemp {
   

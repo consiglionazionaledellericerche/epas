@@ -2,20 +2,15 @@ package manager.recaps.competence;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.CompetenceDao;
 import dao.PersonDao;
-
 import java.util.List;
-
 import manager.CompetenceManager;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.TotalOvertime;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -33,7 +28,16 @@ public class CompetenceRecap {
   List<CompetenceCode> competenceCodeList = Lists.newArrayList();
   List<Competence> compList = Lists.newArrayList();
 
-
+  /**
+   * Costruttore competenceRecap.
+   * @param personDao il dao sulla persona
+   * @param competenceManager il manager sulle competnze
+   * @param competenceDao il dao sulle competenze
+   * @param year l'anno
+   * @param month il mese
+   * @param office l'ufficio
+   * @param competenceCode il codice di competenza
+   */
   public CompetenceRecap(PersonDao personDao, CompetenceManager competenceManager,
       CompetenceDao competenceDao, int year, int month, Office office,
       CompetenceCode competenceCode) {

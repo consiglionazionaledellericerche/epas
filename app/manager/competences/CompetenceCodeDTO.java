@@ -1,7 +1,6 @@
 package manager.competences;
 
 import models.CompetenceCode;
-
 import org.joda.time.LocalDate;
 
 public class CompetenceCodeDTO {

@@ -51,6 +51,13 @@ public class Persons extends Controller {
   @Inject
   private static SecurityRules rules;
 
+  /**
+   * Ritorna le informazioni sui giorni nel periodo richiesto per la persona identificata
+   * dal parametro email.
+   * @param email la mail della persona di cui si vogliono le informazioni sui giorni
+   * @param start l'inizio del periodo
+   * @param end la fine del periodo
+   */
   @BasicAuth
   public static void days(String email, LocalDate start, LocalDate end) {
 
@@ -83,6 +90,14 @@ public class Persons extends Controller {
     renderJSON(personDays);
   }
 
+  /**
+   * Ritorna il json contenente le missioni presenti nel periodo da start a end per la persona 
+   * identificata dalla mail email.
+   * @param email la mail che identifica la persona
+   * @param start la data di inizio della ricerca
+   * @param end la data di fine della ricerca
+   * @param forAttachment se occorre aggiungere gli allegati
+   */
   @BasicAuth
   public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment) {
 
@@ -110,6 +125,14 @@ public class Persons extends Controller {
     renderJSON(personDays);
   }
 
+  /**
+   * Il json contenente le competenze assegnate nel periodo da start a end relative ai codici 
+   * presenti nella lista code per la persona identificata dalla mail email.
+   * @param email la mail che identifica la persona
+   * @param start la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @param code la lista dei codici di competenza da ricercare
+   */
   @BasicAuth
   public static void competences(String email, LocalDate start, LocalDate end, List<String> code) {
 
@@ -143,6 +166,11 @@ public class Persons extends Controller {
     renderJSON(competencesList);
   }
 
+  /**
+   * Ritorna la lista delle persone appartenenti alla sede sedeId alla data date.
+   * @param sedeId l'identificativo della sede di cui si vogliono le persone
+   * @param date la data a cui si vuole la lista
+   */
   @BasicAuth
   public static void peopleList(String sedeId, LocalDate date) {
     User user = Security.getUser().get();

@@ -2,19 +2,15 @@ package manager.recaps.competence;
 
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.wrapper.IWrapperFactory;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
-
 import org.joda.time.YearMonth;
-
 import play.data.validation.Valid;
 
 /**
@@ -37,6 +33,15 @@ public class PersonMonthCompetenceRecap {
   public int nightShift = 0;
   public int progressivoFinalePositivoMese = 0;
 
+  /**
+   * Costruttore.
+   * @param competenceCodeDao il dao dei codici di competenza
+   * @param competenceDao il dao delle competenze
+   * @param wrapperFactory il wrapperFactory
+   * @param contract il contratto
+   * @param month il mese
+   * @param year l'anno
+   */
   public PersonMonthCompetenceRecap(CompetenceCodeDao competenceCodeDao,
                                     CompetenceDao competenceDao, IWrapperFactory wrapperFactory,
                                     Contract contract, int month, int year) {

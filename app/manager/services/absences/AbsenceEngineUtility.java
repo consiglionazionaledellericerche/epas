@@ -181,6 +181,12 @@ public class AbsenceEngineUtility {
     }
   }
   
+  /**
+   * la quantità corretta prendibile in percentuale.
+   * @param absence l'assenza
+   * @param amount la quantità prendibile
+   * @return la quantità corretta prendibile in percentuale.
+   */
   public Integer takenBehaviouralFixes(Absence absence, Integer amount) {
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);

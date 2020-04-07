@@ -43,6 +43,7 @@ public class OfficeManager {
   }
 
   /**
+   * True se il permesso sull'ufficio viene creato, false se è esistente.
    * @return true Se il permesso su quell'ufficio viene creato, false se è già esistente.
    */
   public boolean setUro(User user, Office office, Role role) {

@@ -4,17 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Person;
-
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
-
 import play.Play;
 import play.libs.Mail;
 
@@ -44,6 +39,13 @@ public class EmailManager {
     return baseUrl + RECOVERY_PATH + token;
   }
 
+  /**
+   * Invia la mail contenente il message al destinatario to con campo from e object compilati.
+   * @param from il mittente della mail
+   * @param to il destinatario della mail
+   * @param subject l'oggetto della mail
+   * @param message il messaggio
+   */
   public void sendMail(Optional<String> from, String to, String subject, String message) {
 
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -64,6 +66,10 @@ public class EmailManager {
     log.info("Inviata mail con oggetto '{}' a {}", subject, to);
   }
 
+  /**
+   * Manda la mail per recuperare la password alla persona passata.
+   * @param person la persona cui occorre recuperare la password
+   */
   public void recoveryPasswordMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 

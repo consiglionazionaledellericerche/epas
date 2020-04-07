@@ -26,6 +26,7 @@ public class ReperibilityTypeMonthDao extends DaoBase {
   }
 
   /**
+   * Il riepilogo mensile della reperibilità, se esiste, che contiene le info.
    * @param reperibilityType il tipo di attività di reperibilità
    * @param date la data da ricercare
    * @return il reperibilityTypeMonth che contiene le informazioni richieste.
@@ -41,8 +42,9 @@ public class ReperibilityTypeMonthDao extends DaoBase {
   }
 
   /**
+   * Il riepilogo mensile della reperibilità, se esiste, relativo all'id passato.
    * @param id l'identificativo del reperibilityTypeMonth
-   * @return il reperibilityTypeMonth.
+   * @return il reperibilityTypeMonth con id passato come parametro.
    */
   public Optional<ReperibilityTypeMonth> byId(long id) {
     final QReperibilityTypeMonth rtm = QReperibilityTypeMonth.reperibilityTypeMonth;
@@ -51,10 +53,11 @@ public class ReperibilityTypeMonthDao extends DaoBase {
   }
 
   /**
+   * La lista dei riepiloghi di reperibilità mensile relativi alla sede nell'anno/mese.
    * @param office la sede di riferimento
    * @param month l'anno/mese da controllare
    * @return la lista dei reperibilityTypeMonth appartenenti alla sede e all'anno/mese passati come
-   * parametro.
+   *     parametro.
    */
   public List<ReperibilityTypeMonth> byOfficeInMonth(Office office, YearMonth month) {
     final QReperibilityTypeMonth rtm = QReperibilityTypeMonth.reperibilityTypeMonth;

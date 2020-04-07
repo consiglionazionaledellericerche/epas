@@ -7,20 +7,13 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-
 import dao.PersonDao;
-
 import injection.StaticInject;
-
 import java.lang.reflect.Type;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
 import models.exports.AbsenceFromClient;
-
 import org.joda.time.LocalDate;
 
 @Slf4j
@@ -43,7 +36,7 @@ public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFr
             .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer())
             .create().fromJson(json, AbsenceFromClient.class);
 
-    /**
+    /*
      * Cercare la persona in funzione del tipo di matricolaFirma.
      * Nel campo matricolaFirma decido di riportare il valore dell'id
      * con cui viene salvata la persona sul db invece che la matricola

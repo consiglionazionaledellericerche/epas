@@ -48,6 +48,10 @@ public class OrganizationShiftTimeTable extends BaseModel {
   public boolean considerEverySlot = true;
   
   
+  /**
+   * Il numero degli slot.
+   * @return quanti slot ci sono.
+   */
   @Transient
   public long slotCount() {
     long slots = this.organizationShiftSlot.stream()

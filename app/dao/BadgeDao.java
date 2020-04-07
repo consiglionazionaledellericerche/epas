@@ -20,6 +20,7 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
+   * Ritorna il badge identificato dal codice e dal badgereader.
    * @param code il codice del badge.
    * @param badgeReader opzionale
    * @return l'oggetto badge identificato dal codice code passato come parametro.
@@ -36,6 +37,7 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
+   * Ritorna il badge identificato dall'id passato come parametro.
    * @param id identificativo del badge richiesto
    * @return il badge con identificativo passato come parametro.
    */
@@ -45,6 +47,7 @@ public class BadgeDao extends DaoBase {
   }
 
   /**
+   * RItorna la lista di badge per codice e persona.
    * @param code il numero badge.
    * @param person la persona proprietaria dei badge
    * @return la lista di tutti i record di badge con lo stesso code per la persona specificata

@@ -2,14 +2,11 @@ package models.absences.definitions;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import models.absences.AmountType;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeAmountAdjustment;
-
 import org.assertj.core.util.Lists;
 
 /**
@@ -101,9 +98,9 @@ public enum DefaultTakable {
       9000, TakeAmountAdjustment.workingTimePercent),
   
   T_COVID19(AmountType.units, 
-	      ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
-	      ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
-	      -1, null),
+    ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
+    ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
+    -1, null),
 
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 

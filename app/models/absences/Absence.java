@@ -270,6 +270,10 @@ public class Absence extends BaseModel {
     return absenceType.code;
   }
 
+  /**
+   * Controlla se viene violata la quantità minima giustificabile.
+   * @return true se viene violata la quantità minima giustificabile, false altrimenti.
+   */
   public boolean violateMinimumTime() {
     Optional<AbsenceTypeJustifiedBehaviour> behaviour =
         this.absenceType.getBehaviour(JustifiedBehaviourName.minimumTime);
@@ -279,6 +283,10 @@ public class Absence extends BaseModel {
     return false;
   }
 
+  /**
+   * Controlla se viene violata la quantità massima giustificabile.
+   * @return true se viene violata la quantità massima giustificabile, false altrimenti.
+   */
   public boolean violateMaximumTime() {
     Optional<AbsenceTypeJustifiedBehaviour> behaviour =
         this.absenceType.getBehaviour(JustifiedBehaviourName.maximumTime);

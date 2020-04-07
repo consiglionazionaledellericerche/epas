@@ -36,7 +36,8 @@ public class TimeVariationManager {
    * @param minutes i minuti da recuperare
    * @return il timevariation creato con i campi passati come parametro.
    */
-  public TimeVariation create(Absence absence, int hours, int minutes, Optional<LocalDate> dateVariation) {
+  public TimeVariation create(Absence absence, int hours, int minutes, 
+      Optional<LocalDate> dateVariation) {
     
     TimeVariation timeVariation = new TimeVariation();
     timeVariation.absence = absence;

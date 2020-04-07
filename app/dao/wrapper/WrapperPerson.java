@@ -6,22 +6,17 @@ import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.SortedMap;
-
 import manager.CompetenceManager;
 import manager.PersonManager;
-
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -33,11 +28,12 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
+ * Wrapper per la person.
+ * 
  * @author marco.
  */
 public class WrapperPerson implements IWrapperPerson {
@@ -165,6 +161,9 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * L'ultimo contratto attivo nel mese, se esiste.
+   * @param year l'anno
+   * @param month il mese
    * @return l'ultimo contratto attivo nel mese.
    */
   @Override
@@ -180,6 +179,9 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * Il primo contratto attivo nel mese se esiste.
+   * @param year l'anno
+   * @param month il mese
    * @return il primo contratto attivo nel mese.
    */
   @Override

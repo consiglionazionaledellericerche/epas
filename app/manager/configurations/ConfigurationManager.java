@@ -643,6 +643,9 @@ public class ConfigurationManager {
     }
   }
   
+  /**
+   * Aggiorna la configurazione di tutte le persone.
+   */
   public void updatePeopleConfigurations() {
     List<Person> people = personDao.peopleWithoutConfiguration();
     for (Person person: people) {

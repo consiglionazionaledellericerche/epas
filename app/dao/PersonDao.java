@@ -246,15 +246,13 @@ public final class PersonDao extends DaoBase {
   }
   
   /**
-   * 
-   * @param group
-   * @param name
-   * @param offices
-   * @param onlyTechnician
-   * @param start
-   * @param end
-   * @param personInCharge
-   * @return
+   * La lista di persone che rispondono ai criteri di ricerca.
+   * @param group il gruppo di codici di competenza
+   * @param offices l'insieme delle sedi
+   * @param onlyTechnician se si vogliono solo i tecnici
+   * @param start da quando fare la ricerca
+   * @param end fino a quando fare la ricerca
+   * @return la lista di persone che rispondono ai criteri di ricerca.
    */
   public List<Person> listForCompetenceGroup(CompetenceCodeGroup group, 
       Set<Office> offices, boolean onlyTechnician,
@@ -1075,6 +1073,10 @@ public final class PersonDao extends DaoBase {
         .distinct().fetch();
   }
   
+  /**
+   * La lista di persone senza configurazione.
+   * @return la lista di persone senza configurazione.
+   */
   public List<Person> peopleWithoutConfiguration() {
     final QPerson person = QPerson.person;
     return getQueryFactory()

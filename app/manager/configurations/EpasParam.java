@@ -3,25 +3,19 @@ package manager.configurations;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
-
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
-
 import play.Play;
 
 @Slf4j
@@ -83,12 +77,12 @@ public enum EpasParam {
   
   DISABLED_RELATIVE_PERMISSION("disabled_relative_permission",
 
-		  EpasParamCategory.GENERAL,
-		  EpasParamTimeType.GENERAL,
-		  EpasParamValueType.BOOLEAN,
-		  EpasParamValueType.formatValue(false),
-		  Lists.<RecomputationType>newArrayList(),
-		  Person.class),
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
 
   OFF_SITE_ABSENCE_WITH_CONVENTION("off_site_absence_with_convention",
 
@@ -110,21 +104,21 @@ public enum EpasParam {
   
   COVID_19("covid_19",
 
-	  EpasParamCategory.GENERAL,
-	  EpasParamTimeType.GENERAL,
-	  EpasParamValueType.BOOLEAN,
-	  EpasParamValueType.formatValue(false),
-	  Lists.<RecomputationType>newArrayList(),
-	  Person.class),
+    EpasParamCategory.GENERAL,
+    EpasParamTimeType.GENERAL,
+    EpasParamValueType.BOOLEAN,
+    EpasParamValueType.formatValue(false),
+    Lists.<RecomputationType>newArrayList(),
+    Person.class),
   
   ADDITIONAL_HOURS("additional_hours",
 
-	  EpasParamCategory.GENERAL,
-	  EpasParamTimeType.GENERAL,
-	  EpasParamValueType.BOOLEAN,
-	  EpasParamValueType.formatValue(false),
-	  Lists.<RecomputationType>newArrayList(),
-	  Person.class),
+    EpasParamCategory.GENERAL,
+    EpasParamTimeType.GENERAL,
+    EpasParamValueType.BOOLEAN,
+    EpasParamValueType.formatValue(false),
+    Lists.<RecomputationType>newArrayList(),
+    Person.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
@@ -676,6 +670,8 @@ public enum EpasParam {
             return new Integer(value);
           case BOOLEAN:
             return new Boolean(value);
+          default:
+            log.warn("Tipo non riconosciuto: {}", type);
         }
       } catch (Exception ex) {
         return null;

@@ -1,12 +1,10 @@
 package manager.services.absences.errors;
 
 import lombok.Builder;
-
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
-
 import org.joda.time.LocalDate;
 
 @Builder    

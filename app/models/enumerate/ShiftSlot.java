@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per la tipoloia di slot di turno.
  * @author arianna
  */
 public enum ShiftSlot {
@@ -16,6 +17,11 @@ public enum ShiftSlot {
 
   ;
 
+  /**
+   * Lo slot di turno a partire dal nome.
+   * @param name il nome dello slot
+   * @return lo slot di turno col nome passato come parametro.
+   */
   public static ShiftSlot getEnum(String name) {
     for (ShiftSlot shiftSlot : values()) {
       if (shiftSlot.getName().equals(name)) {

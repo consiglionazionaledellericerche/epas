@@ -1,7 +1,6 @@
 package helpers;
 
 import java.io.IOException;
-
 import play.Logger;
 import play.mvc.Http;
 import play.mvc.Http.Request;

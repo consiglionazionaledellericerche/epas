@@ -1,7 +1,6 @@
 package models.dto;
 
 import org.joda.time.DateTimeConstants;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
 

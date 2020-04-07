@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per l'autorizzazione alla timbratura web.
  * @author dario
  */
 public enum AuthWebStamping {

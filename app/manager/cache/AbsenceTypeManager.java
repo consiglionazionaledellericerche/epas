@@ -104,6 +104,7 @@ public class AbsenceTypeManager {
   }
 
   /**
+   * L'absenceType relativo al codice.
    * @return lo AbsenceType relativo al codice code passato come parametro.
    */
   private AbsenceType getAbsenceTypeByCode(
@@ -120,8 +121,9 @@ public class AbsenceTypeManager {
   }
 
   /**
+   * L'insieme dei codici di assenza che decurtano giorni di ferie.
    * @return set di tutti i codici di assenza che prevedono la riduzione dei giorni dell'anno su cui
-   * computare la maturazione delle ferie.
+   *     computare la maturazione delle ferie.
    */
   private Set<AbsenceType> getReducingAccruingDaysForVacations() {
 
@@ -152,6 +154,7 @@ public class AbsenceTypeManager {
   }
 
   /**
+   * L'insieme dei codici d'assenza da considerare per il calcolo delle ferie.
    * @return set di tutti i codici di assenza da considerare per il calcolo delle ferie.
    */
   private Set<AbsenceType> getCodesForVacations() {

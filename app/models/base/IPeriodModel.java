@@ -1,9 +1,7 @@
 package models.base;
 
 import it.cnr.iit.epas.DateInterval;
-
 import org.joda.time.LocalDate;
-
 import play.db.Model;
 
 /**

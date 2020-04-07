@@ -87,6 +87,10 @@ public class ShiftTimeTable extends BaseModel {
   @Column(name = "calculation_type")
   public CalculationType calculationType;
 
+  /**
+   * Quanti slot ci sono nella timetable.
+   * @return la quantità di slot presenti nella timetable.
+   */
   @Transient
   public int slotCount() {
     int slots = 0;

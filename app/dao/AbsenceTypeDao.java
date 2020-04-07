@@ -31,6 +31,10 @@ public class AbsenceTypeDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Ritorna una lista di dto di tipi assenza che non è chiaro dove venga usata...
+   * @return la lista dei dto.
+   */
   public List<AbsenceTypeDto> countersDto() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -44,6 +48,10 @@ public class AbsenceTypeDao extends DaoBase {
         .fetch();
   }
 
+  /**
+   * Ritorna la mappa di tipo assenza/quantità.
+   * @return la mappa dei tipi assenza relazionata alla quantità di quei tipi presa
+   */
   public Map<AbsenceType, Long> counters() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -87,6 +95,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista dei tipi assenza che vanno ad Attestati.
    * @return la lista degli AbsenceType che non siano di internalUse.
    */
   public List<AbsenceType> certificateTypes() {
@@ -98,6 +107,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna l'absenceType appartenente all'id passato come parametro.
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public AbsenceType getAbsenceTypeById(Long long1) {
@@ -111,6 +121,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista dei tipi assenza validi a partire dalla data date.
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
    *     codice di assenza crescente.
    */
@@ -126,6 +137,7 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna l'absenceType (opzionale) relativo al codice stringa passato come parametro.
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> getAbsenceTypeByCode(String string) {

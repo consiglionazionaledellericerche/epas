@@ -85,7 +85,8 @@ public class CertificationsComunication {
 
   /**
    * Per l'ottenenere il Bearer Token: curl -s -X POST -H "Content-Type:
-   * application/x-www-form-urlencoded" -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
+   * application/x-www-form-urlencoded" 
+   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
    * -d 'username=app.epas&password=............. &grant_type=password&scope=read%20write
    * &client_secret=mySecretOAuthSecret&client_id=attestatiapp' "http://as2dock.si.cnr.it/oauth/token"
    *
@@ -124,6 +125,7 @@ public class CertificationsComunication {
   }
 
   /**
+   * Nuovo token con validità estesa.
    * @param token token precedente (già ottenuto dal server).
    * @return Un nuovo token Oauth con validità estesa
    */

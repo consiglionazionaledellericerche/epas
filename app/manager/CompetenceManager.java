@@ -301,7 +301,7 @@ public class CompetenceManager {
         Optional<ContractMonthRecap> recap =
             wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent()) {
-          /**
+          /*
            * FIXME: in realtà bisogna controllare che la persona nell'arco
            * del mese non sia stata in turno. In quel caso nei giorni
            * in cui la persona è in turno e fa un tempo di lavoro
@@ -388,7 +388,7 @@ public class CompetenceManager {
         }
         break;
       case entireMonth:
-        /**
+        /*
          * in questo caso il valore deve essere per forza = 1 perchè rappresenta l'intero mese 
          * assegnato come competenza (caso tipico: cod. 303 Ind.ta' Risc. Rad. Ion. Com.1)
          */

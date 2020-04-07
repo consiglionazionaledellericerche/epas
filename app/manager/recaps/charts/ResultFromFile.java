@@ -1,10 +1,10 @@
 package manager.recaps.charts;
 
 import lombok.EqualsAndHashCode;
-
 import org.joda.time.LocalDate;
 
 /**
+ * Result.
  * @author daniele
  * @since 05/07/16.
  */

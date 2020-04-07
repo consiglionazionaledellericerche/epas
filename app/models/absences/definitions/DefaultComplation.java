@@ -2,13 +2,10 @@ package models.absences.definitions;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
-
 import org.assertj.core.util.Lists;
 
 /**

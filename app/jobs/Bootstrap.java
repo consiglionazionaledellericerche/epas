@@ -1,19 +1,15 @@
 package jobs;
 
 import com.google.common.io.Resources;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
-
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -22,7 +18,6 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;

@@ -2,11 +2,8 @@ package manager.response;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.google.common.base.Function;
-
 import helpers.rest.JacksonModule;
-
 import models.absences.Absence;
-
 import org.joda.time.LocalDate;
 
 @JsonFilter(JacksonModule.FILTER)
@@ -49,6 +46,12 @@ public class AbsencesResponse {
     this.absenceCode = absenceCode;
   }
 
+  /**
+   * Costruttore.
+   * @param date la data
+   * @param absenceCode il codice di assenza
+   * @param warning il warning 
+   */
   public AbsencesResponse(LocalDate date, String absenceCode, String warning) {
     super();
     this.date = date;
@@ -120,7 +123,12 @@ public class AbsencesResponse {
     this.absenceInError = absenceInError;
   }
 
-  public enum toDate implements Function<AbsencesResponse, LocalDate> {
+  /**
+   * Enumerato che ritorna la data di un AbsenceResponse.
+   * @author dario
+   *
+   */
+  public enum ToDate implements Function<AbsencesResponse, LocalDate> {
     INSTANCE;
 
     @Override

@@ -34,6 +34,7 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna il lettore badge identificato dall'id passato.
    * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byId(Long id) {
@@ -43,6 +44,7 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna il badgereader associato al codice passato.
    * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byCode(String code) {
@@ -105,6 +107,7 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista di lettori badge associati alla sede.
    * @return la lista di badgeReader di cui l'ufficio è proprietario.
    */
   public List<BadgeReader> getBadgeReaderByOffice(Office office) {

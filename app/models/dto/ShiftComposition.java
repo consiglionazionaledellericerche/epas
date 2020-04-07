@@ -9,8 +9,9 @@ public class ShiftComposition {
   private int quantity;
   private OrganizationShiftConfiguration organizationShiftConfiguration;
   
-  public ShiftComposition(OrganizationShiftConfiguration organizationShiftConfiguration, int quantity) {
-    this.organizationShiftConfiguration =organizationShiftConfiguration;
+  public ShiftComposition(OrganizationShiftConfiguration organizationShiftConfiguration, 
+      int quantity) {
+    this.organizationShiftConfiguration = organizationShiftConfiguration;
     this.quantity = quantity;
   }
   
