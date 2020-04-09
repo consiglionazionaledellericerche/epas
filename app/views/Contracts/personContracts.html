@@ -112,10 +112,16 @@
 		<td>${contract.value.endContract?.format()}</td>
 		
 		<td>
-			#{b.buttons center:true}
-        #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
-      #{/b.buttons}
-			</td>
+				#{b.buttons center:true}
+					#{secure.check 'Contracts.merge'}
+					#{b.link @Contracts.merge(contract.value.id), color:'warning', title:'Merge'/}
+					#{/secure.check}
+					#{secure.check 'Contracts.split'}
+					#{b.link @Contracts.split(contract.value.id), color:'danger', title:'Split'/}
+        			#{/secure.check}
+        			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+      			#{/b.buttons}
+		</td>
 		</tr>
 	  #{/list}
 	  </table>

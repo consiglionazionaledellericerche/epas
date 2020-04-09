@@ -19,6 +19,7 @@ import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -26,6 +27,7 @@ import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
+import manager.service.contracts.ContractService;
 import manager.services.absences.AbsenceService;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
@@ -36,6 +38,7 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.absences.AbsenceType;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
@@ -71,6 +74,8 @@ public class Contracts extends Controller {
   static AbsenceService absenceService;
   @Inject
   static PersonDayDao personDayDao;
+  @Inject
+  static ContractService contractService;
 
   /**
    * I contratti del dipendente.
@@ -118,6 +123,102 @@ public class Contracts extends Controller {
     LocalDate sourceDateRecoveryDay = contract.sourceDateRecoveryDay;
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
         onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay);
+  }
+  
+  /**
+   * Renderizza la pagina in cui si può provvedere allo split di un contratto.
+   * @param contractId l'identificativo del contratto da splittare
+   */
+  public static void split(Long contractId) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+    
+    LocalDate dateToSplit = new LocalDate();
+    
+    render(contract, dateToSplit);
+  }
+  
+  /**
+   * Provvede alla divisione del contratto contract in due contratti distinti, uno che termina il 
+   * giorno precedente dateToSplit e l'altro che inizia a dateToSplit.
+   * @param contract il contratto da splittare
+   * @param dateToSplit la data a cui splittarlo
+   */
+  public static void splitContract(@Valid Contract contract, @Required LocalDate dateToSplit) {
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+    
+    if (!DateUtility.isDateIntoInterval(dateToSplit, 
+        new DateInterval(contract.beginDate, contract.calculatedEnd()))) {
+      validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@split", contract, dateToSplit);
+    }
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
+    
+    //1) si recuperano le assenze fatte da dateToSplit fino a fine contratto
+    Map<LocalDate, List<AbsenceType>> map = contractService.getAbsencesInContract(contract.person, 
+        dateToSplit, Optional.<LocalDate>absent());
+    //2) si eliminano le assenze recuperate al punto 1
+    Long count = contractService.deleteAbsencesInPeriod(contract.person, dateToSplit, 
+        Optional.<LocalDate>absent());
+    log.debug("Rimosse {} assenze per {}", count, contract.person.getFullname());
+    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
+    //3) si splitta il contratto in due contratti nuovi
+    // Salvo la situazione precedente
+    final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+    contract.endDate = dateToSplit.minusDays(1);
+    if (!contractManager.isContractNotOverlapping(contract)) {
+      Validation.addError("contract.crossValidationFailed",
+          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
+      render("@split", contract, wrappedContract, dateToSplit);
+    }
+
+    DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
+        wrappedContract.initializationMissing());
+    if (recomputeRecap.recomputeFrom != null) {
+      contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
+    } else {
+      contractManager.properContractUpdate(contract, LocalDate.now(), false);
+    }
+    //4) creo il nuovo contratto a partire da dateToSplit
+    Contract newContract = new Contract();
+    newContract.beginDate = dateToSplit;
+    newContract.endDate = previousInterval.getEnd();
+    contractManager.properContractCreate(newContract, wtt, true);
+    
+    //5) riassegno le assenze sul nuovo contratto...
+    //TODO: completare...
+    if (count != 0) {
+      //...chiamare il service che inserisce le assenze sul nuovo contratto
+    }
+    
+    flash.success(Web.msgSaved(Contract.class));
+    split(contract.id);
+  }
+  
+  /**
+   * Renderizza la pagina in cui si può fondere l'attuale contratto col precedente, se esiste.
+   * @param contractId l'identificativo del contratto da fondere
+   */
+  public static void merge(Long contractId) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+    Person person = contract.person;
+ 
+    Contract previousContract = personDao.getPreviousPersonContract(contract);    
+    
+    render(person, contract, previousContract);
+  }
+  
+  public static void mergeContract() {
+    
   }
 
   /**
