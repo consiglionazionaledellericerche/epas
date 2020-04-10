@@ -18,6 +18,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -38,12 +39,15 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.definitions.DefaultAbsenceType;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -159,17 +163,24 @@ public class Contracts extends Controller {
     }
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
-    
-    //1) si recuperano le assenze fatte da dateToSplit fino a fine contratto
-    Map<LocalDate, List<AbsenceType>> map = contractService.getAbsencesInContract(contract.person, 
-        dateToSplit, Optional.<LocalDate>absent());
-    //2) si eliminano le assenze recuperate al punto 1
-    Long count = contractService.deleteAbsencesInPeriod(contract.person, dateToSplit, 
-        Optional.<LocalDate>absent());
+    Optional<LocalDate> to = contract.endDate != null ? 
+        Optional.fromNullable(contract.endDate) : Optional.absent();
+    List<Absence> list = contractService
+        .getAbsencesInContract(contract.person, dateToSplit, to);
+    log.debug("Lista assenze contiene {} elementi", list.size());
+    int count = 0;
+    for (Absence abs : list) {      
+      abs.delete();  
+      count ++;
+    }
+    //1) si eliminano le assenze a partire da dateToSplit
+//    Long count = contractService.deleteAbsencesInPeriod(contract.person, dateToSplit, 
+//        Optional.<LocalDate>absent());
     log.debug("Rimosse {} assenze per {}", count, contract.person.getFullname());
     Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
-    //3) si splitta il contratto in due contratti nuovi
-    // Salvo la situazione precedente
+    
+    //2) si splitta il contratto in due contratti nuovi
+    log.info("Inizio procedura di split del contratto {}", contract.toString());
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
     contract.endDate = dateToSplit.minusDays(1);
     if (!contractManager.isContractNotOverlapping(contract)) {
@@ -177,7 +188,6 @@ public class Contracts extends Controller {
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@split", contract, wrappedContract, dateToSplit);
     }
-
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
     RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
         wrappedContract.initializationMissing());
@@ -186,16 +196,19 @@ public class Contracts extends Controller {
     } else {
       contractManager.properContractUpdate(contract, LocalDate.now(), false);
     }
-    //4) creo il nuovo contratto a partire da dateToSplit
-    Contract newContract = new Contract();
-    newContract.beginDate = dateToSplit;
-    newContract.endDate = previousInterval.getEnd();
-    contractManager.properContractCreate(newContract, wtt, true);
+    log.info("Termine procedura di split del contratto {}", contract.toString());
     
-    //5) riassegno le assenze sul nuovo contratto...
-    //TODO: completare...
+    //3) creo il nuovo contratto a partire da dateToSplit
+    log.info("Creazione nuovo contratto");
+    Contract newContract = contractService.createNewContract(dateToSplit, wtt, previousInterval);
+    contractManager.properContractCreate(newContract, wtt, true);
+    log.info("Fine creazione nuovo contratto: {}", newContract.toString());
+    
+    //4) riassegno le assenze sul nuovo contratto...
     if (count != 0) {
-      //...chiamare il service che inserisce le assenze sul nuovo contratto
+      log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", dateToSplit);
+      contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), dateToSplit);
+      log.info("Terminata persistenza assenze.");
     }
     
     flash.success(Web.msgSaved(Contract.class));
