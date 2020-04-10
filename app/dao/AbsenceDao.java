@@ -390,7 +390,7 @@ public class AbsenceDao extends DaoBase {
     if (to.isPresent()) {
       condition.and(absence.personDay.date.between(from, to.get()));
     } else {
-      condition.and(absence.personDay.date.eq(from));
+      condition.and(absence.personDay.date.goe(from));
     }
     return getQueryFactory().delete(absence)
         .where(absence.personDay.person.eq(person)
