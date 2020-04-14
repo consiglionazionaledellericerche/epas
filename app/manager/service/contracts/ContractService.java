@@ -9,6 +9,7 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +77,7 @@ public class ContractService {
   public final List<Absence> getAbsencesInContract(Person person, 
       LocalDate from, Optional<LocalDate> to) {
     
-    return absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
-        from, to, false);
+    return absenceDao.absenceInPeriod(person, from, to);
     
   }
 
@@ -137,17 +137,20 @@ public class ContractService {
   }
   
   /**
-   * 
-   * @param dateToSplit
-   * @param wtt
-   * @param previousInterval
-   * @return
+   * Ritorna il nuovo contratto con i parametri passati.
+   * @param person la persona di cui si sta creando il contratto
+   * @param dateToSplit la data da cui ripartire col nuovo contratto
+   * @param wtt l'orario di lavoro
+   * @param previousInterval l'intervallo precedente
+   * @return il nuovo contratto con le informazioni di base per crearlo.
    */
-  public Contract createNewContract(LocalDate dateToSplit, Optional<WorkingTimeType> wtt, 
-      DateInterval previousInterval) {
+  public Contract createNewContract(Person person, LocalDate dateToSplit, 
+      Optional<WorkingTimeType> wtt, DateInterval previousInterval) {
     Contract newContract = new Contract();
+    newContract.person = person;
     newContract.beginDate = dateToSplit;
-    newContract.endDate = previousInterval.getEnd();
+    newContract.endDate = !DateUtility.isInfinity(previousInterval.getEnd()) 
+        ? previousInterval.getEnd() : null;
     return newContract;
   }
   
