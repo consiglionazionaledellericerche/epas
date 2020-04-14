@@ -161,21 +161,22 @@ public class Contracts extends Controller {
       response.status = 400;
       render("@split", contract, dateToSplit);
     }
-    IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
-    Optional<LocalDate> to = contract.endDate != null ? 
-        Optional.fromNullable(contract.endDate) : Optional.absent();
+
+    Optional<LocalDate> to = contract.endDate != null 
+        ? Optional.fromNullable(contract.endDate) : Optional.absent();
+        
+    //1) si eliminano le assenze a partire da dateToSplit
     List<Absence> list = contractService
         .getAbsencesInContract(contract.person, dateToSplit, to);
     log.debug("Lista assenze contiene {} elementi", list.size());
     int count = 0;
     for (Absence abs : list) {      
       abs.delete();  
-      count ++;
+      count++;
     }
-    //1) si eliminano le assenze a partire da dateToSplit
-//    Long count = contractService.deleteAbsencesInPeriod(contract.person, dateToSplit, 
-//        Optional.<LocalDate>absent());
+    
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
     log.debug("Rimosse {} assenze per {}", count, contract.person.getFullname());
     Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
     
@@ -200,7 +201,8 @@ public class Contracts extends Controller {
     
     //3) creo il nuovo contratto a partire da dateToSplit
     log.info("Creazione nuovo contratto");
-    Contract newContract = contractService.createNewContract(dateToSplit, wtt, previousInterval);
+    Contract newContract = contractService.createNewContract(wrappedPerson.getValue(),
+        dateToSplit, wtt, previousInterval);
     contractManager.properContractCreate(newContract, wtt, true);
     log.info("Fine creazione nuovo contratto: {}", newContract.toString());
     
