@@ -214,7 +214,7 @@ public class Contracts extends Controller {
     }
     
     flash.success(Web.msgSaved(Contract.class));
-    split(contract.id);
+    personContracts(wrappedPerson.getValue().id);
   }
   
   /**
@@ -232,7 +232,58 @@ public class Contracts extends Controller {
     render(person, contract, previousContract);
   }
   
-  public static void mergeContract() {
+  /**
+   * Fonde insieme due contratti contigui.
+   * @param contract il contratto attuale
+   * @param previousContract il contratto precedente
+   */
+  public static void mergeContract(@Valid Contract contract, @Valid Contract previousContract) {
+    notFoundIfNull(contract);
+    notFoundIfNull(previousContract);
+    rules.checkIfPermitted(contract.person.office);
+    Optional<LocalDate> to = contract.endDate != null 
+        ? Optional.fromNullable(contract.endDate) : Optional.absent();
+        
+    //1) si eliminano le assenze a partire da contract.beginDate
+    List<Absence> list = contractService
+        .getAbsencesInContract(contract.person, contract.getBeginDate(), to);
+    log.debug("Lista assenze contiene {} elementi", list.size());
+    int count = 0;
+    for (Absence abs : list) {      
+      abs.delete();  
+      count++;
+    }
+    log.debug("Cancellate {} assenze", count);
+    //2) cancello il contratto più recente
+    contract.delete();
+    log.debug("Cancellato contratto {}", contract.toString());
+    
+    //3) prorogo la data fine di previousContract a contract.endDate
+    IWrapperContract wrappedContract = wrapperFactory.create(previousContract);
+    IWrapperPerson wrappedPerson = wrapperFactory.create(previousContract.person);
+    final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+    
+    previousContract.endDate = to.isPresent() ? to.get() : null;
+    log.debug("Prorogo il precedente contratto {} alla data {}", previousContract, previousContract.endDate);
+    DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
+        wrappedContract.initializationMissing());
+    if (recomputeRecap.recomputeFrom != null) {
+      contractManager.properContractUpdate(previousContract, recomputeRecap.recomputeFrom, false);
+    } else {
+      contractManager.properContractUpdate(previousContract, LocalDate.now(), false);
+    }
+    
+    //4) riassegno le assenze sul nuovo contratto...
+    if (count != 0) {
+      log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", 
+          contract.beginDate);
+      contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), contract.beginDate);
+      log.info("Terminata persistenza assenze.");
+    }
+    
+    flash.success(Web.msgSaved(Contract.class));
+    personContracts(wrappedPerson.getValue().id);
     
   }
 
