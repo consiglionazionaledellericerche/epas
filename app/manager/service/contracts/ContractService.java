@@ -15,11 +15,13 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.PersonDayManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceCertificationService;
+import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.Person;
@@ -27,7 +29,10 @@ import models.PersonDay;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
@@ -42,7 +47,9 @@ public class ContractService {
   private final AbsenceComponentDao absenceComponentDao;
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
-  
+  private final AbsenceService absenceService;
+  private final AbsenceManager absenceManager;
+
 
   /**
    * Injection.
@@ -58,13 +65,16 @@ public class ContractService {
   public ContractService(AbsenceDao absenceDao, PersonDayManager personDayManager,
       AbsenceCertificationService absenceCertificationService, 
       AbsenceComponentDao absenceComponentDao, ConsistencyManager consistencyManager,
-      IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory, AbsenceService absenceService, 
+      AbsenceManager absenceManager) {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.absenceCertificationService = absenceCertificationService;
     this.absenceComponentDao = absenceComponentDao;
     this.consistencyManager = consistencyManager;
     this.wrapperFactory = wrapperFactory;
+    this.absenceService = absenceService;
+    this.absenceManager = absenceManager;
   }
 
   /**
@@ -76,9 +86,9 @@ public class ContractService {
    */
   public final List<Absence> getAbsencesInContract(Person person, 
       LocalDate from, Optional<LocalDate> to) {
-    
+
     return absenceDao.absenceInPeriod(person, from, to);
-    
+
   }
 
   /**
@@ -135,7 +145,7 @@ public class ContractService {
     JPA.em().flush();
     consistencyManager.updatePersonSituation(person.id, updateFrom);
   }
-  
+
   /**
    * Ritorna il nuovo contratto con i parametri passati.
    * @param person la persona di cui si sta creando il contratto
@@ -153,5 +163,28 @@ public class ContractService {
         ? previousInterval.getEnd() : null;
     return newContract;
   }
-  
+
+  /**
+   * Ripristina le assenze salvate in precedenza sul nuovo contratto.
+   * @param absences la lista di assenze da ripristinare
+   */
+  public void resetAbsences(List<Absence> absences) {
+    GroupAbsenceType groupAbsenceType = null;
+    AbsenceType absenceType = null;
+    JustifiedType justifiedType;
+    for (Absence abs : absences) {
+      justifiedType = abs.justifiedType;
+      Integer hours = abs.justifiedMinutes != null ? abs.justifiedMinutes / 60 : null;
+      Integer minutes = abs.justifiedMinutes != null ? abs.justifiedMinutes % 60 : null;
+      InsertReport insertReport = absenceService.insert(abs.personDay.person, 
+          abs.absenceType.defaultTakableGroup(), 
+          abs.personDay.date, abs.personDay.date,
+          absenceType, justifiedType, hours, minutes, false, absenceManager);
+
+      absenceManager.saveAbsences(insertReport, abs.personDay.person, abs.personDay.date, null, 
+          justifiedType, groupAbsenceType);
+    }
+
+  }
+
 }
