@@ -13,6 +13,7 @@ import io.micrometer.core.instrument.binder.jpa.HibernateMetrics;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.core.lang.Nullable;
@@ -22,6 +23,7 @@ import java.time.Duration;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import lombok.val;
+import org.hibernate.SessionFactory;
 import play.Play;
 import play.db.jpa.JPA;
 
@@ -65,8 +67,8 @@ public class MetricsModule extends AbstractModule {
 
   @Provides
   public HibernateMetrics hibernateMetrics(Provider<EntityManager> emp) {
-    return new HibernateMetrics(emp.get().getEntityManagerFactory(),
-        JPA.DEFAULT, ImmutableList.of());
+      return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
+          JPA.DEFAULT, ImmutableList.of());
   }
 
   @Provides
@@ -81,11 +83,12 @@ public class MetricsModule extends AbstractModule {
   protected void configure() {
     bind(MeterRegistry.class).to(PrometheusMeterRegistry.class);
     val meterBinder = Multibinder.newSetBinder(binder(), MeterBinder.class);
-    //meterBinder.addBinding().to(HibernateMetrics.class);
-    meterBinder.addBinding().to(UptimeMetrics.class);
-    meterBinder.addBinding().to(ProcessorMetrics.class);
+    meterBinder.addBinding().to(ClassLoaderMetrics.class);
+    meterBinder.addBinding().to(FileDescriptorMetrics.class);
+    meterBinder.addBinding().to(HibernateMetrics.class);
     meterBinder.addBinding().to(JvmGcMetrics.class);
     meterBinder.addBinding().to(JvmMemoryMetrics.class);
-    meterBinder.addBinding().to(ClassLoaderMetrics.class);
+    meterBinder.addBinding().to(ProcessorMetrics.class);
+    meterBinder.addBinding().to(UptimeMetrics.class);
   }
 }

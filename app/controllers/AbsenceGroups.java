@@ -646,8 +646,18 @@ public class AbsenceGroups extends Controller {
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
         absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
+    log.info("Richiesto inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {} (ore:{}, minuti:{})", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType,
+        from, to, hours, minutes);
+    
     absenceManager.saveAbsences(insertReport, person, from, recoveryDate, 
         justifiedType, groupAbsenceType);
+    
+    log.info("Effettuato inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {} (ore:{}, minuti:{})", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType, 
+        from, to, hours, minutes);
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
