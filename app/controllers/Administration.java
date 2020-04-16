@@ -83,6 +83,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -929,5 +930,32 @@ public class Administration extends Controller {
     office.save();
     institute.save();
 
+  }
+  
+  public static void emergency(Boolean confirm) {
+    render(confirm);
+  }
+  
+  /**
+   * Il peggior hack di sempre per uccidere il play.
+   * È da utilizzare in casi disperati come quando sta finendo la 
+   * RAM e non si riesce a fare altre operazioni.
+   * Da usare solo nella versione con Docker che effettua il 
+   * riavvio del servizio.
+   */
+  public static void shutdown(Boolean confirm) {
+    if (confirm == null || !confirm) {
+      flash.success("Conferma lo shutdown selezionando la casella di conferma");
+      confirm = false;
+      render("@emergency", confirm);
+      return;
+    }
+    new Job<Void>() {
+      public void doJob() {
+        log.warn("Killing ePAS -> bye bye, see you soon :-)");
+        System.exit(0);
+      }
+    }.afterRequest();
+    redirect("/");
   }
 }
