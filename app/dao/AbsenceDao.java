@@ -343,6 +343,8 @@ public class AbsenceDao extends DaoBase {
   }
 
   /**
+   * La lista di assenze filtrata per persona, data inizio, fine, tipo di assenza e 
+   * se compatibile con la reperibilità.
    * @param person la persona di cui si vogliono le assenze
    * @param start la data di inizio da cui cercare
    * @param end la data di fine fino a cui cercare
@@ -372,7 +374,7 @@ public class AbsenceDao extends DaoBase {
    * Metodo che ritorna la lista delle assenze per missione contrassegnate dall'identificativo.
    *
    * @param externalId l'identificativo esterno fornito dal client missioni in fase di persistenza
-   * dell'assenza sul db
+   *     dell'assenza sul db
    * @return la lista di assenze che hanno come identificativo l'id passato come parametro.
    */
   public List<Absence> absencesPersistedByMissions(long externalId) {
@@ -380,6 +382,26 @@ public class AbsenceDao extends DaoBase {
 
     return  getQueryFactory().selectFrom(absence)
         .where(absence.externalIdentifier.eq(externalId)).fetch();
+  }
+  
+  
+  /**
+   * ritorna la lista di assenze effettuata nel periodo da from a to da person.
+   * @param person la persona di cui si vogliono le assenze
+   * @param from la data da cui cercare
+   * @param to (opzionale) la data fino a cui cercare
+   * @return la lista di assenze da from a to della persona person.
+   */
+  public List<Absence> absenceInPeriod(Person person, LocalDate from, Optional<LocalDate> to) {
+    final QAbsence absence = QAbsence.absence;
+    BooleanBuilder condition = new BooleanBuilder();
+    if (to.isPresent()) {
+      condition.and(absence.personDay.date.between(from, to.get()));
+    } else {
+      condition.and(absence.personDay.date.goe(from));
+    }
+    return getQueryFactory().selectFrom(absence)
+        .where(absence.personDay.person.eq(person).and(condition)).fetch();
   }
 
 
