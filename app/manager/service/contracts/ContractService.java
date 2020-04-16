@@ -104,11 +104,6 @@ public class ContractService {
         .absencesToPersist(person, updateFrom.getYear());
     absences.sort(Comparator.comparing(Absence::getAbsenceDate));
     for (Absence absence : absences) {
-      JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
-      if (!absenceComponentDao
-          .findAbsences(person, absence.getAbsenceDate(), absence.absenceType.code).isEmpty()) {
-        continue;
-      }
 
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
