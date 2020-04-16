@@ -55,10 +55,12 @@
 		<div class="col-sm-4 col-sm-offset-4">
 		#{f.booleanRadio 'attestatiSync', value:attestatiSync /}
 		</div>
+		<div class="col-sm-4 col-sm-offset-4">
 		#{b.buttons center:true}
 		   #{b.submit 'Fondi'/}
 		   #{b.cancel @edit(contract.id) /}
 		#{/b.buttons}
+		</div>
 
 		#{/form}
 
