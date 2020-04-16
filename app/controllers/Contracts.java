@@ -300,11 +300,13 @@ public class Contracts extends Controller {
         log.info("Si resettano le assenze salvate in precedenza.");
         contractService.resetAbsences(copy);
         log.info("Procedura completata.");
-      } 
-      log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", 
-          contract.beginDate);
-      contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), contract.beginDate);
-      log.info("Terminata persistenza assenze.");
+      } else {
+        log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", 
+            contract.beginDate);
+        contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), contract.beginDate);
+        log.info("Terminata persistenza assenze.");
+
+      }
     }
 
     flash.success(Web.msgSaved(Contract.class));
