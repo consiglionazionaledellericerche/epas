@@ -92,17 +92,6 @@ public class ContractService {
   }
 
   /**
-   * Cancella le assenze per person da from a to.
-   * @param person la persona per cui cancellare le assenze
-   * @param from la data da cui cancellare le assenze
-   * @param to (opzionale) la data fino a cui cancellare le assenze
-   * @return la quantità di assenze cancellate.
-   */
-  public Long deleteAbsencesInPeriod(Person person, LocalDate from, Optional<LocalDate> to) {
-    return absenceDao.deleteAbsencesInPeriod(person, from, to);
-  }
-
-  /**
    * Si collega ad Attestati e scarica le assenze dell'anno di updateFrom.
    * Poi le persiste ignorando quelle esistenti.
    * @param person la persona il cui contratto è stato splittato

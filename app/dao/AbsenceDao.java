@@ -384,18 +384,6 @@ public class AbsenceDao extends DaoBase {
         .where(absence.externalIdentifier.eq(externalId)).fetch();
   }
   
-  public Long deleteAbsencesInPeriod(Person person, LocalDate from, Optional<LocalDate> to) {
-    final QAbsence absence = QAbsence.absence;
-    BooleanBuilder condition = new BooleanBuilder();
-    if (to.isPresent()) {
-      condition.and(absence.personDay.date.between(from, to.get()));
-    } else {
-      condition.and(absence.personDay.date.goe(from));
-    }
-    return getQueryFactory().delete(absence)
-        .where(absence.personDay.person.eq(person)
-            .and(condition)).execute();
-  }
   
   /**
    * ritorna la lista di assenze effettuata nel periodo da from a to da person.
