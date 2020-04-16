@@ -1,0 +1,34 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Funzionalità di emergenza' /}
+
+#{include './_nav.html' /}
+
+<div class="jumbotron">
+  <h2 class="display-4">Funzionalità di emergenza</h2>
+  <p class="lead">
+	Il peggior hack di sempre per uccidere il play, 
+	da utilizzare in casi disperati, per esempio quando sta finendo la 
+    RAM e non si riesce a fare altre operazioni.
+  </p>
+  <hr class="my-4">
+  <p>Da usare solo nella versione con Docker che effettua il riavvio del servizio.</p>
+  
+  #{b.buttons}
+  #{secure.link @Administration.shutdown(confirm:null), class:'btn btn-primary btn-lg'}
+  	Uccidi il play
+  #{/secure.link}
+  #{/b.buttons}
+  
+  <p>
+  #{if confirm != null}
+  #{alert textcolor:'warning'}Conferma lo shutdown selezionando la casella di conferma sottostante#{/alert}
+  #{form action:@shutdown(), 'method':'POST', class:'form-horizontal'}
+    #{f.checkbox 'confirm', label:'Si, sono sicuro' /}
+    #{b.buttons}
+      #{b.submit 'Conferma' /}
+    #{/b.buttons}
+  #{/form}
+  #{/if}
+  </p>
+</div>

@@ -778,7 +778,9 @@ when
     || action.startsWith("PrintTags.")
     || action.startsWith("PersonMonths.")
     || action.startsWith("Stampings.")
-    || action.startsWith("Vacations."))
+    || action.startsWith("Vacations.")
+    || action in (
+    	"Administration.emergency", "HealthCheck.shutdown"))
 then
  $c.revoke();
 end
