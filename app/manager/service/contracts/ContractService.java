@@ -173,6 +173,9 @@ public class ContractService {
     AbsenceType absenceType = null;
     JustifiedType justifiedType;
     for (Absence abs : absences) {
+      if (abs.absenceType.defaultTakableGroup() == null) {
+        continue;
+      }
       justifiedType = abs.justifiedType;
       Integer hours = abs.justifiedMinutes != null ? abs.justifiedMinutes / 60 : null;
       Integer minutes = abs.justifiedMinutes != null ? abs.justifiedMinutes % 60 : null;
