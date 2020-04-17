@@ -14,7 +14,7 @@ import models.enumerate.ShiftSlot;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 @Slf4j
 public class TranslateShiftTimeTable extends Job<Void> {
 

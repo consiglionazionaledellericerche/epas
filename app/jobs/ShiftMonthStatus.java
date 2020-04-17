@@ -19,7 +19,7 @@ import play.jobs.OnApplicationStart;
  * @since 09/06/17.
  */
 @Slf4j
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 public class ShiftMonthStatus extends Job<Void> {
 
   /**
