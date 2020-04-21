@@ -16,7 +16,7 @@ import play.jobs.OnApplicationStart;
  * @since 30/06/16.
  */
 @Slf4j
-//@OnApplicationStart(async = true)
+@OnApplicationStart(async = true)
 public class BadgesNormalization extends Job<Void> {
 
   @Inject

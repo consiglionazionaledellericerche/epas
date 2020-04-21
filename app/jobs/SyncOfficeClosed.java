@@ -15,7 +15,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 @Slf4j
-//@OnApplicationStart(async = true)
+@OnApplicationStart(async = true)
 public class SyncOfficeClosed extends Job<Void> {
 
   @Inject
