@@ -14,12 +14,13 @@ import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
+import models.dto.PersonCompetenceCodeDto;
 import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
 import org.joda.time.LocalDate;
-import jobs.CheckPersonCompetence.PersonCompetenceCodeDto;
+
 
 /**
  * Dao per l'accesso alle informazioni dei CompetenceCode.
@@ -309,6 +310,16 @@ public class CompetenceCodeDao extends DaoBase {
         .andAnyOf(pcc.endDate.isNull(), pcc.endDate.gt(LocalDate.now())))
         .groupBy(pcc.person.id, pcc.competenceCode.id).having(pcc.count().gt(1L))
         .fetch();
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public List<PersonCompetenceCodes> getWrongs() {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    
+    return getQueryFactory().selectFrom(pcc).where(pcc.beginDate.goe(pcc.endDate)).fetch();
   }
 
 }

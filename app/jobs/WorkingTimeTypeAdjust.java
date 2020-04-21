@@ -6,7 +6,7 @@ import models.WorkingTimeType;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
-//@OnApplicationStart(async = true)
+@OnApplicationStart(async = true)
 @Slf4j
 public class WorkingTimeTypeAdjust extends Job<Void> {
 
