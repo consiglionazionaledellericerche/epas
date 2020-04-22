@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -12,11 +14,13 @@ import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
+import models.dto.PersonCompetenceCodeDto;
 import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
 import org.joda.time.LocalDate;
+
 
 /**
  * Dao per l'accesso alle informazioni dei CompetenceCode.
@@ -288,6 +292,34 @@ public class CompetenceCodeDao extends DaoBase {
     return getQueryFactory().selectFrom(pcc)
         .where(pcc.competenceCode.in(codesList).and(pcc.person.office.eq(office)).and(condition))
         .fetch();
+  }
+  
+  /**
+   * 
+   * @return la lista di pcc duplicati.
+   */
+  public List<PersonCompetenceCodeDto> getDuplicates() {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    /*
+     * from persons_competence_codes where begin_date < now() and (end_date is null or end_date > now()) 
+     * group by person_id, competence_code_id having count(*) > 1 order by person_id, competence_code_id;
+     * query.select(Projections.constructor(CatDTO.class, cat.id, cat.name))
+     */
+    return getQueryFactory().from(pcc).select(Projections.constructor(PersonCompetenceCodeDto.class, pcc.person.id, pcc.competenceCode.id))
+        .where(pcc.beginDate.lt(LocalDate.now())
+        .andAnyOf(pcc.endDate.isNull(), pcc.endDate.gt(LocalDate.now())))
+        .groupBy(pcc.person.id, pcc.competenceCode.id).having(pcc.count().gt(1L))
+        .fetch();
+  }
+  
+  /**
+   * 
+   * @return
+   */
+  public List<PersonCompetenceCodes> getWrongs() {
+    final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    
+    return getQueryFactory().selectFrom(pcc).where(pcc.beginDate.goe(pcc.endDate)).fetch();
   }
 
 }
