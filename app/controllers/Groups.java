@@ -5,9 +5,12 @@ import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.UsersRolesOfficesDao;
 import helpers.Web;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.GroupManager;
 import models.GeneralSetting;
@@ -16,6 +19,7 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.dto.SeatSituationDto;
 import models.flows.Group;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -39,6 +43,8 @@ public class Groups extends Controller {
   private static PersonDao personDao;
   @Inject
   private static GeneralSettingDao settingDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -140,19 +146,16 @@ public class Groups extends Controller {
     render("@edit", office, peopleForGroups);
   }
   
-  //  public static void manageGroup() {
-  //    User currentUser = Security.getUser().get();
-  //    List<Group> managerGroups = Lists.newArrayList();
-  //    if (currentUser.isSystemUser()) {
-  //      managerGroups = groupDao.groupsByManager(Optional.<Person>absent());
-  //    }
-  //    if (!currentUser.hasRoles(Role.GROUP_MANAGER)) {
-  //      flash.error("L'utente non dispone dei diritti per accedere alla funzionalità");
-  //      Application.index();
-  //    }
-  //    //TODO: fare la regola drools per accedere alla funzionalità
-  //    rules.checkIfPermitted();
-  //    managerGroups = groupDao.groupsByManager(Optional.fromNullable(currentUser.person));
-  //    render(managerGroups);
-  //  }
+  public static void seatOrganizationChart() {
+    
+    val currentPerson = Security.getUser().get().person;
+    //Accesso da utente di sistema senza persona associata
+    if (currentPerson == null) {
+      Application.index();
+    }
+    SeatSituationDto seatSituation = groupManager.createOrganizationChart(currentPerson);
+    List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.user)
+        .stream().map(uro -> uro.role).collect(Collectors.toList());
+    render(seatSituation, currentPerson, roles);
+  }
 }

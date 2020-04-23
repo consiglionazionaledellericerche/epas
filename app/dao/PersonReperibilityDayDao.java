@@ -285,5 +285,4 @@ public class PersonReperibilityDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
-
 }

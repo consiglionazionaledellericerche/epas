@@ -734,6 +734,24 @@ ferieAnnoPassato= Ferie anno passato (da fare)
 ferieAnnoPresente= Ferie anno corrente (da fare)
 permessi= Permessi legge (da fare)
 
+#######################################################
+# Ruoli												  #
+#######################################################
+
+seatSupervisor = Responsabile Sede
+personnelAdmin = Amministratore Personale
+personnelAdminMini = Amministratore Personale Sola lettura
+employee = Dipendente
+badgeReader = Lettore di badge
+restClient = Client rest
+technicalAdmin = Amministratore Tecnico
+shiftManager = Gestore turni
+reperibilityManager = Gestore reperibilità
+groupManager = Responsabile gruppo
+mealTicketManager = Gestore buoni pasto
+registryManager = Gestore anagrafica
+personDayReader = Lettore informazioni
+
 ###########################
 # Messaggi di validazione
 ###########################
@@ -830,7 +848,7 @@ AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
-
+Groups.seatOrganizationChart =Organigramma sede e ruoli
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto

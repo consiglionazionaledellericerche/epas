@@ -505,6 +505,8 @@ when
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
+		/* Visualizzazione organigramma*/
+		"Groups.seatOrganizationChart",
 		
      	/* Ferie */
      	"Vacations.show",
