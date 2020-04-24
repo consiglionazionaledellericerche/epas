@@ -507,6 +507,7 @@ when
 		
 		/* Visualizzazione organigramma*/
 		"Groups.seatOrganizationChart",
+		"Groups.viewInfoRole",
 		
      	/* Ferie */
      	"Vacations.show",

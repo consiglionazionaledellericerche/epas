@@ -752,6 +752,11 @@ mealTicketManager = Gestore buoni pasto
 registryManager = Gestore anagrafica
 personDayReader = Lettore informazioni
 
+#########################################################
+# Azioni eseguibili dai ruoli							#
+#########################################################
+seatSupervisor.action =Può vedere le presenze in sede,\n\r può vedere la situazione ferie dei dipendenti, può approvare le ferie e i rip.comp. dei dipendenti e/o dei responsabili di gruppo
+
 ###########################
 # Messaggi di validazione
 ###########################

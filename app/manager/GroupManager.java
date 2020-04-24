@@ -1,6 +1,7 @@
 package manager;
 
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import dao.GroupDao;
 import dao.PersonReperibilityDayDao;
@@ -8,6 +9,7 @@ import dao.RoleDao;
 import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.assertj.core.util.Lists;
@@ -94,45 +96,70 @@ public class GroupManager {
    * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
    *     modificare lo stato delle informazioni della persona passata come parametro.
    */
-  public SeatSituationDto createOrganizationChart(Person person) {
+  public Map<Role, List<User>> createOrganizationChart(Person person) {
     
-    SeatSituationDto seatSituation = new SeatSituationDto();
-    seatSituation.personnelAdmins = getPersonnelAdminInSeat(person.office);
-    seatSituation.technicalAdmins = getTechnicalAdminInSeat(person.office);
-    seatSituation.seatSupervisors = getSeatSupervisor(person.office);
-    /*
-     * Turni, reperibilità e gruppi di lavoro devo cercarli sulla base 
-     * dell'appartenenza della persona al gruppo/servizio
-     */
-    if (!person.personShifts.isEmpty()) {
-      seatSituation.shiftSupervisors = person.personShifts.stream()
-          .flatMap(ps -> ps.personShiftShiftTypes.stream()
-              .map(psst -> psst.shiftType.shiftCategories.supervisor.user))
-          .collect(Collectors.toList());
-          
-    } else {
-      seatSituation.shiftSupervisors = Lists.emptyList();
-    }
-    if (!person.reperibility.isEmpty()) {
-      seatSituation.reperibilitySupervisors = person.reperibility.stream()
-          .map(pr -> pr.personReperibilityType.supervisor.user).collect(Collectors.toList());
-    } else {
-      seatSituation.reperibilitySupervisors = Lists.emptyList();
-    }
-    if (!person.groups.isEmpty()) {
-      seatSituation.groupManagers = person.groups.stream()
-          .map(g -> g.manager.user).collect(Collectors.toList());
-    } else {
-      seatSituation.groupManagers = Lists.emptyList();
+    Map<Role, List<User>> map = Maps.newHashMap();
+    for (Role role: roleDao.getAll()) {
+      if (role.name.equals(Role.BADGE_READER)) {
+        continue;
+      }
+      if (role.name.equals(Role.EMPLOYEE)) {
+        continue;
+      }
+      if (role.name.equals(Role.GROUP_MANAGER)) {
+        if (!person.groups.isEmpty()) {
+          map.put(role, person.groups.stream()
+              .map(g -> g.manager.user).collect(Collectors.toList()));
+        } else {
+          map.put(role, Lists.emptyList());
+        }
+      }
+      if (role.name.equals(Role.MEAL_TICKET_MANAGER)) {
+        map.put(role, getMealTicketsManager(person.office));
+      }
+      if (role.name.equals(Role.PERSON_DAY_READER)) {
+        continue;
+      }
+      if (role.name.equals(Role.PERSONNEL_ADMIN)) {
+        map.put(role, getPersonnelAdminInSeat(person.office));
+      }
+      if (role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+        map.put(role, getPersonnelAdminMiniInSeat(person.office));
+      }
+      if (role.name.equals(Role.REGISTRY_MANAGER)) {
+        map.put(role, getRegistryManager(person.office));
+      }
+      if (role.name.equals(Role.REPERIBILITY_MANAGER)) {
+        if (!person.reperibility.isEmpty()) {
+          map.put(role, person.reperibility.stream()
+              .map(pr -> pr.personReperibilityType.supervisor.user).collect(Collectors.toList()));
+        } else {
+          map.put(role, Lists.emptyList());
+        }
+      }
+      if (role.name.equals(Role.REST_CLIENT)) {
+        continue;
+      }
+      if (role.name.equals(Role.SEAT_SUPERVISOR)) {
+        map.put(role, getSeatSupervisor(person.office));
+      }
+      if (role.name.equals(Role.SHIFT_MANAGER)) {
+        if (!person.personShifts.isEmpty()) {
+          map.put(role, person.personShifts.stream()
+              .flatMap(ps -> ps.personShiftShiftTypes.stream()
+                  .map(psst -> psst.shiftType.shiftCategories.supervisor.user))
+              .collect(Collectors.toList()));
+              
+        } else {
+          map.put(role, Lists.emptyList());
+        }
+      }
+      if (role.name.equals(Role.TECHNICAL_ADMIN)) {
+        map.put(role, getTechnicalAdminInSeat(person.office));
+      }
     }
         
-    /*
-     * Fine
-     */
-    seatSituation.mealTicketsManager = getMealTicketsManager(person.office);
-    seatSituation.registryManagers = getRegistryManager(person.office);
-        
-    return seatSituation;
+    return map;
   }
   
   private List<User> getTechnicalAdminInSeat(Office office) {
@@ -153,6 +180,10 @@ public class GroupManager {
   
   private List<User> getRegistryManager(Office office) {
     return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.REGISTRY_MANAGER), office);
+  }
+  
+  private List<User> getPersonnelAdminMiniInSeat(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI), office);
   }
 
 }

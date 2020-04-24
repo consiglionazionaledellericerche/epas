@@ -1,13 +1,16 @@
 package controllers;
 
+import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import helpers.Web;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
@@ -45,6 +48,8 @@ public class Groups extends Controller {
   private static GeneralSettingDao settingDao;
   @Inject
   private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -153,9 +158,15 @@ public class Groups extends Controller {
     if (currentPerson == null) {
       Application.index();
     }
-    SeatSituationDto seatSituation = groupManager.createOrganizationChart(currentPerson);
+    Map<Role, List<User>> map = groupManager.createOrganizationChart(currentPerson);
+    
     List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.user)
         .stream().map(uro -> uro.role).collect(Collectors.toList());
-    render(seatSituation, currentPerson, roles);
+    render(map, currentPerson, roles);
+  }
+  
+  public static void viewInfoRole(Long id) {
+    Role role = roleDao.getRoleById(id);
+    render(role);
   }
 }

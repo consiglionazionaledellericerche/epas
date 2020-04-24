@@ -20,146 +20,35 @@
 	       #{/list}
 	    </ul>
 	#{/accordionItem}
-	
-	
 	#{accordionItem 'Organigramma', parent:'generic', title:'Altri ruoli in ePAS', open:true, color:'info'}
-	<h4>Responsabile sede</h4>    
-    #{if seatSituation.seatSupervisors.empty }
-      <div class="alert alert-danger">
-        Non è stato ancora impostato alcun responsabile sede!
-      </div>
-    #{/if}
-    #{else}
-	    <ul class="list-group">
-	       #{list items:seatSituation.seatSupervisors, as:'userRole'}
-	         <li class="list-group-item clearfix">
-						 <span class="label label-primary"> ${userRole.person.fullname}</span>
-             <span class="label label-badge label-success pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-check"></i> Può visualizzare alcuni miei dati
-             </span>
-	          </li>
-	       #{/list}
-	    </ul>
-    #{/else}
-    
-   	    
-    #{if !seatSituation.groupManagers.empty }
-    	<h4>Responsabile gruppo di lavoro</h4>
-	    <ul class="list-group">
-	       #{list items:seatSituation.groupManagers, as:'userRole'}
-	         <li class="list-group-item clearfix">
-						 <span class="label label-primary"> ${userRole.person.fullname}</span>
-             <span class="label label-badge label-success pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-check"></i> Può visualizzare alcuni miei dati
-             </span>
-	          </li>
-	       #{/list}
-	    </ul>
-    #{/if}
+  		#{list items:map.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}
 
-
-    
-    <h4>Amministratore del personale</h4>
-    #{if seatSituation.personnelAdmins.empty }
-      <div class="alert alert-danger">
-        Non è stato ancora impostato alcun amministratore del personale!
-      </div>
-    #{/if}
-    #{else}
-		<ul class="list-group">
-			#{list items:seatSituation.personnelAdmins, as:'userRole'}
-			<li class="list-group-item clearfix">
-				<span class="label label-primary"> ${userRole.person.fullname}</span>
-				<span class="label label-badge label-warning pull-right" webui-popover-hover data-content="Inserire azioni..." >
-					<i class="fa fa-exclamation"></i> Può modificare alcuni miei dati
-				</span>
-			</li>
-			#{/list}
-		</ul>
-    #{/else}
-    
-    #{if !seatSituation.mealTicketsManager.empty }
-    	<h4>Gestori dei buoni pasto</h4>    
-	    <ul class="list-group">
-        <ul class="list-group">
-          #{list items:seatSituation.mealTicketsManager, as:'userRole'}
-          <li class="list-group-item clearfix">
-            <span class="label label-primary"> ${userRole.person.fullname}</span>
-            <span class="label label-badge label-warning pull-right" webui-popover-hover data-content="Inserire azioni..." >
-              <i class="fa fa-exclamation"></i> Può modificare alcuni miei dati
-            </span>
-          </li>
-          #{/list}
-        </ul>
-	    </ul>
-    #{/if}
-    
-    #{if !seatSituation.registryManagers.empty }
-    	<h4>Gestori dell'anagrafica</h4>    
-	    <ul class="list-group">
-        <ul class="list-group">
-          #{list items:seatSituation.registryManagers, as:'userRole'}
-          <li class="list-group-item clearfix">
-            <span class="label label-primary"> ${userRole.person.fullname}</span>
-            <span class="label label-badge label-warning pull-right"  webui-popover-hover data-content="Inserire azioni..." >
-              <i class="fa fa-exclamation"></i> Può modificare alcuni miei dati
-            </span>
-          </li>
-          #{/list}
-        </ul>
-	    </ul>
-    #{/if}
-    
-    #{if !seatSituation.shiftSupervisors.empty }
-    	<h4>Responsabile servizio di turno</h4>
-	    <ul class="list-group">
-	       #{list items:seatSituation.shiftSupervisors, as:'userRole'}
-	         <li class="list-group-item clearfix">
-						 <span class="label label-primary"> ${userRole.person.fullname}</span>
-             <span class="label label-badge label-success pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-exclamation"></i> Può modificare alcuni miei dati
-             </span>
-	          </li>
-	       #{/list}
-	    </ul>
-    #{/if}
-    
-    #{if !seatSituation.reperibilitySupervisors.empty }
-    	<h4>Responsabile servizio di reperibilità</h4>
-	    <ul class="list-group">
-	       #{list items:seatSituation.reperibilitySupervisors, as:'userRole'}
-	         <li class="list-group-item clearfix">
-						 <span class="label label-primary"> ${userRole.person.fullname}</span>
-             <span class="label label-badge label-success pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-exclamation"></i> Può modificare alcuni miei dati
-             </span>
-	          </li>
-	       #{/list}
-	    </ul>
-    #{/if}
-    
-    	<h4>Amministratore tecnico</h4>    
-    #{if seatSituation.technicalAdmins.empty }
-      <div class="alert alert-danger">
-        Non è stato ancora impostato alcun amministratore tecnico!
-      </div>
-    #{/if}
-    #{else}
-	    <ul class="list-group">
-	       #{list items:seatSituation.technicalAdmins, as:'userRole'}
-	         <li class="list-group-item clearfix">
-						 <span class="label label-primary"> ${userRole.person.fullname}</span>
-             <span class="label label-badge label-success pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-check"></i> Può visualizzare alcuni miei dati
-             </span>
-	          </li>
-	       #{/list}
-	    </ul>
-    #{/else}
-    #{/accordionItem}
-    #{/accordionGroup}
-    </div>
-    
-    
+  		
+  		#{/list}
+  	#{/accordionItem}
+  	#{/accordionGroup}	
+   
+    </div>   
 
 </div>
+
+<div id="modalViewRole" class="modal fade container" tabindex="-1"></div>
