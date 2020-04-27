@@ -13,9 +13,10 @@
 	       #{list items:roles, as:'role'}
 	              <li class="list-group-item clearfix">
 						 <span class="label label-primary"> &{role.name}</span>
-             <span class="label label-badge label-info pull-right" webui-popover-hover data-content="Inserire azioni..." >
-               <i class="fa fa-info"></i> Cosa fa
-             </span>
+             		<a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(role.id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		            </a>
 	          </li>
 	       #{/list}
 	    </ul>
