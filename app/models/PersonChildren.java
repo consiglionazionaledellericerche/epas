@@ -33,6 +33,8 @@ public class PersonChildren extends BaseModel {
   @CheckWith(LocalDatePast.class)
   @Required
   public LocalDate bornDate;
+  
+  public String taxCode;
 
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;
