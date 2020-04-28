@@ -262,7 +262,8 @@
       <td>${abs.absenceType.code}</td>
       <td>${abs.absenceType.description}</td>
       <td>
-      #{if abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day)}
+      #{if abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day) 
+      	|| abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.assign_all_day)}
         Tutto il giorno
       #{/if}
       #{elseif abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.complete_day_and_add_overtime)}
