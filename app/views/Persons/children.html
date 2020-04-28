@@ -21,6 +21,7 @@
 	        <th>Nome</th>
 	        <th>Cognome</th>
 	        <th>Data di nascita</th>
+	        <th>Codice fiscale</th>
 	        <th></th>
 	      </tr>
 	      </thead>
@@ -30,6 +31,7 @@
 	      <td>${child.name}</td>
 	      <td>${child.surname}</td>
 	      <td>${child.bornDate?.format()}</td>
+	      <td>${child.taxCode != null ? child.taxCode : 'non presente'}
 	      <td class="col-xs-3">
 	        <div class="btn-group pull-right" role="group" >
 	            <a role="button" class="btn btn-primary" href="@{Persons.editChild(child.id)}" data-async-modal="#defaultModal">Modifica</a>
