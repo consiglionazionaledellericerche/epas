@@ -114,6 +114,7 @@ categoryTab.priority =priorità
 child.bornDate= Data entrata in famiglia
 child.name= Nome
 child.surname= Cognome
+child.taxCode= Codice fiscale
 personChildren=Figlio Dipendente
 
 codeBlock=Codice Blocco
