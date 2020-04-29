@@ -85,8 +85,8 @@ public class PersonDays extends Controller {
    * @param month il mese di riferimento
    */
   @BasicAuth
-  public static void getDaySituationByOffice(String sedeId, Integer year, Integer month) {
-    log.debug("getDaySituationByOffice -> sedeId={}, year={}, month={}", sedeId, year, month);
+  public static void getMonthSituationByOffice(String sedeId, Integer year, Integer month) {
+    log.debug("getMonthSituationByOffice -> sedeId={}, year={}, month={}", sedeId, year, month);
     if ((year == null && month == null) || sedeId == null) {
       notFound();
     }
@@ -118,10 +118,43 @@ public class PersonDays extends Controller {
         map.put(person, list);
         date = date.plusDays(1);
       }
-      
     }
     log.debug("Terminato invio di informazioni della sede {} per l'anno {} mese {}", 
         office.get().name, year, month);
+    renderJSON(map);
+  }
+  
+  /**
+   * 
+   * @param sedeId
+   * @param date
+   */
+  @BasicAuth
+  public static void getDaySituationByOffice(String sedeId, LocalDate date) {
+    log.debug("getDaySituationByOffice -> sedeId={}, data={}", sedeId, date);
+    if (sedeId == null || date == null) {
+      notFound();
+    }
+    Optional<Office> office = officeDao.byCodeId(sedeId);
+    if (!office.isPresent()) {
+      notFound();
+    }
+    rules.checkIfPermitted(office.get());
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office.get());
+    List<Person> personList = personDao.list(Optional.<String>absent(), offices, false, date, date, true).list();
+    Map<Person, PersonDayDto> map = Maps.newHashMap();
+    for (Person person : personList) {
+      PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
+      if (pd == null) {
+        JsonResponse.notFound("Non sono presenti informazioni per "
+                + person.name + " " + person.surname + " nel giorno " + date);
+      }
+      PersonDayDto pdDto = generateDayDto(pd);
+      map.put(person, pdDto);
+    }
+    log.debug("Terminato invio di informazioni della sede {} per il giorno {}", 
+        office.get().name, date);
     renderJSON(map);
   }
 
