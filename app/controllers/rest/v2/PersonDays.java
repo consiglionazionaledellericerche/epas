@@ -125,9 +125,10 @@ public class PersonDays extends Controller {
   }
   
   /**
-   * 
-   * @param sedeId
-   * @param date
+   * Metodo che ritorna la mappa delle situazioni giornaliere di tutti 
+   * i dipendenti della sede passata come parametro alla data passata come parametro.
+   * @param sedeId l'identificativo della sede di cui cercare le persone
+   * @param date la data per cui cercare i dati
    */
   @BasicAuth
   public static void getDaySituationByOffice(String sedeId, LocalDate date) {
@@ -142,7 +143,8 @@ public class PersonDays extends Controller {
     rules.checkIfPermitted(office.get());
     Set<Office> offices = Sets.newHashSet();
     offices.add(office.get());
-    List<Person> personList = personDao.list(Optional.<String>absent(), offices, false, date, date, true).list();
+    List<Person> personList = personDao
+        .list(Optional.<String>absent(), offices, false, date, date, true).list();
     Map<Person, PersonDayDto> map = Maps.newHashMap();
     for (Person person : personList) {
       PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
