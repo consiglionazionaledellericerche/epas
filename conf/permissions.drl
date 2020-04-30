@@ -2406,6 +2406,8 @@ when
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation"        
 
        ), target == null, granted == false)
@@ -2430,6 +2432,8 @@ when
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
 
+		"rest.v2.PersonDays.getDaySituationByOffice",
+		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation"
 		
        ), target == $o, granted == false)
@@ -2587,6 +2591,8 @@ when
  $c: PermissionCheck(action in (
 
         "rest.PersonDays.getDaySituation",
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList"
@@ -2601,7 +2607,8 @@ when
  $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $o: Office() from $uro.office
  $c: PermissionCheck(action in (
-
+		"rest.v2.PersonDays.getDaySituationByOffice",
+		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
@@ -2620,7 +2627,8 @@ rule AccountRole_PersonDaysReader
 when
  AccountRole(this in (AccountRole.PERSON_DAYS_READER)) 
  $c: PermissionCheck(action in (
-
+		"rest.v2.PersonDays.getDaySituationByOffice",
+		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
