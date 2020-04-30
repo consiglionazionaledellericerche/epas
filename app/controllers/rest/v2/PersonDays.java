@@ -3,10 +3,10 @@ package controllers.rest.v2;
 import cnr.sync.dto.v2.AbsenceDto;
 import cnr.sync.dto.v2.PersonDayDto;
 import cnr.sync.dto.v2.StampingDto;
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Maps;
-import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
@@ -94,31 +94,25 @@ public class PersonDays extends Controller {
     if (!office.isPresent()) {
       notFound();
     }
-    rules.checkIfPermitted(office.get());
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office.get());
-    List<Person> personList = personDao.getActivePersonInMonth(offices, new YearMonth(year, month));
+    rules.checkIfPermitted(office.get());    
+    
     Map<Person, List<PersonDayDto>> map = Maps.newHashMap();
-    for (Person person : personList) {
-      List<PersonDayDto> list = Lists.newArrayList();
-      LocalDate date = new LocalDate(year, month, 1);
-      LocalDate until = date.dayOfMonth().withMaximumValue();
-      while (!date.isAfter(until)) {
-        PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
-        if (pd == null) {
-          JsonResponse.notFound("Non sono presenti informazioni per "
-                  + person.name + " " + person.surname + " nel giorno " + date);
-        }
-        PersonDayDto pdDto = generateDayDto(pd);
-        
-        if (map.containsKey(person)) {
-          list = map.get(person);          
-        } 
-        list.add(pdDto);
-        map.put(person, list);
-        date = date.plusDays(1);
+    LocalDate date = new LocalDate(year, month, 1);
+    LocalDate until = date.dayOfMonth().withMaximumValue();
+    List<PersonDay> days = personDayDao.getPersonDaysByOfficeInPeriod(office.get(), date, until);
+    List<PersonDayDto> list = null;
+    for (PersonDay pd : days) {
+      PersonDayDto pdDto = generateDayDto(pd);
+      if (map.containsKey(pd.person)) {
+        list = map.get(pd.person);   
+      } else {
+        list = Lists.newArrayList();
       }
+      list.add(pdDto);
+      map.put(pd.person, list);
+      
     }
+
     log.debug("Terminato invio di informazioni della sede {} per l'anno {} mese {}", 
         office.get().name, year, month);
     renderJSON(map);

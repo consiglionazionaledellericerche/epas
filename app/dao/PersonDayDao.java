@@ -8,11 +8,13 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
@@ -264,5 +266,16 @@ public class PersonDayDao extends DaoBase {
     final PersonDay result = getQueryFactory().selectFrom(personDay)
         .where(personDay.absences.contains(abs)).fetchOne();
     return Optional.fromNullable(result);
+  }
+  
+  public List<PersonDay> getPersonDaysByOfficeInPeriod(Office office, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QPerson person = QPerson.person;
+    
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.person, person)
+        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .orderBy(personDay.date.asc()).fetch();
+        
   }
 }
