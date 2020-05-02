@@ -268,7 +268,17 @@ public class PersonDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
   
-  public List<PersonDay> getPersonDaysByOfficeInPeriod(Office office, LocalDate begin, LocalDate end) {
+  /**
+   * Metodo che ritorna la lista dei giorni di lavoro tra begin e date per i dipendenti della 
+   * sede office.
+   * Usato nel controllers.rest persondays.
+   * @param office la sede per cui si cercano i giorni di lavoro
+   * @param begin la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @return la lista dei giorni di lavoro dei dipendenti della sede office tra begin e date.
+   */
+  public List<PersonDay> getPersonDaysByOfficeInPeriod(Office office, 
+      LocalDate begin, LocalDate end) {
     QPersonDay personDay = QPersonDay.personDay;
     QPerson person = QPerson.person;
     
