@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import dao.AbsenceDao;
@@ -28,6 +29,7 @@ public class PersonMonthlySituationData {
   private final CompetenceDao competenceDao;
   private final PersonDayDao personDayDao;
   
+  @Inject
   public PersonMonthlySituationData(PersonDayManager personDayManager,
       PersonMonthRecapDao personMonthRecapDao, AbsenceDao absenceDao,
       CompetenceDao competenceDao, PersonDayDao personDayDao) {
@@ -61,10 +63,7 @@ public class PersonMonthlySituationData {
   private Map<String, Certification> trainingHours(Person person, int year, int month,
       Map<String, Certification> certifications) {
 
-    CertificatedData data = personMonthRecapDao.getPersonCertificatedData(person, month, year);
-    if (data == null) {
-      System.out.println("porcodio");
-    }
+
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.absent());
