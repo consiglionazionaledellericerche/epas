@@ -26,7 +26,6 @@ import models.Stamping;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
