@@ -10,7 +10,8 @@ import lombok.Data;
 @Data
 public class CertificationDto {
   
-  private String type;
-  private String content;
-  
+  private List<CertificationAbsenceDto> absences;
+  private List<CertificationCompetencesDto> competences;
+  private List<CertificationMealTicketDto> tickets;
+  private List<CertificationTrainingHoursDto> trainingHours;
 }
