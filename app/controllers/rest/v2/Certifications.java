@@ -64,7 +64,7 @@ public class Certifications extends Controller{
   public static void getMonthSituation(String email, String eppn, 
       Long personPersoId, int year, int month) {
 
-    log.info("Richieste informazioni mensili da applicazione esterna");
+    log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPersoId);
 
     if (!person.isPresent()) {
@@ -91,7 +91,7 @@ public class Certifications extends Controller{
    * @param month
    */
   public static void getMonthSituationByOffice(String sedeId, int year, int month) {
-    log.info("Richieste informazioni mensili da applicazione esterna");
+    log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
       notFound();
