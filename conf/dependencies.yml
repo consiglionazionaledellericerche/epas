@@ -64,12 +64,12 @@ require:
         - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
     - play-codeborne -> lombok 1.2.5
     - org.projectlombok -> lombok 1.18.4
-    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.2.0
+    - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.8.0
     - com.fasterxml.jackson.core -> jackson-core 2.9.8
     - com.fasterxml.jackson.core -> jackson-annotations 2.9.8
     - com.fasterxml.jackson.core -> jackson-databind 2.9.8
-    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.9.8
     - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.9.8
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.9.8
     - com.fasterxml.jackson.module -> jackson-module-afterburner 2.9.8
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
