@@ -1578,7 +1578,7 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false),
 
-  A_35R("35R", "dottorato di ricerca retribuito", true, ImmutableSet.of(JustifiedTypeName.all_day),
+  A_35R("35R", "dottorato di ricerca retribuito", false, ImmutableSet.of(JustifiedTypeName.all_day),
       0, false, false, 0, null, Sets.newHashSet(), null, null, false),
 
   A_62("62", "distacco sindacale", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
@@ -1592,7 +1592,7 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false),
 
-  A_50("50", "aspettativa per ricongiungimento familiare all'estero", true,
+  A_50("50", "aspettativa per ricongiungimento familiare all'estero", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false),
 
