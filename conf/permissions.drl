@@ -2407,6 +2407,7 @@ when
         "rest.PersonDays.getMonthSituation",
         
         "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation"        
@@ -2434,6 +2435,7 @@ when
         "rest.PersonDays.getMonthSituation",
 
 		"rest.v2.Certifications.getMonthSituation",
+		"rest.v2.Certifications.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation"
@@ -2594,6 +2596,7 @@ when
 
         "rest.PersonDays.getDaySituation",
         "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
@@ -2611,6 +2614,7 @@ when
  $o: Office() from $uro.office
  $c: PermissionCheck(action in (
  		"rest.v2.Certifications.getMonthSituation",
+ 		"rest.v2.Certifications.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
@@ -2632,6 +2636,7 @@ when
  AccountRole(this in (AccountRole.PERSON_DAYS_READER)) 
  $c: PermissionCheck(action in (
  		"rest.v2.Certifications.getMonthSituation",
+ 		"rest.v2.Certifications.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
