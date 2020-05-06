@@ -9,9 +9,11 @@ import lombok.Data;
 @Builder
 @Data
 public class CertificationDto {
-  
+  private String fullName;
+  private int year;
+  private int month;
   private List<CertificationAbsenceDto> absences;
   private List<CertificationCompetencesDto> competences;
-  private List<CertificationMealTicketDto> tickets;
+  private List<CertificationMealTicketDto> mealTickets;
   private List<CertificationTrainingHoursDto> trainingHours;
 }
