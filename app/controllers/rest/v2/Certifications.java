@@ -3,6 +3,7 @@ package controllers.rest.v2;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,9 +20,11 @@ import cnr.sync.dto.v2.CertificationMealTicketDto;
 import cnr.sync.dto.v2.CertificationTrainingHoursDto;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.JsonResponse;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import manager.attestati.service.ICertificationService;
@@ -46,7 +49,8 @@ public class Certifications extends Controller{
   static SecurityRules rules;
   @Inject
   static OfficeDao officeDao;
-
+  @Inject
+  static GsonBuilder gsonBuilder;
   /**
    * Metodo rest che permette di ritornare una lista contenente le informazioni mensili
    * del dipendente (assenze, competenze, ore di formazione, buoni pasto).
@@ -182,6 +186,12 @@ public class Certifications extends Controller{
         .trainingHours(trainingHours)
         .build();
     return obj;
+  }
+  
+  @NoCheck
+  public static void test() {
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(LocalDate.now()));
   }
 }
 
