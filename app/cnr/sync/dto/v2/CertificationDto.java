@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class CertificationDto {
   private String fullName;
+  private String number;
   private int year;
   private int month;
   private List<CertificationAbsenceDto> absences;

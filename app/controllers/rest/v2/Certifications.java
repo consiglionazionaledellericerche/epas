@@ -173,6 +173,7 @@ public class Certifications extends Controller{
     }
     CertificationDto obj = CertificationDto.builder()
         .fullName(person.getFullname())
+        .number(person.number)
         .year(year)
         .month(month)
         .absences(absences)
