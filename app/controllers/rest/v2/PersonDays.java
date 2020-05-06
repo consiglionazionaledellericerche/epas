@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
@@ -44,6 +46,8 @@ public class PersonDays extends Controller {
   private static SecurityRules rules;
   @Inject
   private static OfficeDao officeDao;
+  @Inject
+  static GsonBuilder gsonBuilder;
 
   /**
    * Metodo rest che ritorna la situazione della persona (passata per email o eppn) in un giorno 
@@ -73,7 +77,8 @@ public class PersonDays extends Controller {
               + person.get().name + " " + person.get().surname + " nel giorno " + date);
     }
     PersonDayDto pdDto = generateDayDto(pd);
-    renderJSON(pdDto);
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(pdDto));
   }
   
   /**
@@ -114,7 +119,8 @@ public class PersonDays extends Controller {
 
     log.debug("Terminato invio di informazioni della sede {} per l'anno {} mese {}", 
         office.get().name, year, month);
-    renderJSON(map);
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(map));
   }
   
   /**
@@ -150,7 +156,8 @@ public class PersonDays extends Controller {
     }
     log.debug("Terminato invio di informazioni della sede {} per il giorno {}", 
         office.get().name, date);
-    renderJSON(map);
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(map));
   }
 
   /**
@@ -161,7 +168,7 @@ public class PersonDays extends Controller {
   private static PersonDayDto generateDayDto(PersonDay pd) {
     PersonDayDto pdDto = 
         PersonDayDto.builder()
-          .data(pd.date.toString())
+          .data(pd.date)
           .buonoPasto(pd.isTicketAvailable)
           .differenza(pd.difference)
           .progressivo(pd.progressive)
