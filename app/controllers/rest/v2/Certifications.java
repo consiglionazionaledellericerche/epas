@@ -79,7 +79,8 @@ public class Certifications extends Controller{
     
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
-    renderJSON(dto);
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(dto));
 
   }
   
@@ -108,7 +109,8 @@ public class Certifications extends Controller{
       CertificationDto dto = generateCertDto(map, year, month, person);
       list.add(dto);
     }
-    renderJSON(list);
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(list));
   }
 
   /**
@@ -126,17 +128,17 @@ public class Certifications extends Controller{
     List<CertificationCompetencesDto> competences = Lists.newArrayList();
     List<CertificationMealTicketDto> mealTickets = Lists.newArrayList();
     List<CertificationTrainingHoursDto> trainingHours = Lists.newArrayList();
-    String from;
-    String to;
+    LocalDate from;
+    LocalDate to;
     String[] places;
     for (Map.Entry<String, Certification> entry : map.entrySet()) {
       switch(entry.getValue().certificationType) {
         case ABSENCE:
           places = entry.getValue().content.split(";");
-          from = new LocalDate(year, month, Integer.parseInt(places[1]))
-              .toString(ISODateTimeFormat.basicDate());
-          to = new LocalDate(year, month, Integer.parseInt(places[2]))
-              .toString(ISODateTimeFormat.basicDate());
+          from = new LocalDate(year, month, Integer.parseInt(places[1]));
+              //.toString(ISODateTimeFormat.basicDate());
+          to = new LocalDate(year, month, Integer.parseInt(places[2]));
+              //.toString(ISODateTimeFormat.basicDate());
           CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
               .code(places[0])
               .from(from)
@@ -160,10 +162,10 @@ public class Certifications extends Controller{
           break;
         case FORMATION:
           places = entry.getValue().content.split(";");
-          from = new LocalDate(year, month, Integer.parseInt(places[0]))
-              .toString(ISODateTimeFormat.basicDate());
-          to = new LocalDate(year, month, Integer.parseInt(places[1]))
-              .toString(ISODateTimeFormat.basicDate());
+          from = new LocalDate(year, month, Integer.parseInt(places[0]));
+              //.toString(ISODateTimeFormat.basicDate());
+          to = new LocalDate(year, month, Integer.parseInt(places[1]));
+              //.toString(ISODateTimeFormat.basicDate());
           CertificationTrainingHoursDto trainingHour = CertificationTrainingHoursDto.builder()
               .from(from)
               .to(to)
@@ -188,10 +190,5 @@ public class Certifications extends Controller{
     return obj;
   }
   
-  @NoCheck
-  public static void test() {
-    val gson = gsonBuilder.create();
-    renderJSON(gson.toJson(LocalDate.now()));
-  }
 }
 

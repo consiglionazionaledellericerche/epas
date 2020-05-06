@@ -10,6 +10,6 @@ import lombok.Data;
 public class CertificationTrainingHoursDto {
 
   public Integer quantity;
-  public String from;
-  public String to;
+  public LocalDate from;
+  public LocalDate to;
 }
