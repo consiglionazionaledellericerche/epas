@@ -113,6 +113,10 @@ public enum DefaultGroup {
   FERIE_CNR("31/94/32 - Ferie e permessi legge", "", DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
+  
+  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, null,
+      null, false, false), 
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
