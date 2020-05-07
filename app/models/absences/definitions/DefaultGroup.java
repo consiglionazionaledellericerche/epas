@@ -88,7 +88,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_ORE_AGGIUNTIVE,
       DefaultComplation.C_OA, null, false, false),
 
-  G_OA_DIPENDENTI("Ore aggiuntive dipendenti", "", DefaultCategoryType.ORE_AGGIUNTIVE_DIPENDENTI, 1,
+  G_OA_DIPENDENTI("Ore aggiuntive dipendenti", "", DefaultCategoryType.ORE_AGGIUNTIVE_DIPENDENTI, 2,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_ORE_AGGIUNTIVE,
       DefaultComplation.C_OA, null, false, false),
 
@@ -421,7 +421,7 @@ public enum DefaultGroup {
   }
 
   public static List<String> employeeAdditionalHoursCodes() {
-    return getCodes(DefaultGroup.G_OA);
+    return getCodes(DefaultGroup.G_OA_DIPENDENTI);
   }
 
   private static List<String> getCodes(DefaultGroup defaultGroup) {
