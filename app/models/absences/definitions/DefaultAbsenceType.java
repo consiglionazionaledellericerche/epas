@@ -24,7 +24,8 @@ public enum DefaultAbsenceType {
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, true),
-
+  
+  
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
@@ -392,6 +393,11 @@ public enum DefaultAbsenceType {
   A_32("32", "Ferie anno corrente", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, false), 
+  A_ESENZ19("ESENZ19",
+      "esenzione dal servizo per Covid-19", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
+      Sets.newHashSet(), null, null, true),
+
   A_37("37", "ferie anno precedente (dopo il 31/8)", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, false),
