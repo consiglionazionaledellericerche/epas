@@ -163,6 +163,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_37), 
       -1, null),
 
+  T_ESENZ_19(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_ESENZ19), 
+      ImmutableSet.of(DefaultAbsenceType.A_ESENZ19), 
+      -1, null),
+  
   T_RIPOSI_CNR(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_91), 
       ImmutableSet.of(DefaultAbsenceType.A_91), 
