@@ -71,6 +71,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -693,9 +694,21 @@ public class ChartsManager {
       boolean onlyMission) {
     try {
       FileOutputStream out = new FileOutputStream(file);
-
-      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_"
-          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
+      Sheet sheet = null;
+      String fullname = "";
+      if (psDto.person.name.contains(" ")) {
+        String[] names = psDto.person.name.split(" ");
+        fullname = psDto.person.surname + " " + names[0];
+      } else {
+        fullname = psDto.person.fullName();
+      }
+      String sheetname = fullname + "_"
+          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year;
+      
+      if (sheetname != null && sheetname.length() > 31) {
+        sheetname = sheetname.substring(0, 31);
+      }
+      sheet = wb.createSheet(sheetname); 
 
       CellStyle cs = createHeader(wb);
       Row row = null;
@@ -807,7 +820,7 @@ public class ChartsManager {
         log.error("problema in chiusura stream");
         ex.printStackTrace();
       }
-    } catch (FileNotFoundException ex) {
+    } catch (IllegalArgumentException | FileNotFoundException ex) {
       log.error("Problema in riconoscimento file");
       ex.printStackTrace();
     }
