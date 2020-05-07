@@ -344,7 +344,8 @@ public class AbsenceType extends BaseModel {
       for (GroupAbsenceType group : behaviour.groupAbsenceTypes) {  //quasi sempre 1
         if (group.automatic == true || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
             || group.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()) 
-            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())
+            || group.name.equals(DefaultGroup.G_OA_DIPENDENTI.name())) {
           //TODO: questi gruppi (anche in groups permitted) vanno taggati
           continue;
         }
