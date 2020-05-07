@@ -51,6 +51,7 @@ public class Certifications extends Controller{
   static OfficeDao officeDao;
   @Inject
   static GsonBuilder gsonBuilder;
+  
   /**
    * Metodo rest che permette di ritornare una lista contenente le informazioni mensili
    * del dipendente (assenze, competenze, ore di formazione, buoni pasto).
@@ -85,10 +86,12 @@ public class Certifications extends Controller{
   }
   
   /**
-   * 
-   * @param sedeId
-   * @param year
-   * @param month
+   * Metodo che ritorna la lista degli oggetti contenenti le info mensili per la generazione
+   * delle buste paga verso sistemi esterni per tutti i dipendenti della sede identificata
+   * da sedeId nell'anno year e nel mese month.
+   * @param sedeId l'identificativo della sede
+   * @param year l'anno
+   * @param month il mese
    */
   public static void getMonthSituationByOffice(String sedeId, int year, int month) {
     log.debug("Richieste informazioni mensili da applicazione esterna");
@@ -122,7 +125,8 @@ public class Certifications extends Controller{
    * @param person la persona per cui cercare le informazioni
    * @return il dto contenente le informazioni da inviare al chiamante del servizio rest.
    */   
-  private static CertificationDto generateCertDto(Map<String, Certification> map, int year, int month, Person person) {
+  private static CertificationDto generateCertDto(Map<String, Certification> map, 
+      int year, int month, Person person) {
         
     List<CertificationAbsenceDto> absences = Lists.newArrayList();
     List<CertificationCompetencesDto> competences = Lists.newArrayList();
@@ -132,13 +136,11 @@ public class Certifications extends Controller{
     LocalDate to;
     String[] places;
     for (Map.Entry<String, Certification> entry : map.entrySet()) {
-      switch(entry.getValue().certificationType) {
+      switch (entry.getValue().certificationType) {
         case ABSENCE:
           places = entry.getValue().content.split(";");
           from = new LocalDate(year, month, Integer.parseInt(places[1]));
-              //.toString(ISODateTimeFormat.basicDate());
           to = new LocalDate(year, month, Integer.parseInt(places[2]));
-              //.toString(ISODateTimeFormat.basicDate());
           CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
               .code(places[0])
               .from(from)
@@ -163,9 +165,7 @@ public class Certifications extends Controller{
         case FORMATION:
           places = entry.getValue().content.split(";");
           from = new LocalDate(year, month, Integer.parseInt(places[0]));
-              //.toString(ISODateTimeFormat.basicDate());
           to = new LocalDate(year, month, Integer.parseInt(places[1]));
-              //.toString(ISODateTimeFormat.basicDate());
           CertificationTrainingHoursDto trainingHour = CertificationTrainingHoursDto.builder()
               .from(from)
               .to(to)
@@ -173,8 +173,8 @@ public class Certifications extends Controller{
               .build();
           trainingHours.add(trainingHour);
           break;
-          default:
-            break;
+        default:
+          break;
       }
     }
     CertificationDto obj = CertificationDto.builder()
