@@ -1511,7 +1511,8 @@ public class PersonDayManager {
       if (stampEnter == null) {
         if (stamping.isIn()) {
           if ((stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO && serviceStamping) 
-              || (stamping.stampType == null && !serviceStamping)) {
+              || (stamping.stampType == null && !serviceStamping)
+              || (stamping.stampType == StampTypes.PAUSA_PRANZO && !serviceStamping)) {
             stampEnter = stamping;
             continue;
           }
