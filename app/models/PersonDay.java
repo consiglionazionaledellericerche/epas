@@ -142,6 +142,10 @@ public class PersonDay extends BaseModel {
   @NotAudited
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
+  
+  @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+  @OrderBy("date ASC")
+  public List<TeleworkStamping> teleworkStampings = new ArrayList<TeleworkStamping>();
 
   @ManyToOne
   @JoinColumn(name = "stamp_modification_type_id")

@@ -181,6 +181,13 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TELEWORK_STAMPINGS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente gli orari di lavoro relativi al Telelavoro (103). <strong>NOTA BENE: </strong>questi orari non concorrono in alcun
+      modo alla formazione del residuo orario del giorno.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.RIGHT_TO_STUDY) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi ai permessi per diritto allo studio.
