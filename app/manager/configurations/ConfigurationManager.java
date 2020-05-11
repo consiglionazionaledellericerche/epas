@@ -29,6 +29,7 @@ import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.query.QConfiguration;
+import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -62,6 +63,20 @@ public class ConfigurationManager {
     return (List<Configuration>) query.fetch();
   }
 
+  /**
+   * 
+   * @param epasParam
+   * @param value
+   * @return
+   */
+  public List<PersonConfiguration> configurationWithTypeAndValue(EpasParam epasParam, String value) {
+    final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
+    
+    final JPQLQuery query = queryFactory.selectFrom(configuration)
+        .where(configuration.epasParam.eq(epasParam)
+            .and(configuration.fieldValue.eq(value)));
+    return query.fetch();
+  }
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
