@@ -617,6 +617,15 @@ public class Stampings extends Controller {
 
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office);
   }
+  
+  /**
+   * 
+   * @param year
+   * @param month
+   */
+  public static void teleworkStampings(int year, int month) {
+    render();
+  }
 
 }
 
