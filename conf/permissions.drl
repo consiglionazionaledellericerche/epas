@@ -490,8 +490,6 @@ when
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
      	
-     	/* Gestione riposi compensativi per chiusura ente*/
-     	"TimeVariations.personShow",
 
 		/* Richieste di assenza */
 		"AbsenceRequests.blank",
@@ -560,6 +558,16 @@ when
      	"ReportCentre.sendProblem"
 
        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule EmployeeCanManageTeleworkStampings
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "Stampings.teleworkStampings", granted == false, target == null)
 then
  $c.grant();
 end
