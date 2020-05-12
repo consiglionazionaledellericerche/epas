@@ -1,8 +1,11 @@
 package models;
 
+import com.beust.jcommander.Strings;
+import com.google.common.collect.Range;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +21,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import models.absences.Absence;
 import models.base.BaseModel;
+import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
@@ -257,7 +261,7 @@ public class PersonDay extends BaseModel {
   public boolean hasError(Troubles trouble) {
     return this.troubles.stream().anyMatch(error -> error.cause == trouble);
   }
-
+  
   @Override
   public String toString() {
     return String.format(

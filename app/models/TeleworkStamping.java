@@ -15,6 +15,7 @@ import org.joda.time.LocalDateTime;
 import it.cnr.iit.epas.NullStringBinder;
 import models.Stamping.WayType;
 import models.base.BaseModel;
+import models.enumerate.StampTypes;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -29,6 +30,10 @@ public class TeleworkStamping extends BaseModel {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(nullable = false, updatable = false)
   public PersonDay personDay;
+  
+  @Column(name = "stamp_type")
+  @Enumerated(EnumType.STRING)
+  public StampTypes stampType;
   
   @Required @NotNull
   @Column(nullable = false)

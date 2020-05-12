@@ -1,10 +1,11 @@
 # --- !Ups
 
-CREATE TABLE telework_stampings  (
+CREATE TABLE telework_stampings(
     id BIGSERIAL PRIMARY KEY,
     date timestamp without time zone,
     note character varying(255),
     way character varying(255),
+    stamp_type TEXT,
     person_day_id bigint NOT NULL,
     FOREIGN KEY (person_day_id) REFERENCES person_days (id),
     version INT DEFAULT 0
@@ -19,6 +20,7 @@ CREATE TABLE telework_stampings_history(
     date timestamp without time zone,
     note character varying(255),
     way character varying(255),
+    stamp_type TEXT,
     person_day_id bigint,
 	PRIMARY KEY (id, _revision, _revision_type)
 );

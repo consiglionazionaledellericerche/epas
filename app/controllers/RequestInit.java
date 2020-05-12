@@ -166,7 +166,7 @@ public class RequestInit extends Controller {
     final Collection<String> monthYearSwitcher = ImmutableList.of(
         "Stampings.stampings",
         "Stampings.insertWorkingOffSitePresence",
-        "Stampings.teleworkStampings",
+        "TeleworkStampings.teleworkStampings",
         "Absences.absences",
         "Competences.competences",
         "Competences.enabledCompetences",
