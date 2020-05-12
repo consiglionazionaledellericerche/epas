@@ -1,0 +1,19 @@
+<div class="list-group-item-text">
+  <strong><i class="fa fa-user-circle" aria-hidden="true"></i> Inizio-fine lavoro: </strong>
+  #{list items:day.beginEnd, as:'stamp'}  
+  	<span class="label label-primary">${stamp.date}</span>  
+  #{/list}
+  
+  <br>
+  <strong><i class="fa fa-cutlery" aria-hidden="true"></i> Pausa pranzo: </strong>
+  #{list items:day.meal, as:'meal'}  
+  	<span class="label label-primary">${meal.date}</span>  
+  #{/list}
+  
+  <br>
+  <strong><i class="fa fa-hand-paper-o" aria-hidden="true"></i> Interruzioni: </strong>
+  #{list items:day.interruptions, as:'inter'}  
+  	<span class="label label-primary">${meal.date}</span>  
+  #{/list}
+ 
+</div>
