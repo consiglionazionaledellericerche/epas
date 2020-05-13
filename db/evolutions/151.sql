@@ -4,7 +4,6 @@ CREATE TABLE telework_stampings(
     id BIGSERIAL PRIMARY KEY,
     date timestamp without time zone,
     note character varying(255),
-    way character varying(255),
     stamp_type TEXT,
     person_day_id bigint NOT NULL,
     FOREIGN KEY (person_day_id) REFERENCES person_days (id),
@@ -19,7 +18,6 @@ CREATE TABLE telework_stampings_history(
     _revision_type SMALLINT NOT NULL,
     date timestamp without time zone,
     note character varying(255),
-    way character varying(255),
     stamp_type TEXT,
     person_day_id bigint,
 	PRIMARY KEY (id, _revision, _revision_type)

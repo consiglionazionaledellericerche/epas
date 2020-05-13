@@ -1,0 +1,10 @@
+package manager.services.telework.errors;
+
+public enum TeleworkStampingError {
+  MEAL_STAMPING_PRESENT,
+  MEAL_STAMPING_OUT_OF_BOUNDS,
+  BEGIN_STAMPING_PRESENT,
+  END_STAMPING_PRESENT,
+  INTERRUPTION_OUT_OF_BOUNDS,
+  INTERRUPTION_IN_MEAL_TIME;
+}

@@ -79,6 +79,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final QStampModificationType stampModificationType;
 
+    public final ListPath<models.TeleworkStamping, QTeleworkStamping> teleworkStampings = this.<models.TeleworkStamping, QTeleworkStamping>createList("teleworkStampings", models.TeleworkStamping.class, QTeleworkStamping.class, PathInits.DIRECT2);
+
     public final NumberPath<Integer> timeAtWork = createNumber("timeAtWork", Integer.class);
 
     public final BooleanPath today = createBoolean("today");

@@ -38,10 +38,6 @@ public class TeleworkStamping extends BaseModel {
   @Required @NotNull
   @Column(nullable = false)
   public LocalDateTime date;
-  
-  @Required @NotNull
-  @Enumerated(EnumType.STRING)
-  public WayType way;
 
   @As(binder = NullStringBinder.class)
   public String note;

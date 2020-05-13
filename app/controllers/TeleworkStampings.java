@@ -11,6 +11,7 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +20,16 @@ import manager.TeleworkStampingManager;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.telework.errors.Errors;
 import models.Person;
 import models.PersonDay;
+import models.Stamping;
 import models.TeleworkStamping;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.StampTypes;
+import play.data.validation.CheckWith;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -46,10 +52,12 @@ public class TeleworkStampings extends Controller{
   static PersonDao personDao;
   @Inject
   static SecurityRules rules;
+  
   /**
-   * 
-   * @param year
-   * @param month
+   * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
+   * per telelavoro nell'anno/mese passati come parametro.
+   * @param year l'anno
+   * @param month il mese
    */
   public static void teleworkStampings(final Integer year, final Integer month) {
     if (year == null || month == null) {
@@ -61,6 +69,9 @@ public class TeleworkStampings extends Controller{
       Application.index();
     }
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    List<StampTypes> beginEnd = StampTypes.beginEndTelework();
+    List<StampTypes> meals = StampTypes.beginEndMealInTelework();
+    List<StampTypes> interruptions = StampTypes.beginEndInterruptionInTelework();
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
@@ -77,9 +88,9 @@ public class TeleworkStampings extends Controller{
       
       TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
           .personDay(day.personDay)
-          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, Optional.<StampTypes>absent(), false))
-          .meal(manager.getSpecificTeleworkStampings(day.personDay, Optional.of(StampTypes.PAUSA_PRANZO), false))
-          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, Optional.<StampTypes>absent(), true))
+          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
+          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
+          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
           .build();
       list.add(dto);
     }
@@ -87,6 +98,11 @@ public class TeleworkStampings extends Controller{
     render(list, year, month);
   }
   
+  /**
+   * Renderizza la modale per l'inserimento della timbratura in telelavoro.
+   * @param personId l'identificativo della persona
+   * @param date la data in cui inserire la timbratura
+   */
   public static void insertStamping(Long personId, LocalDate date) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -97,12 +113,33 @@ public class TeleworkStampings extends Controller{
     render(person, date, stamping);
   }
   
+  /**
+   * Cancella la timbratura in telelavoro.
+   * @param teleworkStampingId l'identificativo della timbratura in telelavoro
+   */
   public static void deleteTeleworkStamping(long teleworkStampingId) {
     
   }
   
-  public static void save() {
+  /**
+   * Persiste la timbratura in telelavoro.
+   * @param personId l'identificativo della persona
+   * @param date la data 
+   * @param stamping la timbratura da salvare
+   * @param time l'orario della timbratura
+   */
+  public static void save(Long personId, @Required LocalDate date, @Required TeleworkStamping stamping,
+      @Required @CheckWith(StringIsTime.class) String time) {
+    Preconditions.checkState(!date.isAfter(LocalDate.now()));
+
+    final Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
     
+    PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+    Optional<Errors> check = manager.checkTeleworkStamping(stamping, pd);
+    if (check.isPresent()) {
+      
+    }
   }
   
   public static void editTeleworkStamping(long teleworkStampingId) {
