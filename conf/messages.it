@@ -935,6 +935,12 @@ StampTypes.GUARDIA_MEDICA= Guardia Medica
 StampTypes.PAUSA_PRANZO= Pausa Pranzo
 StampTypes.LAVORO_FUORI_SEDE= Lavoro fuori sede
 StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
+StampTypes.INIZIO_TELELAVORO =Inizio telelavoro
+StampTypes.FINE_TELELAVORO =Fine telelavoro
+StampTypes.INIZIO_PRANZO_TELELAVORO =Inizio pranzo in telelavoro
+StampTypes.FINE_PRANZO_TELELAVORO =Fine pranzo in telelavoro
+StampTypes.INIZIO_INTERRUZIONE =Inizio interruzione in telelavoro
+StampTypes.FINE_INTERRUZIONE =Fine interruzione in telelavoro
 
 ShiftSlot.MORNING = Mattina
 ShiftSlot.AFTERNOON = Pomeriggio

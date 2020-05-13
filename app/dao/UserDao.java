@@ -210,6 +210,9 @@ public class UserDao extends DaoBase {
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
     }
+    if (user.person.checkConf(EpasParam.TELEWORK_STAMPINGS, "true")) {
+      stampTypes.addAll(StampTypes.onlyActiveInTelework());
+    }
 
     return stampTypes;
   }
