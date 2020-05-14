@@ -28,6 +28,7 @@ import models.PersonShiftShiftType;
 import models.PersonShift;
 import models.ShiftTypeMonth;
 import models.Stamping;
+import models.TeleworkStamping;
 import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
@@ -562,17 +563,17 @@ then
  $c.grant();
 end
 
-rule EmployeeCanManageTeleworkStampings
+rule EmployeeCanAccessTeleworkStampings
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
   PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
-  $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings", 
-  	"TeleworkStampings.insertStamping"),
-  	granted == false, target == null)
+  $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
+  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping"), granted == false, target == null)
 then
- $c.grant();
+  $c.grant();
 end
+
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when

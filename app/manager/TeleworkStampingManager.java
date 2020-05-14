@@ -122,42 +122,20 @@ public class TeleworkStampingManager {
    * @return
    */
   public Optional<Errors> checkTeleworkStamping(TeleworkStamping stamping, PersonDay pd) {
-    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
-    List<TeleworkStamping> beginEnd = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
-    List<TeleworkStamping> interruptions = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+    
+    Optional<Errors> error = Optional.absent();
     if (stamping.stampType.equals(StampTypes.INIZIO_TELELAVORO)) {
-      if (beginEnd.isEmpty()) {
-        return Optional.absent();
-      }
-      java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-          .filter(tws -> tws.stampType.equals(StampTypes.INIZIO_TELELAVORO)).findFirst();
-      if (stamp.isPresent()) {
-        Errors error = new Errors();
-        error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
-        error.personDay = pd;
-        error.advice = "Inizio telelavoro già presente";
-        return Optional.of(error);
-      }
-      for (TeleworkStamping tws : pd.teleworkStampings) {
-        if (tws.date.isBefore(stamping.date)) {
-          Errors error = new Errors();
-          error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
-          error.personDay = pd;
-          error.advice = "Inizio telelavoro già presente";
-          return Optional.of(error);
-        }
-      }
+      error = checkBeginTelework(pd, stamping);
     }
     if (stamping.stampType.equals(StampTypes.FINE_TELELAVORO)) {
-
+      error = checkEndInTelework(pd, stamping);
     }
     if (stamping.stampType.equals(StampTypes.INIZIO_PRANZO_TELELAVORO)) {
-
+      error = checkBeginMealInTelework(pd, stamping);
     }
+    
     if (stamping.stampType.equals(StampTypes.FINE_PRANZO_TELELAVORO)) {
-
+      error = checkEndMealInTelework(pd, stamping);
     }
     if (stamping.stampType.equals(StampTypes.INIZIO_INTERRUZIONE)) {
 
@@ -165,16 +143,23 @@ public class TeleworkStampingManager {
     if (stamping.stampType.equals(StampTypes.FINE_INTERRUZIONE)) {
 
     }
-    return Optional.<Errors>absent();
+    return error;
   }
   
-//  private Range<LocalDateTime> getStampingRange(List<TeleworkStamping> list, LocalDate date) {
-//    
-//    if (list.isEmpty()) {      
-//      return Range.closed(setBeginOfTheDay(date), setEndOfTheDay(date));
-//    }
-//    
-//  }
+  private Range<LocalDateTime> getStampingRange(List<TeleworkStamping> list, LocalDate date) {
+    
+    if (list.isEmpty()) {      
+      return Range.closed(setBeginOfTheDay(date), setEndOfTheDay(date));
+    }
+    if (list.size() == 2) {
+      return Range.closed(list.get(0).date, list.get(1).date);
+    }
+    if (list.get(0).stampType.isBeginInTelework()) {
+      return Range.closed(list.get(0).date, setEndOfTheDay(date));
+    } else {
+      return Range.closed(setBeginOfTheDay(date), list.get(0).date);
+    }
+  }
   
   private LocalDateTime setBeginOfTheDay(LocalDate date) {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
@@ -183,5 +168,161 @@ public class TeleworkStampingManager {
   private LocalDateTime setEndOfTheDay(LocalDate date) {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0)
         .hourOfDay().withMaximumValue().minuteOfHour().withMaximumValue();
+  }
+  
+  /**
+   * 
+   * @param pd
+   * @param stamping
+   * @return
+   */
+  private Optional<Errors> checkBeginTelework(PersonDay pd, TeleworkStamping stamping) {
+    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> beginEnd = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+    List<TeleworkStamping> interruptions = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+    if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
+      return Optional.absent();
+    }
+    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
+        .filter(tws -> tws.stampType.equals(StampTypes.INIZIO_TELELAVORO)).findFirst();
+    if (stamp.isPresent()) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
+      error.personDay = pd;
+      error.advice = "Inizio telelavoro già presente";
+      return Optional.of(error);
+    }
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    if (!beginEndRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
+      error.personDay = pd;
+      error.advice = "Inizio telelavoro successivo alla data di fine telelavoro";
+      return Optional.of(error);
+    }
+    return Optional.absent();
+  }
+  
+  /**
+   * 
+   * @param pd
+   * @param stamping
+   * @return
+   */
+  private Optional<Errors> checkEndInTelework(PersonDay pd, TeleworkStamping stamping) {
+    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> beginEnd = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+    List<TeleworkStamping> interruptions = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+    if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
+      return Optional.absent();
+    }
+    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
+        .filter(tws -> tws.stampType.equals(StampTypes.FINE_TELELAVORO)).findFirst();
+    if (stamp.isPresent()) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.END_STAMPING_PRESENT;
+      error.personDay = pd;
+      error.advice = "Fine telelavoro già presente";
+      return Optional.of(error);
+    }
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    if (!beginEndRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.END_STAMPING_BEFORE_BEGIN;
+      error.personDay = pd;
+      error.advice = "Fine telelavoro precedente alla data di inizio telelavoro";
+      return Optional.of(error);
+    }
+    return Optional.absent();
+  }
+  
+  /**
+   * 
+   * @param pd
+   * @param stamping
+   * @return
+   */
+  private Optional<Errors> checkBeginMealInTelework(PersonDay pd, TeleworkStamping stamping) {
+    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> beginEnd = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+    List<TeleworkStamping> interruptions = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+    if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
+      return Optional.absent();
+    }
+    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
+        .filter(tws -> tws.stampType.equals(StampTypes.INIZIO_PRANZO_TELELAVORO)).findFirst();
+    if (stamp.isPresent()) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;
+      error.personDay = pd;
+      error.advice = "Inizio pranzo in telelavoro già presente";
+      return Optional.of(error);
+    }
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
+    if (!beginEndRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
+      error.personDay = pd;
+      error.advice = "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
+      return Optional.of(error);
+    }
+    if (!mealRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.EXISTING_END_STAMPING_BEFORE_BEGIN_MEAL;
+      error.personDay = pd;
+      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo orario di fine pranzo in telelavoro";
+      return Optional.of(error);
+    }
+    return Optional.absent();
+  }
+  
+  /**
+   * 
+   * @param pd
+   * @param stamping
+   * @return
+   */
+  private Optional<Errors> checkEndMealInTelework(PersonDay pd, TeleworkStamping stamping) {
+    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> beginEnd = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+    List<TeleworkStamping> interruptions = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+    if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
+      return Optional.absent();
+    }
+    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
+        .filter(tws -> tws.stampType.equals(StampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
+    if (stamp.isPresent()) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;
+      error.personDay = pd;
+      error.advice = "Fine pranzo in telelavoro già presente";
+      return Optional.of(error);
+    }
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
+    if (!beginEndRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
+      error.personDay = pd;
+      error.advice = "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
+      return Optional.of(error);
+    }
+    if (!mealRange.contains(stamping.date)) {
+      Errors error = new Errors();
+      error.error = TeleworkStampingError.EXISTING_BEGIN_STAMPING_AFTER_END_MEAL;
+      error.personDay = pd;
+      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo orario di fine pranzo in telelavoro";
+      return Optional.of(error);
+    }
+    return Optional.absent();
   }
 }

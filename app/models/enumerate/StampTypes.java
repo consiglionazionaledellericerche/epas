@@ -194,5 +194,13 @@ public enum StampTypes {
   public boolean isBeginEndInterruptionInTelework() {
     return this == INIZIO_INTERRUZIONE || this == FINE_INTERRUZIONE;
   }
+  
+  public boolean isEndInTelework() {
+    return this == FINE_PRANZO_TELELAVORO || this == FINE_TELELAVORO;
+  }
+  
+  public boolean isBeginInTelework() {
+    return this == INIZIO_PRANZO_TELELAVORO || this == INIZIO_TELELAVORO;
+  }
 
 }

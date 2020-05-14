@@ -9,9 +9,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import it.cnr.iit.epas.NullStringBinder;
 import models.Stamping.WayType;
 import models.base.BaseModel;
@@ -42,5 +44,35 @@ public class TeleworkStamping extends BaseModel {
   @As(binder = NullStringBinder.class)
   public String note;
   
+  /**
+   * Fondamentale per far funzionare alcune drools.
+   *
+   * @return Restituisce il proprietario della timbratura.
+   */
+  public Person getOwner() {
+    return personDay.person;
+  }
+  
+  /**
+   * Utile per effettuare i controlli temporali sulle drools.
+   *
+   * @return il mese relativo alla data della timbratura.
+   */
+  public YearMonth getYearMonth() {
+    return new YearMonth(date.getYear(), date.getMonthOfYear());
+  }
+  
+  /**
+   * Orario formattato come HH:mm.
+   * @return orario della timbratura formattato come HH:mm.
+   */
+  @Transient
+  public String formattedHour() {
+    if (this.date != null) {
+      return date.toString("HH:mm");
+    } else {
+      return "";
+    }
+  }
   
 }
