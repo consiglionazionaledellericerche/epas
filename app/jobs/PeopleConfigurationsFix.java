@@ -46,15 +46,15 @@ public class PeopleConfigurationsFix extends Job<Void> {
      *  Aggiungo pezzo in cui per tutti coloro che hanno il parametro "telelavoro" a "sì", viene messo a 
      *  "sì" anche il nuovo parametro di "inserimento orario in telelavoro"
      */
-    List<PersonConfiguration> teleworkList = configurationManager
-        .configurationWithTypeAndValue(EpasParam.TELEWORK, "true");
-    for (PersonConfiguration pc : teleworkList) {
-      if (configurationManager.configValue(pc.person, EpasParam.TELEWORK_STAMPINGS).equals(Boolean.FALSE)) {
-        log.debug("Modifico il valore del parametro {} per {}", EpasParam.TELEWORK_STAMPINGS, pc.person.fullName());
-        configurationManager.updateBoolean(EpasParam.TELEWORK_STAMPINGS, pc.person, 
-            true, Optional.<LocalDate>absent(), Optional.absent(), true);
-      }      
-    }
+//    List<PersonConfiguration> teleworkList = configurationManager
+//        .configurationWithTypeAndValue(EpasParam.TELEWORK, "true");
+//    for (PersonConfiguration pc : teleworkList) {
+//      if (configurationManager.configValue(pc.person, EpasParam.TELEWORK_STAMPINGS).equals(Boolean.FALSE)) {
+//        log.debug("Modifico il valore del parametro {} per {}", EpasParam.TELEWORK_STAMPINGS, pc.person.fullName());
+//        configurationManager.updateBoolean(EpasParam.TELEWORK_STAMPINGS, pc.person, 
+//            true, Optional.<LocalDate>absent(), Optional.absent(), true);
+//      }      
+//    }
   }
 }
 
