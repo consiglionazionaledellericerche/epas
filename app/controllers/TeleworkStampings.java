@@ -59,7 +59,7 @@ public class TeleworkStampings extends Controller{
   static StampingManager stampingManager;
   @Inject
   static TeleworkStampingDao teleworkStampingDao;
-  
+
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
    * per telelavoro nell'anno/mese passati come parametro.
@@ -90,9 +90,8 @@ public class TeleworkStampings extends Controller{
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    for (PersonStampingDayRecap day : psDto.daysRecap) {
-      
-      
+    for (PersonStampingDayRecap day : psDto.daysRecap) {      
+
       TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
           .personDay(day.personDay)
           .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
@@ -101,10 +100,48 @@ public class TeleworkStampings extends Controller{
           .build();
       list.add(dto);
     }
-    
+
     render(list, year, month);
   }
-  
+
+  public static void personTeleworkStampings(Long personId, Integer year, Integer month) {
+    if (year == null || month == null) {
+      Stampings.personStamping(personId, LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+    }
+    Person person = personDao.getPersonById(personId);
+    Preconditions.checkNotNull(person);
+
+    rules.checkIfPermitted(person.office);
+
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+
+    if (!wrPerson.isActiveInMonth(new YearMonth(year, month))) {
+
+      flash.error("Non esiste situazione mensile per il mese di %s",
+          person.fullName(), DateUtility.fromIntToStringMonth(month));
+
+      YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
+      personTeleworkStampings(personId, last.getYear(), last.getMonthOfYear());
+    }
+    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    List<StampTypes> beginEnd = StampTypes.beginEndTelework();
+    List<StampTypes> meals = StampTypes.beginEndMealInTelework();
+    List<StampTypes> interruptions = StampTypes.beginEndInterruptionInTelework();
+    PersonStampingRecap psDto = stampingsRecapFactory
+        .create(wrPerson.getValue(), year, month, true);
+    for (PersonStampingDayRecap day : psDto.daysRecap) {      
+
+      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
+          .personDay(day.personDay)
+          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
+          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
+          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
+          .build();
+      list.add(dto);      
+    }
+    render(year, month, list, person);
+  }
+
   /**
    * Renderizza la modale per l'inserimento della timbratura in telelavoro.
    * @param personId l'identificativo della persona
@@ -119,7 +156,7 @@ public class TeleworkStampings extends Controller{
     TeleworkStamping stamping = new TeleworkStamping();
     render(person, date, stamping);
   }
-  
+
   /**
    * Cancella la timbratura in telelavoro.
    * @param teleworkStampingId l'identificativo della timbratura in telelavoro
@@ -131,7 +168,7 @@ public class TeleworkStampings extends Controller{
         stamping.formattedHour(), stamping.stampType.getDescription());
     teleworkStampings(stamping.date.getYear(), stamping.date.getMonthOfYear());
   }
-  
+
   /**
    * Persiste la timbratura in telelavoro.
    * @param personId l'identificativo della persona
@@ -145,7 +182,7 @@ public class TeleworkStampings extends Controller{
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    
+
     PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
     stamping.date = stampingManager.deparseStampingDateTime(date, time);
     Optional<Errors> check = manager.checkTeleworkStamping(stamping, pd);
@@ -156,7 +193,7 @@ public class TeleworkStampings extends Controller{
         render("@insertStamping", stamping, person, date, time);
       }
     }
-    
+
     boolean newInsert = !stamping.isPersistent();
 
     // Se si tratta di un update ha già tutti i riferimenti al personday
@@ -170,10 +207,10 @@ public class TeleworkStampings extends Controller{
     flash.success("Orario inserito correttamente");
     teleworkStampings(date.getYear(), date.getMonthOfYear());
   }
-  
+
   public static void editTeleworkStamping(long teleworkStampingId) {
     TeleworkStamping stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
-    
+
   }
-  
+
 }

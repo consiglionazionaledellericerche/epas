@@ -39,6 +39,7 @@ import models.query.QContractWorkingTimeType;
 import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QPersonCompetenceCodes;
+import models.query.QPersonConfiguration;
 import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
@@ -632,7 +633,7 @@ public final class PersonDao extends DaoBase {
       Set<Office> offices,
       boolean onlyTechnician, Optional<LocalDate> start, Optional<LocalDate> end,
       boolean onlyOnCertificate, Optional<CompetenceCode> compCode,
-      /*Optional<Person> personInCharge,*/ boolean onlySynchronized) {
+      boolean onlySynchronized, boolean onlyPeopleInTelework) {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
@@ -644,8 +645,9 @@ public final class PersonDao extends DaoBase {
     if (start.isPresent()) {
       filterCompetenceCodeEnabled(condition, compCode, start.get());
     }
-    //filterPersonInCharge(condition, personInCharge);
+    
     filterOnlySynchronized(condition, onlySynchronized);
+    filterOnlyTelework(condition, onlyPeopleInTelework);
 
     return injectedQuery.where(condition);
 
@@ -775,6 +777,14 @@ public final class PersonDao extends DaoBase {
       condition.and(contract.onCertificate.isTrue());
     }
   }
+  
+  private void filterOnlyTelework(BooleanBuilder condition, boolean value) {
+    if (value) {
+      final QPersonConfiguration conf = QPersonConfiguration.personConfiguration;
+      condition.and(conf.epasParam.eq(EpasParam.TELEWORK_STAMPINGS)
+          .and(conf.fieldValue.eq("true")));
+    }
+  }
 
   /**
    * Filtra le persone che appartengono al gruppo di lavoro del personInCharge.
@@ -901,7 +911,7 @@ public final class PersonDao extends DaoBase {
    * un office in offices. Importante: utile perchè non sporca l'entity manager con oggetti
    * parziali.
    */
-  public List<PersonLite> liteList(Set<Office> offices, int year, int month) {
+  public List<PersonLite> liteList(Set<Office> offices, int year, int month, boolean onlyPeopleInTelework) {
 
     final QPerson person = QPerson.person;
 
@@ -911,14 +921,41 @@ public final class PersonDao extends DaoBase {
 
     JPQLQuery<?> lightQuery =
         getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
+        .leftJoin(person.personConfigurations, QPersonConfiguration.personConfiguration)
             .orderBy(person.surname.asc(), person.name.asc()).distinct();
 
     lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, beginMonth,
-        endMonth, true, Optional.absent(), /*Optional.<Person>absent(),*/ false);
+        endMonth, true, Optional.absent(), false, onlyPeopleInTelework);
 
     return lightQuery
         .select(Projections.bean(PersonLite.class, person.id, person.name, person.surname)).fetch();
   }
+  
+  /**
+   * Ritorna la lista delle persone che fanno telelavoro e che devono compilare il form
+   * per gli orari in telelavoro.
+   * @param offices la lista degli uffici
+   * @param year l'anno
+   * @param month il mese
+   * @return la lista delle persone in telelavoro da esporre nel menu a tendina.
+   */
+//  public List<PersonLite> liteTeleworkList (Set<Office> offices, int year, int month) {
+//    final QPerson person = QPerson.person;
+//    Optional<LocalDate> begin = Optional.fromNullable(new LocalDate(year, month, 1));
+//    Optional<LocalDate> end = Optional.fromNullable(begin.get().dayOfMonth().withMaximumValue());
+//    BooleanBuilder condition = new BooleanBuilder();
+//    
+//    filterOnlyTelework(condition, true);
+//    JPQLQuery<?> lightQuery =
+//        getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
+//            .orderBy(person.surname.asc(), person.name.asc()).distinct();
+//
+//    lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, begin,
+//        end, true, Optional.absent(), false);
+//    lightQuery = lightQuery.where(condition);
+//    return lightQuery
+//        .select(Projections.bean(PersonLite.class, person.id, person.name, person.surname)).fetch();
+//  }
 
   /**
    * Questo metodo ci è utile per popolare le select delle persone.
@@ -935,7 +972,7 @@ public final class PersonDao extends DaoBase {
             .orderBy(person.surname.asc(), person.name.asc()).distinct();
 
     lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, Optional.absent(),
-        Optional.absent(), true, Optional.absent(), /*Optional.absent(),*/ false);
+        Optional.absent(), true, Optional.absent(), false, false);
 
     return lightQuery
         .select(Projections.bean(PersonLite.class, person.id, person.name, person.surname))
