@@ -860,6 +860,7 @@ Stampings.stampingsByAdmin= Timbrature da amministratore
 Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 TeleworkStampings.teleworkStampings= Inserimento orario in telelavoro
+TeleworkStampings.personTeleworkStampings= Orari dipendenti in telelavoro
 
 Stats.general =Statistiche utilizzatori
 

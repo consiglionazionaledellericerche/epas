@@ -101,7 +101,7 @@ public class RequestInit extends Controller {
     } else if (currentUser.person != null) {
       personId = currentUser.person.id;
     } else {
-      val personList = personDao.liteList(offices, year, month);
+      val personList = personDao.liteList(offices, year, month, false);
       if (!personList.isEmpty()) {
         personId = personList.iterator().next().id;
         session.put("personSelected", personId);
@@ -173,6 +173,7 @@ public class RequestInit extends Controller {
         "Competences.exportCompetences",
         "Competences.getCompetenceGroupInYearMonth",
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
         "Stampings.dailyPresenceForPersonInCharge",
@@ -226,6 +227,10 @@ public class RequestInit extends Controller {
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
         "AbsenceGroups.certificationsAbsences");
+    
+    final Collection<String> personTeleworkSwitcher = ImmutableList.of(
+        "TeleworkStampings.personTeleworkStampings"
+        );
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
@@ -336,7 +341,7 @@ public class RequestInit extends Controller {
     }
 
     if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
-      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, false);
       renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
@@ -355,6 +360,12 @@ public class RequestInit extends Controller {
           redirect(Router.reverse(currentAction, args).url);
         }
       }
+    }
+    
+    if (personTeleworkSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, true);
+      renderArgs.put("navPersons", persons);
+      renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
 

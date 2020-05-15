@@ -47,6 +47,10 @@
       #{secure.li @Stampings.personStamping(currentData.personId, currentData.year, currentData.month) }
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{secure.li @TeleworkStampings.personTeleworkStampings(currentData.personId, currentData.year, currentData.month) }
+      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      #{/secure.li}
 
       #{secure.li @Absences.showGeneralMonthlyAbsences(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-user-times" aria-hidden="true"></i>

@@ -863,6 +863,7 @@ when
     "Stampings.missingStamping",
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
+    "TeleworkStampings.personTeleworkStampings",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -1246,6 +1247,7 @@ when
         "PrintTags.showTag",
 
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1328,6 +1330,8 @@ when
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
 		"Stampings.stampingsByAdmin",
+		
+		"TeleworkStampings.personTeleworkStampings",
 		
         "Vacations.list",
         "Vacations.vacationSummary",
