@@ -26,40 +26,6 @@ import models.enumerate.StampTypes;
 @Slf4j
 public class TeleworkStampingManager {
 
-  private final PersonDayDao personDayDao;
-  private final PersonDao personDao;
-  private final PersonDayManager personDayManager;
-  private final PersonStampingDayRecapFactory stampingDayRecapFactory;
-  private final ConsistencyManager consistencyManager;
-  private final StampingDao stampingDao;
-  private final NotificationManager notificationManager;
-  private final IWrapperFactory wrapperFactory;
-
-  /**
-   * Injection.
-   * @param personDayDao il dao per cercare i personday
-   * @param personDao il dao per cercare le persone
-   * @param personDayManager il manager per lavorare sui personday
-   * @param stampingDayRecapFactory il factory per lavorare sugli stampingDayRecap
-   * @param consistencyManager il costruttore dell'injector.
-   */
-  @Inject
-  public TeleworkStampingManager(PersonDayDao personDayDao,
-      PersonDao personDao,
-      PersonDayManager personDayManager,
-      PersonStampingDayRecapFactory stampingDayRecapFactory,
-      ConsistencyManager consistencyManager, StampingDao stampingDao,
-      NotificationManager notificationManager, IWrapperFactory wrapperFactory) {
-
-    this.personDayDao = personDayDao;
-    this.personDao = personDao;
-    this.personDayManager = personDayManager;
-    this.stampingDayRecapFactory = stampingDayRecapFactory;
-    this.consistencyManager = consistencyManager;
-    this.stampingDao = stampingDao;
-    this.notificationManager = notificationManager;
-    this.wrapperFactory = wrapperFactory;
-  }
 
   /**
    * Ritorna la lista di timbrature in telelavoro nel giorno pd con causale appartenente a quelle
@@ -82,44 +48,13 @@ public class TeleworkStampingManager {
     return list;
   }
 
-
   /**
-   * 
-   * @param pd
-   * @return
-   */
-  public boolean hasTeleworkStampingsWellFormed(PersonDay pd) {
-    if (pd.teleworkStampings.size() == 0 || pd.teleworkStampings.size() % 2 != 0) {
-      return false;
-    }
-    List<TeleworkStamping> meal = pd.teleworkStampings.stream()
-        .filter(st -> st.stampType.equals(StampTypes.PAUSA_PRANZO)).collect(Collectors.toList());
-    List<TeleworkStamping> beginEnd = pd.teleworkStampings.stream()
-        .filter(st -> st.stampType == null).collect(Collectors.toList());
-    List<TeleworkStamping> interruptions = pd.teleworkStampings.stream()
-        .filter(st -> st.stampType == null && !Strings.isNullOrEmpty(st.note))
-        .collect(Collectors.toList());
-    Range<LocalDateTime> beginEndRange = Range.closed(beginEnd.get(0).date, beginEnd.get(1).date);
-    Range<LocalDateTime> mealRange = Range.closed(meal.get(0).date, meal.get(1).date);
-    for (TeleworkStamping tws : meal) {
-      if (!beginEndRange.contains(tws.date)) {
-        return false;
-      }
-    }
-    for (TeleworkStamping tws : interruptions) {
-      if (!beginEndRange.contains(tws.date) || mealRange.contains(tws.date)) {
-        return false;
-      }
-    }  
-
-    return true;
-  }
-
-  /**
-   * 
-   * @param stamping
-   * @param pd
-   * @return
+   * Verifica se l'inserimento di una timbratura in un giorno può dare origine ad un errore di 
+   * malformazione della lista di timbrature.
+   * @param stamping la timbratura in telelavoro
+   * @param pd il personday del giorno
+   * @return l'opzionale contenente l'errore rilevato dal possibile inserimento della timbratura
+   *     in un giorno di telelavoro. 
    */
   public Optional<Errors> checkTeleworkStamping(TeleworkStamping stamping, PersonDay pd) {
     
@@ -138,10 +73,10 @@ public class TeleworkStampingManager {
       error = checkEndMealInTelework(pd, stamping);
     }
     if (stamping.stampType.equals(StampTypes.INIZIO_INTERRUZIONE)) {
-
+      //TODO: verificare come e se completare...
     }
     if (stamping.stampType.equals(StampTypes.FINE_INTERRUZIONE)) {
-
+    //TODO: verificare come e se completare...
     }
     return error;
   }
@@ -161,23 +96,36 @@ public class TeleworkStampingManager {
     }
   }
   
+  /**
+   * Il localDateTime dell'inizio della giornata.
+   * @param date la data di riferimento
+   * @return il localdatetime rappresentante l'inizio della giornata.
+   */
   private LocalDateTime setBeginOfTheDay(LocalDate date) {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
   }
   
+  /**
+   * Il localDateTime della fine della giornata.
+   * @param date la data di riferimento
+   * @return il localdatetime rappresentante la fine della giornata.
+   */
   private LocalDateTime setEndOfTheDay(LocalDate date) {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0)
         .hourOfDay().withMaximumValue().minuteOfHour().withMaximumValue();
   }
   
   /**
-   * 
-   * @param pd
-   * @param stamping
-   * @return
+   * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
+   * lavoro in telelavoro.
+   * @param pd il personday del giorno
+   * @param stamping la timbratura in telelavoro da inserire
+   * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
+   *     la timbratura nel giorno.
    */
   private Optional<Errors> checkBeginTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> meal = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
         getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
@@ -206,13 +154,16 @@ public class TeleworkStampingManager {
   }
   
   /**
-   * 
-   * @param pd
-   * @param stamping
-   * @return
+   * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
+   * lavoro in telelavoro.
+   * @param pd il personday del giorno
+   * @param stamping la timbratura in telelavoro da inserire
+   * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
+   *     la timbratura nel giorno.
    */
   private Optional<Errors> checkEndInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> meal = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
         getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
@@ -241,13 +192,16 @@ public class TeleworkStampingManager {
   }
   
   /**
-   * 
-   * @param pd
-   * @param stamping
-   * @return
+   * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
+   * pranzo in telelavoro.
+   * @param pd il personday del giorno
+   * @param stamping la timbratura in telelavoro da inserire
+   * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
+   *     la timbratura nel giorno.
    */
   private Optional<Errors> checkBeginMealInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> meal = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
         getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
@@ -270,27 +224,32 @@ public class TeleworkStampingManager {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
       error.personDay = pd;
-      error.advice = "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
+      error.advice = 
+          "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
       return Optional.of(error);
     }
     if (!mealRange.contains(stamping.date)) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.EXISTING_END_STAMPING_BEFORE_BEGIN_MEAL;
       error.personDay = pd;
-      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo orario di fine pranzo in telelavoro";
+      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo "
+          + "orario di fine pranzo in telelavoro";
       return Optional.of(error);
     }
     return Optional.absent();
   }
   
   /**
-   * 
-   * @param pd
-   * @param stamping
-   * @return
+   * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
+   * lavoro in telelavoro.
+   * @param pd il personday del giorno
+   * @param stamping la timbratura in telelavoro da inserire
+   * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
+   *     la timbratura nel giorno.
    */
   private Optional<Errors> checkEndMealInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+    List<TeleworkStamping> meal = 
+        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
         getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
@@ -313,14 +272,16 @@ public class TeleworkStampingManager {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
       error.personDay = pd;
-      error.advice = "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
+      error.advice = 
+          "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
       return Optional.of(error);
     }
     if (!mealRange.contains(stamping.date)) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.EXISTING_BEGIN_STAMPING_AFTER_END_MEAL;
       error.personDay = pd;
-      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo orario di fine pranzo in telelavoro";
+      error.advice = "Orario di inizio pausa pranzo in telelavoro successivo "
+          + "orario di fine pranzo in telelavoro";
       return Optional.of(error);
     }
     return Optional.absent();
