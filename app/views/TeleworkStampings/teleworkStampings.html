@@ -24,11 +24,13 @@
           #{/else}
           
           </li>
-          #{if (day.hasTeleworkStampingsWellFormed() && day.isTeleworkInDay()) || (!day.personDay.stampings.isEmpty() && !day.isTeleworkInDay())}
+          #{if (day.hasTeleworkStampingsWellFormed() && day.isTeleworkInDay()) 
+          || (!day.personDay.stampings.isEmpty() && !day.isTeleworkInDay())}
           <li class="list-group-item  list-group-item-bianco">
           #{/if}
           #{else}
-          <li class="list-group-item  list-group-item-warning">
+          <li class="list-group-item  list-group-item-warning" webui-popover-hover
+    			data-content="Giornata incompleta: verificare orari inseriti e/o codice telelavoro (103)">
           #{/else}
             #{include './_info.html' /}
           </li>
