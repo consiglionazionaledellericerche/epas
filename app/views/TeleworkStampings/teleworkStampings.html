@@ -12,21 +12,26 @@
      	 <div class="pull-right btn-group">            
       		
             <a class="btn btn-sm btn-default" href="@{TeleworkStampings.insertStamping(day.personDay.person.id, day.personDay.date.format())}" data-async-modal="#modalInsertStamping">
-              <i class="fa fa-plus"></i> Aggiungi orario</a>            
+            <i class="fa fa-plus"></i> Aggiungi orario</a>            
     		
           </div>
           <h4>
           #{if day.personDay.isHoliday}
-          <span class="label label-danger">${day.personDay.date.shortDayName()}</span></h4>
+          	<span class="label label-danger">${day.personDay.date.shortDayName()}</span></h4>
           #{/if}
           #{else}
-          <span class="label label-info">${day.personDay.date.shortDayName()}</span></h4>
+          	<span class="label label-info">${day.personDay.date.shortDayName()}</span></h4>
           #{/else}
           
           </li>
-        <li class="list-group-item  list-group-item-bianco">
-          #{include './_info.html' /}
-        </li>
+          #{if (day.hasTeleworkStampingsWellFormed() && day.isTeleworkInDay()) || (!day.personDay.stampings.isEmpty() && !day.isTeleworkInDay())}
+          <li class="list-group-item  list-group-item-bianco">
+          #{/if}
+          #{else}
+          <li class="list-group-item  list-group-item-warning">
+          #{/else}
+            #{include './_info.html' /}
+          </li>
       </ul>
 #{/list}
 
