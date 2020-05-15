@@ -23,6 +23,10 @@ CREATE TABLE telework_stampings_history(
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 
+INSERT INTO person_configurations (person_id, epas_param, field_value, begin_date, end_date, version) 
+SELECT person_id, 'TELEWORK_STAMPINGS', 'true', now(), null, 0 
+FROM person_configurations where epas_param = 'TELEWORK' and field_value = 'true';
+
 CREATE INDEX telework_stampings_history_id ON telework_stampings_history(id);
 CREATE INDEX telework_stampings_history_revision ON telework_stampings_history(_revision);
 
