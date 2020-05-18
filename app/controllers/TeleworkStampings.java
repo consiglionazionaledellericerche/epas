@@ -30,6 +30,7 @@ import models.Stamping;
 import models.TeleworkStamping;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -76,9 +77,9 @@ public class TeleworkStampings extends Controller{
       Application.index();
     }
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<StampTypes> beginEnd = StampTypes.beginEndTelework();
-    List<StampTypes> meals = StampTypes.beginEndMealInTelework();
-    List<StampTypes> interruptions = StampTypes.beginEndInterruptionInTelework();
+    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
+    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
+    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
@@ -124,9 +125,9 @@ public class TeleworkStampings extends Controller{
       personTeleworkStampings(personId, last.getYear(), last.getMonthOfYear());
     }
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<StampTypes> beginEnd = StampTypes.beginEndTelework();
-    List<StampTypes> meals = StampTypes.beginEndMealInTelework();
-    List<StampTypes> interruptions = StampTypes.beginEndInterruptionInTelework();
+    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
+    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
+    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrPerson.getValue(), year, month, true);
     for (PersonStampingDayRecap day : psDto.daysRecap) {      
@@ -161,8 +162,13 @@ public class TeleworkStampings extends Controller{
    * Cancella la timbratura in telelavoro.
    * @param teleworkStampingId l'identificativo della timbratura in telelavoro
    */
-  public static void deleteTeleworkStamping(long teleworkStampingId) {
+  public static void deleteTeleworkStamping(long teleworkStampingId, boolean confirmed) {
     TeleworkStamping stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
+    notFoundIfNull(stamping);
+    if (!confirmed) {
+      confirmed = true;
+      render(stamping, confirmed);
+    }
     stamping.delete();
     flash.success("Timbratura %s - %s eliminata correttamente", 
         stamping.formattedHour(), stamping.stampType.getDescription());

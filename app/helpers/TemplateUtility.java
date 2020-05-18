@@ -60,6 +60,7 @@ import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
@@ -529,6 +530,10 @@ public class TemplateUtility {
 
   public List<StampTypes> getStampTypes() {
     return UserDao.getAllowedStampTypes(Security.getUser().get());
+  }
+  
+  public List<TeleworkStampTypes> getTeleworkStampTypes() {
+    return UserDao.getAllowedTeleworkStampTypes(Security.getUser().get());
   }
 
   /**

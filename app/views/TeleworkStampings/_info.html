@@ -1,20 +1,23 @@
 <div class="list-group-item-text">
   <strong><i class="fa fa-user-circle" aria-hidden="true"></i> Inizio-fine lavoro: </strong>
   #{list items:day.beginEnd, as:'stamp'}  
-  	<a class="label label-primary" href="@{TeleworkStampings.deleteTeleworkStamping(stamp.id)}">${stamp.formattedHour()}</a>  
+  	<a class="label label-primary" href="@{TeleworkStampings.deleteTeleworkStamping(stamp.id)}" 
+  		data-async-modal="#modalDeleteStamping">${stamp.formattedHour()}</a>  
   #{/list}
   
   <br>
   <strong><i class="fa fa-cutlery" aria-hidden="true"></i> Pausa pranzo: </strong>
   #{list items:day.meal, as:'meal'}  
-  	<a class="label label-danger" href="@{TeleworkStampings.deleteTeleworkStamping(meal.id)}">${meal.formattedHour()}</a> 
+  	<a class="label label-danger" href="@{TeleworkStampings.deleteTeleworkStamping(meal.id)}" 
+  		data-async-modal="#modalDeleteStamping">${meal.formattedHour()}</a> 
   	
   #{/list}
   
   <br>
   <strong><i class="fa fa-hand-paper-o" aria-hidden="true"></i> Interruzioni: </strong>
   #{list items:day.interruptions, as:'inter'}  
-  	<a class="label label-info" href="@{TeleworkStampings.deleteTeleworkStamping(inter.id)}">${inter.formattedHour()}</a> 
+  	<a class="label label-info" href="@{TeleworkStampings.deleteTeleworkStamping(inter.id)}" 
+  		data-async-modal="#modalDeleteStamping">${inter.formattedHour()}</a> 
   	
   #{/list}
  

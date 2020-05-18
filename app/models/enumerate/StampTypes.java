@@ -41,13 +41,8 @@ public enum StampTypes {
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica",false, false),
-  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true),
-  INIZIO_TELELAVORO("it", "inizioTelelavoro", "Inizio telelavoro", false, true),
-  FINE_TELELAVORO("ft", "fineTelelavoro", "Fine telelavoro", false, true),
-  INIZIO_PRANZO_TELELAVORO("ipt", "inizioPranzoTelelavoro", "Inizio pranzo telelavoro", false, true),
-  FINE_PRANZO_TELELAVORO("fpt", "finePranzoTelelavoro", "Fine pranzo telelavoro", false, true),
-  INIZIO_INTERRUZIONE("ii", "inizioInterruzione", "Inizio interruzione", false, true),
-  FINE_INTERRUZIONE("fi", "fineInterruzione", "Fine interruzione", false, true);
+  PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
+  
 
   private String identifier;
   private String code;
@@ -110,41 +105,7 @@ public enum StampTypes {
     return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
   }
   
-  /**
-   * La lista delle stampTypes associatbili a timbrature in telelavoro.
-   * @return la lista di stampTypes associabili a timbrature in telelavoro.
-   */
-  public static List<StampTypes> onlyActiveInTelework() {
-    return onlyActive().stream().filter(StampTypes::ableForTeleworkStamping)
-        .collect(Collectors.toList());
-  }
   
-  /**
-   * 
-   * @return la lista di stampTypes di inizio e fine lavoro in telelavoro.
-   */
-  public static List<StampTypes> beginEndTelework() {
-    return onlyActive().stream().filter(StampTypes::isBeginEndTelework)
-        .collect(Collectors.toList());
-  }
-  
-  /**
-   * 
-   * @return la lista di stampTypes di inizio e fine pranzo in telelavoro.
-   */
-  public static List<StampTypes> beginEndMealInTelework() {
-    return onlyActive().stream().filter(StampTypes::isBeginEndMealInTelework)
-        .collect(Collectors.toList());
-  }
-  
-  /**
-   * 
-   * @return la lista di stampTypes di inizio e fine interruzione in telelavoro.
-   */
-  public static List<StampTypes> beginEndInterruptionInTelework() {
-    return onlyActive().stream().filter(StampTypes::isBeginEndInterruptionInTelework)
-        .collect(Collectors.toList());
-  }
   
   /**
    * Verifica se una causale è attiva a partire dal suo codice passato come parametro.
@@ -173,34 +134,5 @@ public enum StampTypes {
     return this != LAVORO_FUORI_SEDE;
   }
   
-  /**
-   * Controlla se la causale è abilitata per le timbrature in telelavoro.
-   * @return le causali associabili a timbrature in telelavoro
-   */
-  public boolean ableForTeleworkStamping() {
-    return this == FINE_INTERRUZIONE || this == FINE_PRANZO_TELELAVORO 
-        || this == FINE_TELELAVORO || this == INIZIO_INTERRUZIONE 
-        || this == INIZIO_PRANZO_TELELAVORO || this == INIZIO_TELELAVORO;
-  }
   
-  public boolean isBeginEndTelework() {
-    return this == INIZIO_TELELAVORO || this == FINE_TELELAVORO;
-  }
-  
-  public boolean isBeginEndMealInTelework() {
-    return this == INIZIO_PRANZO_TELELAVORO || this == FINE_PRANZO_TELELAVORO;
-  }
-  
-  public boolean isBeginEndInterruptionInTelework() {
-    return this == INIZIO_INTERRUZIONE || this == FINE_INTERRUZIONE;
-  }
-  
-  public boolean isEndInTelework() {
-    return this == FINE_PRANZO_TELELAVORO || this == FINE_TELELAVORO;
-  }
-  
-  public boolean isBeginInTelework() {
-    return this == INIZIO_PRANZO_TELELAVORO || this == INIZIO_TELELAVORO;
-  }
-
 }

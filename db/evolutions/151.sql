@@ -10,7 +10,7 @@ CREATE TABLE telework_stampings(
     version INT DEFAULT 0
 );
 
-CREATE INDEX telework_stampings_id ON telework_stampings(id);
+
 
 CREATE TABLE telework_stampings_history(
 	id BIGINT NOT NULL,
@@ -23,17 +23,20 @@ CREATE TABLE telework_stampings_history(
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 
+CREATE INDEX telework_stampings_id ON telework_stampings(id);
+CREATE INDEX telework_stampings_history_id ON telework_stampings_history(id);
+CREATE INDEX telework_stampings_person_day_id ON telework_stampings(person_day_id);
+CREATE INDEX telework_stampings_history_revision ON telework_stampings_history(_revision);
+
 INSERT INTO person_configurations (person_id, epas_param, field_value, begin_date, end_date, version) 
 SELECT person_id, 'TELEWORK_STAMPINGS', 'true', now(), null, 0 
 FROM person_configurations where epas_param = 'TELEWORK' and field_value = 'true';
 
-CREATE INDEX telework_stampings_history_id ON telework_stampings_history(id);
-CREATE INDEX telework_stampings_history_revision ON telework_stampings_history(_revision);
 
 # --- !Downs
 
 DROP INDEX telework_stampings_history_id;
-DROP INDEX telework_stampings_history_revision;
+DROP INDEX telework_stampings_person_day_id;
 DROP INDEX telework_stampings_id;
 
 DROP TABLE telework_stampings_history;
