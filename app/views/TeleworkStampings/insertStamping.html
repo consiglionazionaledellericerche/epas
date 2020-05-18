@@ -32,7 +32,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	
 	  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
 	
-	  #{set stampTypes: templateUtility.stampTypes /}
+	  #{set stampTypes: templateUtility.teleworkStampTypes /}
 	  
       #{f.selectEnum 'stamping.stampType', items:stampTypes /}
 

@@ -17,7 +17,7 @@ import org.joda.time.YearMonth;
 import it.cnr.iit.epas.NullStringBinder;
 import models.Stamping.WayType;
 import models.base.BaseModel;
-import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -35,7 +35,7 @@ public class TeleworkStamping extends BaseModel {
   
   @Column(name = "stamp_type")
   @Enumerated(EnumType.STRING)
-  public StampTypes stampType;
+  public TeleworkStampTypes stampType;
   
   @Required @NotNull
   @Column(nullable = false)

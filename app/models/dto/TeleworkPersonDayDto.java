@@ -11,7 +11,7 @@ import lombok.Data;
 import models.PersonDay;
 import models.TeleworkStamping;
 import models.absences.definitions.DefaultAbsenceType;
-import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 
 @Builder
 @Data
@@ -44,8 +44,8 @@ public class TeleworkPersonDayDto {
     if (this.personDay.teleworkStampings.size() == 0 || this.personDay.teleworkStampings.size() % 2 != 0) {
       return false;
     }
-    List<StampTypes> completeDayInTelework = StampTypes.beginEndTelework();
-    completeDayInTelework.addAll(StampTypes.beginEndMealInTelework());
+    List<TeleworkStampTypes> completeDayInTelework = TeleworkStampTypes.beginEndTelework();
+    completeDayInTelework.addAll(TeleworkStampTypes.beginEndMealInTelework());
     int count = completeDayInTelework.size();
     for (TeleworkStamping tws : this.personDay.teleworkStampings) {
       if (completeDayInTelework.contains(tws.stampType)) {

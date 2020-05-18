@@ -22,6 +22,7 @@ import manager.services.telework.errors.TeleworkStampingError;
 import models.PersonDay;
 import models.TeleworkStamping;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 
 @Slf4j
 public class TeleworkStampingManager {
@@ -36,10 +37,10 @@ public class TeleworkStampingManager {
    *     parametro.
    */
   public List<TeleworkStamping> getSpecificTeleworkStampings(PersonDay pd, 
-      List<StampTypes> stampTypes) {
+      List<TeleworkStampTypes> stampTypes) {
     List<TeleworkStamping> list = Lists.newArrayList();
     for (TeleworkStamping tws : pd.teleworkStampings) {
-      for (StampTypes st : stampTypes) {
+      for (TeleworkStampTypes st : stampTypes) {
         if (tws.stampType.equals(st)) {
           list.add(tws);
         }
@@ -59,23 +60,23 @@ public class TeleworkStampingManager {
   public Optional<Errors> checkTeleworkStamping(TeleworkStamping stamping, PersonDay pd) {
     
     Optional<Errors> error = Optional.absent();
-    if (stamping.stampType.equals(StampTypes.INIZIO_TELELAVORO)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
       error = checkBeginTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(StampTypes.FINE_TELELAVORO)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
       error = checkEndInTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(StampTypes.INIZIO_PRANZO_TELELAVORO)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
       error = checkBeginMealInTelework(pd, stamping);
     }
     
-    if (stamping.stampType.equals(StampTypes.FINE_PRANZO_TELELAVORO)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
       error = checkEndMealInTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(StampTypes.INIZIO_INTERRUZIONE)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE)) {
       //TODO: verificare come e se completare...
     }
-    if (stamping.stampType.equals(StampTypes.FINE_INTERRUZIONE)) {
+    if (stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
     //TODO: verificare come e se completare...
     }
     return error;
@@ -125,16 +126,16 @@ public class TeleworkStampingManager {
    */
   private Optional<Errors> checkBeginTelework(PersonDay pd, TeleworkStamping stamping) {
     List<TeleworkStamping> meal = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
     java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(StampTypes.INIZIO_TELELAVORO)).findFirst();
+        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
@@ -163,16 +164,16 @@ public class TeleworkStampingManager {
    */
   private Optional<Errors> checkEndInTelework(PersonDay pd, TeleworkStamping stamping) {
     List<TeleworkStamping> meal = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
     java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(StampTypes.FINE_TELELAVORO)).findFirst();
+        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.END_STAMPING_PRESENT;
@@ -201,16 +202,16 @@ public class TeleworkStampingManager {
    */
   private Optional<Errors> checkBeginMealInTelework(PersonDay pd, TeleworkStamping stamping) {
     List<TeleworkStamping> meal = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
     java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(StampTypes.INIZIO_PRANZO_TELELAVORO)).findFirst();
+        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;
@@ -249,16 +250,16 @@ public class TeleworkStampingManager {
    */
   private Optional<Errors> checkEndMealInTelework(PersonDay pd, TeleworkStamping stamping) {
     List<TeleworkStamping> meal = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndMealInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
     List<TeleworkStamping> beginEnd = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
     List<TeleworkStamping> interruptions = 
-        getSpecificTeleworkStampings(pd, StampTypes.beginEndInterruptionInTelework());
+        getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
     java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(StampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
+        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;

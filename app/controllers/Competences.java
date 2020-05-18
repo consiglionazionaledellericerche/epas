@@ -1259,7 +1259,7 @@ public class Competences extends Controller {
 
     if (!shiftType.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     } else {
       rules.checkIfPermitted(shiftType.get().shiftCategories.office);
       ShiftType type = shiftType.get();
@@ -1344,7 +1344,7 @@ public class Competences extends Controller {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
     if (!type.isPresent()) {
       flash.error("Attività non presente. Verificare l'identificativo");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
     rules.checkIfPermitted(type.get().shiftCategories.office);
@@ -1490,7 +1490,7 @@ public class Competences extends Controller {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     if (type == null) {
       flash.error("Attività non presente. Verificare l'identificativo");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
     rules.checkIfPermitted(type.office);
