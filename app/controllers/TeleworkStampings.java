@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
@@ -28,6 +29,7 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.TeleworkStamping;
+import models.dto.ReperibilityEvent;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
@@ -219,4 +221,14 @@ public class TeleworkStampings extends Controller{
 
   }
 
+  public static void show(LocalDate date) {
+    final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
+    //rules.checkIfPermitted(reperibilitySelected);
+
+    render(currentDate);
+  }
+  
+  public static void events(LocalDate start, LocalDate end) {
+    List<ReperibilityEvent> events = new ArrayList<>();
+  }
 }
