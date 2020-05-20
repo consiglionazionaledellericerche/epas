@@ -11,6 +11,7 @@ import lombok.Data;
 public class PersonDayDto {
 
   private LocalDate data;
+  private String number;
   private int tempoLavoro;
   private int differenza;
   private int progressivo;

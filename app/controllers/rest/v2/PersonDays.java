@@ -169,6 +169,7 @@ public class PersonDays extends Controller {
     PersonDayDto pdDto = 
         PersonDayDto.builder()
           .data(pd.date)
+          .number(pd.person.number)
           .buonoPasto(pd.isTicketAvailable)
           .differenza(pd.difference)
           .progressivo(pd.progressive)
