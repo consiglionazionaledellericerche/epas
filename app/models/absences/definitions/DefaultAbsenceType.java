@@ -25,6 +25,12 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, true),
   
+  A_COVID19BP("COVID19",
+      "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
+      + "con maturazione buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), null, null, true),
+  
   
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
