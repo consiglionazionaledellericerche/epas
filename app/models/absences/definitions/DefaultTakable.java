@@ -98,8 +98,8 @@ public enum DefaultTakable {
       9000, TakeAmountAdjustment.workingTimePercent),
   
   T_COVID19(AmountType.units, 
-    ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
-    ImmutableSet.of(DefaultAbsenceType.A_COVID19), 
+    ImmutableSet.of(DefaultAbsenceType.A_COVID19, DefaultAbsenceType.A_COVID19BP), 
+    ImmutableSet.of(DefaultAbsenceType.A_COVID19, DefaultAbsenceType.A_COVID19BP), 
     -1, null),
 
   T_0(AmountType.minutes, 
@@ -429,7 +429,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_419, DefaultAbsenceType.A_62,
-          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19),
+          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19, 
+          DefaultAbsenceType.A_COVID19BP),
       ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -471,7 +472,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_419, DefaultAbsenceType.A_62,
-          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19),
+          DefaultAbsenceType.A_62A,DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19,
+          DefaultAbsenceType.A_COVID19BP),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 
