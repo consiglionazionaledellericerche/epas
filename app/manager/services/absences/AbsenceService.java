@@ -427,6 +427,7 @@ public class AbsenceService {
         orderedChildren, fetchedContracts, initializationGroups);
 
     // scan dei gruppi
+    log.info("Chiamata la scan delle assenze per {} a partire dalla data {}", person, from);
     absenceScan.scan();
 
     log.debug("");
