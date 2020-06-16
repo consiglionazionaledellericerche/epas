@@ -139,7 +139,7 @@ public class ServiceFactories {
 
     } else {
       buildPeriodChainPhase2(periodChain, absenceToInsert, 
-          allPersistedAbsences, groupPersistedAbsences);
+          allPersistedAbsences, groupPersistedAbsences, fetchedContracts);
     }
 
     completePeriodChain(periodChain);
@@ -223,7 +223,7 @@ public class ServiceFactories {
    */
   public void buildPeriodChainPhase2(PeriodChain periodChain, 
       Absence absenceToInsert, List<Absence> allPersistedAbsences, 
-      List<Absence> groupPersistedAbsences) {
+      List<Absence> groupPersistedAbsences, List<Contract> fetchedContracts) {
     
     periodChain.allInvolvedAbsences = absenceEngineUtility
         .mapAbsences(allPersistedAbsences, null);
@@ -239,7 +239,7 @@ public class ServiceFactories {
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       for (Absence absence : absencePeriod
           .filterAbsencesInPeriod(periodChain.involvedAbsencesInGroup)) {
-        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
+        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence, fetchedContracts);
       }
     }
 
@@ -247,7 +247,7 @@ public class ServiceFactories {
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       
       boolean successInsertInPeriod = 
-          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
+          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert, fetchedContracts);
 
       // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
       if (!absencePeriod.containsCriticalErrors() && !absencePeriod.isCompromisedComplation()) {
@@ -394,7 +394,7 @@ public class ServiceFactories {
 
   private void dispatchAbsenceInPeriod(PeriodChain periodChain, 
       AbsencePeriod absencePeriod, 
-      Absence absence) {
+      Absence absence, List<Contract> fetchedContracts) {
     
     //se il period ha problemi critici esco
     if (absencePeriod.containsCriticalErrors()) {
@@ -437,6 +437,9 @@ public class ServiceFactories {
 
     if (isTaken) {
       
+      TakableAbsenceBehaviour takableBehaviour = 
+          absencePeriod.groupAbsenceType.getTakableAbsenceBehaviour();
+      
       int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person,
           absence, absencePeriod.takeAmountType);
       
@@ -447,7 +450,9 @@ public class ServiceFactories {
         return;
       }
       
-      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount);
+      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount, 
+          fetchedContracts, absencePeriod.periodInterval(), 
+          takableBehaviour.takableAmountAdjustment);
       
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
       if (!takenAbsence.canAddTakenAbsence()) {
@@ -490,7 +495,7 @@ public class ServiceFactories {
   }
   
   private boolean insertAbsenceInPeriod(PeriodChain periodChain, AbsencePeriod absencePeriod, 
-      Absence absenceToInsert) {
+      Absence absenceToInsert, List<Contract> fetchedContracts) {
     if (absenceToInsert == null) {
       return false;
     }
@@ -513,7 +518,7 @@ public class ServiceFactories {
     
     // i vincoli dentro il periodo
     absencePeriod.attemptedInsertAbsence = absenceToInsert;
-    dispatchAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
+    dispatchAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert, fetchedContracts);
     
     // sono riuscito a inserirla
     if (!absencePeriod.getDayInPeriod(absenceToInsert.getAbsenceDate())
