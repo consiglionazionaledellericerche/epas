@@ -7,6 +7,8 @@ import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import jdk.internal.jline.internal.Log;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +34,7 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import org.joda.time.LocalDate;
 
+@Slf4j
 public class ServiceFactories {
 
   private AbsenceEngineUtility absenceEngineUtility;
@@ -599,12 +602,16 @@ public class ServiceFactories {
     if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     } else {
+      log.info("Controllo la reperibilità per {} nel giorno {}", person, absence.getAbsenceDate());
       //check sulla reperibilità
       if (personReperibilityDayDao
           .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+        log.info("Aggiungere warning di reperibilità per {} in data {}", person, absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
       }
+      log.info("Controllo i turni per {} nel giorno {}", person, absence.getAbsenceDate());
       if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+        log.info("Aggiungere warning di turno per {} in data {}", person, absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
       }
     }
