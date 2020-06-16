@@ -5,6 +5,8 @@ import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
@@ -39,6 +41,10 @@ public class Groups extends Controller {
   private static PersonDao personDao;
   @Inject
   private static GeneralSettingDao settingDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -95,14 +101,14 @@ public class Groups extends Controller {
     rules.checkIfPermitted(office);
     User user = Security.getUser().get();
     List<Group> groups = null;
-    if (user.isSystemUser()) {
-      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
-    }
-    if (user.hasRoles(Role.PERSONNEL_ADMIN)) {
-      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
-    }
-    if (user.hasRoles(Role.GROUP_MANAGER)) {
+    if (uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.GROUP_MANAGER), office)
+        .isPresent()) {
       groups = groupDao.groupsByOffice(office, Optional.fromNullable(user.person));
+    }
+    if (user.isSystemUser() 
+        || uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN), office)
+        .isPresent()) {
+      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
     }
      
     render(groups, office);
