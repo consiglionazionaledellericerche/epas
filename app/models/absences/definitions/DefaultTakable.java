@@ -511,11 +511,13 @@ public enum DefaultTakable {
 
   T_ASPETTATIVA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_54, DefaultAbsenceType.A_54C, DefaultAbsenceType.A_54D,
+          DefaultAbsenceType.A_54DD,
           DefaultAbsenceType.A_54E, DefaultAbsenceType.A_54F, DefaultAbsenceType.A_54P,
           DefaultAbsenceType.A_54A17, DefaultAbsenceType.A_54CNR, DefaultAbsenceType.A_54ORGPP,
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_54R, DefaultAbsenceType.A_54VV,
           DefaultAbsenceType.A_54VVH7),
       ImmutableSet.of(DefaultAbsenceType.A_54, DefaultAbsenceType.A_54C, DefaultAbsenceType.A_54D,
+          DefaultAbsenceType.A_54DD,
           DefaultAbsenceType.A_54E, DefaultAbsenceType.A_54F, DefaultAbsenceType.A_54P,
           DefaultAbsenceType.A_54A17, DefaultAbsenceType.A_54CNR, DefaultAbsenceType.A_54ORGPP,
           DefaultAbsenceType.A_54L230, DefaultAbsenceType.A_54R, DefaultAbsenceType.A_54VV,
