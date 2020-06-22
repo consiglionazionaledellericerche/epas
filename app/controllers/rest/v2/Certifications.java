@@ -21,8 +21,10 @@ import cnr.sync.dto.v2.CertificationTrainingHoursDto;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.Resecure.NoCheck;
+import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,10 @@ import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
 import models.Office;
 import models.Person;
+import models.WorkingTimeTypeDay;
+import models.absences.Absence;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -51,6 +57,10 @@ public class Certifications extends Controller{
   static OfficeDao officeDao;
   @Inject
   static GsonBuilder gsonBuilder;
+  @Inject
+  static AbsenceDao absenceDao;
+  @Inject
+  static WorkingTimeTypeDao workingTimeTypeDao;
   
   /**
    * Metodo rest che permette di ritornare una lista contenente le informazioni mensili
@@ -126,27 +136,20 @@ public class Certifications extends Controller{
    * @return il dto contenente le informazioni da inviare al chiamante del servizio rest.
    */   
   private static CertificationDto generateCertDto(Map<String, Certification> map, 
-      int year, int month, Person person) {
-        
-    List<CertificationAbsenceDto> absences = Lists.newArrayList();
+      int year, int month, Person person) {        
+    
     List<CertificationCompetencesDto> competences = Lists.newArrayList();
     List<CertificationMealTicketDto> mealTickets = Lists.newArrayList();
     List<CertificationTrainingHoursDto> trainingHours = Lists.newArrayList();
+
     LocalDate from;
     LocalDate to;
     String[] places;
+    List<CertificationAbsenceDto> absences = searchAbsences(person, year, month);
+
     for (Map.Entry<String, Certification> entry : map.entrySet()) {
       switch (entry.getValue().certificationType) {
         case ABSENCE:
-          places = entry.getValue().content.split(";");
-          from = new LocalDate(year, month, Integer.parseInt(places[1]));
-          to = new LocalDate(year, month, Integer.parseInt(places[2]));
-          CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
-              .code(places[0])
-              .from(from)
-              .to(to)
-              .build();
-          absences.add(absence);
           break;
         case COMPETENCE:
           places = entry.getValue().content.split(";");
@@ -190,5 +193,86 @@ public class Certifications extends Controller{
     return obj;
   }
   
+  /**
+   * Metodo privato per la ricerca delle assenze.
+   * @param person la persona di cui cercare le assenze
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @return la lista di dto contenente la informazioni sulle assenze nell'anno/mese fatte 
+   *    dalla persona.
+   */
+  private static List<CertificationAbsenceDto> searchAbsences(Person person, int year, int month) {
+    List<CertificationAbsenceDto> absences = Lists.newArrayList();
+    LocalDate begin = new LocalDate(year, month, 1);
+    LocalDate end = begin.dayOfMonth().withMaximumValue();
+
+    List<Absence> absencesPlus = absenceDao
+        .getAbsenceWithNoHInMonth(person, begin, end);
+    LocalDate previousDate = null;
+    String previousAbsenceCode = null;
+    Integer dayBegin = null;
+    Integer dayEnd = null;
+    Integer timeToJustify = null;
+    String justifiedType = "";
+    for (Absence abs : absencesPlus) {
+      
+      String absenceCodeToSend = abs.absenceType.code.toUpperCase();      
+      if (previousDate != null && previousDate.plusDays(1).equals(abs.personDay.date)
+          && previousAbsenceCode.equals(absenceCodeToSend)) {
+        dayEnd = abs.personDay.date.getDayOfMonth();
+        previousDate = abs.personDay.date;        
+        continue;
+      }
+      // 2) Fine Assenza più giorni
+      if (previousDate != null) {
+        
+        CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
+            .code(previousAbsenceCode)
+            .justifiedTime(timeToJustify)
+            .justifiedType(justifiedType)
+            .from(new LocalDate(year, month, dayBegin))
+            .to(new LocalDate(year, month, dayEnd))
+            .build();
+        absences.add(absence);        
+        previousDate = null;
+      }
+
+      // 3) Nuova Assenza  
+      dayBegin = abs.personDay.date.getDayOfMonth();
+      dayEnd = abs.personDay.date.getDayOfMonth();
+      previousDate = abs.personDay.date;
+      previousAbsenceCode = absenceCodeToSend;
+      timeToJustify = abs.justifiedMinutes;
+      if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
+          || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
+        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
+            .getWorkingTimeTypeDay(abs.personDay.date, person);
+        timeToJustify = workingTimeTypeDay.get().workingTime;
+      }
+      if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
+            .getWorkingTimeTypeDay(abs.personDay.date, person);
+        timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+      }
+      if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {
+        timeToJustify = abs.absenceType.justifiedTime;
+      }
+      justifiedType = abs.getJustifiedType().getLabel();
+      
+    }
+    if (!absencesPlus.isEmpty()) {
+      CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
+          .code(previousAbsenceCode)
+          .justifiedTime(timeToJustify)
+          .justifiedType(justifiedType)
+          .from(new LocalDate(year, month, dayBegin))
+          .to(new LocalDate(year, month, dayEnd))
+          .build();
+      absences.add(absence);   
+    }
+      
+    
+    return absences;
+  }
 }
 

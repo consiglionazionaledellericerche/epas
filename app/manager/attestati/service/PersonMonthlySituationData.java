@@ -40,6 +40,16 @@ public class PersonMonthlySituationData {
     this.personDayDao = personDayDao;
   }
   
+  /**
+   * Crea la mappa con le info mensili per i dipendenti.
+   * @param person il dipendente di cui cercare le informazioni
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param codeToPresence true se si vuole il codice di assenza per attestati, false per quello 
+   * usato nel cartellino (esempio i casi di codici a ore e minuti e non orari)
+   * @return la mappa contenente le info su assenze, competenze, buoni pasto e ore di formazione 
+   *     del dipendente person nell'anno year e nel mese month.
+   */
   public Map<String, Certification> getCertification(Person person, int year, int month) {
         
     Map<String, Certification> actualCertifications = Maps.newHashMap();
