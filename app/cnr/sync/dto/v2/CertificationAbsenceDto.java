@@ -9,6 +9,8 @@ import lombok.Data;
 public class CertificationAbsenceDto {
 
   public String code;
+  private Integer justifiedTime;
+  private String justifiedType;
   public LocalDate from;
   public LocalDate to;
 }
