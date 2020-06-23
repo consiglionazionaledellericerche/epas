@@ -188,11 +188,12 @@ public class AbsenceEngineUtility {
    * @return la quantità corretta prendibile in percentuale.
    */
   public Integer takenBehaviouralFixes(Absence absence, Integer amount,
-      List<Contract> fetchedContracts, DateInterval periodInterval, TakeAmountAdjustment adjustment) {
+      List<Contract> fetchedContracts, DateInterval periodInterval, 
+      TakeAmountAdjustment adjustment) {
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
-      final int MAX_MINUTES_TO_CUT_BACK = 360;
+      final int Max_Minutes_To_Cut_Back = 360;
       boolean workTimeAdjustment = adjustment.workTime;
 
       for (Contract contract : fetchedContracts) {
@@ -206,8 +207,8 @@ public class AbsenceEngineUtility {
           
           if (workTimeAdjustment && cwtt.workingTimeType.enableAdjustmentForQuantity) {
             //Adeguamento sull'incidenza del tipo orario
-            if (cwtt.getWorkingTimeType().averageMinutesInWeek() >= MAX_MINUTES_TO_CUT_BACK) {
-              return MAX_MINUTES_TO_CUT_BACK;
+            if (cwtt.getWorkingTimeType().averageMinutesInWeek() >= Max_Minutes_To_Cut_Back) {
+              return Max_Minutes_To_Cut_Back;
             }
             return cwtt.getWorkingTimeType().averageMinutesInWeek();
           }          

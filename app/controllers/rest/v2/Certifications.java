@@ -1,23 +1,15 @@
 package controllers.rest.v2;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.swing.text.DateFormatter;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+
 import cnr.sync.dto.v2.CertificationAbsenceDto;
 import cnr.sync.dto.v2.CertificationCompetencesDto;
 import cnr.sync.dto.v2.CertificationDto;
 import cnr.sync.dto.v2.CertificationMealTicketDto;
 import cnr.sync.dto.v2.CertificationTrainingHoursDto;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.Resecure.NoCheck;
@@ -26,8 +18,13 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
-import lombok.val;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.inject.Inject;
+import javax.swing.text.DateFormatter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
@@ -39,13 +36,17 @@ import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 @Slf4j
 @With(Resecure.class)
-public class Certifications extends Controller{
+public class Certifications extends Controller {
 
   @Inject
   static PersonMonthlySituationData monthData;

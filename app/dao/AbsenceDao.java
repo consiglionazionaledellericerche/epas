@@ -220,7 +220,7 @@ public class AbsenceDao extends DaoBase {
    * @param begin la data di inizio
    * @param end la data di fine
    * @return la lista di assenze che non comprendono le assenze orarie "H" che non giustificano
-   *    niente.
+   *     niente.
    */
   public List<Absence> getAbsenceWithNoHInMonth(Person person, LocalDate begin, LocalDate end) {
     
