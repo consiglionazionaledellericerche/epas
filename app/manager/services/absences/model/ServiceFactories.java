@@ -7,7 +7,6 @@ import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import jdk.internal.jline.internal.Log;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
