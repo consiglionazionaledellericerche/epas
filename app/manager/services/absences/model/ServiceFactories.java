@@ -7,11 +7,11 @@ import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -125,7 +125,7 @@ public class ServiceFactories {
           Sets.newHashSet());
     } else {
       allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
-          periodChain.from, periodChain.to,Sets.newHashSet());
+          periodChain.from, periodChain.to, Sets.newHashSet());
       groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
           periodChain.from, periodChain.to, 
           periodChain.periodChainInvolvedCodes());
@@ -610,7 +610,8 @@ public class ServiceFactories {
       //check sulla reperibilità
       if (personReperibilityDayDao
           .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
-        log.info("Aggiungere warning di reperibilità per {} in data {}", person, absence.getAbsenceDate());
+        log.info("Aggiungere warning di reperibilità per {} in data {}", person, 
+            absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
       }
       log.info("Controllo i turni per {} nel giorno {}", person, absence.getAbsenceDate());

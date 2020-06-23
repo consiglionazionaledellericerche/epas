@@ -2,15 +2,13 @@ package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import manager.PersonDayManager;
 import models.CertificatedData;
 import models.Certification;
@@ -20,6 +18,10 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.absences.Absence;
 import models.enumerate.CertificationType;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
+
+
 
 public class PersonMonthlySituationData {
 
@@ -29,6 +31,14 @@ public class PersonMonthlySituationData {
   private final CompetenceDao competenceDao;
   private final PersonDayDao personDayDao;
   
+  /**
+   * Injector.
+   * @param personDayManager il persondaymanager
+   * @param personMonthRecapDao il dao dei riepiloghi mensili
+   * @param absenceDao il dao delle assenze
+   * @param competenceDao il dao delle competenze
+   * @param personDayDao il dao sui personDay
+   */
   @Inject
   public PersonMonthlySituationData(PersonDayManager personDayManager,
       PersonMonthRecapDao personMonthRecapDao, AbsenceDao absenceDao,
@@ -45,8 +55,6 @@ public class PersonMonthlySituationData {
    * @param person il dipendente di cui cercare le informazioni
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
-   * @param codeToPresence true se si vuole il codice di assenza per attestati, false per quello 
-   * usato nel cartellino (esempio i casi di codici a ore e minuti e non orari)
    * @return la mappa contenente le info su assenze, competenze, buoni pasto e ore di formazione 
    *     del dipendente person nell'anno year e nel mese month.
    */
