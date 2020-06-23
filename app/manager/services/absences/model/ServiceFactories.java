@@ -597,9 +597,6 @@ public class ServiceFactories {
       Person person, Absence absence, 
       Map<LocalDate, Set<Absence>> allCodeAbsences) {
 
-    //log.trace("L'assenza data={}, codice={} viene processata per i vincoli generici", 
-    //    absence.getAbsenceDate(), absence.getAbsenceType().getCode());
-
     final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
 
     //Codice non prendibile nei giorni di festa ed è festa.
@@ -609,7 +606,8 @@ public class ServiceFactories {
       log.info("Controllo la reperibilità per {} nel giorno {}", person, absence.getAbsenceDate());
       //check sulla reperibilità
       if (personReperibilityDayDao
-          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent() 
+          && !absence.getAbsenceType().reperibilityCompatible) {
         log.info("Aggiungere warning di reperibilità per {} in data {}", person, 
             absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
