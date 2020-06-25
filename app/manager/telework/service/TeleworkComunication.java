@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.service.AttestatiApis;
 import models.Office;
+import models.User;
 import models.dto.TeleworkDto;
 import play.Play;
 import play.libs.WS;
@@ -79,14 +80,14 @@ public class TeleworkComunication {
    * @param stampingId l'identificativo della timbratura in telelavoro da recuperare
    * @return La timbratura in telelavoro.
    */
-  public TeleworkDto get(long stampingId)
+  public TeleworkDto get(long stampingId, User user)
       throws NoSuchFieldException, ExecutionException {
 
 
     final String url = TELEWORK_API_URL + "/" + SHOW + "/" + stampingId;
         
 
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
@@ -111,14 +112,14 @@ public class TeleworkComunication {
    *     timbrature in telelavoro
    * @return La lista di timbrature in telelavoro.
    */
-  public List<TeleworkDto> getList(long personDayId)
+  public List<TeleworkDto> getList(long personDayId, User user)
       throws NoSuchFieldException, ExecutionException {
 
 
     final String url = TELEWORK_API_URL + "/" + LIST + "/" + personDayId;
         
 
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
@@ -142,10 +143,10 @@ public class TeleworkComunication {
    * @throws NoSuchFieldException eccezione di assenza di un campo nel metodo che crea il messaggio
    *     da inviare all'applicazione Telework.
    */
-  public void save(TeleworkDto dto) throws NoSuchFieldException {
+  public void save(TeleworkDto dto, User user) throws NoSuchFieldException {
     
     final String url = TELEWORK_API_URL + "/" + SAVE;
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.post();
     
@@ -165,13 +166,16 @@ public class TeleworkComunication {
    * @param url url
    * @param contentType contentType
    */
-  private WSRequest prepareOAuthRequest(String url, String contentType)
+  private WSRequest prepareOAuthRequest(String url, String contentType, User user)
       throws NoSuchFieldException {
 
     final String baseUrl = getTeleworkBaseUrl();
 
     WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType);
+    wsRequest.username = user.username;
+    wsRequest.password = user.password; 
+        
 
     wsRequest.timeout(POST_TIMEOUT);
     return wsRequest;
