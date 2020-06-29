@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -25,14 +26,17 @@ import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.telework.errors.Errors;
+import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.TeleworkStamping;
 import models.dto.ReperibilityEvent;
+import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
+import play.Play;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -43,6 +47,10 @@ import security.SecurityRules;
 @Slf4j
 @With({Resecure.class})
 public class TeleworkStampings extends Controller{
+
+  static final String TELEWORK_CONF = "telework.stampings.active";
+  static final int OK = 200;
+
 
   @Inject
   static IWrapperFactory wrapperFactory;
@@ -62,6 +70,8 @@ public class TeleworkStampings extends Controller{
   static StampingManager stampingManager;
   @Inject
   static TeleworkStampingDao teleworkStampingDao;
+  @Inject
+  static TeleworkComunication comunication;
 
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
@@ -171,7 +181,28 @@ public class TeleworkStampings extends Controller{
       confirmed = true;
       render(stamping, confirmed);
     }
-    stamping.delete();
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
+      log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
+      log.info("Cancello la timbratura {}", stamping.toString());
+
+      int result = 0;
+      try {
+        result = comunication.delete(teleworkStampingId);
+      } catch (NoSuchFieldException ex) {
+        ex.printStackTrace();
+      }
+
+      if (result == OK) {
+        flash.success("Orario inserito correttamente");        
+      } else {
+        flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", result);
+      }
+      teleworkStampings(stamping.date.getYear(), stamping.date.getMonthOfYear());
+
+    } else {
+      stamping.delete();
+    }
+
     flash.success("Timbratura %s - %s eliminata correttamente", 
         stamping.formattedHour(), stamping.stampType.getDescription());
     teleworkStampings(stamping.date.getYear(), stamping.date.getMonthOfYear());
@@ -201,24 +232,52 @@ public class TeleworkStampings extends Controller{
         render("@insertStamping", stamping, person, date, time);
       }
     }
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
+      log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
+      log.info("Salvo la timbratura {}", stamping.toString());
 
-    boolean newInsert = !stamping.isPersistent();
+      int result = manager.save(stamping);
+      if (result == OK) {
+        flash.success("Orario inserito correttamente");        
+      } else {
+        flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", result);
+      }
+      teleworkStampings(date.getYear(), date.getMonthOfYear());
 
-    // Se si tratta di un update ha già tutti i riferimenti al personday
-    if (newInsert) {
-      final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-      stamping.personDay = personDay;
-      // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
-      personDay.teleworkStampings.add(stamping);
-    }
-    stamping.save();
-    flash.success("Orario inserito correttamente");
-    teleworkStampings(date.getYear(), date.getMonthOfYear());
+    } else {
+      boolean newInsert = !stamping.isPersistent();
+
+      // Se si tratta di un update ha già tutti i riferimenti al personday
+      if (newInsert) {
+        final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
+        stamping.personDay = personDay;
+        // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
+        personDay.teleworkStampings.add(stamping);
+      }
+      stamping.save();
+      flash.success("Orario inserito correttamente");
+      teleworkStampings(date.getYear(), date.getMonthOfYear());
+    }    
+
   }
 
   public static void editTeleworkStamping(long teleworkStampingId) {
-    TeleworkStamping stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
+    TeleworkStamping stamping = null;
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
+      log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
+      try {
+        stamping = manager.get(teleworkStampingId);
+      } catch (ExecutionException ex) {
+        // TODO Auto-generated catch block
+        ex.printStackTrace();
+      } 
+      
+      
+    } else {
+      stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
+    }
 
+    render(stamping);
   }
 
   public static void show(LocalDate date) {
@@ -227,7 +286,7 @@ public class TeleworkStampings extends Controller{
 
     render(currentDate);
   }
-  
+
   public static void events(LocalDate start, LocalDate end) {
     List<ReperibilityEvent> events = new ArrayList<>();
   }

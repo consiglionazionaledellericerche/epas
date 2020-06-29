@@ -80,14 +80,14 @@ public class TeleworkComunication {
    * @param stampingId l'identificativo della timbratura in telelavoro da recuperare
    * @return La timbratura in telelavoro.
    */
-  public TeleworkDto get(long stampingId, User user)
+  public TeleworkDto get(long stampingId)
       throws NoSuchFieldException, ExecutionException {
 
 
     final String url = TELEWORK_API_URL + "/" + SHOW + "/" + stampingId;
         
 
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
@@ -119,7 +119,7 @@ public class TeleworkComunication {
     final String url = TELEWORK_API_URL + "/" + LIST + "/" + personDayId;
         
 
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
@@ -143,10 +143,10 @@ public class TeleworkComunication {
    * @throws NoSuchFieldException eccezione di assenza di un campo nel metodo che crea il messaggio
    *     da inviare all'applicazione Telework.
    */
-  public void save(TeleworkDto dto, User user) throws NoSuchFieldException {
+  public int save(TeleworkDto dto) throws NoSuchFieldException {
     
     final String url = TELEWORK_API_URL + "/" + SAVE;
-    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE, user);
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.post();
     
@@ -154,10 +154,46 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Invalid token");
+      throw new ApiRequestException("Utente non autorizzato");
+    } else {
+      log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
     }
+        
+    return httpResponse.getStatus();
+  }
+  
+  public int update(TeleworkDto dto) throws NoSuchFieldException {
+    final String url = TELEWORK_API_URL + "/" + UPDATE;
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    wsRequest.body = dto;
+    HttpResponse httpResponse = wsRequest.put();
     
-    log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
+    // Caso di utente non autorizzato
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      
+      log.error("Utente non autorizzato: {}", wsRequest.username);
+      throw new ApiRequestException("Utente non autorizzato");
+    } else {
+      log.info("Timbratura {} in telelavoro modificata correttamente", dto.toString());
+    }
+        
+    return httpResponse.getStatus();
+  }
+  
+  public int delete(long stampingId) throws NoSuchFieldException {
+    final String url = TELEWORK_API_URL + "/" + DELETE + "/" + stampingId;
+    WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.delete();
+    // Caso di utente non autorizzato
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      
+      log.error("Utente non autorizzato: {}", wsRequest.username);
+      throw new ApiRequestException("Utente non autorizzato");
+    } else {
+      log.info("Timbratura {} in telelavoro eliminata correttamente", stampingId);
+    }
+        
+    return httpResponse.getStatus();
   }
   
   /**
@@ -166,15 +202,16 @@ public class TeleworkComunication {
    * @param url url
    * @param contentType contentType
    */
-  private WSRequest prepareOAuthRequest(String url, String contentType, User user)
+  private WSRequest prepareOAuthRequest(String url, String contentType)
       throws NoSuchFieldException {
 
     final String baseUrl = getTeleworkBaseUrl();
-
+    final String user = getTeleworkUser();
+    final String password = getTeleworkPass();
     WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType);
-    wsRequest.username = user.username;
-    wsRequest.password = user.password; 
+    wsRequest.username = user;
+    wsRequest.password = password; 
         
 
     wsRequest.timeout(POST_TIMEOUT);

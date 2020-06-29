@@ -4,30 +4,44 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.persistence.Transient;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.persistence.Transient;
 import lombok.extern.slf4j.Slf4j;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import manager.services.telework.errors.Errors;
 import manager.services.telework.errors.TeleworkStampingError;
+import manager.telework.service.TeleworkComunication;
 import models.PersonDay;
 import models.TeleworkStamping;
+import models.User;
+import models.dto.TeleworkDto;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.modelmapper.ModelMapper;
+import cnr.sync.dto.v2.StampingDto;
+
 
 @Slf4j
 public class TeleworkStampingManager {
 
 
+  private TeleworkComunication comunication;
+  
+  @Inject
+  public TeleworkStampingManager(TeleworkComunication comunication) {
+    this.comunication = comunication;
+  }
+  
   /**
    * Ritorna la lista di timbrature in telelavoro nel giorno pd con causale appartenente a quelle
    * riportate nella lista di causali da ricercare.
@@ -47,6 +61,71 @@ public class TeleworkStampingManager {
       }
     }
     return list;
+  }
+  
+  /**
+   * Chiama il metodo di comunicazione con l'applicazione esterna per salvare la timbratura
+   * da telelavoro.
+   * @param stamping la timbratura in telelavoro da salvare
+   * @return 200 se la timbratura è stata salvata correttamente, altro numero altrimenti.
+   */
+  public int save(TeleworkStamping stamping) {
+    int result = 0;
+    TeleworkDto dto = TeleworkDto.builder()
+        .date(transform(stamping.date))
+        .stampType(stamping.stampType.getCode())
+        .note(stamping.note)
+        .personDayId(stamping.personDay.id)
+        .build();
+    try {
+      result = comunication.save(dto);
+    } catch (NoSuchFieldException ex) {
+      // TODO Auto-generated catch block
+      ex.printStackTrace();
+    }
+    return result;
+  }
+  
+  public int update(TeleworkStamping stamping) {
+    int result = 0;
+    TeleworkDto dto = TeleworkDto.builder()
+        .date(transform(stamping.date))
+        .stampType(stamping.stampType.getCode())
+        .note(stamping.note)
+        .personDayId(stamping.personDay.id)
+        .build();
+    try {
+      result = comunication.update(dto);
+    } catch (NoSuchFieldException ex) {
+      // TODO Auto-generated catch block
+      ex.printStackTrace();
+    }
+    return result;
+  }
+  
+  /**
+   * Chiama la funzionalità di cancellazione della timbratura da telelavoro.
+   * @param stampingId l'identificativo della timbratura da eliminare
+   * @return 200 se la timbratura è stata eliminata correttamente, altro numero altrimenti.
+   */
+  public int delete(long stampingId) {
+    int result = 0;
+    try {
+      result = comunication.delete(stampingId);
+    } catch (NoSuchFieldException ex) {
+      ex.printStackTrace();
+    }
+    return result;
+  }
+  
+  public TeleworkStamping get(long stampingId) throws ExecutionException {
+    TeleworkStamping stamping = null;
+    try {
+      stamping = mapper(comunication.get(stampingId));
+    } catch(NoSuchFieldException ex) {
+      ex.printStackTrace();
+    }
+    return stamping;
   }
 
   /**
@@ -286,5 +365,28 @@ public class TeleworkStampingManager {
       return Optional.of(error);
     }
     return Optional.absent();
+  }
+  
+  /**
+   * Metodo di utilità che trasforma uno joda LocalDateTime in un java.time LocalDateTime.
+   * @param dateTime lo joda contenente la data/ora
+   * @return la data/ora nel formato java.time.
+   */
+  private java.time.LocalDateTime transform(LocalDateTime dateTime) {
+    java.time.LocalDateTime time = java.time.LocalDateTime.of(
+        dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), 
+        dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
+    return time;
+  }
+  
+  /**
+   * 
+   * @param dto
+   * @return
+   */
+  private TeleworkStamping mapper(TeleworkDto dto) {
+    ModelMapper modelMapper = new ModelMapper();
+    TeleworkStamping stamping = modelMapper.map(dto, TeleworkStamping.class);
+    return stamping;
   }
 }
