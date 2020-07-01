@@ -203,7 +203,7 @@ public enum DefaultTakable {
   
   T_COVID50(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_COVID50), 
-      ImmutableSet.of(DefaultAbsenceType.A_COVID50), 15, null),
+      ImmutableSet.of(DefaultAbsenceType.A_COVID50), 30, null),
 
   T_25(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25, 
