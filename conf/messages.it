@@ -1113,6 +1113,7 @@ absenceType.consideredWeekEnd= Festivi
 absenceType.description= Descrizione
 absenceType.internalUse= Interno
 absenceType.qualifications= Livelli
+absenceType.reperibilityCompatible=Compatibile con reperibilità
 absenceType.tecnici= Tecnici
 absenceType.tecnologi= Tecnologi
 absenceType.validFrom= Inizio validita'

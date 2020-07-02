@@ -69,6 +69,7 @@ public class EnumAllineator {
         absenceType.justifiedTime = defaultAbsenceType.get().justifiedTime;
         absenceType.consideredWeekEnd = defaultAbsenceType.get().consideredWeekEnd;
         absenceType.timeForMealTicket = defaultAbsenceType.get().timeForMealTicket;
+        absenceType.reperibilityCompatible = defaultAbsenceType.get().reperibilityCompatible;
         absenceType.replacingTime = defaultAbsenceType.get().replacingTime;
         if (defaultAbsenceType.get().replacingType != null) {
           absenceType.replacingType = absenceComponentDao
@@ -510,6 +511,7 @@ public class EnumAllineator {
     absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
     absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
     absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
+    absenceType.reperibilityCompatible = defaultAbsenceType.reperibilityCompatible;
     absenceType.replacingTime = defaultAbsenceType.replacingTime;
     if (defaultAbsenceType.replacingType != null) {
       absenceType.replacingType = absenceComponentDao
