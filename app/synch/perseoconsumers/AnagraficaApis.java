@@ -87,6 +87,7 @@ public class AnagraficaApis {
         + Play.configuration.getProperty(PEOPLE_IN_OFFICE);
   }
 
+  @Deprecated
   public static String getPeople() throws NoSuchFieldException {
     return getPerseoBaseUrl() + Play.configuration.getProperty(PEOPLE);
   }
