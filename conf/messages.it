@@ -612,7 +612,7 @@ type.description =Descrizione
 type.allowUnpairSlots =Permetti disparità tra gli slot di turno 
 considerEverySlot =Permetti assegnamento turno con tutti slot popolati
 type.office =Sede
-type.supervisor =Supervisore servizio
+type.supervisor =Responsabile servizio
 type.managers =Gestori reperibilità
 
 timeTable.startMorning =inizio turno
@@ -644,7 +644,7 @@ timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
-cat.supervisor =Supervisore servizio
+cat.supervisor =Responsabile servizio
 cat.managers =Gestori dei turni
 
 uro.office=Sede
