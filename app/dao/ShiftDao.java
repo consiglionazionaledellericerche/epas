@@ -248,9 +248,9 @@ public class ShiftDao extends DaoBase {
   }
 
   /**
-   * La lista dei servizi di turno di cui person è supervisore.
-   * @param person il supervisore di cui si vuol sapere i turni
-   * @return la lista dei turni in cui person è supervisore.
+   * La lista dei servizi di turno di cui person è responsabile.
+   * @param person il responsabile di cui si vuol sapere i turni
+   * @return la lista dei turni in cui person è responsabile.
    */
   public List<ShiftCategories> getCategoriesBySupervisor(Person person) {
     final QShiftCategories sc = QShiftCategories.shiftCategories;
