@@ -660,7 +660,7 @@ public class Calendar extends Controller {
 
     Map<String, Object> args = new HashMap<>();
     // Check tra la richiesta del riepilogo e l'approvazione definitiva dei turni: non ci devono
-    // essere state modifiche in modo da evitare che il supervisore validi una situazione diversa 
+    // essere state modifiche in modo da evitare che il responsabile validi una situazione diversa 
     // da quella che si aspetta
     if (shiftTypeMonth.version != version) {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
