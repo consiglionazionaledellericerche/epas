@@ -22,7 +22,7 @@ import play.mvc.Http;
 @Slf4j
 public class TeleworkComunication {
 
-  private static final String TELEWORK_API_URL = "/v1/stampingcontroller";
+  private static final String TELEWORK_API_URL = "api/v1/stamping";
   private static final String ERROR = "Missing required parameter: ";
   private static final String TELEWORK_BASE_URL = "telework.base";
   private static final String TELEWORK_PASS = "telework.pass";
@@ -31,11 +31,11 @@ public class TeleworkComunication {
   private static final String JSON_CONTENT_TYPE = "application/json";
   private static final String POST_TIMEOUT = "5min";
   
-  private static final String SHOW = "/show";
-  private static final String UPDATE = "/update";
-  private static final String DELETE = "/delete";
-  private static final String LIST = "/list";
-  private static final String SAVE = "/save";
+//  private static final String SHOW = "/show";
+//  private static final String UPDATE = "/update";
+//  private static final String DELETE = "/delete";
+//  private static final String LIST = "/list";
+//  private static final String SAVE = "/save";
   
   
   /**
@@ -84,7 +84,7 @@ public class TeleworkComunication {
       throws NoSuchFieldException, ExecutionException {
 
 
-    final String url = TELEWORK_API_URL + SHOW + "/" + stampingId;
+    final String url = TELEWORK_API_URL + "/" + stampingId;
         
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
@@ -116,7 +116,7 @@ public class TeleworkComunication {
       throws NoSuchFieldException, ExecutionException {
 
 
-    final String url = TELEWORK_API_URL + LIST + "/" + personDayId;
+    final String url = TELEWORK_API_URL + "/" + personDayId;
         
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
@@ -145,7 +145,7 @@ public class TeleworkComunication {
    */
   public int save(TeleworkDto dto) throws NoSuchFieldException {
     
-    final String url = TELEWORK_API_URL + SAVE;
+    final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.post();
@@ -163,7 +163,7 @@ public class TeleworkComunication {
   }
   
   public int update(TeleworkDto dto) throws NoSuchFieldException {
-    final String url = TELEWORK_API_URL + UPDATE;
+    final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.put();
@@ -181,7 +181,7 @@ public class TeleworkComunication {
   }
   
   public int delete(long stampingId) throws NoSuchFieldException {
-    final String url = TELEWORK_API_URL + DELETE + "/" + stampingId;
+    final String url = TELEWORK_API_URL + "/" + stampingId;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.delete();
     // Caso di utente non autorizzato
