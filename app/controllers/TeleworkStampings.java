@@ -235,7 +235,7 @@ public class TeleworkStampings extends Controller{
     if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
       log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
       log.info("Salvo la timbratura {}", stamping.toString());
-
+      stamping.personDay = pd;
       int result = manager.save(stamping);
       if (result == OK) {
         flash.success("Orario inserito correttamente");        

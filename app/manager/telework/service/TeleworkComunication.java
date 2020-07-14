@@ -84,7 +84,7 @@ public class TeleworkComunication {
       throws NoSuchFieldException, ExecutionException {
 
 
-    final String url = TELEWORK_API_URL + "/" + SHOW + "/" + stampingId;
+    final String url = TELEWORK_API_URL + SHOW + "/" + stampingId;
         
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
@@ -94,7 +94,7 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Invalid token");
+      
     }
 
     TeleworkDto teleworkStamping= new Gson()
@@ -116,7 +116,7 @@ public class TeleworkComunication {
       throws NoSuchFieldException, ExecutionException {
 
 
-    final String url = TELEWORK_API_URL + "/" + LIST + "/" + personDayId;
+    final String url = TELEWORK_API_URL + LIST + "/" + personDayId;
         
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
@@ -126,7 +126,7 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Invalid token");
+      
     }
 
     List<TeleworkDto> teleworkStampings = new Gson()
@@ -145,7 +145,7 @@ public class TeleworkComunication {
    */
   public int save(TeleworkDto dto) throws NoSuchFieldException {
     
-    final String url = TELEWORK_API_URL + "/" + SAVE;
+    final String url = TELEWORK_API_URL + SAVE;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.post();
@@ -154,7 +154,7 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Utente non autorizzato");
+      
     } else {
       log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
     }
@@ -163,7 +163,7 @@ public class TeleworkComunication {
   }
   
   public int update(TeleworkDto dto) throws NoSuchFieldException {
-    final String url = TELEWORK_API_URL + "/" + UPDATE;
+    final String url = TELEWORK_API_URL + UPDATE;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.put();
@@ -172,7 +172,7 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Utente non autorizzato");
+      
     } else {
       log.info("Timbratura {} in telelavoro modificata correttamente", dto.toString());
     }
@@ -181,14 +181,14 @@ public class TeleworkComunication {
   }
   
   public int delete(long stampingId) throws NoSuchFieldException {
-    final String url = TELEWORK_API_URL + "/" + DELETE + "/" + stampingId;
+    final String url = TELEWORK_API_URL + DELETE + "/" + stampingId;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.delete();
     // Caso di utente non autorizzato
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       
       log.error("Utente non autorizzato: {}", wsRequest.username);
-      throw new ApiRequestException("Utente non autorizzato");
+      
     } else {
       log.info("Timbratura {} in telelavoro eliminata correttamente", stampingId);
     }
