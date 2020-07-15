@@ -67,7 +67,7 @@ public class TeleworkStampingManager {
    * Chiama il metodo di comunicazione con l'applicazione esterna per salvare la timbratura
    * da telelavoro.
    * @param stamping la timbratura in telelavoro da salvare
-   * @return 200 se la timbratura è stata salvata correttamente, altro numero altrimenti.
+   * @return 201 se la timbratura è stata salvata correttamente, altro numero altrimenti.
    */
   public int save(TeleworkStamping stamping) {
     int result = 0;

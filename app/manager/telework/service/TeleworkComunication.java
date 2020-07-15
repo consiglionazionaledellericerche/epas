@@ -216,9 +216,7 @@ public class TeleworkComunication {
     final String password = getTeleworkPass();
     WSRequest wsRequest = WS.url(baseUrl + url)
         .setHeader("Content-Type", contentType);
-    wsRequest.username = user;
-    wsRequest.password = password; 
-        
+    wsRequest.authenticate(user, password);        
 
     wsRequest.timeout(POST_TIMEOUT);
     return wsRequest;
