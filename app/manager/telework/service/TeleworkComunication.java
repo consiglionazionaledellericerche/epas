@@ -153,11 +153,15 @@ public class TeleworkComunication {
     HttpResponse httpResponse = wsRequest.post();
     
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      
-      log.error("Utente non autorizzato: {}", wsRequest.username);
-      
-    } else {
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
+      log.error("Utente non autorizzato: {}", wsRequest.username);      
+    } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
+      log.error("Errore nella procedura di inserimento della timbratura su sistema esterno");
+    } else if (httpResponse.getStatus() == Http.StatusCode.BAD_REQUEST 
+        || httpResponse.getStatus() == Http.StatusCode.NOT_FOUND) {
+      log.error("Parametri passati non corretti o malformati");
+    }
+    else {
       log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
     }
         
