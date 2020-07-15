@@ -72,10 +72,10 @@ public class TeleworkStampingManager {
   public int save(TeleworkStamping stamping) {
     int result = 0;
     TeleworkDto dto = TeleworkDto.builder()
-        .date(transform(stamping.date))
-        .stampType(stamping.stampType.getCode())
+        .date(transform(stamping.date).toString())
+        .stampType(stamping.stampType.name())
         .note(stamping.note)
-        .personDayId(stamping.personDay.id)
+        .personDayId(stamping.personDay.id.toString())
         .build();
     try {
       result = comunication.save(dto);
@@ -89,10 +89,10 @@ public class TeleworkStampingManager {
   public int update(TeleworkStamping stamping) {
     int result = 0;
     TeleworkDto dto = TeleworkDto.builder()
-        .date(transform(stamping.date))
-        .stampType(stamping.stampType.getCode())
+        .date(transform(stamping.date).toString())
+        .stampType(stamping.stampType.name())
         .note(stamping.note)
-        .personDayId(stamping.personDay.id)
+        .personDayId(stamping.personDay.id.toString())
         .build();
     try {
       result = comunication.update(dto);
