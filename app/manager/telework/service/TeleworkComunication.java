@@ -22,7 +22,7 @@ import play.mvc.Http;
 @Slf4j
 public class TeleworkComunication {
 
-  private static final String TELEWORK_API_URL = "api/v1/stamping";
+  private static final String TELEWORK_API_URL = "/api/v1/stamping/";
   private static final String ERROR = "Missing required parameter: ";
   private static final String TELEWORK_BASE_URL = "telework.base";
   private static final String TELEWORK_PASS = "telework.pass";
@@ -147,7 +147,9 @@ public class TeleworkComunication {
     
     final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
-    wsRequest.body = dto;
+    String json = new Gson().toJson(dto);
+    
+    wsRequest.body = json;
     HttpResponse httpResponse = wsRequest.post();
     
     // Caso di utente non autorizzato

@@ -101,7 +101,7 @@ public class StampingManager {
     Integer hour = Integer.parseInt(time.substring(0, 2));
     Integer minute = Integer.parseInt(time.substring(2, 4));
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(),
-        date.getDayOfMonth(), hour, minute);
+        date.getDayOfMonth(), hour, minute, 0);
 
   }
 
