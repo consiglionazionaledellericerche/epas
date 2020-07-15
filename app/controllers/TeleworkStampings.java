@@ -41,6 +41,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
@@ -49,9 +50,7 @@ import security.SecurityRules;
 public class TeleworkStampings extends Controller{
 
   static final String TELEWORK_CONF = "telework.stampings.active";
-  static final int OK = 200;
-
-
+  
   @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
@@ -192,7 +191,7 @@ public class TeleworkStampings extends Controller{
         ex.printStackTrace();
       }
 
-      if (result == OK) {
+      if (result == Http.StatusCode.CREATED) {
         flash.success("Orario inserito correttamente");        
       } else {
         flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", result);
@@ -237,7 +236,7 @@ public class TeleworkStampings extends Controller{
       log.info("Salvo la timbratura {}", stamping.toString());
       stamping.personDay = pd;
       int result = manager.save(stamping);
-      if (result == OK) {
+      if (result == Http.StatusCode.CREATED) {
         flash.success("Orario inserito correttamente");        
       } else {
         flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", result);
