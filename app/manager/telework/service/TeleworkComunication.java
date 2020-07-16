@@ -34,7 +34,7 @@ public class TeleworkComunication {
 //  private static final String SHOW = "/show";
 //  private static final String UPDATE = "/update";
 //  private static final String DELETE = "/delete";
-//  private static final String LIST = "/list";
+  private static final String LIST = "list/";
 //  private static final String SAVE = "/save";
   
   
@@ -112,21 +112,18 @@ public class TeleworkComunication {
    *     timbrature in telelavoro
    * @return La lista di timbrature in telelavoro.
    */
-  public List<TeleworkDto> getList(long personDayId, User user)
+  public List<TeleworkDto> getList(long personDayId)
       throws NoSuchFieldException, ExecutionException {
 
-
-    final String url = TELEWORK_API_URL + "/" + personDayId;
-        
+    final String url = TELEWORK_API_URL + LIST;        
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    wsRequest.setParameter("personDayId", personDayId);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      
-      log.error("Utente non autorizzato: {}", wsRequest.username);
-      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
+      log.error("Utente non autorizzato: {}", wsRequest.username);      
     }
 
     List<TeleworkDto> teleworkStampings = new Gson()
