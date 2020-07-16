@@ -3,6 +3,7 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -10,12 +11,15 @@ import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.Transient;
 import lombok.extern.slf4j.Slf4j;
+import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
+import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.telework.errors.Errors;
 import manager.services.telework.errors.TeleworkStampingError;
 import manager.telework.service.TeleworkComunication;
@@ -23,6 +27,7 @@ import models.PersonDay;
 import models.TeleworkStamping;
 import models.User;
 import models.dto.TeleworkDto;
+import models.dto.TeleworkPersonDayDto;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
@@ -118,6 +123,12 @@ public class TeleworkStampingManager {
     return result;
   }
   
+  /**
+   * Ritorna la timbratura in telelavoro con id specificato.
+   * @param stampingId l'identificativo della timbratura da ricercare
+   * @return la timbratura in telelavoro con id passato come parametro.
+   * @throws ExecutionException
+   */
   public TeleworkStamping get(long stampingId) throws ExecutionException {
     TeleworkStamping stamping = null;
     try {
@@ -126,6 +137,55 @@ public class TeleworkStampingManager {
       ex.printStackTrace();
     }
     return stamping;
+  }
+  
+  /**
+   * Ritorna la lista di dto contenente la lista delle timbrature in telelavoro per ogni personDay.
+   * @param psDto il personStampingRecap mensile da cui prendere le info sui personDay
+   * @return la lista di dto da ritornare alla vista.
+   * @throws NoSuchFieldException
+   * @throws ExecutionException
+   */
+  public List<TeleworkPersonDayDto> getMonthlyStampings(PersonStampingRecap psDto) 
+      throws NoSuchFieldException, ExecutionException {
+    List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
+    
+    for (PersonStampingDayRecap day : psDto.daysRecap) {
+      List<TeleworkDto> list = comunication.getList(day.personDay.id);
+      
+      List<TeleworkStamping> beginEnd = Lists.newArrayList();
+      List<TeleworkStamping> meal = Lists.newArrayList();
+      List<TeleworkStamping> interruptions = Lists.newArrayList();
+      for (TeleworkDto dto : list) {
+        TeleworkStamping stamping = mapper(dto);
+  
+        
+        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
+            || stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+          beginEnd.add(stamping);
+        }
+        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO) 
+            || stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+          meal.add(stamping);
+        }
+        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE) 
+            || stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+          interruptions.add(stamping);
+        }    
+        
+      }
+      TeleworkPersonDayDto teleworkDto = TeleworkPersonDayDto.builder()
+          .personDay(day.personDay)
+          .beginEnd(beginEnd)
+          .meal(meal)
+          .interruptions(interruptions)
+          .build();
+     
+      dtoList.add(teleworkDto);
+    }
+    
+    
+    return dtoList;
   }
 
   /**

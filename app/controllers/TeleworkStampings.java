@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
@@ -50,7 +51,7 @@ import security.SecurityRules;
 public class TeleworkStampings extends Controller{
 
   static final String TELEWORK_CONF = "telework.stampings.active";
-  
+
   @Inject
   static IWrapperFactory wrapperFactory;
   @Inject
@@ -77,8 +78,11 @@ public class TeleworkStampings extends Controller{
    * per telelavoro nell'anno/mese passati come parametro.
    * @param year l'anno
    * @param month il mese
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public static void teleworkStampings(final Integer year, final Integer month) {
+  public static void teleworkStampings(final Integer year, final Integer month) 
+      throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
@@ -102,20 +106,32 @@ public class TeleworkStampings extends Controller{
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    for (PersonStampingDayRecap day : psDto.daysRecap) {      
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
+      log.info("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+      list = manager.getMonthlyStampings(psDto);
+    } else {
+      for (PersonStampingDayRecap day : psDto.daysRecap) {      
 
-      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-          .personDay(day.personDay)
-          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-          .build();
-      list.add(dto);
+        TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
+            .personDay(day.personDay)
+            .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
+            .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
+            .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
+            .build();
+        list.add(dto);
+      }
+
     }
 
     render(list, year, month);
   }
 
+  /**
+   * 
+   * @param personId
+   * @param year
+   * @param month
+   */
   public static void personTeleworkStampings(Long personId, Integer year, Integer month) {
     if (year == null || month == null) {
       Stampings.personStamping(personId, LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
@@ -172,8 +188,11 @@ public class TeleworkStampings extends Controller{
   /**
    * Cancella la timbratura in telelavoro.
    * @param teleworkStampingId l'identificativo della timbratura in telelavoro
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public static void deleteTeleworkStamping(long teleworkStampingId, boolean confirmed) {
+  public static void deleteTeleworkStamping(long teleworkStampingId, boolean confirmed) 
+      throws NoSuchFieldException, ExecutionException {
     TeleworkStamping stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
     notFoundIfNull(stamping);
     if (!confirmed) {
@@ -213,9 +232,11 @@ public class TeleworkStampings extends Controller{
    * @param date la data 
    * @param stamping la timbratura da salvare
    * @param time l'orario della timbratura
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
   public static void save(Long personId, @Required LocalDate date, @Required TeleworkStamping stamping,
-      @Required @CheckWith(StringIsTime.class) String time) {
+      @Required @CheckWith(StringIsTime.class) String time) throws NoSuchFieldException, ExecutionException {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
@@ -270,8 +291,8 @@ public class TeleworkStampings extends Controller{
         // TODO Auto-generated catch block
         ex.printStackTrace();
       } 
-      
-      
+
+
     } else {
       stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
     }
