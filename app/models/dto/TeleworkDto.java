@@ -10,8 +10,10 @@ import models.enumerate.TeleworkStampTypes;
 @Data
 @Builder
 public class TeleworkDto {
+  
+  private Long id;
 
-  private String personDayId;
+  private long personDayId;
   
   private String stampType;
   
@@ -19,4 +21,9 @@ public class TeleworkDto {
   
   private String note;
   
+  @Override
+  public String toString() {
+    return "Id timbratura: "+ id + ", PersonDayId: " + personDayId + ", Causale: " 
+        + stampType + ", Data: " + date + ", Note: " + note;
+  }
 }

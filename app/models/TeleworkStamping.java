@@ -1,5 +1,6 @@
 package models;
 
+import it.cnr.iit.epas.NullStringBinder;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,13 +12,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
-import it.cnr.iit.epas.NullStringBinder;
 import models.Stamping.WayType;
 import models.base.BaseModel;
 import models.enumerate.TeleworkStampTypes;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.Model;

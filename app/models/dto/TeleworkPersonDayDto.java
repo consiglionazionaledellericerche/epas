@@ -5,13 +5,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.joda.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 import models.PersonDay;
 import models.TeleworkStamping;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.TeleworkStampTypes;
+import org.joda.time.LocalDateTime;
+
 
 @Builder
 @Data
@@ -37,11 +38,11 @@ public class TeleworkPersonDayDto {
 
   /**
    * Controlla se le timbrature in telelavoro sono ben formate.
-   * @param pd il personDay
    * @return true se le timbrature di telelavoro sono ben formate, false altrimenti.
    */
   public boolean hasTeleworkStampingsWellFormed() {
-    if (this.personDay.teleworkStampings.size() == 0 || this.personDay.teleworkStampings.size() % 2 != 0) {
+    if (this.personDay.teleworkStampings.size() == 0 
+        || this.personDay.teleworkStampings.size() % 2 != 0) {
       return false;
     }
     List<TeleworkStampTypes> completeDayInTelework = TeleworkStampTypes.beginEndTelework();
@@ -49,7 +50,7 @@ public class TeleworkPersonDayDto {
     int count = completeDayInTelework.size();
     for (TeleworkStamping tws : this.personDay.teleworkStampings) {
       if (completeDayInTelework.contains(tws.stampType)) {
-        count --;
+        count--;
       }
     }
     if (count == 0) {
