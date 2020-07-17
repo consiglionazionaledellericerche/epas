@@ -1,5 +1,6 @@
 package manager;
 
+import cnr.sync.dto.v2.StampingDto;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -10,6 +11,8 @@ import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -33,7 +36,6 @@ import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.modelmapper.ModelMapper;
-import cnr.sync.dto.v2.StampingDto;
 
 
 @Slf4j
@@ -80,7 +82,7 @@ public class TeleworkStampingManager {
         .date(transform(stamping.date).toString())
         .stampType(stamping.stampType.name())
         .note(stamping.note)
-        .personDayId(stamping.personDay.id.toString())
+        .personDayId(stamping.personDay.id)
         .build();
     try {
       result = comunication.save(dto);
@@ -91,13 +93,18 @@ public class TeleworkStampingManager {
     return result;
   }
   
+  /**
+   * Metodo che modifica una timbratura in telelavoro.
+   * @param stamping la timbratura in telelavoro da modificare
+   * @return il codice HTTP con il risultato della update della timbratura.
+   */
   public int update(TeleworkStamping stamping) {
     int result = 0;
     TeleworkDto dto = TeleworkDto.builder()
         .date(transform(stamping.date).toString())
         .stampType(stamping.stampType.name())
         .note(stamping.note)
-        .personDayId(stamping.personDay.id.toString())
+        .personDayId(stamping.personDay.id)
         .build();
     try {
       result = comunication.update(dto);
@@ -127,13 +134,13 @@ public class TeleworkStampingManager {
    * Ritorna la timbratura in telelavoro con id specificato.
    * @param stampingId l'identificativo della timbratura da ricercare
    * @return la timbratura in telelavoro con id passato come parametro.
-   * @throws ExecutionException
+   * @throws ExecutionException eccezione in esecuzione
    */
   public TeleworkStamping get(long stampingId) throws ExecutionException {
     TeleworkStamping stamping = null;
     try {
       stamping = mapper(comunication.get(stampingId));
-    } catch(NoSuchFieldException ex) {
+    } catch (NoSuchFieldException ex) {
       ex.printStackTrace();
     }
     return stamping;
@@ -143,37 +150,46 @@ public class TeleworkStampingManager {
    * Ritorna la lista di dto contenente la lista delle timbrature in telelavoro per ogni personDay.
    * @param psDto il personStampingRecap mensile da cui prendere le info sui personDay
    * @return la lista di dto da ritornare alla vista.
-   * @throws NoSuchFieldException
-   * @throws ExecutionException
+   * @throws NoSuchFieldException eccezione di mancanza di parametro
+   * @throws ExecutionException eccezione in esecuzione
    */
   public List<TeleworkPersonDayDto> getMonthlyStampings(PersonStampingRecap psDto) 
       throws NoSuchFieldException, ExecutionException {
     List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
     
     for (PersonStampingDayRecap day : psDto.daysRecap) {
-      List<TeleworkDto> list = comunication.getList(day.personDay.id);
-      
       List<TeleworkStamping> beginEnd = Lists.newArrayList();
       List<TeleworkStamping> meal = Lists.newArrayList();
       List<TeleworkStamping> interruptions = Lists.newArrayList();
-      for (TeleworkDto dto : list) {
-        TeleworkStamping stamping = mapper(dto);
-  
-        
-        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
-            || stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
-          beginEnd.add(stamping);
+      
+      if (day.personDay.id == null) {
+        log.info("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+      } else {
+        List<TeleworkDto> list = comunication.getList(day.personDay.id);        
+
+        for (TeleworkDto dto : list) {
+          TeleworkStamping stamping = mapper(dto);    
+          
+          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
+              || stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+            beginEnd.add(stamping);
+          }
+          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO) 
+              || stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+            meal.add(stamping);
+          }
+          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE) 
+              || stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+            interruptions.add(stamping);
+          }          
         }
-        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO) 
-            || stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
-          meal.add(stamping);
-        }
-        if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE) 
-            || stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
-          interruptions.add(stamping);
-        }    
-        
       }
+      Comparator<TeleworkStamping> comparator = (TeleworkStamping m1, TeleworkStamping m2) 
+          -> m1.date.compareTo(m2.date);
+      Collections.sort(beginEnd, comparator);
+      Collections.sort(meal, comparator);
+      Collections.sort(interruptions, comparator);      
+      
       TeleworkPersonDayDto teleworkDto = TeleworkPersonDayDto.builder()
           .personDay(day.personDay)
           .beginEnd(beginEnd)
@@ -350,7 +366,8 @@ public class TeleworkStampingManager {
       return Optional.absent();
     }
     java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)).findFirst();
+        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO))
+        .findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;
@@ -440,13 +457,19 @@ public class TeleworkStampingManager {
   }
   
   /**
-   * 
-   * @param dto
-   * @return
+   * Mappa il dto TeleworkDto sull'oggetto di modello TeleworkStamping.
+   * @param dto l'oggetto da mappare
+   * @return l'oggetto di modello TeleworkStamping.
    */
-  private TeleworkStamping mapper(TeleworkDto dto) {
+  public TeleworkStamping mapper(TeleworkDto dto) {
     ModelMapper modelMapper = new ModelMapper();
     TeleworkStamping stamping = modelMapper.map(dto, TeleworkStamping.class);
+    if (stamping.date == null && dto.getDate() != null) {
+      stamping.date = new LocalDateTime(dto.getDate());
+    }
+    if (stamping.id == null) {
+      stamping.id = dto.getPersonDayId();
+    }
     return stamping;
   }
 }

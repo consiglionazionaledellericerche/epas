@@ -2,7 +2,11 @@ package manager.telework.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import helpers.rest.ApiRequestException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -30,12 +34,8 @@ public class TeleworkComunication {
   
   private static final String JSON_CONTENT_TYPE = "application/json";
   private static final String POST_TIMEOUT = "5min";
-  
-//  private static final String SHOW = "/show";
-//  private static final String UPDATE = "/update";
-//  private static final String DELETE = "/delete";
   private static final String LIST = "list/";
-//  private static final String SAVE = "/save";
+
   
   
   /**
@@ -83,21 +83,18 @@ public class TeleworkComunication {
   public TeleworkDto get(long stampingId)
       throws NoSuchFieldException, ExecutionException {
 
-
-    final String url = TELEWORK_API_URL + "/" + stampingId;
-        
+    final String url = TELEWORK_API_URL + stampingId;        
 
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
+    wsRequest.setParameter("id", stampingId);
     HttpResponse httpResponse = wsRequest.get();
 
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      
-      log.error("Utente non autorizzato: {}", wsRequest.username);
-      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
+      log.error("Utente non autorizzato: {}", wsRequest.username);      
     }
 
-    TeleworkDto teleworkStamping= new Gson()
+    TeleworkDto teleworkStamping = new Gson()
         .fromJson(httpResponse.getJson(), TeleworkDto.class);
 
     log.info("Recuperata lista delle timbrature in telelavoro ");
@@ -125,9 +122,9 @@ public class TeleworkComunication {
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
       log.error("Utente non autorizzato: {}", wsRequest.username);      
     }
-
+    
     List<TeleworkDto> teleworkStampings = new Gson()
-        .fromJson(httpResponse.getJson(), List.class);
+        .fromJson(httpResponse.getJson(), new TypeToken<List<TeleworkDto>>() {}.getType());
 
     log.info("Recuperata lista delle timbrature in telelavoro ");
 
@@ -157,14 +154,20 @@ public class TeleworkComunication {
     } else if (httpResponse.getStatus() == Http.StatusCode.BAD_REQUEST 
         || httpResponse.getStatus() == Http.StatusCode.NOT_FOUND) {
       log.error("Parametri passati non corretti o malformati");
-    }
-    else {
+    } else {
       log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
     }
         
     return httpResponse.getStatus();
   }
   
+  /**
+   * Comunica con la applicazione telework-stamping la richiesta di modifica di una 
+   * timbratura in telelavoro.
+   * @param dto l'oggetto dto da inviare per permettere la modifica della timbratura relativa
+   * @return il risultato dell'operazione.
+   * @throws NoSuchFieldException eccezione di mancanza di parametro
+   */
   public int update(TeleworkDto dto) throws NoSuchFieldException {
     final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
@@ -172,10 +175,8 @@ public class TeleworkComunication {
     HttpResponse httpResponse = wsRequest.put();
     
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      
-      log.error("Utente non autorizzato: {}", wsRequest.username);
-      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
+      log.error("Utente non autorizzato: {}", wsRequest.username);      
     } else {
       log.info("Timbratura {} in telelavoro modificata correttamente", dto.toString());
     }
@@ -183,15 +184,19 @@ public class TeleworkComunication {
     return httpResponse.getStatus();
   }
   
+  /**
+   * Metodo che cancella la timbratura su applicazione esterna.
+   * @param stampingId l'identificativo della timbratura da eliminare
+   * @return 204 se l'eliminazione è andata a buon fine
+   * @throws NoSuchFieldException eccezione di mancanza di parametro
+   */
   public int delete(long stampingId) throws NoSuchFieldException {
-    final String url = TELEWORK_API_URL + "/" + stampingId;
+    final String url = TELEWORK_API_URL + stampingId;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     HttpResponse httpResponse = wsRequest.delete();
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
-      
-      log.error("Utente non autorizzato: {}", wsRequest.username);
-      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
+      log.error("Utente non autorizzato: {}", wsRequest.username);      
     } else {
       log.info("Timbratura {} in telelavoro eliminata correttamente", stampingId);
     }
