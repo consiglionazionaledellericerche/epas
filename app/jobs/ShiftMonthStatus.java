@@ -8,6 +8,7 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
@@ -27,6 +28,13 @@ public class ShiftMonthStatus extends Job<Void> {
    */
   @Override
   public void doJob() {
+    
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
+    
     final List<ShiftType> shiftTypes = ShiftType.findAll();
     final YearMonth currentMonth = YearMonth.now();
 
