@@ -11,6 +11,7 @@ import models.OrganizationShiftTimeTable;
 import models.ShiftTimeTable;
 import models.enumerate.PaymentType;
 import models.enumerate.ShiftSlot;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
@@ -26,6 +27,11 @@ public class TranslateShiftTimeTable extends Job<Void> {
 
   @Override
   public void doJob() {
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
     final List<ShiftTimeTable> list = ShiftTimeTable.findAll();
     log.info("Inizio procedura trasformazione timetable");
     for (ShiftTimeTable tt : list) {
