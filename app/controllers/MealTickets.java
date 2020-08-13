@@ -11,6 +11,7 @@ import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.validators.LocalDateIsNotFuture;
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import models.Person;
 import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -247,7 +249,8 @@ public class MealTickets extends Controller {
   public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
-      @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
+      @Valid @Required @CheckWith(LocalDateIsNotFuture.class) LocalDate deliveryDate, 
+      @Valid @Required LocalDate expireDate) {
 
     Contract contract = contractDao.getContractById(contractId);
     Person person = contract.person;
