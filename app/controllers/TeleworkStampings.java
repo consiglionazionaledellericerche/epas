@@ -109,6 +109,11 @@ public class TeleworkStampings extends Controller {
     if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
       log.info("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
       list = manager.getMonthlyStampings(psDto);
+      if (list.isEmpty()) {
+        flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
+            + "L'applicazione potrebbe essere spenta o non raggiungibile."
+            + "Riprovare più tardi");
+      }
     } else {
       for (PersonStampingDayRecap day : psDto.daysRecap) {      
 
