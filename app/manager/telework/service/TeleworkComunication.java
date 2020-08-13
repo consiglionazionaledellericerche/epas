@@ -1,11 +1,13 @@
 package manager.telework.service;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import helpers.rest.ApiRequestException;
+import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -113,11 +115,16 @@ public class TeleworkComunication {
       throws NoSuchFieldException, ExecutionException {
 
     final String url = TELEWORK_API_URL + LIST;        
-
+    HttpResponse httpResponse;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.setParameter("personDayId", personDayId);
-    HttpResponse httpResponse = wsRequest.get();
-
+    try {
+       httpResponse = wsRequest.get();  
+    } catch (Exception ex) {
+      log.warn("Applicazione telework-stamping non risponde.");
+      return Lists.newArrayList();
+    }
+    
     // Caso di utente non autorizzato
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
       log.error("Utente non autorizzato: {}", wsRequest.username);      

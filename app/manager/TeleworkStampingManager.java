@@ -166,7 +166,9 @@ public class TeleworkStampingManager {
         log.info("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
       } else {
         List<TeleworkDto> list = comunication.getList(day.personDay.id);        
-
+        if (list.isEmpty()) {
+          return dtoList;
+        }
         for (TeleworkDto dto : list) {
           TeleworkStamping stamping = mapper(dto);    
           
