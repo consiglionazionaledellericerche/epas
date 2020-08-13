@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -89,7 +90,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;
 
-  @Getter
+  //@Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
@@ -128,7 +129,21 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
-
+   
+  @Getter
+  @OneToOne
+  private Contract previousContract;
+    
+  @Transient
+  public List<VacationPeriod> getVacationPeriods() {
+    if (getPreviousContract() == null) {
+      return vacationPeriods;
+    }
+    List<VacationPeriod> vp = vacationPeriods;
+    vp.addAll(getPreviousContract().getVacationPeriods());
+    return vp;
+  }
+  
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "

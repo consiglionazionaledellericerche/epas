@@ -930,7 +930,7 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    if (contract.sourceDateResidual == null) {
+    if (contract.sourceDateVacation == null) {
       contractManager.cleanVacationInitialization(contract);
     }
 
@@ -940,7 +940,6 @@ public class Contracts extends Controller {
 
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
-
 
     render(contract, wrContract, wrOffice, wrPerson, 
         sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed);
