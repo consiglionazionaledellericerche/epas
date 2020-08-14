@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -33,15 +35,17 @@ public class VacationFactory {
   
   private final ConfigurationManager configurationManager;
   private final AbsenceComponentDao absenceComponentDao;
+  private final IWrapperFactory wrapperFactory;
 
   /**
    * Costruttore. 
    */
   @Inject
   public VacationFactory(ConfigurationManager configurationManager, 
-      AbsenceComponentDao absenceComponentDao) {
+      AbsenceComponentDao absenceComponentDao, IWrapperFactory wrapperFactory) {
     this.configurationManager = configurationManager;
     this.absenceComponentDao = absenceComponentDao;
+    this.wrapperFactory = wrapperFactory;
   }
   
   /**
@@ -145,7 +149,7 @@ public class VacationFactory {
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -226,7 +230,7 @@ public class VacationFactory {
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
     //Permessi nell'anno
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;

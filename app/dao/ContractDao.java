@@ -186,5 +186,23 @@ public class ContractDao extends DaoBase {
     return getQueryFactory().selectFrom(csp)
         .where(csp.id.eq(id)).fetchOne();
   }
+  
+  /**
+   * 
+   * @param actualContract il contratto attuale del dipendente
+   * @return il contratto precedente
+   */
+  public Optional<Contract> getPreviousContract(Optional<Contract> actualContract) {
+    Contract previousContract = null;
+    List<Contract> contractList = getPersonContractList(actualContract.get().person);
+    for (Contract contract : contractList) {
+      if (previousContract == null 
+          || (contract.calculatedEnd() != null && contract.calculatedEnd().isBefore(actualContract.get().beginDate) 
+              && contract.beginDate.isAfter(previousContract.endDate))) {
+        previousContract = contract;
+      }
+    }
+    return Optional.fromNullable(previousContract);
+  }
 
 }

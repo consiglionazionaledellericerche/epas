@@ -19,6 +19,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
@@ -131,16 +132,26 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
    
   @Getter
+  @Setter
   @OneToOne
   private Contract previousContract;
     
   @Transient
   public List<VacationPeriod> getVacationPeriods() {
-    if (getPreviousContract() == null) {
-      return vacationPeriods;
+//    if (getPreviousContract() == null) {
+//      return vacationPeriods;
+//    }
+//    List<VacationPeriod> vp = vacationPeriods;
+//    vp.addAll(getPreviousContract().getVacationPeriods());
+    return vacationPeriods;
+  }
+  
+  @Transient
+  public List<VacationPeriod> getExtendedVacationPeriods() {
+    List<VacationPeriod> vp = getVacationPeriods();
+    if (getPreviousContract() != null) {
+      vp.addAll(getPreviousContract().getVacationPeriods());
     }
-    List<VacationPeriod> vp = vacationPeriods;
-    vp.addAll(getPreviousContract().getVacationPeriods());
     return vp;
   }
   
