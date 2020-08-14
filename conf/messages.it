@@ -156,6 +156,7 @@ contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
 contract.perseoId =Identificato contratto in Anagrafica
 sourceDateRecoveryDay = Data inizializzazione riposi compensativi
+linkedToPreviousContract = Continuazione del precedente contratto
 
 previousContract.beginDate= Inizio precedente contratto
 previousContract.endContract= Terminato Il
