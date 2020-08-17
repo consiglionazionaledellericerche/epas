@@ -373,15 +373,21 @@ public class Contracts extends Controller {
     }
     //Controllo se il contratto deve essere linkato al precedente...
     if (linkedToPreviousContract) {
-      IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
-      Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
-      if (previousContract.isPresent()) {
-        contract.setPreviousContract(previousContract.get());
-      } else {
-        Validation.addError("linkedToPreviousContract", 
-            "Non esiste alcun contratto precedente cui linkare il contratto attuale");
-        render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-            onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+      if (contract.getPreviousContract() == null) {
+        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
+        Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
+        if (previousContract.isPresent()) {
+          contract.setPreviousContract(previousContract.get());
+        } else {
+          Validation.addError("linkedToPreviousContract", 
+              "Non esiste alcun contratto precedente cui linkare il contratto attuale");
+          render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
+              onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+        }
+      }    
+    } else {
+      if (contract.getPreviousContract() != null) {
+        contract.setPreviousContract(null);
       }
     }
 
