@@ -445,6 +445,24 @@ public class AbsencePeriod {
   public String toString() {
     return from + " " + to + " " + fixedPeriodTakableAmount + takableCodes;  
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AbsencePeriod)) {
+      return false;
+    }
+    AbsencePeriod other = (AbsencePeriod) o;
+    return from.isEqual(other.from) &&
+        to.isEqual(other.to) &&
+        person.id.equals(other.person.id) &&
+        groupAbsenceType.id.equals(groupAbsenceType.id);
+  }
+  
+  @Override
+  public int hashCode() {
+    return from.hashCode() + to.hashCode() 
+      + person.hashCode() + groupAbsenceType.hashCode();
+  }
 }
 
 

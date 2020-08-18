@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -91,7 +92,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;
 
-  //@Getter
+  @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
   public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
@@ -135,20 +136,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Setter
   @OneToOne
   private Contract previousContract;
-    
-  @Transient
-  public List<VacationPeriod> getVacationPeriods() {
-//    if (getPreviousContract() == null) {
-//      return vacationPeriods;
-//    }
-//    List<VacationPeriod> vp = vacationPeriods;
-//    vp.addAll(getPreviousContract().getVacationPeriods());
-    return vacationPeriods;
-  }
-  
+
   @Transient
   public List<VacationPeriod> getExtendedVacationPeriods() {
-    List<VacationPeriod> vp = getVacationPeriods();
+    List<VacationPeriod> vp = new ArrayList(getVacationPeriods());
     if (getPreviousContract() != null) {
       vp.addAll(getPreviousContract().getVacationPeriods());
     }
@@ -203,7 +194,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
       return Sets.newHashSet(contractStampProfile);
     }
     if (type.equals(VacationPeriod.class)) {
-      return Sets.newHashSet(vacationPeriods);
+      return Sets.newHashSet(getExtendedVacationPeriods());
     }
     if (type.equals(ContractMandatoryTimeSlot.class)) {
       return Sets.newHashSet(contractMandatoryTimeSlots);
