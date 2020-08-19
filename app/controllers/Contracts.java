@@ -123,10 +123,11 @@ public class Contracts extends Controller {
     LocalDate endContract = contract.endContract;
     boolean onCertificate = contract.onCertificate;
     boolean isTemporaryMissing = contract.isTemporaryMissing;
+    boolean linkedToPreviousContract = contract.getPreviousContract() != null ? true : false;
     String perseoId = contract.perseoId;
     LocalDate sourceDateRecoveryDay = contract.sourceDateRecoveryDay;
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay);
+        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
   }
 
   /**
@@ -327,7 +328,7 @@ public class Contracts extends Controller {
   public static void update(@Valid Contract contract, @Required LocalDate beginDate,
       @Valid LocalDate endDate, @Valid LocalDate endContract,
       boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing,
-      String perseoId, LocalDate sourceDateRecoveryDay) {
+      String perseoId, LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
@@ -370,12 +371,42 @@ public class Contracts extends Controller {
     if (isTemporaryMissing != null) {
       contract.isTemporaryMissing = isTemporaryMissing;  
     }
+    //Controllo se il contratto deve essere linkato al precedente...
+    if (linkedToPreviousContract) {
+      if (contract.getPreviousContract() == null) {
+        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
+        Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
+        if (previousContract.isPresent()) {
+          contract.setPreviousContract(previousContract.get());          
+          if (confirmed 
+              && contract.beginDate.minusDays(1).isEqual(previousContract.get().endDate)) {
+            contractManager.mergeVacationPeriods(contract, previousContract.get());
+          }
+          
+        } else {
+          Validation.addError("linkedToPreviousContract", 
+              "Non esiste alcun contratto precedente cui linkare il contratto attuale");
+          render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
+              onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+        }
+      }    
+    } else {
+      Contract temp = contract.getPreviousContract();
+      if (temp != null) {        
+        contract.setPreviousContract(null);
+        
+        if (confirmed && contract.beginDate.minusDays(1).isEqual(temp.endDate)) {
+          //contract.save();
+          contractManager.splitVacationPeriods(contract);
+        }         
+      }
+    }
 
     if (!contractManager.isContractNotOverlapping(contract)) {
       Validation.addError("contract.crossValidationFailed",
           "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate, perseoId, sourceDateRecoveryDay);
+          onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
     }
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -387,7 +418,8 @@ public class Contracts extends Controller {
       confirmed = true;
       response.status = 400;
       render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-          onCertificate, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay);
+          onCertificate, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay, 
+          linkedToPreviousContract);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
@@ -930,7 +962,7 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    if (contract.sourceDateResidual == null) {
+    if (contract.sourceDateVacation == null) {
       contractManager.cleanVacationInitialization(contract);
     }
 
@@ -940,7 +972,6 @@ public class Contracts extends Controller {
 
     IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
     IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
-
 
     render(contract, wrContract, wrOffice, wrPerson, 
         sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed);

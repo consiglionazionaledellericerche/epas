@@ -9,6 +9,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -145,7 +146,7 @@ public class VacationFactory {
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -212,7 +213,7 @@ public class VacationFactory {
     //Collapse initialization days
     handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
@@ -226,7 +227,7 @@ public class VacationFactory {
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
     //Permessi nell'anno
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -268,10 +269,10 @@ public class VacationFactory {
     LocalDate endYear = new LocalDate(year, 12, 31);
     
     if (!beginYear.isEqual(periods.get(0).from)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     if (!endYear.isEqual(periods.get(periods.size() - 1).to)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     
     int lowerLimitSelected = lowerLimits.get(0);
@@ -298,7 +299,7 @@ public class VacationFactory {
       periods.get(0).vacationAmountBeforeInitializationPatch = newAmount;
     }
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> fixTooLucky(List<AbsencePeriod> periods, List<Integer> upperLimits, 
@@ -388,7 +389,9 @@ public class VacationFactory {
   private List<AbsencePeriod> handleAccruedFirstYear(Person person, GroupAbsenceType group, 
       Contract contract, List<AbsencePeriod> periods) {
     List<AbsencePeriod> fixed = Lists.newArrayList();
-    LocalDate secondYearStart = contract.beginDate.plusYears(1);
+    
+    LocalDate secondYearStart = contract.getPreviousContract() != null ?
+        contract.getPreviousContract().beginDate : contract.beginDate.plusYears(1);
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {
@@ -515,7 +518,7 @@ public class VacationFactory {
         break;
       }
     }
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   /**
