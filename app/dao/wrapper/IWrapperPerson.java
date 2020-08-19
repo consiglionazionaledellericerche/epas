@@ -35,6 +35,12 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    * Il contratto attuale. Istanzia una variabile Lazy.
    */
   Optional<Contract> getCurrentContract();
+  
+  /**
+   * 
+   * Il contratto precedente, se esiste.
+   */
+  Optional<Contract> getPreviousContract();
 
 
   /**

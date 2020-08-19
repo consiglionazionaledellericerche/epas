@@ -55,6 +55,8 @@
 	    	#{f.date 'endDate', value:endDate?.format() /}
 	    	#{f.date 'endContract', value:endContract?.format() /}
 	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+    		#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract /}
+	    	
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
 	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
 	    	#{/secure.check}
@@ -84,6 +86,7 @@
 			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
 			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
 			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
+			#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
 			#{/secure.check}

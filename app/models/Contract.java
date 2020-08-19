@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,10 +15,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
@@ -128,7 +131,21 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
+   
+  @Getter
+  @Setter
+  @OneToOne
+  private Contract previousContract;
 
+  @Transient
+  public List<VacationPeriod> getExtendedVacationPeriods() {
+    List<VacationPeriod> vp = new ArrayList(getVacationPeriods());
+    if (getPreviousContract() != null) {
+      vp.addAll(getPreviousContract().getVacationPeriods());
+    }
+    return vp;
+  }
+  
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
@@ -177,7 +194,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
       return Sets.newHashSet(contractStampProfile);
     }
     if (type.equals(VacationPeriod.class)) {
-      return Sets.newHashSet(vacationPeriods);
+      return Sets.newHashSet(getVacationPeriods());
     }
     if (type.equals(ContractMandatoryTimeSlot.class)) {
       return Sets.newHashSet(contractMandatoryTimeSlots);
