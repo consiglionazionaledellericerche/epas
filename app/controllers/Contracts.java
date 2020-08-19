@@ -377,7 +377,12 @@ public class Contracts extends Controller {
         IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
         Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
         if (previousContract.isPresent()) {
-          contract.setPreviousContract(previousContract.get());
+          contract.setPreviousContract(previousContract.get());          
+          if (confirmed 
+              && contract.beginDate.minusDays(1).isEqual(previousContract.get().endDate)) {
+            contractManager.mergeVacationPeriods(contract, previousContract.get());
+          }
+          
         } else {
           Validation.addError("linkedToPreviousContract", 
               "Non esiste alcun contratto precedente cui linkare il contratto attuale");
@@ -386,8 +391,14 @@ public class Contracts extends Controller {
         }
       }    
     } else {
-      if (contract.getPreviousContract() != null) {
+      Contract temp = contract.getPreviousContract();
+      if (temp != null) {        
         contract.setPreviousContract(null);
+        
+        if (confirmed && contract.beginDate.minusDays(1).isEqual(temp.endDate)) {
+          //contract.save();
+          contractManager.splitVacationPeriods(contract);
+        }         
       }
     }
 
