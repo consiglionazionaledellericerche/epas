@@ -356,5 +356,4 @@ public class WrapperContract implements IWrapperContract {
   }
 
 
-
 }
