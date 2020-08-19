@@ -1,6 +1,7 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
@@ -192,12 +193,13 @@ public class ContractDao extends DaoBase {
    * @param actualContract il contratto attuale del dipendente
    * @return il contratto precedente
    */
-  public Optional<Contract> getPreviousContract(Optional<Contract> actualContract) {
+  public Optional<Contract> getPreviousContract(Contract actualContract) {
+    Verify.verifyNotNull(actualContract);
     Contract previousContract = null;
-    List<Contract> contractList = getPersonContractList(actualContract.get().person);
+    List<Contract> contractList = getPersonContractList(actualContract.person);
     for (Contract contract : contractList) {
       if (previousContract == null 
-          || (contract.calculatedEnd() != null && contract.calculatedEnd().isBefore(actualContract.get().beginDate) 
+          || (contract.calculatedEnd() != null && contract.calculatedEnd().isBefore(actualContract.beginDate) 
               && contract.beginDate.isAfter(previousContract.endDate))) {
         previousContract = contract;
       }

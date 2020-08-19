@@ -520,7 +520,7 @@ public class WrapperPerson implements IWrapperPerson {
     }
     
     if (previousContract == null) {
-      previousContract = contractDao.getPreviousContract(getCurrentContract());
+      previousContract = contractDao.getPreviousContract(getCurrentContract().get());
     }
     return previousContract;
   }
