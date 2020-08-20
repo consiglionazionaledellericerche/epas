@@ -37,7 +37,6 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   Optional<Contract> getCurrentContract();
   
   /**
-   * 
    * Il contratto precedente, se esiste.
    */
   Optional<Contract> getPreviousContract();

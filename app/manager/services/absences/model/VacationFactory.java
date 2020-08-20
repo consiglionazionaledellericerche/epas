@@ -591,7 +591,7 @@ public class VacationFactory {
   
   private LocalDate vacationsExpireDate(int year, Office office) {
 
-    MonthDay monthDay = (MonthDay)configurationManager
+    MonthDay monthDay = (MonthDay) configurationManager
         .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
 
     LocalDate expireDate = LocalDate.now()
