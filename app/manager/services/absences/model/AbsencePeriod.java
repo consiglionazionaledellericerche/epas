@@ -452,10 +452,10 @@ public class AbsencePeriod {
       return false;
     }
     AbsencePeriod other = (AbsencePeriod) o;
-    return from.isEqual(other.from) &&
-        to.isEqual(other.to) &&
-        person.id.equals(other.person.id) &&
-        groupAbsenceType.id.equals(groupAbsenceType.id);
+    return from.isEqual(other.from) 
+        && to.isEqual(other.to) 
+        && person.id.equals(other.person.id) 
+        && groupAbsenceType.id.equals(groupAbsenceType.id);
   }
   
   @Override

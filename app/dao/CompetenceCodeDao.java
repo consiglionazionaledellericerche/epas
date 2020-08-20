@@ -295,17 +295,15 @@ public class CompetenceCodeDao extends DaoBase {
   }
   
   /**
-   * 
+   * Ritorna la lista dei person competence codes duplicati.
    * @return la lista di pcc duplicati.
    */
   public List<PersonCompetenceCodeDto> getDuplicates() {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-    /*
-     * from persons_competence_codes where begin_date < now() and (end_date is null or end_date > now()) 
-     * group by person_id, competence_code_id having count(*) > 1 order by person_id, competence_code_id;
-     * query.select(Projections.constructor(CatDTO.class, cat.id, cat.name))
-     */
-    return getQueryFactory().from(pcc).select(Projections.constructor(PersonCompetenceCodeDto.class, pcc.person.id, pcc.competenceCode.id))
+
+    return getQueryFactory().from(pcc)
+        .select(Projections.constructor(PersonCompetenceCodeDto.class, 
+            pcc.person.id, pcc.competenceCode.id))
         .where(pcc.beginDate.lt(LocalDate.now())
         .andAnyOf(pcc.endDate.isNull(), pcc.endDate.gt(LocalDate.now())))
         .groupBy(pcc.person.id, pcc.competenceCode.id).having(pcc.count().gt(1L))
@@ -313,8 +311,8 @@ public class CompetenceCodeDao extends DaoBase {
   }
   
   /**
-   * 
-   * @return
+   * Ritorna la lista dei person competence codes con date sballate.
+   * @return la lista dei pcc con date sballate.
    */
   public List<PersonCompetenceCodes> getWrongs() {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;

@@ -127,7 +127,8 @@ public class Contracts extends Controller {
     String perseoId = contract.perseoId;
     LocalDate sourceDateRecoveryDay = contract.sourceDateRecoveryDay;
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay, 
+        linkedToPreviousContract);
   }
 
   /**

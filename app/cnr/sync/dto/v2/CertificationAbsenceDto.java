@@ -1,8 +1,9 @@
 package cnr.sync.dto.v2;
 
-import org.joda.time.LocalDate;
 import lombok.Builder;
 import lombok.Data;
+import org.joda.time.LocalDate;
+
 
 @Data
 @Builder

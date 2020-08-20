@@ -137,6 +137,11 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToOne
   private Contract previousContract;
 
+  /**
+   * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
+   * 
+   */
   @Transient
   public List<VacationPeriod> getExtendedVacationPeriods() {
     List<VacationPeriod> vp = new ArrayList(getVacationPeriods());

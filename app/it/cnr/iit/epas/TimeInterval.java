@@ -1,11 +1,12 @@
 package it.cnr.iit.epas;
 
-import org.joda.time.Hours;
-import org.joda.time.LocalTime;
-import org.joda.time.Minutes;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
+import org.joda.time.Hours;
+import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
+
 
 @NoArgsConstructor
 public class TimeInterval {
@@ -45,11 +46,11 @@ public class TimeInterval {
 
     if (begin == null && end == null) {
       begin = new LocalTime(0, 0, 0);
-      end = new LocalTime(23,59,59);
+      end = new LocalTime(23, 59, 59);
     } else if (begin == null) {
       begin = new LocalTime(0, 0, 0);
     } else if (end == null) {
-      end = new LocalTime(23,59,59);
+      end = new LocalTime(23, 59, 59);
     }
 
     //Non applico il riferimento ma costruisco nuovi oggetti
