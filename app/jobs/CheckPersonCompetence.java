@@ -4,13 +4,13 @@ import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Maps;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.NumberPath;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.CompetenceCode;
 import models.Person;
@@ -53,12 +53,6 @@ public class CheckPersonCompetence extends Job<Void> {
       Person person = personDao.getPersonById(dto.personId);
       CompetenceCode code = competenceCodeDao.getCompetenceCodeById(dto.competenceCodeId);
       List<PersonCompetenceCodes> subList = competenceCodeDao.listByPersonAndCode(person, code);
-//      subList.sort((m1, m2) -> {
-//        if(m1.beginDate.isEqual(m2.beginDate)){
-//          return 0;
-//        }
-//        return m1.beginDate.isBefore(m2.beginDate) ? -1 : 1;
-//      });
 
       log.debug("Trovati {} periodi", subList.size());
       //List<PersonCompetenceCodes> toDelete = Lists.newArrayList();

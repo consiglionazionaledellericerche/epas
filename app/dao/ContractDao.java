@@ -189,7 +189,7 @@ public class ContractDao extends DaoBase {
   }
   
   /**
-   * 
+   * Ritorna il contratto precedente.
    * @param actualContract il contratto attuale del dipendente
    * @return il contratto precedente
    */
@@ -199,7 +199,8 @@ public class ContractDao extends DaoBase {
     List<Contract> contractList = getPersonContractList(actualContract.person);
     for (Contract contract : contractList) {
       if (previousContract == null 
-          || (contract.calculatedEnd() != null && contract.calculatedEnd().isBefore(actualContract.beginDate) 
+          || (contract.calculatedEnd() != null && contract.calculatedEnd()
+          .isBefore(actualContract.beginDate) 
               && contract.beginDate.isAfter(previousContract.endDate))) {
         previousContract = contract;
       }

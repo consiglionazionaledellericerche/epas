@@ -2,9 +2,10 @@ package cnr.sync.dto.v2;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import org.joda.time.LocalDate;
 import lombok.Builder;
 import lombok.Data;
+import org.joda.time.LocalDate;
+
 
 @Builder
 @Data

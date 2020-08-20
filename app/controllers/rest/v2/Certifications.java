@@ -200,7 +200,7 @@ public class Certifications extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @return la lista di dto contenente la informazioni sulle assenze nell'anno/mese fatte 
-   *    dalla persona.
+   *     dalla persona.
    */
   private static List<CertificationAbsenceDto> searchAbsences(Person person, int year, int month) {
     List<CertificationAbsenceDto> absences = Lists.newArrayList();
