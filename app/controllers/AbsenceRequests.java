@@ -37,6 +37,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -115,6 +116,10 @@ public class AbsenceRequests extends Controller {
   public static void compensatoryRests() {
     list(AbsenceRequestType.COMPENSATORY_REST);
   }
+  
+  public static void personalPermissions() {
+    list(AbsenceRequestType.PERSONAL_PERMISSION);
+  }
 
   public static void shortTermPermit() {
     list(AbsenceRequestType.SHORT_TERM_PERMIT);
@@ -126,6 +131,10 @@ public class AbsenceRequests extends Controller {
 
   public static void compensatoryRestsToApprove() {
     listToApprove(AbsenceRequestType.COMPENSATORY_REST);
+  }
+  
+  public static void permissionsToApprove() {
+    listToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
   }
 
   public static void shortTermPermitToApprove() {
@@ -250,6 +259,7 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
+
     boolean showVacationPeriods = false;
     boolean retroactiveAbsence = false;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
@@ -265,7 +275,7 @@ public class AbsenceRequests extends Controller {
             null, null, false, absenceManager);
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
-        retroactiveAbsence);
+        retroactiveAbsence, absenceForm);
 
   }
 
@@ -274,7 +284,9 @@ public class AbsenceRequests extends Controller {
    *
    * @param absenceRequest richiesta di assenza da modificare.
    */
-  public static void edit(AbsenceRequest absenceRequest, boolean retroactiveAbsence) {
+  public static void edit(AbsenceRequest absenceRequest, boolean retroactiveAbsence,
+      GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
+      JustifiedType justifiedType, Integer hours, Integer minutes) {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
@@ -286,7 +298,8 @@ public class AbsenceRequests extends Controller {
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, retroactiveAbsence);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, 
+          groupAbsenceType, absenceType, justifiedType, hours, minutes);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
       Validation.addError("absenceRequest.startAt",
@@ -319,7 +332,7 @@ public class AbsenceRequests extends Controller {
       flash.error(Web.msgHasErrors());
 
       render("@edit", absenceRequest, insertable, retroactiveAbsence);
-      return;
+      //return;
     }
 
     if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
@@ -332,15 +345,18 @@ public class AbsenceRequests extends Controller {
         render("@edit", absenceRequest, insertable, retroactiveAbsence);
       }
     }
-    GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
-    AbsenceType absenceType = null;
+    if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
+      groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    }
+    
+    
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, null, null, null, false, true);
+        false, absenceType, justifiedType, hours, minutes, false, true);
     InsertReport insertReport =
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-            null, null, false, absenceManager);
+            absenceForm.hours, absenceForm.minutes, false, absenceManager);
 
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST)
@@ -364,6 +380,7 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
+
 
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
         compensatoryRestAvailable, retroactiveAbsence);

@@ -31,6 +31,10 @@
         <i class="fa fa-bath" aria-hidden="true"></i>
       #{/secure.li}
       
+      #{secure.li @AbsenceRequests.personalPermissions()}
+        <i class="fa fa-male" aria-hidden="true"></i>
+      #{/secure.li}
+      
       <li class="divider"></li>
       
 	  #{secure.li @AbsenceRequests.vacationsToApprove()}
@@ -41,6 +45,14 @@
       #{/secure.li}
 
       #{secure.li @AbsenceRequests.compensatoryRestsToApprove()}
+        <i class="fa fa-bath" aria-hidden="true"></i>
+        #{if templateUtility.compensatoryRestRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+      
+      
+      #{secure.li @AbsenceRequests.permissionsToApprove()}
         <i class="fa fa-bath" aria-hidden="true"></i>
         #{if templateUtility.compensatoryRestRequests() > 0}
       		<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>

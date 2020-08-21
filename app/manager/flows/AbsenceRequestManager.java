@@ -122,6 +122,7 @@ public class AbsenceRequestManager {
 
   private static final String FERIE_CNR = "FERIE_CNR";
   private static final String RIPOSI_CNR = "RIPOSI_CNR";
+  private static final String PERMESSI_PERSONALI = "G_661";
 
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
@@ -689,6 +690,12 @@ public class AbsenceRequestManager {
         break;
       case COMPENSATORY_REST:
         group = absenceDao.groupAbsenceTypeByName(RIPOSI_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }
+        break;
+      case PERSONAL_PERMISSION:
+        group = absenceDao.groupAbsenceTypeByName(PERMESSI_PERSONALI);
         if (group.isPresent()) {
           groupAbsenceType = group.get();
         }
