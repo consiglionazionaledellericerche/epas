@@ -24,6 +24,51 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 
 	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
 	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	
+
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+	
+		#{if absenceForm != null}
+		#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+     
+	    #{if absenceForm.hasAbsenceTypeChoice()} 
+			 #{f.selectModel 'absenceType', personalizeItems:true}
+			   #{if absenceForm.automaticChoiceExists}
+			      <optgroup label="Inserimento Automatico">
+			        <option value=""
+			          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
+				  <optgroup/>
+			   #{/if}   
+			   <optgroup label="Codice Specifico">
+			    #{list absenceForm.absenceTypes, as:'absenceType'}
+			    <option value="${absenceType?.id}"
+			      #{if absenceForm.absenceTypeSelected != null && absenceForm.absenceTypeSelected.equals(absenceType) } selected #{/if}>
+			      ${absenceType.getLabel()}
+			    </option>
+			    #{/list}   
+			   <optgroup/>
+			 #{/f.selectModel}
+		 #{/if}
+		 #{else}
+		   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
+		   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
+		 #{/else}
+	   
+	     #{if absenceForm.hasJustifiedTypeChoice() }
+	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+	     #{/if}
+	     
+	     *{ seleziona minuti }*    
+	     #{if absenceForm.hasHourMinutesChoice() }
+	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
+	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
+	     #{/if}
+	     #{/if}
+	
+	#{/if}
+
+	
+      
 	#{if retroactiveAbsence}
 		#{f.input 'absenceRequest.note', required:true, value:absenceRequest.note /}
 	#{/if}
@@ -57,7 +102,18 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.hidden 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}
 	#{f.hidden 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
 	#{f.hidden 'absenceRequest.note' /}
+
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+		#{if absenceForm != null} 
+      	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+      	#{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
+      	#{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
       
+      	#{f.hidden 'hours', value:absenceForm.hours /}
+      	#{f.hidden 'minutes', value:absenceForm.minutes /}
+    	#{/if}
+    #{/if}
+
             
 	#{b.buttons center:true}
 		 #{b.link @list(absenceRequest.type), color:'default', title:'Indietro' /}
