@@ -62,6 +62,13 @@ public class AbsenceRequest extends MutableModel {
   public LocalDateTime endTo;
 
   /**
+   * Campi ore e minuti per le assenze orarie
+   */
+  public Integer hours;
+  
+  public Integer minutes;
+  
+  /**
    * Descrizione facoltativa della richiesta.
    */
   public String note;

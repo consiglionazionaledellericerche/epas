@@ -193,9 +193,12 @@ public class NotificationManager {
       if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
-      } else {
+      } else if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST){
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+      } else {
+        groupAbsenceType =
+            componentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
       }
       if (!absence.isEmpty()) {
         notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false,
@@ -347,6 +350,7 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
+        || groupAbsenceType.name.equals(DefaultGroup.G_661.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
         notifyAbsence(absence, currentUser, NotificationManager.Crud.CREATE);
@@ -582,6 +586,8 @@ public class NotificationManager {
     String requestType = "";
     if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
+      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
