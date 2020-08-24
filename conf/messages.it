@@ -37,7 +37,7 @@ DELETE =Richiesta cancellata
 EXPIRING =Richiesta scaduta
 AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
 AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
-AbsenceRequestType.PERSONAL_PERMISSIONS_TO_APPROVE=Permessi personali da approvare
+AbsenceRequestType.PERSONAL_PERMISSION_TO_APPROVE=Permessi personali da approvare
 AbsenceRequestType.VACATION_REQUEST=Ferie
 AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
 AbsenceRequestType.PERSONAL_PERMISSIONS=Permesso personale
@@ -822,6 +822,7 @@ AbsenceRequests.personalPermissions =Miei permessi personali
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
+AbsenceRequests.permissionsToApprove =Flussi di permessi personali
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie

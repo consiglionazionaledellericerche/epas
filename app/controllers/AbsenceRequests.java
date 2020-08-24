@@ -389,7 +389,8 @@ public class AbsenceRequests extends Controller {
   /**
    * Salvataggio di una richiesta di assenza.
    */
-  public static void save(@Required @Valid AbsenceRequest absenceRequest, boolean persist) {
+  public static void save(@Required @Valid AbsenceRequest absenceRequest, 
+      Integer hours, Integer minutes, boolean persist) {
 
     log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
 
@@ -404,6 +405,11 @@ public class AbsenceRequests extends Controller {
 
     if (absenceRequest.endTo == null) {
       absenceRequest.endTo = absenceRequest.startAt;
+    }
+    
+    if (hours != null && minutes != null) {
+      absenceRequest.hours = hours;
+      absenceRequest.minutes = minutes;
     }
 
     boolean isNewRequest = !absenceRequest.isPersistent();
