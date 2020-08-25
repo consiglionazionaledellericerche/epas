@@ -451,11 +451,31 @@ public class AbsencePeriod {
     if (!(o instanceof AbsencePeriod)) {
       return false;
     }
+    
     AbsencePeriod other = (AbsencePeriod) o;
-    return from.isEqual(other.from) 
-        && to.isEqual(other.to) 
-        && person.id.equals(other.person.id) 
-        && groupAbsenceType.id.equals(groupAbsenceType.id);
+    
+    boolean isEqual = false;
+    
+    if ((from == null && other.from != null) || 
+        from != null && other.from == null) {
+      return false; 
+    }
+    if ((to == null && other.to != null) || 
+        to != null && other.to == null) {
+      return false; 
+    }
+    
+    isEqual = person.id.equals(other.person.id) && 
+        groupAbsenceType.id.equals(groupAbsenceType.id);
+    
+    if (from != null && other.from != null) {
+      isEqual = isEqual && from.isEqual(other.from);
+    }
+    if (to != null && other.to != null) {
+      isEqual = isEqual && to.isEqual(other.to);
+    }
+    
+    return isEqual;
   }
   
   @Override
@@ -463,6 +483,5 @@ public class AbsencePeriod {
     return from.hashCode() + to.hashCode() 
       + person.hashCode() + groupAbsenceType.hashCode();
   }
+
 }
-
-
