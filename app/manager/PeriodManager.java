@@ -8,8 +8,10 @@ import com.google.common.collect.Range;
 import edu.emory.mathcs.backport.java.util.Collections;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -61,8 +63,16 @@ public class PeriodManager {
     boolean recomputeBeginSet = false;
 
     //controllo iniziale consistenza periodo.
-    if (propertyInPeriod.calculatedEnd() != null) {
-      Verify.verify(!propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd()));
+    if (propertyInPeriod.getBeginDate() != null && 
+        propertyInPeriod.calculatedEnd() != null &&
+        propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd())) {
+      log.warn("Scartato aggiornamento PropertyInPeriod per data inconsistente. "
+          + "propertyInPeriod.owner = {}, propertyInPeriod.type = {}. "
+          + "beginDate = {}, calculatedEnd = {}", 
+          propertyInPeriod.getOwner(), propertyInPeriod.getType(),
+          propertyInPeriod.getBeginDate(),
+          propertyInPeriod.calculatedEnd());
+      return propertyInPeriod.getOwner().periods(propertyInPeriod.getType()).stream().collect(Collectors.toList());
     }
     
     //copia dei periodi ordinata
