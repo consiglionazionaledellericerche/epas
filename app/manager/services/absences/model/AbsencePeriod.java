@@ -480,8 +480,10 @@ public class AbsencePeriod {
   
   @Override
   public int hashCode() {
-    return from.hashCode() + to.hashCode() 
-      + person.hashCode() + groupAbsenceType.hashCode();
+    return (from != null ? from.hashCode() : 0) + 
+        (to != null ? to.hashCode() : 0) + 
+        (person != null ? person.hashCode() : 0) + 
+        (groupAbsenceType != null ? groupAbsenceType.hashCode() : 0);
   }
 
 }
