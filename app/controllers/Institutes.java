@@ -44,6 +44,10 @@ public class Institutes extends Controller {
     render(results);
   }
 
+  /**
+   * Ritorna la form di editing dell'istituto con id passato come parametro.
+   * @param id l'identificativo dell'istituto da editare
+   */
   public static void edit(Long id) {
 
     final Institute institute = Institute.findById(id);
@@ -56,6 +60,10 @@ public class Institutes extends Controller {
     render("@edit", institute);
   }
 
+  /**
+   * Permette il salvataggio dell'istituto in oggetto al metodo.
+   * @param institute l'oggetto da persistere
+   */
   public static void save(@Valid Institute institute) {
 
     if (Validation.hasErrors()) {
@@ -71,6 +79,10 @@ public class Institutes extends Controller {
     }
   }
 
+  /**
+   * Cancella l'oggetto institute con id passato come parametro.
+   * @param id l'identificativo dell'istituto da cancellare
+   */
   public static void delete(Long id) {
     final Institute institute = Institute.findById(id);
     notFoundIfNull(institute);

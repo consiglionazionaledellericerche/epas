@@ -203,6 +203,8 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
+   * Ritorna la stringa cryptata con aes e chiave play predefinita.
+   * @param value la stringa da criptare
    * @return la stringa cryptata con aes e chiave play predefinita.
    */
   public static String encrypt(String value) {
@@ -260,6 +262,7 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
+   * Ritorna la stringa dell'anno mese passato come parametro.
    * @param month Yearmoth da formattare
    * @return La Stringa in formato Mese(nome) Anno
    */

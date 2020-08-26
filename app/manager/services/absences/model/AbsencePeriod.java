@@ -445,6 +445,45 @@ public class AbsencePeriod {
   public String toString() {
     return from + " " + to + " " + fixedPeriodTakableAmount + takableCodes;  
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AbsencePeriod)) {
+      return false;
+    }
+    
+    AbsencePeriod other = (AbsencePeriod) o;
+    
+    boolean isEqual = false;
+    
+    if ((from == null && other.from != null) || 
+        from != null && other.from == null) {
+      return false; 
+    }
+    if ((to == null && other.to != null) || 
+        to != null && other.to == null) {
+      return false; 
+    }
+    
+    isEqual = person.id.equals(other.person.id) && 
+        groupAbsenceType.id.equals(groupAbsenceType.id);
+    
+    if (from != null && other.from != null) {
+      isEqual = isEqual && from.isEqual(other.from);
+    }
+    if (to != null && other.to != null) {
+      isEqual = isEqual && to.isEqual(other.to);
+    }
+    
+    return isEqual;
+  }
+  
+  @Override
+  public int hashCode() {
+    return (from != null ? from.hashCode() : 0) + 
+        (to != null ? to.hashCode() : 0) + 
+        (person != null ? person.hashCode() : 0) + 
+        (groupAbsenceType != null ? groupAbsenceType.hashCode() : 0);
+  }
+
 }
-
-

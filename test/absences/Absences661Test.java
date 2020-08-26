@@ -87,7 +87,7 @@ public class Absences661Test extends UnitTest {
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
-        allPersistedAbsences, groupPersistedAbsences);
+        allPersistedAbsences, groupPersistedAbsences, person.contracts);
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);

@@ -151,6 +151,16 @@ public class WorkingTimeType extends BaseModel {
    * @return percentuale
    */
   public int percentEuristic() {
+    int average = averageMinutesInWeek();
+    if (average == 0) {
+      return 100;
+    }
+    
+    int percent = (average * 100) / WORKTIME_BASE;  
+    return percent;
+  }
+  
+  public int averageMinutesInWeek() {
     int totalMinutes = 0;
     int totalDays = 0;
     for (WorkingTimeTypeDay workingTimeTypeDay : this.workingTimeTypeDays) {
@@ -163,12 +173,7 @@ public class WorkingTimeType extends BaseModel {
       }
       
     }
-    if (totalDays == 0) {
-      return 100;
-    }
-    
-    int percent = ((totalMinutes / totalDays) * 100) / WORKTIME_BASE;  
-    return percent;
+    return totalMinutes / totalDays;
   }
     
 
