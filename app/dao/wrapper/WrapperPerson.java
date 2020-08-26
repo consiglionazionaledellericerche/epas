@@ -50,6 +50,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   private List<Contract> sortedContracts;
   private Optional<Contract> currentContract;
+  private Optional<Contract> previousContract;
   private Optional<WorkingTimeType> currentWorkingTimeType;
   private Optional<VacationPeriod> currentVacationPeriod;
   private Optional<ContractStampProfile> currentContractStampProfile;
@@ -509,5 +510,18 @@ public class WrapperPerson implements IWrapperPerson {
       }
     }
     return Optional.of(last);
+  }
+
+  @Override
+  public Optional<Contract> getPreviousContract() {
+    
+    if (previousContract != null) {
+      return previousContract;
+    }
+    
+    if (previousContract == null) {
+      previousContract = contractDao.getPreviousContract(getCurrentContract().get());
+    }
+    return previousContract;
   }
 }

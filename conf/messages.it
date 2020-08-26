@@ -156,6 +156,7 @@ contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
 contract.perseoId =Identificato contratto in Anagrafica
 sourceDateRecoveryDay = Data inizializzazione riposi compensativi
+linkedToPreviousContract = Continuazione del precedente contratto
 
 previousContract.beginDate= Inizio precedente contratto
 previousContract.endContract= Terminato Il
@@ -612,7 +613,7 @@ type.description =Descrizione
 type.allowUnpairSlots =Permetti disparità tra gli slot di turno 
 considerEverySlot =Permetti assegnamento turno con tutti slot popolati
 type.office =Sede
-type.supervisor =Supervisore servizio
+type.supervisor =Responsabile servizio
 type.managers =Gestori reperibilità
 
 timeTable.startMorning =inizio turno
@@ -644,7 +645,7 @@ timeTable.endEveningLunchTime =fine pranzo
 
 cat.description =Descrizione
 cat.office =Sede
-cat.supervisor =Supervisore servizio
+cat.supervisor =Responsabile servizio
 cat.managers =Gestori dei turni
 
 uro.office=Sede
@@ -1122,6 +1123,7 @@ absenceType.consideredWeekEnd= Festivi
 absenceType.description= Descrizione
 absenceType.internalUse= Interno
 absenceType.qualifications= Livelli
+absenceType.reperibilityCompatible=Compatibile con reperibilità
 absenceType.tecnici= Tecnici
 absenceType.tecnologi= Tecnologi
 absenceType.validFrom= Inizio validita'

@@ -25,6 +25,12 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, true),
   
+  A_COVID19BP("COVID19",
+      "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
+      + "con maturazione buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), null, null, true),
+  
   
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
@@ -434,7 +440,7 @@ public enum DefaultAbsenceType {
       + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 
       0, true, false, 0, null, Sets.newHashSet(), null, null, false),
 
-  A_COVID50("COVID50", "Congedo parentale straordinario per un massimo di  15 gg. lavorativi.", 
+  A_COVID50("COVID50", "Congedo parentale straordinario per un massimo di  30 gg. lavorativi.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
       Sets.newHashSet(), null, null, false), 
   
@@ -1035,6 +1041,9 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true /* festivo capire */, false, 0,
       null, Sets.newHashSet(), null, null, false), 
   A_54D("54D", "aspett.per nomina a Dirett.Ammin.", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true /* festivo capire */, false, 0,
+      null, Sets.newHashSet(), null, null, false), 
+  A_54DD("54DD", "aspett.funz.dirigenzia.no anz.serv.", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true /* festivo capire */, false, 0,
       null, Sets.newHashSet(), null, null, false), 
   A_54E("54E", "congedo eventi cause particolari", false,

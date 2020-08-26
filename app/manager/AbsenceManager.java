@@ -160,7 +160,10 @@ public class AbsenceManager {
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
+      log.info("Prima del lancio dei ricalcoli");      
       JPA.em().flush();
+      log.info("Flush dell'entity manager effettuata");
+      
       consistencyManager.updatePersonSituation(person.id, from);
     }
   }

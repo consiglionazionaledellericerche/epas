@@ -2,15 +2,17 @@ package cnr.sync.dto.v2;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import org.joda.time.LocalDate;
 import lombok.Builder;
 import lombok.Data;
+import org.joda.time.LocalDate;
+
 
 @Builder
 @Data
 public class PersonDayDto {
 
   private LocalDate data;
+  private String number;
   private int tempoLavoro;
   private int differenza;
   private int progressivo;

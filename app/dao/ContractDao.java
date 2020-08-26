@@ -1,6 +1,7 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
@@ -185,6 +186,26 @@ public class ContractDao extends DaoBase {
     QContractStampProfile csp = QContractStampProfile.contractStampProfile;
     return getQueryFactory().selectFrom(csp)
         .where(csp.id.eq(id)).fetchOne();
+  }
+  
+  /**
+   * Ritorna il contratto precedente.
+   * @param actualContract il contratto attuale del dipendente
+   * @return il contratto precedente
+   */
+  public Optional<Contract> getPreviousContract(Contract actualContract) {
+    Verify.verifyNotNull(actualContract);
+    Contract previousContract = null;
+    List<Contract> contractList = getPersonContractList(actualContract.person);
+    for (Contract contract : contractList) {
+      if (previousContract == null 
+          || (contract.calculatedEnd() != null && contract.calculatedEnd()
+          .isBefore(actualContract.beginDate) 
+              && contract.beginDate.isAfter(previousContract.endDate))) {
+        previousContract = contract;
+      }
+    }
+    return Optional.fromNullable(previousContract);
   }
 
 }

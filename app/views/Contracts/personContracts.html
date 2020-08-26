@@ -91,6 +91,7 @@
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
 			<th>Data terminazione<br>esperienza</th>
+			<th>Continuativo del precedente</th>
 			<th>Gestisci</th>
 		</tr>
     #{list items:contractList, as:'contract'}
@@ -110,8 +111,8 @@
 		</td>
 		
 		<td>${contract.value.endContract?.format()}</td>
-		
-		<td>
+		<td align="center">#{if contract.value.previousContract != null} SI #{/if}</td>
+		<td align="center">
 				#{b.buttons center:true}
 					#{secure.check 'Contracts.merge'}
 					#{b.link @Contracts.merge(contract.value.id), color:'warning', title:'Merge'/}

@@ -20,6 +20,7 @@ import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
@@ -213,6 +214,27 @@ public class AbsenceDao extends DaoBase {
         .orderBy(absence.personDay.date.asc()).fetch();
   }
 
+  /**
+   * Metodo per la ricerca di tutte le assenze che giustificano qualcosa.
+   * @param person la persona di cui interessano le assenze
+   * @param begin la data di inizio
+   * @param end la data di fine
+   * @return la lista di assenze che non comprendono le assenze orarie "H" che non giustificano
+   *     niente.
+   */
+  public List<Absence> getAbsenceWithNoHInMonth(Person person, LocalDate begin, LocalDate end) {
+    
+    final QAbsence absence = QAbsence.absence;
+    final QJustifiedType type = QJustifiedType.justifiedType;
+    
+    return getQueryFactory().selectFrom(absence)
+        .leftJoin(absence.justifiedType, type)
+        .where(absence.personDay.person.eq(person)
+        .and(absence.personDay.date.between(begin, end)
+            .and(type.name.ne(JustifiedTypeName.nothing))))
+        .orderBy(absence.personDay.date.asc())
+        .fetch();
+  }
 
   /**
    * Controlla che nell'intervallo passato in args non esista gia' una assenza giornaliera.
