@@ -472,8 +472,11 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     final GroupAbsenceType compensatory =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
+    final GroupAbsenceType permissions =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     groupsPermitted.add(vacation);
     groupsPermitted.add(compensatory);
+    groupsPermitted.add(permissions);
     return groupsPermitted;
   }
 

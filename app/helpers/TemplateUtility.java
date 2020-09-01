@@ -198,6 +198,25 @@ public class TemplateUtility {
 
     return results.size();
   }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste di permesso personale
+   * da approvare nel template.
+   * @return la quantità di richieste di permesso personale da approvare.
+   */
+  public final int personalPermissionRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(),Optional.absent(), 
+            AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
+
+    return results.size();
+  }
 
 
   /**

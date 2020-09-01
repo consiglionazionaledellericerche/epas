@@ -37,8 +37,10 @@ DELETE =Richiesta cancellata
 EXPIRING =Richiesta scaduta
 AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
 AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
+AbsenceRequestType.PERSONAL_PERMISSION_TO_APPROVE=Permessi personali da approvare
 AbsenceRequestType.VACATION_REQUEST=Ferie
 AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
+AbsenceRequestType.PERSONAL_PERMISSIONS=Permesso personale
 
 activity =Attività di turno
 ADD= Inserimento
@@ -816,9 +818,11 @@ Contracts.initializationsStatus=Dati Iniziali
 AbsenceRequests.vacations =Mie richieste di ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
+AbsenceRequests.personalPermissions =Miei permessi personali
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
+AbsenceRequests.permissionsToApprove =Flussi di permessi personali
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
@@ -828,6 +832,10 @@ AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
 AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
+
+AbsenceRequestType.PERSONAL_PERMISSION =permesso personale
+AbsenceRequestType.PERSONAL_PERMISSIONS =Miei permessi personali
+AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
@@ -997,6 +1005,7 @@ TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
+SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da I a III
@@ -1039,6 +1048,11 @@ COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazion
 COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
 
+PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
+PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile Sede	
+PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile gruppo di lavoro		
+PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi

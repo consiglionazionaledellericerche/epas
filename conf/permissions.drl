@@ -501,6 +501,7 @@ when
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.personalPermissions",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
@@ -629,10 +630,12 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
+			"AbsenceRequests.permissionsToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.personalPermissions",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
@@ -667,10 +670,12 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
+			"AbsenceRequests.permissionsToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.personalPermissions",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show"
 			
@@ -1093,10 +1098,12 @@ when
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
+		"AbsenceRequests.permissionsToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.personalPermissions",
 		"AbsenceRequests.officeHeadApproval",
 		"AbsenceRequests.show",
 		"AbsenceRequests.approval",
@@ -1123,10 +1130,12 @@ when
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
+		"AbsenceRequests.permissionsToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.personalPermissions",
 		"AbsenceRequests.show"
 
         ), target == $o, granted == false)
@@ -1176,6 +1185,7 @@ when
  		"AbsenceRequests.vacationsToApprove",
  		"AbsenceRequests.compensatoryRestsToApprove",
  		"AbsenceRequests.listToApprove",
+ 		"AbsenceRequests.permissionsToApprove",
  		
 
         /* Vecchio permesso viewPerson */
