@@ -164,7 +164,7 @@ public class NotificationManager {
      */
     if (groupAbsenceType.name.equals(DefaultGroup.G_661.name())) {
       val sendManagerNotification = configurationManager.configValue(person.office, 
-          EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+          EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
       if (sendManagerNotification.equals(Boolean.TRUE) 
           && !groupDao.myGroups(absence.personDay.person).isEmpty()) {
         log.debug("Invio la notifica anche al responsabile di gruppo...");
@@ -175,6 +175,9 @@ public class NotificationManager {
             sendEmailToManagerFor661(m, absence);
           }          
         });
+      } else {
+        log.debug("Non invio mail al responsabile di gruppo perchè non presente "
+            + "o non attivato da configurazione");
       }
     }
     
@@ -214,7 +217,7 @@ public class NotificationManager {
       if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
-      } else if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST){
+      } else if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
       } else {
@@ -751,7 +754,7 @@ public class NotificationManager {
     } else {
       int hours = absence.getJustifiedMinutes() / 60;
       int minutes = absence.getJustifiedMinutes() % 60;
-      justifiedTime = ""+hours+" ore e "+minutes+ " minuti";
+      justifiedTime = "" + hours + " ore e " + minutes + " minuti";
     }
     simpleEmail.setSubject("ePas Notifica terminazione flusso permesso personale");
     final StringBuilder message =
@@ -768,6 +771,7 @@ public class NotificationManager {
       e.printStackTrace();
     }
     Mail.send(simpleEmail);
-    log.info("Inviata email al responsabile/gestore per informazione chiusura flusso permesso personale");
+    log.info("Inviata email al responsabile/gestore per informazione "
+        + "chiusura flusso permesso personale");
   }
 }
