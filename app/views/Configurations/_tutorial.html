@@ -122,6 +122,14 @@
            
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661) }
+      <p>Abilitando questa funzionalità sarà possibile notificare al <u>responsabile di gruppo</u> di un dipendente, 
+      qualora i gruppi siano stati definiti, l'avvenuta terminazione di un flusso di richiesta di permesso personale (661) 
+      da parte del dipendente stesso.<br>
+      Per la configurazione del flusso di approvazione vedi la scheda: <strong>"Flussi di lavoro"</strong>.<p>
+           
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
       <p>Esempio: <em>impostando il valore 31/8 per l'anno 2016 si otterrà che le ferie dell'anno 2015 si
