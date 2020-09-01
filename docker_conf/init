@@ -360,6 +360,19 @@ fi
 
 ### Fine impostazione dati dell'ente/azienda che utilzza ePAS
 
+### Configurazione parametri telework-stampings
+
+TELEWORK_BASEURL=${TELEWORK_BASEURL:-http://telework-stampings:8080}
+TELEWORK_USER=${TELEWORK_USER:-app.epas}
+TELEWORK_PASS=${TELEWORK_PASS:-epas.app}
+
+sed 's#{{TELEWORK_BASEURL}}#'"${TELEWORK_BASEURL}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{TELEWORK_USER}}#'"${TELEWORK_USER}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{TELEWORK_PASS}}#'"${TELEWORK_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+
+### Fine configurazione parametri telework-stampings
+
+
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
     echo "Applico eventuali evoluzioni al database..."
