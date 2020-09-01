@@ -42,6 +42,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
@@ -122,6 +123,7 @@ public class AbsenceRequestManager {
 
   private static final String FERIE_CNR = "FERIE_CNR";
   private static final String RIPOSI_CNR = "RIPOSI_CNR";
+  private static final String PERMESSI_PERSONALI = "G_661";
 
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
@@ -465,14 +467,27 @@ public class AbsenceRequestManager {
     log.debug("Flusso relativo a {} terminato. Inserimento in corso delle assenze.",
         absenceRequest);
     GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
+    Integer hours = null;
+    Integer minutes = null;
     AbsenceType absenceType = null;
+    JustifiedType type = null;
+    if (absenceRequest.type.equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.hours;
+      minutes = absenceRequest.minutes;
+      if (hours != null && minutes != null) {
+        absenceType = absenceDao.absenceTypeByCode("661M").get();
+        type = absenceDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+      
+      }
+    }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, null, null, null, false, true);
+        false, absenceType, type, hours, minutes, false, true);
     InsertReport insertReport =
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-            null, null, false, absenceManager);
+            hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.person,
@@ -499,9 +514,6 @@ public class AbsenceRequestManager {
       consistencyManager.updatePersonSituation(absenceRequest.person.id, absenceForm.from);
 
     }
-
-    // notificationManager.notifyAbsenceOnAbsenceRequestCompleted(
-    // Lists.newArrayList(), absenceRequest.person, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
 
     return insertReport;
   }
@@ -689,6 +701,12 @@ public class AbsenceRequestManager {
         break;
       case COMPENSATORY_REST:
         group = absenceDao.groupAbsenceTypeByName(RIPOSI_CNR);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }
+        break;
+      case PERSONAL_PERMISSION:
+        group = absenceDao.groupAbsenceTypeByName(PERMESSI_PERSONALI);
         if (group.isPresent()) {
           groupAbsenceType = group.get();
         }
