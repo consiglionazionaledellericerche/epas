@@ -70,6 +70,10 @@ services:
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
       #- REPORT_SUBJECT=${REPORT_SUBJECT}       # default: Segnalazione ePAS
+      #- TELEWORK_BASEURL=${TELEWORK_BASEURL}   # default: http://telework-stampings:8080
+      #- TELEWORK_BASEURL=${TELEWORK_USER}   # default: app.epas
+      #- TELEWORK_BASEURL=${TELEWORK_PASS}   # default: chiedere al team di sviluppo
+      
     restart: unless-stopped
 
   traefik:
