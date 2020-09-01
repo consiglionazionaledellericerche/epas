@@ -23,6 +23,7 @@ import models.Stamping;
 import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
@@ -121,7 +122,8 @@ public class NotificationManager {
   /**
    * Gestore delle notifiche per le assenze.
    */
-  private void notifyAbsence(Absence absence, User currentUser, Crud operation) {
+  private void notifyAbsence(Absence absence, GroupAbsenceType groupAbsenceType, 
+      User currentUser, Crud operation) {
     Verify.verifyNotNull(absence);
     final Person person = absence.personDay.person;
     String template;
@@ -157,6 +159,28 @@ public class NotificationManager {
           Notification.builder().destination(user).message(message)
               .subject(NotificationSubject.ABSENCE, absence.id).create();
         });
+    /*
+     * Verifico se si tratta di un 661 e invio la mail al responsabile di gruppo se esiste...
+     */
+    if (groupAbsenceType.name.equals(DefaultGroup.G_661.name())) {
+      val sendManagerNotification = configurationManager.configValue(person.office, 
+          EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
+      if (sendManagerNotification.equals(Boolean.TRUE) 
+          && !groupDao.myGroups(absence.personDay.person).isEmpty()) {
+        log.debug("Invio la notifica anche al responsabile di gruppo...");
+        groupDao.myGroups(absence.personDay.person).stream().map(p -> p.manager).forEach(m -> {
+          //Mandare una mail solo nel caso del codice giornaliero o ad ore e minuti 
+          //(non l'assenza oraria)
+          if (absence.getJustifiedMinutes() != null) {
+            sendEmailToManagerFor661(m, absence);
+          }          
+        });
+      } else {
+        log.debug("Non invio mail al responsabile di gruppo perchè non presente "
+            + "o non attivato da configurazione");
+      }
+    }
+    
   }
 
   /**
@@ -193,9 +217,12 @@ public class NotificationManager {
       if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
-      } else {
+      } else if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+      } else {
+        groupAbsenceType =
+            componentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
       }
       if (!absence.isEmpty()) {
         notificationAbsencePolicy(person.user, absence.get(0), groupAbsenceType, true, false,
@@ -347,17 +374,18 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
+        || groupAbsenceType.name.equals(DefaultGroup.G_661.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
-        notifyAbsence(absence, currentUser, NotificationManager.Crud.CREATE);
+        notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.CREATE);
         return;
       }
       if (update) {
-        notifyAbsence(absence, currentUser, NotificationManager.Crud.UPDATE);
+        notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.UPDATE);
         return;
       }
       if (delete) {
-        notifyAbsence(absence, currentUser, NotificationManager.Crud.DELETE);
+        notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.DELETE);
         return;
       }
 
@@ -547,6 +575,8 @@ public class NotificationManager {
     String requestType = "";
     if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
+      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
@@ -582,6 +612,8 @@ public class NotificationManager {
     String requestType = "";
     if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
+      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
@@ -671,6 +703,8 @@ public class NotificationManager {
     String requestType = "";
     if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
+      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
@@ -697,5 +731,47 @@ public class NotificationManager {
         + "concomitanti coi giorni di richiesta: {}. " 
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
         absenceRequest, receiver.email, simpleEmail.getSubject(), mailBody);
+  }
+  
+  /**
+   * Metodo privato che invia al responsabile la mail di notifica di chiusura di un flusso
+   * di richiesta per permesso personale di un dipendente appartenente al gruppo del 
+   * responsabile.
+   * @param manager il responsabile destinatario della mail
+   * @param absence l'assenza per permesso personale da notificare
+   */
+  private void sendEmailToManagerFor661 (Person manager, Absence absence) {
+    SimpleEmail simpleEmail = new SimpleEmail();
+    try {
+      simpleEmail.addTo(manager.email);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    String requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
+    String justifiedTime = "";
+    if (absence.justifiedType.name.equals(JustifiedType.JustifiedTypeName.all_day)) {
+      justifiedTime = "tutto il giorno";
+    } else {
+      int hours = absence.getJustifiedMinutes() / 60;
+      int minutes = absence.getJustifiedMinutes() % 60;
+      justifiedTime = "" + hours + " ore e " + minutes + " minuti";
+    }
+    simpleEmail.setSubject("ePas Notifica terminazione flusso permesso personale");
+    final StringBuilder message =
+        new StringBuilder().append(String.format("Gentile %s,\r\n", manager.getFullname()));
+    message.append(String.format("\r\n è stata approvata la richiesta di : %s", requestType));
+    message.append(String.format("\r\n per il giorno %s", absence.date));
+    message.append(String.format("\r\n che giustifica %s", justifiedTime));
+    message.append(String.format("\r\n per il dipendente %s", 
+        absence.getPersonDay().person.getFullname()));
+    val mailBody = message.toString();
+    try {
+      simpleEmail.setMsg(mailBody);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    Mail.send(simpleEmail);
+    log.info("Inviata email al responsabile/gestore per informazione "
+        + "chiusura flusso permesso personale");
   }
 }
