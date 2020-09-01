@@ -361,6 +361,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  SEND_MANAGER_NOTIFICATION_FOR_661("send_manager_notification_for_661",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   /**
    * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.

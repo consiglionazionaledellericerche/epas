@@ -997,6 +997,7 @@ TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni e reperibilità
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
+SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da I a III
