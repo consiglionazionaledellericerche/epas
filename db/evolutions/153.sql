@@ -1,3 +1,5 @@
+# --- !Ups
+
 CREATE TABLE telework_stampings(
     id BIGSERIAL PRIMARY KEY,
     date timestamp without time zone,
