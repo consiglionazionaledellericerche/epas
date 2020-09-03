@@ -43,12 +43,12 @@ public class TeleworkStampingManager {
 
 
   private TeleworkComunication comunication;
-  
+
   @Inject
   public TeleworkStampingManager(TeleworkComunication comunication) {
     this.comunication = comunication;
   }
-  
+
   /**
    * Ritorna la lista di timbrature in telelavoro nel giorno pd con causale appartenente a quelle
    * riportate nella lista di causali da ricercare.
@@ -69,7 +69,7 @@ public class TeleworkStampingManager {
     }
     return list;
   }
-  
+
   /**
    * Chiama il metodo di comunicazione con l'applicazione esterna per salvare la timbratura
    * da telelavoro.
@@ -92,7 +92,7 @@ public class TeleworkStampingManager {
     }
     return result;
   }
-  
+
   /**
    * Metodo che modifica una timbratura in telelavoro.
    * @param stamping la timbratura in telelavoro da modificare
@@ -114,7 +114,7 @@ public class TeleworkStampingManager {
     }
     return result;
   }
-  
+
   /**
    * Chiama la funzionalità di cancellazione della timbratura da telelavoro.
    * @param stampingId l'identificativo della timbratura da eliminare
@@ -129,7 +129,7 @@ public class TeleworkStampingManager {
     }
     return result;
   }
-  
+
   /**
    * Ritorna la timbratura in telelavoro con id specificato.
    * @param stampingId l'identificativo della timbratura da ricercare
@@ -145,7 +145,7 @@ public class TeleworkStampingManager {
     }
     return stamping;
   }
-  
+
   /**
    * Ritorna la lista di dto contenente la lista delle timbrature in telelavoro per ogni personDay.
    * @param psDto il personStampingRecap mensile da cui prendere le info sui personDay
@@ -156,22 +156,26 @@ public class TeleworkStampingManager {
   public List<TeleworkPersonDayDto> getMonthlyStampings(PersonStampingRecap psDto) 
       throws NoSuchFieldException, ExecutionException {
     List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
-    
+
     for (PersonStampingDayRecap day : psDto.daysRecap) {
       List<TeleworkStamping> beginEnd = Lists.newArrayList();
       List<TeleworkStamping> meal = Lists.newArrayList();
       List<TeleworkStamping> interruptions = Lists.newArrayList();
-      
+      List<TeleworkDto> list = Lists.newArrayList();
       if (day.personDay.id == null) {
         log.info("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
       } else {
-        List<TeleworkDto> list = comunication.getList(day.personDay.id);        
-        if (list.isEmpty()) {
-          return dtoList;
-        }
+         list = comunication.getList(day.personDay.id);        
+      }
+      
+      if (list.isEmpty()) {
+        //TODO: aggiungere il pezzo in cui si creano i teleworkDto vuoti nel caso non esistano 
+        log.debug("Non ci sono timbrature associate al giorno in applicazione telework-stampings!");
+
+      } else {
         for (TeleworkDto dto : list) {
           TeleworkStamping stamping = mapper(dto);    
-          
+
           if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
               || stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
             beginEnd.add(stamping);
@@ -185,24 +189,25 @@ public class TeleworkStampingManager {
             interruptions.add(stamping);
           }          
         }
-      }
+      }      
+
       Comparator<TeleworkStamping> comparator = (TeleworkStamping m1, TeleworkStamping m2) 
           -> m1.date.compareTo(m2.date);
-      Collections.sort(beginEnd, comparator);
-      Collections.sort(meal, comparator);
-      Collections.sort(interruptions, comparator);      
-      
+          Collections.sort(beginEnd, comparator);
+          Collections.sort(meal, comparator);
+          Collections.sort(interruptions, comparator);      
+
       TeleworkPersonDayDto teleworkDto = TeleworkPersonDayDto.builder()
           .personDay(day.personDay)
           .beginEnd(beginEnd)
           .meal(meal)
           .interruptions(interruptions)
           .build();
-     
+
       dtoList.add(teleworkDto);
     }
-    
-    
+
+
     return dtoList;
   }
 
@@ -215,7 +220,7 @@ public class TeleworkStampingManager {
    *     in un giorno di telelavoro. 
    */
   public Optional<Errors> checkTeleworkStamping(TeleworkStamping stamping, PersonDay pd) {
-    
+
     Optional<Errors> error = Optional.absent();
     if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
       error = checkBeginTelework(pd, stamping);
@@ -226,7 +231,7 @@ public class TeleworkStampingManager {
     if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
       error = checkBeginMealInTelework(pd, stamping);
     }
-    
+
     if (stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
       error = checkEndMealInTelework(pd, stamping);
     }
@@ -234,13 +239,13 @@ public class TeleworkStampingManager {
       //TODO: verificare come e se completare...
     }
     if (stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
-    //TODO: verificare come e se completare...
+      //TODO: verificare come e se completare...
     }
     return error;
   }
-  
+
   private Range<LocalDateTime> getStampingRange(List<TeleworkStamping> list, LocalDate date) {
-    
+
     if (list.isEmpty()) {      
       return Range.closed(setBeginOfTheDay(date), setEndOfTheDay(date));
     }
@@ -253,7 +258,7 @@ public class TeleworkStampingManager {
       return Range.closed(setBeginOfTheDay(date), list.get(0).date);
     }
   }
-  
+
   /**
    * Il localDateTime dell'inizio della giornata.
    * @param date la data di riferimento
@@ -262,7 +267,7 @@ public class TeleworkStampingManager {
   private LocalDateTime setBeginOfTheDay(LocalDate date) {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
   }
-  
+
   /**
    * Il localDateTime della fine della giornata.
    * @param date la data di riferimento
@@ -272,7 +277,7 @@ public class TeleworkStampingManager {
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0)
         .hourOfDay().withMaximumValue().minuteOfHour().withMaximumValue();
   }
-  
+
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * lavoro in telelavoro.
@@ -310,7 +315,7 @@ public class TeleworkStampingManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
@@ -348,7 +353,7 @@ public class TeleworkStampingManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * pranzo in telelavoro.
@@ -397,7 +402,7 @@ public class TeleworkStampingManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
@@ -445,7 +450,7 @@ public class TeleworkStampingManager {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Metodo di utilità che trasforma uno joda LocalDateTime in un java.time LocalDateTime.
    * @param dateTime lo joda contenente la data/ora
@@ -457,7 +462,7 @@ public class TeleworkStampingManager {
         dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
     return time;
   }
-  
+
   /**
    * Mappa il dto TeleworkDto sull'oggetto di modello TeleworkStamping.
    * @param dto l'oggetto da mappare
