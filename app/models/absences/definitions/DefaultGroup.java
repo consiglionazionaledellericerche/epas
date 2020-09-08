@@ -133,9 +133,9 @@ public enum DefaultGroup {
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_RIPOSI_CNR_FESTIVO, null, null, false, false),
 
-  RIPOSI_CNR_CHIUSURA_ENTE("91CE - Riposo compensativo per chiusura ente", "",
-      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
-      PeriodType.always, DefaultTakable.T_RIPOSI_CHIUSURA_ENTE, null, null, false, false),
+//  RIPOSI_CNR_CHIUSURA_ENTE("91CE - Riposo compensativo per chiusura ente", "",
+//      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
+//      PeriodType.always, DefaultTakable.T_RIPOSI_CHIUSURA_ENTE, null, null, false, false),
 
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", "",
       DefaultCategoryType.RIPOSI_COMPENSATIVI_DIPENDENTI, 1, // must be greater than RIPOSI_CNR
