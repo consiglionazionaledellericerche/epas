@@ -119,6 +119,18 @@ public class PersonShiftDayDao extends DaoBase {
     final QPersonShift personShift = QPersonShift.personShift;
     return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)).fetch();
   }
+  
+  /**
+   * Metodo di utilità che ritorna i casi di turnisti erroneamente disabilitati nonostante le date
+   * di inizio e fine attività di turnista contengano la data odierna.
+   * @return la lista delle persone erroneamente disabilitate.
+   */
+  public List<PersonShift> getWrongDisabled() {
+    final QPersonShift personShift = QPersonShift.personShift;
+    return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)
+        .and(personShift.beginDate.loe(LocalDate.now())
+            .andAnyOf(personShift.endDate.isNull(), personShift.endDate.goe(LocalDate.now())))).fetch();
+  }
 
   /**
    * Tutti gli ShiftCategories.
