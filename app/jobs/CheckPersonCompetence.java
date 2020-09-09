@@ -6,6 +6,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.NumberPath;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
+import dao.PersonShiftDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonCompetenceCodes;
+import models.PersonShift;
 import models.dto.PersonCompetenceCodeDto;
 import play.Play;
 import play.jobs.Job;
@@ -28,6 +30,8 @@ public class CheckPersonCompetence extends Job<Void> {
   static CompetenceCodeDao competenceCodeDao;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static PersonShiftDayDao shiftDao;
 
   @Override
   public void doJob() {
@@ -48,7 +52,8 @@ public class CheckPersonCompetence extends Job<Void> {
 
     List<PersonCompetenceCodeDto> list = competenceCodeDao.getDuplicates();
     log.info("Trovate {} pcc con date sovrapposte", list.size());
-
+    
+    
     for (PersonCompetenceCodeDto dto : list) {
       Person person = personDao.getPersonById(dto.personId);
       CompetenceCode code = competenceCodeDao.getCompetenceCodeById(dto.competenceCodeId);
@@ -83,6 +88,13 @@ public class CheckPersonCompetence extends Job<Void> {
       }
       //toDelete.forEach(pcc -> pcc.delete());
     }
+    
+    List<PersonShift> wrongDisabled = shiftDao.getWrongDisabled();
+    wrongDisabled.forEach(ps -> {
+      ps.disabled = false;
+      ps.save();
+    });
+    log.info("Sistemati i dipendenti erroneamente disabilitati.");
     log.info("Procedura terminata");
 
   }
