@@ -755,11 +755,17 @@ public class ShiftManager2 {
       default:
         break;
     }
-
+    List<ShiftTroubles> troubles = Lists.newArrayList();
+    if (activity.organizaionShiftTimeTable != null && 
+        !activity.organizaionShiftTimeTable.considerEverySlot) {
+      troubles.addAll(ShiftTroubles.warningTroubles());
+    } else {
+      troubles.addAll(ShiftTroubles.invalidatingTroubles());
+    }
     // I conteggi funzionano nel caso lo stato dei turni sia aggiornato
     for (PersonShiftDay shift : list) {
       // Nessun errore sul turno
-      if (!shift.hasOneOfErrors(ShiftTroubles.invalidatingTroubles())) {
+      if (!shift.hasOneOfErrors(troubles)) {
         PersonDay pd = personDayManager
             .getOrCreateAndPersistPersonDay(shift.personShift.person, shift.date);
         if (shift.organizationShiftSlot != null) {
