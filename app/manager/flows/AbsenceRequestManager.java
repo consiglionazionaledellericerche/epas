@@ -768,9 +768,9 @@ public class AbsenceRequestManager {
     List<LocalDate> troubleDays = Lists.newArrayList();
     while (!temp.isAfter(absenceRequest.endToAsDate())) {
       if (checkIfAbsenceInShiftOrReperibility(absenceRequest.person, temp)) {
-        map.put(temp, new Boolean(true));
+        map.put(temp, Boolean.TRUE);
       } else {
-        map.put(temp, new Boolean(false));
+        map.put(temp, Boolean.FALSE);
       }
       temp = temp.plusDays(1);
     }

@@ -1,17 +1,13 @@
 package models.dto;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
+import lombok.val;
 import models.PersonDay;
-import models.TeleworkStamping;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.TeleworkStampTypes;
-import org.joda.time.LocalDateTime;
 
 
 @Builder
@@ -19,10 +15,25 @@ import org.joda.time.LocalDateTime;
 public class TeleworkPersonDayDto {
 
   public PersonDay personDay;
-  public List<TeleworkStamping> beginEnd;
-  public List<TeleworkStamping> meal;
-  public List<TeleworkStamping> interruptions;
+  public List<TeleworkDto> beginEnd;
+  public List<TeleworkDto> meal;
+  public List<TeleworkDto> interruptions;
 
+  /**
+   * @return true se non ci sono timbrature per telelavoro, 
+   *   false altrimenti.
+   */
+  public boolean isEmpty() {
+    return beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty();
+  }
+  
+  public List<TeleworkDto> getTeleworkStampings() {
+    List<TeleworkDto> list = Lists.newArrayList(beginEnd);
+    list.addAll(meal);
+    list.addAll(interruptions);
+    return list;
+  }
+  
   public boolean isBeginEndComplete() {
     return !beginEnd.isEmpty() && beginEnd.size() % 2 == 0;
   }
@@ -41,15 +52,15 @@ public class TeleworkPersonDayDto {
    * @return true se le timbrature di telelavoro sono ben formate, false altrimenti.
    */
   public boolean hasTeleworkStampingsWellFormed() {
-    if (this.personDay.teleworkStampings.size() == 0 
-        || this.personDay.teleworkStampings.size() % 2 != 0) {
+    if (this.getTeleworkStampings().size() == 0 
+        || this.getTeleworkStampings().size() % 2 != 0) {
       return false;
     }
     List<TeleworkStampTypes> completeDayInTelework = TeleworkStampTypes.beginEndTelework();
     completeDayInTelework.addAll(TeleworkStampTypes.beginEndMealInTelework());
     int count = completeDayInTelework.size();
-    for (TeleworkStamping tws : this.personDay.teleworkStampings) {
-      if (completeDayInTelework.contains(tws.stampType)) {
+    for (TeleworkDto tws : this.getTeleworkStampings()) {
+      if (completeDayInTelework.contains(tws.getStampType())) {
         count--;
       }
     }

@@ -11,8 +11,8 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -102,9 +102,20 @@ public class StampingManager {
     Integer minute = Integer.parseInt(time.substring(2, 4));
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(),
         date.getDayOfMonth(), hour, minute, 0);
-
   }
 
+  /**
+   * Crea il tempo. Il campo time è già stato validato HH:MM o HHMM
+   */
+  public java.time.LocalDateTime deparseStampingDateTimeAsJavaTime(LocalDate date, String time) {
+
+    time = time.replaceAll(":", "");
+    Integer hour = Integer.parseInt(time.substring(0, 2));
+    Integer minute = Integer.parseInt(time.substring(2, 4));
+    return java.time.LocalDateTime.of(date.getYear(), date.getMonthOfYear(),
+        date.getDayOfMonth(), hour, minute, 0);
+  }
+  
   /**
    * Calcola il numero massimo di coppie ingresso/uscita in un giorno specifico per tutte le persone
    * presenti nella lista di persone attive a quella data.

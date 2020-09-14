@@ -6,6 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import injection.AutoRegister;
+import lombok.val;
 
 /**
  * Registrazione delle utilità per la serializzazione / deserializzazione JSON.
@@ -16,7 +17,9 @@ public class GsonModule implements Module {
 
   @Provides
   public GsonBuilder builderFactory() {
-    return Converters.registerAll(new GsonBuilder())
+    val builder = new GsonBuilder(); 
+    com.fatboyindustrial.gsonjavatime.Converters.registerAll(builder).serializeNulls();
+    return Converters.registerAll(builder)
         .serializeNulls();
   }
 
