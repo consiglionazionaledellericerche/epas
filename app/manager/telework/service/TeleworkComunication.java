@@ -3,6 +3,7 @@ package manager.telework.service;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.service.AttestatiApis;
@@ -38,6 +41,8 @@ public class TeleworkComunication {
   private static final String POST_TIMEOUT = "5min";
   private static final String LIST = "list/";
 
+  @Inject
+  GsonBuilder gsonBuilder;
   
   
   /**
@@ -96,10 +101,11 @@ public class TeleworkComunication {
       log.error("Utente non autorizzato: {}", wsRequest.username);      
     }
 
-    TeleworkDto teleworkStamping = new Gson()
-        .fromJson(httpResponse.getJson(), TeleworkDto.class);
+    val gson = gsonBuilder.create();
+    TeleworkDto teleworkStamping = 
+        gson.fromJson(httpResponse.getJson(), TeleworkDto.class);
 
-    log.info("Recuperata lista delle timbrature in telelavoro ");
+    log.trace("Recuperata lista delle timbrature in telelavoro ");
 
     return teleworkStamping;
   }
@@ -130,10 +136,14 @@ public class TeleworkComunication {
       log.error("Utente non autorizzato: {}", wsRequest.username);      
     }
     
-    List<TeleworkDto> teleworkStampings = new Gson()
-        .fromJson(httpResponse.getJson(), new TypeToken<List<TeleworkDto>>() {}.getType());
+    log.debug("httpResponse.json = {}", httpResponse.getJson());
+    val gson = gsonBuilder.create();
+    List<TeleworkDto> teleworkStampings = 
+        gson.fromJson(
+            httpResponse.getJson(), 
+            new TypeToken<List<TeleworkDto>>() {}.getType());
 
-    log.info("Recuperata lista delle timbrature in telelavoro ");
+    log.trace("Recuperata lista delle timbrature in telelavoro ");
 
     return teleworkStampings;
   }
@@ -148,8 +158,9 @@ public class TeleworkComunication {
     
     final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
-    String json = new Gson().toJson(dto);
-    
+    val gson = gsonBuilder.create();
+    String json = gson.toJson(dto);
+
     wsRequest.body = json;
     HttpResponse httpResponse = wsRequest.post();
     

@@ -53,10 +53,11 @@
       #{secure.li @Stampings.stampings(session.get("yearSelected"), session.get("monthSelected")) }
         <i class="fa fa-calendar" aria-hidden="true"></i>
       #{/secure.li}
-      
-      #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
-      <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
-      #{/secure.li}
+      #{if teleworkStampingsActive}
+     	 #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
+      		<i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+         #{/secure.li}
+      #{/if}
       
       #{secure.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
       <i class="fa fa-user-times" aria-hidden="true"></i>

@@ -1,42 +1,27 @@
 package manager;
 
-import cnr.sync.dto.v2.StampingDto;
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
-import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
-import dao.wrapper.IWrapperFactory;
-import it.cnr.iit.epas.DateUtility;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.persistence.Transient;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.recaps.personstamping.PersonStampingDayRecap;
-import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.telework.errors.Errors;
 import manager.services.telework.errors.TeleworkStampingError;
 import manager.telework.service.TeleworkComunication;
 import models.PersonDay;
-import models.TeleworkStamping;
-import models.User;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
-import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.modelmapper.ModelMapper;
-
 
 @Slf4j
 public class TeleworkStampingManager {
@@ -56,13 +41,23 @@ public class TeleworkStampingManager {
    * @param stampTypes la lista di causali da cercare
    * @return la lista di timbrature di lavoro in telelavoro con causale quelle passate come 
    *     parametro.
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public List<TeleworkStamping> getSpecificTeleworkStampings(PersonDay pd, 
+  public List<TeleworkDto> getSpecificTeleworkStampings(PersonDay pd, 
       List<TeleworkStampTypes> stampTypes) {
-    List<TeleworkStamping> list = Lists.newArrayList();
-    for (TeleworkStamping tws : pd.teleworkStampings) {
+    @val
+    java.util.List<models.dto.TeleworkDto> teleworkStampings;
+    try {
+      teleworkStampings = comunication.getList(pd.id);
+    } catch (NoSuchFieldException | ExecutionException e) {
+     throw new RuntimeException(e);
+    }
+    List<TeleworkDto> list = Lists.newArrayList();
+    for (TeleworkDto tws : teleworkStampings) {
+      val stampType = tws.getStampType();
       for (TeleworkStampTypes st : stampTypes) {
-        if (tws.stampType.equals(st)) {
+        if (stampType.equals(st)) {
           list.add(tws);
         }
       }
@@ -76,19 +71,12 @@ public class TeleworkStampingManager {
    * @param stamping la timbratura in telelavoro da salvare
    * @return 201 se la timbratura è stata salvata correttamente, altro numero altrimenti.
    */
-  public int save(TeleworkStamping stamping) {
+  public int save(TeleworkDto stamping) {
     int result = 0;
-    TeleworkDto dto = TeleworkDto.builder()
-        .date(transform(stamping.date).toString())
-        .stampType(stamping.stampType.name())
-        .note(stamping.note)
-        .personDayId(stamping.personDay.id)
-        .build();
     try {
-      result = comunication.save(dto);
+      result = comunication.save(stamping);
     } catch (NoSuchFieldException ex) {
-      // TODO Auto-generated catch block
-      ex.printStackTrace();
+      log.error("Errore nel salvataggio timbratura {}", stamping);
     }
     return result;
   }
@@ -98,19 +86,13 @@ public class TeleworkStampingManager {
    * @param stamping la timbratura in telelavoro da modificare
    * @return il codice HTTP con il risultato della update della timbratura.
    */
-  public int update(TeleworkStamping stamping) {
+  public int update(TeleworkDto stamping) {
     int result = 0;
-    TeleworkDto dto = TeleworkDto.builder()
-        .date(transform(stamping.date).toString())
-        .stampType(stamping.stampType.name())
-        .note(stamping.note)
-        .personDayId(stamping.personDay.id)
-        .build();
     try {
-      result = comunication.update(dto);
+      result = comunication.update(stamping);
     } catch (NoSuchFieldException ex) {
-      // TODO Auto-generated catch block
-      ex.printStackTrace();
+      log.error("Errore durante l'aggiornanto della timbratura {}", stamping);
+      return result;
     }
     return result;
   }
@@ -125,7 +107,9 @@ public class TeleworkStampingManager {
     try {
       result = comunication.delete(stampingId);
     } catch (NoSuchFieldException ex) {
-      ex.printStackTrace();
+      log.error("Errore durante la cancellazione della timbratura id = {}", 
+          stampingId);
+      return result;
     }
     return result;
   }
@@ -136,12 +120,12 @@ public class TeleworkStampingManager {
    * @return la timbratura in telelavoro con id passato come parametro.
    * @throws ExecutionException eccezione in esecuzione
    */
-  public TeleworkStamping get(long stampingId) throws ExecutionException {
-    TeleworkStamping stamping = null;
+  public TeleworkDto get(long stampingId) throws ExecutionException {
+    TeleworkDto stamping = null;
     try {
-      stamping = mapper(comunication.get(stampingId));
+      stamping = comunication.get(stampingId);
     } catch (NoSuchFieldException ex) {
-      ex.printStackTrace();
+      log.error("Errore prelevando la timbratura con id = {}", stampingId);
     }
     return stamping;
   }
@@ -156,43 +140,45 @@ public class TeleworkStampingManager {
   public List<TeleworkPersonDayDto> getMonthlyStampings(PersonStampingRecap psDto) 
       throws NoSuchFieldException, ExecutionException {
     List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
-
-    for (PersonStampingDayRecap day : psDto.daysRecap) {
-      List<TeleworkStamping> beginEnd = Lists.newArrayList();
-      List<TeleworkStamping> meal = Lists.newArrayList();
-      List<TeleworkStamping> interruptions = Lists.newArrayList();
+    List<PersonStampingDayRecap> pastDaysRecap = 
+        psDto.daysRecap.stream().filter(d -> {
+      return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+    }).collect(Collectors.toList());
+    for (PersonStampingDayRecap day : pastDaysRecap) {
+      List<TeleworkDto> beginEnd = Lists.newArrayList();
+      List<TeleworkDto> meal = Lists.newArrayList();
+      List<TeleworkDto> interruptions = Lists.newArrayList();
       List<TeleworkDto> list = Lists.newArrayList();
       if (day.personDay.id == null) {
-        log.info("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
       } else {
          list = comunication.getList(day.personDay.id);        
       }
       
       if (list.isEmpty()) {
         //TODO: aggiungere il pezzo in cui si creano i teleworkDto vuoti nel caso non esistano 
-        log.debug("Non ci sono timbrature associate al giorno in applicazione telework-stampings!");
+        log.trace("Non ci sono timbrature associate al giorno in applicazione telework-stampings!");
 
       } else {
-        for (TeleworkDto dto : list) {
-          TeleworkStamping stamping = mapper(dto);    
-
-          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
-              || stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+        for (TeleworkDto stamping : list) {    
+          TeleworkStampTypes stampType = stamping.getStampType();
+          if (stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO) 
+              || stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
             beginEnd.add(stamping);
           }
-          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO) 
-              || stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+          if (stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO) 
+              || stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
             meal.add(stamping);
           }
-          if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE) 
-              || stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+          if (stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE) 
+              || stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
             interruptions.add(stamping);
           }          
         }
       }      
 
-      Comparator<TeleworkStamping> comparator = (TeleworkStamping m1, TeleworkStamping m2) 
-          -> m1.date.compareTo(m2.date);
+      Comparator<TeleworkDto> comparator = (TeleworkDto m1, TeleworkDto m2) 
+          -> m1.getDate().compareTo(m2.getDate());
           Collections.sort(beginEnd, comparator);
           Collections.sort(meal, comparator);
           Collections.sort(interruptions, comparator);      
@@ -219,43 +205,44 @@ public class TeleworkStampingManager {
    * @return l'opzionale contenente l'errore rilevato dal possibile inserimento della timbratura
    *     in un giorno di telelavoro. 
    */
-  public Optional<Errors> checkTeleworkStamping(TeleworkStamping stamping, PersonDay pd) {
+  public Optional<Errors> checkTeleworkStamping(TeleworkDto stamping, PersonDay pd) {
 
+    val stampType = stamping.getStampType();
     Optional<Errors> error = Optional.absent();
-    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
+    if (stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
       error = checkBeginTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+    if (stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
       error = checkEndInTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
+    if (stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
       error = checkBeginMealInTelework(pd, stamping);
     }
 
-    if (stamping.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+    if (stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
       error = checkEndMealInTelework(pd, stamping);
     }
-    if (stamping.stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE)) {
+    if (stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE)) {
       //TODO: verificare come e se completare...
     }
-    if (stamping.stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+    if (stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
       //TODO: verificare come e se completare...
     }
     return error;
   }
 
-  private Range<LocalDateTime> getStampingRange(List<TeleworkStamping> list, LocalDate date) {
+  private Range<LocalDateTime> getStampingRange(List<TeleworkDto> list, LocalDate date) {
 
     if (list.isEmpty()) {      
       return Range.closed(setBeginOfTheDay(date), setEndOfTheDay(date));
     }
     if (list.size() == 2) {
-      return Range.closed(list.get(0).date, list.get(1).date);
+      return Range.closed(list.get(0).getDate(), list.get(1).getDate());
     }
-    if (list.get(0).stampType.isBeginInTelework()) {
-      return Range.closed(list.get(0).date, setEndOfTheDay(date));
+    if (list.get(0).getStampType().isBeginInTelework()) {
+      return Range.closed(list.get(0).getDate(), setEndOfTheDay(date));
     } else {
-      return Range.closed(setBeginOfTheDay(date), list.get(0).date);
+      return Range.closed(setBeginOfTheDay(date), list.get(0).getDate());
     }
   }
 
@@ -265,7 +252,7 @@ public class TeleworkStampingManager {
    * @return il localdatetime rappresentante l'inizio della giornata.
    */
   private LocalDateTime setBeginOfTheDay(LocalDate date) {
-    return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
+    return LocalDateTime.of(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
   }
 
   /**
@@ -274,8 +261,7 @@ public class TeleworkStampingManager {
    * @return il localdatetime rappresentante la fine della giornata.
    */
   private LocalDateTime setEndOfTheDay(LocalDate date) {
-    return new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0)
-        .hourOfDay().withMaximumValue().minuteOfHour().withMaximumValue();
+    return LocalDateTime.of(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 23, 59);
   }
 
   /**
@@ -286,18 +272,18 @@ public class TeleworkStampingManager {
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
    *     la timbratura nel giorno.
    */
-  private Optional<Errors> checkBeginTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = 
+  private Optional<Errors> checkBeginTelework(PersonDay pd, TeleworkDto stamping) {
+    List<TeleworkDto> meal = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
-    List<TeleworkStamping> beginEnd = 
+    List<TeleworkDto> beginEnd = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
-    List<TeleworkStamping> interruptions = 
+    List<TeleworkDto> interruptions = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
-    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)).findFirst();
+    java.util.Optional<TeleworkDto> stamp = beginEnd.stream()
+        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.INIZIO_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
@@ -306,7 +292,7 @@ public class TeleworkStampingManager {
       return Optional.of(error);
     }
     Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
-    if (!beginEndRange.contains(stamping.date)) {
+    if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
       error.personDay = pd;
@@ -324,18 +310,18 @@ public class TeleworkStampingManager {
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
    *     la timbratura nel giorno.
    */
-  private Optional<Errors> checkEndInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = 
+  private Optional<Errors> checkEndInTelework(PersonDay pd, TeleworkDto stamping) {
+    List<TeleworkDto> meal = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
-    List<TeleworkStamping> beginEnd = 
+    List<TeleworkDto> beginEnd = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
-    List<TeleworkStamping> interruptions = 
+    List<TeleworkDto> interruptions = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
-    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)).findFirst();
+    java.util.Optional<TeleworkDto> stamp = beginEnd.stream()
+        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.FINE_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.END_STAMPING_PRESENT;
@@ -344,7 +330,7 @@ public class TeleworkStampingManager {
       return Optional.of(error);
     }
     Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
-    if (!beginEndRange.contains(stamping.date)) {
+    if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.END_STAMPING_BEFORE_BEGIN;
       error.personDay = pd;
@@ -362,18 +348,18 @@ public class TeleworkStampingManager {
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
    *     la timbratura nel giorno.
    */
-  private Optional<Errors> checkBeginMealInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = 
+  private Optional<Errors> checkBeginMealInTelework(PersonDay pd, TeleworkDto stamping) {
+    List<TeleworkDto> meal = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
-    List<TeleworkStamping> beginEnd = 
+    List<TeleworkDto> beginEnd = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
-    List<TeleworkStamping> interruptions = 
+    List<TeleworkDto> interruptions = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
-    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO))
+    java.util.Optional<TeleworkDto> stamp = beginEnd.stream()
+        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO))
         .findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
@@ -384,7 +370,7 @@ public class TeleworkStampingManager {
     }
     Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
     Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
-    if (!beginEndRange.contains(stamping.date)) {
+    if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
       error.personDay = pd;
@@ -392,7 +378,7 @@ public class TeleworkStampingManager {
           "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
       return Optional.of(error);
     }
-    if (!mealRange.contains(stamping.date)) {
+    if (!mealRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.EXISTING_END_STAMPING_BEFORE_BEGIN_MEAL;
       error.personDay = pd;
@@ -411,18 +397,18 @@ public class TeleworkStampingManager {
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
    *     la timbratura nel giorno.
    */
-  private Optional<Errors> checkEndMealInTelework(PersonDay pd, TeleworkStamping stamping) {
-    List<TeleworkStamping> meal = 
+  private Optional<Errors> checkEndMealInTelework(PersonDay pd, TeleworkDto stamping) {
+    List<TeleworkDto> meal = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndMealInTelework());
-    List<TeleworkStamping> beginEnd = 
+    List<TeleworkDto> beginEnd = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndTelework());
-    List<TeleworkStamping> interruptions = 
+    List<TeleworkDto> interruptions = 
         getSpecificTeleworkStampings(pd, TeleworkStampTypes.beginEndInterruptionInTelework());
     if (beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty()) {
       return Optional.absent();
     }
-    java.util.Optional<TeleworkStamping> stamp = beginEnd.stream()
-        .filter(tws -> tws.stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
+    java.util.Optional<TeleworkDto> stamp = beginEnd.stream()
+        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;
@@ -432,7 +418,7 @@ public class TeleworkStampingManager {
     }
     Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
     Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
-    if (!beginEndRange.contains(stamping.date)) {
+    if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
       error.personDay = pd;
@@ -440,7 +426,7 @@ public class TeleworkStampingManager {
           "Orario di pausa pranzo in telelavoro fuori dalla fascia inizio-fine telelavoro";
       return Optional.of(error);
     }
-    if (!mealRange.contains(stamping.date)) {
+    if (!mealRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.EXISTING_BEGIN_STAMPING_AFTER_END_MEAL;
       error.personDay = pd;
@@ -451,32 +437,4 @@ public class TeleworkStampingManager {
     return Optional.absent();
   }
 
-  /**
-   * Metodo di utilità che trasforma uno joda LocalDateTime in un java.time LocalDateTime.
-   * @param dateTime lo joda contenente la data/ora
-   * @return la data/ora nel formato java.time.
-   */
-  private java.time.LocalDateTime transform(LocalDateTime dateTime) {
-    java.time.LocalDateTime time = java.time.LocalDateTime.of(
-        dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), 
-        dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
-    return time;
-  }
-
-  /**
-   * Mappa il dto TeleworkDto sull'oggetto di modello TeleworkStamping.
-   * @param dto l'oggetto da mappare
-   * @return l'oggetto di modello TeleworkStamping.
-   */
-  public TeleworkStamping mapper(TeleworkDto dto) {
-    ModelMapper modelMapper = new ModelMapper();
-    TeleworkStamping stamping = modelMapper.map(dto, TeleworkStamping.class);
-    if (stamping.date == null && dto.getDate() != null) {
-      stamping.date = new LocalDateTime(dto.getDate());
-    }
-    if (stamping.id == null) {
-      stamping.id = dto.getPersonDayId();
-    }
-    return stamping;
-  }
 }

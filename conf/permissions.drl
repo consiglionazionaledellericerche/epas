@@ -28,7 +28,6 @@ import models.PersonShiftShiftType;
 import models.PersonShift;
 import models.ShiftTypeMonth;
 import models.Stamping;
-import models.TeleworkStamping;
 import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;

@@ -5,19 +5,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import dao.TeleworkStampingDao;
-import dao.history.HistoryValue;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.StampingManager;
 import manager.TeleworkStampingManager;
@@ -28,16 +24,11 @@ import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
-import models.Stamping;
-import models.TeleworkStamping;
-import models.dto.ReperibilityEvent;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
-import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import play.Play;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -49,8 +40,6 @@ import security.SecurityRules;
 @Slf4j
 @With({Resecure.class})
 public class TeleworkStampings extends Controller {
-
-  static final String TELEWORK_CONF = "telework.stampings.active";
 
   @Inject
   static IWrapperFactory wrapperFactory;
@@ -68,8 +57,6 @@ public class TeleworkStampings extends Controller {
   static SecurityRules rules;
   @Inject
   static StampingManager stampingManager;
-  @Inject
-  static TeleworkStampingDao teleworkStampingDao;
   @Inject
   static TeleworkComunication comunication;
 
@@ -92,9 +79,6 @@ public class TeleworkStampings extends Controller {
       Application.index();
     }
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
-    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
-    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
@@ -106,26 +90,13 @@ public class TeleworkStampings extends Controller {
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
-      log.info("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
-      list = manager.getMonthlyStampings(psDto);
-      if (list.isEmpty()) {
-        flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
-            + "L'applicazione potrebbe essere spenta o non raggiungibile."
-            + "Riprovare più tardi");
-      }
-    } else {
-      for (PersonStampingDayRecap day : psDto.daysRecap) {      
-
-        TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-            .personDay(day.personDay)
-            .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-            .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-            .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-            .build();
-        list.add(dto);
-      }
-
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    if (list.isEmpty()) {
+      flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
+          + "L'applicazione potrebbe essere spenta o non raggiungibile."
+          + "Riprovare più tardi");
     }
 
     render(list, year, month);
@@ -187,7 +158,7 @@ public class TeleworkStampings extends Controller {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
     rules.checkIfPermitted(person);
 
-    TeleworkStamping stamping = new TeleworkStamping();
+    TeleworkDto stamping = TeleworkDto.builder().build();
     render(person, date, stamping);
   }
 
@@ -199,53 +170,40 @@ public class TeleworkStampings extends Controller {
    */
   public static void deleteTeleworkStamping(long teleworkStampingId, boolean confirmed) 
       throws NoSuchFieldException, ExecutionException {
-    TeleworkStamping stamping = null;
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
-      
-      TeleworkDto dto = null;
-      if (!confirmed) {
-        log.info("Recupero la timbratura dall'applicazione esterna da cancellare");
-        try {
-          dto = comunication.get(teleworkStampingId);
-        } catch (NoSuchFieldException ex) {
-          ex.printStackTrace();
-        }
-        stamping = manager.mapper(dto);
-        confirmed = true;
-        render(stamping, confirmed);
-      }      
-      
-      log.info("Comunico con il nuovo sistema per la cancellazione della "
-          + "timbratura in telelavoro...");     
 
-      int result = 0;
+    TeleworkDto stamping = null;
+    if (!confirmed) {
+      log.debug("Recupero la timbratura dall'applicazione esterna da cancellare");
       try {
-        result = comunication.delete(teleworkStampingId);
+        stamping = comunication.get(teleworkStampingId);
       } catch (NoSuchFieldException ex) {
         ex.printStackTrace();
       }
+      confirmed = true;
+      render(stamping, confirmed);
+    }      
 
-      if (result == Http.StatusCode.NO_RESPONSE) {
-        flash.success("Orario eliminato correttamente");        
-      } else {
-        flash.error("Errore nell'eliminazione della timbratura su sistema esterno. Errore %s", 
-            result);
-      }
-      teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
-          Integer.parseInt(session.get("monthSelected")));
+    log.debug("Comunico con il nuovo sistema per la cancellazione della "
+        + "timbratura in telelavoro...");     
 
-    } else {
-      stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
-      notFoundIfNull(stamping);
-      if (!confirmed) {
-        confirmed = true;
-        render(stamping, confirmed);
-      }
-      stamping.delete();
+    int result = 0;
+    try {
+      result = comunication.delete(teleworkStampingId);
+    } catch (NoSuchFieldException ex) {
+      ex.printStackTrace();
     }
 
+    if (result == Http.StatusCode.NO_RESPONSE) {
+      flash.success("Orario eliminato correttamente");        
+    } else {
+      flash.error("Errore nell'eliminazione della timbratura su sistema esterno. Errore %s", 
+          result);
+    }
+    teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
+        Integer.parseInt(session.get("monthSelected")));
+
     flash.success("Timbratura %s - %s eliminata correttamente", 
-        stamping.formattedHour(), stamping.stampType.getDescription());
+        stamping.formattedHour(), stamping.getStampType());
     teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
@@ -260,7 +218,7 @@ public class TeleworkStampings extends Controller {
    * @throws NoSuchFieldException eccezione di mancanza di parametro
    */
   public static void save(Long personId, @Required LocalDate date, 
-      @Required TeleworkStamping stamping, @Required @CheckWith(StringIsTime.class) String time) 
+      @Required TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
           throws NoSuchFieldException, ExecutionException {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -268,7 +226,7 @@ public class TeleworkStampings extends Controller {
     notFoundIfNull(person);
 
     PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    stamping.setDate(stampingManager.deparseStampingDateTimeAsJavaTime(date, time));
     Optional<Errors> check = manager.checkTeleworkStamping(stamping, pd);
     if (check.isPresent()) {
       Validation.addError("stamping.stampType", check.get().advice);
@@ -277,33 +235,17 @@ public class TeleworkStampings extends Controller {
         render("@insertStamping", stamping, person, date, time);
       }
     }
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
-      log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
-      log.info("Salvo la timbratura {}", stamping.toString());
-      stamping.personDay = pd;
-      int result = manager.save(stamping);
-      if (result == Http.StatusCode.CREATED) {
-        flash.success("Orario inserito correttamente");        
-      } else {
-        flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", 
-            result);
-      }
-      teleworkStampings(date.getYear(), date.getMonthOfYear());
-
+    log.debug("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
+    stamping.setPersonDayId(pd.getId());
+    int result = manager.save(stamping);
+    if (result == Http.StatusCode.CREATED) {
+      log.info("Creata la timbratura {} nel sistema esterno", stamping.toString());      
+      flash.success("Orario inserito correttamente");        
     } else {
-      boolean newInsert = !stamping.isPersistent();
-
-      // Se si tratta di un update ha già tutti i riferimenti al personday
-      if (newInsert) {
-        final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-        stamping.personDay = personDay;
-        // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
-        personDay.teleworkStampings.add(stamping);
-      }
-      stamping.save();
-      flash.success("Orario inserito correttamente");
-      teleworkStampings(date.getYear(), date.getMonthOfYear());
-    }    
+      flash.error("Errore nel salvataggio della timbratura su sistema esterno. Errore %s", 
+          result);
+    }
+    teleworkStampings(date.getYear(), date.getMonthOfYear());    
 
   }
 
@@ -312,36 +254,16 @@ public class TeleworkStampings extends Controller {
    * @param teleworkStampingId l'identificativo della timbratura da modificare
    */
   public static void editTeleworkStamping(long teleworkStampingId) {
-    TeleworkStamping stamping = null;
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF))) {
-      log.info("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
-      try {
-        stamping = manager.get(teleworkStampingId);
-      } catch (ExecutionException ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
-      } 
-
-
-    } else {
-      stamping = teleworkStampingDao.getStampingById(teleworkStampingId);
+    TeleworkDto stamping = null;
+    log.debug("Comunico con il nuovo sistema per la memorizzazione delle ore in telelavoro...");
+    try {
+      stamping = manager.get(teleworkStampingId);
+    } catch (ExecutionException ex) {
+      log.error("Problema durante la ricezione della timbratura per telelavoro {}",
+          teleworkStampingId, ex);
     }
-
+    
     render(stamping);
   }
 
-  /**
-   * Metodo per eventuale calendario.
-   * @param date la data a cui mostrare la situazione
-   */
-  public static void show(LocalDate date) {
-    final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
-    //rules.checkIfPermitted(reperibilitySelected);
-
-    render(currentDate);
-  }
-
-  public static void events(LocalDate start, LocalDate end) {
-    List<ReperibilityEvent> events = new ArrayList<>();
-  }
 }

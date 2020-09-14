@@ -19,6 +19,7 @@ import manager.SecureManager;
 import models.Office;
 import models.User;
 import org.joda.time.LocalDate;
+import play.Play;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -40,9 +41,15 @@ public class RequestInit extends Controller {
   @Inject
   static UserDao userDao;
 
+  static final String TELEWORK_CONF = "telework.stampings.active";
+
   @Before(priority = 1)
   static void injectMenu() {
 
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF, "false"))) {
+      renderArgs.put("teleworkStampingsActive", true);
+    }
+    
     Optional<User> user = Security.getUser();
 
     if (!user.isPresent()) {

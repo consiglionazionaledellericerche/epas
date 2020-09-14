@@ -503,7 +503,7 @@ public class CompetenceManager {
     boolean servicesInitialized = true;
     if (competenceCodeList.stream().anyMatch(isReperibility())) {
       List<PersonReperibilityType> prtList = reperibilityDao
-          .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
+          .getReperibilityTypeByOffice(office, Optional.fromNullable(Boolean.FALSE));
       if (prtList.isEmpty()) {
         servicesInitialized = false;
       }

@@ -1,11 +1,8 @@
 package models;
 
-import com.beust.jcommander.Strings;
-import com.google.common.collect.Range;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,7 +18,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import models.absences.Absence;
 import models.base.BaseModel;
-import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
@@ -147,10 +143,6 @@ public class PersonDay extends BaseModel {
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
   
-  @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-  @OrderBy("date ASC")
-  public List<TeleworkStamping> teleworkStampings = new ArrayList<TeleworkStamping>();
-
   @ManyToOne
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
