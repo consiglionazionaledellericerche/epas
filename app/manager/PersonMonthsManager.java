@@ -105,7 +105,7 @@ public class PersonMonthsManager {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
-            Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
+            Optional.fromNullable(month), Optional.fromNullable(Boolean.TRUE));
 
     // TODO & FIXME: lo stato di validazione deve essere intercettato da attestati.
     

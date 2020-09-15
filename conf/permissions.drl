@@ -490,8 +490,6 @@ when
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
      	
-     	/* Gestione riposi compensativi per chiusura ente*/
-     	"TimeVariations.personShow",
 
 		/* Richieste di assenza */
 		"AbsenceRequests.blank",
@@ -564,6 +562,18 @@ when
 then
  $c.grant();
 end
+
+rule EmployeeCanAccessTeleworkStampings
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
+  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping"), granted == false, target == null)
+then
+  $c.grant();
+end
+
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
@@ -857,6 +867,7 @@ when
     "Stampings.missingStamping",
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
+    "TeleworkStampings.personTeleworkStampings",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -1245,6 +1256,7 @@ when
         "PrintTags.showTag",
 
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1327,6 +1339,8 @@ when
         "Stampings.dailyPresence",
         "Stampings.missingStamping",
 		"Stampings.stampingsByAdmin",
+		
+		"TeleworkStampings.personTeleworkStampings",
 		
         "Vacations.list",
         "Vacations.vacationSummary",

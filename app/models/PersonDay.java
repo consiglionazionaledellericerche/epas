@@ -142,7 +142,7 @@ public class PersonDay extends BaseModel {
   @NotAudited
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
-
+  
   @ManyToOne
   @JoinColumn(name = "stamp_modification_type_id")
   public StampModificationType stampModificationType;
@@ -253,7 +253,7 @@ public class PersonDay extends BaseModel {
   public boolean hasError(Troubles trouble) {
     return this.troubles.stream().anyMatch(error -> error.cause == trouble);
   }
-
+  
   @Override
   public String toString() {
     return String.format(

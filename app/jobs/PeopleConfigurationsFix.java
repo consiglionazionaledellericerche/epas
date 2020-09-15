@@ -1,10 +1,14 @@
 package jobs;
 
+import com.google.common.base.Optional;
 import java.util.List;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Person;
+import models.PersonConfiguration;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;

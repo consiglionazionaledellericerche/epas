@@ -65,11 +65,13 @@ require:
     - play-codeborne -> lombok 1.2.5
     - org.projectlombok -> lombok 1.18.4
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.8.0
+    - com.fatboyindustrial.gson-javatime-serialisers -> gson-javatime-serialisers 1.1.1
     - com.fasterxml.jackson.core -> jackson-core 2.9.8
     - com.fasterxml.jackson.core -> jackson-annotations 2.9.8
     - com.fasterxml.jackson.core -> jackson-databind 2.9.8
     - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.9.8
     - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.9.8
+    - com.fasterxml.jackson.datatype -> jackson-datatype-jsr310 2.9.8 
     - com.fasterxml.jackson.module -> jackson-module-afterburner 2.9.8
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
@@ -85,6 +87,7 @@ require:
         - org.osgi -> org.osgi.enterprise
     - xerces -> xercesImpl 2.12.0
     - it.cnr.iit -> play-qmodel 1.5.3
+    - org.modelmapper -> modelmapper 2.3.0
     
 # My custom repository
 

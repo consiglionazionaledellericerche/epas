@@ -12,10 +12,12 @@ services:
   epas:
     image: docker-registry.services.iit.cnr.it/epas/epas:stable
     container_name: epas
+    ports:
+     - 9000:9000
     networks:
       - epas
     volumes:
-      #- ./epas/logs:/home/epas/epas/logs
+      - ./docker-data/logs:/home/epas/epas/logs
       #- ./epas/attachments:/home/epas/epas/data/attachments
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -69,11 +71,10 @@ services:
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
       #- REPORT_SUBJECT=${REPORT_SUBJECT}       # default: Segnalazione ePAS
-      
-      #- TELEWORK_ACTIVE=${TELEWORK_ACTIVE}   # default: false 
-      #- TELEWORK_BASEURL=${TELEWORK_BASEURL}   # default: http://telework-stampings:8080
-      #- TELEWORK_USER=${TELEWORK_USER}   # default: app.epas
-      #- TELEWORK_PASS=${TELEWORK_PASS}   # default: chiedere al team di sviluppo
-      
+      - TELEWORK_ACTIVE=${TELEWORK_ACTIVE}   # default: false
+      - TELEWORK_BASEURL=${TELEWORK_BASEURL}   # default: http://telework-stampings:8080
+      - TELEWORK_USER=${TELEWORK_USER}   # default: app.epas
+      - TELEWORK_PASS=${TELEWORK_PASS}   # default: chiedere al team di sviluppo
+
     restart: unless-stopped
 

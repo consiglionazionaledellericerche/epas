@@ -22,6 +22,7 @@ import models.Office;
 import models.Role;
 import models.User;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
@@ -209,8 +210,27 @@ public class UserDao extends DaoBase {
     if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true")
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
-    }
+    } 
 
+    return stampTypes;
+  }
+  
+  /**
+   * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti di
+   * amministrazione potranno usufruire della sola causale lavoro fuori sede.
+   *
+   * @param user user
+   * @return list
+   */
+  public static List<TeleworkStampTypes> getAllowedTeleworkStampTypes(final User user) {
+    
+    if (user.isSystemUser()) {
+      return TeleworkStampTypes.onlyActive();
+    }
+    val stampTypes = Lists.<TeleworkStampTypes>newArrayList();
+    if (user.person.checkConf(EpasParam.TELEWORK_STAMPINGS, "true")) {
+      stampTypes.addAll(TeleworkStampTypes.onlyActiveInTelework());
+    }
     return stampTypes;
   }
 
