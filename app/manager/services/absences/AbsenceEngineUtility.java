@@ -549,7 +549,7 @@ public class AbsenceEngineUtility {
       }  
     }
         
-    Double totalAssigned = new Double(0);
+    Double totalAssigned = Double.valueOf(0);
     
     //Ricerca dei periodi di attività
     for (Contract contract : contracts) {

@@ -42,6 +42,7 @@ public enum StampTypes {
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
   GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica",false, false),
   PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
+  
 
   private String identifier;
   private String code;
@@ -104,6 +105,8 @@ public enum StampTypes {
     return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
   }
   
+  
+  
   /**
    * Verifica se una causale è attiva a partire dal suo codice passato come parametro.
    * @return true se la causale passata come parametro è attiva. False altrimenti
@@ -130,5 +133,6 @@ public enum StampTypes {
   public boolean isNotOffSiteWork() {
     return this != LAVORO_FUORI_SEDE;
   }
-
+  
+  
 }

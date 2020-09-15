@@ -66,6 +66,15 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Person.class),
   
+  TELEWORK_STAMPINGS("telework_stampings",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
   DISABLED_PERSON_PERMISSION("disabled_person_permission",
 
       EpasParamCategory.GENERAL,
@@ -729,10 +738,10 @@ public enum EpasParam {
             }
           case DAY_MONTH:
             return new MonthDay(
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[1]),
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[1]),
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[0]));
           case MONTH:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case EMAIL:
             return value;
           case IP_LIST:
@@ -740,9 +749,9 @@ public enum EpasParam {
                 Splitter.on(IP_LIST_SEPARATOR)
                 .trimResults().omitEmptyStrings().splitToList(value.trim()));
           case INTEGER:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case BOOLEAN:
-            return new Boolean(value);
+            return Boolean.parseBoolean(value);
           default:
             log.warn("Tipo non riconosciuto: {}", type);
         }

@@ -68,11 +68,21 @@ public class TemplateExtensions extends JavaExtensions {
   private static final DateTimeFormatter DT_FORMATTER = DateTimeFormat
       .forPattern("dd/MM/yyyy HH:mm:ss");
   private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
+  private static final java.time.format.DateTimeFormatter DATE_TIME_JAVA_TIME_FORMATTER = 
+      java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
   private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
 
   public static String format(ReadablePeriod period) {
     return PERIOD_FORMATTER.print(period);
+  }
+
+  public static String format(java.time.LocalDate date) {
+    return date.format(DATE_TIME_JAVA_TIME_FORMATTER);
+  }
+
+  public static String format(java.time.LocalDateTime dateTime) {
+    return dateTime.format(DATE_TIME_JAVA_TIME_FORMATTER);
   }
 
   public static String format(LocalDate date) {

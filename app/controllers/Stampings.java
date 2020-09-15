@@ -617,6 +617,8 @@ public class Stampings extends Controller {
 
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office);
   }
+  
+ 
 
 }
 
