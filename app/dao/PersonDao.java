@@ -519,7 +519,7 @@ public final class PersonDao extends DaoBase {
    * @param perseoId il campo perseoId associato alla persona.
    * @return la persona se esiste associata al parametro eppn.
    */
-  public Optional<Person> byEppnOrEmailOrPerseoId(String eppn, String email, Long perseoId) {
+  public Optional<Person> byEppnOrEmailOrPerseoIdOrFiscalCode(String eppn, String email, Long perseoId, String fiscalCode) {
     if (eppn == null && email == null && perseoId == null) {
       return Optional.absent();
     }
@@ -527,6 +527,9 @@ public final class PersonDao extends DaoBase {
       return byEppn(eppn);
     } else if (email != null) {
       return byEmail(email);  
+    }
+    if (fiscalCode != null) {
+      return null;
     }
     return Optional.fromNullable(getPersonByPerseoId(perseoId));
   }

@@ -64,6 +64,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public String othersSurnames;
 
+  public String fiscalCode;
+
   public LocalDate birthday;
 
   @Email
@@ -177,6 +179,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonShift> personShifts = Lists.newArrayList();
 
+  @Getter
   @ManyToOne
   @Required
   public Qualification qualification;
@@ -199,6 +202,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * restituito un solo elemento (effettivamente per noi è lo stesso badge).Quindi person.badges non
    * restituisce i duplicati
    */
+  @Getter
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<Badge> badges = Sets.newHashSet();
 

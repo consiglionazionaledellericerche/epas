@@ -62,7 +62,7 @@ public class Persons extends Controller {
   public static void days(String email, LocalDate start, LocalDate end) {
 
     if (email == null) {
-      email = "cristian.lucchesi@iit.cnr.it";
+      JsonResponse.badRequest("Email obbligatoria");
     }
     Optional<Person> person = personDao.byEmail(email);
     if (!person.isPresent()) {
@@ -102,7 +102,7 @@ public class Persons extends Controller {
   public static void missions(String email, LocalDate start, LocalDate end, boolean forAttachment) {
 
     if (email == null) {
-      email = "cristian.lucchesi@iit.cnr.it";
+      JsonResponse.badRequest("Email obbligatoria");
     }
     Optional<Person> person = personDao.byEmail(email);
     List<DayRecap> personDays = Lists.newArrayList();
@@ -135,7 +135,9 @@ public class Persons extends Controller {
    */
   @BasicAuth
   public static void competences(String email, LocalDate start, LocalDate end, List<String> code) {
-
+    if (email == null) {
+      JsonResponse.badRequest("Email obbligatoria");
+    }
     Person person = personDao.byEmail(email).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto");

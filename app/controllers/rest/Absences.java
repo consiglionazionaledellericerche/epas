@@ -63,9 +63,9 @@ public class Absences extends Controller {
    * @param end data di fine della assenze da cercare
    */
   @BasicAuth
-  public static void absencesInPeriod(String eppn, String email, Long personPerseoId, 
-      LocalDate begin, LocalDate end) {
-    Person person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId).orNull();
+  public static void absencesInPeriod(String eppn, String email, Long personPerseoId,
+      String fiscalCode, LocalDate begin, LocalDate end) {
+    Person person = personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPerseoId, fiscalCode).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -111,9 +111,10 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void insertAbsence(
-      String eppn, String email, Long personPerseoId, String absenceCode, LocalDate begin, 
+      String eppn, String email, Long personPerseoId, String fiscalCode,
+      String absenceCode, LocalDate begin, 
       LocalDate end, Integer hours, Integer minutes) {
-    Person person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId).orNull();
+    Person person = personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPerseoId, fiscalCode).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -177,11 +178,12 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void checkAbsence(String eppn, String email, Long personPerseoId,
-      String absenceCode, LocalDate begin, LocalDate end, 
+      String fiscalCode, String absenceCode, LocalDate begin, LocalDate end, 
       Integer hours, Integer minutes) 
           throws JsonProcessingException {
 
-    Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId);
+    Optional<Person> person = 
+        personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPerseoId, fiscalCode);
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
