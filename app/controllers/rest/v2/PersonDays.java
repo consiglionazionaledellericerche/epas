@@ -57,12 +57,13 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getDaySituation(String email, String eppn, 
-      Long personPersoId, LocalDate date) {
+      Long personPersoId, String fiscalCode, LocalDate date) {
     log.debug("getDaySituation -> email={}, eppn={}, date={}", email, date);
     if ((email == null && eppn == null) || date == null) {
       notFound();
     }
-    Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPersoId);
+    Optional<Person> person = 
+        personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPersoId, fiscalCode);
 
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente in ePAS la "
