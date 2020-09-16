@@ -64,6 +64,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public String othersSurnames;
 
+  @Unique
+  @As(binder = NullStringBinder.class)
   public String fiscalCode;
 
   public LocalDate birthday;

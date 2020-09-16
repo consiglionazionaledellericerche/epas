@@ -23,6 +23,7 @@ import lombok.var;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -39,7 +40,8 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  
+  private final OfficeManager officeManager;
+  private final UserManager userManager;
 
   /**
    * Costrutture.
@@ -56,13 +58,16 @@ public class PersonManager {
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory,
-      UsersRolesOfficesDao uroDao) {
+      UsersRolesOfficesDao uroDao,
+      OfficeManager officeManager,
+      UserManager userManager) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    
+    this.officeManager = officeManager;
+    this.userManager = userManager;
   }
 
   /**
@@ -329,7 +334,7 @@ public class PersonManager {
    * Per esempio se l'username è giuseppe.verdi e l'mail è g.verdi@iit.cnr.it
    * il campo ePPN viene impostato a giuseppe.verdi@cnr.it
   */ 
-  public static String eppn(String username, String email) {
+  public String eppn(String username, String email) {
     Verify.verifyNotNull(username);
     Verify.verifyNotNull(email);
     
@@ -346,6 +351,17 @@ public class PersonManager {
           domainTokens[domainTokens.length - 2], domainTokens[domainTokens.length - 1]);
     }
     return String.format("%s@%s", username, domain);
+  }
+  
+  public boolean properPersonCreate(Person person) {
+    userManager.createUser(person);
+    // Se il campo eppn è vuoto viene calcolato euristicamente...
+    if (person.email != null && person.eppn == null) {
+      person.eppn = eppn(person.user.username, person.email);
+    }
+    Role employee = Role.find("byName", Role.EMPLOYEE).first();
+    officeManager.setUro(person.user, person.office, employee);
+    return true;
   }
 
 }
