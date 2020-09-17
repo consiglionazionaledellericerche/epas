@@ -27,7 +27,6 @@ import models.PersonDay;
 import models.Stamping;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -56,13 +55,16 @@ public class PersonDays extends Controller {
    * campo eppn.
    */
   @BasicAuth
-  public static void getDaySituation(String email, String eppn, 
-      Long personPersoId, LocalDate date) {
+  public static void getDaySituation(
+      Long id, String email, String eppn, 
+      Long personPersoId, String fiscalCode, LocalDate date) {
     log.debug("getDaySituation -> email={}, eppn={}, date={}", email, date);
     if ((email == null && eppn == null) || date == null) {
       notFound();
     }
-    Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPersoId);
+    Optional<Person> person = 
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPersoId, fiscalCode);
 
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente in ePAS la "
