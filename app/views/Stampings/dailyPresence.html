@@ -15,6 +15,21 @@
 #{/if}
 
 <div class="container">
+  #{accordionItem 'Tabella', parent:'codici', title:'Riepilogo situazione giornaliera', open:false, color:'warning'}
+  <table class="table table-bordered table-striped">
+  	<tr>
+  		<th>Situazione nel giorno</th>
+  		<th>Quantità</th>
+  	</tr>
+  	#{list items:map.entrySet(), as:'entry'}
+  		<tr>
+  			<td>${entry.getKey()}</td>
+  			<td>${entry.getValue()}</td>
+  		</tr>
+  	#{/list}
+  </table>
+  #{/accordionItem}
+  
   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
     <tr>
       <th class="group-single">Nome</th>
