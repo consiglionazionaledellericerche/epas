@@ -64,12 +64,14 @@ public class Certifications extends Controller {
    * @param month il mese
    */
   @BasicAuth
-  public static void getMonthSituation(String email, String eppn, 
+  public static void getMonthSituation(
+      Long id, String email, String eppn, 
       Long personPersoId, String fiscalCode, int year, int month) {
 
     log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Person> person = 
-        personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPersoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPersoId, fiscalCode);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "

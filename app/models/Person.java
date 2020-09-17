@@ -18,9 +18,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.EpasParam;
 import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
@@ -47,6 +49,7 @@ import play.data.validation.Unique;
  * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le informazioni della
  * persona in fase di personDao.list. Necessaria comunque la join con le relazioni OneToOne.
  */
+@Slf4j
 @Entity
 @Audited
 @Table(name = "persons")
@@ -283,6 +286,15 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
+  @PreRemove
+  private void onDelete() {
+    this.groups.stream().forEach(g -> { 
+        g.people.remove(this);
+        log.info("Rimossa associazione {} a gruppo {}", getFullname(), g.name);
+        g.save();
+      });
+  }
+  
   /**
    * Comparatore di persone per fullname e poi id.
    *

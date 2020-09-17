@@ -43,24 +43,49 @@ public class Persons extends Controller {
   static GsonBuilder gsonBuilder;
 
   @BasicAuth
-  public static void show(String email, String eppn, Long personPerseoId, String fiscalCode) {
+  public static void show(Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
 
-    val person = getPersonFromRequest(email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
     rules.checkIfPermitted(person.office);
-    
+
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
-  
+
   @BasicAuth
-  public static void update(String email, String eppn, Long personPerseoId, String fiscalCode,
+  public static void create(String body) 
+      throws JsonParseException, JsonMappingException, IOException {
+    Verify.verify(request.method.equalsIgnoreCase("POST"));
+
+    log.debug("Create person -> request.body = {}", body);
+
+    val gson = gsonBuilder.create();
+    val personDto = gson.fromJson(body, PersonCreateDto.class); 
+    val validationResult = validation.valid(personDto); 
+    if (!validationResult.ok) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+
+    val person = PersonCreateDto.build(personDto);
+    if (!validation.valid(person).ok) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    };
+    personManager.properPersonCreate(person);
+    person.save();
+
+    log.info("Created person {} via REST", person);
+    renderJSON(gson.toJson(PersonShowDto.build(person)));
+  }
+
+  @BasicAuth
+  public static void update(Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
       String body) throws JsonParseException, JsonMappingException, IOException {
     Verify.verify(request.method.equalsIgnoreCase("PUT"));
-    
-    log.debug("update person -> request.body = {}", body);
-    
-    val person = getPersonFromRequest(email, eppn, personPerseoId, fiscalCode);
+
+    log.debug("Update person -> request.body = {}", body);
+
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
     val gson = gsonBuilder.create();
     val personDto = gson.fromJson(body, PersonUpdateDto.class); 
@@ -70,49 +95,43 @@ public class Persons extends Controller {
     }
 
     personDto.update(person);
-    person.save();
-    
-    log.info("Aggiornata persona {} via REST", person);
-    renderJSON(gson.toJson(PersonShowDto.build(person)));
-  }
-  
-  @BasicAuth
-  public static void create(String body) 
-      throws JsonParseException, JsonMappingException, IOException {
-    Verify.verify(request.method.equalsIgnoreCase("POST"));
-    
-    log.debug("Create person -> request.body = {}", body);
-    
-    val gson = gsonBuilder.create();
-    val personDto = gson.fromJson(body, PersonCreateDto.class); 
-    val validationResult = validation.valid(personDto); 
-    if (!validationResult.ok) {
-      JsonResponse.badRequest(validation.errorsMap().toString());
-    }
-    
-    val person = PersonCreateDto.build(personDto);
-    if (!personManager.properPersonCreate(person) ||
-        !validation.valid(person).ok) {
-      //Restituire un messaggio esaustivo dei problemi 
-      //riscontrati
+    if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     };
-    
     person.save();
-    
-    log.info("Created person {} via REST", person);
+
+    log.info("Updated person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));
+  }
+
+  @BasicAuth
+  public static void delete(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+    Verify.verify(request.method.equalsIgnoreCase("DELETE"));
+    val person = getPersonFromRequest(id, null, null, null, null);
+    rules.checkIfPermitted(person.office);
+    
+    if (!person.contracts.isEmpty()) {
+      JsonResponse.conflict(
+          String.format("Ci sono %d contratti associati a questa persona. "
+              + "Cancellare prima i contratti associati.", person.contracts.size()));
+    }
+
+    person.delete();
+    log.info("Deleted person {} via REST", person);
+    JsonResponse.ok();
   }
   
   @Util
   public static Person getPersonFromRequest(
-      String email, String eppn, Long personPerseoId, String fiscalCode) {
-    if (email == null && eppn == null && personPerseoId == null && fiscalCode == null) {
-      JsonResponse.notFound();
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+    if (id == null && email == null && eppn == null && 
+        personPerseoId == null && fiscalCode == null) {
+      JsonResponse.badRequest();
     }
 
     Optional<Person> person = 
-        personDao.byEppnOrEmailOrPerseoIdOrFiscalCode(eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, eppn, email, personPerseoId, fiscalCode);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
@@ -121,7 +140,7 @@ public class Persons extends Controller {
       JsonResponse.notFound("Non è stato possibile individuare la persona in ePAS con "
           + "i parametri passati.");
     }
-    
+
     return person.get();
   }
 }

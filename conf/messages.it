@@ -525,6 +525,7 @@ person.birthday=Data di nascita
 person.currentVacationPeriod= Ferie
 person.currentWorkingTimeType= Tipo Orario
 person.email=Email
+person.fiscalCode=Codice Fiscale
 person.perseoId=Id Anagrafica esterna
 person.eppn=Eppn (Per login Shibboleth)
 person.isPersonInCharge= Responsabile gruppo di lavoro

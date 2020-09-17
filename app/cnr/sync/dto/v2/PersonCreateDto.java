@@ -5,6 +5,7 @@ import lombok.val;
 import models.Office;
 import models.Person;
 import models.Qualification;
+import org.joda.time.LocalDate;
 import org.modelmapper.ModelMapper;
 import play.data.validation.Required;
 
@@ -30,7 +31,9 @@ public class PersonCreateDto {
   private String telephone;
   private String fax;
   private String mobile;
+  @Required
   private Integer qualification;
+  @Required
   private Long officeId;
   
   public static Person build(PersonCreateDto personDto) {
@@ -45,6 +48,7 @@ public class PersonCreateDto {
     if (personDto.getOfficeId() != null) {
       person.office = Office.findById(personDto.getOfficeId());  
     }
+    person.beginDate = LocalDate.now();
     return person;
   }
 }

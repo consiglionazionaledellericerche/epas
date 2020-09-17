@@ -1779,7 +1779,14 @@ when
      	"Persons.removePersonFromGroup",
 
      	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail"), target == null, granted == false)
+     	"Persons.updateSendEmail",
+     	
+     	"rest.v2.Persons.show",
+     	"rest.v2.Persons.create",
+     	"rest.v2.Persons.update",
+     	"rest.v2.Persons.delete"
+     	
+     	), target == null, granted == false)
 then
  $c.grant();
 end
@@ -1844,7 +1851,14 @@ when
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
      	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail"), target == $o, granted == false)
+     	"Persons.updateSendEmail",
+     	
+     	"rest.v2.Persons.show",
+     	"rest.v2.Persons.create",
+     	"rest.v2.Persons.update",
+     	"rest.v2.Persons.delete"
+     	
+     	), target == $o, granted == false)
 then
  $c.grant();
 end
