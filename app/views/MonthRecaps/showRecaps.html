@@ -4,7 +4,7 @@
 
 
 <div class="container">
-	#{title title:'Riepilogo del mese ' + month+'/'+year +  ' - ' + office?.name /}
+	#{title title:'Riepilogo del mese di ' + templateUtility.monthName(month) + ' ' + year +  ' - ' + office?.name /}
 </div>
 
 #{stampings.presenceDashboardTabs activeAction:'showRecaps' /}
