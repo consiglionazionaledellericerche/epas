@@ -353,7 +353,15 @@ public class PersonManager {
     return String.format("%s@%s", username, domain);
   }
   
-  public boolean properPersonCreate(Person person) {
+  /**
+   * Si occupa di creare l'utente collegato alla persona,
+   * di impostare i ruoli corretti e creare l'epp se
+   * non passato.
+   * 
+   * @param person l'oggetto Person da configurare con
+   *    gli attributi ed oggetti correlati opportuni.
+   */
+  public void properPersonCreate(Person person) {
     userManager.createUser(person);
     // Se il campo eppn è vuoto viene calcolato euristicamente...
     if (person.email != null && person.eppn == null) {
@@ -361,7 +369,6 @@ public class PersonManager {
     }
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
     officeManager.setUro(person.user, person.office, employee);
-    return true;
   }
 
 }

@@ -150,17 +150,8 @@ public class Persons extends Controller {
     person.name = WordUtils.capitalizeFully(person.name);
     person.surname = WordUtils.capitalizeFully(person.surname);
 
-    person.user = userManager.createUser(person);
-
-    // Se il campo eppn è vuoto viene calcolato euristicamente...
-    if (person.email != null && person.eppn == null) {
-      person.eppn = personManager.eppn(person.user.username, person.email);
-    }
-
+    personManager.properPersonCreate(person);
     person.save();
-
-    Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.user, person.office, employee);
 
     contract.person = person;
 
