@@ -6,6 +6,7 @@ import com.beust.jcommander.Strings;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
 import dao.OfficeDao;
@@ -26,6 +27,7 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -576,8 +578,10 @@ public class Stampings extends Controller {
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
+    
+    Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
 
-    render(daysRecap, office, date, numberOfInOut);
+    render(daysRecap, office, date, numberOfInOut, map);
   }
 
   /**
