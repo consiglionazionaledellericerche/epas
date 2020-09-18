@@ -1786,7 +1786,8 @@ when
      	"rest.v2.Persons.show",
      	"rest.v2.Persons.create",
      	"rest.v2.Persons.update",
-     	"rest.v2.Persons.delete"
+     	"rest.v2.Persons.delete",
+     	"rest.v2.Persons.list"
      	
      	), target == null, granted == false)
 then
@@ -1858,7 +1859,8 @@ when
      	"rest.v2.Persons.show",
      	"rest.v2.Persons.create",
      	"rest.v2.Persons.update",
-     	"rest.v2.Persons.delete"
+     	"rest.v2.Persons.delete",
+     	"rest.v2.Persons.list"
      	
      	), target == $o, granted == false)
 then
