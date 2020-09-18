@@ -2,19 +2,25 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import lombok.Data;
+import manager.MonthsRecapManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.services.absences.AbsenceService;
@@ -23,6 +29,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
@@ -52,6 +59,10 @@ public class MonthRecaps extends Controller {
   private static AbsenceService absenceService;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static PersonDayDao personDayDao;
+  @Inject
+  private static MonthsRecapManager monthsRecapManager;
 
   /**
    * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
@@ -93,6 +104,28 @@ public class MonthRecaps extends Controller {
 
 
     render(recaps, year, month, office);
+  }
+  
+  /**
+   * 
+   * @param month
+   * @param year
+   * @param officeId
+   */
+  public static void generateSmartWorkingMonthlyRecap(int month, int year, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    
+    Map<Person, List<PersonDay>> map = Maps.newHashMap();
+    YearMonth yearMonth = new YearMonth(year, month);
+    List<Person> simplePersonList = personDao
+        .listFetched(Optional.<String>absent(), ImmutableSet.of(office), false, null, null, false)
+        .list();
+    for (Person person : simplePersonList) {
+      map.put(person, personDayDao.getPersonDayInMonth(person, yearMonth));
+    }
+    InputStream file = monthsRecapManager.buildFile(yearMonth, simplePersonList);
+    renderBinary(file);
   }
 
   /**
