@@ -23,7 +23,6 @@ import manager.PersonManager;
 import manager.UserManager;
 import models.Office;
 import models.Person;
-import org.testng.util.Strings;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -183,16 +182,7 @@ public class Persons extends Controller {
     if (id == null && code == null && codeId == null) {
       JsonResponse.badRequest();
     }
-    Optional<Office> office = Optional.absent();
-    if (id != null) {
-      office = Optional.fromNullable(officeDao.getOfficeById(id));
-    }
-    if (!Strings.isNullOrEmpty(code)) {
-      office = officeDao.byCode(code);
-    }
-    if (!Strings.isNullOrEmpty(codeId)) {
-      office = officeDao.byCodeId(codeId);
-    }
+    Optional<Office> office = officeDao.byIdOrCodeOrCodeId(id, code, codeId);
 
     if (!office.isPresent()) {
       log.info("Non trovato l'ufficio in base ai parametri passati: "

@@ -18,6 +18,7 @@ import models.User;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
+import org.testng.util.Strings;
 
 /**
  * Dao per gli uffici.
@@ -34,6 +35,19 @@ public class OfficeDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  public Optional<Office> byIdOrCodeOrCodeId(Long id, String code, String codeId) {
+    if (id != null) {
+      return Optional.fromNullable(getOfficeById(id));
+    }
+    if (!Strings.isNullOrEmpty(code)) {
+      return byCode(code);
+    }
+    if (!Strings.isNullOrEmpty(codeId)) {
+      return byCodeId(codeId);
+    }
+    return Optional.absent();
+  }
+  
   /**
    * Preleva l'office dal suo id.
    * 
