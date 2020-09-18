@@ -49,6 +49,7 @@ import models.query.QUser;
 import models.query.QWorkingTimeType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import org.testng.util.Strings;
 
 /**
  * DAO per le person.
@@ -510,6 +511,21 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dal codice fiscale.
+   *
+   * @param fiscalCode il codice fiscale della persona.
+   * @return la persona se esiste, Optional.absent() altrimenti.
+   */
+  public Optional<Person> byFiscalCode(String fiscalCode) {
+    final QPerson person = QPerson.person;
+    final Person result = getQueryFactory().selectFrom(person)
+        .where(person.fiscalCode.equalsIgnoreCase(fiscalCode))
+        .fetchOne();
+
+    return Optional.fromNullable(result);
+  }
+  
+  /**
    * Persona (se esiste) a partire dal campo eppn o dal campo email.
    * Il campo eppn viene usato come prioritario se passato, poi viene
    * utilizzato il campo email se passato, infine il campo perseoId. 
@@ -521,21 +537,26 @@ public final class PersonDao extends DaoBase {
    */
   public Optional<Person> byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
       Long id, String eppn, String email, Long perseoId, String fiscalCode) {
-    if (id == null && eppn == null && email == null && perseoId == null) {
+    if (id == null && eppn == null && email == null && perseoId == null &&
+        fiscalCode == null) {
       return Optional.absent();
     }
     if (id != null) {
       return Optional.fromNullable(getPersonById(id));
     }
-    if (eppn != null) {
+    if (!Strings.isNullOrEmpty(eppn)) {
       return byEppn(eppn);
-    } else if (email != null) {
+    } 
+    if (!Strings.isNullOrEmpty(email)) {
       return byEmail(email);  
     }
-    if (fiscalCode != null) {
-      return null;
+    if (perseoId != null) {
+      return Optional.fromNullable(getPersonByPerseoId(perseoId));  
     }
-    return Optional.fromNullable(getPersonByPerseoId(perseoId));
+    if (!Strings.isNullOrEmpty(fiscalCode)) {
+      return byFiscalCode(fiscalCode);
+    }
+    return Optional.absent();
   }
   
   /**
