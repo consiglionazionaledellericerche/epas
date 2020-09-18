@@ -10,16 +10,20 @@ import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.JsonResponse;
 import java.io.IOException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.OfficeManager;
 import manager.PersonManager;
 import manager.UserManager;
+import models.Office;
 import models.Person;
+import org.testng.util.Strings;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -29,6 +33,8 @@ import security.SecurityRules;
 @Slf4j
 public class Persons extends Controller {
 
+  @Inject
+  static OfficeDao officeDao;
   @Inject
   static PersonDao personDao;
   @Inject
@@ -41,6 +47,16 @@ public class Persons extends Controller {
   static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
+
+  @BasicAuth
+  public static void list(Long id, String code, String codeId) {
+    val office = getOfficeFromRequest(id, code, codeId);
+    rules.checkIfPermitted(office);
+    
+    val list = 
+        office.persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
+  }
 
   @BasicAuth
   public static void show(Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
@@ -71,6 +87,12 @@ public class Persons extends Controller {
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     };
+    
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione anagrafica sull'office indicato
+    //nel DTO
+    rules.checkIfPermitted(person.office);
+    
     personManager.properPersonCreate(person);
     person.save();
 
@@ -86,7 +108,12 @@ public class Persons extends Controller {
     log.debug("Update person -> request.body = {}", body);
 
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
-
+    
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione anagrafica sull'office attuale 
+    //della persona
+    rules.checkIfPermitted(person.office);
+    
     val gson = gsonBuilder.create();
     val personDto = gson.fromJson(body, PersonUpdateDto.class); 
     val validationResult = validation.valid(personDto); 
@@ -95,6 +122,12 @@ public class Persons extends Controller {
     }
 
     personDto.update(person);
+    
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione anagrafica sull'office indicato 
+    //nel DTO
+    rules.checkIfPermitted(person.office);
+
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     };
@@ -142,5 +175,33 @@ public class Persons extends Controller {
     }
 
     return person.get();
+  }
+  
+  @Util
+  public static Office getOfficeFromRequest(
+      Long id, String code, String codeId) {
+    if (id == null && code == null && codeId == null) {
+      JsonResponse.badRequest();
+    }
+    Optional<Office> office = Optional.absent();
+    if (id != null) {
+      office = Optional.fromNullable(officeDao.getOfficeById(id));
+    }
+    if (!Strings.isNullOrEmpty(code)) {
+      office = officeDao.byCode(code);
+    }
+    if (!Strings.isNullOrEmpty(codeId)) {
+      office = officeDao.byCodeId(codeId);
+    }
+
+    if (!office.isPresent()) {
+      log.info("Non trovato l'ufficio in base ai parametri passati: "
+          + "id = {}, code = {}, codeId = {}", 
+          id, code, codeId);
+      JsonResponse.notFound("Non è stato possibile individuare l'ufficio in ePAS con "
+          + "i parametri passati.");
+    }
+
+    return office.get();
   }
 }
