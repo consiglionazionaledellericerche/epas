@@ -2,19 +2,26 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import lombok.Data;
+import manager.MonthsRecapManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.services.absences.AbsenceService;
@@ -23,6 +30,7 @@ import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
@@ -52,6 +60,10 @@ public class MonthRecaps extends Controller {
   private static AbsenceService absenceService;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static PersonDayDao personDayDao;
+  @Inject
+  private static MonthsRecapManager monthsRecapManager;
 
   /**
    * Controller che gescisce il calcolo del riepilogo annuale residuale delle persone.
@@ -94,6 +106,37 @@ public class MonthRecaps extends Controller {
 
     render(recaps, year, month, office);
   }
+  
+  /**
+   * Genera il file con le info su smart working / lavoro in sede.
+   * @param month il mese di riferimento
+   * @param year l'anno di riferimento
+   * @param officeId l'id della sede
+   */
+  public static void generateSmartWorkingMonthlyRecap(int month, int year, Long officeId) {
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    Map<Person, List<PersonDay>> map = Maps.newHashMap();
+    YearMonth yearMonth = new YearMonth(year, month);
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office);
+    List<Person> simplePersonList = personDao.getActivePersonInMonth(offices, yearMonth);
+        
+    for (Person person : simplePersonList) {
+      map.put(person, personDayDao.getPersonDayInMonth(person, yearMonth));
+    }
+    InputStream file = null;
+    try {
+      file = monthsRecapManager.buildFile(yearMonth, simplePersonList);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    renderBinary(file);
+  }
 
   /**
    * Recap chiesto da IVV. TODO: una raccolta di piccole funzionalità
@@ -122,7 +165,7 @@ public class MonthRecaps extends Controller {
         Sets.newHashSet(office), false, monthBegin, monthEnd, true)
         .list();
 
-    List<CustomRecapDTO> customRecapList = Lists.newArrayList();
+    List<CustomRecapDto> customRecapList = Lists.newArrayList();
 
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
@@ -140,7 +183,7 @@ public class MonthRecaps extends Controller {
         // Per essere danila compliant andrebbero tolte dal conteggio le assenze effettuate 
         // dopo monthEnd. Anche chissene.
 
-        CustomRecapDTO danilaDto = new CustomRecapDTO();
+        CustomRecapDto danilaDto = new CustomRecapDto();
         danilaDto.ferieAnnoCorrente = situation.currentYear.usableTotal();
 
         danilaDto.ferieAnnoPassato = situation.lastYear != null 
@@ -177,7 +220,7 @@ public class MonthRecaps extends Controller {
    *  @author alessandro
    */
   @Data
-  public static class CustomRecapDTO {
+  public static class CustomRecapDto {
     public Person person;
     public int ferieAnnoPassato;
     public int ferieAnnoCorrente;
