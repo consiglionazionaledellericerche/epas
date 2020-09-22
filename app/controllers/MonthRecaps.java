@@ -116,6 +116,8 @@ public class MonthRecaps extends Controller {
   public static void generateSmartWorkingMonthlyRecap(int month, int year, Long officeId) {
     
     Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
     
     Map<Person, List<PersonDay>> map = Maps.newHashMap();
     YearMonth yearMonth = new YearMonth(year, month);

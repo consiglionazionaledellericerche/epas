@@ -1523,6 +1523,8 @@ when
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
+        /*Risultati tra smart working e lavoro nella sede*/
+        "MonthRecaps.generateSmartWorkingMonthlyRecap",
         
         /*Permesso relativo alla gestione dei gruppi*/
         "Groups.createGroup",
@@ -1659,6 +1661,8 @@ when
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
+        /*Risultato tra lo smart working e il lavoro nella sede*/
+        "MonthRecaps.generateSmartWorkingMonthlyRecap",
         
         /*Permesso relativo alla gestione dei gruppi*/
         "Groups.createGroup",
