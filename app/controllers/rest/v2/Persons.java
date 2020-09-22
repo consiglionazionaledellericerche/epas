@@ -140,7 +140,7 @@ public class Persons extends Controller {
   public static void delete(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
     Verify.verify(request.method.equalsIgnoreCase("DELETE"));
-    val person = getPersonFromRequest(id, null, null, null, null);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
     
     if (!person.contracts.isEmpty()) {
@@ -150,6 +150,7 @@ public class Persons extends Controller {
     }
 
     person.delete();
+    person.user.delete();
     log.info("Deleted person {} via REST", person);
     JsonResponse.ok();
   }
