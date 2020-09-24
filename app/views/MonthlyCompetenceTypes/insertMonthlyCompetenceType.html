@@ -1,6 +1,6 @@
 #{modalAsync id:'modalMonthlyCompetenceType', button:'Salva', title:'Nuovo tipo di competenza mensile'}
 <div id="absenceCodeData">
-  #{include './_tutorialFill.html' /}	
+  	
   #{form action:@MonthlyCompetenceTypes.saveType(), method:'POST', autocomplete:false,
   class:'form form-horizontal', 'data-async':'#page_content',
   'data-async-error':'#absenceCodeData'}
