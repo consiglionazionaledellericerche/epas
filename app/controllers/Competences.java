@@ -1010,7 +1010,9 @@ public class Competences extends Controller {
           type.monthsStatus.stream().map(st -> st.delete());  
           log.debug("Elimino i gli shift_type_month relativi a {}", type.type);
         }        
-      }       
+      } else {
+        toDelete.add(type);
+      }
       if (toDelete.contains(type)) {
         log.debug("Elimino le relazioni tra persone e shift_type");        
         for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
