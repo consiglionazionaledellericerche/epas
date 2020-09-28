@@ -4,13 +4,16 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
+import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
 import models.Office;
 import models.Person;
 import models.flows.Group;
+import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 
 public class GroupDao extends DaoBase {
@@ -21,6 +24,12 @@ public class GroupDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  public Optional<Group> byId(Long id) {
+    final QGroup group = QGroup.group;
+    return Optional.fromNullable(
+        getQueryFactory().selectFrom(group).where(group.id.eq(id)).fetchFirst());
+  }
+  
   /**
    * Metodo che ritorna la lista dei gruppi che appartengono alla sede passata come parametro.
    *
@@ -52,6 +61,14 @@ public class GroupDao extends DaoBase {
     return getQueryFactory().selectFrom(group).where(condition).fetch();
   }
 
+  private Predicate personAffiliationCondition(QAffiliation affiliation, Person person) {
+    BooleanBuilder endDateCondition = new BooleanBuilder(affiliation.endDate.isNull());
+    endDateCondition = endDateCondition.or(affiliation.endDate.after(LocalDate.now()));
+    return affiliation.person.eq(person)
+        .and(affiliation.beginDate.before(LocalDate.now())
+            .or(endDateCondition));
+  } 
+  
   /**
    * Metodo che ritorna la lista dei gruppi di cui fa parte la person passata come parametro.
    *
@@ -60,7 +77,12 @@ public class GroupDao extends DaoBase {
    */
   public List<Group> myGroups(Person person) {
     final QGroup group = QGroup.group;
-    return getQueryFactory().selectFrom(group).where(group.people.contains(person)).fetch();
+    final QAffiliation affiliation = QAffiliation.affiliation;
+    BooleanBuilder endDateCondition = new BooleanBuilder(affiliation.endDate.isNull());
+    endDateCondition = endDateCondition.or(affiliation.endDate.after(LocalDate.now()));
+    return getQueryFactory().selectFrom(group)
+        .join(group.affiliations, affiliation)
+        .where(personAffiliationCondition(affiliation, person)).fetch();
   }
 
   /**
@@ -72,8 +94,11 @@ public class GroupDao extends DaoBase {
    */
   public Optional<Group> checkManagerPerson(Person manager, Person person) {
     final QGroup group = QGroup.group;
+    final QAffiliation affiliation = QAffiliation.affiliation;
     final Group result = getQueryFactory().selectFrom(group)
-        .where(group.manager.eq(manager).and(group.people.contains(person))).fetchFirst();
+        .join(group.affiliations, affiliation)
+        .where(personAffiliationCondition(affiliation, person), group.manager.eq(manager))
+        .fetchFirst();
     return Optional.fromNullable(result);
   }
 }

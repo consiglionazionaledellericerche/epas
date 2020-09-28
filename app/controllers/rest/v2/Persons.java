@@ -10,7 +10,6 @@ import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.JsonResponse;
 import java.io.IOException;
@@ -18,10 +17,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-import manager.OfficeManager;
 import manager.PersonManager;
 import manager.UserManager;
-import models.Office;
 import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -33,15 +30,11 @@ import security.SecurityRules;
 public class Persons extends Controller {
 
   @Inject
-  static OfficeDao officeDao;
-  @Inject
   static PersonDao personDao;
   @Inject
   static UserManager userManager;
   @Inject
   static PersonManager personManager;
-  @Inject
-  static OfficeManager officeManager;
   @Inject 
   static SecurityRules rules;
   @Inject
@@ -49,7 +42,7 @@ public class Persons extends Controller {
 
   @BasicAuth
   public static void list(Long id, String code, String codeId) {
-    val office = getOfficeFromRequest(id, code, codeId);
+    val office = Offices.getOfficeFromRequest(id, code, codeId);
     rules.checkIfPermitted(office);
     
     val list = 
@@ -85,7 +78,7 @@ public class Persons extends Controller {
     val person = PersonCreateDto.build(personDto);
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
-    };
+    }
     
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
@@ -129,7 +122,7 @@ public class Persons extends Controller {
 
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
-    };
+    }
     person.save();
 
     log.info("Updated person {} via REST", person);
@@ -158,13 +151,14 @@ public class Persons extends Controller {
   @Util
   public static Person getPersonFromRequest(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-    if (id == null && email == null && eppn == null && 
-        personPerseoId == null && fiscalCode == null) {
+    if (id == null && email == null && eppn == null 
+        && personPerseoId == null && fiscalCode == null) {
       JsonResponse.badRequest();
     }
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPerseoId, fiscalCode);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
@@ -177,22 +171,5 @@ public class Persons extends Controller {
     return person.get();
   }
   
-  @Util
-  public static Office getOfficeFromRequest(
-      Long id, String code, String codeId) {
-    if (id == null && code == null && codeId == null) {
-      JsonResponse.badRequest();
-    }
-    Optional<Office> office = officeDao.byIdOrCodeOrCodeId(id, code, codeId);
 
-    if (!office.isPresent()) {
-      log.info("Non trovato l'ufficio in base ai parametri passati: "
-          + "id = {}, code = {}, codeId = {}", 
-          id, code, codeId);
-      JsonResponse.notFound("Non è stato possibile individuare l'ufficio in ePAS con "
-          + "i parametri passati.");
-    }
-
-    return office.get();
-  }
 }

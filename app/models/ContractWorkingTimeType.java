@@ -44,7 +44,7 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @Override
   public void setValue(Object value) {
-    this.workingTimeType = (WorkingTimeType)value;
+    this.workingTimeType = (WorkingTimeType) value;
   }
 
   public IPropertiesInPeriodOwner getOwner() {
@@ -52,13 +52,13 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   }
 
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.contract = (Contract)target;
+    this.contract = (Contract) target;
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof WorkingTimeType) {
-      return this.getValue().equals(((WorkingTimeType)otherValue));
+      return this.getValue().equals(((WorkingTimeType) otherValue));
     }
     return false;
   }

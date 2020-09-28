@@ -43,7 +43,7 @@ public class ContractMandatoryTimeSlot extends PropertyInPeriod implements IProp
 
   @Override
   public void setValue(Object value) {
-    this.timeSlot = (TimeSlot)value;
+    this.timeSlot = (TimeSlot) value;
   }
 
   public IPropertiesInPeriodOwner getOwner() {
@@ -51,13 +51,13 @@ public class ContractMandatoryTimeSlot extends PropertyInPeriod implements IProp
   }
 
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.contract = (Contract)target;
+    this.contract = (Contract) target;
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof TimeSlot) {
-      return this.getValue().equals(((TimeSlot)otherValue));
+      return this.getValue().equals(((TimeSlot) otherValue));
     }
     return false;
   }

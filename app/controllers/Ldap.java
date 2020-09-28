@@ -37,7 +37,7 @@ public class Ldap extends Controller {
       url = request.params.get("return");
     }
     if (url == null) {
-      url = Play.configuration.getProperty("ldap.login.return","/");
+      url = Play.configuration.getProperty("ldap.login.return", "/");
     }
 
     log.debug("Ldap: Redirecting user back to destination location: " + url);
