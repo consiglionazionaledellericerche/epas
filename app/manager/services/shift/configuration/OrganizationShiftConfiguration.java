@@ -10,17 +10,17 @@ import org.joda.time.LocalTime;
 
 public enum OrganizationShiftConfiguration {
 
-  INAF_MORNING(new LocalTime(6,0), new LocalTime(14,0), 
+  INAF_MORNING(new LocalTime(6, 0), new LocalTime(14, 0),
       CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
-  INAF_EVENING(new LocalTime(14,0), new LocalTime(22,0), 
+  INAF_EVENING(new LocalTime(14, 0), new LocalTime(22, 0),
       CompetenceCodeDefinition.WORKING_DAY_SHIFT, false),
-  INAF_NIGHT(new LocalTime(22,0), new LocalTime(6,0), 
+  INAF_NIGHT(new LocalTime(22, 0), new LocalTime(6, 0),
       CompetenceCodeDefinition.NIGHT_SHIFT, false),
-  INAF_MORNING_HOLIDAY(new LocalTime(6,0), new LocalTime(14,0), 
+  INAF_MORNING_HOLIDAY(new LocalTime(6, 0), new LocalTime(14, 0),
       CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
-  INAF_EVENING_HOLIDAY(new LocalTime(14,0), new LocalTime(22,0), 
+  INAF_EVENING_HOLIDAY(new LocalTime(14, 0), new LocalTime(22, 0),
       CompetenceCodeDefinition.HOLIDAY_SHIFT, true),
-  INAF_NIGHT_HOLIDAY(new LocalTime(22,0), new LocalTime(6,0), 
+  INAF_NIGHT_HOLIDAY(new LocalTime(22, 0), new LocalTime(6, 0),
       CompetenceCodeDefinition.HOLIDAY_SHIFT, true);
   
   public LocalTime beginSlot;

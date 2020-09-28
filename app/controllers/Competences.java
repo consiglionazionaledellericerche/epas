@@ -1190,7 +1190,7 @@ public class Competences extends Controller {
           || type.exitTolerance > type.exitMaxTolerance) {
         flash.error("Le soglie minime non possono essere superiori a quelle massime");
 
-        render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
+        render("@configureShift", step, cat, type, breakInRange, enableExitTolerance);
       }
       step++;
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
@@ -1512,7 +1512,7 @@ public class Competences extends Controller {
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
     List<Person> available = competenceCodeDao
-        .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+        .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
         .stream().filter(e -> (personAssociated.stream()
             .noneMatch(d -> d.person.equals(e.person))))        
         .map(pcc -> pcc.person).distinct()
@@ -1575,7 +1575,7 @@ public class Competences extends Controller {
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
       List<Person> available = competenceCodeDao
-          .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+          .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
           .stream().filter(e -> (personAssociated.stream()
               .noneMatch(d -> d.person.equals(e.person))))        
           .map(pcc -> pcc.person).distinct()

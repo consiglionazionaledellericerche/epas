@@ -4,6 +4,7 @@ import com.beust.jcommander.internal.Sets;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.val;
 import models.Person;
 import org.modelmapper.ModelMapper;
@@ -15,16 +16,12 @@ import org.modelmapper.ModelMapper;
  *
  */
 @Data
-public class PersonShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class PersonShowDto extends PersonShowTerseDto {
   
-  private Long id;
   private String name;
   private String surname;
   private String othersSurnames;
-  private String fiscalCode;
-  private String email;
-  private String number; //Matricola
-  private String eppn;
   private String telephone;
   private String fax;
   private String mobile;

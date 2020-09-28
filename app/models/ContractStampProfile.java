@@ -70,7 +70,7 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner owner) {
-    this.contract = (Contract)owner;
+    this.contract = (Contract) owner;
   }
 
   @Override
@@ -90,14 +90,14 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setValue(Object value) {
-    this.fixedworkingtime = (Boolean)value;
+    this.fixedworkingtime = (Boolean) value;
 
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof Boolean) {
-      return this.getValue() == (Boolean)otherValue;
+      return this.getValue() == (Boolean) otherValue;
     }
     return false;
   }

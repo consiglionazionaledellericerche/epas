@@ -30,6 +30,7 @@ import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 import models.query.QBadge;
 import models.query.QConfiguration;
@@ -537,8 +538,8 @@ public final class PersonDao extends DaoBase {
    */
   public Optional<Person> byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
       Long id, String eppn, String email, Long perseoId, String fiscalCode) {
-    if (id == null && eppn == null && email == null && perseoId == null &&
-        fiscalCode == null) {
+    if (id == null && eppn == null && email == null && perseoId == null 
+        && fiscalCode == null) {
       return Optional.absent();
     }
     if (id != null) {
@@ -703,14 +704,16 @@ public final class PersonDao extends DaoBase {
 
     final QPerson person = QPerson.person;
     final QContract contract = QContract.contract;
-
+    final QAffiliation affiliation = QAffiliation.affiliation;
+    
     final JPQLQuery<Person> query = getQueryFactory().selectFrom(person)
 
         // join one to many or many to many (only one bag fetchable!!!)
         .leftJoin(person.contracts, contract)
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes)
         .leftJoin(person.user, QUser.user)
-        .leftJoin(person.groups, QGroup.group)
+        .leftJoin(person.affiliations, affiliation)
+        .leftJoin(affiliation.group, QGroup.group)
         // join one to one
         .leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetchJoin()
         .leftJoin(
@@ -958,32 +961,6 @@ public final class PersonDao extends DaoBase {
     return lightQuery
         .select(Projections.bean(PersonLite.class, person.id, person.name, person.surname)).fetch();
   }
-  
-  /**
-   * Ritorna la lista delle persone che fanno telelavoro e che devono compilare il form
-   * per gli orari in telelavoro.
-   * @param offices la lista degli uffici
-   * @param year l'anno
-   * @param month il mese
-   * @return la lista delle persone in telelavoro da esporre nel menu a tendina.
-   */
-//  public List<PersonLite> liteTeleworkList (Set<Office> offices, int year, int month) {
-//    final QPerson person = QPerson.person;
-//    Optional<LocalDate> begin = Optional.fromNullable(new LocalDate(year, month, 1));
-//    Optional<LocalDate> end = Optional.fromNullable(begin.get().dayOfMonth().withMaximumValue());
-//    BooleanBuilder condition = new BooleanBuilder();
-//    
-//    filterOnlyTelework(condition, true);
-//    JPQLQuery<?> lightQuery =
-//        getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
-//            .orderBy(person.surname.asc(), person.name.asc()).distinct();
-//
-//    lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, begin,
-//        end, true, Optional.absent(), false);
-//    lightQuery = lightQuery.where(condition);
-//    return lightQuery
-//        .select(Projections.bean(PersonLite.class, person.id, person.name, person.surname)).fetch();
-//  }
 
   /**
    * Questo metodo ci è utile per popolare le select delle persone.

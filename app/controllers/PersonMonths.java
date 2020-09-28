@@ -375,7 +375,7 @@ public class PersonMonths extends Controller {
           ImmutableSet.of(person.office), false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
-          person, month, year, begin, end, value,simplePersonList);
+          person, month, year, begin, end, value, simplePersonList);
     }
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);

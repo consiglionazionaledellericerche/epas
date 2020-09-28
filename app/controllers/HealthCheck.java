@@ -2,10 +2,9 @@ package controllers;
 
 import controllers.Resecure.NoCheck;
 import java.lang.management.ManagementFactory;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import play.Play;
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
@@ -14,7 +13,7 @@ import play.mvc.With;
 @With({Resecure.class})
 public class HealthCheck extends Controller {
 
-  public final static String DEFAULT_LOAD_WARNING_THRESHOLD = "4";
+  public static final String DEFAULT_LOAD_WARNING_THRESHOLD = "4";
   
   /**
    * Controlla il carico del sistema operativo ospitante

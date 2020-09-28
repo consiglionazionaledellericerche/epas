@@ -88,7 +88,7 @@ public class AbsenceCertificationService {
   public Optional<CertificationYearSituation> certificationYearSituationCached(Person person, 
       int year) {
     return Optional.fromNullable(
-        (CertificationYearSituation)Cache.get(cysKey(person, year)));
+        (CertificationYearSituation) Cache.get(cysKey(person, year)));
     
   }
   
@@ -111,7 +111,7 @@ public class AbsenceCertificationService {
       }
     }
     
-    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
+    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente) Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);        
@@ -127,7 +127,7 @@ public class AbsenceCertificationService {
       return null;
     }
     
-    CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
+    CruscottoDipendente cruscottoPrev = (CruscottoDipendente) Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
@@ -454,7 +454,7 @@ public class AbsenceCertificationService {
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code37, year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
-    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code37,  year);
     if (vacationSituation.lastYear != null) {
       vacationPreviousYear.notPresent = absenceNotInAttestati(
           vacationSituation.lastYear.absencesUsed(),
@@ -717,8 +717,6 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType completeDayAndAddOvertime = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {

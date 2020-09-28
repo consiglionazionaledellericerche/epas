@@ -256,7 +256,7 @@ public class Charts extends Controller {
     rules.checkIfPermitted(office);
     
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
-      Validation.addError("endDate","La data di fine non può precedere la data di inizio!");      
+      Validation.addError("endDate", "La data di fine non può precedere la data di inizio!");      
     }
     if (Validation.hasErrors()) {      
       
@@ -284,6 +284,6 @@ public class Charts extends Controller {
   }
 
   public enum ExportFile {
-    CSV,XLS;
+    CSV, XLS;
   }
 }

@@ -251,7 +251,7 @@ public class NotificationManager {
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
-          if (group.manager.equals(user.person) && group.people.contains(person)) {
+          if (group.manager.equals(user.person) && group.getPeople().contains(person)) {
             Notification.builder().destination(user).message(message)
                 .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
           }
@@ -740,7 +740,7 @@ public class NotificationManager {
    * @param manager il responsabile destinatario della mail
    * @param absence l'assenza per permesso personale da notificare
    */
-  private void sendEmailToManagerFor661 (Person manager, Absence absence) {
+  private void sendEmailToManagerFor661(Person manager, Absence absence) {
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
       simpleEmail.addTo(manager.email);

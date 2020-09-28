@@ -1,17 +1,13 @@
 package db.h2support.base;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
-
-import com.beust.jcommander.internal.Lists;
-
 import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
-
 import java.util.List;
 import java.util.Set;
-
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
@@ -19,7 +15,6 @@ import models.absences.AbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
-
 import org.joda.time.LocalDate;
 
 public class H2AbsenceSupport {

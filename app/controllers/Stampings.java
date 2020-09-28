@@ -6,7 +6,6 @@ import com.beust.jcommander.Strings;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
 import dao.OfficeDao;
@@ -31,8 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -272,7 +271,7 @@ public class Stampings extends Controller {
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
     if (stamping.isOffSiteWork()) {
-      render("@editOffSite", stamping,person, date, historyStamping);
+      render("@editOffSite", stamping, person, date, historyStamping);
     }
 
     render(stamping, person, date, historyStamping);
@@ -602,7 +601,7 @@ public class Stampings extends Controller {
     if (uro.isPresent()) {
       
       people = groupDao.groupsByManager(Optional.fromNullable(user.person))
-          .stream().flatMap(g -> g.people.stream().distinct()).collect(Collectors.toList()); 
+          .stream().flatMap(g -> g.getPeople().stream().distinct()).collect(Collectors.toList()); 
     } else {
       flash.error("{} non sono presenti gruppi associati alla tua persona. "
           + "Rivolgiti all'amministratore del personale", user.person.fullName());
