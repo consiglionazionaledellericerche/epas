@@ -53,6 +53,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
+import models.MonthlyCompetenceType;
 import models.Office;
 import models.OrganizationShiftTimeTable;
 import models.Person;
@@ -855,8 +856,9 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+    List<MonthlyCompetenceType> types = MonthlyCompetenceType.findAll();
 
-    render("@editReperibility", officePeople, office);
+    render("@editReperibility", officePeople, office, types);
   }
 
   /**

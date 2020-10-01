@@ -31,4 +31,9 @@ public class MonthlyCompetenceType extends BaseModel{
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "holidays_code", nullable = false)
   public CompetenceCode holidaysCode;
+  
+  @Override
+  public String toString() {
+    return name;
+  }
 }

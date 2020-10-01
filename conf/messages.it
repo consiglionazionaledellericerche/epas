@@ -432,6 +432,7 @@ name=Nome
 noResultFound=Nessuna corrispondenza trovata.
 note= Note
 
+monthlyCompetenceType =Tipo servizio giornaliero
 monthlyCompetencetype.name =Nome
 monthlyCompetencetype.workdaysCode =Codice feriale
 monthlyCompetencetype.holidaysCode =Codice festivo
