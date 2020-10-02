@@ -249,6 +249,27 @@ public final class PersonDao extends DaoBase {
   }
   
   /**
+   * Lista per codice di competenza.
+   *
+   * @param offices Uffici dei quali verificare le persone
+   * @param yearMonth Il mese interessato
+   * @param code Il codice di competenza da considerare
+   * @return La lista delle persone con il codice di competenza abilitato nel mese specificato.
+   */
+  public List<Person> listForCompetence(
+      Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
+    int year = yearMonth.getYear();
+    int month = yearMonth.getMonthOfYear();
+
+    Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
+    Optional<LocalDate> endMonth =
+        Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
+    return personQuery(Optional.absent(), offices, false, beginMonth, endMonth,
+        true, Optional.fromNullable(code), Optional.absent(), false)
+        .fetch();
+  }
+  
+  /**
    * La lista di persone che rispondono ai criteri di ricerca.
    * @param group il gruppo di codici di competenza
    * @param offices l'insieme delle sedi
@@ -283,27 +304,6 @@ public final class PersonDao extends DaoBase {
     
     return query.where(condition).fetch();
 
-  }
-
-  /**
-   * Lista per codice di competenza.
-   *
-   * @param offices Uffici dei quali verificare le persone
-   * @param yearMonth Il mese interessato
-   * @param code Il codice di competenza da considerare
-   * @return La lista delle persone con il codice di competenza abilitato nel mese specificato.
-   */
-  public List<Person> listForCompetence(
-      Set<Office> offices, YearMonth yearMonth, CompetenceCode code) {
-    int year = yearMonth.getYear();
-    int month = yearMonth.getMonthOfYear();
-
-    Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
-    Optional<LocalDate> endMonth =
-        Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
-    return personQuery(Optional.absent(), offices, false, beginMonth, endMonth,
-        true, Optional.fromNullable(code), Optional.absent(), false)
-        .fetch();
   }
 
   /**
@@ -942,7 +942,8 @@ public final class PersonDao extends DaoBase {
    * un office in offices. Importante: utile perchè non sporca l'entity manager con oggetti
    * parziali.
    */
-  public List<PersonLite> liteList(Set<Office> offices, int year, int month, boolean onlyPeopleInTelework) {
+  public List<PersonLite> liteList(
+      Set<Office> offices, int year, int month, boolean onlyPeopleInTelework) {
 
     final QPerson person = QPerson.person;
 

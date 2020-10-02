@@ -24,6 +24,9 @@ public class GroupDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Restisce il gruppo prelevare per id.
+   */
   public Optional<Group> byId(Long id) {
     final QGroup group = QGroup.group;
     return Optional.fromNullable(
@@ -31,19 +34,25 @@ public class GroupDao extends DaoBase {
   }
   
   /**
-   * Metodo che ritorna la lista dei gruppi che appartengono alla sede passata come parametro.
+   * Metodo che ritorna la lista dei gruppi attivi che appartengono alla sede passata 
+   * come parametro.
    *
    * @param office la sede di cui si richiedono i gruppi
    * @return la lista dei gruppi i cui responsabili appartengono alla sede passata come parametro.
    */
-  public List<Group> groupsByOffice(Office office, Optional<Person> manager) {
+  public List<Group> groupsByOffice(Office office, Optional<Person> manager,
+      Optional<Boolean> includeDisabled) {
     final QGroup group = QGroup.group;
     BooleanBuilder condition = new BooleanBuilder();
     if (manager.isPresent()) {
       condition.and(group.manager.eq(manager.get()));
     }
-    return getQueryFactory().selectFrom(group).where(group.office.eq(office)).where(condition)
-        .fetch();
+    if (!includeDisabled.isPresent()) {
+      condition.and(group.endDate.isNull().or(group.endDate.after(LocalDate.now())));  
+    }
+    
+    return getQueryFactory().selectFrom(group).where(group.office.eq(office), condition)
+        .orderBy(group.name.asc()).fetch();
   }
 
   /**
@@ -58,33 +67,42 @@ public class GroupDao extends DaoBase {
     if (person.isPresent()) {
       condition.and(group.manager.eq(person.get()));
     }
+    condition.and(group.endDate.isNull().or(group.endDate.after(LocalDate.now())));
     return getQueryFactory().selectFrom(group).where(condition).fetch();
   }
 
-  private Predicate personAffiliationCondition(QAffiliation affiliation, Person person) {
+  private Predicate personAffiliationCondition(
+      QAffiliation affiliation, Person person, LocalDate atDate) {
     BooleanBuilder endDateCondition = new BooleanBuilder(affiliation.endDate.isNull());
-    endDateCondition = endDateCondition.or(affiliation.endDate.after(LocalDate.now()));
+    endDateCondition = endDateCondition.or(affiliation.endDate.after(atDate));
     return affiliation.person.eq(person)
-        .and(affiliation.beginDate.before(LocalDate.now())
+        .and(affiliation.beginDate.before(atDate)
             .or(endDateCondition));
   } 
   
   /**
-   * Metodo che ritorna la lista dei gruppi di cui fa parte la person passata come parametro.
+   * Metodo che ritorna la lista dei gruppi di cui fa parte la person passata come parametro
+   * ed alla data indicata.
    *
    * @param person la persona di cui si cercano i gruppi di cui fa parte
+   * @param atDate la data in cui cercare l'appartenenza ai gruppi.
    * @return la lista dei gruppi di cui fa parte la persona passata come parametro.
    */
-  public List<Group> myGroups(Person person) {
+  public List<Group> myGroups(Person person, LocalDate atDate) {
     final QGroup group = QGroup.group;
     final QAffiliation affiliation = QAffiliation.affiliation;
     BooleanBuilder endDateCondition = new BooleanBuilder(affiliation.endDate.isNull());
-    endDateCondition = endDateCondition.or(affiliation.endDate.after(LocalDate.now()));
+    endDateCondition = endDateCondition.or(affiliation.endDate.after(atDate));
     return getQueryFactory().selectFrom(group)
         .join(group.affiliations, affiliation)
-        .where(personAffiliationCondition(affiliation, person)).fetch();
+        .where(personAffiliationCondition(affiliation, person, atDate)).fetch();
   }
-
+  
+  public List<Group> myGroups(Person person) {
+    return myGroups(person, LocalDate.now());
+  }
+  
+  
   /**
    * Metodo che ritorna il gruppo, se esiste, con manager manager e come appartenente person.
    *
@@ -97,7 +115,9 @@ public class GroupDao extends DaoBase {
     final QAffiliation affiliation = QAffiliation.affiliation;
     final Group result = getQueryFactory().selectFrom(group)
         .join(group.affiliations, affiliation)
-        .where(personAffiliationCondition(affiliation, person), group.manager.eq(manager))
+        .where(
+            personAffiliationCondition(
+                affiliation, person, LocalDate.now()), group.manager.eq(manager))
         .fetchFirst();
     return Optional.fromNullable(result);
   }
