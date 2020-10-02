@@ -32,7 +32,6 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.Role;
 import models.User;
 import models.VacationPeriod;
 import models.WorkingTimeType;

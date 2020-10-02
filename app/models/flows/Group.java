@@ -1,5 +1,6 @@
 package models.flows;
 
+
 import com.google.common.collect.Lists;
 import java.time.LocalDate;
 import java.util.List;
@@ -50,24 +51,37 @@ public class Group extends MutableModel {
   public LocalDate endDate;
 
   /**
+   * Verificat se un gruppo è sempre attivo alla data attuale.
    * @return true se il gruppo non ha una data di fine passata.
    */
   public boolean isActive() {
-    return endDate == null || !endDate.isAfter(LocalDate.now());
+    return endDate == null || endDate.isAfter(LocalDate.now());
   }
   
+  /**
+   * La lista delle persone che appartengono al gruppo
+   * ad una certa data.
+   */
   @Transient
   public List<Person> getPeople(LocalDate date) {
     return affiliations.stream()
-        .filter(a -> a.beginDate.isBefore(date) 
+        .filter(a -> !a.beginDate.isAfter(date) 
             && (a.endDate == null || a.endDate.isAfter(date)))
         .map(a -> a.getPerson())
         .collect(Collectors.toList());
   }
-  
+
+  /**
+   * La lista delle persone che appartengono al gruppo
+   * alla data odierna.
+   */
   @Transient
   public List<Person> getPeople() {
     return getPeople(LocalDate.now());
+  }
+  
+  public String getLabel() {
+    return name;
   }
   
 }

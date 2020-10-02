@@ -17,9 +17,10 @@
   #{f.input 'group.description' /}
   #{f.hidden 'office.id' /}  
   #{f.selectModel 'group.manager', items: peopleForGroups, required:true /}
-  #{f.selectMultipleModel 'group.people', values: peopleForGroups /}
+  #{f.selectModels 'people', value:group.people, items: peopleForGroups /}
   #{f.booleanRadio 'group.sendFlowsEmail' /}
-
+  
+  #{f.date 'group.endDate', label:'endDate' /}
   #{b.buttons center:true}
     
     #{b.save /}

@@ -185,7 +185,8 @@ public class AbsenceRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
-    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results =
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
