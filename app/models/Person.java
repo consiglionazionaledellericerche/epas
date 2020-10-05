@@ -258,20 +258,24 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Lista dei gruppi di una persona alla data odierna.
    * @return la lista dei gruppi a cui appartiente oggi una persona. 
    */
+  @Transient
   public List<Group> getGroups() {
     return getGroups(java.time.LocalDate.now());
   }
   
   /**
+   * Lista dei gruppi di una persona alla data indicata.
    * @return la lista dei gruppi a cui appartiente una persona ad una data
-   *    passata per parametro.
+   *     passata per parametro.
    */
+  @Transient
   public List<Group> getGroups(java.time.LocalDate date) {
     return affiliations.stream()
-        .filter(a -> a.beginDate.isBefore(date) 
-            && (a.endDate == null || a.endDate.isAfter(date)))
+        .filter(a -> a.getBeginDate().isBefore(date) 
+            && (a.getEndDate() == null || a.getEndDate().isAfter(date)))
         .map(a -> a.getGroup()).collect(Collectors.toList());
   }
   

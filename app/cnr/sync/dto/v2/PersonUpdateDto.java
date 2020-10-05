@@ -14,6 +14,10 @@ import models.Qualification;
 @Builder
 public class PersonUpdateDto extends PersonCreateDto {
 
+  /**
+   * Aggiorna i dati dell'oggetto Person passato con quelli
+   * presenti nell'instanza di questo DTO.
+   */
   public void update(Person person) {
     person.name = getName();
     person.surname = getSurname();
@@ -28,7 +32,8 @@ public class PersonUpdateDto extends PersonCreateDto {
     if (getQualification() != null) {
       person.qualification = 
           ((Qualification) Qualification.findAll().stream()
-              .filter(q -> ((Qualification) q).qualification == getQualification().intValue()).findFirst().get());        
+              .filter(q -> ((Qualification) q).qualification == getQualification().intValue())
+              .findFirst().get());        
     }
     if (getOfficeId() != null) {
       person.office = Office.findById(getOfficeId());  

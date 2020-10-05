@@ -35,6 +35,9 @@ public class OfficeDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Cerca un ufficio per id, code o codeId, in questo ordine.
+   */
   public Optional<Office> byIdOrCodeOrCodeId(Long id, String code, String codeId) {
     if (id != null) {
       return Optional.fromNullable(getOfficeById(id));

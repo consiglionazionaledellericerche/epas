@@ -20,6 +20,10 @@ public class PersonShowTerseDto {
   private String number; //Matricola
   private String eppn;
   
+  /**
+   * Nuova instanza di un PersonShowTerseDto contenente i valori 
+   * dell'oggetto person passato.
+   */  
   public static PersonShowTerseDto build(Person person) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);

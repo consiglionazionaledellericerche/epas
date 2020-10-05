@@ -6,6 +6,9 @@ ALTER TABLE groups_history ADD COLUMN external_id TEXT;
 ALTER TABLE groups ADD COLUMN end_date DATE;
 ALTER TABLE groups_history ADD COLUMN end_date DATE;
 
+CREATE INDEX groups_office_id_idx ON groups(office_id);
+CREATE UNIQUE INDEX groups_external_id_unique_idx ON groups(external_id, office_id);
+
 CREATE TABLE affiliation (
   id BIGSERIAL PRIMARY KEY NOT NULL,
   group_id BIGINT NOT NULL REFERENCES groups(id),
@@ -15,6 +18,11 @@ CREATE TABLE affiliation (
   percentage NUMERIC(5,2) DEFAULT 100,
   version INT DEFAULT 0
 );
+
+CREATE INDEX affiliation_group_id_idx ON affiliation(group_id);
+CREATE INDEX affiliation_person_id_idx ON affiliation(person_id);
+CREATE INDEX affiliation_begin_date_idx ON affiliation(begin_date);
+CREATE INDEX affiliation_end_date_idx ON affiliation(end_date);
 
 CREATE TABLE affiliation_history(
 	id BIGINT NOT NULL,

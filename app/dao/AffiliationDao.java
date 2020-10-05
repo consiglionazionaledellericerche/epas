@@ -3,6 +3,7 @@ package dao;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import models.flows.Affiliation;
 import models.flows.query.QAffiliation;
@@ -17,9 +18,9 @@ public class AffiliationDao extends DaoBase {
   /**
    * Affiliazione prelevata per id.
    */
-  public Affiliation byId(Long id) {
+  public Optional<Affiliation> byId(Long id) {
     QAffiliation affilation = QAffiliation.affiliation;
-    return (Affiliation) getQueryFactory().from(affilation)
-        .where(affilation.id.eq(id)).fetchOne();
+    return Optional.ofNullable((Affiliation) getQueryFactory().from(affilation)
+        .where(affilation.id.eq(id)).fetchOne());
   }
 }

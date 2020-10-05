@@ -18,6 +18,18 @@ public class Offices extends Controller {
   @Inject
   static OfficeDao officeDao;
   
+  /**
+   * Cerca l'ufficio in funzione dei parametri passati.
+   * La ricerca viene fatta in funzione dei parametri passati
+   * che possono essere null, nell'ordine id, code, codeId.
+   * 
+   * @param id identificativo in ePAS dell'ufficio
+   * @param code codice cds dell'ufficio
+   * @param codeId sedeId di attestati
+   * @return l'Ufficio se trovato, altrimenti torna direttamente 
+   *     una risposta HTTP 404.
+   * 
+   */
   @Util
   public static Office getOfficeFromRequest(
       Long id, String code, String codeId) {

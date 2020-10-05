@@ -15,8 +15,8 @@ import helpers.JsonResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.PersonManager;
 import manager.UserManager;
 import models.Person;
@@ -40,6 +40,10 @@ public class Persons extends Controller {
   @Inject
   static GsonBuilder gsonBuilder;
 
+  /**
+   * Lista JSON delle persone che appartengono alla sede
+   * individuata con i parametri passati. 
+   */
   @BasicAuth
   public static void list(Long id, String code, String codeId) {
     val office = Offices.getOfficeFromRequest(id, code, codeId);
@@ -50,8 +54,13 @@ public class Persons extends Controller {
     renderJSON(gsonBuilder.create().toJson(list));
   }
 
+  /**
+   * Restituisce il JSON con i dati della persona individuata con i parametri
+   * passati. 
+   */
   @BasicAuth
-  public static void show(Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+  public static void show(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
 
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
@@ -61,6 +70,10 @@ public class Persons extends Controller {
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Crea una persona con i valori passati via JSON.
+   * Questo metodo può essere chiamato solo in HTTP POST.
+   */
   @BasicAuth
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
@@ -92,8 +105,14 @@ public class Persons extends Controller {
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Aggiorna i dati di una persona individuata con i parametri HTTP
+   * passati ed i valori passati nel body HTTP come JSON.
+   * Questo metodo può essere chiamato solo via HTTP PUT.
+   */
   @BasicAuth
-  public static void update(Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+  public static void update(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
       String body) throws JsonParseException, JsonMappingException, IOException {
     Verify.verify(request.method.equalsIgnoreCase("PUT"));
 
@@ -129,6 +148,11 @@ public class Persons extends Controller {
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Effettua la cancellazione di una persona individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
   @BasicAuth
   public static void delete(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
@@ -148,6 +172,16 @@ public class Persons extends Controller {
     JsonResponse.ok();
   }
   
+  /**
+   * Cerca la persona in funzione dei parametri passati.
+   * La ricerca viene fatta in funzione dei parametri passati
+   * che possono essere null, nell'ordine id, email, eppn,
+   * perseoPersonId, fiscalCode.
+   * 
+   * @return la persona se trovata, altrimenti torna direttamente 
+   *     una risposta HTTP 404.
+   * 
+   */
   @Util
   public static Person getPersonFromRequest(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
