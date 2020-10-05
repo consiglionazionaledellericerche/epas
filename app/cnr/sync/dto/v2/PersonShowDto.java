@@ -28,7 +28,11 @@ public class PersonShowDto extends PersonShowTerseDto {
   private Integer qualification;
   private Set<String> badges = Sets.newHashSet();
   private OfficeDto office;
-  
+
+  /**
+   * Nuova instanza di un PersonShowDto contenente i valori 
+   * dell'oggetto person passato.
+   */
   public static PersonShowDto build(Person person) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);

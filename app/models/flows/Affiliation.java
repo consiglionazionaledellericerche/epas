@@ -23,10 +23,12 @@ public class Affiliation extends BaseModel {
 
   private static final long serialVersionUID = -8101378323853245726L;
   
+  @Required
   @CheckWith(AffiliationCheck.class)
   @ManyToOne
   private Group group;
 
+  @Required
   @ManyToOne
   private Person person;
   
@@ -35,9 +37,9 @@ public class Affiliation extends BaseModel {
 
   @NotNull
   @Required
-  public LocalDate beginDate;
+  private LocalDate beginDate;
 
-  public LocalDate endDate;
+  private LocalDate endDate;
 
   /**
    * Il Range che comprende le date di inizio e fine dell'assegnazione.

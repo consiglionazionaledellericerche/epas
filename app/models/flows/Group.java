@@ -18,6 +18,7 @@ import models.Person;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 @Getter
 @Audited
@@ -27,6 +28,7 @@ public class Group extends MutableModel {
 
   private static final long serialVersionUID = -5169540784395404L;
 
+  @Unique(value = "office, name")
   public String name;
 
   public String description;
@@ -46,6 +48,7 @@ public class Group extends MutableModel {
   @OneToMany(mappedBy = "group")
   public List<Affiliation> affiliations = Lists.newArrayList();
 
+  @Unique(value = "office, externalId")
   public String externalId;
 
   public LocalDate endDate;
@@ -65,8 +68,8 @@ public class Group extends MutableModel {
   @Transient
   public List<Person> getPeople(LocalDate date) {
     return affiliations.stream()
-        .filter(a -> !a.beginDate.isAfter(date) 
-            && (a.endDate == null || a.endDate.isAfter(date)))
+        .filter(a -> !a.getBeginDate().isAfter(date) 
+            && (a.getEndDate() == null || a.getEndDate().isAfter(date)))
         .map(a -> a.getPerson())
         .collect(Collectors.toList());
   }

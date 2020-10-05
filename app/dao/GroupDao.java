@@ -34,6 +34,17 @@ public class GroupDao extends DaoBase {
   }
   
   /**
+   * Restisce il gruppo da prelevare per externalId e office.
+   */
+  public Optional<Group> byOfficeAndExternalId(Office office, String externalId) {
+    final QGroup group = QGroup.group;
+    return Optional.fromNullable(
+        getQueryFactory().selectFrom(group)
+          .where(group.office.eq(office), group.externalId.eq(externalId))
+          .fetchFirst());
+  }
+  
+  /**
    * Metodo che ritorna la lista dei gruppi attivi che appartengono alla sede passata 
    * come parametro.
    *

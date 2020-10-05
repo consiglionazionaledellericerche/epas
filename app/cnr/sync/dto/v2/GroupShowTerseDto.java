@@ -7,7 +7,7 @@ import models.flows.Group;
 import org.modelmapper.ModelMapper;
 
 /**
- * Dati esportati in Json per un gruppo di persone.
+ * Dati esportati in forma ridotta ed in Json per un gruppo di persone.
  * 
  * @author cristian
  *
@@ -20,7 +20,11 @@ public class GroupShowTerseDto {
   private String description;
   private LocalDate endDate;
   private PersonShowTerseDto manager;
-  
+
+  /**
+   * Nuova instanza di un GroupShowTerseDto contenente i valori 
+   * dell'oggetto group passato.
+   */
   public static GroupShowTerseDto build(Group group) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);

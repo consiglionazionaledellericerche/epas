@@ -88,7 +88,7 @@ public class Affiliations extends Controller {
    */
   public static void delete(Long id, boolean confirmed) {
     notFoundIfNull(id);
-    val affiliation = affiliationDao.byId(id);
+    val affiliation = affiliationDao.byId(id).orElse(null);
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
     if (!confirmed) {      
@@ -105,7 +105,7 @@ public class Affiliations extends Controller {
    */
   public static void edit(Long id) {
     notFoundIfNull(id);
-    val affiliation = affiliationDao.byId(id);
+    val affiliation = affiliationDao.byId(id).orElse(null);
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
     val activeGroups = 

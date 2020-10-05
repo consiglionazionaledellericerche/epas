@@ -22,6 +22,10 @@ public class GroupShowDto extends GroupShowTerseDto {
   private Set<PersonShowTerseDto> people = Sets.newHashSet();
   private OfficeDto office;
   
+  /**
+   * Nuova instanza di un GroupShowDto contenente i valori 
+   * dell'oggetto group passato.
+   */
   public static GroupShowDto build(Group group) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);

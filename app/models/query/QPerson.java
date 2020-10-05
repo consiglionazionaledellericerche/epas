@@ -61,8 +61,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fullname = createString("fullname");
 
-    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
-
     public final ListPath<models.flows.Group, models.flows.query.QGroup> groupsPeople = this.<models.flows.Group, models.flows.query.QGroup>createList("groupsPeople", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
 
     //inherited

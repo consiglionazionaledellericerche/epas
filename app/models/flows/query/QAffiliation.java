@@ -24,7 +24,7 @@ public class QAffiliation extends EntityPathBase<Affiliation> {
 
     public static final QAffiliation affiliation = new QAffiliation("affiliation");
 
-    public final play.db.jpa.query.QGenericModel _super = new play.db.jpa.query.QGenericModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<java.time.LocalDate> beginDate = createDate("beginDate", java.time.LocalDate.class);
 
@@ -35,7 +35,8 @@ public class QAffiliation extends EntityPathBase<Affiliation> {
 
     public final QGroup group;
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
+    //inherited
+    public final NumberPath<Long> id = _super.id;
 
     public final NumberPath<java.math.BigDecimal> percentage = createNumber("percentage", java.math.BigDecimal.class);
 
@@ -43,6 +44,9 @@ public class QAffiliation extends EntityPathBase<Affiliation> {
     public final BooleanPath persistent = _super.persistent;
 
     public final models.query.QPerson person;
+
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
 
     public QAffiliation(String variable) {
         this(Affiliation.class, forVariable(variable), INITS);

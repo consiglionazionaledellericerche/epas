@@ -7,6 +7,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
+import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 import models.query.QOffice;
 import models.query.QPerson;
@@ -135,9 +137,13 @@ public class AbsenceRequestDao extends DaoBase {
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = managerQuery(officeList, conditions, signer);
+      final QAffiliation affiliation = QAffiliation.affiliation;
       List<AbsenceRequest> queryResults = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
+          .join(person.affiliations, affiliation)
+            .on(affiliation.beginDate.before(LocalDate.now())
+                .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+          .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions))
           .fetch();
       results.addAll(queryResults);
@@ -225,9 +231,13 @@ public class AbsenceRequestDao extends DaoBase {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
           .and(absenceRequest.managerApproved.isNotNull())
           .and(person.office.eq(signer.office));
+      final QAffiliation affiliation = QAffiliation.affiliation;      
       query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
+          .join(person.affiliations, affiliation)
+            .on(affiliation.beginDate.before(LocalDate.now())
+              .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+          .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions));
     } else {
       query = getQueryFactory().selectFrom(absenceRequest).where(conditions);
@@ -265,6 +275,7 @@ public class AbsenceRequestDao extends DaoBase {
               uros.stream().map(
                   userRoleOffice -> userRoleOffice.office)
                   .collect(Collectors.toSet())).and(conditions))
+          .orderBy(absenceRequest.startAt.desc())
           .fetch();
     } else {
       return Lists.newArrayList();
@@ -309,15 +320,20 @@ public class AbsenceRequestDao extends DaoBase {
 
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
-          .and(absenceRequest.managerApproved.isNotNull())
+        .and(absenceRequest.managerApproved.isNotNull())
           .and(person.office.in(officeList));
+      final QAffiliation affiliation = QAffiliation.affiliation;
       query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
-          .where(group.manager.eq(signer).and(conditions));
+          .join(person.affiliations, affiliation)
+          .join(affiliation.group, group)
+          .where(group.manager.eq(signer).and(conditions))
+          .orderBy(absenceRequest.startAt.desc());
     } else {
       query = getQueryFactory()
-          .selectFrom(absenceRequest).where(conditions);
+          .selectFrom(absenceRequest).where(conditions)
+          .orderBy(absenceRequest.startAt.desc())
+          ;
     }
     results.addAll(query.fetch());
     return results;
@@ -352,6 +368,7 @@ public class AbsenceRequestDao extends DaoBase {
           .where(office.in(uros.stream().map(
               userRoleOffices -> userRoleOffices.office)
               .collect(Collectors.toSet())).and(conditions))
+          .orderBy(absenceRequest.startAt.desc())
           .fetch();
     } else {
       return Lists.newArrayList();

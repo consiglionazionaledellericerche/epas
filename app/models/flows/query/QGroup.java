@@ -45,6 +45,8 @@ public class QGroup extends EntityPathBase<Group> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final StringPath label = createString("label");
+
     public final models.query.QPerson manager;
 
     public final StringPath name = createString("name");

@@ -12,6 +12,7 @@ public class AffiliationCheck extends Check {
     }
     final Affiliation affiliation = (Affiliation) validatedObject;
     if (affiliation.getPerson().affiliations.stream()
+        .filter(a -> !a.id.equals(affiliation.getId()))
         .anyMatch(aff -> aff.overlap(affiliation))) {
       setMessage("validation.affiliation.membershipAlreadyPresent");
       return false;
