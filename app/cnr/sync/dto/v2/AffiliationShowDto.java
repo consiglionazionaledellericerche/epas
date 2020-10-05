@@ -17,8 +17,8 @@ import org.modelmapper.ModelMapper;
 public class AffiliationShowDto {
   
   private Long id;
-  private Long groupId;
-  private Long personId;
+  private GroupShowTerseDto group;
+  private PersonShowTerseDto person;
   private BigDecimal percentage;
   private LocalDate beginDate;
   private LocalDate endDate;
@@ -29,6 +29,9 @@ public class AffiliationShowDto {
    */
   public static AffiliationShowDto build(Affiliation affiliation) {
     val modelMapper = new ModelMapper();
-    return modelMapper.map(affiliation, AffiliationShowDto.class);
+    val affilationDto = modelMapper.map(affiliation, AffiliationShowDto.class);
+    affilationDto.setGroup(GroupShowTerseDto.build(affiliation.getGroup()));
+    affilationDto.setPerson(PersonShowTerseDto.build(affiliation.getPerson()));
+    return affilationDto;
   }
 }
