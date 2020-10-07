@@ -52,7 +52,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.contract = (Contract)target;
+    this.contract = (Contract) target;
     
   }
 
@@ -73,14 +73,14 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
 
   @Override
   public void setValue(Object value) {
-    this.vacationCode = (VacationCode)value;
+    this.vacationCode = (VacationCode) value;
     
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof VacationCode) {
-      return this.getValue().equals(((VacationCode)otherValue));
+      return this.getValue().equals(((VacationCode) otherValue));
     }
     return false;
   }

@@ -2,15 +2,22 @@ package manager;
 
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import dao.GroupDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Office;
+import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
+import models.flows.Affiliation;
 import models.flows.Group;
 
 @Slf4j
@@ -77,5 +84,35 @@ public class GroupManager {
       return true;
     }
     return false;
+  }
+  
+  /**
+   * Inserisce ed elimina le affiliazioni ad un gruppo con data 
+   * corrente in funzione della lista delle persone passate.
+   */
+  public void updatePeople(Group group, Set<Person> people) {
+    log.info("current people = {}, new people = {}", group.getPeople(), people); 
+    val toDisable = Sets.difference(Sets.newHashSet(group.getPeople()), people);
+    log.info("toDisable = {}", toDisable);
+    val currentAffiliationsToDisable = 
+        group.getAffiliations().stream()
+          .filter(a -> a.isActive() && toDisable.contains(a.getPerson()))
+          .collect(Collectors.toSet());
+    currentAffiliationsToDisable.stream().forEach(a ->  {      
+      a.setEndDate(LocalDate.now());
+      a.save();
+      log.info("Disabilita associazione di {} al gruppo {}", 
+          a.getPerson().getFullname(), a.getGroup().getName());
+    });
+    val toInsert = Sets.difference(people, Sets.newHashSet(group.getPeople()));
+    toInsert.forEach(person -> {
+      val affiliation = new Affiliation();
+      affiliation.setPerson(person);
+      affiliation.setGroup(group);
+      affiliation.setBeginDate(LocalDate.now());
+      affiliation.save();
+      log.info("Inserita nuova associazione tra {} al gruppo {}", 
+          person.getFullname(), group.getName());
+    });
   }
 }

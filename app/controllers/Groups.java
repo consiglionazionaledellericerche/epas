@@ -8,9 +8,14 @@ import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import helpers.Web;
+import helpers.jpa.JpaReferenceBinder;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.GroupManager;
 import models.GeneralSetting;
 import models.Office;
@@ -19,6 +24,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.Group;
+import play.data.binding.As;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -51,21 +57,31 @@ public class Groups extends Controller {
    * @param group il gruppo da creare
    * @param office la sede su cui crearlo
    */
-  public static void createGroup(@Valid Group group, Office office) {
-
+  public static void createGroup(
+      @Valid Group group, Office office,
+      @As(binder = JpaReferenceBinder.class)
+      Set<Person> people) {
+    log.info("affiltionaPeople = {}", people);
     if (Validation.hasErrors()) {
       response.status = 400;
-      render("@blank", office);
+      List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+      log.info("Create groups errors = {}", validation.errorsMap());
+      render("@edit", group, office, peopleForGroups);
     }
     rules.checkIfPermitted(group.office);
     group.office = office;
+    final boolean isNew = group.id != null;        
     group.save();
-    log.debug("Salvato nuovo gruppo di lavoro: {} per la sede {}", group.name, group.office);
+    log.debug("Salvato gruppo di lavoro: {} per la sede {}", group.name, group.office);
+
+    groupManager.updatePeople(group, people);
+
     UsersRolesOffices uro = new UsersRolesOffices();
     groupManager.createManager(office, group, uro);
-    
-    flash.success("Nuovo gruppo  di lavoro %s salvato correttamente.",
-        group.name);
+    String message = isNew 
+        ? "Nuovo gruppo di lavoro %s salvato correttamente." 
+            : "Gruppo  di lavoro %s salvato correttamente.";
+    flash.success(message, group.name);
     showGroups(office.id);
   }
 
@@ -84,9 +100,16 @@ public class Groups extends Controller {
           + "Impossibile eliminarlo.", group.name);
       showGroups(group.manager.office.id);
     } 
-    //elimino il gruppo.
-    group.delete();
-    log.debug("Eliminato gruppo {}", group.name);
+    if (group.affiliations.isEmpty()) {
+      //elimino il gruppo.
+      group.delete();
+      log.info("Eliminato gruppo {}", group.name);
+    } else {
+      group.endDate = LocalDate.now();
+      group.save();
+      log.info("Disattivato gruppo {}", group.name);
+    }
+
     flash.success(Web.msgDeleted(Group.class));
     showGroups(group.manager.office.id);
   }
@@ -103,15 +126,23 @@ public class Groups extends Controller {
     List<Group> groups = null;
     if (uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.GROUP_MANAGER), office)
         .isPresent()) {
-      groups = groupDao.groupsByOffice(office, Optional.fromNullable(user.person));
+      groups = 
+          groupDao.groupsByOffice(office, Optional.fromNullable(user.person), Optional.of(true));
     }
     if (user.isSystemUser() 
         || uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN), office)
         .isPresent()) {
-      groups = groupDao.groupsByOffice(office, Optional.<Person>absent());
+      groups = groupDao.groupsByOffice(office, Optional.<Person>absent(), Optional.of(true));
     }
-     
-    render(groups, office);
+    val activeGroups = groups.stream().filter(g -> g.isActive())
+        .sorted((g1, g2) -> 
+            g1.getName().toLowerCase().compareTo(g2.getName().toLowerCase()))
+         .collect(Collectors.toList());
+    val disabledGroups = groups.stream().filter(g -> !g.isActive())
+        .sorted((g1, g2) -> 
+            g1.getName().toLowerCase().compareTo(g2.getName().toLowerCase()))
+        .collect(Collectors.toList());
+    render(activeGroups, disabledGroups, office);
   }
 
   /**

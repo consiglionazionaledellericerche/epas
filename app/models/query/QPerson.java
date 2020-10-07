@@ -26,6 +26,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
+    public final ListPath<models.flows.Affiliation, models.flows.query.QAffiliation> affiliations = this.<models.flows.Affiliation, models.flows.query.QAffiliation>createList("affiliations", models.flows.Affiliation.class, models.flows.query.QAffiliation.class, PathInits.DIRECT2);
+
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
     //inherited
@@ -58,8 +60,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final StringPath fiscalCode = createString("fiscalCode");
 
     public final StringPath fullname = createString("fullname");
-
-    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
 
     public final ListPath<models.flows.Group, models.flows.query.QGroup> groupsPeople = this.<models.flows.Group, models.flows.query.QGroup>createList("groupsPeople", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
 

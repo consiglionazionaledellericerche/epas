@@ -56,6 +56,16 @@ Administration.jvmConfiguration.table= Parametri Jvm
 Administration.runtimeData.table= Valori di Runtime
 Administration.threadsData.table= Informazioni sui thread attivi
 
+Affiliations.personAffiliations=Gruppi
+Affiliation =Appartenenza al gruppo
+affiliation =Appartenenza al gruppo
+affiliation.group =Gruppo
+affiliation.person =Persona
+affiliation.percentage =Percentuale
+affiliation.beginDate =Data inizio
+affiliation.endDate =Data fine
+affiliationPeople= Afferenti al gruppo
+
 application.data= Informazioni applicazione
 
 badge.badgeReader= Lettore badge associato
@@ -743,6 +753,7 @@ permessi= Permessi legge (da fare)
 # Messaggi di validazione
 ###########################
 
+validation.affiliation.membershipAlreadyPresent =Associazione a questo gruppo già presente nelle date specificate
 validation.after=Deve essere successiva a %2$s
 validation.before=Deve essere precedente a %2$s
 validation.email=Indirizzo email non valido

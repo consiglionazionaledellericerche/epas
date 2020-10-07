@@ -176,7 +176,7 @@ public class StatsManager {
     row.createCell(0).setCellValue("Numero dipendenti della SAC");
     row.createCell(1).setCellValue(numberOfHeadQuarterPersons);
     
-    IntStream.of(0,1).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1).forEach(column -> sheet.autoSizeColumn(column));
     
   }
   
@@ -204,7 +204,7 @@ public class StatsManager {
       cellCds = row.createCell(2);
       cellCds.setCellValue(institute.cds);
     }
-    IntStream.of(0,1,2).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2).forEach(column -> sheet.autoSizeColumn(column));
   }
   
   private void buildOfficesSheet(Workbook wb, String sheetName, Set<Office> offices) {
@@ -234,7 +234,7 @@ public class StatsManager {
       cellCds = row.createCell(3);
       cellCds.setCellValue(office.address);      
     }
-    IntStream.of(0,1,2,3).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2, 3).forEach(column -> sheet.autoSizeColumn(column));
   }
 
 }

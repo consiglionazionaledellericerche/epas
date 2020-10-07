@@ -953,7 +953,7 @@ public class CompetenceManager {
    * @param code il codice di competenza da riconteggiare
    */
   public void applyBonusPerPerson(Person person, YearMonth yearMonth, CompetenceCode code) {
-    LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1);
+    LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
         .getByPersonAndCodeAndDate(person, code, date);
     if (pcc.isPresent()) {

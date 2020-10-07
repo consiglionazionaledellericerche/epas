@@ -13,22 +13,22 @@ import models.enumerate.EventColor;
 @JsonInclude(Include.NON_NULL)
 public class TeleworkEvent {
 
-//Campi di default dell'eventObject fullcalendar
- private String title;
- private boolean allDay;
- private LocalDate start;
- private LocalDate end;
- private String url;
- private String className;
- 
- private String color;
- private String backgroundColor;
- private String borderColor;
- private String textColor;
- 
- private Long personDayId;
- private Long personId;
- private EventColor eventColor;
- 
- 
+  //Campi di default dell'eventObject fullcalendar
+  private String title;
+  private boolean allDay;
+  private LocalDate start;
+  private LocalDate end;
+  private String url;
+  private String className;
+
+  private String color;
+  private String backgroundColor;
+  private String borderColor;
+  private String textColor;
+
+  private Long personDayId;
+  private Long personId;
+  private EventColor eventColor;
+
+
 }

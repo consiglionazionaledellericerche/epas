@@ -41,8 +41,6 @@ public class TeleworkStampingManager {
    * @param stampTypes la lista di causali da cercare
    * @return la lista di timbrature di lavoro in telelavoro con causale quelle passate come 
    *     parametro.
-   * @throws ExecutionException 
-   * @throws NoSuchFieldException 
    */
   public List<TeleworkDto> getSpecificTeleworkStampings(PersonDay pd, 
       List<TeleworkStampTypes> stampTypes) {
@@ -51,7 +49,7 @@ public class TeleworkStampingManager {
     try {
       teleworkStampings = comunication.getList(pd.id);
     } catch (NoSuchFieldException | ExecutionException e) {
-     throw new RuntimeException(e);
+      throw new RuntimeException(e);
     }
     List<TeleworkDto> list = Lists.newArrayList();
     for (TeleworkDto tws : teleworkStampings) {
@@ -142,8 +140,8 @@ public class TeleworkStampingManager {
     List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
     List<PersonStampingDayRecap> pastDaysRecap = 
         psDto.daysRecap.stream().filter(d -> {
-      return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
-    }).collect(Collectors.toList());
+          return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+        }).collect(Collectors.toList());
     for (PersonStampingDayRecap day : pastDaysRecap) {
       List<TeleworkDto> beginEnd = Lists.newArrayList();
       List<TeleworkDto> meal = Lists.newArrayList();
@@ -152,7 +150,7 @@ public class TeleworkStampingManager {
       if (day.personDay.id == null) {
         log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
       } else {
-         list = comunication.getList(day.personDay.id);        
+        list = comunication.getList(day.personDay.id);        
       }
       
       if (list.isEmpty()) {
@@ -179,9 +177,9 @@ public class TeleworkStampingManager {
 
       Comparator<TeleworkDto> comparator = (TeleworkDto m1, TeleworkDto m2) 
           -> m1.getDate().compareTo(m2.getDate());
-          Collections.sort(beginEnd, comparator);
-          Collections.sort(meal, comparator);
-          Collections.sort(interruptions, comparator);      
+      Collections.sort(beginEnd, comparator);
+      Collections.sort(meal, comparator);
+      Collections.sort(interruptions, comparator);      
 
       TeleworkPersonDayDto teleworkDto = TeleworkPersonDayDto.builder()
           .personDay(day.personDay)

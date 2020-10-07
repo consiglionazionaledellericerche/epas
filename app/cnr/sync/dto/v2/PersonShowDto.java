@@ -4,6 +4,7 @@ import com.beust.jcommander.internal.Sets;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.val;
 import models.Person;
 import org.modelmapper.ModelMapper;
@@ -15,23 +16,23 @@ import org.modelmapper.ModelMapper;
  *
  */
 @Data
-public class PersonShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class PersonShowDto extends PersonShowTerseDto {
   
-  private Long id;
   private String name;
   private String surname;
   private String othersSurnames;
-  private String fiscalCode;
-  private String email;
-  private String number; //Matricola
-  private String eppn;
   private String telephone;
   private String fax;
   private String mobile;
   private Integer qualification;
   private Set<String> badges = Sets.newHashSet();
   private OfficeDto office;
-  
+
+  /**
+   * Nuova instanza di un PersonShowDto contenente i valori 
+   * dell'oggetto person passato.
+   */
   public static PersonShowDto build(Person person) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);

@@ -122,7 +122,7 @@ public class ReperibilityCalendar extends Controller {
     if (reperibility != null) {
       rules.checkIfPermitted(reperibility);
       final List<PersonReperibility> people = 
-          reperibilityManager2.reperibilityWorkers(reperibility,start, end);
+          reperibilityManager2.reperibilityWorkers(reperibility, start, end);
       int index = 0;
       final List<ReperibilityEvent> reperibilityWorkers = new ArrayList<>();
 
@@ -595,7 +595,7 @@ public class ReperibilityCalendar extends Controller {
       flash.keep();
       args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
       args.put("reperibilityId", reperibilityTypeMonth.personReperibilityType.id);
-      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement",args).url);
+      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement", args).url);
     }
     reperibilityTypeMonth.approved = true;
     reperibilityTypeMonth.save();
