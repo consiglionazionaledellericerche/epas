@@ -14,28 +14,21 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-
 import dao.PersonDao;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.rest.ApiRequestException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-
 import models.Contract;
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-
 import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j

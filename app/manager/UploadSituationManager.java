@@ -77,7 +77,7 @@ public class UploadSituationManager {
       }
       List<PersonMonthRecap> pmrList = 
           personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
-              person, year, Optional.fromNullable(month),Optional.<Boolean>absent());
+              person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
       for (PersonMonthRecap pmr : pmrList) {
         body = body + person.number + " F " + pmr.fromDate.getDayOfMonth() + " " 
             + pmr.toDate.getDayOfMonth() + " " + pmr.trainingHours + " \r\n";

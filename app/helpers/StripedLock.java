@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
  * @author cristian
  *
  */
-@Getter @RequiredArgsConstructor
+@Getter 
+@RequiredArgsConstructor
 public class StripedLock {
 
   private final Striped<Lock> lock;

@@ -488,7 +488,7 @@ public class ShiftManager2 {
           if (lunchBreakStart != null && lunchBreakEnd != null) {
             if (Range.open(slotBegin, slotEnd)
                 .encloses(Range.closed(lunchBreakStart, lunchBreakEnd))) {
-              rangeSet.add(Range.closed(lunchBreakStart,lunchBreakEnd));
+              rangeSet.add(Range.closed(lunchBreakStart, lunchBreakEnd));
             }
           }              
 
@@ -716,8 +716,9 @@ public class ShiftManager2 {
           convertFromString(setting.endDailyShift));
 
       night = new TimeInterval(convertFromString(setting.startNightlyShift), 
-          new LocalTime(23,59));
-      beforeDawn = new TimeInterval(new LocalTime(0,0), convertFromString(setting.endNightlyShift));
+          new LocalTime(23, 59));
+      beforeDawn = new TimeInterval(
+          new LocalTime(0, 0), convertFromString(setting.endNightlyShift));
 
     } else {
       log.warn("Manca il general setting relativo all'ente. Occore definirlo!!!");
@@ -756,8 +757,8 @@ public class ShiftManager2 {
         break;
     }
     List<ShiftTroubles> troubles = Lists.newArrayList();
-    if (activity.organizaionShiftTimeTable != null && 
-        !activity.organizaionShiftTimeTable.considerEverySlot) {
+    if (activity.organizaionShiftTimeTable != null
+        && !activity.organizaionShiftTimeTable.considerEverySlot) {
       troubles.addAll(ShiftTroubles.warningTroubles());
     } else {
       troubles.addAll(ShiftTroubles.invalidatingTroubles());
@@ -888,7 +889,7 @@ public class ShiftManager2 {
   private LocalTime convertFromString(String str) {
     final String splitter = ":";
     String[] s = str.split(splitter);
-    LocalTime time = new LocalTime(new Integer(s[0]), new Integer(s[1]));
+    LocalTime time = new LocalTime(Integer.valueOf(s[0]), Integer.valueOf(s[1]));
     return time;
   }
 

@@ -63,9 +63,9 @@ public class PeriodManager {
     boolean recomputeBeginSet = false;
 
     //controllo iniziale consistenza periodo.
-    if (propertyInPeriod.getBeginDate() != null && 
-        propertyInPeriod.calculatedEnd() != null &&
-        propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd())) {
+    if (propertyInPeriod.getBeginDate() != null 
+        &&  propertyInPeriod.calculatedEnd() != null 
+        && propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd())) {
       log.warn("Scartato aggiornamento PropertyInPeriod per data inconsistente. "
           + "propertyInPeriod.owner = {}, propertyInPeriod.type = {}. "
           + "beginDate = {}, calculatedEnd = {}", 

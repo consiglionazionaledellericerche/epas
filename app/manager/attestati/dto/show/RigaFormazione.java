@@ -15,7 +15,7 @@ public class RigaFormazione {
         .add("id", id)
         .add("giornoInizio", giornoInizio)
         .add("giornoFine", giornoFine)
-        .add("numOre",numOre)
+        .add("numOre", numOre)
         .toString();
   }
   

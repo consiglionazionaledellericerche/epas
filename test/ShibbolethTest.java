@@ -34,10 +34,10 @@ public class ShibbolethTest extends FunctionalTest {
     // will be used to authenticate the next user which
     // logins in.
     MockShibboleth.removeAll();
-    MockShibboleth.set("eppn",DEFAULT_USER_EMAIL);
+    MockShibboleth.set("eppn", DEFAULT_USER_EMAIL);
 
     final String loginUrl = Router.reverse("shib.Shibboleth.login").url;
-    Response response = httpGet(loginUrl,true);
+    Response response = httpGet(loginUrl, true);
     assertIsOk(response);
     log.debug("response.contentType = {}", response.contentType);
     assertContentType("text/html", response);
@@ -58,7 +58,7 @@ public class ShibbolethTest extends FunctionalTest {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {
       String redirectedTo = response.getHeader("Location");
-      response = httpGet(redirectedTo,followRedirect);
+      response = httpGet(redirectedTo, followRedirect);
     }
     return response;
   }

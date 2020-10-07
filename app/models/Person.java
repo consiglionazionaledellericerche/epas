@@ -29,6 +29,7 @@ import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 import models.enumerate.CertificationType;
+import models.flows.Affiliation;
 import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -109,11 +110,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean wantEmail;
 
   /**
-   * nuova relazione tra Person e Groups relativa ai responsabili e ai gruppi.
+   * Le affiliazioni di una persona sono le appartenenze ai gruppi con percentuale
+   * e date.
    */
-  @ManyToMany(mappedBy = "people")
-  public List<Group> groups = Lists.newArrayList();
-
+  @OneToMany(mappedBy = "person")
+  public List<Affiliation> affiliations = Lists.newArrayList();
+  
   @OneToMany(mappedBy = "manager")
   public List<Group> groupsPeople = Lists.newArrayList();
 
@@ -255,6 +257,28 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
+  /**
+   * Lista dei gruppi di una persona alla data odierna.
+   * @return la lista dei gruppi a cui appartiente oggi una persona. 
+   */
+  @Transient
+  public List<Group> getGroups() {
+    return getGroups(java.time.LocalDate.now());
+  }
+  
+  /**
+   * Lista dei gruppi di una persona alla data indicata.
+   * @return la lista dei gruppi a cui appartiente una persona ad una data
+   *     passata per parametro.
+   */
+  @Transient
+  public List<Group> getGroups(java.time.LocalDate date) {
+    return affiliations.stream()
+        .filter(a -> a.getBeginDate().isBefore(date) 
+            && (a.getEndDate() == null || a.getEndDate().isAfter(date)))
+        .map(a -> a.getGroup()).collect(Collectors.toList());
+  }
+  
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
 
@@ -288,11 +312,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @PreRemove
   private void onDelete() {
-    this.groups.stream().forEach(g -> { 
-        g.people.remove(this);
+    this.getGroups().stream().forEach(g -> { 
+      g.getAffiliations().stream().filter(a -> a.getPerson().equals(this)).forEach(a -> {
+        a.delete();
         log.info("Rimossa associazione {} a gruppo {}", getFullname(), g.name);
-        g.save();
       });
+    });
   }
   
   /**
@@ -379,6 +404,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   public List<Person> getPersonsInCharge() {
-    return groupsPeople.stream().flatMap(g -> g.people.stream()).collect(Collectors.toList());
+    return groupsPeople.stream().flatMap(g -> g.getPeople().stream()).collect(Collectors.toList());
   }
 }

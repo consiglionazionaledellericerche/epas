@@ -56,7 +56,7 @@ public class SecurityTest extends FunctionalTest {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {
       String redirectedTo = response.getHeader("Location");
-      response = httpGet(redirectedTo,followRedirect);
+      response = httpGet(redirectedTo, followRedirect);
     }
     return response;
   }

@@ -87,7 +87,7 @@ public class Missions extends Controller {
     }
     
     // Check if integration ePAS-Missions is enabled
-    if (!(Boolean)configurationManager
+    if (!(Boolean) configurationManager
         .configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
       logInfo(String.format("Non verrà processato il messaggio in quanto la sede %s "
           + "cui appartiene il destinatario %s ha l'integrazione con Missioni disabilitata",

@@ -36,13 +36,18 @@ public class PersonCreateDto {
   @Required
   private Long officeId;
   
+  /**
+   * Nuova istanza di un oggetto person a partire dai 
+   * valori presenti nel rispettivo DTO.
+   */
   public static Person build(PersonCreateDto personDto) {
     ModelMapper modelMapper = new ModelMapper();
     val person = modelMapper.map(personDto, Person.class);
     if (personDto.getQualification() != null) {
       person.qualification = 
           ((Qualification) Qualification.findAll().stream()
-              .filter(q -> ((Qualification) q).qualification == personDto.getQualification().intValue())
+              .filter(q -> 
+                ((Qualification) q).qualification == personDto.getQualification().intValue())
               .findFirst().get());        
     }
     if (personDto.getOfficeId() != null) {

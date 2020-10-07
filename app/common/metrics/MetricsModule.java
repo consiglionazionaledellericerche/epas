@@ -72,21 +72,21 @@ public class MetricsModule extends AbstractModule {
 
   @Provides
   public HibernateMetrics hibernateMetrics(Provider<EntityManager> emp) {
-      return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
-          JPA.DEFAULT, ImmutableList.of());
+    return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
+        JPA.DEFAULT, ImmutableList.of());
   }
 
   public DataSource getDataSource(Provider<EntityManager> emp) {
     val entityManagerFactory = emp.get().getEntityManagerFactory();
     ConnectionProvider cp = ((SessionFactory) entityManagerFactory).getSessionFactoryOptions()
-          .getServiceRegistry()
-          .getService(ConnectionProvider.class);
-  return cp.unwrap(DataSource.class);
+        .getServiceRegistry()
+        .getService(ConnectionProvider.class);
+    return cp.unwrap(DataSource.class);
   }
   
   public String getDatabaseName() {
-   val databaseUrl = Splitter.on("/").splitToList(Play.configuration.getProperty("db"));
-   return databaseUrl.get(databaseUrl.size() - 1);
+    val databaseUrl = Splitter.on("/").splitToList(Play.configuration.getProperty("db"));
+    return databaseUrl.get(databaseUrl.size() - 1);
   }
   
   @Provides

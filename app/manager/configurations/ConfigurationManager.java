@@ -69,7 +69,8 @@ public class ConfigurationManager {
    * @param value
    * @return
    */
-  public List<PersonConfiguration> configurationWithTypeAndValue(EpasParam epasParam, String value) {
+  public List<PersonConfiguration> configurationWithTypeAndValue(
+      EpasParam epasParam, String value) {
     final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
     
     final JPQLQuery query = queryFactory.selectFrom(configuration)
@@ -77,6 +78,7 @@ public class ConfigurationManager {
             .and(configuration.fieldValue.eq(value)));
     return query.fetch();
   }
+  
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
