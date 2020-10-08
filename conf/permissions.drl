@@ -501,6 +501,7 @@ when
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
@@ -630,11 +631,13 @@ when
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
 			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
@@ -670,11 +673,13 @@ when
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
 			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show"
 			
@@ -1099,11 +1104,13 @@ when
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
 		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.officeHeadApproval",
 		"AbsenceRequests.show",
 		"AbsenceRequests.approval",
@@ -1132,11 +1139,13 @@ when
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
 		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show"
 
         ), target == $o, granted == false)
@@ -1187,6 +1196,7 @@ when
  		"AbsenceRequests.compensatoryRestsToApprove",
  		"AbsenceRequests.listToApprove",
  		"AbsenceRequests.permissionsToApprove",
+ 		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
  		
 
         /* Vecchio permesso viewPerson */
