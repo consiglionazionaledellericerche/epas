@@ -130,9 +130,9 @@ public class MealTickets extends Controller {
    * @param month il mese di riferimento
    */
   public static void personMealTickets(Long contractId, Integer year, Integer month) {
-    
+
     Contract contract = contractDao.getContractById(contractId);
-    
+
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
     rules.checkIfPermitted(contract.person.office);
@@ -255,14 +255,14 @@ public class MealTickets extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     Person person = contract.person;
     notFoundIfNull(contract.person);
-    
+
     rules.checkIfPermitted(contract.person.office);
     Preconditions.checkState(contract.isPersistent());
     User admin = Security.getUser().get();
 
     MealTicketRecap recap;
     //Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-    
+
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
@@ -273,7 +273,7 @@ public class MealTickets extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      
+
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
@@ -285,17 +285,17 @@ public class MealTickets extends Controller {
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
-    
+
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
     ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
         ticketNumberFrom, ticketNumberTo, expireDate, office));
-    
+
     ticketToAddOrdered.forEach(ticket -> {
       validation.valid(ticket);          
-      
+
     });
     if (Validation.hasErrors()) {
-      
+
       Validation.errors().forEach(error -> {
         if (error.getKey().equals(".code")) {
           flash.error(Messages.get("mealTicket.error"));
@@ -303,7 +303,7 @@ public class MealTickets extends Controller {
               deliveryDate, expireDate, admin);
         }
       });
-      
+
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
@@ -507,9 +507,17 @@ public class MealTickets extends Controller {
   public static void findCodeBlock(String code) {
 
     List<BlockMealTicket> blocks = Lists.newArrayList();
+    List<MealTicket> mealTicket = Lists.newArrayList();
     if (code != null && !code.isEmpty()) {
-      List<MealTicket> mealTicket = mealTicketDao.getMealTicketsMatchCodeBlock(code,
-          Optional.<Office>absent());
+      if (Security.getUser().get().isSystemUser()) {
+        mealTicket = mealTicketDao.getMealTicketsMatchCodeBlock(code,
+            Optional.<Office>absent());
+
+      } else {
+        mealTicket = mealTicketDao
+            .getMealTicketsMatchCodeBlock(code, 
+                Optional.of(Security.getUser().get().person.office));
+      }
       blocks = MealTicketStaticUtility
           .getBlockMealTicketFromOrderedList(mealTicket, Optional.<DateInterval>absent());
     }
