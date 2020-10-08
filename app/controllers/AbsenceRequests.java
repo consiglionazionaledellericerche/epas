@@ -120,7 +120,12 @@ public class AbsenceRequests extends Controller {
   public static void personalPermissions() {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
   }
-
+  
+  public static void vacationsPastYearAfterDeadline() {
+    list(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
+  }
+  
+ 
   public static void shortTermPermit() {
     list(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
@@ -135,6 +140,10 @@ public class AbsenceRequests extends Controller {
   
   public static void permissionsToApprove() {
     listToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
+  }
+  
+  public static void vacationsPastYearAfterDeadlineToApprove() {
+    listToApprove(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
   }
 
   public static void shortTermPermitToApprove() {

@@ -831,10 +831,12 @@ AbsenceRequests.vacations =Mie richieste di ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
 AbsenceRequests.personalPermissions =Miei permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadline =Mie richieste ferie anno passato dopo deadline
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 AbsenceRequests.permissionsToApprove =Flussi di permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno passato dopo deadline
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
@@ -1047,6 +1049,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
+ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
 
 VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
 VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 

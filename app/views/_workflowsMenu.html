@@ -38,6 +38,12 @@
         <i class="fa fa-exclamation" aria-hidden="true"></i>
       #{/secure.li}
       
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      #{/secure.li}
+      #{/secure.check}
+      
       <li class="divider"></li>
       
 	  #{secure.li @AbsenceRequests.vacationsToApprove()}
@@ -61,6 +67,15 @@
       		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
     	#{/if}
       #{/secure.li}
+      
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+      #{/secure.check}
             
 
     </ul>
