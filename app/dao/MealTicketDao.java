@@ -142,7 +142,7 @@ public class MealTicketDao extends DaoBase {
 
     query.where(mealTicket.block.like("%" + code + "%"));
     if (office.isPresent()) {
-      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(true)));
+      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(false)));
     }
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();
