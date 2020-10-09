@@ -376,6 +376,7 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.G_661.name())
+        || groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
         notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.CREATE);
@@ -706,6 +707,8 @@ public class NotificationManager {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
     } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
       requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
+    } else if (absenceRequest.type == AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST) {
+      requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
