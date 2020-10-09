@@ -35,12 +35,13 @@ public class GroupCreateDto {
    */
   public static Group build(GroupCreateDto groupDto) {
     ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val group = modelMapper.map(groupDto, Group.class);
     if (groupDto.getOfficeId() != null) {
       group.office = Office.findById(groupDto.getOfficeId());  
     }
     if (groupDto.getManagerId() != null) {
-      group.office = Person.findById(groupDto.getManagerId());  
+      group.manager = Person.findById(groupDto.getManagerId());  
     }
     return group;
   }
