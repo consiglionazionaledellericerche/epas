@@ -44,6 +44,8 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
 import models.flows.enumerate.AbsenceRequestEventType;
@@ -481,6 +483,9 @@ public class AbsenceRequestManager {
             .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
       
       }
+    }
+    if (absenceRequest.type.equals(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
+      absenceType = absenceDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
     }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,

@@ -38,6 +38,7 @@ import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -359,7 +360,9 @@ public class AbsenceRequests extends Controller {
       groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     }
     
-    
+    if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())) {
+      absenceType = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
+    }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, justifiedType, hours, minutes, false, true);
