@@ -21,6 +21,7 @@ public class GroupShowDto extends GroupShowTerseDto {
   
   private Set<PersonShowTerseDto> people = Sets.newHashSet();
   private OfficeDto office;
+  private String externalId;
   
   /**
    * Nuova instanza di un GroupShowDto contenente i valori 
