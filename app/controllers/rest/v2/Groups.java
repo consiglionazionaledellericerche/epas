@@ -1,6 +1,5 @@
 package controllers.rest.v2;
 
-import cnr.sync.dto.v2.AffiliationShowDto;
 import cnr.sync.dto.v2.GroupCreateDto;
 import cnr.sync.dto.v2.GroupShowDto;
 import cnr.sync.dto.v2.GroupShowTerseDto;
@@ -10,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import dao.AffiliationDao;
 import dao.GroupDao;
 import helpers.JsonResponse;
 import java.io.IOException;
@@ -34,8 +32,6 @@ public class Groups extends Controller {
 
   @Inject
   static GroupDao groupDao;
-  @Inject
-  static AffiliationDao affiliationDao;
   @Inject 
   static SecurityRules rules;
   @Inject
@@ -59,14 +55,19 @@ public class Groups extends Controller {
   }
 
   /**
-   * Restituisce il JSON con l'affiliazione cercata per id. 
+   * Restituisce il JSON con il gruppo cercato per id. 
    */
   public static void show(Long id) {
+    if (id == null) {
+      JsonResponse.notFound();
+    }
+    val group = groupDao.byId(id).orNull();
+    if (group == null) {
+      JsonResponse.notFound();
+    }
     notFoundIfNull(id);
-    val affiliation = affiliationDao.byId(id).orElse(null);
-    notFoundIfNull(affiliation);
-    rules.checkIfPermitted(affiliation.getGroup().getOffice());
-    renderJSON(gsonBuilder.create().toJson(AffiliationShowDto.build(affiliation)));
+    rules.checkIfPermitted(group.office);
+    renderJSON(gsonBuilder.create().toJson(GroupShowDto.build(group)));
   }
 
   /**
