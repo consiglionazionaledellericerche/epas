@@ -27,7 +27,7 @@ public class AffiliationUpdateDto extends AffiliationCreateDto {
       affiliation.setPerson(Person.findById(getPersonId()));  
     }
     affiliation.setPercentage(getPercentage());
-    affiliation.setBeginDate(getEndDate());
+    affiliation.setBeginDate(getBeginDate());
     affiliation.setEndDate(getEndDate());
   }
 }
