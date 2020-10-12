@@ -31,6 +31,7 @@ import manager.configurations.ConfigurationManager;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.model.DayInPeriod.TemplateRow;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
@@ -53,6 +54,7 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.db.jpa.JPA;
@@ -847,6 +849,25 @@ public class AbsenceRequestManager {
       }
       temp = temp.plusDays(1);
     }
+  }
+  
+  /**
+   * Metodo di utilità che corregge le date nella richiesta di assenza.
+   * @param absenceRequest la richiesta di assenza 
+   * @param insertReport il report derivante dai parametri di richiesta di assenza
+   * @return l'absenceRequest con le date corrette se la richiesta contiene una data di fine che è
+   *     successiva alla data massima inseribile nella richiesta per via delle assenze disponibili.
+   */
+  public AbsenceRequest checkAbsenceRequestDates(AbsenceRequest absenceRequest, 
+      InsertReport insertReport) {
+    LocalDate checkDate = null;
+    for (TemplateRow row : insertReport.insertTemplateRows) {
+      checkDate = row.date;
+    }
+    if (absenceRequest.endTo.toLocalDate().isAfter(checkDate)) {
+      absenceRequest.endTo = checkDate.toLocalDateTime(new LocalTime(0, 0, 0));
+    }
+    return absenceRequest;
   }
 
 
