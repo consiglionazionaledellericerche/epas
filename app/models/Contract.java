@@ -5,9 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import helpers.validators.ContractBeginDateAndOverlapingCheck;
+import helpers.validators.ContractBeforeSourceResidualAndOverlapingCheck;
 import helpers.validators.ContractEndContractCheck;
-import helpers.validators.ContractEndDateCheck;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,12 +41,6 @@ import play.data.validation.Required;
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
-  //@CheckWith(ContractBeginDateAndOverlapingCheck.class)
-  //public LocalDate beginDate;
-  
-  //@CheckWith(ContractEndDateCheck.class)
-  //public LocalDate endDate;
   
   public String perseoId;
 
@@ -62,6 +55,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
    */
+  @CheckWith(ContractBeforeSourceResidualAndOverlapingCheck.class)
   @Getter
   public LocalDate sourceDateResidual = null;
   
@@ -113,7 +107,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
-  //@CheckWith(ContractEndContractCheck.class)
+  @CheckWith(ContractEndContractCheck.class)
   @Getter
   public LocalDate endContract;
 
@@ -148,7 +142,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Setter
   @OneToOne
   private Contract previousContract;
-
+  
   /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.

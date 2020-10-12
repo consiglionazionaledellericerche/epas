@@ -319,34 +319,24 @@ public class Contracts extends Controller {
    * @param confirmed     step di conferma
    */
   public static void update(@Valid Contract contract, 
-      //      @Required LocalDate beginDate,
-      //      @Valid LocalDate endDate, @Valid LocalDate endContract,
-      //      boolean onCertificate, 
       boolean confirmed, Boolean isTemporaryMissing,
-      String perseoId, LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
+      LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-
+    
     if (Validation.hasErrors()) {
       log.info("ValidationErrors = {}", validation.errorsMap());
       response.status = 400;
-      render("@edit", contract, wrappedContract, 
-          //beginDate, endDate, endContract, onCertificate, 
-          perseoId, sourceDateRecoveryDay);
+      render("@edit", contract, wrappedContract, sourceDateRecoveryDay);
     }
 
     // Salvo la situazione precedente
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-    //    contract.beginDate = beginDate;
-    //    contract.endDate = endDate;
-    //    contract.endContract = endContract;
-    //    contract.onCertificate = onCertificate;
-    contract.perseoId = perseoId;
     contract.sourceDateRecoveryDay = sourceDateRecoveryDay;
     if (isTemporaryMissing != null) {
       contract.isTemporaryMissing = isTemporaryMissing;  
@@ -366,9 +356,8 @@ public class Contracts extends Controller {
         } else {
           Validation.addError("linkedToPreviousContract", 
               "Non esiste alcun contratto precedente cui linkare il contratto attuale");
-          render("@edit", contract, wrappedContract, 
-              //beginDate, endDate, endContract, onCertificate, 
-              perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+          render("@edit", contract, wrappedContract,
+              sourceDateRecoveryDay, linkedToPreviousContract);
         }
       }    
     } else {
@@ -383,14 +372,6 @@ public class Contracts extends Controller {
       }
     }
 
-    if (!contractManager.isContractNotOverlapping(contract)) {
-      Validation.addError("contract.crossValidationFailed",
-          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
-      render("@edit", contract, wrappedContract, 
-          //beginDate, endDate, endContract, onCertificate, 
-          perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
-    }
-
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
     RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
         wrappedContract.initializationMissing());
@@ -400,8 +381,7 @@ public class Contracts extends Controller {
       confirmed = true;
       response.status = 400;
       render("@edit", contract, wrappedContract, 
-          //beginDate, endDate, endContract,onCertificate, 
-          confirmed, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay, 
+          confirmed, isTemporaryMissing, recomputeRecap, sourceDateRecoveryDay, 
           linkedToPreviousContract);
     } else {
       if (recomputeRecap.recomputeFrom != null) {

@@ -1,5 +1,6 @@
 package models.base;
 
+import helpers.validators.PeriodEndDateCheck;
 import it.cnr.iit.epas.DateInterval;
 import java.util.Comparator;
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
 @MappedSuperclass
@@ -23,6 +25,7 @@ public abstract class PeriodModel extends BaseModel
   @Column(name = "begin_date")
   public LocalDate beginDate;
 
+  @CheckWith(PeriodEndDateCheck.class)
   @Getter
   @Setter
   @Column(name = "end_date")
