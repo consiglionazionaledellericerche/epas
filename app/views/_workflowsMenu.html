@@ -12,9 +12,10 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 		<i class="fa fa-recycle fa-fw"></i>  
 		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0 
-		    	|| templateUtility.personalPermissionRequests() > 0}
+		    	|| templateUtility.personalPermissionRequests() > 0 || templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
       			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
-      				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()}
+      				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()
+      				+ templateUtility.vacationPastYearAfterDeadlineRequests()}
       			</span>
     		#{/if}       
 	     <!-- visualizza l'username -->
@@ -37,6 +38,12 @@
       #{secure.li @AbsenceRequests.personalPermissions()}
         <i class="fa fa-exclamation" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      #{/secure.li}
+      #{/secure.check}
       
       <li class="divider"></li>
       
@@ -61,6 +68,15 @@
       		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
     	#{/if}
       #{/secure.li}
+      
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+      #{/secure.check}
             
 
     </ul>
