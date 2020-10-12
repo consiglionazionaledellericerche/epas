@@ -18,9 +18,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -40,14 +38,11 @@ import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.absences.definitions.DefaultAbsenceType;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -158,7 +153,7 @@ public class Contracts extends Controller {
 
     if (!DateUtility.isDateIntoInterval(dateToSplit, 
         new DateInterval(contract.beginDate, contract.calculatedEnd()))) {
-      validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
+      Validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
     }
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -183,9 +178,7 @@ public class Contracts extends Controller {
     }
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
     log.debug("Rimosse {} assenze per {}", count, contract.person.getFullname());
-    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
 
     //2) si splitta il contratto in due contratti nuovi
     log.info("Inizio procedura di split del contratto {}", contract.toString());
@@ -208,6 +201,9 @@ public class Contracts extends Controller {
 
     //3) creo il nuovo contratto a partire da dateToSplit
     log.info("Creazione nuovo contratto");
+    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
+    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
+
     Contract newContract = contractService.createNewContract(wrappedPerson.getValue(),
         dateToSplit, wtt, previousInterval);
     contractManager.properContractCreate(newContract, wtt, true);

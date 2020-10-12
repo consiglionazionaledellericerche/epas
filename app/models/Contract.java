@@ -3,6 +3,7 @@ package models;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -243,5 +244,29 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return true;
   }
 
+  /**
+   * Il Range che comprende le date di inizio e fine/chiusura del contratto.
+   */
+  public Range<LocalDate> getRange() {
+    if (calculatedEnd() != null) {
+      return Range.closed(beginDate, calculatedEnd());
+    }
+    return Range.atLeast(beginDate);
+  }
 
+  /**
+   * Verifica di sovrapposizione con il range di questo contratto.
+   * @return true se il range passato si sovrappone a quello definito
+   *     in questo contratto.
+   */
+  public boolean overlap(Range<LocalDate> otherRange) {
+    return getRange().isConnected(otherRange);
+  }
+  
+  /**
+   * Verifica di sovrapposizione tra due contratti.
+   */
+  public boolean overlap(Contract otherContract) {
+    return overlap(otherContract.getRange());
+  }
 }
