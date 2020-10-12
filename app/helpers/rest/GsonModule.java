@@ -1,4 +1,4 @@
-package helpers;
+package helpers.rest;
 
 import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.GsonBuilder;
@@ -15,6 +15,9 @@ import lombok.val;
 @AutoRegister
 public class GsonModule implements Module {
 
+  /**
+   * Fornisce una istanza configurata del GsonBuilder.
+   */
   @Provides
   public GsonBuilder builderFactory() {
     val builder = new GsonBuilder(); 
