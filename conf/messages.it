@@ -754,6 +754,13 @@ permessi= Permessi legge (da fare)
 ###########################
 
 validation.affiliation.membershipAlreadyPresent =Associazione a questo gruppo già presente nelle date specificate
+
+validation.contract.contractOverlaping =Il contratto non può intersecarsi con altri contratti del dipendente
+validation.contract.sourceDateResidualBeforeBeginDate =La data di inizio non può essere successiva alla data di inizializzazione
+validation.contract.endDateBeforeBeginContract =La data di scadenza non può precedere l'inizio del contratto.
+validation.contract.endContractBeforeBeginContract =La data di terminazione del contratto non può precedere l'inizio del contratto.
+validation.contract.endContractBeforeEndDate =La data di terminazione del contratto non può precedere la data di scadenza del contratto.
+
 validation.after=Deve essere successiva a %2$s
 validation.before=Deve essere precedente a %2$s
 validation.email=Indirizzo email non valido
