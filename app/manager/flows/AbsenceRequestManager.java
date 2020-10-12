@@ -900,7 +900,7 @@ public class AbsenceRequestManager {
     for (TemplateRow row : insertReport.insertTemplateRows) {
       checkDate = row.date;
     }
-    if (absenceRequest.endTo.toLocalDate().isAfter(checkDate)) {
+    if (checkDate != null && absenceRequest.endTo.toLocalDate().isAfter(checkDate)) {
       absenceRequest.endTo = checkDate.toLocalDateTime(new LocalTime(0, 0, 0));
     }
     return absenceRequest;
