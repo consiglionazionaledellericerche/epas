@@ -1,10 +1,8 @@
 package manager.flows;
 
-
-
-import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Maps;
 import controllers.Security;
 import dao.AbsenceRequestDao;
 import dao.GroupDao;
@@ -28,7 +26,6 @@ import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;
-import manager.recaps.charts.ResultFromFile;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -47,7 +44,6 @@ import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
-import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
 import models.flows.AbsenceRequestEvent;
 import models.flows.enumerate.AbsenceRequestEventType;
@@ -516,7 +512,8 @@ public class AbsenceRequestManager {
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager.sendReperibilityShiftEmail(absenceRequest.person,
             insertReport.reperibilityShiftDate());
-        //TODO: aggiungere metodo che invia la stessa mail che mando al dipendente anche al responsabile
+        //TODO: aggiungere metodo che invia la stessa mail che mando al 
+        //dipendente anche al responsabile
         // del turno o della reperibilità
         warnSupervisorAndManager(absenceRequest);
 
