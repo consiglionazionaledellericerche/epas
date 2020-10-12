@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import helpers.validators.ContractBeginDateAndOverlapingCheck;
+import helpers.validators.ContractEndContractCheck;
+import helpers.validators.ContractEndDateCheck;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +31,7 @@ import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -39,6 +43,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
 
+  //@CheckWith(ContractBeginDateAndOverlapingCheck.class)
+  //public LocalDate beginDate;
+  
+  //@CheckWith(ContractEndDateCheck.class)
+  //public LocalDate endDate;
+  
   public String perseoId;
 
   /**
@@ -103,6 +113,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
+  //@CheckWith(ContractEndContractCheck.class)
   @Getter
   public LocalDate endContract;
 
