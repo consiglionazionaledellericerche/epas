@@ -38,6 +38,7 @@ import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -120,7 +121,12 @@ public class AbsenceRequests extends Controller {
   public static void personalPermissions() {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
   }
-
+  
+  public static void vacationsPastYearAfterDeadline() {
+    list(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
+  }
+  
+ 
   public static void shortTermPermit() {
     list(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
@@ -135,6 +141,10 @@ public class AbsenceRequests extends Controller {
   
   public static void permissionsToApprove() {
     listToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
+  }
+  
+  public static void vacationsPastYearAfterDeadlineToApprove() {
+    listToApprove(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
   }
 
   public static void shortTermPermitToApprove() {
@@ -274,6 +284,7 @@ public class AbsenceRequests extends Controller {
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             null, null, false, absenceManager);
+    
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
         retroactiveAbsence, absenceForm);
@@ -350,7 +361,9 @@ public class AbsenceRequests extends Controller {
       groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     }
     
-    
+    if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())) {
+      absenceType = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
+    }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, justifiedType, hours, minutes, false, true);
@@ -358,6 +371,8 @@ public class AbsenceRequests extends Controller {
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             absenceForm.hours, absenceForm.minutes, false, absenceManager);
+    
+    absenceRequest = absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST)
@@ -476,9 +491,7 @@ public class AbsenceRequests extends Controller {
 
     if (approved) {
       notificationManager.sendEmailToUser(absenceRequest);
-      if (!absenceRequestManager.getTroubleDays(absenceRequest).isEmpty()) {
-        absenceRequestManager.warnSupervisorAndManager(absenceRequest);
-      }
+
       flash.success("Operazione conclusa correttamente");
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
