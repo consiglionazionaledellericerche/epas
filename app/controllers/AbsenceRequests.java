@@ -491,9 +491,7 @@ public class AbsenceRequests extends Controller {
 
     if (approved) {
       notificationManager.sendEmailToUser(absenceRequest);
-      if (!absenceRequestManager.getTroubleDays(absenceRequest).isEmpty()) {
-        absenceRequestManager.warnSupervisorAndManager(absenceRequest);
-      }
+
       flash.success("Operazione conclusa correttamente");
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");

@@ -28,6 +28,7 @@ import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;
+import manager.recaps.charts.ResultFromFile;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -163,7 +164,7 @@ public class AbsenceRequestManager {
           "Approvazione del responsabile di gruppo richiesta. "
               + "La persona %s non ha impostato nessun responsabile di gruppo "
               + "e non appartiene ad alcun gruppo. " + "Contattare l'ufficio del personale.",
-          person.getFullname()));
+              person.getFullname()));
     }
 
     if (config.isOfficeHeadApprovalRequired() && uroDao
@@ -483,7 +484,7 @@ public class AbsenceRequestManager {
         absenceType = absenceDao.absenceTypeByCode("661M").get();
         type = absenceDao
             .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-      
+
       }
     }
     if (absenceRequest.type.equals(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
@@ -515,6 +516,10 @@ public class AbsenceRequestManager {
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager.sendReperibilityShiftEmail(absenceRequest.person,
             insertReport.reperibilityShiftDate());
+        //TODO: aggiungere metodo che invia la stessa mail che mando al dipendente anche al responsabile
+        // del turno o della reperibilità
+        warnSupervisorAndManager(absenceRequest);
+
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
             absenceRequest.person.fullName(), insertReport.reperibilityShiftDate());
       }
@@ -814,43 +819,74 @@ public class AbsenceRequestManager {
 
   /**
    * Metodo void che controlla i giorni in cui la richiesta d'assenza matcha con i giorni di
-   * reperibilità e/o turno del dipendente e informa il responsabile del servizio via mail.
+   * reperibilità e/o turno del dipendente e informa il responsabile e i gestori 
+   * del servizio via mail.
    * 
    * @param absenceRequest la richiesta d'assenza
    */
   public void warnSupervisorAndManager(AbsenceRequest absenceRequest) {
+
     LocalDate temp = absenceRequest.startAtAsDate();
+    Map<PersonReperibilityType, List<LocalDate>> repMap = Maps.newHashMap();
+    Map<ShiftCategories, List<LocalDate>> shiftMap = Maps.newHashMap();
+    
+    //splitto le date incriminate tra reperibilità e turno
     while (!temp.isAfter(absenceRequest.endToAsDate())) {
       Optional<PersonReperibilityDay> prd =
           personReperibilityDayDao.getPersonReperibilityDay(absenceRequest.person, temp);
-      if (prd.isPresent()) {
-        notificationManager.sendEmailToSupervisorOrManager(absenceRequest,
-            prd.get().reperibilityType.supervisor, Optional.<ShiftCategories>absent(),
-            Optional.fromNullable(prd.get().reperibilityType), temp);
-        for (Person manager : prd.get().reperibilityType.managers) {
-          notificationManager.sendEmailToSupervisorOrManager(absenceRequest, manager,
-              Optional.<ShiftCategories>absent(), Optional.fromNullable(prd.get().reperibilityType),
-              temp);
+      if (prd.isPresent()) {        
+        List<LocalDate> list = repMap.get(prd.get().reperibilityType);
+        if (list == null) {
+          list = Lists.newArrayList();
         }
+        list.add(temp);
+        repMap.put(prd.get().reperibilityType, list);        
       }
 
       Optional<PersonShiftDay> psd =
           personShiftDayDao.getPersonShiftDay(absenceRequest.person, temp);
       if (psd.isPresent()) {
-        notificationManager.sendEmailToSupervisorOrManager(absenceRequest,
-            psd.get().shiftType.shiftCategories.supervisor,
-            Optional.fromNullable(psd.get().shiftType.shiftCategories),
-            Optional.<PersonReperibilityType>absent(), temp);
-        for (Person manager : psd.get().shiftType.shiftCategories.managers) {
-          notificationManager.sendEmailToSupervisorOrManager(absenceRequest, manager,
-              Optional.fromNullable(psd.get().shiftType.shiftCategories),
-              Optional.<PersonReperibilityType>absent(), temp);
+        List<LocalDate> list = shiftMap.get(psd.get().shiftType.shiftCategories);
+        if (list == null) {
+          list = Lists.newArrayList();
         }
+        list.add(temp);
+        shiftMap.put(psd.get().shiftType.shiftCategories, list);        
       }
       temp = temp.plusDays(1);
     }
+    /*
+     *  per ogni giorno incriminato informo il responsabile e i gestori del servizio 
+     *  di reperibilità
+     */
+    for (Map.Entry<PersonReperibilityType, List<LocalDate>> entry : repMap.entrySet()) {
+      
+      notificationManager.sendEmailToSupervisorOrManager(absenceRequest,
+          entry.getKey().supervisor, Optional.<ShiftCategories>absent(),
+          Optional.fromNullable(entry.getKey()), entry.getValue());
+      for (Person manager : entry.getKey().managers) {
+        notificationManager.sendEmailToSupervisorOrManager(absenceRequest, manager,
+            Optional.<ShiftCategories>absent(), Optional.fromNullable(entry.getKey()),
+            entry.getValue());
+      }
+    }    
+    /*
+     *  per ogni giorno incriminato informo il responsabile e i gestori del servizio
+     *  di turno
+     */
+    for (Map.Entry<ShiftCategories, List<LocalDate>> entry : shiftMap.entrySet()) {
+      notificationManager.sendEmailToSupervisorOrManager(absenceRequest,
+          entry.getKey().supervisor,
+          Optional.fromNullable(entry.getKey()),
+          Optional.<PersonReperibilityType>absent(), entry.getValue());
+      for (Person manager : entry.getKey().managers) {
+        notificationManager.sendEmailToSupervisorOrManager(absenceRequest, manager,
+            Optional.fromNullable(entry.getKey()),
+            Optional.<PersonReperibilityType>absent(), entry.getValue());
+      }
+    }
   }
-  
+
   /**
    * Metodo di utilità che corregge le date nella richiesta di assenza.
    * @param absenceRequest la richiesta di assenza 
