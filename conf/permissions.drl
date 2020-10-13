@@ -1541,7 +1541,13 @@ when
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+        
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
         ), target == null, granted == false)
 then
@@ -1679,7 +1685,13 @@ when
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
        ), target == $o, granted == false)
 then
