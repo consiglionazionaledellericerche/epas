@@ -95,12 +95,11 @@ public class Groups extends Controller {
     rules.checkIfPermitted(group.office);
 
     //elimino il ruolo di manager
-    if (!groupManager.deleteManager(group)) {
-      flash.error("Non esiste un manager associato al gruppo {}. "
-          + "Impossibile eliminarlo.", group.name);
-      showGroups(group.manager.office.id);
-    } 
-    if (group.affiliations.isEmpty()) {
+    groupManager.deleteManager(group);
+
+    if (group.getPeople().isEmpty()) {
+      //Elimino eventuali vecchie associazioni
+      group.affiliations.stream().forEach(a -> a.delete());
       //elimino il gruppo.
       group.delete();
       log.info("Eliminato gruppo {}", group.name);
@@ -173,23 +172,7 @@ public class Groups extends Controller {
     } else {
       peopleForGroups = personDao.byOffice(office);
     }
-    
     render("@edit", office, peopleForGroups);
   }
-  
-  //  public static void manageGroup() {
-  //    User currentUser = Security.getUser().get();
-  //    List<Group> managerGroups = Lists.newArrayList();
-  //    if (currentUser.isSystemUser()) {
-  //      managerGroups = groupDao.groupsByManager(Optional.<Person>absent());
-  //    }
-  //    if (!currentUser.hasRoles(Role.GROUP_MANAGER)) {
-  //      flash.error("L'utente non dispone dei diritti per accedere alla funzionalità");
-  //      Application.index();
-  //    }
-  //    //TODO: fare la regola drools per accedere alla funzionalità
-  //    rules.checkIfPermitted();
-  //    managerGroups = groupDao.groupsByManager(Optional.fromNullable(currentUser.person));
-  //    render(managerGroups);
-  //  }
+
 }
