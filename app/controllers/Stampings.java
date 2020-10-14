@@ -614,11 +614,12 @@ public class Stampings extends Controller {
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
     Office office = user.person.office;
+    Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;
     boolean groupView = true;
 
-    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office);
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office, map);
   }
   
  
