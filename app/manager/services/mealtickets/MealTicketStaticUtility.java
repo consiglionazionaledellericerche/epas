@@ -37,9 +37,6 @@ public class MealTicketStaticUtility {
           && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
         continue;
       }
-      if (mealTicket.block.equals("41249")) {
-        System.out.println("Arrivati");
-      }
 
       //Primo buono pasto
       if (currentBlock == null) {
