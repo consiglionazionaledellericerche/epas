@@ -28,10 +28,11 @@ public class ContractCreateDto {
   private LocalDate endContract;
   private String perseoId;
   private Boolean onCertificate = Boolean.TRUE;
-  private Long previousContractId;
+
   //utilizzato per indicare alla classe ContractManager il tipo di
   //orario di lavoro da associare alla creazione del contratto.
-  @Required
+  //Se il campo non è passato il contractManager associarà
+  //il tipo di orario predefinito "Normale"
   private Long workingTimeTypeId;
   
   @JsonIgnore
@@ -44,9 +45,6 @@ public class ContractCreateDto {
    */
   public static Contract build(ContractCreateDto contractDto) {
     val contract = modelMapper.map(contractDto, Contract.class);
-    if (contractDto.getPreviousContractId() != null) {
-      contract.setPreviousContract(Contract.findById(contractDto.getPreviousContractId()));  
-    }
     return contract;
   }
 }
