@@ -91,12 +91,15 @@ public class GroupManager {
    * corrente in funzione della lista delle persone passate.
    */
   public void updatePeople(Group group, Set<Person> people) {
-    log.info("current people = {}, new people = {}", group.getPeople(), people); 
+    log.info("current people = {}, new people = {}", group.getPeople(), people);
+    if (people == null) {
+      people = Sets.newHashSet();
+    }
     val toDisable = Sets.difference(Sets.newHashSet(group.getPeople()), people);
-    log.info("toDisable = {}", toDisable);
+    log.info("Person toDisable = {}", toDisable);
     val currentAffiliationsToDisable = 
         group.getAffiliations().stream()
-          .filter(a -> a.isActive() && toDisable.contains(a.getPerson()))
+          .filter(a -> !a.isActive() && toDisable.contains(a.getPerson()))
           .collect(Collectors.toSet());
     currentAffiliationsToDisable.stream().forEach(a ->  {      
       a.setEndDate(LocalDate.now());
