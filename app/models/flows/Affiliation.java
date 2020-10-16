@@ -83,6 +83,6 @@ public class Affiliation extends BaseModel {
    */
   public boolean isActive() {
     return beginDate.isBefore(LocalDate.now()) 
-        && (endDate == null || endDate.isAfter(LocalDate.now()));
+        && (endDate == null || LocalDate.now().isBefore(endDate));
   }
 }
