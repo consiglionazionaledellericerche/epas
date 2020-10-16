@@ -26,6 +26,9 @@ public class ModelMapperModule extends AbstractModule {
     modelMapper.addConverter(jodaToJavaLocalDateConverter());
     modelMapper.addConverter(jodaToJavaLocalTimeConverter());
     modelMapper.addConverter(jodaToJavaLocalDateTimeConverter());
+    modelMapper.addConverter(javaToJodaLocalDateConverter());
+    modelMapper.addConverter(javaToJodaLocalTimeConverter());
+    modelMapper.addConverter(javaToJodaLocalDateTimeConverter());
     return modelMapper;
   }
   
@@ -64,4 +67,40 @@ public class ModelMapperModule extends AbstractModule {
       }
     };
   }
+
+  /**
+   * Converter per il ModelMapper per convertire java.time.LocalDate in org.joda.time.LocalDate.
+   */
+  public Converter<LocalDate, org.joda.time.LocalDate> javaToJodaLocalDateConverter() {
+    return new AbstractConverter<LocalDate, org.joda.time.LocalDate>() {
+      protected org.joda.time.LocalDate convert(LocalDate source) {
+        return JodaConverters.javaToJodaLocalDate(source);
+      }
+    };
+  }
+
+  /**
+   * Converter per il ModelMapper per convertire java.time.LocalTime in org.joda.time.LocalTime.
+   */
+  public Converter<LocalTime, org.joda.time.LocalTime> javaToJodaLocalTimeConverter() {
+    return new AbstractConverter<LocalTime, org.joda.time.LocalTime>() {
+      protected org.joda.time.LocalTime convert(LocalTime source) {
+        return JodaConverters.javaToJodaLocalTime(source);
+      }
+    };
+  }
+
+  /**
+   * Converter per il ModelMapper per convertire java.time.LocalDateTime in 
+   * org.joda.time.LocalDateTime.  
+   */
+  public Converter<LocalDateTime, org.joda.time.LocalDateTime> 
+      javaToJodaLocalDateTimeConverter() {
+    return new AbstractConverter<LocalDateTime, org.joda.time.LocalDateTime>() {
+      protected org.joda.time.LocalDateTime convert(LocalDateTime source) {
+        return JodaConverters.javaToJodaLocalDateTime(source);
+      }
+    };
+  }
+
 }
