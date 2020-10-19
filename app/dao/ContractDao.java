@@ -39,6 +39,19 @@ public class ContractDao extends DaoBase {
   }
 
   /**
+   * Il contratto relativo all'id passato come parametro e facendo la 
+   * joinFetch con la persona.
+   * 
+   * @return il contratto corrispondente all'id passato come parametro.
+   */
+  public Contract byId(Long id) {
+    QContract contract = QContract.contract;
+    return getQueryFactory().selectFrom(contract)
+        .join(contract.person).fetchJoin()
+        .where(contract.id.eq(id)).fetchOne();
+  }
+  
+  /**
    * Il contratto relativo all'id passato come parametro.
    * @return il contratto corrispondente all'id passato come parametro.
    */

@@ -1826,7 +1826,15 @@ when
      	"rest.v2.Affiliations.update",
      	"rest.v2.Affiliations.delete",
      	"rest.v2.Affiliations.byGroup",
-     	"rest.v2.Affiliations.byPerson"
+     	"rest.v2.Affiliations.byPerson",
+     	
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show",
+     	"rest.v2.Contracts.create",
+     	"rest.v2.Contracts.update",
+     	"rest.v2.Contracts.setPreviousContract",
+     	"rest.v2.Contracts.unsetPreviousContract",
+     	"rest.v2.Contracts.delete"
      	
      	), target == null, granted == false)
 then
@@ -1912,8 +1920,16 @@ when
      	"rest.v2.Affiliations.update",
      	"rest.v2.Affiliations.delete",
      	"rest.v2.Affiliations.byGroup",
-     	"rest.v2.Affiliations.byPerson"
+     	"rest.v2.Affiliations.byPerson",
 
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show",
+     	"rest.v2.Contracts.create",
+     	"rest.v2.Contracts.update",
+     	"rest.v2.Contracts.setPreviousContract",
+     	"rest.v2.Contracts.unsetPreviousContract",
+     	"rest.v2.Contracts.delete"
+     	
      	), target == $o, granted == false)
 then
  $c.grant();
