@@ -10,18 +10,15 @@ import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.JsonResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-import manager.OfficeManager;
+import lombok.val;
 import manager.PersonManager;
 import manager.UserManager;
-import models.Office;
 import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -33,23 +30,23 @@ import security.SecurityRules;
 public class Persons extends Controller {
 
   @Inject
-  static OfficeDao officeDao;
-  @Inject
   static PersonDao personDao;
   @Inject
   static UserManager userManager;
   @Inject
   static PersonManager personManager;
-  @Inject
-  static OfficeManager officeManager;
   @Inject 
   static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
 
+  /**
+   * Lista JSON delle persone che appartengono alla sede
+   * individuata con i parametri passati. 
+   */
   @BasicAuth
   public static void list(Long id, String code, String codeId) {
-    val office = getOfficeFromRequest(id, code, codeId);
+    val office = Offices.getOfficeFromRequest(id, code, codeId);
     rules.checkIfPermitted(office);
     
     val list = 
@@ -57,8 +54,13 @@ public class Persons extends Controller {
     renderJSON(gsonBuilder.create().toJson(list));
   }
 
+  /**
+   * Restituisce il JSON con i dati della persona individuata con i parametri
+   * passati. 
+   */
   @BasicAuth
-  public static void show(Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+  public static void show(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
 
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
@@ -68,6 +70,10 @@ public class Persons extends Controller {
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Crea una persona con i valori passati via JSON.
+   * Questo metodo può essere chiamato solo in HTTP POST.
+   */
   @BasicAuth
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
@@ -85,7 +91,7 @@ public class Persons extends Controller {
     val person = PersonCreateDto.build(personDto);
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
-    };
+    }
     
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
@@ -99,8 +105,14 @@ public class Persons extends Controller {
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Aggiorna i dati di una persona individuata con i parametri HTTP
+   * passati ed i valori passati nel body HTTP come JSON.
+   * Questo metodo può essere chiamato solo via HTTP PUT.
+   */
   @BasicAuth
-  public static void update(Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+  public static void update(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
       String body) throws JsonParseException, JsonMappingException, IOException {
     Verify.verify(request.method.equalsIgnoreCase("PUT"));
 
@@ -129,13 +141,18 @@ public class Persons extends Controller {
 
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
-    };
+    }
     person.save();
 
     log.info("Updated person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));
   }
 
+  /**
+   * Effettua la cancellazione di una persona individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
   @BasicAuth
   public static void delete(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
@@ -155,16 +172,27 @@ public class Persons extends Controller {
     JsonResponse.ok();
   }
   
+  /**
+   * Cerca la persona in funzione dei parametri passati.
+   * La ricerca viene fatta in funzione dei parametri passati
+   * che possono essere null, nell'ordine id, email, eppn,
+   * perseoPersonId, fiscalCode.
+   * 
+   * @return la persona se trovata, altrimenti torna direttamente 
+   *     una risposta HTTP 404.
+   * 
+   */
   @Util
   public static Person getPersonFromRequest(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-    if (id == null && email == null && eppn == null && 
-        personPerseoId == null && fiscalCode == null) {
+    if (id == null && email == null && eppn == null 
+        && personPerseoId == null && fiscalCode == null) {
       JsonResponse.badRequest();
     }
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPerseoId, fiscalCode);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
@@ -177,22 +205,5 @@ public class Persons extends Controller {
     return person.get();
   }
   
-  @Util
-  public static Office getOfficeFromRequest(
-      Long id, String code, String codeId) {
-    if (id == null && code == null && codeId == null) {
-      JsonResponse.badRequest();
-    }
-    Optional<Office> office = officeDao.byIdOrCodeOrCodeId(id, code, codeId);
 
-    if (!office.isPresent()) {
-      log.info("Non trovato l'ufficio in base ai parametri passati: "
-          + "id = {}, code = {}, codeId = {}", 
-          id, code, codeId);
-      JsonResponse.notFound("Non è stato possibile individuare l'ufficio in ePAS con "
-          + "i parametri passati.");
-    }
-
-    return office.get();
-  }
 }

@@ -569,7 +569,7 @@ public class AbsenceEngineUtility {
         int cwttDays = DateUtility.daysInInterval(cwttInverval);
 
         //Incidenza cwtt sul periodo totale (in giorni)
-        Double cwttPercent = ((double)cwttDays * 100) / periodDays; // (*)
+        Double cwttPercent = ((double) cwttDays * 100) / periodDays; // (*)
         
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;

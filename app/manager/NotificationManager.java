@@ -247,11 +247,12 @@ public class NotificationManager {
             .map(uro -> uro.user).collect(Collectors.toList());
     if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
-      List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+      List<Group> groups = 
+          groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
-          if (group.manager.equals(user.person) && group.people.contains(person)) {
+          if (group.manager.equals(user.person) && group.getPeople().contains(person)) {
             Notification.builder().destination(user).message(message)
                 .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
           }
@@ -375,6 +376,7 @@ public class NotificationManager {
         || groupAbsenceType.name.equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.name.equals(DefaultGroup.G_661.name())
+        || groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())
         || groupAbsenceType.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
         notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.CREATE);
@@ -664,8 +666,8 @@ public class NotificationManager {
    * @param date la data incriminata
    */
   public void sendEmailToSupervisorOrManager(AbsenceRequest absenceRequest, Person receiver,
-      Optional<ShiftCategories> shift, Optional<PersonReperibilityType> rep, LocalDate date) {
-    sendEmailToServiceSupervisorOrManager(absenceRequest, receiver, shift, rep, date);
+      Optional<ShiftCategories> shift, Optional<PersonReperibilityType> rep, List<LocalDate> dates) {
+    sendEmailToServiceSupervisorOrManager(absenceRequest, receiver, shift, rep, dates);
   }
 
   /**
@@ -679,7 +681,7 @@ public class NotificationManager {
    * @param date la data incriminata
    */
   private void sendEmailToServiceSupervisorOrManager(AbsenceRequest absenceRequest, Person receiver,
-      Optional<ShiftCategories> shift, Optional<PersonReperibilityType> rep, LocalDate date) {
+      Optional<ShiftCategories> shift, Optional<PersonReperibilityType> rep, List<LocalDate> dates) {
     Verify.verifyNotNull(absenceRequest);
 
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -705,6 +707,9 @@ public class NotificationManager {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
     } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
       requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
+    } else if (absenceRequest.type 
+        == AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST) {
+      requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }
@@ -715,8 +720,18 @@ public class NotificationManager {
     message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
         absenceRequest.endTo.toLocalDate()));
     message.append(String.format("\r\n per il dipendente %s", absenceRequest.person.getFullname()));
-    message
-        .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", date, type));
+    if (dates.size() == 1) {
+      message
+      .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", dates.get(0), type));
+    } else {
+      String datesToCheck = "";
+      for (LocalDate date : dates) {
+        datesToCheck = datesToCheck + date.toString() + " ";
+      }
+      message
+      .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", datesToCheck, type));
+    }
+    
     message.append(String.format("\r\n per il servizio %s", service));
     message.append(String.format("\r\n Verificare la compatibilità delle date delle assenze con "
         + "la schedulazione del dipendente nel servizio"));
@@ -740,7 +755,7 @@ public class NotificationManager {
    * @param manager il responsabile destinatario della mail
    * @param absence l'assenza per permesso personale da notificare
    */
-  private void sendEmailToManagerFor661 (Person manager, Absence absence) {
+  private void sendEmailToManagerFor661(Person manager, Absence absence) {
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
       simpleEmail.addTo(manager.email);

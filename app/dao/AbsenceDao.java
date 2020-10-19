@@ -20,7 +20,6 @@ import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
-import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
@@ -414,7 +413,8 @@ public class AbsenceDao extends DaoBase {
    * @param to (opzionale) la data fino a cui cercare
    * @return la lista di assenze da from a to della persona person.
    */
-  public List<Absence> absenceInPeriod(Person person, LocalDate from, Optional<LocalDate> to) {
+  public List<Absence> absenceInPeriod(
+      Person person, LocalDate from, Optional<LocalDate> to) {
     final QAbsence absence = QAbsence.absence;
     BooleanBuilder condition = new BooleanBuilder();
     if (to.isPresent()) {

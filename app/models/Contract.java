@@ -144,7 +144,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @Transient
   public List<VacationPeriod> getExtendedVacationPeriods() {
-    List<VacationPeriod> vp = new ArrayList(getVacationPeriods());
+    List<VacationPeriod> vp = new ArrayList<VacationPeriod>(getVacationPeriods());
     if (getPreviousContract() != null) {
       vp.addAll(getPreviousContract().getVacationPeriods());
     }

@@ -102,7 +102,7 @@ public class TimeSlots extends Controller {
     }
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors for {}: {}",timeSlot,
+      log.warn("validation errors for {}: {}", timeSlot,
           validation.errorsMap());
       Long officeId = timeSlot.office != null ? timeSlot.office.id : null;
       render("@blank", timeSlot, officeId);

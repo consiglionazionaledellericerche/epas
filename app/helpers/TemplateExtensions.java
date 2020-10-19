@@ -70,6 +70,8 @@ public class TemplateExtensions extends JavaExtensions {
   private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
   private static final java.time.format.DateTimeFormatter DATE_TIME_JAVA_TIME_FORMATTER = 
       java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+  private static final java.time.format.DateTimeFormatter LOCALDATE_JAVA_FORMATTER = 
+      java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
   private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
 
@@ -78,7 +80,7 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   public static String format(java.time.LocalDate date) {
-    return date.format(DATE_TIME_JAVA_TIME_FORMATTER);
+    return date.format(LOCALDATE_JAVA_FORMATTER);
   }
 
   public static String format(java.time.LocalDateTime dateTime) {
@@ -278,6 +280,10 @@ public class TemplateExtensions extends JavaExtensions {
    */
   public static String asText(YearMonth month) {
     return WordUtils.capitalize(month.monthOfYear().getAsText()) + " " + month.getYear();
+  }
+  
+  public static void main(String[] args) {
+    System.out.println(java.time.LocalDate.now().format(LOCALDATE_JAVA_FORMATTER));
   }
 
 }
