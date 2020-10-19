@@ -3,7 +3,10 @@ package models;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import helpers.validators.ContractBeforeSourceResidualAndOverlapingCheck;
+import helpers.validators.ContractEndContractCheck;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +30,7 @@ import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -37,7 +41,7 @@ import play.data.validation.Required;
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
+  
   public String perseoId;
 
   /**
@@ -51,6 +55,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
    */
+  @CheckWith(ContractBeforeSourceResidualAndOverlapingCheck.class)
   @Getter
   public LocalDate sourceDateResidual = null;
   
@@ -102,6 +107,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
+  @CheckWith(ContractEndContractCheck.class)
   @Getter
   public LocalDate endContract;
 
@@ -136,7 +142,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Setter
   @OneToOne
   private Contract previousContract;
-
+  
   /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
@@ -243,5 +249,29 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return true;
   }
 
+  /**
+   * Il Range che comprende le date di inizio e fine/chiusura del contratto.
+   */
+  public Range<LocalDate> getRange() {
+    if (calculatedEnd() != null) {
+      return Range.closed(beginDate, calculatedEnd());
+    }
+    return Range.atLeast(beginDate);
+  }
 
+  /**
+   * Verifica di sovrapposizione con il range di questo contratto.
+   * @return true se il range passato si sovrappone a quello definito
+   *     in questo contratto.
+   */
+  public boolean overlap(Range<LocalDate> otherRange) {
+    return getRange().isConnected(otherRange);
+  }
+  
+  /**
+   * Verifica di sovrapposizione tra due contratti.
+   */
+  public boolean overlap(Contract otherContract) {
+    return overlap(otherContract.getRange());
+  }
 }
