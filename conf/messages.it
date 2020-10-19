@@ -38,9 +38,11 @@ EXPIRING =Richiesta scaduta
 AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
 AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
 AbsenceRequestType.PERSONAL_PERMISSION_TO_APPROVE=Permessi personali da approvare
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TO_APPROVE=Ferie anno passato dopo deadline da approvare
 AbsenceRequestType.VACATION_REQUEST=Ferie
 AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
 AbsenceRequestType.PERSONAL_PERMISSIONS=Permesso personale
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS=Ferie anno passato dopo deadline
 
 activity =Attività di turno
 ADD= Inserimento
@@ -55,6 +57,16 @@ Administration.playConfiguration.table= Parametri di Configurazione Play! framew
 Administration.jvmConfiguration.table= Parametri Jvm
 Administration.runtimeData.table= Valori di Runtime
 Administration.threadsData.table= Informazioni sui thread attivi
+
+Affiliations.personAffiliations=Gruppi
+Affiliation =Appartenenza al gruppo
+affiliation =Appartenenza al gruppo
+affiliation.group =Gruppo
+affiliation.person =Persona
+affiliation.percentage =Percentuale
+affiliation.beginDate =Data inizio
+affiliation.endDate =Data fine
+affiliationPeople= Afferenti al gruppo
 
 application.data= Informazioni applicazione
 
@@ -746,6 +758,7 @@ permessi= Permessi legge (da fare)
 # Messaggi di validazione
 ###########################
 
+validation.affiliation.membershipAlreadyPresent =Associazione a questo gruppo già presente nelle date specificate
 validation.after=Deve essere successiva a %2$s
 validation.before=Deve essere precedente a %2$s
 validation.email=Indirizzo email non valido
@@ -823,15 +836,18 @@ AbsenceRequests.vacations =Mie richieste di ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
 AbsenceRequests.personalPermissions =Miei permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadline =Mie richieste ferie anno passato dopo deadline
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 AbsenceRequests.permissionsToApprove =Flussi di permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno passato dopo deadline
 
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
 AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
+
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
 AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
@@ -844,6 +860,10 @@ AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
 
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
@@ -1039,6 +1059,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
+ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
 
 VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
 VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 

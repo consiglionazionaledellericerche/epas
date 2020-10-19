@@ -46,7 +46,7 @@ public enum DefaultCategoryType {
   PERMESSO_ESAMI("Permesso esami", 12, DefaultTab.ALTRI_CODICI), 
   ORE_AGGIUNTIVE("Ore aggiuntive", 13, DefaultTab.ALTRI_CODICI), 
   PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO("Permesso motivi privati non retribuito", 
-      13,DefaultTab.ALTRI_CODICI), 
+      13, DefaultTab.ALTRI_CODICI), 
   PERMESSO_MOTIVI_PRIVATI_NON_RETIBUITO_TD("Permesso motivi privati non retribuito t.d.", 
       13, DefaultTab.ALTRI_CODICI),
 

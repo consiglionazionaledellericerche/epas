@@ -8,7 +8,6 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
-import lombok.extern.slf4j.Slf4j;
 import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;

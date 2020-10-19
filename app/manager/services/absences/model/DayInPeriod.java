@@ -297,7 +297,7 @@ public class DayInPeriod {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0 giorni";// giorno lavorativo";
+        return "0 giorni"; // giorno lavorativo";
       }
       int units = amount / 100;
       int percent = amount % 100;

@@ -173,7 +173,8 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
@@ -191,9 +192,10 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(),Optional.absent(), 
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
     return results.size();
@@ -210,10 +212,31 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(),Optional.absent(), 
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie anno passato
+   * post deadline da approvare nel template.
+   * @return la quantità di richieste ferie anno passato post deadline da approvare.
+   */
+  public final int vacationPastYearAfterDeadlineRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
 
     return results.size();
   }
@@ -632,7 +655,7 @@ public class TemplateUtility {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0 giorni";// giorno lavorativo";
+        return "0 giorni"; // giorno lavorativo";
       }
       int units = amount / 100;
       int percent = amount % 100;

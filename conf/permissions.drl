@@ -501,6 +501,7 @@ when
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
@@ -630,11 +631,13 @@ when
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
 			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
@@ -670,11 +673,13 @@ when
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
 			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show"
 			
@@ -1099,11 +1104,13 @@ when
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
 		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.officeHeadApproval",
 		"AbsenceRequests.show",
 		"AbsenceRequests.approval",
@@ -1132,11 +1139,13 @@ when
 		"AbsenceRequests.vacationsToApprove",
 		"AbsenceRequests.compensatoryRestsToApprove",
 		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show"
 
         ), target == $o, granted == false)
@@ -1187,6 +1196,7 @@ when
  		"AbsenceRequests.compensatoryRestsToApprove",
  		"AbsenceRequests.listToApprove",
  		"AbsenceRequests.permissionsToApprove",
+ 		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
  		
 
         /* Vecchio permesso viewPerson */
@@ -1531,7 +1541,13 @@ when
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+        
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
         ), target == null, granted == false)
 then
@@ -1669,7 +1685,13 @@ when
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
        ), target == $o, granted == false)
 then
@@ -1791,7 +1813,20 @@ when
      	"rest.v2.Persons.create",
      	"rest.v2.Persons.update",
      	"rest.v2.Persons.delete",
-     	"rest.v2.Persons.list"
+     	"rest.v2.Persons.list",
+
+     	"rest.v2.Groups.show",
+     	"rest.v2.Groups.create",
+     	"rest.v2.Groups.update",
+     	"rest.v2.Groups.delete",
+     	"rest.v2.Groups.list",
+     	
+     	"rest.v2.Affiliations.show",
+     	"rest.v2.Affiliations.create",
+     	"rest.v2.Affiliations.update",
+     	"rest.v2.Affiliations.delete",
+     	"rest.v2.Affiliations.byGroup",
+     	"rest.v2.Affiliations.byPerson"
      	
      	), target == null, granted == false)
 then
@@ -1864,8 +1899,21 @@ when
      	"rest.v2.Persons.create",
      	"rest.v2.Persons.update",
      	"rest.v2.Persons.delete",
-     	"rest.v2.Persons.list"
+     	"rest.v2.Persons.list",
+
+     	"rest.v2.Groups.show",
+     	"rest.v2.Groups.create",
+     	"rest.v2.Groups.update",
+     	"rest.v2.Groups.delete",
+     	"rest.v2.Groups.list",
      	
+     	"rest.v2.Affiliations.show",
+     	"rest.v2.Affiliations.create",
+     	"rest.v2.Affiliations.update",
+     	"rest.v2.Affiliations.delete",
+     	"rest.v2.Affiliations.byGroup",
+     	"rest.v2.Affiliations.byPerson"
+
      	), target == $o, granted == false)
 then
  $c.grant();
@@ -2628,6 +2676,20 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per l'abilitazione alla visualizzazione delle richieste di ferie anno passato dopo il 31/8
+ */
+rule isVacationPastYearFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
 then
   $c.grant();
 end

@@ -125,7 +125,7 @@ public class TeleworkComunication {
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.setParameter("personDayId", personDayId);
     try {
-       httpResponse = wsRequest.get();  
+      httpResponse = wsRequest.get();  
     } catch (Exception ex) {
       log.warn("Applicazione telework-stamping non risponde.");
       return Lists.newArrayList();
