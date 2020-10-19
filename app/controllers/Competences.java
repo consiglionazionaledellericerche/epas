@@ -971,8 +971,10 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+    //TODO: caricare la lista delle competenze mensili
+    List<MonthlyCompetenceType> types = Lists.newArrayList();
 
-    render(type, officePeople, office);
+    render(type, officePeople, office, types);
   }
 
 
