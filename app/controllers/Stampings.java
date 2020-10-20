@@ -2,9 +2,10 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 
-import com.beust.jcommander.Strings;
+//import com.beust.jcommander.Strings;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
@@ -30,8 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
@@ -56,6 +57,7 @@ import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -324,7 +326,7 @@ public class Stampings extends Controller {
     final User currentUser = Security.getUser().get();
     String result = stampingManager
         .persistStamping(stamping, date, time, person, currentUser, newInsert);
-    if (!Strings.isStringEmpty(result)) {
+    if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
       flash.success(Web.msgSaved(Stampings.class));
@@ -356,13 +358,15 @@ public class Stampings extends Controller {
     if (stamping.way == null) {
       Validation.addError("stamping.way", "Obbligatorio");
     }
-    if (Strings.isStringEmpty(stamping.reason)) {
+    if (Strings.isNullOrEmpty(stamping.reason)) {
       Validation.addError("stamping.reason", "Obbligatorio");
     }
-    if (Strings.isStringEmpty(stamping.place)) {
+    if (Strings.isNullOrEmpty(stamping.place)) {
       Validation.addError("stamping.place", "Obbligatorio");
     }
-    if (Validation.hasErrors()) {
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    val validationResult = validation.valid(stamping);
+    if (!validationResult.ok) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
@@ -376,9 +380,7 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
-        
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-
+    
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
@@ -398,7 +400,7 @@ public class Stampings extends Controller {
     
     String result = stampingManager
         .persistStamping(stamping, date, time, person, currentUser, newInsert);
-    if (!Strings.isStringEmpty(result)) {
+    if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
       flash.success(Web.msgSaved(Stampings.class));
