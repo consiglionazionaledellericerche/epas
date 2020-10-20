@@ -17,7 +17,10 @@ import models.enumerate.StampTypes;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
+import helpers.validators.StringIsTime;
+import helpers.validators.StringIsValid;
 import play.data.binding.As;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
 
@@ -57,10 +60,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @As(binder = NullStringBinder.class)
   public String note;
   
-  @As(binder = NullStringBinder.class)
+  //@As(binder = NullStringBinder.class)
+  @CheckWith(StringIsValid.class)
   public String place;
   
   @As(binder = NullStringBinder.class)
+  //@CheckWith(StringIsValid.class)
   public String reason;
 
   /**
