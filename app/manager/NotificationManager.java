@@ -20,6 +20,7 @@ import models.PersonReperibilityType;
 import models.Role;
 import models.ShiftCategories;
 import models.Stamping;
+import models.Stamping.WayType;
 import models.User;
 import models.absences.Absence;
 import models.absences.GroupAbsenceType;
@@ -93,7 +94,8 @@ public class NotificationManager {
     final Person person = stamping.personDay.person;
     final String template;
     if (Crud.CREATE == operation) {
-      template = "%s ha inserito una nuova timbratura: %s";
+      template = "%s ha inserito una nuova timbratura: %s di tipo %s "
+          + "nel luogo %s con motivazione %s";
     } else if (Crud.UPDATE == operation) {
       template = "%s ha modificato una timbratura: %s";
     } else if (Crud.DELETE == operation) {
@@ -101,7 +103,14 @@ public class NotificationManager {
     } else {
       template = null;
     }
-    final String message = String.format(template, person.fullName(), stamping.date.toString(DTF));
+    String verso = "";
+    if (stamping.way.equals(WayType.in)) {
+      verso = "ingresso";
+    } else {
+      verso = "uscita";
+    }
+    final String message = String.format(template, person.fullName(), stamping.date.toString(DTF), 
+        verso, stamping.place, stamping.reason);
 
     person.office.usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
