@@ -60,12 +60,12 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @As(binder = NullStringBinder.class)
   public String note;
   
-  //@As(binder = NullStringBinder.class)
+  @As(binder = NullStringBinder.class)
   @CheckWith(StringIsValid.class)
   public String place;
   
   @As(binder = NullStringBinder.class)
-  //@CheckWith(StringIsValid.class)
+  @CheckWith(StringIsValid.class)
   public String reason;
 
   /**

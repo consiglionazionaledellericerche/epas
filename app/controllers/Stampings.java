@@ -287,7 +287,7 @@ public class Stampings extends Controller {
    * @param stamping timbratura
    * @param time     orario
    */
-  public static void save(Long personId, @Required LocalDate date, @Required @Valid Stamping stamping,
+  public static void save(Long personId, @Required LocalDate date, @Required Stamping stamping,
       @Required @CheckWith(StringIsTime.class) String time) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
@@ -364,7 +364,9 @@ public class Stampings extends Controller {
     if (Strings.isNullOrEmpty(stamping.place)) {
       Validation.addError("stamping.place", "Obbligatorio");
     }
-    if (Validation.hasErrors()) {
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    val validationResult = validation.valid(stamping);
+    if (!validationResult.ok) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
@@ -378,9 +380,7 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
-        
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-
+    
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
