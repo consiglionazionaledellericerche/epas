@@ -28,6 +28,7 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.i18n.Messages;
@@ -368,4 +369,5 @@ public class StampingManager {
     return person;
   }
 
+  
 }
