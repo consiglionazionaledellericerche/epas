@@ -1,11 +1,14 @@
-package cnr.sync.dto.v2;
+package cnr.sync.dto.v3;
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDate;
+import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.enumerate.StampTypes;
+import org.modelmapper.ModelMapper;
 
 /**
  * DTO per l'esportazione via REST delle informazioni 
@@ -16,11 +19,11 @@ import models.enumerate.StampTypes;
  *
  */
 @ToString
-@Builder
 @Data
-public class StampingDto {
+public class StampingShowTerseDto {
 
-  private String date;
+  private Long id;
+  private LocalDate date;
   private WayType way;
   private StampTypes stampType;
   private String place;
@@ -29,19 +32,15 @@ public class StampingDto {
   private boolean markedByEmployee;
   private String note;
 
+  @JsonIgnore
+  @Inject
+  static ModelMapper modelMapper;
+  
   /**
-   * Nuova instanza di un StampingDto contenente i valori 
+   * Nuova instanza di un StampingShowTerseDto contenente i valori 
    * dell'oggetto stamping passato.
    */
-  public static StampingDto build(Stamping stamping) {
-    return StampingDto.builder()
-        .date(stamping.date.toString())
-        .way(stamping.way)
-        .place(stamping.place)
-        .reason(stamping.reason)
-        .markedByAdmin(stamping.markedByAdmin)
-        .markedByEmployee(stamping.markedByAdmin)
-        .note(stamping.note)        
-        .build();
+  public static StampingShowTerseDto build(Stamping stamping) {
+    return modelMapper.map(stamping, StampingShowTerseDto.class);    
   }
 }
