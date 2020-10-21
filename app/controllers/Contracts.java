@@ -18,9 +18,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -40,14 +38,11 @@ import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.absences.definitions.DefaultAbsenceType;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -158,7 +153,7 @@ public class Contracts extends Controller {
 
     if (!DateUtility.isDateIntoInterval(dateToSplit, 
         new DateInterval(contract.beginDate, contract.calculatedEnd()))) {
-      validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
+      Validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
     }
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -183,9 +178,7 @@ public class Contracts extends Controller {
     }
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
     log.debug("Rimosse {} assenze per {}", count, contract.person.getFullname());
-    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
 
     //2) si splitta il contratto in due contratti nuovi
     log.info("Inizio procedura di split del contratto {}", contract.toString());
@@ -208,6 +201,9 @@ public class Contracts extends Controller {
 
     //3) creo il nuovo contratto a partire da dateToSplit
     log.info("Creazione nuovo contratto");
+    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.person);
+    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
+
     Contract newContract = contractService.createNewContract(wrappedPerson.getValue(),
         dateToSplit, wtt, previousInterval);
     contractManager.properContractCreate(newContract, wtt, true);
@@ -320,94 +316,40 @@ public class Contracts extends Controller {
    * Aggiornamento date e on certificate contratto.
    *
    * @param contract      contract
-   * @param beginDate     inizio
-   * @param endDate       scadenza
-   * @param endContract   terminazione
-   * @param onCertificate in attestati
    * @param confirmed     step di conferma
    */
-  public static void update(@Valid Contract contract, @Required LocalDate beginDate,
-      @Valid LocalDate endDate, @Valid LocalDate endContract,
-      boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing,
-      String perseoId, LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
+  public static void update(@Valid Contract contract, 
+      boolean confirmed, Boolean isTemporaryMissing,
+      LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-
-    if (!Validation.hasErrors()) {
-      if (contract.sourceDateResidual != null
-          && contract.sourceDateResidual.isBefore(beginDate)) {
-        Validation.addError("beginDate",
-            "non può essere successiva alla data di inizializzazione");
-      }
-      if (endDate != null && endDate.isBefore(beginDate)) {
-        Validation.addError("endDate", "non può precedere l'inizio del contratto.");
-      }
-      if (endContract != null && endContract.isBefore(beginDate)) {
-        Validation.addError("endContract", "non può precedere l'inizio del contratto.");
-      }
-      if (endDate != null && endContract != null && endContract.isAfter(endDate)) {
-        Validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
-      }
-    }
-
+    
     if (Validation.hasErrors()) {
+      log.info("ValidationErrors = {}", validation.errorsMap());
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate, perseoId, sourceDateRecoveryDay);
+      render("@edit", contract, wrappedContract, sourceDateRecoveryDay);
     }
 
     // Salvo la situazione precedente
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-    contract.beginDate = beginDate;
-    contract.endDate = endDate;
-    contract.endContract = endContract;
-    contract.onCertificate = onCertificate;
-    contract.perseoId = perseoId;
     contract.sourceDateRecoveryDay = sourceDateRecoveryDay;
     if (isTemporaryMissing != null) {
       contract.isTemporaryMissing = isTemporaryMissing;  
     }
-    //Controllo se il contratto deve essere linkato al precedente...
-    if (linkedToPreviousContract) {
-      if (contract.getPreviousContract() == null) {
-        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
-        Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
-        if (previousContract.isPresent()) {
-          contract.setPreviousContract(previousContract.get());          
-          if (confirmed 
-              && contract.beginDate.minusDays(1).isEqual(previousContract.get().endDate)) {
-            contractManager.mergeVacationPeriods(contract, previousContract.get());
-          }
-          
-        } else {
-          Validation.addError("linkedToPreviousContract", 
-              "Non esiste alcun contratto precedente cui linkare il contratto attuale");
-          render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-              onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
-        }
-      }    
-    } else {
-      Contract temp = contract.getPreviousContract();
-      if (temp != null) {        
-        contract.setPreviousContract(null);
-        
-        if (confirmed && contract.beginDate.minusDays(1).isEqual(temp.endDate)) {
-          //contract.save();
-          contractManager.splitVacationPeriods(contract);
-        }         
-      }
+    //Controllo se il contratto deve e può essere linkato al precedente...
+    if (linkedToPreviousContract && !contractManager.canAppyPreviousContractLink(contract)) {
+      Validation.addError("linkedToPreviousContract", 
+          "Non esiste alcun contratto precedente cui linkare il contratto attuale");
+      render("@edit", contract, wrappedContract,
+          sourceDateRecoveryDay, linkedToPreviousContract);
     }
-
-    if (!contractManager.isContractNotOverlapping(contract)) {
-      Validation.addError("contract.crossValidationFailed",
-          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate, perseoId, sourceDateRecoveryDay, linkedToPreviousContract);
+    if (confirmed) {
+      contractManager.applyPreviousContractLink(contract, linkedToPreviousContract);
     }
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -418,8 +360,8 @@ public class Contracts extends Controller {
     if (!confirmed) {
       confirmed = true;
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-          onCertificate, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay, 
+      render("@edit", contract, wrappedContract, 
+          confirmed, isTemporaryMissing, recomputeRecap, sourceDateRecoveryDay, 
           linkedToPreviousContract);
     } else {
       if (recomputeRecap.recomputeFrom != null) {
@@ -465,14 +407,8 @@ public class Contracts extends Controller {
 
     rules.checkIfPermitted(contract.person.office);
 
-
     if (!Validation.hasErrors()) {
-
-      if (contract.endDate != null
-          && contract.endDate.isBefore(contract.beginDate)) {
-        Validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
-
-      } else if (!contractManager.properContractCreate(contract, Optional.of(wtt), true)) {
+      if (!contractManager.properContractCreate(contract, Optional.of(wtt), true)) {
         Validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
         if (contract.endDate != null) {
           Validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");

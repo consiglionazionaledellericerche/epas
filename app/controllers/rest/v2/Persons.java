@@ -6,10 +6,10 @@ import cnr.sync.dto.v2.PersonUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
-import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.PersonDao;
 import helpers.JsonResponse;
 import java.io.IOException;
@@ -46,6 +46,7 @@ public class Persons extends Controller {
    */
   @BasicAuth
   public static void list(Long id, String code, String codeId) {
+    RestUtil.checkMethod(request, HttpMethod.GET);
     val office = Offices.getOfficeFromRequest(id, code, codeId);
     rules.checkIfPermitted(office);
     
@@ -58,10 +59,9 @@ public class Persons extends Controller {
    * Restituisce il JSON con i dati della persona individuata con i parametri
    * passati. 
    */
-  @BasicAuth
   public static void show(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-
+    RestUtil.checkMethod(request, HttpMethod.GET);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
     rules.checkIfPermitted(person.office);
@@ -77,7 +77,7 @@ public class Persons extends Controller {
   @BasicAuth
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    Verify.verify(request.method.equalsIgnoreCase("POST"));
+    RestUtil.checkMethod(request, HttpMethod.POST);
 
     log.debug("Create person -> request.body = {}", body);
 
@@ -114,7 +114,7 @@ public class Persons extends Controller {
   public static void update(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
       String body) throws JsonParseException, JsonMappingException, IOException {
-    Verify.verify(request.method.equalsIgnoreCase("PUT"));
+    RestUtil.checkMethod(request, HttpMethod.PUT);
 
     log.debug("Update person -> request.body = {}", body);
 
@@ -156,7 +156,7 @@ public class Persons extends Controller {
   @BasicAuth
   public static void delete(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-    Verify.verify(request.method.equalsIgnoreCase("DELETE"));
+    RestUtil.checkMethod(request, HttpMethod.DELETE);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
     

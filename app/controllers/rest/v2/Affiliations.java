@@ -5,9 +5,9 @@ import cnr.sync.dto.v2.AffiliationShowDto;
 import cnr.sync.dto.v2.AffiliationUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.common.base.Verify;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
+import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.AffiliationDao;
 import dao.GroupDao;
 import helpers.JsonResponse;
@@ -17,8 +17,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import models.flows.Affiliation;
 import org.testng.collections.Lists;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 import security.SecurityRules;
 
@@ -48,6 +50,7 @@ public class Affiliations extends Controller {
    *     questo momento, se false (il default) le include tutte.
    */
   public static void byGroup(Long id, boolean includeInactive) {
+    RestUtil.checkMethod(request, HttpMethod.GET);
     if (id == null) {
       JsonResponse.notFound();
     }
@@ -80,6 +83,7 @@ public class Affiliations extends Controller {
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
       String fiscalCode, boolean includeInactive) {
+    RestUtil.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
 
@@ -101,14 +105,8 @@ public class Affiliations extends Controller {
    * Restituisce il JSON con l'affiliazione cercata per id. 
    */
   public static void show(Long id) {
-    if (id == null) {
-      JsonResponse.notFound();
-    }
-    val affiliation = affiliationDao.byId(id).orElse(null);
-    if (affiliation == null) {
-      JsonResponse.notFound();
-    }
-    rules.checkIfPermitted(affiliation.getGroup().getOffice());
+    RestUtil.checkMethod(request, HttpMethod.GET);
+    val affiliation = getAffiliationFromRequest(id);
     renderJSON(gsonBuilder.create().toJson(AffiliationShowDto.build(affiliation)));
   }
 
@@ -118,7 +116,7 @@ public class Affiliations extends Controller {
    */
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    Verify.verify(request.method.equalsIgnoreCase("POST"));
+    RestUtil.checkMethod(request, HttpMethod.POST);
     log.debug("Create affiliation -> request.body = {}", body);
     if (body == null) {
       JsonResponse.badRequest();
@@ -154,15 +152,9 @@ public class Affiliations extends Controller {
    */
   public static void update(Long id, String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    Verify.verify(request.method.equalsIgnoreCase("PUT"));
-    if (id == null) {
-      JsonResponse.notFound();
-    }
+    RestUtil.checkMethod(request, HttpMethod.PUT);
     log.debug("Update affiliation -> request.body = {}", body);
-    val affiliation = affiliationDao.byId(id).orElse(null);
-    if (affiliation == null) {
-      JsonResponse.notFound();
-    }
+    val affiliation = getAffiliationFromRequest(id);
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
@@ -200,18 +192,37 @@ public class Affiliations extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void delete(Long id) {
-    Verify.verify(request.method.equalsIgnoreCase("DELETE"));
-    if (id == null) {
-      JsonResponse.notFound();
-    }
-    val affiliation = affiliationDao.byId(id).orElse(null);
-    if (affiliation == null) {
-      JsonResponse.notFound();
-    }    
-    rules.checkIfPermitted(affiliation.getGroup().getOffice());
+    RestUtil.checkMethod(request, HttpMethod.DELETE);
+    val affiliation = getAffiliationFromRequest(id);
 
     affiliation.delete();
     log.info("Deleted affiliation {} via REST", affiliation);
     JsonResponse.ok();
+  }
+  
+  /**
+   * Cerca l'affiliazione in funzione del id passato.
+   * 
+   * @return l'l'affiliazione se trovata, altrimenti torna direttamente 
+   *     una risposta HTTP 404.
+   * 
+   */
+  @Util
+  private static Affiliation getAffiliationFromRequest(Long id) {
+    if (id == null) {
+      JsonResponse.notFound();
+    }
+
+    val affiliation = affiliationDao.byId(id).orElse(null);
+
+    if (affiliation == null) {
+      JsonResponse.notFound();
+    }    
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione anagrafica sull'office attuale 
+    //del gruppo a cui appartiene l'affiliazione
+    rules.checkIfPermitted(affiliation.getGroup().getOffice());
+    return affiliation;
   }
 }
