@@ -1466,7 +1466,6 @@ public class Competences extends Controller {
 
     }
     type.shiftCategories = cat;
-    //type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
     type.save();
 
@@ -1517,9 +1516,8 @@ public class Competences extends Controller {
     List<PersonReperibility> personAssociated = 
         reperibilityDao.byOffice(type.office, LocalDate.now());
 
-    List<CompetenceCode> codeList = Lists.newArrayList();
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
+    List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
+
     List<Person> available = competenceCodeDao
         .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
         .stream().filter(e -> (personAssociated.stream()

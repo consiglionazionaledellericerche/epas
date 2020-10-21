@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -29,13 +30,20 @@ public class MonthlyCompetenceType extends BaseModel {
   @Required
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "workdays_code", nullable = false)
-  public CompetenceCode workdaysCode;
-  
+  public CompetenceCode workdaysCode;  
   
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "holidays_code", nullable = false)
   public CompetenceCode holidaysCode;
+  
+  @Transient
+  public List<CompetenceCode> getCodesForActivity() {
+    List<CompetenceCode> list = Lists.newArrayList();
+    list.add(workdaysCode);
+    list.add(holidaysCode);
+    return list;
+  }
   
   @Override
   public String toString() {
