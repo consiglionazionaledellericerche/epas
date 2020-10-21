@@ -258,7 +258,7 @@ when
   
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -280,7 +280,7 @@ rule reperibilitySupervisorCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -337,7 +337,7 @@ rule isReperibilityManager_generic
 when 
   $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person	
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -356,7 +356,7 @@ rule reperibilityManagerCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -432,7 +432,7 @@ when
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person (reperibility != null) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
@@ -446,7 +446,7 @@ rule isAvailable_personReperibilityType
 when
 	$p: Person (reperibility != null) from currentOperator.person
 	$o: Office() from $p.office
-  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
 	$c: PermissionCheck(action in (
