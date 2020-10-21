@@ -11,7 +11,7 @@
 #{/set}
 
 <!-- Switcher delle attività di turno-->
-#{title title:'Calendario reperibilità' /}
+#{title title:'Calendario ' + reperibilitySelected.monthlyCompetenceType.name /}
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3">
         #{form action:@ReperibilityCalendar.show(), method:'POST', class:'form form-horizontal',
