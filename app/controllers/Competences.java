@@ -12,6 +12,7 @@ import com.google.common.collect.Table;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.MonthlyCompetenceTypeDao;
 import dao.OfficeDao;
 import dao.OrganizationShiftTimeTableDao;
 import dao.PersonDao;
@@ -126,6 +127,8 @@ public class Competences extends Controller {
   private static ShiftOrganizationManager shiftOrganizationManager;
   @Inject
   private static OrganizationShiftTimeTableDao shiftTimeTableDao;
+  @Inject
+  private static MonthlyCompetenceTypeDao monthlyDao;
 
 
   /**
@@ -972,7 +975,7 @@ public class Competences extends Controller {
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     //TODO: caricare la lista delle competenze mensili
-    List<MonthlyCompetenceType> types = Lists.newArrayList();
+    List<MonthlyCompetenceType> types = monthlyDao.listTypes();
 
     render(type, officePeople, office, types);
   }
