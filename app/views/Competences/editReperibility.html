@@ -16,7 +16,7 @@ title:(Action + ' servizio giornaliero')}
   #{/if}
   
   #{f.view 'type.office', value:office /}
-  #{f.selectModel 'monthlyCompetenceType', items: types, required:true /}
+  #{f.selectModel 'type.monthlyCompetenceType', items: types, required:true /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
   #{f.selectMultipleModel 'type.managers', values: officePeople /}
 	#{secure.check 'Competences.saveReperibility'}

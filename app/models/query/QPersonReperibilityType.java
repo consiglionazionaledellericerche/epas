@@ -49,6 +49,8 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public final QPerson supervisor;
 
+    public final QMonthlyCompetenceType type;
+
     //inherited
     public final NumberPath<Integer> version = _super.version;
 
@@ -72,6 +74,7 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
         super(type, metadata, inits);
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
+        this.type = inits.isInitialized("type") ? new QMonthlyCompetenceType(forProperty("type"), inits.get("type")) : null;
     }
 
 }

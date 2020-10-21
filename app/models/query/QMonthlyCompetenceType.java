@@ -39,6 +39,8 @@ public class QMonthlyCompetenceType extends EntityPathBase<MonthlyCompetenceType
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> personReperibilityTypes = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("personReperibilityTypes", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Integer> version = _super.version;
 
