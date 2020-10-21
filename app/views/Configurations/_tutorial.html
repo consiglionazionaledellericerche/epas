@@ -11,9 +11,14 @@
     #{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_CALENDARSHIFT) }
-      <p>Impostando a sì questo parametro si potranno abilitare il calendario per la gestione dei turni ai supervisori e ai gestori di turno,
-       e il calendario per la gestione delle reperibilità ai supervisori e ai gestori di reperibilità.<br>
-       Anche i turnisti e i reperibili potranno verificare la propria situazione di turno e di reperibilità attraverso una propria schermata.
+      <p>Impostando a sì questo parametro si potranno abilitare il calendario per la gestione dei turni ai supervisori e ai gestori di turno.<br>
+       Anche i turnisti potranno verificare la propria situazione di turno attraverso una propria schermata.
+      </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_CALENDAR_REPERIBILITY) }
+      <p>Impostando a sì questo parametro si potranno abilitare il calendario per la gestione delle reperibilità ai supervisori e ai gestori di reperibilità.<br>
+       Anche i reperibili potranno verificare la propria situazione di reperibilità attraverso una propria schermata.
       </p> 
     #{/if}
     

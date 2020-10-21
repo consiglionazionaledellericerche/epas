@@ -40,6 +40,14 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  ENABLE_CALENDAR_REPERIBILITY("enable_calendar_reperibility",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   ENABLE_MISSIONS_INTEGRATION("enable_mission_integration",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
