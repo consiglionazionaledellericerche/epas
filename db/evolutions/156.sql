@@ -20,6 +20,10 @@ CREATE TABLE monthly_competence_type_history(
 
 CREATE INDEX monthly_competence_type_history_id ON monthly_competence_type_history(id);
 
+ALTER TABLE person_reperibility_types ADD COLUMN monthly_competence_type_id BIGINT;
+ALTER TABLE person_reperibility_types_history ADD COLUMN monthly_competence_type_id BIGINT;
+ALTER TABLE person_reperibility_types ADD FOREIGN KEY (monthly_competence_type_id) REFERENCES monthly_competence_type(id);
+
 # --- !Downs
 
 DROP TABLE monthly_competence_type_history;
