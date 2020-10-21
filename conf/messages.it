@@ -632,7 +632,8 @@ type.allowUnpairSlots =Permetti disparità tra gli slot di turno
 considerEverySlot =Permetti assegnamento turno con tutti slot popolati
 type.office =Sede
 type.supervisor =Responsabile servizio
-type.managers =Gestori reperibilità
+type.managers =Gestori servizio mensile
+type.monthlyCompetenceType =Tipologia competenza mensile
 
 timeTable.startMorning =inizio turno
 timeTable.endMorning =fine turno
