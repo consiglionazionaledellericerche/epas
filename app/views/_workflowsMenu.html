@@ -26,6 +26,14 @@
 
     *{ items }*
     <ul class="dropdown-menu">
+    
+      #{secure.check 'CompetenceRequests.enabled'}
+      #{secure.li @CompetenceRequests.overtimes()}
+        <i class="fa fa-money" aria-hidden="true"></i>
+      #{/secure.li}
+      #{/secure.check}
+    
+      <li class="divider"></li>
 
       #{secure.li @AbsenceRequests.vacations()}
         <i class="fa fa-plane" aria-hidden="true"></i>
@@ -42,6 +50,18 @@
       #{secure.check 'AbsenceRequests.pastYearEnabled'}
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      #{/secure.li}
+      #{/secure.check}
+      
+      <li class="divider"></li>
+      
+      
+      #{secure.check 'CompetenceRequests.handleEnabled'}
+      #{secure.li @CompetenceRequests.overtimesToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+       	#{if templateUtility.overtimeRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
+    	#{/if} 
       #{/secure.li}
       #{/secure.check}
       
