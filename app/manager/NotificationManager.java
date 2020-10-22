@@ -907,10 +907,10 @@ public class NotificationManager {
         .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
     if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
-      List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+      List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent(), Optional.absent());
       for (User user : users) {
         for (Group group : groups) {
-          if (group.manager.equals(user.person) && group.people.contains(person)) {
+          if (group.manager.equals(user.person) && group.getPeople().contains(person)) {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
           }
@@ -1027,7 +1027,7 @@ public class NotificationManager {
       .subject(NotificationSubject.COMPETENCE, competence.id).create();
     });
 
-    sendEmailAbsenceRequestConfirmation(absenceRequest);
+    //sendEmailAbsenceRequestConfirmation(absenceRequest);
 
   }
 

@@ -117,7 +117,7 @@ public class CompetenceRequestDao extends DaoBase {
           .and(person.office.eq(signer.office));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          .join(person.groups, group)
+          //.join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
     } else {
       query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
@@ -193,7 +193,7 @@ public class CompetenceRequestDao extends DaoBase {
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          .join(person.groups, group)
+          //.join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions))
           .fetch();
       results.addAll(queryResults);
@@ -232,7 +232,7 @@ public class CompetenceRequestDao extends DaoBase {
           .and(person.office.in(officeList));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          .join(person.groups, group)
+          //.join(person.groups, group)
           .where(group.manager.eq(signer).and(conditions));
     } else {
       query = getQueryFactory()

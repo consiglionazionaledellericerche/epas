@@ -68,6 +68,7 @@ import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 
@@ -254,7 +255,7 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.absent());
     List<CompetenceRequest> results = competenceRequestDao
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 

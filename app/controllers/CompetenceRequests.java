@@ -122,7 +122,7 @@ public class CompetenceRequests extends Controller{
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}",
         type, fromDate);
-    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
+    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent(), Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
