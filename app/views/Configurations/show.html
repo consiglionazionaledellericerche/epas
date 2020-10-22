@@ -20,6 +20,10 @@
     if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.FLOWS)) {
       flowsActive = true;
     }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.COMPETENCE_FLOWS)) {
+      flowsActive = true;
+    }
+    
   }%
   
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
@@ -234,6 +238,56 @@
         <th>Al</th>
       </tr>
       #{list flows.findAll({!it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+        <td>${conf.beginDate.format()}</td>
+        <td>${conf.calculatedEnd()?.format()}</td>
+      </tr>
+      #{/list}
+    </table>
+  </div>
+  #{/tabContentItem}
+  #{/if}
+  
+  #{if templateUtility.isFlowsActive()}
+  	#{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta straordinari', active:flowsActive /}
+  #{/if}
+  
+  #{if templateUtility.isFlowsActive()}	
+  #{tabContentItem id:'COMPETENCE_FLOWS', active:flowsActive}
+  <div id="editFlows">
+    #{alert color:'info'}
+    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di richiesta straordinari per la sede
+      <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+    #{/alert}
+
+    <table class="table">
+      <tr>
+        <th>Attivazione</th>
+        <th>Valore</th>
+      </tr>
+      #{list competence_flows.findAll({it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/list}
+    </table>
+
+
+    <table class="table">
+      <tr>
+        <th>Parametri specifici</th>
+        <th>Valore</th>
+        <th>Dal</th>
+        <th>Al</th>
+      </tr>
+      #{list competence_flows.findAll({!it.epasParam.general}), as:'conf'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
