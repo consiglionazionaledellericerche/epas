@@ -3,32 +3,24 @@ package manager.services.mealtickets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
-import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.List;
+import javax.inject.Inject;
 import manager.ConsistencyManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 /**
  * Implementazione di produzione del servizio meal tickets.

@@ -1,22 +1,12 @@
 package manager;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
+import controllers.Security;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonDayDao;
@@ -26,11 +16,15 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
@@ -41,10 +35,18 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
+import play.db.jpa.JPA;
 import play.libs.Mail;
+import security.SecurityRules;
 
 
 /**
@@ -69,6 +71,8 @@ public class AbsenceManager {
   private final IWrapperFactory wrapperFactory;
   private final PersonDayManager personDayManager;
   private final AbsenceComponentDao absenceComponentDao;
+  private final NotificationManager notificationManager;
+  private final SecurityRules rules;
 
   /**
    * Costruttore.
@@ -99,7 +103,9 @@ public class AbsenceManager {
       ConsistencyManager consistencyManager,
       ConfigurationManager configurationManager,
       PersonDayManager personDayManager,
-      IWrapperFactory wrapperFactory) {
+      IWrapperFactory wrapperFactory,
+      NotificationManager notificationManager,
+      SecurityRules rules) {
 
     this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
@@ -114,8 +120,54 @@ public class AbsenceManager {
     this.consistencyManager = consistencyManager;
     this.wrapperFactory = wrapperFactory;
     this.personDayManager = personDayManager;
+    this.notificationManager = notificationManager;
+    this.rules = rules;
   }
 
+  /**
+   * Salva l'assenza.
+   * @param insertReport il report di inserimento assenza
+   * @param person la persona per cui salvare l'assenza
+   * @param from la data da cui salvare
+   * @param recoveryDate se esiste una data entro cui occorre recuperare l'assenza (es.:91CE)
+   * @param justifiedType il tipo di giustificazione
+   * @param groupAbsenceType il gruppo di appartenenza dell'assenza
+   */
+  public void saveAbsences(InsertReport insertReport, Person person, LocalDate from, 
+      LocalDate recoveryDate, JustifiedType justifiedType, GroupAbsenceType groupAbsenceType) {
+    
+    //Persistenza
+    if (!insertReport.absencesToPersist.isEmpty()) {
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager
+            .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
+        absence.personDay = personDay;
+        if (justifiedType.name.equals(JustifiedTypeName.recover_time)) {
+
+          absence = handleRecoveryAbsence(absence, person, recoveryDate);
+        }
+        personDay.absences.add(absence);
+        rules.check("AbsenceGroups.save", absence);
+        absence.save();
+        personDay.save();
+
+        notificationManager.notificationAbsencePolicy(Security.getUser().get(),
+            absence, groupAbsenceType, true, false, false);
+
+      }
+      if (!insertReport.reperibilityShiftDate().isEmpty()) {
+        sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
+        log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
+            person.fullName(), insertReport.reperibilityShiftDate());
+      }
+      log.info("Prima del lancio dei ricalcoli");      
+      JPA.em().flush();
+      log.info("Flush dell'entity manager effettuata");
+      
+      consistencyManager.updatePersonSituation(person.id, from);
+    }
+  }
+  
   /**
    * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data
    * specificata. Se voglio inserire un riposo compensativo per il mese successivo a oggi considero
@@ -243,13 +295,16 @@ public class AbsenceManager {
     Preconditions.checkNotNull(file);
     Preconditions.checkNotNull(mealTicket);
 
-    log.info("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
-            + "mealTicket = {}. Attachment = {}", person.fullName(), absenceType.code,
-        dateFrom, dateTo.or(dateFrom), mealTicket.orNull(), file.orNull());
+    log.debug("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
+            + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", 
+            person.fullName(), absenceType.code, dateFrom, dateTo.or(dateFrom), mealTicket.orNull(),
+            file.orNull(), justifiedMinutes.orNull());
 
     AbsenceInsertReport air = new AbsenceInsertReport();
 
     if (!absenceType.qualifications.contains(person.qualification)) {
+      log.info("codice {} non utilizzabile per {} con qualifica {}", 
+          absenceType, person.getFullname(), person.qualification);
       air.getWarnings().add(AbsencesResponse.CODICE_NON_UTILIZZABILE);
       return air;
     }
@@ -324,7 +379,6 @@ public class AbsenceManager {
         sendReperibilityShiftEmail(person, air.datesInReperibilityOrShift());
       }
     }
-
     return air;
   }
 

@@ -21,7 +21,6 @@ import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.data.validation.Required;
-import play.db.jpa.JPABase;
 
 @Entity
 @Audited
@@ -35,10 +34,10 @@ public class PersonShiftDay extends BaseModel {
   @Enumerated(EnumType.STRING)
   public ShiftSlot shiftSlot;
   
-//  @Transient
-//  public ShiftSlot getShiftSlot() {
-//    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
-//  }
+  //  @Transient
+  //  public ShiftSlot getShiftSlot() {
+  //    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
+  //}
 
   //@Required
   @ManyToOne
@@ -69,6 +68,10 @@ public class PersonShiftDay extends BaseModel {
   @Column(name = "exceeded_thresholds")
   public int exceededThresholds;
 
+  /**
+   * Controlla l'orario di inizio dello slot.
+   * @return l'orario di inizio dello slot.
+   */
   @Transient
   public LocalTime slotBegin() {
     switch (shiftSlot) {
@@ -83,6 +86,10 @@ public class PersonShiftDay extends BaseModel {
     }
   }
 
+  /**
+   * Controlla l'orario di fine dello slot.
+   * @return l'orario di fine dello slot.
+   */
   @Transient
   public LocalTime slotEnd() {
     switch (shiftSlot) {
@@ -97,6 +104,10 @@ public class PersonShiftDay extends BaseModel {
     }
   }
 
+  /**
+   * Controlla l'inizio della pausa pranzo nel turno.
+   * @return l'inizio della pausa pranzo nel turno.
+   */
   @Transient
   public LocalTime lunchTimeBegin() {
     switch (shiftSlot) {
@@ -111,6 +122,10 @@ public class PersonShiftDay extends BaseModel {
     }
   }
 
+  /**
+   * Controlla la fine della pausa pranzo nel turno.
+   * @return l'orario di fine pausa pranzo nel turno.
+   */
   @Transient
   public LocalTime lunchTimeEnd() {
     switch (shiftSlot) {
@@ -130,23 +145,16 @@ public class PersonShiftDay extends BaseModel {
     return troubles.stream().anyMatch(error -> error.cause == trouble);
   }
 
+  /**
+   * Controlla se ci sono errori nel turno.
+   * @param shiftTroubles la collezione di errori sul turno
+   * @return true se ci sono errori sul turno, false altrimenti.
+   */
   @Transient
   public boolean hasOneOfErrors(Collection<ShiftTroubles> shiftTroubles) {
     return troubles.stream().anyMatch(trouble -> {
       return shiftTroubles.contains(trouble.cause);
     });
-  }
-
-  @Override
-  @Deprecated
-  public <T extends JPABase> T save() {
-    return super.save();
-  }
-  
-  @Override
-  @Deprecated
-  public <T extends JPABase> T delete() {
-    return super.delete();
   }
 
 }

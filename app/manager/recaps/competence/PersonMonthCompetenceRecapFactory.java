@@ -1,13 +1,10 @@
 package manager.recaps.competence;
 
 import com.google.common.base.Optional;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.wrapper.IWrapperFactory;
-
 import javax.inject.Inject;
-
 import models.Contract;
 
 public class PersonMonthCompetenceRecapFactory {

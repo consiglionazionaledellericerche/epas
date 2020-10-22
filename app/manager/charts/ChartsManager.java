@@ -71,6 +71,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -409,6 +410,8 @@ public class ChartsManager {
   }
 
   /**
+   * Genera la mappa matricole-risultati dal file contenente le informazioni su assenze
+   * e date in cui sono state prese.
    * @param file file da parsare per il recupero delle informazioni sulle assenze
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
    *         tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
@@ -490,7 +493,8 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera un file contenente tutte le informazioni sulle ore di lavoro rispetto ai parametri
+   *         passati.
    * @param forAll se si richiede la stampa per tutti
    * @param peopleIds la lista degli id delle persone selezionate per essere esportate
    * @param beginDate la data di inizio
@@ -511,9 +515,9 @@ public class ChartsManager {
       personList = peopleIds.stream().map(item -> personDao.getPersonById(item))
           .collect(Collectors.toList());
     } else {
-      personList = personDao
-          .list(Optional.absent(), offices, false, LocalDate.now(), LocalDate.now(), true)
-          .list();
+      personList = personDao.list(
+          Optional.<String>absent(), offices, false, beginDate, 
+          endDate, true).list();
     }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     ZipOutputStream zos = new ZipOutputStream(out);
@@ -679,7 +683,8 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera  il file contenente la situazione mensile della persona a cui fa riferimento il
+   *         personStampingRecap passato come parametro.
    * @param psDto il personStampingRecap contenente le info sul mese trascorso dalla persona
    * @param file il file in cui caricare le informazioni
    * @return il file contenente la situazione mensile della persona a cui fa riferimento il
@@ -689,9 +694,21 @@ public class ChartsManager {
       boolean onlyMission) {
     try {
       FileOutputStream out = new FileOutputStream(file);
-
-      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_"
-          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
+      Sheet sheet = null;
+      String fullname = "";
+      if (psDto.person.name.contains(" ")) {
+        String[] names = psDto.person.name.split(" ");
+        fullname = psDto.person.surname + " " + names[0];
+      } else {
+        fullname = psDto.person.fullName();
+      }
+      String sheetname = fullname + "_"
+          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year;
+      
+      if (sheetname != null && sheetname.length() > 31) {
+        sheetname = sheetname.substring(0, 31);
+      }
+      sheet = wb.createSheet(sheetname); 
 
       CellStyle cs = createHeader(wb);
       Row row = null;
@@ -803,7 +820,7 @@ public class ChartsManager {
         log.error("problema in chiusura stream");
         ex.printStackTrace();
       }
-    } catch (FileNotFoundException ex) {
+    } catch (IllegalArgumentException | FileNotFoundException ex) {
       log.error("Problema in riconoscimento file");
       ex.printStackTrace();
     }
@@ -811,7 +828,7 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera lo stile delle celle di intestazione.
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -829,7 +846,7 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera lo stile per una cella di giorno di vacanza.
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno di vacanza.
    */
@@ -844,7 +861,7 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera lo stile per una cella di un giorno lavorativo.
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno lavorativo.
    */
@@ -857,7 +874,7 @@ public class ChartsManager {
   }
 
   /**
-   * 
+   * Genera il tempo derivante da timbrature per lavoro fuori sede.
    * @param pd il personday
    * @return il tempo a lavoro derivante dalle timbrature identificate come lavoro fuori sede.
    */

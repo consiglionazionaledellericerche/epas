@@ -1,18 +1,12 @@
 package models;
 
 import helpers.validators.LocalDatePast;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
@@ -39,6 +33,8 @@ public class PersonChildren extends BaseModel {
   @CheckWith(LocalDatePast.class)
   @Required
   public LocalDate bornDate;
+  
+  public String taxCode;
 
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;

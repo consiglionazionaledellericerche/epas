@@ -7,15 +7,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import javax.inject.Inject;
-
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -37,7 +32,6 @@ import manager.YearlyAbsencesManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.recaps.YearlyAbsencesRecap;
-
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -46,16 +40,13 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -376,9 +367,10 @@ public class Absences extends Controller {
     class DateComparator implements Comparator<Absence> {
       @Override
       public int compare(Absence a, Absence b) {
-          return a.personDay.date.compareTo(b.personDay.date);
+        return a.personDay.date.compareTo(b.personDay.date);
       }
     }
+    
     List<Absence> missioni = Lists.newArrayList();
     List<Absence> ferie = Lists.newArrayList();
     List<Absence> riposiCompensativi = Lists.newArrayList();
@@ -472,8 +464,8 @@ public class Absences extends Controller {
   }
 
   /**
-   * @param year Render della pagina absencePerPerson.html che riassume le assenze annuali di una
-   *             persona
+   * Metodo che ritorna le assenze nell'anno per una persona.
+   * @param year l'anno di riferimento
    */
 
   public static void absencesPerPerson(Integer year) {

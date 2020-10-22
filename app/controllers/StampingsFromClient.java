@@ -86,8 +86,11 @@ public class StampingsFromClient extends Controller {
 
 
   /**
-   * Inserimento di assenza con ricalcolo.
+   * Vecchio metodo che permetteva la verifica dell'assenza a partire dal DTO passato.
+   * @deprecated utilizzare rest.Absences.insertAbsence
+   *     Inserimento di assenza con ricalcolo.
    */
+  @Deprecated
   @BasicAuth
   public static void absence(AbsenceFromClient body) {
 
@@ -111,8 +114,12 @@ public class StampingsFromClient extends Controller {
   }
 
   /**
-   * Inserimento di assenza senza ricalcolo.
+   * Vecchio metodo che permetteva l'inserimento dell'assenza a partire dal DTO passato
+   * senza effettuare ricalcoli.
+   * @deprecated utilizzare rest.Absences.insertAbsence
+   *     Inserimento di assenza senza ricalcolo.
    */
+  @Deprecated
   @BasicAuth
   public static void absenceNotRecompute(AbsenceFromClient body) {
 

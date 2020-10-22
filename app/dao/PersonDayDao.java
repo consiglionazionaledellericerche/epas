@@ -8,11 +8,13 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
@@ -21,6 +23,7 @@ import org.joda.time.YearMonth;
 
 
 /**
+ * Il dao dei personDay.
  * @author dario.
  */
 public class PersonDayDao extends DaoBase {
@@ -31,6 +34,7 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il personday relativo all'id passato come parametro.
    * @param personDayId l'id del personday
    * @return il personday relativo all'id passato come parametro.
    */
@@ -45,6 +49,7 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il personday, se esiste, per una persona a una certa data.
    * @param person la persona
    * @param date la data
    * @return un personday se esiste per quella persona in quella data.
@@ -60,8 +65,12 @@ public class PersonDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+
   /**
    * Il primo personDay esistente precedente a date per person.
+   * @param person la persona da cercare
+   * @param date la data da cui cercare indietro
+   * @return Il primo personDay esistente precedente a date per person.
    */
   public PersonDay getPreviousPersonDay(Person person, LocalDate date) {
 
@@ -75,6 +84,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti i personday di una persona.
+   * @param person la persona di cui cercare i personday
    * @return tutti i personDay relativi alla persona person passata come parametro.
    */
   public List<PersonDay> getAllPersonDay(Person person) {
@@ -152,6 +163,7 @@ public class PersonDayDao extends DaoBase {
 
 
   /**
+   * La lista dei personday di una persona tra begin e end.
    * @param person la persona
    * @param begin la data inizio da cui cercare
    * @param end la data fino a cui cercare
@@ -164,6 +176,7 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * La lista dei personday di una persona tra begin e end (opzionale).
    * @param person la persona di cui si vogliono i personday
    * @param begin la data di inizio da cui cercare i personday
    * @param end la data di fine (opzionale)
@@ -222,8 +235,9 @@ public class PersonDayDao extends DaoBase {
 
 
   /**
+   * La lista dei personday di un singolo giorno di una lista di persone.
    * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
-   * lista.
+   *     lista.
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
     final QPersonDay personDay = QPersonDay.personDay;
@@ -233,6 +247,7 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il più vecchio personday presente sul db.
    * @return il personday facente riferimento al giorno più vecchio presente sul db.
    */
   public PersonDay getOldestPersonDay() {
@@ -242,6 +257,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il personday, se esiste, che contiene l'assenza passata come parametro.
+   * @param abs l'assenza di cui si cerca il personday che la conteneva
    * @return il personDay che conteneva l'assenza passata come parametro.
    */
   public Optional<PersonDay> getByAbsence(Absence abs) {
@@ -249,5 +266,26 @@ public class PersonDayDao extends DaoBase {
     final PersonDay result = getQueryFactory().selectFrom(personDay)
         .where(personDay.absences.contains(abs)).fetchOne();
     return Optional.fromNullable(result);
+  }
+  
+  /**
+   * Metodo che ritorna la lista dei giorni di lavoro tra begin e date per i dipendenti della 
+   * sede office.
+   * Usato nel controllers.rest persondays.
+   * @param office la sede per cui si cercano i giorni di lavoro
+   * @param begin la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @return la lista dei giorni di lavoro dei dipendenti della sede office tra begin e date.
+   */
+  public List<PersonDay> getPersonDaysByOfficeInPeriod(Office office, 
+      LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QPerson person = QPerson.person;
+    
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.person, person)
+        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .orderBy(personDay.date.asc()).fetch();
+        
   }
 }

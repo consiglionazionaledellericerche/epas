@@ -13,7 +13,8 @@
   	#{tabList}
   		#{tabItem id:'people', title:'Persone associate', active:true /} 
   		#{tabItem id:'activity', title:'Attività' /} 
-  		#{tabItem id:'timeTable', title:'Orario turno' /} 		 		
+  		#{tabItem id:'timeTable', title:'Orario turno' /} 
+  		#{tabItem id:'delete', title:'Elimina' /}		 		
   	#{/tabList}
   	
   	#{tabContent}
@@ -92,6 +93,9 @@
 			#{f.input 'type.type' /}
 			#{f.input 'type.description' /}
 			#{f.booleanRadio 'type.allowUnpairSlots', popover:true /}
+			#{if type.organizaionShiftTimeTable != null }
+				#{f.booleanRadio 'considerEverySlot', value:type.organizaionShiftTimeTable.considerEverySlot, popover:true /}
+			#{/if}
 			#{/alert}
 			#{alert color: 'danger'}
 			
@@ -160,6 +164,22 @@
 		#{/list}		
 		#{/else}
 		</div>
+	#{/tabContentItem}
+	
+	#{tabContentItem id:'delete'}
+	<br>
+		#{form action:@deleteActivity(), method:'POST', class:'form form-horizontal'}
+		#{alert color: 'danger'}		
+			Eliminare l'attività ${type.type} - ${type.description} ?
+		#{/alert}
+		#{if type.persistent}
+	 			#{f.hidden 'type.id' /}
+		#{/if}
+		
+		  #{b.buttons color:'danger', center:true}
+		  		#{b.submit 'Elimina'/}
+		  #{/b.buttons}
+		#{/form}
 	#{/tabContentItem}
 	
 	#{/tabContent}

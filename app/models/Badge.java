@@ -1,20 +1,15 @@
 package models;
 
 import it.cnr.iit.epas.NullStringBinder;
-
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
 import lombok.EqualsAndHashCode;
-import lombok.val;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
-
 import play.data.binding.As;
 import play.data.validation.Required;
 
@@ -48,6 +43,11 @@ public class Badge extends BaseModel {
   @JoinColumn(name = "badge_system_id")
   public BadgeSystem badgeSystem;
 
+  
+  /**
+   * Assegna code come numero del badge.
+   * @param code il numero del badge
+   */
   public void setCode(String code) {
     try {
       this.code = String.valueOf(Integer.valueOf(code));

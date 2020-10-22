@@ -262,6 +262,7 @@ public class Configurations extends Controller {
   }
 
   /**
+   * Modifica la configurazione.
    * @param configuration    la configurazione da modificare.
    * @param configurationDto l'oggetto contenente la nuova configurazione.
    * @param confirmed        se siamo nel caso della conferma o no.
@@ -346,6 +347,7 @@ public class Configurations extends Controller {
   }
 
   /**
+   * Modifica la configurazione della persona.
    * @param configuration    la configurazione della persona da modificare.
    * @param configurationDto l'oggetto contenente la configurazione nuova.
    * @param confirmed        se siamo nello stato di conferma delle operazioni.
@@ -432,6 +434,10 @@ public class Configurations extends Controller {
     show(officeId, EpasParam.EpasParamCategory.AUTOCERTIFICATION);
   }
 
+  /**
+   * Permette di rimuovere l'allegato all'autocertificazione per le timbrature.
+   * @param attachmentId l'identificativo dell'allegato da rimuovere
+   */
   public static void removeAttachment(Long attachmentId) {
 
     final Attachment attachment = Attachment.findById(attachmentId);
@@ -447,6 +453,10 @@ public class Configurations extends Controller {
     show(officeId, EpasParam.EpasParamCategory.AUTOCERTIFICATION);
   }
 
+  /**
+   * Ritorna l'allegato con identificativo attachmentId.
+   * @param attachmentId l'identificativo dell'allegato da ritornare
+   */
   public static void getAttachment(Long attachmentId) {
 
     final Attachment attachment = Attachment.findById(attachmentId);

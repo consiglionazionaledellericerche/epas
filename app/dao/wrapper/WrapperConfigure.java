@@ -4,9 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import injection.AutoRegister;
 
-/**
- * @author marco.
- */
 @AutoRegister
 public class WrapperConfigure extends AbstractModule {
 
@@ -21,6 +18,7 @@ public class WrapperConfigure extends AbstractModule {
             .implement(IWrapperPersonDay.class, WrapperPersonDay.class)
             .implement(IWrapperContractMonthRecap.class, WrapperContractMonthRecap.class)
             .implement(IWrapperContractWorkingTimeType.class, WrapperContractWorkingTimeType.class)
+            .implement(IWrapperTimeSlot.class, WrapperTimeSlot.class)
             .build(IWrapperFactory.class));
   }
 }

@@ -1,5 +1,6 @@
 package models;
 
+import com.google.common.base.Strings;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,29 +10,29 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import models.base.BaseModel;
+import models.enumerate.PaymentType;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalTime;
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import models.base.BaseModel;
-import models.enumerate.CalculationType;
-import models.enumerate.PaymentType;
-import play.data.validation.Required;
 
 /**
- * 
- * @author dario
  * Nuova gestione degli slot dei turni associati.
+ * @author dario
+ * 
  */
 @Audited
 @Entity
-public class OrganizationShiftSlot extends BaseModel{
+public class OrganizationShiftSlot extends BaseModel {
 
   private static final long serialVersionUID = 2019_10_28_1039L;
   
   
   public String name;
   
+  /**
+   * Ritorna il nome dello slot formato attraverso inizio e fine dell'orario.
+   * @return il nome dello slot.
+   */
   @Transient
   public String getName() {
     if (Strings.isNullOrEmpty(this.name)) {
@@ -59,7 +60,7 @@ public class OrganizationShiftSlot extends BaseModel{
   
   @Enumerated(EnumType.STRING)
   @Column(name = "payment_type")
-  public PaymentType paymentType;;
+  public PaymentType paymentType;
  
   public Integer minutesPaid;
   

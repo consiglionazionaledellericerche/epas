@@ -4,18 +4,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.model.YearProgression.YearPortion;
-
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -27,12 +25,9 @@ import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public class VacationFactory {
@@ -151,7 +146,7 @@ public class VacationFactory {
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -218,7 +213,7 @@ public class VacationFactory {
     //Collapse initialization days
     handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
@@ -232,7 +227,7 @@ public class VacationFactory {
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
     //Permessi nell'anno
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -274,10 +269,10 @@ public class VacationFactory {
     LocalDate endYear = new LocalDate(year, 12, 31);
     
     if (!beginYear.isEqual(periods.get(0).from)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     if (!endYear.isEqual(periods.get(periods.size() - 1).to)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     
     int lowerLimitSelected = lowerLimits.get(0);
@@ -304,7 +299,7 @@ public class VacationFactory {
       periods.get(0).vacationAmountBeforeInitializationPatch = newAmount;
     }
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> fixTooLucky(List<AbsencePeriod> periods, List<Integer> upperLimits, 
@@ -394,7 +389,9 @@ public class VacationFactory {
   private List<AbsencePeriod> handleAccruedFirstYear(Person person, GroupAbsenceType group, 
       Contract contract, List<AbsencePeriod> periods) {
     List<AbsencePeriod> fixed = Lists.newArrayList();
-    LocalDate secondYearStart = contract.beginDate.plusYears(1);
+    
+    LocalDate secondYearStart = contract.getPreviousContract() != null
+        ? contract.getPreviousContract().beginDate : contract.beginDate.plusYears(1);
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {
@@ -476,7 +473,10 @@ public class VacationFactory {
           Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
 
           subPeriod.initialization = subPeriod.splittedWith.initialization;
-          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount());
+          //I valori dei giorni di assenza nel periodo sono già stati moltiplicati per
+          //100 quindi è necessario diverli prima di ripassarli al metodo che li 
+          //imposta nel subPeriod.
+          subPeriod.setFixedPeriodTakableAmount(splittedWith.getFixedPeriodTakableAmount() / 100);
         }
       }
       if (splittedWith != null) {
@@ -491,7 +491,7 @@ public class VacationFactory {
       VacationPeriod vacationPeriod, Set<AbsenceType> takableCodes, Set<AbsenceType> takenCodes) {
     
     if (yearProgression == null) {
-      log.info("La yearProgression è null...");
+      log.debug("La yearProgression è null...");
       return Lists.newArrayList();
     }
     
@@ -518,7 +518,7 @@ public class VacationFactory {
         break;
       }
     }
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   /**
@@ -591,7 +591,7 @@ public class VacationFactory {
   
   private LocalDate vacationsExpireDate(int year, Office office) {
 
-    MonthDay monthDay = (MonthDay)configurationManager
+    MonthDay monthDay = (MonthDay) configurationManager
         .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
 
     LocalDate expireDate = LocalDate.now()

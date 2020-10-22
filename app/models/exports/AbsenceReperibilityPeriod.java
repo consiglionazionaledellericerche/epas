@@ -2,10 +2,8 @@ package models.exports;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-
 import models.Person;
 import models.PersonReperibilityType;
-
 import org.joda.time.LocalDate;
 
 /**

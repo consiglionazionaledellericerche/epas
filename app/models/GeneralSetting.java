@@ -1,11 +1,9 @@
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalTime;
 
 @ToString
 @Entity
@@ -38,4 +36,18 @@ public class GeneralSetting extends BaseModel {
   
   public String endNightlyShift = "6:00";
   // Fine parametri gestione codici di competenza turno
+  
+  // Parametri gestione gruppi
+  
+  public boolean handleGroupsByInstitute = true;
+  
+  // Fine parametri gestione gruppi
+  
+  // Parametri gestione giorni di turno
+  
+  public boolean saturdayHolidayShift = true;
+  
+  public boolean roundingShiftQuantity = false;
+  
+  // Fine parametri gestione giorni di turno
 }

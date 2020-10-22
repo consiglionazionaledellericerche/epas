@@ -2,23 +2,17 @@ package controllers;
 
 import dao.BadgeReaderDao;
 import dao.ZoneDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import models.BadgeReader;
 import models.Zone;
 import models.ZoneToZones;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @Slf4j
@@ -75,7 +69,7 @@ public class Zones extends Controller {
     if (link == null) {
       link = new ZoneToZones();
     }
-    log.info("Link = {}", link);
+    log.debug("Link = {}", link);
     List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(reader);
     render(zones, link, reader, list);
   }

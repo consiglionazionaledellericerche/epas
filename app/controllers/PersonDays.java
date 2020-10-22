@@ -3,31 +3,24 @@ package controllers;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
 import dao.history.StampingHistoryDao;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import manager.ConsistencyManager;
-
 import models.PersonDay;
 import models.Stamping;
 import models.ZoneToZones;
 import models.absences.Absence;
-
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 /**

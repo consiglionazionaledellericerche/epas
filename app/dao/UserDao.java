@@ -22,6 +22,7 @@ import models.Office;
 import models.Role;
 import models.User;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
@@ -36,6 +37,9 @@ public class UserDao extends DaoBase {
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
   /**
+   * L'user identificato dall'id passato come parametro.
+   * @param id l'identificativo dell'utente
+   * @param password (opzionale) la password dell'utente
    * @return lo user  identificato dall'id passato come parametro.
    */
   public User getUserByIdAndPassword(Long id, Optional<String> password) {
@@ -50,6 +54,8 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * L'utente cui il token appartiene.
+   * @param recoveryToken la stringa con il token per ricreare la password
    * @return l'user corrispondente al recoveryToken inviato per il recovery della password.
    */
   public User getUserByRecoveryToken(String recoveryToken) {
@@ -59,6 +65,9 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * L'user corrispondente all'username e alla password (opzionale) passati.
+   * @param username l'username dell'utente
+   * @param password (opzionale) la password dell'utente
    * @return l'user corrispondente a username e password passati come parametro.
    */
   public User getUserByUsernameAndPassword(String username, Optional<String> password) {
@@ -93,6 +102,7 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * La lista degli utenti per sede.
    * @param name Filtro sul nome
    * @param offices Gli uffici che hanno qualche tipo di relazione con gli user restituiti
    * @param onlyEnable filtra solo sugli utenti abilitati
@@ -126,6 +136,8 @@ public class UserDao extends DaoBase {
   }
 
   /**
+   * la lista degli utenti "orfani".
+   * @param name (opzionale) l'eventuale nome su cui fare la restrizione di ricerca
    * @return La lista degli utenti senza legami con una sede.
    */
   public SimpleResults<User> noOwnerUsers(Optional<String> name) {
@@ -198,8 +210,27 @@ public class UserDao extends DaoBase {
     if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true")
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
-    }
+    } 
 
+    return stampTypes;
+  }
+  
+  /**
+   * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti di
+   * amministrazione potranno usufruire della sola causale lavoro fuori sede.
+   *
+   * @param user user
+   * @return list
+   */
+  public static List<TeleworkStampTypes> getAllowedTeleworkStampTypes(final User user) {
+    
+    if (user.isSystemUser()) {
+      return TeleworkStampTypes.onlyActive();
+    }
+    val stampTypes = Lists.<TeleworkStampTypes>newArrayList();
+    if (user.person.checkConf(EpasParam.TELEWORK_STAMPINGS, "true")) {
+      stampTypes.addAll(TeleworkStampTypes.onlyActiveInTelework());
+    }
     return stampTypes;
   }
 

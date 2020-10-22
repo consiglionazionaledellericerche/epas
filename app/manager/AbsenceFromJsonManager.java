@@ -1,19 +1,14 @@
 package manager;
 
 import com.google.common.base.Optional;
-
 import dao.AbsenceDao;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import models.Person;
 import models.absences.Absence;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +20,10 @@ public class AbsenceFromJsonManager {
   private AbsenceDao absenceDao;
 
   /**
+   * La lista dei personPeriodAbsenceCode relativa ai parametri passati.
+   * @param body il dto arrivato via json
+   * @param dateFrom la data da cui cercare
+   * @param dateTo la data fino a cui cercare
    * @return la lista dei PersonPeriodAbsenceCode nel periodo compreso tra 'dateFrom' e 'dateTo'
    *     per le persone recuperate dal 'body' contenente la lista delle persone ricavate dalle
    *     email arrivate via chiamata post json.

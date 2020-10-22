@@ -65,14 +65,15 @@ public class OrganizationShiftTimeTableDao extends DaoBase {
   }
   
   
-  /*************************************************************************************************
-   * Parte relativa a query su OrganizationShiftSlot              
-   *************************************************************************************************/
+  /************************************************************************************************
+   * Parte relativa a query su OrganizationShiftSlot.         
+   ************************************************************************************************/
   
   public Optional<OrganizationShiftSlot> getByNameAndPrefix(String str, String prefix) {
     final QOrganizationShiftSlot oss = QOrganizationShiftSlot.organizationShiftSlot;
     final OrganizationShiftSlot query = getQueryFactory()
-        .selectFrom(oss).where(oss.name.contains(str).and(oss.name.startsWith(prefix))).fetchFirst();
+        .selectFrom(oss).where(oss.name.contains(str)
+            .and(oss.name.startsWith(prefix))).fetchFirst();
     return Optional.fromNullable(query);
   }
 }

@@ -59,8 +59,8 @@ public class PersonDays extends Controller {
       JsonResponse.notFound("Non sono presenti informazioni per "
               + person.name + " " + person.surname + " nel giorno " + date);
     }
-    PersonDayDto pdDTO = generateDayDTO(pd);
-    renderJSON(pdDTO);
+    PersonDayDto pdDto = generateDayDto(pd);
+    renderJSON(pdDto);
   }
 
 
@@ -80,7 +80,7 @@ public class PersonDays extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
 
-    /**
+    /*
      * TODO: capire perchè mi dà granted all'utilizzo del metodo nonostante
      * la drools (probabilmente scritta male, da capire meglio).
      * Adesso viene bypassato col controllo sopra...però è veramente orrendo
@@ -88,12 +88,12 @@ public class PersonDays extends Controller {
     rules.checkIfPermitted(person);
     List<Contract> monthContracts = wrapperFactory
             .create(person).orderedMonthContracts(year, month);
-    PersonMonthDto pmDTO = new PersonMonthDto();
+    PersonMonthDto pmDto = new PersonMonthDto();
     for (Contract contract : monthContracts) {
       Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
               .getContractMonthRecap(new YearMonth(year, month));
       if (cmr.isPresent()) {
-        pmDTO = generateMonthDTO(cmr.get());
+        pmDto = generateMonthDto(cmr.get());
       } else {
         JsonResponse.notFound(
             "Non sono presenti informazioni per "
@@ -101,16 +101,17 @@ public class PersonDays extends Controller {
             + DateUtility.fromIntToStringMonth(month));
       }
     }
-    renderJSON(pmDTO);
+    renderJSON(pmDto);
 
   }
 
 
   /**
+   * Metodo che costruisce il dto sulla base del personDay passato come parametro.
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
    *     alle funzioni rest.
    */
-  private static PersonDayDto generateDayDTO(PersonDay pd) {
+  private static PersonDayDto generateDayDto(PersonDay pd) {
     PersonDayDto pdDto = new PersonDayDto();
     pdDto.buonopasto = pd.isTicketAvailable;
     pdDto.differenza = pd.difference;
@@ -130,10 +131,11 @@ public class PersonDays extends Controller {
   }
 
   /**
+   * Metodo che genera il dto sulla base del contractMonthRecap passato come parametro.
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
    *     parametro da ritornare alle funzioni rest.
    */
-  private static PersonMonthDto generateMonthDTO(ContractMonthRecap cmr) {
+  private static PersonMonthDto generateMonthDto(ContractMonthRecap cmr) {
     PersonMonthDto pmDto = new PersonMonthDto();
     pmDto.buoniMensa = cmr.remainingMealTickets;
     pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;

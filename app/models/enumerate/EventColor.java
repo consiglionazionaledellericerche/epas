@@ -1,6 +1,7 @@
 package models.enumerate;
 
 /**
+ * Enumerato per la gestione dei colori degli eventi per i turni.
  * @author daniele
  * @since 26/05/17.
  */

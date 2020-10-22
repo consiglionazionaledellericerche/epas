@@ -70,7 +70,8 @@ public class TimeVariations extends Controller {
    * @param hours le ore da restituire
    * @param minutes i minuti da restituire
    */
-  public static void saveVariation(long absenceId, int hours, int minutes, Optional<LocalDate> dateVariation) {
+  public static void saveVariation(long absenceId, int hours, int minutes, 
+      Optional<LocalDate> dateVariation) {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
     rules.checkIfPermitted(absence.personDay.person);
@@ -80,10 +81,12 @@ public class TimeVariations extends Controller {
       Stampings.personStamping(absence.personDay.person.id, 
           LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-    TimeVariation timeVariation = timeVariationManager.create(absence, hours, minutes, dateVariation);
+    TimeVariation timeVariation = timeVariationManager
+        .create(absence, hours, minutes, dateVariation);
     
     timeVariation.save();
-    consistencyManager.updatePersonSituation(absence.personDay.person.id, dateVariation.or(LocalDate.now()));
+    consistencyManager
+    .updatePersonSituation(absence.personDay.person.id, dateVariation.or(LocalDate.now()));
     flash.success("Aggiornato recupero ore per assenza %s in data %s", 
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 
@@ -101,7 +104,8 @@ public class TimeVariations extends Controller {
 
     Absence absence = timeVariation.absence;
     timeVariation.delete();
-    consistencyManager.updatePersonSituation(absence.personDay.person.id, timeVariation.dateVariation);
+    consistencyManager
+    .updatePersonSituation(absence.personDay.person.id, timeVariation.dateVariation);
     flash.success("Rimossa variazione oraria per il %s del giorno %s", 
         absence.absenceType.code, absence.personDay.date);
     Stampings.personStamping(absence.personDay.person.id, 

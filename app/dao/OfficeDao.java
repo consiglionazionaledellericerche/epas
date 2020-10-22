@@ -18,6 +18,7 @@ import models.User;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
+import org.testng.util.Strings;
 
 /**
  * Dao per gli uffici.
@@ -34,6 +35,22 @@ public class OfficeDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Cerca un ufficio per id, code o codeId, in questo ordine.
+   */
+  public Optional<Office> byIdOrCodeOrCodeId(Long id, String code, String codeId) {
+    if (id != null) {
+      return Optional.fromNullable(getOfficeById(id));
+    }
+    if (!Strings.isNullOrEmpty(code)) {
+      return byCode(code);
+    }
+    if (!Strings.isNullOrEmpty(codeId)) {
+      return byCodeId(codeId);
+    }
+    return Optional.absent();
+  }
+  
   /**
    * Preleva l'office dal suo id.
    * 
@@ -61,6 +78,8 @@ public class OfficeDao extends DaoBase {
 
   
   /**
+   * L'ufficio con il codice code.
+   * @param code il codice della sede
    * @return l'ufficio associato al codice passato come parametro.
    */
   public Optional<Office> byCode(String code) {
@@ -73,6 +92,8 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
+   * L'ufficio, se esiste, con il codeId passato come parametro.
+   * @param codeId il codice della sede 
    * @return l'ufficio associato al codice passato come parametro.
    */
   public Optional<Office> byCodeId(String codeId) {
@@ -84,6 +105,8 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
+   * L'ufficio, se esiste, con perseoId uguale a quello passato come parametro.
+   * @param perseoId l'id dell'anagrafica
    * @return l'ufficio associato al perseoId.
    */
   public Optional<Office> byPerseoId(Long perseoId) {
@@ -208,7 +231,11 @@ public class OfficeDao extends DaoBase {
 
   }
 
-
+  /**
+   * L'istituto con cds passato come parametro.
+   * @param cds centro di spesa
+   * @return l'istituto, se esiste, con centro di spesa uguale a quello passato.
+   */
   public Optional<Institute> byCds(String cds) {
 
     final QInstitute institute = QInstitute.institute;
@@ -217,6 +244,11 @@ public class OfficeDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+  /**
+   * L'istituto con id passato come parametro.
+   * @param id l'identificativo dell'istituto
+   * @return l'istituto, se esiste, con id passato come parametro
+   */
   public Optional<Institute> instituteById(Long id) {
 
     final QInstitute institute = QInstitute.institute;

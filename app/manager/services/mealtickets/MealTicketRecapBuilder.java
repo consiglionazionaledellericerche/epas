@@ -1,14 +1,12 @@
 package manager.services.mealtickets;
 
+import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -44,7 +42,7 @@ public class MealTicketRecapBuilder {
     mealTicketRecap.setContract(contract);
     
     mealTicketRecap.setMealTicketInterval(
-        new DateInterval(mealTicketInterval.getBegin(), LocalDate.now()));
+        DateInterval.withBegin(mealTicketInterval.getBegin(), Optional.absent()));
 
     mealTicketRecap.setPersonDaysMealTickets(personDays);
 

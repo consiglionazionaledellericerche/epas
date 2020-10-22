@@ -9,16 +9,19 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
 import dao.wrapper.IWrapperFactory;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.PrintTagsManager;
 import manager.SecureManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.Stamping;
 import models.dto.OffSiteWorkingTemp;
 import models.dto.PrintTagsInfo;
@@ -94,14 +97,23 @@ public class PrintTags extends Controller {
       List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
       if (includeStampingDetails) {
         historyStampingsList = printTagsManager.getHistoricalList(psDto);
-      }        
+      }
+      val stampingOwnersInDays = 
+          printTagsManager.getStampingOwnerInDays(p, YearMonth.of(year, month));
+      log.debug("Trovati {} utenti diversi che hanno inserito/timbrature nel mese {}/{} "
+          + "per {}", 
+          stampingOwnersInDays.keySet().size(), month, year, person.getFullname());
+
       List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
+      List<PersonDay> holidaysInShift = printTagsManager.getHolidaysInShift(psDto);
       PrintTagsInfo info = PrintTagsInfo.builder()
           .psDto(psDto)
           .person(p)
           .includeStampingDetails(includeStampingDetails)
           .offSiteWorkingTempList(offSiteWorkingTemp)
           .historyStampingsList(historyStampingsList)
+          .stampingOwnersInDays(stampingOwnersInDays)
+          .holidaysInShift(holidaysInShift)
           .build();
       log.debug("Creato il PrintTagsInfo per {}", info.person.fullName());
       dtoList.add(info);

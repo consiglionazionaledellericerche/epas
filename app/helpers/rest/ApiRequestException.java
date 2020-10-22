@@ -1,6 +1,7 @@
 package helpers.rest;
 
 /**
+ * Eccezioni per api.
  * @author daniele on 19/04/16.
  */
 public class ApiRequestException extends RuntimeException {

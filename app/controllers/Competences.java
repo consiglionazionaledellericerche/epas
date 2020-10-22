@@ -27,17 +27,16 @@ import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import lombok.extern.slf4j.Slf4j;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ShiftOrganizationManager;
@@ -55,7 +54,6 @@ import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
 import models.Office;
-import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.Person;
 import models.PersonCompetenceCodes;
@@ -67,7 +65,6 @@ import models.PersonShiftShiftType;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.TotalOvertime;
 import models.User;
 import models.dto.OrganizationTimeTable;
@@ -75,7 +72,6 @@ import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
 import models.enumerate.PaymentType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
 import play.data.validation.Required;
@@ -506,6 +502,7 @@ public class Competences extends Controller {
   }
 
   /**
+   * Ritorna la form di inserimento della competenza alla persona.
    * @param personId l'id della persona
    * @param competenceId l'id della competenza
    * @param month        il mese
@@ -649,10 +646,11 @@ public class Competences extends Controller {
   /**
    * Report. Esporta in formato .csv la situazione annuale degli straordinari
    */
-  public static void exportCompetences(Long officeId) {
+  public static void exportCompetences(Long officeId, int year, int month) {
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted();
-    render(office);
+    List<CompetenceCodeGroup> list = competenceCodeDao.getAllGroups();
+    render(office, list, year, month);
   }
 
   /**
@@ -661,7 +659,8 @@ public class Competences extends Controller {
    *
    * @param year anno
    */
-  public static void getOvertimeInYear(int year, Long officeId) throws IOException {
+  public static void getCompetenceGroupInYearMonth(int year, int month, Long officeId, 
+      CompetenceCodeGroup group) throws IOException {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -670,15 +669,13 @@ public class Competences extends Controller {
     set.add(office);
 
     List<Person> personList = personDao
-        .listForCompetence(competenceCodeDao.getCompetenceCodeByCode("S1"),
-            Optional.fromNullable(""),
-            set,
-            false, new LocalDate(year, 1, 1),
-            new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue(),
-            Optional.<Person>absent()).list();
+        .listForCompetenceGroup(group, set, false, new LocalDate(year, month, 1), 
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 
-    FileInputStream inputStream = competenceManager.getOvertimeInYear(year, personList);
-    renderBinary(inputStream, "straordinari" + year + ".csv");
+    FileInputStream inputStream = competenceManager
+        .getCompetenceGroupInYearMonth(year, month, personList, group);
+    renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() 
+        + DateUtility.fromIntToStringMonth(month) + year + ".csv");
   }
 
   /**
@@ -902,7 +899,7 @@ public class Competences extends Controller {
   }
 
   /**
-   * 
+   * Salva il servizio di turno.
    * @param cat il servizio per turno
    * @param office la sede a cui si vuole collegare il servizio
    *     metodo che persiste il servizio associandolo alla sede.
@@ -1006,23 +1003,25 @@ public class Competences extends Controller {
           cat.save();          
         } else {
           toDelete.add(type);
-          log.info("Elinino i person_shift_days relativi a {}", type.type);
+          log.debug("Elinino i person_shift_days relativi a {}", type.type);
           for (PersonShiftDay psd : type.personShiftDays) {
             psd.delete();
           }
           type.monthsStatus.stream().map(st -> st.delete());  
-          log.info("Elimino i gli shift_type_month relativi a {}", type.type);
+          log.debug("Elimino i gli shift_type_month relativi a {}", type.type);
         }        
-      }       
+      } else {
+        toDelete.add(type);
+      }
       if (toDelete.contains(type)) {
-        log.info("Elimino le relazioni tra persone e shift_type");        
+        log.debug("Elimino le relazioni tra persone e shift_type");        
         for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
           psst.delete();
         }
-        log.info("Elimino lo shift_type {}", type.type);
+        log.debug("Elimino lo shift_type {}", type.type);
         type.delete();
       }
-      
+
     }
     if (toDelete.size() == shiftTypeList.size()) {
       cat.delete();
@@ -1031,7 +1030,7 @@ public class Competences extends Controller {
       flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
           + "importanti presenti in altre tabelle");
     }   
-    
+
     activateServices(cat.office.id);
   }
 
@@ -1060,7 +1059,8 @@ public class Competences extends Controller {
   /**
    * metodo che ritorna la form di creazione di una nuova timetable.
    */
-  public static void configureShiftTimeTable(int step, int slot, String name,
+  public static void configureShiftTimeTable(int step, int slot, 
+      boolean considerEverySlot, String name,
       CalculationType calculationType, Long officeId, List<OrganizationTimeTable> list) {
     if (step == 0) {
       step++;
@@ -1088,7 +1088,7 @@ public class Competences extends Controller {
       }
       List<PaymentType> paymentTypes = Arrays.asList(PaymentType.values());
       step++;
-      render(officeId, calculationType, slot, step, list, name, paymentTypes);
+      render(officeId, calculationType, slot, step, list, name, paymentTypes, considerEverySlot);
     }
     Office office = officeDao.getOfficeById(officeId);
     if (office == null) {
@@ -1096,13 +1096,13 @@ public class Competences extends Controller {
       render();
     }
     String result = shiftOrganizationManager
-        .generateTimeTableAndSlot(list, office, calculationType, name);
+        .generateTimeTableAndSlot(list, office, calculationType, name, considerEverySlot);
     if (Strings.isNullOrEmpty(result)) {
       flash.success("Inserita nuova timetable");
     } else {
       flash.error("Errore nella creazione della timetable: %s", result);
     }
-    
+
     manageCompetenceCode();
   }
 
@@ -1162,7 +1162,7 @@ public class Competences extends Controller {
 
       List<ShiftTimeTable> internalList = Lists.newArrayList();
       List<OrganizationShiftTimeTable> externalList = Lists.newArrayList();
-            
+
       if (shift != null) {
         ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
         internalList.add(stt);
@@ -1179,7 +1179,7 @@ public class Competences extends Controller {
           Cache.safeAdd(external, externalList, "10mn");     
         }        
       }  
-      
+
       step++;      
       enableExitTolerance = false;
       render(step, type, cat, breakInRange, enableExitTolerance);
@@ -1192,7 +1192,7 @@ public class Competences extends Controller {
           || type.exitTolerance > type.exitMaxTolerance) {
         flash.error("Le soglie minime non possono essere superiori a quelle massime");
 
-        render("@configureShift",step, cat, type, breakInRange, enableExitTolerance);
+        render("@configureShift", step, cat, type, breakInRange, enableExitTolerance);
       }
       step++;
       //metto in cache la struttura dell'attività e ritorno il dto per creare la timetable
@@ -1207,7 +1207,7 @@ public class Competences extends Controller {
         step = 0;
         render(cat, type, step, breakInRange);
       }
-      
+
       if (internalTimeTable != null) {
         ShiftTimeTable stt = internalTimeTable.get(0);
         Cache.safeAdd(internal, internalTimeTable, "10mn");
@@ -1244,7 +1244,7 @@ public class Competences extends Controller {
         competenceManager.persistShiftType(service, Optional.<ShiftTimeTable>absent(), 
             Optional.fromNullable(ostt), cat);
       }
-      
+
       Cache.clear();
       flash.success("Attività salvata correttamente!");
       activateServices(cat.office.id);
@@ -1261,7 +1261,7 @@ public class Competences extends Controller {
 
     if (!shiftType.isPresent()) {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     } else {
       rules.checkIfPermitted(shiftType.get().shiftCategories.office);
       ShiftType type = shiftType.get();
@@ -1301,10 +1301,40 @@ public class Competences extends Controller {
    * modifica i parametri dell'attività passata tramite id.
    * @param type l'attività di cui si vogliono modificare i parametri
    */
-  public static void editActivity(ShiftType type) {
+  public static void editActivity(ShiftType type, boolean considerEverySlot) {
+    if (type.organizaionShiftTimeTable != null) {
+      OrganizationShiftTimeTable ott = type.organizaionShiftTimeTable;
+      ott.considerEverySlot = considerEverySlot;
+      ott.save();
+    }
     type.save();
     flash.success("Modificati parametri per l'attività: %s", type.description);
     manageShiftType(type.id);
+  }
+
+  /**
+   * Elimina l'attività di turno passata come parametro.
+   * @param type l'attovità di turno
+   */
+  public static void deleteActivity(ShiftType type) {
+    
+    rules.checkIfPermitted(type.shiftCategories.office);
+    if (!type.personShiftDays.isEmpty()) {
+      flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
+          + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", 
+          type.type);
+      manageShiftType(type.id);
+    }
+    if (!type.personShiftShiftTypes.isEmpty()) {
+      log.debug("L'attività {} è ancora referenziata a qualche persona");
+      type.personShiftShiftTypes.stream().forEach(psst -> psst.delete());
+      
+    }
+    type.delete();
+    log.info("Eliminata attività {}", type.type);
+    flash.success("Attività %s eliminata", type.type);
+    activateServices(type.shiftCategories.office.id);
+
   }
 
 
@@ -1316,7 +1346,7 @@ public class Competences extends Controller {
     Optional<ShiftType> type = shiftDao.getShiftTypeById(typeId);
     if (!type.isPresent()) {
       flash.error("Attività non presente. Verificare l'identificativo");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
     rules.checkIfPermitted(type.get().shiftCategories.office);
@@ -1462,7 +1492,7 @@ public class Competences extends Controller {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     if (type == null) {
       flash.error("Attività non presente. Verificare l'identificativo");
-      activateServices(new Long(session.get("officeSelected")));
+      activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
     rules.checkIfPermitted(type.office);
@@ -1484,7 +1514,7 @@ public class Competences extends Controller {
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
     codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
     List<Person> available = competenceCodeDao
-        .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+        .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
         .stream().filter(e -> (personAssociated.stream()
             .noneMatch(d -> d.person.equals(e.person))))        
         .map(pcc -> pcc.person).distinct()
@@ -1547,7 +1577,7 @@ public class Competences extends Controller {
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
       List<Person> available = competenceCodeDao
-          .listByCodesAndOffice(codeList, type.office,Optional.fromNullable(LocalDate.now()))
+          .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
           .stream().filter(e -> (personAssociated.stream()
               .noneMatch(d -> d.person.equals(e.person))))        
           .map(pcc -> pcc.person).distinct()

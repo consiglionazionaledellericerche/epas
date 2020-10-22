@@ -3,9 +3,7 @@ package manager.response;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import org.joda.time.LocalDate;
 
 public class AbsenceInsertReport {
@@ -80,6 +78,10 @@ public class AbsenceInsertReport {
     this.absenceInReperibilityOrShift = absenceInReperibilityOrShift;
   }
 
+  /**
+   * Metodo che ritorna la lista dei giorni di reperibilità o turno.
+   * @return la lista dei giorni in cui si è in reperibilità o turno.
+   */
   public List<LocalDate> datesInReperibilityOrShift() {
 
     return FluentIterable.from(absences).filter(
@@ -88,7 +90,7 @@ public class AbsenceInsertReport {
           public boolean apply(AbsencesResponse air) {
             return air.isDayInReperibilityOrShift();
           }
-        }).transform(AbsencesResponse.toDate.INSTANCE).toList();
+        }).transform(AbsencesResponse.ToDate.INSTANCE).toList();
   }
 
 }

@@ -2,25 +2,20 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-
 import controllers.Security;
-import controllers.Stampings;
-
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
-
-import helpers.Web;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.SortedMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -29,11 +24,13 @@ import models.Role;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
 import play.i18n.Messages;
 
 @Slf4j
@@ -49,6 +46,7 @@ public class StampingManager {
   private final IWrapperFactory wrapperFactory;
 
   /**
+   * Injection.
    * @param personDayDao il dao per cercare i personday
    * @param personDao il dao per cercare le persone
    * @param personDayManager il manager per lavorare sui personday
@@ -74,7 +72,7 @@ public class StampingManager {
   }
 
 
-  
+
   /**
    * Metodo che verifica se la timbratura precedente a quella che si vuole inserire è con 
    *     causale lavoro fuori sede per permettere al chiamante di inserire una timbratura
@@ -109,8 +107,19 @@ public class StampingManager {
     Integer hour = Integer.parseInt(time.substring(0, 2));
     Integer minute = Integer.parseInt(time.substring(2, 4));
     return new LocalDateTime(date.getYear(), date.getMonthOfYear(),
-        date.getDayOfMonth(), hour, minute);
+        date.getDayOfMonth(), hour, minute, 0);
+  }
 
+  /**
+   * Crea il tempo. Il campo time è già stato validato HH:MM o HHMM
+   */
+  public java.time.LocalDateTime deparseStampingDateTimeAsJavaTime(LocalDate date, String time) {
+
+    time = time.replaceAll(":", "");
+    Integer hour = Integer.parseInt(time.substring(0, 2));
+    Integer minute = Integer.parseInt(time.substring(2, 4));
+    return java.time.LocalDateTime.of(date.getYear(), date.getMonthOfYear(),
+        date.getDayOfMonth(), hour, minute, 0);
   }
 
   /**
@@ -155,7 +164,7 @@ public class StampingManager {
   public String persistStamping(Stamping stamping, LocalDate date, String time, 
       Person person, User currentUser, boolean newInsert) {
     String result = "";
-    
+
     val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
     //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
     //alla timbratura esistente allora creo/modifico la timbratura.
@@ -188,11 +197,11 @@ public class StampingManager {
         result = "Timbratura ignorata perché già presente.";
       }
     }
-    
+
     return result;
   }
-  
-  
+
+
   /**
    * Stamping dal formato del client al formato ePAS.
    */
@@ -239,9 +248,9 @@ public class StampingManager {
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
         ? stampingFromClient.zona : null;
     stamping.note = stampingFromClient.note;
-    
+
     stamping.save();
-    
+
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
         stamping.getLabel(), person, person.number);
 
@@ -276,6 +285,45 @@ public class StampingManager {
   }
 
   /**
+   * Metodo per formare una mappa di riepilogo nella presenza giornaliera.
+   * @param daysRecap la lista dei personStampingDayRecap per stabilire chi è presente
+   *     e chi no in uno specifico giorno
+   * @return la mappa contenente le motivazioni delle assenze e quanti hanno quella motivazione
+   *     oltre a quanti sono presenti.
+   */
+  public Map<String, Integer> createDailyMap(List<PersonStampingDayRecap> daysRecap) {
+    SortedMap<String, Integer> map = Maps.newTreeMap();
+    String key = "";
+    int value = 0;
+    for (PersonStampingDayRecap day : daysRecap) {
+      if (day.personDay.stampings.isEmpty() && day.personDay.absences.isEmpty()) {
+        key = "Giorno in attesa di completamento";
+      } else if (day.personDay.stampings.isEmpty() 
+          && (day.personDay.absences.get(0).justifiedType.name.equals(JustifiedTypeName.all_day) 
+          || day.personDay.absences.get(0).justifiedType.name
+          .equals(JustifiedTypeName.assign_all_day)
+          || day.personDay.absences.get(0).justifiedType.name
+          .equals(JustifiedTypeName.complete_day_and_add_overtime))) {
+        key = day.personDay.absences.get(0).getAbsenceType().getCode() + " - " 
+            + day.personDay.absences.get(0).getAbsenceType().getShortDescription();
+      } else {
+        key = "Presenti";
+      }
+      if (!map.containsKey(key)) {
+        map.put(key, 1); 
+      } else {
+        value = map.get(key);
+        value++;
+        map.put(key, value);
+      }
+    }
+
+    return map;
+  }
+
+  /**
+   * Controlla se lo stamptype è da inserire tra quelli per la timbratura fuori sede, 
+   * false altrimenti.
    * @param stamping la timbratura da controllare
    * @param user l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
@@ -317,8 +365,9 @@ public class StampingManager {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
           + " matricolaFirma={}. Controllare il database.", stamping.numeroBadge);
     }
-   
+
     return person;
   }
 
+  
 }

@@ -30,6 +30,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath handleGroupsByInstitute = createBoolean("handleGroupsByInstitute");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -37,6 +39,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final BooleanPath roundingShiftQuantity = createBoolean("roundingShiftQuantity");
+
+    public final BooleanPath saturdayHolidayShift = createBoolean("saturdayHolidayShift");
 
     public final StringPath startDailyShift = createString("startDailyShift");
 

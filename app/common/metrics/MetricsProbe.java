@@ -79,8 +79,11 @@ public class MetricsProbe extends Controller {
     if (sample == null) {
       return -1;
     }
-    try (val registry = new SimpleMeterRegistry()) {
+    val registry = new SimpleMeterRegistry();
+    try {
       return sample.stop(registry.timer(PROBE));
+    } finally {
+      registry.close();
     }
   }
 }

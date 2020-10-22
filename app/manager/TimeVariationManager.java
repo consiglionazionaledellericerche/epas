@@ -1,24 +1,16 @@
 package manager;
 
 import com.google.common.base.Optional;
-
 import dao.AbsenceDao;
-
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Office;
 import models.Person;
 import models.TimeVariation;
 import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
-
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
@@ -44,7 +36,8 @@ public class TimeVariationManager {
    * @param minutes i minuti da recuperare
    * @return il timevariation creato con i campi passati come parametro.
    */
-  public TimeVariation create(Absence absence, int hours, int minutes, Optional<LocalDate> dateVariation) {
+  public TimeVariation create(Absence absence, int hours, int minutes, 
+      Optional<LocalDate> dateVariation) {
     
     TimeVariation timeVariation = new TimeVariation();
     timeVariation.absence = absence;

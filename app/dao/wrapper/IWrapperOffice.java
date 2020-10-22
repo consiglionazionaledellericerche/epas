@@ -1,13 +1,9 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
-
 import models.Office;
-import models.Role;
 import models.UsersRolesOffices;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -19,6 +15,7 @@ import org.joda.time.YearMonth;
 public interface IWrapperOffice extends IWrapperModel<Office> {
 
   /**
+   * La data di creazione della sede.
    * @return la data di installazione della sede.
    */
   LocalDate initDate();

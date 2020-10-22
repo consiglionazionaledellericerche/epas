@@ -30,6 +30,13 @@ public class PersonDayHistoryDao {
     this.absenceTypeDao = absenceTypeDao;
   }
 
+  /**
+   * La lista delle revisioni della timbratura.
+   * @param personDayId l'identificativo del personday cui appartiene la timbratura di cui
+   *     si vogliono le revisioni.
+   * @return la lista delle revisioni della timbratura relativa al personDay con identificativo
+   *     personDayId.
+   */
   @SuppressWarnings("unchecked")
   public List<HistoryValue<Stamping>> stampings(long personDayId) {
     final AuditQuery query = auditReader.get().createQuery()
@@ -43,6 +50,34 @@ public class PersonDayHistoryDao {
         .toList();
   }
 
+  /**
+   * La lista delle revisioni delle timbrature.
+   * @param personDayId l'identificativo del personday
+   * @return la lista delle revisioni delle timbrature alla creazione.
+   */
+  @SuppressWarnings("unchecked")
+  public List<HistoryValue<Stamping>> stampingsAtCreation(long personDayId) {
+    final AuditQuery query = auditReader.get().createQuery()
+        //Vengono prelevate solo le revisioni delle entity non cancellate
+        //tramite il terzo parametro a false del metodo forRevisionsOfEntity
+        .forRevisionsOfEntity(Stamping.class, false, false)
+        .add(AuditEntity.relatedId("personDay").eq(personDayId))
+        .add(AuditEntity.revisionType().eq(RevisionType.ADD))
+        .addOrder(AuditEntity.property("id").asc())
+        .addOrder(AuditEntity.revisionNumber().asc());
+
+    return FluentIterable.from(query.getResultList())
+        .transform(HistoryValue.fromTuple(Stamping.class))
+        .toList();
+  }
+  
+  /**
+   * La lista delle revisioni delle assenze relative al personday con
+   * identificativo personDayId.
+   * @param personDayId l'identificativo del personday
+   * @return la lista delle revisioni delle assenze relative al personday con
+   *     identificativo personDayId.
+   */
   @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> absences(long personDayId) {
     final AuditQuery query = auditReader.get().createQuery()
@@ -57,6 +92,7 @@ public class PersonDayHistoryDao {
   }
 
   /**
+   * La lista dello storico di tutte le revisioni dei codici di missione orari.
    * @return la lista dello storico di tutti i codici di missione orari.
    */
   public List<HistoryValue<Absence>> oldMissions() {
@@ -94,7 +130,9 @@ public class PersonDayHistoryDao {
   }
 
   /**
-   *
+   * La lista delle revisioni relative all'assenza con id passato.
+   * @param id l'identificativo dell'assenza inserita
+   * @return la lista delle revisioni dell'assenza con id passato.
    */
   public List<HistoryValue<Absence>> specificAbsence(long id) {
     final AuditQuery query = auditReader.get().createQuery()

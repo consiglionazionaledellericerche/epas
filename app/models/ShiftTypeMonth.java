@@ -6,13 +6,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
 
 /**
+ * Oggetto che contiene l'approvazione delle ore di turno.
  * @author daniele
  * @since 09/06/17.
  */

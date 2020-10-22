@@ -3,19 +3,14 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import dao.AbsenceDao;
-
 import java.util.Comparator;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +45,14 @@ public class YearlyAbsencesManager {
   @Inject
   private AbsenceDao absenceDao;
 
+  /**
+   * Genera la tabella con la tripla persona-tipo assenza-quantità.
+   * @param persons la lista delle persone
+   * @param abt il tipo di assenza
+   * @param begin la data di inizio
+   * @param end la data di fine
+   * @return la tabella contenente la tripla persona-tipo assenza-quantità.
+   */
   public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(
       List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
 
@@ -84,21 +87,21 @@ public class YearlyAbsencesManager {
   /*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
   public static final class AbsenceTypeDays {
     public String absenceCode;
-    public Integer i;
+    public Integer number;
 
     public AbsenceTypeDays(String absenceCode, Integer i) {
       this.absenceCode = absenceCode;
-      this.i = i;
+      this.number = i;
     }
 
     public AbsenceTypeDays(String absenceCode) {
       this.absenceCode = absenceCode;
-      this.i = null;
+      this.number = null;
     }
 
     public AbsenceTypeDays() {
       this.absenceCode = null;
-      this.i = null;
+      this.number = null;
     }
 
     @Override

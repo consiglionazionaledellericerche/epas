@@ -13,5 +13,8 @@ public enum AccountRole {
   CONTRACTUAL_MANAGER,
   //Amministratore in sola lettura
   RO_ADMIN, 
-  ABSENCES_MANAGER
+  ABSENCES_MANAGER,
+  //Può leggere i dati di tutto il personale relativi
+  //a presenze e assenze del personale
+  PERSON_DAYS_READER
 }

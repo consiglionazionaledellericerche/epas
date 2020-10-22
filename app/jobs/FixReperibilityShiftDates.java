@@ -1,22 +1,15 @@
 package jobs;
 
 import com.google.common.base.Optional;
-
 import dao.CompetenceCodeDao;
 import dao.PersonShiftDayDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.CompetenceCode;
-
 import models.PersonCompetenceCodes;
 import models.PersonReperibility;
 import models.PersonShift;
-
 import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;

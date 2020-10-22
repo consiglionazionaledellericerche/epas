@@ -3,14 +3,11 @@ package models;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import models.base.BaseModel;
 import models.enumerate.Troubles;
-
 import org.hibernate.envers.Audited;
 
 @Audited
@@ -29,6 +26,11 @@ public class PersonDayInTrouble extends BaseModel {
   @JoinColumn(updatable = false)
   public PersonDay personDay;
 
+  /**
+   * Costruttore.
+   * @param pd il personday
+   * @param cause la causa del trouble
+   */
   public PersonDayInTrouble(PersonDay pd, Troubles cause) {
     this.personDay = pd;
     this.cause = cause;

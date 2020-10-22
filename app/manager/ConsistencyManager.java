@@ -416,7 +416,8 @@ public class ConsistencyManager {
     }
 
     // decido festivo / lavorativo
-    pd.getValue().isHoliday = personDayManager.isHoliday(pd.getValue().person, pd.getValue().date);
+    pd.getValue().isHoliday = personDayManager
+        .isHoliday(pd.getValue().person, pd.getValue().date);
     pd.getValue().save();
 
     // controllo uscita notturna
@@ -440,7 +441,7 @@ public class ConsistencyManager {
    
     personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
     
-    personDayManager.handleShortPermission(pd);
+    personDayManager.checkAndManageMandatoryTimeSlot(pd.getValue());
 
     // controllo problemi strutturali del person day
     if (pd.getValue().date.isBefore(LocalDate.now())) {
@@ -536,7 +537,7 @@ public class ConsistencyManager {
       // Se yearMonthFrom non è successivo alla fine del contratto...
       if (!yearMonthFrom.isAfter(endContractYearMonth)) {
 
-        if (contract.vacationPeriods.isEmpty()) {
+        if (contract.getExtendedVacationPeriods().isEmpty()) {
           log.error("No vacation period {}", contract.toString());
           continue;
         }

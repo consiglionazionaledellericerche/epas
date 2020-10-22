@@ -1,7 +1,6 @@
 package models.base;
 
 import org.joda.time.LocalDate;
-
 import play.db.Model;
 
 /**

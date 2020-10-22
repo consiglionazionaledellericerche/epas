@@ -70,8 +70,7 @@ public class BadgeManager {
         }
       }
     } catch (Exception ignored) {
-      //Tipo String
-      //log.info("Impossibile {}", badge.code);
+      log.info("Exception: {}", ignored);
     }
   }
 

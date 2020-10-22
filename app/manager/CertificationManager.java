@@ -1,26 +1,14 @@
 package manager;
 
-import com.google.common.collect.Lists;
 import dao.PersonDayDao;
 import it.cnr.iit.epas.DateUtility;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import models.Person;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.YearMonth;
 
 
@@ -52,7 +40,7 @@ public class CertificationManager {
       PrintWriter pw = new PrintWriter(new File(file.getAbsolutePath()));
       StringBuilder sb = new StringBuilder();
       for (Person person : people) {
-        log.info("Controllo la situazione dei buoni pasto per {}", person.getFullname());
+        log.debug("Controllo la situazione dei buoni pasto per {}", person.getFullname());
         val mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
             .getPersonDayInMonth(person, new YearMonth(year, month)));
         if (mealTicket > 0) {
@@ -65,9 +53,9 @@ public class CertificationManager {
           sb.append(yearMonth);
           sb.append("\r\n");
         } else {
-          log.info("Non ci sono buoni da inserire in questo mese per {}", person.getFullname());
+          log.debug("Non ci sono buoni da inserire in questo mese per {}", person.getFullname());
         }   
-        log.info("Inseriti {} buoni per {}", mealTicket, person.getFullname());
+        log.debug("Inseriti {} buoni per {}", mealTicket, person.getFullname());
       }
       pw.write(sb.toString());
       pw.close();

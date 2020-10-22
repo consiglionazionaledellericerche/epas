@@ -1,17 +1,16 @@
 package models;
 
 import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.AbsenceType;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 
 
@@ -33,6 +32,8 @@ public class Qualification extends BaseModel {
   @ManyToMany(mappedBy = "qualifications")
   public List<AbsenceType> absenceTypes;
 
+  @Getter
+  @Setter
   @Required
   public int qualification;
 

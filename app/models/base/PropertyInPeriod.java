@@ -2,11 +2,9 @@ package models.base;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -36,11 +34,11 @@ public abstract class PropertyInPeriod extends PeriodModel implements IPropertyI
     Class<?> superClass = this.getClass();
     PropertyInPeriod obj = null;
     try {
-      obj = (PropertyInPeriod)superClass.newInstance();
+      obj = (PropertyInPeriod) superClass.newInstance();
       obj.setOwner(this.getOwner());
       obj.setValue(this.getValue());
       obj.setType(this.getType());
-      return (PropertyInPeriod)obj;
+      return (PropertyInPeriod) obj;
     } catch (InstantiationException | IllegalAccessException ex) {
       ex.printStackTrace();
       log.error("Impossibile creare una nuova istanza di {}", this.toString());

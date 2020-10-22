@@ -2,25 +2,24 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.Lists;
-
+import com.google.common.collect.Range;
 import edu.emory.mathcs.backport.java.util.Collections;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
-
 import org.joda.time.LocalDate;
-
 import play.db.jpa.JPA;
 
 /**
@@ -29,6 +28,8 @@ import play.db.jpa.JPA;
  * @author alessandro
  *
  */
+
+@Slf4j
 public class PeriodManager {
 
   @Inject
@@ -45,11 +46,33 @@ public class PeriodManager {
    */
   public final List<IPropertyInPeriod> updatePeriods(
       IPropertyInPeriod propertyInPeriod, boolean persist) {
+    return updatePeriods(propertyInPeriod, persist, true);
+  }
+
+  /**
+   * Inserisce il nuovo period all'interno dei periodi in target.
+   *
+   * @param propertyInPeriod il periodo da inserire (ex.ContractWorkingTimeType)
+   * @param persist true persiste la nuova lista di periodi.
+   * @param validateAllPeriodCovered se impostata a true controlla che tutto il periodo dell'owner
+   *     del propertyInPeriod sia coperto.
+   * @return la nuova lista dei periodi
+   */
+  public final List<IPropertyInPeriod> updatePeriods(
+      IPropertyInPeriod propertyInPeriod, boolean persist, boolean validateAllPeriodCovered) {
     boolean recomputeBeginSet = false;
 
     //controllo iniziale consistenza periodo.
-    if (propertyInPeriod.calculatedEnd() != null) {
-      Verify.verify(!propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd()));
+    if (propertyInPeriod.getBeginDate() != null 
+        &&  propertyInPeriod.calculatedEnd() != null 
+        && propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd())) {
+      log.warn("Scartato aggiornamento PropertyInPeriod per data inconsistente. "
+          + "propertyInPeriod.owner = {}, propertyInPeriod.type = {}. "
+          + "beginDate = {}, calculatedEnd = {}", 
+          propertyInPeriod.getOwner(), propertyInPeriod.getType(),
+          propertyInPeriod.getBeginDate(),
+          propertyInPeriod.calculatedEnd());
+      return propertyInPeriod.getOwner().periods(propertyInPeriod.getType()).stream().collect(Collectors.toList());
     }
     
     //copia dei periodi ordinata
@@ -145,7 +168,7 @@ public class PeriodManager {
         periodRemoved._delete();
       }
       if (propertyInPeriod.getType().equals(EpasParam.WORKING_OFF_SITE)) {
-        
+        log.debug("...");
       }
       for (IPropertyInPeriod periodInsert : periodList) {
         periodInsert._save();
@@ -159,14 +182,44 @@ public class PeriodManager {
 
   }
   
+  /**
+   * true se il periodo si sovrappone a quelli esistenti, false altrimenti.
+   * @param period il periodo da analizzare
+   * @param currentPeriods i periodi presenti sul db
+   * @return true se il periodo si sovrappone a quelli esistenti, false altrimenti.
+   */
+  public final boolean isOverlapped(IPropertyInPeriod period, 
+      Collection<IPropertyInPeriod> currentPeriods) {
+    Range<LocalDate> periodRange;
+    if (period.calculatedEnd() != null) {
+      periodRange = Range.closed(period.getBeginDate(), period.calculatedEnd());
+    } else {
+      periodRange = Range.downTo(period.getBeginDate(), BoundType.CLOSED);
+    }
+    
+    for (IPropertyInPeriod oldPeriod : currentPeriods) {
+      Range<LocalDate> oldPeriodRange;
+      if (oldPeriod.getEndDate() != null) {
+        oldPeriodRange = Range.closed(oldPeriod.getBeginDate(), oldPeriod.getEndDate());
+      } else {
+        oldPeriodRange = Range.downTo(oldPeriod.getBeginDate(), BoundType.CLOSED);
+      }
+
+      if (periodRange.isConnected(oldPeriodRange)) {
+        return true;
+      }
+    }
+    return false;
+  }
   
   /**
-   * Controlla che per ogni giorno dell'owner vi sia uno e uno solo valore.
-   * @return esito
+   * Preleva le data iniziale più piccola e la data finale più grande di quelle
+   * presenti nei periodi passati. 
+   * @param periods i periodi di cui prelevare data iniziale e finale
+   * @return un DateInterval composto con data iniziale più piccola dei vari 
+   *     periodi e data finale più grande dei vari periodi
    */
-  private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
-      List<IPropertyInPeriod> periods) {
-    
+  private final Optional<DateInterval> getDateIntervalPeriod(List<IPropertyInPeriod> periods) {
     //Costruzione intervallo covered
     Collections.sort(periods);
     LocalDate begin = null;
@@ -180,24 +233,35 @@ public class PeriodManager {
       
       // Non dovrebbero essercene altri.
       if (end == null) {
-        return false;
+        return Optional.absent();
       }
       
       // Deve iniziare subito dopo la fine del precedente.
       if (!end.plusDays(1).isEqual(period.getBeginDate())) {
-        return false;
+        return Optional.absent();
       }
       
       end = period.calculatedEnd();
+    } 
+    return Optional.of(new DateInterval(begin, end));
+  }
+  
+  /**
+   * Controlla che per ogni giorno dell'owner vi sia uno e uno solo valore.
+   * @return esito
+   */
+  private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
+      List<IPropertyInPeriod> periods) {
+    val beginEndPeriods = getDateIntervalPeriod(periods);
+    if (!beginEndPeriods.isPresent()) {
+      return false;
     }
-
     //Confronto fra intervallo covered e quello dell'owner
-    return DateUtility.areIntervalsEquals(new DateInterval(begin, end),
+    return DateUtility.areIntervalsEquals(beginEndPeriods.get(),
         new DateInterval(owner.getBeginDate(), owner.calculatedEnd()));
    
-        
   }
- 
+  
   /**
    * Inserisce un periodo nella nuova lista ordinata. Se il periodo precedente ha lo stesso valore
    * effettua la merge.
@@ -373,7 +437,11 @@ public class PeriodManager {
     return recomputeRecap;
   }
 
-  private void setDays(RecomputeRecap recomputeRecap) {
+  /**
+   * Assegna i giorni su cui far valere il periodo.
+   * @param recomputeRecap il recomputeRecap contenente i riepiloghi
+   */
+  public void setDays(RecomputeRecap recomputeRecap) {
     if (recomputeRecap.recomputeFrom != null
         && !recomputeRecap.recomputeFrom.isAfter(LocalDate.now())) {
       recomputeRecap.days = DateUtility.daysInInterval(

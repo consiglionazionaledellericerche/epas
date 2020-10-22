@@ -32,7 +32,9 @@ public class PeriodoDipendente {
   
   
   public static class PeriodoDipendenteDettagli implements Serializable {
-    
+
+    private static final long serialVersionUID = 8981830602033609237L;
+
     public int id;                                  //id dipendente 
     public int matricola;                         //17162
     //public SedePeriodoDipendente sede;

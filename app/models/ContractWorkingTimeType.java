@@ -5,13 +5,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import lombok.Getter;
-
+import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
-
 import play.data.validation.Required;
 
 
@@ -20,6 +18,7 @@ import play.data.validation.Required;
  *
  * @author alessandro
  */
+@ToString
 @Entity
 @Table(name = "contracts_working_time_types")
 public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
@@ -45,7 +44,7 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @Override
   public void setValue(Object value) {
-    this.workingTimeType = (WorkingTimeType)value;
+    this.workingTimeType = (WorkingTimeType) value;
   }
 
   public IPropertiesInPeriodOwner getOwner() {
@@ -53,13 +52,13 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   }
 
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.contract = (Contract)target;
+    this.contract = (Contract) target;
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof WorkingTimeType) {
-      return this.getValue().equals(((WorkingTimeType)otherValue));
+      return this.getValue().equals(((WorkingTimeType) otherValue));
     }
     return false;
   }

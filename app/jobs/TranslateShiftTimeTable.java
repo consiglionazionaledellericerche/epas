@@ -1,19 +1,19 @@
 package jobs;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import javax.inject.Inject;
-import org.joda.time.LocalTime;
 import com.google.common.base.Optional;
 import dao.OrganizationShiftTimeTableDao;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftOrganizationManager;
 import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.ShiftTimeTable;
+import models.enumerate.PaymentType;
+import models.enumerate.ShiftSlot;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import models.enumerate.*;
 
 @OnApplicationStart(async = true)
 @Slf4j
@@ -27,6 +27,11 @@ public class TranslateShiftTimeTable extends Job<Void> {
 
   @Override
   public void doJob() {
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
     final List<ShiftTimeTable> list = ShiftTimeTable.findAll();
     log.info("Inizio procedura trasformazione timetable");
     for (ShiftTimeTable tt : list) {
@@ -41,10 +46,10 @@ public class TranslateShiftTimeTable extends Job<Void> {
         ostt.save();
         log.info("Salvata timetable {}", ostt.name);
         OrganizationShiftSlot slotMorning = new OrganizationShiftSlot();
-        OrganizationShiftSlot slotAfternoon = new OrganizationShiftSlot();
+        
         OrganizationShiftSlot slotEvening = new OrganizationShiftSlot();
         if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - "+ShiftSlot.MORNING.toString();
+          slotMorning.name = "IIT - " + ShiftSlot.MORNING.toString();
         } else {
           slotMorning.name = ShiftSlot.MORNING.toString();
         }      
@@ -56,10 +61,10 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.paymentType = PaymentType.T1;
         slotMorning.shiftTimeTable = ostt;
         slotMorning.save();
-        log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
-
+        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        OrganizationShiftSlot slotAfternoon = new OrganizationShiftSlot();
         if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - "+ShiftSlot.AFTERNOON.toString();
+          slotMorning.name = "IIT - " + ShiftSlot.AFTERNOON.toString();
         } else {
           slotMorning.name = ShiftSlot.AFTERNOON.toString();
         } 
@@ -71,10 +76,10 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.paymentType = PaymentType.T1;
         slotAfternoon.shiftTimeTable = ostt;
         slotAfternoon.save();
-        log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
         
         if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - "+ShiftSlot.EVENING.toString();
+          slotMorning.name = "IIT - " + ShiftSlot.EVENING.toString();
         } else {
           slotMorning.name = ShiftSlot.EVENING.toString();
         } 
@@ -87,7 +92,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
           slotMorning.paymentType = PaymentType.T1;
           slotEvening.shiftTimeTable = ostt;
           slotEvening.save();
-          log.info("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+          log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
         }
       }
       

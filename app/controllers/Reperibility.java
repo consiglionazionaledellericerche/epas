@@ -8,18 +8,16 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-
 import controllers.Resecure.BasicAuth;
-
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
-
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,34 +26,28 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceManager;
 import manager.ReperibilityManager;
-
 import models.Competence;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ValidationException;
-
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
-
-import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -91,6 +83,10 @@ public class Reperibility extends Controller {
   private static CompetenceCodeDao competenceCodeDao;
   @Inject
   private static CompetenceDao competenceDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
   /**
    * Restituisce la lista dei reperibili attivi al momento di un determinato tipo.
@@ -326,7 +322,7 @@ public class Reperibility extends Controller {
         reperibilityManager.savePersonReperibilityDaysFromReperibilityPeriods(
             reperibilityType, year, month, body.periods);
 
-    Logger.debug("Giorni di reperibilità da rimuovere = %s", repDaysOfMonthToRemove);
+    log.debug("Giorni di reperibilità da rimuovere = %s", repDaysOfMonthToRemove);
 
     int deletedRep =
         reperibilityManager.deleteReperibilityDaysFromMonth(
@@ -549,10 +545,20 @@ public class Reperibility extends Controller {
     final String thAbs = Messages.get("PDFReport.thAbsences");
     final String description = reperibilityType.description;
     final String supervisor =
-        reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+        reperibilityType.supervisor.getFullname();
+    String seatSupervisor = "";
+    Office office = reperibilityType.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
 
     renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays,
-        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, supervisor);
+        inconsistentAbsence, cFs, cFr, thNoStamp, thAbs, description, 
+        supervisor, seatSupervisor, office);
   }
 
   /**

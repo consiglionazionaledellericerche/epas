@@ -68,11 +68,23 @@ public class TemplateExtensions extends JavaExtensions {
   private static final DateTimeFormatter DT_FORMATTER = DateTimeFormat
       .forPattern("dd/MM/yyyy HH:mm:ss");
   private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
+  private static final java.time.format.DateTimeFormatter DATE_TIME_JAVA_TIME_FORMATTER = 
+      java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+  private static final java.time.format.DateTimeFormatter LOCALDATE_JAVA_FORMATTER = 
+      java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
   private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
 
 
   public static String format(ReadablePeriod period) {
     return PERIOD_FORMATTER.print(period);
+  }
+
+  public static String format(java.time.LocalDate date) {
+    return date.format(LOCALDATE_JAVA_FORMATTER);
+  }
+
+  public static String format(java.time.LocalDateTime dateTime) {
+    return dateTime.format(DATE_TIME_JAVA_TIME_FORMATTER);
   }
 
   public static String format(LocalDate date) {
@@ -203,6 +215,8 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
+   * Ritorna la stringa cryptata con aes e chiave play predefinita.
+   * @param value la stringa da criptare
    * @return la stringa cryptata con aes e chiave play predefinita.
    */
   public static String encrypt(String value) {
@@ -260,11 +274,16 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
+   * Ritorna la stringa dell'anno mese passato come parametro.
    * @param month Yearmoth da formattare
    * @return La Stringa in formato Mese(nome) Anno
    */
   public static String asText(YearMonth month) {
     return WordUtils.capitalize(month.monthOfYear().getAsText()) + " " + month.getYear();
+  }
+  
+  public static void main(String[] args) {
+    System.out.println(java.time.LocalDate.now().format(LOCALDATE_JAVA_FORMATTER));
   }
 
 }

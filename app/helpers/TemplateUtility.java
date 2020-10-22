@@ -24,6 +24,7 @@ import dao.PersonDao;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.ShiftDao;
+import dao.TimeSlotDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.WorkingTimeTypeDao;
@@ -49,6 +50,7 @@ import models.Office;
 import models.Person;
 import models.Qualification;
 import models.Role;
+import models.TimeSlot;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
@@ -59,13 +61,13 @@ import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 
@@ -102,7 +104,7 @@ public class TemplateUtility {
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
   private final CompetenceRequestDao competenceRequestDao;
-  
+  private final TimeSlotDao timeSlotDao;
    
   
   /**
@@ -120,7 +122,8 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao, GroupDao groupDao, CompetenceRequestDao competenceRequestDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao, CompetenceRequestDao competenceRequestDao, 
+      TimeSlotDao timeSlotDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -142,6 +145,8 @@ public class TemplateUtility {
     this.uroDao = uroDao;
     this.groupDao = groupDao;
     this.competenceRequestDao = competenceRequestDao;
+    this.timeSlotDao = timeSlotDao;
+
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -175,12 +180,11 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
-
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
     return results.size();
   }
   
@@ -195,11 +199,51 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), AbsenceRequestType.VACATION_REQUEST, groups, user.person);
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.VACATION_REQUEST, groups, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste di permesso personale
+   * da approvare nel template.
+   * @return la quantità di richieste di permesso personale da approvare.
+   */
+  public final int personalPermissionRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie anno passato
+   * post deadline da approvare nel template.
+   * @return la quantità di richieste ferie anno passato post deadline da approvare.
+   */
+  public final int vacationPastYearAfterDeadlineRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
 
     return results.size();
   }
@@ -313,6 +357,10 @@ public class TemplateUtility {
     return workingTimeTypeDao.getEnabledWorkingTimeTypeForOffice(office);
   }
 
+  public List<TimeSlot> getEnabledTimeSlotsForOffice(Office office) {
+    return timeSlotDao.getEnabledTimeSlotsForOffice(office);
+  }
+  
   public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.office);
   }
@@ -523,6 +571,11 @@ public class TemplateUtility {
   }
 
 
+  /**
+   * La lista dei gruppi badge per sede.
+   * @param office la sede di riferimento
+   * @return la lista dei gruppi badge per sede.
+   */
   public List<BadgeSystem> getConfiguredBadgeSystems(Office office) {
     List<BadgeSystem> configuredBadgeSystem = Lists.newArrayList();
     for (BadgeSystem badgeSystem : office.badgeSystems) {
@@ -540,6 +593,10 @@ public class TemplateUtility {
 
   public List<StampTypes> getStampTypes() {
     return UserDao.getAllowedStampTypes(Security.getUser().get());
+  }
+  
+  public List<TeleworkStampTypes> getTeleworkStampTypes() {
+    return UserDao.getAllowedTeleworkStampTypes(Security.getUser().get());
   }
 
   /**
@@ -590,6 +647,12 @@ public class TemplateUtility {
     return false;
   }
 
+  /**
+   * Se l'assenza è prendibile, false altrimenti.
+   * @param absenceType il tipo di assenza
+   * @param group il gruppo di tipi di assenza
+   * @return se l'assenza è prendibile, false altrimenti
+   */
   public boolean isTakableOnly(AbsenceType absenceType, GroupAbsenceType group) {
     if (group.takableAbsenceBehaviour != null
         && group.takableAbsenceBehaviour.takableCodes.contains(absenceType)
@@ -613,7 +676,7 @@ public class TemplateUtility {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0 giorni";// giorno lavorativo";
+        return "0 giorni"; // giorno lavorativo";
       }
       int units = amount / 100;
       int percent = amount % 100;

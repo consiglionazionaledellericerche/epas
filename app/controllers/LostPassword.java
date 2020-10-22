@@ -1,20 +1,14 @@
 package controllers;
 
 import com.google.common.base.Strings;
-
 import dao.PersonDao;
 import dao.UserDao;
-
 import javax.inject.Inject;
-
 import manager.EmailManager;
 import manager.UserManager;
-
 import models.Person;
 import models.User;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Email;
 import play.data.validation.Equals;
 import play.data.validation.MinSize;

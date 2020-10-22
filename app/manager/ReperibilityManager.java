@@ -72,6 +72,17 @@ public class ReperibilityManager {
   private final CompetenceCodeDao competenceCodeDao;
   private final PersonDayManager personDayManager;
 
+  /**
+   * Injection.
+   * @param competenceDao il dao sulle competenze
+   * @param absenceDao il dao sulle assenze
+   * @param personDao il dao sulle persone
+   * @param personReperibilityDayDao il dao sulle reperibilità
+   * @param personDayManager il manager dei metodi dei personday
+   * @param personDayDao il dao del personday
+   * @param competenceCodeDao il dao sui codici di competenza
+   * @param officeDao il dao sulle sedi
+   */
   @Inject
   public ReperibilityManager(
       CompetenceDao competenceDao, AbsenceDao absenceDao, PersonDao personDao,
@@ -87,9 +98,10 @@ public class ReperibilityManager {
   }
 
   /**
+   * la lista dei periodi di reperibilità effettuati.
    * @param reperibilityDays la lista dei giorni di reperibilità effettuati.
    * @param prt il tipo di reperibilità
-   * @return la lista dei periodi di reperibilità effettuati
+   * @return la lista dei periodi di reperibilità effettuati.
    */
   public List<ReperibilityPeriod> getPersonReperibilityPeriods(
       List<PersonReperibilityDay> reperibilityDays, PersonReperibilityType prt) {
@@ -119,9 +131,10 @@ public class ReperibilityManager {
 
 
   /**
+   * Ritorna la lista dei periodi di assenza in reperibilità.
    * @param absencePersonReperibilityDays lista dei giorni di assenza in reperibilita'.
    * @param reperibilityType tipo di reperibilita'
-   * @return lista di periodi di assenza in reperibilità
+   * @return lista di periodi di assenza in reperibilità.
    */
   public List<AbsenceReperibilityPeriod> getAbsentReperibilityPeriodsFromAbsentReperibilityDays(
       List<Absence> absencePersonReperibilityDays, PersonReperibilityType reperibilityType) {
@@ -153,6 +166,14 @@ public class ReperibilityManager {
     return absenceReperibilityPeriods;
   }
 
+  /**
+   * L'insieme delle reperibilità salvate.
+   * @param reperibilityType la tipologia di servizio di reperibilità
+   * @param year l'anno
+   * @param month il mese
+   * @param reperibilityPeriods i periodi di reperibilità
+   * @return l'insieme delle reperibilità salvate.
+   */
   public Set<Integer> savePersonReperibilityDaysFromReperibilityPeriods(
       PersonReperibilityType reperibilityType, Integer year, Integer month,
       List<ReperibilityPeriod> reperibilityPeriods) {
@@ -351,6 +372,7 @@ public class ReperibilityManager {
 
 
   /**
+   * Cambia le persone in reperibilità.
    * @param reperibilityType type of a reperibility.
    * @param startDay data di inizio del periodo di reperibilità
    * @param endDay data di fine del periodo di reperibilità
@@ -414,8 +436,9 @@ public class ReperibilityManager {
 
 
   /**
+   * Ritorna la list di reperibili coinvolti nei giorni di reperibilità.
    * @param personReperibilityDays lista di giorni di reperibilità effettuati dai reperibili.
-   * @return lista dei reperibili coinvolti nei giorni di reperibilità passati come parametro
+   * @return lista dei reperibili coinvolti nei giorni di reperibilità passati come parametro.
    */
   public List<Person> getPersonsFromReperibilityDays(
       List<PersonReperibilityDay> personReperibilityDays) {
@@ -717,6 +740,7 @@ public class ReperibilityManager {
 
 
   /**
+   * Aggiorna la reperibilità a partire dalle competenze.
    * @param competenceList lista di competenze.
    * @param personsApprovedCompetence tabella contnente per ogni persona, coinvolta nelle competenze
    *        passate come parametro, e per ogni tipo di competenza, il valore approvato per quella
@@ -735,6 +759,7 @@ public class ReperibilityManager {
 
 
   /**
+   * Aggiorna le date del report della reperibilità a partire dalle competenze.
    * @param competenceList lista di competenze.
    * @param reperibilityDateDays tabella contnente per ogni persona, coinvolta nelle competenze
    *        passate come eparametro, e per ogni tipo di competenza, il valore della reason
@@ -865,7 +890,13 @@ public class ReperibilityManager {
     return Optional.of(icsCalendar);
   }
 
-
+  /**
+   * Ritorna un calendario con le ics nei giorni di reperibilità.
+   * @param year l'anno
+   * @param type il tipo di reperibilità
+   * @param personReperibility la personReperibility
+   * @return un Calendar che inserisce le ics in reperibilità.
+   */
   public Calendar createicsReperibilityCalendar(
       int year, Long type, Optional<PersonReperibility> personReperibility) {
 

@@ -9,6 +9,8 @@ import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.ArrayList;
@@ -73,6 +75,10 @@ public class ReperibilityCalendar extends Controller {
   static CompetenceCodeDao competenceCodeDao;
   @Inject
   static PersonDayManager personDayManager;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static RoleDao roleDao;
 
   /**
    * ritorna alla view le info necessarie per creare il calendario.
@@ -87,16 +93,16 @@ public class ReperibilityCalendar extends Controller {
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
     if (reperibilities.isEmpty()) {
-      log.info("Richiesta visualizzazione reperibilità ma nessun servizio di "
+      log.debug("Richiesta visualizzazione reperibilità ma nessun servizio di "
           + "reperibilità presente");
       flash.error("Nessun tipo di reperibilità presente");
       Application.index();
     }
-    
+
     final PersonReperibilityType reperibilitySelected = 
         reperibility.id != null ? reperibility : reperibilities.get(0);
 
-    
+
     rules.checkIfPermitted(reperibilitySelected);
 
     render(reperibilities, reperibilitySelected, currentDate);
@@ -116,7 +122,7 @@ public class ReperibilityCalendar extends Controller {
     if (reperibility != null) {
       rules.checkIfPermitted(reperibility);
       final List<PersonReperibility> people = 
-          reperibilityManager2.reperibilityWorkers(reperibility,start, end);
+          reperibilityManager2.reperibilityWorkers(reperibility, start, end);
       int index = 0;
       final List<ReperibilityEvent> reperibilityWorkers = new ArrayList<>();
 
@@ -429,7 +435,7 @@ public class ReperibilityCalendar extends Controller {
 
     for (Absence abs : absences) {
 
-      /**
+      /*
        * Per quanto riguarda gli eventi 'allDay':
        *
        * La convenzione del fullcalendar è quella di avere il parametro end = null
@@ -563,6 +569,7 @@ public class ReperibilityCalendar extends Controller {
       listWorkdaysRep.add(dto);
       listHolidaysRep.add(dtoHoliday);
     });
+
     //TODO: nella render ritornare una lista di dto alla vista
     render(reperibilityTypeMonth, listWorkdaysRep, listHolidaysRep);
 
@@ -588,7 +595,7 @@ public class ReperibilityCalendar extends Controller {
       flash.keep();
       args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
       args.put("reperibilityId", reperibilityTypeMonth.personReperibilityType.id);
-      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement",args).url);
+      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement", args).url);
     }
     reperibilityTypeMonth.approved = true;
     reperibilityTypeMonth.save();
@@ -620,4 +627,5 @@ public class ReperibilityCalendar extends Controller {
     args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
   }
+
 }

@@ -8,10 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import models.OrganizationShiftSlot;
 import models.enumerate.EventColor;
-import models.enumerate.ShiftSlot;
 import org.joda.time.LocalDateTime;
 
 /**
+ * Evento di turno.
  * @author daniele
  * @since 15/05/17.
  */

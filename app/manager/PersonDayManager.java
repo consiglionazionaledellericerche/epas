@@ -2,32 +2,41 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.google.inject.Inject;
-
+import dao.ContractDao;
+import dao.GeneralSettingDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
 import dao.ZoneDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperPersonDay;
-
 import it.cnr.iit.epas.DateUtility;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
-
+import models.GeneralSetting;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.TimeSlot;
 import models.WorkingTimeTypeDay;
 import models.ZoneToZones;
 import models.absences.Absence;
@@ -36,17 +45,14 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
-
 import org.assertj.core.util.Strings;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
+import play.jobs.Job;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -56,9 +62,11 @@ public class PersonDayManager {
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final PersonShiftDayDao personShiftDayDao;
   private final PersonDayDao personDayDao;
-  private final AbsenceComponentDao absenceComponentDao;
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final ZoneDao zoneDao;
+  private final ContractDao contractDao;
+  private final AbsenceComponentDao absenceComponentDao;
+
 
   /**
    * Costruttore.
@@ -70,16 +78,17 @@ public class PersonDayManager {
   @Inject
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
-      AbsenceComponentDao absenceComponentDao,
-      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao) {
+      PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao,
+      AbsenceComponentDao absenceComponentDao, ContractDao contractDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
-    this.absenceComponentDao = absenceComponentDao;
     this.personShiftDayDao = personShiftDayDao;
     this.personDayDao = personDayDao;
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.zoneDao = zoneDao;
+    this.absenceComponentDao = absenceComponentDao;
+    this.contractDao = contractDao;
   }
 
   /**
@@ -110,7 +119,7 @@ public class PersonDayManager {
 
 
   /**
-   * 
+   * Metodo che controlla se esiste un'assenza a completamento giornaliero nella giornata.
    * @param personDay il personDay in cui cercare l'assenza
    * @return Assenza che giustifica il tempo che manca al raggiungimento dell'orario di lavoro.
    */
@@ -130,21 +139,23 @@ public class PersonDayManager {
     return getAllDay(personDay).isPresent() || getAssignAllDay(personDay).isPresent();
 
   }
-  
+
   /**
-   * 
+   * Metodo che ritorna true se l'assenza è compatibile con la reperibilità, 
+   * false altrimenti.
    * @param personDay il personDay su cui cercare le assenze
    * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
    */
   public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
-    
+
     return personDay.absences.stream()
         .noneMatch(abs -> !abs.absenceType.reperibilityCompatible);
 
   }
 
   /**
-   * 
+   * Metodo che ritorna true se nel giorno c'è un assenza a completamento giornaliero,
+   * false altrimeni.
    * @param personDay il personday da verificare
    * @return se nel giorno vi è un'assenza a completamento giornaliero.
    */
@@ -441,7 +452,7 @@ public class PersonDayManager {
     List<ZoneToZones> link = personDay.person.getZones();
 
     if (!link.isEmpty() && validPairs.size() > 1) {      
-      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs);
+      justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs, startWork, endWork);
 
     }
     personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
@@ -484,15 +495,17 @@ public class PersonDayManager {
       } else {
         if (missingTime < 0) {
           personDay.setTimeAtWork(personDay.getTimeAtWork());
-          
+
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
           personDay.setTimeAtWork(computedTimeAtWork + missingTime);
-          personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
-              .get().getAbsenceType().timeForMealTicket;
+          if (!personDay.isTicketForcedByAdmin) {
+            personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
+                .get().getAbsenceType().timeForMealTicket;
+          }          
         }        
       }
-      
+
     }
 
     //Controllo se ho del tempo aggiuntivo dovuto al lavoro in missione da sommare al tempo a lavoro
@@ -629,34 +642,44 @@ public class PersonDayManager {
     return personDay;
   }
 
+
   /**
-   * 
-   * @param validPairs la lista di coppie di timbrature valide 
+   * Metodo che controlla il tempo giustificato dalle zone di timbratura.
+   * @param validPairs la lista di coppie di timbrature valide
+   * @param startWork l'orario di inizio lavoro in sede
+   * @param endWork l'orario di fine lavoro in sede
    * @return il quantitativo che viene giustificato timbrando uscita/ingresso su zone 
    *     appartenenti a un link.
    */
-  private int justifiedTimeBetweenZones(List<PairStamping> validPairs) {
+  private int justifiedTimeBetweenZones(List<PairStamping> validPairs, 
+      LocalTime startWork, LocalTime endWork) {
+
     int timeToJustify = 0;
-    PairStamping pair = validPairs.get(0);
-    for (int i = 1; i < validPairs.size(); i++) {
-      PairStamping next = validPairs.get(i);
-      if (next != null && stampingsBetweenZones(pair, next)) {
-
+    PairStamping temp = null;
+    for (PairStamping validPair : validPairs) {
+      if (temp != null && stampingsBetweenZones(temp, validPair)) {
         Optional<ZoneToZones> zoneToZones = 
-            zoneDao.getByLinkNames(pair.second.stampingZone, next.first.stampingZone);
+            zoneDao.getByLinkNames(temp.second.stampingZone, validPair.first.stampingZone);
         if (zoneToZones.isPresent()) {
-          if (isTimeInDelay(pair, next, zoneToZones)) {
-            timeToJustify +=  
-                (DateUtility.toMinute(next.first.date) 
-                    - DateUtility.toMinute(pair.second.date));
-          } else {
-            timeToJustify += zoneToZones.get().delay;
-          }
 
+          Range<LocalTime> range = Range.closed(temp.second.date.toLocalTime(), 
+              validPair.first.date.toLocalTime());
+          if (range.lowerEndpoint().isBefore(startWork) 
+              && !range.upperEndpoint().isBefore(startWork)) {
+            range.span(Range.closed(startWork, validPair.first.date.toLocalTime()));
+          }
+          if (isTimeInDelay(temp, validPair, zoneToZones)) {
+            timeToJustify = timeToJustify 
+                + (DateUtility.toMinute(range.upperEndpoint()) 
+                    - DateUtility.toMinute(range.lowerEndpoint()));
+          } else {
+            timeToJustify = timeToJustify + zoneToZones.get().delay;
+          }             
         }
       }
-      pair = next;
+      temp = validPair;
     }
+
     return timeToJustify;
   }
 
@@ -951,7 +974,7 @@ public class PersonDayManager {
   }
 
   /**
-   * 
+   * Metodo che controlla se il giorno è valido rispetto a tempo a lavoro, festivo...
    * @param personDay il personDay relativo alla persona e al giorno di interesse
    * @param pd il wrapper contenente i metodi di utilità
    * @return true se è un giorno valido rispetto a tempo a lavoro, festivo, assenze ecc...
@@ -1031,7 +1054,7 @@ public class PersonDayManager {
     //(1)Costruisco le coppie valide per calcolare il worktime
     List<PairStamping> validPairs = Lists.newArrayList();
     List<Stamping> serviceStampings = Lists.newArrayList();
-    List<Stamping> tunnelStampings = Lists.newArrayList();
+
     Stamping stampEnter = null;
 
     for (Stamping stamping : orderedStampings) {
@@ -1042,10 +1065,6 @@ public class PersonDayManager {
         serviceStampings.add(stamping);
         continue;
       }
-//      if (stamping.stampType == StampTypes.TUNNEL) {
-//        tunnelStampings.add(stamping);
-//        continue;
-//      }
       //cerca l'entrata
       if (stampEnter == null) {
         if (stamping.isIn()) {
@@ -1104,33 +1123,6 @@ public class PersonDayManager {
         stamping.valid = false;
       }
     }
-    
-    //(2a) scarto le stamping di tunnel di timbratura che non appartengono ad alcuna coppia valida
-//    List<Stamping> tunnelStampingsToCheck = Lists.newArrayList();
-//    for (Stamping stamping : tunnelStampings) {
-//      boolean belongToValidPairNotTunnel = false;
-//      boolean belongToValidPairTunnel = false;
-//      for (PairStamping validPair : validPairs) {
-//        LocalDateTime outTime = validPair.second.date;
-//        LocalDateTime inTime = validPair.first.date;
-//        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
-//          if (validPair.second.stampType == StampTypes.TUNNEL
-//              || validPair.first.stampType == StampTypes.TUNNEL) {
-//            belongToValidPairTunnel = true;
-//          } else {
-//            belongToValidPairNotTunnel = true;
-//          }
-//          break;
-//        }
-//      }
-//      if (belongToValidPairNotTunnel) {
-//        tunnelStampingsToCheck.add(stamping);
-//      } else if (belongToValidPairTunnel) {
-//        stamping.valid = true;         //capire se è corretto...
-//      } else {
-//        stamping.valid = false;
-//      }
-//    }
 
     //(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
     for (PairStamping validPair : validPairs) {
@@ -1171,45 +1163,6 @@ public class PersonDayManager {
         }
       }
     }
-    //(3a) aggrego le stampings del tunnel per coppie valide ed eseguo il check di coppia valida
-//    for (PairStamping validPair : validPairs) {
-//      LocalDateTime outTime = validPair.second.date;
-//      LocalDateTime inTime = validPair.first.date;
-//      List<Stamping> tunnelStampingsInSinglePair = tunnelStampingsToCheck.stream()
-//          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
-//          .collect(Collectors.toList());
-//      //check
-//      Stamping tunnelExit = null;
-//      for (Stamping stamping : tunnelStampingsInSinglePair) {
-//        //cerca l'uscita di tunnel
-//        if (tunnelExit == null) {
-//          if (stamping.isOut()) {
-//            tunnelExit = stamping;
-//            continue;
-//          }
-//          if (stamping.isIn()) {
-//            //una entrata di tunnel prima di una uscita da tunnel e' come se non esistesse
-//            stamping.valid = false;
-//            continue;
-//          }
-//        }
-//        //cerca l'entrata nel tunnel
-//        if (tunnelExit != null) {
-//          if (stamping.isIn()) {
-//            stamping.valid = true;
-//            tunnelExit.valid = true;
-//            tunnelExit = null;
-//            continue;
-//          }
-//          //trovo una seconda uscita da tunnel, butto via la prima
-//          if (stamping.isOut()) {
-//            tunnelExit.valid = false;
-//            tunnelExit = stamping;
-//            continue;
-//          }
-//        }
-//      }
-//    }
 
     return validPairs;
   }
@@ -1349,7 +1302,11 @@ public class PersonDayManager {
     return coupleOfStampings;
   }
 
+
   /**
+   * Metodo di utilità che determina la quantità di tempo a lavoro in eccesso nel caso 
+   * una persona sia in turno.
+   * @param pd il personDay da controllare
    * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno.
    */
   public int getExceedInShift(PersonDay pd) {
@@ -1392,10 +1349,11 @@ public class PersonDayManager {
   public int workingMinutes(List<PairStamping> validPairs,
       LocalTime start, LocalTime end) {
 
-    int workingMinutes = 0;
+    int workingMinutes = 0;    
 
     //Per ogni coppia valida butto via il tempo oltre la fascia.
     for (PairStamping validPair : validPairs) {
+
       LocalTime consideredStart = new LocalTime(validPair.first.date);
       LocalTime consideredEnd = new LocalTime(validPair.second.date);
       if (consideredEnd.isBefore(start)) {
@@ -1410,9 +1368,11 @@ public class PersonDayManager {
       if (consideredEnd.isAfter(end) && !validPair.second.isOffSiteWork()) {
         consideredEnd = end;
       }
-      workingMinutes += DateUtility.toMinute(consideredEnd) - DateUtility.toMinute(consideredStart);
-    }
 
+      workingMinutes += DateUtility.toMinute(consideredEnd) 
+          - DateUtility.toMinute(consideredStart);      
+
+    }
     return workingMinutes;
 
   }
@@ -1457,6 +1417,19 @@ public class PersonDayManager {
    */
   public boolean isHoliday(Person person, LocalDate date) {
 
+    return isHoliday(person, date, true);
+
+  }
+
+  /**
+   * Metodo che verifica se il giorno, per la persona passata come parametro, 
+   * è da considerarsi festivo o meno.
+   * @param person persona interessata
+   * @param date la data da controllare
+   * @param saturdayHoliday se il sabato deve essere considerato festivo
+   * @return true se il giorno è festivo, false altrimenti.
+   */
+  public boolean isHoliday(Person person, LocalDate date, boolean saturdayHoliday) {
     //Festività generale
     MonthDay patron = (MonthDay) configurationManager
         .configValue(person.office, EpasParam.DAY_OF_PATRON, date);
@@ -1473,7 +1446,14 @@ public class PersonDayManager {
     }
 
     //tempo a lavoro
-    return workingTimeTypeDay.get().holiday;
+    if (saturdayHoliday) {
+      return workingTimeTypeDay.get().holiday;
+    } else {
+      if (workingTimeTypeDay.get().dayOfWeek == DateTimeConstants.SUNDAY) {
+        return true;
+      }
+      return false;
+    }
   }
 
   /**
@@ -1488,7 +1468,8 @@ public class PersonDayManager {
     }
     final List<Stamping> orderedStampings = ImmutableList
         .copyOf(stampings.stream().sorted().collect(Collectors.toList()));
-    List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
+    List<PairStamping> pairStampings = computeValidPairStampingsForPresence(orderedStampings);
+    //List<PairStamping> pairStampings = computeValidPairStampings(orderedStampings);
     boolean enough = false;
     int timeInSeat = 0;
     //int timeOffSeat = 0;
@@ -1512,38 +1493,292 @@ public class PersonDayManager {
   }
 
   /**
-   * Implementazione bizzarra dei permessi brevi... Andrà superata.
-   * @param pd personDay
+   * Metodo usato per calcolare quanto tempo è stato lavorato in sede dai dipendenti IV-VIII.
+   * @param orderedStampings la lista ordinata delle timbrature
+   * @return la lista delle coppie valide di timbratura che servono per determinare il tempo 
+   *     lavorato in sede.
    */
-  public void handleShortPermission(IWrapperPersonDay pd) {
-    //Gestione permessi brevi 36 ore anno
-    int timeShortPermission = shortPermissionTime(pd.getValue());
-    Absence shortPermission = null;
-    for (Absence absence : pd.getValue().absences) {
-      if (absence.absenceType.code.equals("PB")) {
-        shortPermission = absence;
+  private List<PairStamping> computeValidPairStampingsForPresence(List<Stamping> orderedStampings) {
+    
+    if (orderedStampings.isEmpty()) {
+      return Lists.newArrayList();
+    }
+    boolean serviceStamping = false;
+    Stamping stampEnter = null;
+    List<PairStamping> pairStampings = Lists.newArrayList();
+    for (Stamping stamping : orderedStampings) {
+
+      if (stampEnter == null) {
+        if (stamping.isIn()) {
+          if ((stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO && serviceStamping) 
+              || (stamping.stampType == null && !serviceStamping)
+              || (stamping.stampType == StampTypes.PAUSA_PRANZO && !serviceStamping)) {
+            stampEnter = stamping;
+            continue;
+          }
+
+        }
+        if (stamping.isOut()) {
+          //una uscita prima di una entrata e' come se non esistesse          
+          continue;
+        }
+
+      }
+      //cerca l'uscita
+      if (stampEnter != null) {
+        if (stamping.isOut()) {
+          if (!serviceStamping && stamping.stampType == StampTypes.MOTIVI_DI_SERVIZIO) {
+            serviceStamping = true;
+          }
+          PairStamping pair = new PairStamping(stampEnter, stamping);
+          pairStampings.add(pair);
+
+          stampEnter = null;
+          if (stamping.stampType == null) {
+            serviceStamping = false;
+          }
+          continue;
+        }
+        //trovo un secondo ingresso, butto via il primo
+        if (stamping.isIn()) {          
+          stampEnter = stamping;
+        }
+      }
+      
+    }
+    return pairStampings;
+  }
+
+  /**
+   * L'insieme degli intervalli di tempo per cui non sono presenti timbrature nella fascia 
+   * oraria obbligatoria.
+   * 
+   * @param personDay il PersonDay di cui verificare le tibrature
+   * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
+   * @return l'insieme degli intervalli in cui il dipendente non è al lavoro
+   */
+  private RangeSet<LocalTime> missingTimeRanges(PersonDay personDay, 
+      Range<LocalTime> mandatoryTimeSlotRange) {
+    val workingTimeRangeSet = TreeRangeSet.<LocalTime>create();
+
+    val pairs = getValidPairStampings(personDay.stampings).stream().collect(Collectors.toList());
+
+    for (PairStamping ps : pairs) {
+      val vpr = Range.closed(ps.first.date.toLocalTime(), ps.second.date.toLocalTime());
+      if (mandatoryTimeSlotRange.isConnected(vpr)) {
+        workingTimeRangeSet.add(mandatoryTimeSlotRange.intersection(vpr));
       }
     }
 
-    if (timeShortPermission == 0 && shortPermission != null) {
-      //delete
-      shortPermission.delete();
-      pd.getValue().absences.remove(shortPermission);
-    } else if (timeShortPermission > 0 && shortPermission == null) {
-      //create
-      shortPermission = new Absence();
-      shortPermission.personDay = pd.getValue();
-      shortPermission.absenceType = absenceComponentDao.absenceTypeByCode("PB").get();
-      shortPermission.justifiedType = absenceComponentDao
-          .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
-      shortPermission.justifiedMinutes = timeShortPermission;
-      shortPermission.save();
-      pd.getValue().absences.add(shortPermission);
-    } else if (timeShortPermission > 0 && shortPermission != null) {
-      //edit
-      shortPermission.justifiedMinutes = timeShortPermission;
-      shortPermission.save();
+    if (workingTimeRangeSet.isEmpty()) {
+      return workingTimeRangeSet;
     }
+
+    val missionTimeRangeSet = workingTimeRangeSet.complement();
+    missionTimeRangeSet.remove(Range.upTo(mandatoryTimeSlotRange.lowerEndpoint(), BoundType.OPEN));
+    missionTimeRangeSet.remove(Range.downTo(mandatoryTimeSlotRange.upperEndpoint(), 
+        BoundType.OPEN));
+
+    return missionTimeRangeSet;
+
+  }
+
+  /**
+   * La somma del tempo in cui il dipendente non è al lavoro durante la fascia oraria
+   * obbligatoria. 
+   * 
+   * @param personDay il PersonDay di cui verificare le timbrature 
+   * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
+   * @return il tempo (in minuti) in cui il dipendente non è al lavoro 
+   *     durante la fascia obbligatoria.
+   */
+  private int missingTime(PersonDay personDay, Range<LocalTime> mandatoryTimeSlotRange) {
+    val missingTimeRanges = missingTimeRanges(personDay, mandatoryTimeSlotRange);
+    return missingTimeRanges.asRanges().stream()
+        .mapToInt(tr -> 
+        DateUtility.toMinute(tr.upperEndpoint()) - DateUtility.toMinute(tr.lowerEndpoint())).sum();
+  } 
+
+  /**
+   * Calcola il tempo dell'eventuale pausa pranzo durante la fascia oraria obbligatoria 
+   * di presenza.
+   * 
+   * @param personDay il personDay di cui verificare il tempo per la pausa pranzo
+   * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
+   * @return il tempo della pausa pranzo duranta la fascia oraria obbligatoria
+   */
+  private int lunchTime(PersonDay personDay, Range<LocalTime> mandatoryTimeSlotRange) {
+    int lunchTime = 0;
+
+    LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
+        personDay.person.office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
+
+    val gapLunchPairs = getGapLunchPairs(personDay, lunchInterval.from, 
+        lunchInterval.to, Optional.absent());
+
+    val lunchTimeRangeSet = TreeRangeSet.<LocalTime>create();
+
+    for (PairStamping ps : gapLunchPairs) {
+      val vpr = Range.closed(ps.first.date.toLocalTime(), ps.second.date.toLocalTime());
+      if (mandatoryTimeSlotRange.isConnected(vpr)) {
+        lunchTimeRangeSet.add(mandatoryTimeSlotRange.intersection(vpr));
+      }
+    }
+
+    lunchTime = 
+        lunchTimeRangeSet.asRanges().stream().mapToInt(
+            lt -> DateUtility.toMinute(lt.upperEndpoint()) 
+            - DateUtility.toMinute(lt.lowerEndpoint())).sum();
+
+    return lunchTime;
+  }
+
+  /**
+   * Effettua i calcoli del tempo lavorato durante la fascia oraria obbligatoria, costruendo
+   * l'eventuale permesso breve di cui il dipendente deve usufruire nel caso ci siano assenze orarie
+   * durante l'orario di lavoro obbligatorio.
+   * Le eventuali pause pranzo durante la fascia di oraria obbligatoria sono ammesse e non danno
+   * luogo alla necessità di chiedere un permesso breve.
+   * 
+   * @param personDay il PersonDay contenente le timbrature da verificare (deve essere persistente)
+   * @param mandatoryTimeSlot la fascia oraria obbligatoria da utilizzare nelle verifiche orarie
+   * @return un Optional contente l'assenza che rappresenta il permesso breve 
+   *     (l'assenza non è persita), Optional.absent() se tutta la fascia obbligatoria 
+   *     è coperta come orario. 
+   */
+  private Optional<Absence> buildShortPermissionAbsence(PersonDay personDay, 
+      TimeSlot mandatoryTimeSlot) {   
+    val mandatoryTimeSlotRange = Range.closed(mandatoryTimeSlot.beginSlot, 
+        mandatoryTimeSlot.endSlot);
+
+    int missingTime = missingTime(personDay, mandatoryTimeSlotRange);
+    int lunchTime = lunchTime(personDay, mandatoryTimeSlotRange);
+
+    //Il tempo per pausa pranzo durante la fascia obbligatoria è giustificato
+    missingTime -= lunchTime;
+    if (missingTime > 0) {
+      log.debug("Calcolato permesso breve di {} minuti per {} nel giorno {}", 
+          missingTime, personDay.person.getFullname(), personDay.date);  
+    }
+
+    if (lunchTime > 0) {
+      log.debug("Nell'attribuzione del permesso breve ignorati {} minuti di pausa pranzo", 
+          lunchTime);
+    }
+
+    //create
+    if (missingTime > 0) {
+
+      val shortPermissionAbsenceType = absenceComponentDao.absenceTypeByCode("PB");
+      if (!shortPermissionAbsenceType.isPresent()) {
+        log.warn("Il codice PB per i permessi brevi non è disponibile");
+        return Optional.absent();
+      } else {
+        val shortPermission = new Absence();
+        shortPermission.personDay = personDay;
+        shortPermission.absenceType = absenceComponentDao.absenceTypeByCode("PB").get();
+        shortPermission.justifiedType = absenceComponentDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes_limit);
+        shortPermission.justifiedMinutes = missingTime;
+        return Optional.of(shortPermission);
+      }
+    } else {
+      return Optional.absent(); 
+    }
+
+  }
+
+  /**
+   * Verifica e gestisce eventuali Permessi brevi legati a fascie orarie obbligatorie
+   * per il dipendente.
+   * 
+   * @param personDay il personday da verificare per l'eventuale permesso breve
+   */
+  public void checkAndManageMandatoryTimeSlot(PersonDay personDay) {
+    Verify.verifyNotNull(personDay);
+    Verify.verifyNotNull(personDay.person);
+
+    new Job<Void>() {
+      @Override
+      public void doJob() {
+        val mandatoryTimeSlot = contractDao
+            .getContractMandatoryTimeSlot(personDay.date, personDay.person.id);
+        if (!mandatoryTimeSlot.isPresent()) {
+          log.trace("Le timbrature di {} del giorno {} NON necessitano di controlli "
+              + "sulla fascia obbligatoria",
+              personDay.person, personDay.date);
+          return;
+        }
+        log.trace("Le timbrature di {} del giorno {} necessitano di controlli "
+            + "sulla fascia obbligatoria", 
+            personDay.person, personDay.date);
+
+        //I turni non hanno vincoli di fascia obbligatoria nei giorni in cui sono in turno
+        boolean inShift = personShiftDayDao
+            .getPersonShiftDay(personDay.person, personDay.date).isPresent();
+
+        //Se sono presenti assenze giornalieri la fascia obbigatoria non deve essere 
+        //rispettata anche in presenta di timbrature
+        boolean isAllDayAbsencePresent = isAllDayAbsences(personDay); 
+
+        val previousShortPermission = 
+            personDay.absences.stream().filter(a -> a.absenceType.code.equals("PB")).findFirst();
+
+        if (inShift || isAllDayAbsencePresent) {
+          if (previousShortPermission.isPresent()) {            
+            previousShortPermission.get().delete();
+            log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti"
+                + " assenze giornaliere oppure il dipendente è in turno.",
+                previousShortPermission.get().justifiedMinutes, personDay.date, 
+                personDay.person.getFullname());
+            return;
+          } else {
+            log.debug("Le timbrature di {} del giorno {} NON necessitano di controlli sulla fascia "
+                + "obbligatoria poichè sono presenti assenze giornaliere oppure il dipendente "
+                + "è in turno.",
+                personDay.person, personDay.date);
+            return;
+          }
+        }
+
+        val shortPermission = 
+            buildShortPermissionAbsence(personDay, mandatoryTimeSlot.get().timeSlot);
+
+        if (!shortPermission.isPresent() && !previousShortPermission.isPresent()) {
+          return;
+        }
+
+        if (shortPermission.isPresent() && !previousShortPermission.isPresent()) {
+          log.info("Inserito permesso breve di {} minuti nel giorno {} per {}",
+              shortPermission.get().justifiedMinutes, personDay.date, 
+              personDay.person.getFullname());
+          shortPermission.get().save();
+          return;
+        }
+
+        if (!shortPermission.isPresent() && previousShortPermission.isPresent()) {
+          previousShortPermission.get().delete();
+          log.info("Rimosso permesso breve di {} minuti nel giorno {} per {}",
+              previousShortPermission.get().justifiedMinutes, personDay.date, 
+              personDay.person.getFullname());          
+          return;
+        }
+
+        //Se era già presente un permesso breve di durata diversa dall'attuale viene aggiornato 
+        //il precedente permesso breve
+        if (!previousShortPermission.get().justifiedMinutes
+            .equals(shortPermission.get().justifiedMinutes)) {
+          val newShortPermission = previousShortPermission.get().<Absence>merge();
+          newShortPermission.justifiedMinutes = shortPermission.get().justifiedMinutes;
+          newShortPermission.save();
+          log.debug("Permesso breve esistente nel giorno {} per {}, aggiornato da {} a {} minuti", 
+              personDay.date, personDay.person.getFullname(),
+              previousShortPermission.get().justifiedMinutes, 
+              shortPermission.get().justifiedMinutes);
+        }
+
+      }
+    }.afterRequest();
   }
 
 }

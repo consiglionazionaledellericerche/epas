@@ -1,19 +1,14 @@
 package models;
 
 import com.google.common.base.MoreObjects;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-
 import play.data.validation.Required;
 import play.data.validation.Unique;
 

@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
+import dao.GeneralSettingDao;
 import dao.ShiftDao;
 import dao.ShiftTypeMonthDao;
 import helpers.Web;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.CompetenceCode;
+import models.GeneralSetting;
 import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonCompetenceCodes;
@@ -47,11 +49,7 @@ import play.mvc.Router;
 import play.mvc.With;
 import security.SecurityRules;
 
-/**
- * @author arianna
- * @author daniele
- * @since 15/05/17.
- */
+
 @Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
@@ -70,6 +68,8 @@ public class Calendar extends Controller {
   static ShiftTypeMonthDao shiftTypeMonthDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   private static String holidayCode = "T3";
   private static String nightCode = "T2";
@@ -93,7 +93,7 @@ public class Calendar extends Controller {
     final LocalDate currentDate = Optional.fromNullable(date).or(LocalDate.now());
 
     final List<ShiftType> activities = shiftManager2.getUserActivities();
-    log.info("userActivities.size() = {}", activities.size());
+    log.debug("userActivities.size() = {}", activities.size());
     
     final ShiftType activitySelected = activity.id != null 
         ? activity : activities.size() > 0 ?  activities.get(0) : null;
@@ -295,6 +295,7 @@ public class Calendar extends Controller {
 
 
   /**
+   * Ritorna lista di DTO contenenti le assenze di una persona nell'intervallo specificato.
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -314,7 +315,7 @@ public class Calendar extends Controller {
 
     for (Absence abs : absences) {
 
-      /**
+      /*
        * Per quanto riguarda gli eventi 'allDay':
        *
        * La convenzione del fullcalendar è quella di avere il parametro end = null
@@ -361,9 +362,6 @@ public class Calendar extends Controller {
     final PNotifyObject message;
     final PersonShiftDay shift = shiftDao.getPersonShiftDayById(personShiftDayId);
 
-    final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
-        .shiftType, newDate).orNull();
-
     if (shift == null) {
       message = PNotifyObject.builder()
           .title("Error")
@@ -372,6 +370,9 @@ public class Calendar extends Controller {
           .type("error").build();
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
+      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
+          .shiftType, newDate).orNull();
+
       if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
         shift.date = newDate;
 
@@ -507,6 +508,7 @@ public class Calendar extends Controller {
     if (activity.isPresent()) {
       ShiftType shiftType = activity.get();
       rules.checkIfPermitted(activity.get());
+      
       Map<Person, Integer> shiftsCalculatedCompetences = shiftManager2
           .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.daily);
       Map<Person, Integer> holidayShifts = null;
@@ -527,15 +529,15 @@ public class Calendar extends Controller {
               .filter(c -> c.competenceCode.equals(night) 
                   && !c.beginDate.isAfter(start)))
           .collect(Collectors.toList());
-      
+
       if (!list.isEmpty()) {
-        holidayShifts = 
-            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
+        holidayShifts = shiftManager2
+            .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.holiday);
       }
       
       if (!nightList.isEmpty()) {
-        nightShifts =
-            shiftManager2.calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.nightly);
+        nightShifts = shiftManager2
+            .calculateActivityShiftCompetences(shiftType, start, end, ShiftPeriod.nightly);
       }
       
 
@@ -549,6 +551,7 @@ public class Calendar extends Controller {
 
 
   /**
+   * True se l'attività è modificabile, false altrimenti.
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
@@ -657,7 +660,7 @@ public class Calendar extends Controller {
 
     Map<String, Object> args = new HashMap<>();
     // Check tra la richiesta del riepilogo e l'approvazione definitiva dei turni: non ci devono
-    // essere state modifiche in modo da evitare che il supervisore validi una situazione diversa 
+    // essere state modifiche in modo da evitare che il responsabile validi una situazione diversa 
     // da quella che si aspetta
     if (shiftTypeMonth.version != version) {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "

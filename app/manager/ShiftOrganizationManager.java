@@ -1,11 +1,7 @@
 package manager;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import lombok.extern.slf4j.Slf4j;
-import manager.competences.ShiftTimeTableDto;
 import models.CompetenceCode;
 import models.Office;
 import models.OrganizationShiftSlot;
@@ -17,38 +13,38 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.dto.OrganizationTimeTable;
 import models.enumerate.CalculationType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
-@Slf4j
+
 public class ShiftOrganizationManager {
-
-  private void recalculate(PersonShiftDay personShiftDay) {
-    
-  }
-  
-  private void saveCompetence(Person person, ShiftTypeMonth shiftTypeMonth, 
-      CompetenceCode shiftCode, Integer calculatedCompetences) {    
-  }
-  
-  public void checkShiftValid(PersonShiftDay personShiftDay) {
-    
-  }
   
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to, boolean holiday) {
     return 0;
   }
   
+  /**
+   * Ritorna una stringa contenente un eventuale errore in creazione di time table e slot.
+   * @param list la lista di oggetti che compongono l'organizationTimeTable
+   * @param office la sede
+   * @param calculationType il tipo di calcolo della timetable
+   * @param name il nome
+   * @param considerEverySlot se bisogna considerare tutti gli slot per assegnare il turno
+   * @return la stringa contenente eventuali errori in creazione.
+   */
   public String generateTimeTableAndSlot(List<OrganizationTimeTable> list, 
-      Office office, CalculationType calculationType, String name) {
+      Office office, CalculationType calculationType, String name, boolean considerEverySlot) {
     String result = "";
     OrganizationShiftTimeTable shiftTimeTable = null;
     try {      
       shiftTimeTable = new OrganizationShiftTimeTable();
       shiftTimeTable.name = name;
       shiftTimeTable.calculationType = calculationType;
+      shiftTimeTable.considerEverySlot = considerEverySlot;
       shiftTimeTable.office = office;
       shiftTimeTable.save();
-    } catch(Exception e) {
+    } catch (Exception e) {
       result = "Errore in creazione della timetable";
     }
     try {
@@ -82,17 +78,19 @@ public class ShiftOrganizationManager {
   }
 
   /**
-   * 
+   * Ritorna il nome della timetable trasformata secondo la nuova modellazione.
    * @param shiftTimeTable la timetable da trasformare
    * @return il nome della timetable trasformata secondo la nuova modellazione.
    */
   public String transformTimeTableName(ShiftTimeTable shiftTimeTable) {
-    if (shiftTimeTable.shiftTypes.stream().anyMatch(e -> e.shiftCategories.office.codeId.equals("223400"))) {
-      return String.format("IIT - %s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
+    if (shiftTimeTable.shiftTypes.stream()
+        .anyMatch(e -> e.shiftCategories.office.codeId.equals("223400"))) {
+      return String.format("IIT - %s - %s / %s - %s", 
+          shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
           shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
     }
-    return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, shiftTimeTable.endMorning, 
-        shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
+    return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, 
+        shiftTimeTable.endMorning, shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
   }
   
 }

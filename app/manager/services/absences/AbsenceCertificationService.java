@@ -5,18 +5,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneDipendenteAssenze;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneParametriControllo;
@@ -28,7 +24,6 @@ import manager.services.absences.certifications.CertificationYearSituation.Absen
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -38,10 +33,8 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.cache.Cache;
 
 /**
@@ -95,7 +88,7 @@ public class AbsenceCertificationService {
   public Optional<CertificationYearSituation> certificationYearSituationCached(Person person, 
       int year) {
     return Optional.fromNullable(
-        (CertificationYearSituation)Cache.get(cysKey(person, year)));
+        (CertificationYearSituation) Cache.get(cysKey(person, year)));
     
   }
   
@@ -118,10 +111,10 @@ public class AbsenceCertificationService {
       }
     }
     
-    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
+    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente) Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
-        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
+        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);        
         cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
         Cache.add(crKey(person, year), cruscottoCurrent);
       } catch (Exception ex) {
@@ -134,7 +127,7 @@ public class AbsenceCertificationService {
       return null;
     }
     
-    CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
+    CruscottoDipendente cruscottoPrev = (CruscottoDipendente) Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
@@ -461,7 +454,7 @@ public class AbsenceCertificationService {
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code37, year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
-    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code37,  year);
     if (vacationSituation.lastYear != null) {
       vacationPreviousYear.notPresent = absenceNotInAttestati(
           vacationSituation.lastYear.absencesUsed(),
@@ -724,14 +717,12 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType completeDayAndAddOvertime = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
         Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
         if (!type.isPresent()) {
-          log.info("Un codice utilizzato su attestati non è presente su ePAS {}", code);
+          log.debug("Un codice utilizzato su attestati non è presente su ePAS {}", code);
           continue;
         }
 
@@ -857,7 +848,7 @@ public class AbsenceCertificationService {
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
           if (type.get().justifiedTypesPermitted.size() != 1) {
-            log.info("Impossibile importare una assenza senza justified univoco o definito {}", 
+            log.debug("Impossibile importare una assenza senza justified univoco o definito {}", 
                 type.get().code);
             continue;
           }

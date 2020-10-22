@@ -41,4 +41,37 @@
         #{/b.buttons}
   	#{/form}
   #{/accordionItem}
+    #{accordionItem 'handleGroupsByInstitute', parent:'generalSetting', title:'Gestione gruppi per istituto', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Permette la gestione dei gruppi su base di istituto. Se messo a "no", la gestione dei gruppi è in base alla sede. #{/alert}
+		#{f.booleanRadio 'generalSetting.handleGroupsByInstitute' /}
+  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
+  #{accordionItem 'saturdayHolidayShift', parent:'generalSetting', title:'Gestione sabato per i turni', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Specifica se considerare il sabato come festivo . #{/alert}
+		#{f.booleanRadio 'generalSetting.saturdayHolidayShift' /}
+  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
+  #{accordionItem 'roundingShiftQuantity', parent:'generalSetting', title:'Tipo di calcolo delle ore di turno', open:true}
+  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+  		#{f.hidden 'generalSetting.id' /}
+  		#{alert color:'info'}Specifica se permettere l'arrotondamento per il calcolo delle ore di turno da salvare via approvazione del calendario. #{/alert}
+		#{f.booleanRadio 'generalSetting.roundingShiftQuantity' /}  		
+        #{b.buttons}
+        	#{b.save /}
+        #{/b.buttons}
+  	#{/form}
+  #{/accordionItem}
+    
 #{/accordionGroup}

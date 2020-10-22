@@ -1,13 +1,11 @@
 package models;
 
 import com.google.common.collect.Range;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;
@@ -72,7 +70,7 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner owner) {
-    this.contract = (Contract)owner;
+    this.contract = (Contract) owner;
   }
 
   @Override
@@ -92,14 +90,14 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setValue(Object value) {
-    this.fixedworkingtime = (Boolean)value;
+    this.fixedworkingtime = (Boolean) value;
 
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof Boolean) {
-      return this.getValue() == (Boolean)otherValue;
+      return this.getValue() == (Boolean) otherValue;
     }
     return false;
   }

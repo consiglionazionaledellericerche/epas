@@ -19,6 +19,6 @@ public class JpaReferenceBinder implements TypeBinder<Collection<? extends BaseM
   public Object bind(String name, Annotation[] annotations, String value,
       @SuppressWarnings("rawtypes") Class actualClass, Type genericType) throws Exception {
     final Long id = Long.parseLong(value);
-    return JPA.em().getReference(actualClass, id);
+    return JPA.em().find(actualClass, id);
   }
 }

@@ -19,10 +19,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
-import play.data.validation.Required;
 
 @Entity
 @Audited
@@ -121,6 +119,11 @@ public class ShiftType extends BaseModel {
     }
   }
 
+  /**
+   * RItorna l'oggetto che contiene l'approvazione del turno ad una certa data.
+   * @param date la data da considerare
+   * @return l'oggetto che contiene l'approvazione del turno ad una certa data.
+   */
   @Transient
   public Optional<ShiftTypeMonth> monthStatusByDate(LocalDate date) {
     final YearMonth requestedMonth = new YearMonth(date);
@@ -128,6 +131,11 @@ public class ShiftType extends BaseModel {
         .filter(shiftTypeMonth -> shiftTypeMonth.yearMonth.equals(requestedMonth)).findFirst();
   }
 
+  /**
+   * Controlla se il turno è stato approvato alla data passata come parametro.
+   * @param date la data da considerare
+   * @return true se il turno è stato approvato alla data date, false altrimenti.
+   */
   @Transient
   public boolean approvedOn(LocalDate date) {
     Optional<ShiftTypeMonth> monthStatus = monthStatusByDate(date);

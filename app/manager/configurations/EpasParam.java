@@ -3,25 +3,19 @@ package manager.configurations;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
-
 import models.Office;
 import models.Person;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
-
 import play.Play;
 
 @Slf4j
@@ -72,7 +66,25 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Person.class),
   
+  TELEWORK_STAMPINGS("telework_stampings",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
   DISABLED_PERSON_PERMISSION("disabled_person_permission",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  DISABLED_RELATIVE_PERMISSION("disabled_relative_permission",
 
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -98,6 +110,24 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  COVID_19("covid_19",
+
+    EpasParamCategory.GENERAL,
+    EpasParamTimeType.GENERAL,
+    EpasParamValueType.BOOLEAN,
+    EpasParamValueType.formatValue(false),
+    Lists.<RecomputationType>newArrayList(),
+    Person.class),
+  
+  ADDITIONAL_HOURS("additional_hours",
+
+    EpasParamCategory.GENERAL,
+    EpasParamTimeType.GENERAL,
+    EpasParamValueType.BOOLEAN,
+    EpasParamValueType.formatValue(false),
+    Lists.<RecomputationType>newArrayList(),
+    Person.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
@@ -341,6 +371,22 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  SEND_MANAGER_NOTIFICATION_FOR_661("send_manager_notification_for_661",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  ENABLE_37_FLOW("enable_37_flow",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   /**
    * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
@@ -459,7 +505,7 @@ public enum EpasParam {
       Office.class),
   
   /**
-   * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
+   * Per i responsabili di gruppo è necessaria l'approvazione dei riposi compensativi da parte del 
    * responsabile di sede.
    */
   COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
@@ -471,6 +517,7 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+
   //#####################################################################
   //FLOWS PARAMS COMPETENCES
   
@@ -534,9 +581,72 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
-      Office.class)
+      Office.class),
 
-  ;
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_manager_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class);
   
   public final String name;
   public final EpasParamCategory category;
@@ -701,10 +811,10 @@ public enum EpasParam {
             }
           case DAY_MONTH:
             return new MonthDay(
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[1]),
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[1]),
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[0]));
           case MONTH:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case EMAIL:
             return value;
           case IP_LIST:
@@ -712,9 +822,11 @@ public enum EpasParam {
                 Splitter.on(IP_LIST_SEPARATOR)
                 .trimResults().omitEmptyStrings().splitToList(value.trim()));
           case INTEGER:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case BOOLEAN:
-            return new Boolean(value);
+            return Boolean.parseBoolean(value);
+          default:
+            log.warn("Tipo non riconosciuto: {}", type);
         }
       } catch (Exception ex) {
         return null;

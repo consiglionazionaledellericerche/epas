@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.internal.Messages;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
@@ -32,6 +31,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +45,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -82,6 +83,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -191,7 +193,7 @@ public class Administration extends Controller {
   }
 
   /**
-   * 
+   * Metodo che resetta i codici 92H.
    */
   public static void reset92H() {
     List<HistoryValue<Absence>> allAbsences = historyDao.oldMissions();
@@ -202,11 +204,11 @@ public class Administration extends Controller {
 
       Absence abs = val.value;
       long id = val.value.personDay.id;
-      log.info("Id del personDay = {}", id);
+      log.debug("Id del personDay = {}", id);
       PersonDay pd = personDayDao.getPersonDayById(id);
       if (pd != null) {
         if (pd.absences.contains(abs)) {
-          log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
+          log.debug("l'assenza {} è già nel personday, non la inserisco", abs.id);
           continue;
         }
         pd.save();
@@ -399,17 +401,29 @@ public class Administration extends Controller {
 
     final int mb = 1024 * 1024;
     final Runtime runtime = Runtime.getRuntime();
+    val load = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 
-    final Set<Entry<String, String>> entries = ImmutableMap.of(
+    final Set<Entry<String, String>> entrySet = ImmutableMap.of(
         "Available Processors", String.format("%s", runtime.availableProcessors()),
         "Used Memory", String.format("%s Mb", (runtime.totalMemory() - runtime.freeMemory()) / mb),
         "Free Memory", String.format("%s Mb", runtime.freeMemory() / mb),
         "Max Memory", String.format("%s Mb", runtime.maxMemory() / mb),
         "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
-
+    
+    final Set<Entry<String, String>> entries = Sets.newHashSet(entrySet);
+    entries.add(new SimpleEntry<String, String>("Load", String.format("%s", load)));
     render("@data", entries);
   }
 
+  /**
+   * Mostra le informazioni su thread correnti.
+   */
+  public static void threadsData() {
+    val threads = ManagementFactory.getThreadMXBean();
+    val threadsData = threads.dumpAllThreads(true, true);
+    render("@threadsData", threadsData);
+  }
+  
   /**
    * Render del modale per l'aggiunta di un nuovo parametro di configurazione.
    */
@@ -418,6 +432,7 @@ public class Administration extends Controller {
   }
 
   /**
+   * Metodo che permette di salvare la configurazione.
    * @param name     Nome del parametro
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
@@ -549,7 +564,7 @@ public class Administration extends Controller {
     List<PersonReperibility> list = PersonReperibility.findAll();
     List<PersonReperibility> repList = null;
     log.info("Inizio la normalizzazione delle date...");
-    log.info("Creo la mappa persona-personreperibility");
+    log.debug("Creo la mappa persona-personreperibility");
     for (PersonReperibility pr : list) {
       if (pr.startDate != null && pr.endDate == null) {
         if (!map.containsKey(pr.person)) {
@@ -561,15 +576,15 @@ public class Administration extends Controller {
         map.put(pr.person, repList);
       }      
     }
-    log.info("Valuto la mappa per controllare le date dei personreperibilities");
+    log.debug("Valuto la mappa per controllare le date dei personreperibilities");
     for (Map.Entry<Person, List<PersonReperibility>> entry : map.entrySet()) {
 
       if (entry.getValue().size() > 1) {
         List<PersonReperibility> multipleReps = entry.getValue();
-        log.info("Ordino le person reperibilities");
+        log.debug("Ordino le person reperibilities");
         Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);       
         PersonReperibility pr = null;
-        log.info("Controllo le personreperibilities");
+        log.debug("Controllo le personreperibilities");
         for (PersonReperibility rep : multipleReps) {
           if (pr == null) {
             pr = rep;
@@ -582,10 +597,10 @@ public class Administration extends Controller {
               log.warn("Sono nel caso di due person reperibilities con data fine nulla "
                   + "per lo stesso tipo");
               if (rep.startDate.isBefore(pr.startDate)) {
-                log.info("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
+                log.debug("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
                 pr.delete();                
               } else {
-                log.info("Cancello quello più futuro di {} con data {}", 
+                log.debug("Cancello quello più futuro di {} con data {}", 
                     rep.person, rep.startDate);
                 rep.delete();
               }
@@ -607,10 +622,10 @@ public class Administration extends Controller {
    */
   public static void normalizationShifts() {
     List<PersonShiftShiftType> psstList = PersonShiftShiftType.findAll();
-    log.info("Recupero tutte le associazioni tra persone e attività di turno.");
+    log.debug("Recupero tutte le associazioni tra persone e attività di turno.");
     for (PersonShiftShiftType psst : psstList) {
       if (psst.beginDate == null && psst.endDate == null) {
-        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
+        log.debug("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
             psst.personShift.person.fullName(), psst.shiftType.description);
         psst.delete();
       }
@@ -853,11 +868,17 @@ public class Administration extends Controller {
 
 
   /**
-   * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
+   * Aggiorna la configurazione di tutti gli uffici.
+   * @see: manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
     configurationManager.updateAllOfficesConfigurations();
     renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
+  }
+  
+  public static void updatePeopleConfigurations() {
+    configurationManager.updatePeopleConfigurations();
+    renderText("Aggiornati i parametri di configurazione di tutte le persone.");
   }
 
 
@@ -909,5 +930,32 @@ public class Administration extends Controller {
     office.save();
     institute.save();
 
+  }
+  
+  public static void emergency(Boolean confirm) {
+    render(confirm);
+  }
+  
+  /**
+   * Il peggior hack di sempre per uccidere il play.
+   * È da utilizzare in casi disperati come quando sta finendo la 
+   * RAM e non si riesce a fare altre operazioni.
+   * Da usare solo nella versione con Docker che effettua il 
+   * riavvio del servizio.
+   */
+  public static void shutdown(Boolean confirm) {
+    if (confirm == null || !confirm) {
+      flash.success("Conferma lo shutdown selezionando la casella di conferma");
+      confirm = false;
+      render("@emergency", confirm);
+      return;
+    }
+    new Job<Void>() {
+      public void doJob() {
+        log.warn("Killing ePAS -> bye bye, see you soon :-)");
+        System.exit(0);
+      }
+    }.afterRequest();
+    redirect("/");
   }
 }

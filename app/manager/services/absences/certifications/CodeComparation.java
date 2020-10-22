@@ -2,13 +2,10 @@ package manager.services.absences.certifications;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import manager.attestati.dto.show.CodiceAssenza;
-
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;

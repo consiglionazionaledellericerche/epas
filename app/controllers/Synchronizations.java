@@ -413,6 +413,8 @@ public class Synchronizations extends Controller {
   // TODO: spostare nell'updater?
 
   /**
+   * Permette la join tra la persona presente su ePAS e quella presente su Perseo 
+   * (anagrafica).
    * @param epasPerson Person presente su ePas
    * @param perseoPerson Person prelevata da Perseo.
    */
@@ -557,7 +559,7 @@ public class Synchronizations extends Controller {
     for (Person perseoPerson : perseoPeopleByPerseoId.values()) {
       if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
 
-        log.info("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
+        log.debug("Provo name:{} matricola:{} qualifica:{} perseoId:{}",
             perseoPerson.fullName(), perseoPerson.number,
             perseoPerson.qualification, perseoPerson.perseoId);
 
@@ -591,6 +593,7 @@ public class Synchronizations extends Controller {
   }
 
   /**
+   * Importa tutte le persone presenti nell'ufficio con id epasOfficeId.
    * @param epasOfficeId id dell'ufficio.
    */
   public static void importAllPersonInOffice(Long epasOfficeId) {
@@ -716,6 +719,8 @@ public class Synchronizations extends Controller {
   // TODO: spostare nell'updater?
 
   /**
+   * Permette l'aggiornamento del contratto tra la persona presente su ePAS e quella 
+   * presente su Perseo (anagrafica).
    * @param epasContract contratto presente su ePas
    * @param perseoContract contratto Prelevato da Perseo.
    */
@@ -906,6 +911,10 @@ public class Synchronizations extends Controller {
     render(office, people);
   }
 
+  /**
+   * Sincronizza il parametro eppn delle persone della sede con id officeId.
+   * @param officeId l'identificativo della sede
+   */
   public static void syncEppn(Long officeId) {
 
     if (officeId == null) {

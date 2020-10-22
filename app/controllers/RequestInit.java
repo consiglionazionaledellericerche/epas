@@ -20,6 +20,7 @@ import models.Office;
 import models.User;
 import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
+import play.Play;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -28,9 +29,7 @@ import play.mvc.Router;
 import play.mvc.With;
 
 
-/**
- * @author cristian.
- */
+
 @With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 
@@ -43,9 +42,15 @@ public class RequestInit extends Controller {
   @Inject
   static UserDao userDao;
 
+  static final String TELEWORK_CONF = "telework.stampings.active";
+
   @Before(priority = 1)
   static void injectMenu() {
 
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF, "false"))) {
+      renderArgs.put("teleworkStampingsActive", true);
+    }
+    
     Optional<User> user = Security.getUser();
 
     if (!user.isPresent()) {
@@ -104,7 +109,7 @@ public class RequestInit extends Controller {
     } else if (currentUser.person != null) {
       personId = currentUser.person.id;
     } else {
-      val personList = personDao.liteList(offices, year, month);
+      val personList = personDao.liteList(offices, year, month, false);
       if (!personList.isEmpty()) {
         personId = personList.iterator().next().id;
         session.put("personSelected", personId);
@@ -180,10 +185,14 @@ public class RequestInit extends Controller {
     final Collection<String> monthYearSwitcher = ImmutableList.of(
         "Stampings.stampings",
         "Stampings.insertWorkingOffSitePresence",
+        "TeleworkStampings.teleworkStampings",
         "Absences.absences",
         "Competences.competences",
         "Competences.enabledCompetences",
+        "Competences.exportCompetences",
+        "Competences.getCompetenceGroupInYearMonth",
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
         "Stampings.dailyPresenceForPersonInCharge",
@@ -241,6 +250,10 @@ public class RequestInit extends Controller {
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
         "AbsenceGroups.certificationsAbsences");
+    
+    final Collection<String> personTeleworkSwitcher = ImmutableList.of(
+        "TeleworkStampings.personTeleworkStampings"
+        );
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
@@ -253,7 +266,7 @@ public class RequestInit extends Controller {
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear",
+        "Competences.getCompetenceGroupInYearMonth",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "WorkingTimes.manageWorkingTime",
@@ -353,7 +366,7 @@ public class RequestInit extends Controller {
     }
 
     if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
-      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, false);
       renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
@@ -372,6 +385,12 @@ public class RequestInit extends Controller {
           redirect(Router.reverse(currentAction, args).url);
         }
       }
+    }
+    
+    if (personTeleworkSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, true);
+      renderArgs.put("navPersons", persons);
+      renderArgs.put("switchPerson", true);
     }
     if (officeSwitcher.contains(currentAction)) {
 

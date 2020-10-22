@@ -57,6 +57,7 @@ public class CompetenceCodeManager {
   }
 
   /**
+   * Il codice di competenza relativo al codice passato.
    * @return il CompetenceCode relativo al codice code passato come parametro.
    */
   private CompetenceCode getCompetenceCodeByCode(

@@ -29,6 +29,8 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
+    public final SetPath<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot> contractMandatoryTimeSlots = this.<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot>createSet("contractMandatoryTimeSlots", models.ContractMandatoryTimeSlot.class, QContractMandatoryTimeSlot.class, PathInits.DIRECT2);
+
     public final ListPath<models.ContractMonthRecap, QContractMonthRecap> contractMonthRecaps = this.<models.ContractMonthRecap, QContractMonthRecap>createList("contractMonthRecaps", models.ContractMonthRecap.class, QContractMonthRecap.class, PathInits.DIRECT2);
 
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
@@ -58,6 +60,8 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
+
+    public final QContract previousContract;
 
     public final BooleanPath sourceByAdmin = createBoolean("sourceByAdmin");
 
@@ -107,6 +111,7 @@ public class QContract extends EntityPathBase<Contract> {
     public QContract(Class<? extends Contract> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
+        this.previousContract = inits.isInitialized("previousContract") ? new QContract(forProperty("previousContract"), inits.get("previousContract")) : null;
     }
 
 }

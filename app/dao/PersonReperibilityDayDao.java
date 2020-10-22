@@ -40,7 +40,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @param person la persona
    * @param date la data
    * @return un personReperibilityDay nel caso in cui la persona person in data date fosse
-   * reperibile. Null altrimenti.
+   *     reperibile. Null altrimenti.
    */
   public Optional<PersonReperibilityDay> getPersonReperibilityDay(Person person, LocalDate date) {
     QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
@@ -69,6 +69,11 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
+   * La lista di giorni di reperibilità per la persona nell'intervallo begin-to.
+   * @param begin la data di inizio
+   * @param to la data di fine
+   * @param type il tipo di reperibilità
+   * @param pr (opzionale) la reperibilità
    * @return la lista dei personReperibilityDay nel periodo compreso tra begin e to e con tipo type.
    */
   public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(
@@ -85,8 +90,11 @@ public class PersonReperibilityDayDao extends DaoBase {
 
 
   /**
+   * Cancella i giorni di reperibilità sulla reperibilità nel giorno.
+   * @param type tipo di reperibilità
+   * @param day il giorno da considerare
    * @return il numero di personReperibilityDay cancellati che hanno come parametri il tipo type e
-   * il giorno day.
+   *     il giorno day.
    */
   public long deletePersonReperibilityDay(PersonReperibilityType type, LocalDate day) {
     QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
@@ -94,9 +102,15 @@ public class PersonReperibilityDayDao extends DaoBase {
         .where(prd.reperibilityType.eq(type).and(prd.date.eq(day))).execute();
   }
 
+
   /**
+   * La lista dei giorni di reperibilità della persona nell'attività type tra begin e to.
+   * @param begin la data di inizio
+   * @param to la data di fine
+   * @param type il tipo di reperibilità
+   * @param person la persona
    * @return la lista dei 'personReperibilityDay' della persona 'person' di tipo 'type' presenti nel
-   * periodo tra 'begin' e 'to'.
+   *     periodo tra 'begin' e 'to'.
    */
   public List<PersonReperibilityDay> getPersonReperibilityDaysByPeriodAndType(
       LocalDate begin, LocalDate to, PersonReperibilityType type, Person person) {
@@ -110,6 +124,7 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
+   * Il giorno di reperibilità, se esiste, con id passato come parametro.
    * @param personReperibilityDayId l'id del giorno di reperibilità
    * @return il personReperibilityDay, se esiste, associato all'id passato come parametro.
    */
@@ -126,6 +141,8 @@ public class PersonReperibilityDayDao extends DaoBase {
   //***************************************************************/
 
   /**
+   * Il tipo di reperibilità con id passato come parametro.
+   * @param id l'id del tipo di reperibilità
    * @return il personReperibilityType relativo all'id passato come parametro.
    */
   public PersonReperibilityType getPersonReperibilityTypeById(Long id) {
@@ -134,6 +151,7 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti i tipi di reperibilità.
    * @return la lista di tutti i PersonReperibilityType presenti sul db.
    */
   public List<PersonReperibilityType> getAllReperibilityType() {
@@ -143,8 +161,10 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
+   * La lista dei servizi di reperibilità della sede.
    * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la
-   * reperibilità.
+   *     reperibilità.
+   * @param isActive se è attiva
    * @return la lista dei servizi per cui si vuole la reperibilità
    */
   public List<PersonReperibilityType> getReperibilityTypeByOffice(
@@ -158,9 +178,11 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
+   * Il tipo di reperibilità, se esiste, appartenente alla sede con la descrizione passata.
    * @param description il nome del servizio
+   * @param office la sede su cui cercare
    * @return il tipo di reperibilità, se esiste, con descrizione uguale a quella passata come
-   * parametro.
+   *     parametro.
    */
   public Optional<PersonReperibilityType> getReperibilityTypeByDescription(String description,
       Office office) {
@@ -175,8 +197,11 @@ public class PersonReperibilityDayDao extends DaoBase {
   //***************************************************************/
 
   /**
+   * L'associazione persona/reperibilità relativa ai parametri passati.
+   * @param person la persona da cercare
+   * @param type il tipo di reperibilità
    * @return il PersonReperibility relativo alla persona person e al tipo type passati come
-   * parametro.
+   *     parametro.
    */
   public PersonReperibility getPersonReperibilityByPersonAndType(
       Person person, PersonReperibilityType type) {
@@ -187,8 +212,10 @@ public class PersonReperibilityDayDao extends DaoBase {
 
 
   /**
+   * La lista dei personReperibility che hanno il tipo passato come parametro.
+   * @param type il tipo di reperibilità
    * @return la lista dei personReperibility che hanno come personReperibilityType il tipo passato
-   * come parametro.
+   *     come parametro.
    */
   public List<PersonReperibility> getPersonReperibilityByType(PersonReperibilityType type) {
     final QPersonReperibility pr = QPersonReperibility.personReperibility;

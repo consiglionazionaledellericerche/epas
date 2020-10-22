@@ -29,6 +29,9 @@ public class Security extends Secure.Security {
   private static OfficeManager officeManager;
 
   /**
+   * Verifica se i dati sono corretti per l'autenticazione.
+   * @param username l'username che intende autenticarsi
+   * @param password la password che intende autenticarsi
    * @return true se è autenticato, false altrimenti.
    */
   static boolean authenticate(String username, String password) {
@@ -66,7 +69,7 @@ public class Security extends Secure.Security {
         return Optional.of((User) request.args.get(CURRENT_USER));
       }
       Optional<User> user = Optional.fromNullable(userDao.byUsername(connected()));
-      if (user.isPresent()){
+      if (user.isPresent()) {
         request.args.put(CURRENT_USER, user.get());
       }
       return user;

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class RichiestaInserimentoAttestati {
 
-  public int codiceSede;
+  public String codiceSede;
   public int anno;
   public int mese;
 

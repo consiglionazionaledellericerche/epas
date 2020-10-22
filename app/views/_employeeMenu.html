@@ -53,7 +53,12 @@
       #{secure.li @Stampings.stampings(session.get("yearSelected"), session.get("monthSelected")) }
         <i class="fa fa-calendar" aria-hidden="true"></i>
       #{/secure.li}
-
+      #{if teleworkStampingsActive}
+     	 #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
+      		<i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+         #{/secure.li}
+      #{/if}
+      
       #{secure.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
@@ -61,10 +66,7 @@
       #{secure.li @Absences.absencesPerPerson(session.get("yearSelected")) }
       <i class="fa fa-calendar-o" aria-hidden="true"></i>
       #{/secure.li}
-      
-      #{secure.li @TimeVariations.personShow() }
-      <i class="fa fa-search-plus" aria-hidden="true"></i>
-      #{/secure.li}
+
 
       #{secure.li @Vacations.show(session.get("yearSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>

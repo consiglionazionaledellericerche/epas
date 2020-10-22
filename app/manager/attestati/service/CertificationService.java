@@ -5,18 +5,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import dao.AbsenceDao;
 import dao.CertificationDao;
-import dao.CompetenceDao;
-import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
-import manager.PersonDayManager;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
 import manager.attestati.dto.internal.StatoAttestatoMese;
@@ -29,11 +24,12 @@ import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.Certification;
-import models.Competence;
+//import models.Competence;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
-import models.PersonMonthRecap;
-import models.absences.Absence;
+//import models.PersonMonthRecap;
+//import models.absences.Absence;
 import models.enumerate.CertificationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -49,38 +45,23 @@ import play.mvc.Http;
 public class CertificationService implements ICertificationService {
 
   private final CertificationsComunication certificationsComunication;
-
-  private final PersonMonthRecapDao personMonthRecapDao;
-  private final PersonDayDao personDayDao;
-  private final PersonDayManager personDayManager;
-  private final CompetenceDao competenceDao;
-  private final AbsenceDao absenceDao;
   private final CertificationDao certificationDao;
+  private final PersonMonthlySituationData monthData;
 
 
   /**
    * Constructor.
    *
    * @param certificationsComunication injected.
-   * @param absenceDao injected.
-   * @param competenceDao injected.
-   * @param personMonthRecapDao injected.
-   * @param personDayManager injected.
-   * @param personDayDao injected.
    * @param certificationDao injected.
+   * @param monthData injected.
    */
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
-      AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao,
-      PersonDayManager personDayManager, PersonDayDao personDayDao,
-      CertificationDao certificationDao) {
+      CertificationDao certificationDao, PersonMonthlySituationData monthData) {
     this.certificationsComunication = certificationsComunication;
-    this.absenceDao = absenceDao;
-    this.competenceDao = competenceDao;
-    this.personDayManager = personDayManager;
-    this.personDayDao = personDayDao;
-    this.personMonthRecapDao = personMonthRecapDao;
     this.certificationDao = certificationDao;
+    this.monthData = monthData;
   }
 
   /* (non-Javadoc)
@@ -198,11 +179,9 @@ public class CertificationService implements ICertificationService {
     }
 
     // Lo stato attuale epas
+    // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = trainingHours(person, year, month, actualCertifications);
-    actualCertifications = absences(person, year, month, actualCertifications);
-    actualCertifications = competences(person, year, month, actualCertifications);
-    actualCertifications = mealTicket(person, year, month, actualCertifications);
+    actualCertifications = monthData.getCertification(person, year, month);
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona
@@ -484,162 +463,6 @@ public class CertificationService implements ICertificationService {
 
   }
 
-  /**
-   * Produce le certification delle ore di formazione per la persona.
-   *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certificazioni (sotto forma di mappa)
-   */
-  private Map<String, Certification> trainingHours(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
-            Optional.fromNullable(month), Optional.absent());
-    for (PersonMonthRecap personMonthRecap : trainingHoursList) {
-
-      // Nuova certificazione
-      Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.FORMATION;
-      certification.content = Certification
-          .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
-              personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
-
-      certifications.put(certification.aMapKey(), certification);
-    }
-
-    return certifications;
-  }
-
-
-  /**
-   * Produce le certification delle assenze per la persona.
-   *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certificazioni (sotto forma di mappa)
-   */
-  private Map<String, Certification> absences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    //log.info("Persona {}", person);
-
-    List<Absence> absences = absenceDao
-        .getAbsencesNotInternalUseInMonth(person, year, month);
-    if (absences.isEmpty()) {
-      return certifications;
-    }
-
-    Certification certification = null;
-    LocalDate previousDate = null;
-    String previousAbsenceCode = null;
-    Integer dayBegin = null;
-
-    for (Absence absence : absences) {
-
-      //codici a uso interno li salto
-      if (absence.absenceType.internalUse) {
-        continue;
-      }
-
-      //Codice per attestati
-      String absenceCodeToSend = absence.absenceType.code.toUpperCase();
-      if (absence.absenceType.certificateCode != null
-          && !absence.absenceType.certificateCode.trim().isEmpty()) {
-        absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
-      }
-
-      // 1) Continua Assenza più giorni
-      Integer dayEnd;
-      if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
-          && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = absence.personDay.date.getDayOfMonth();
-        previousDate = absence.personDay.date;
-        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
-        continue;
-      }
-
-      // 2) Fine Assenza più giorni
-      if (previousDate != null) {
-
-        certifications.put(certification.aMapKey(), certification);
-        previousDate = null;
-      }
-
-      // 3) Nuova Assenza  
-      dayBegin = absence.personDay.date.getDayOfMonth();
-      dayEnd = absence.personDay.date.getDayOfMonth();
-      previousDate = absence.personDay.date;
-      previousAbsenceCode = absenceCodeToSend;
-
-      certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.ABSENCE;
-      certification.content = Certification.serializeAbsences(absenceCodeToSend,
-          dayBegin, dayEnd);
-    }
-
-    certifications.put(certification.aMapKey(), certification);
-
-    return certifications;
-  }
-
-  private Map<String, Certification> competences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    List<Competence> competences = competenceDao
-        .getCompetenceInMonthForUploadSituation(person, year, month);
-
-    for (Competence competence : competences) {
-      Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.COMPETENCE;
-      certification.content = Certification.serializeCompetences(competence.competenceCode.code,
-          competence.valueApproved);
-
-      certifications.put(certification.aMapKey(), certification);
-    }
-
-    return certifications;
-  }
-
-  /**
-   * Produce la certificazione buoni pasto della persona.
-   *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certification (sotto forma di mappa)
-   */
-  private Map<String, Certification> mealTicket(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    Certification certification = new Certification();
-    certification.person = person;
-    certification.year = year;
-    certification.month = month;
-    certification.certificationType = CertificationType.MEAL;
-
-    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
-        .getPersonDayInMonth(person, new YearMonth(year, month)));
-
-    certification.content = String.valueOf(mealTicket);
-
-    certifications.put(certification.aMapKey(), certification);
-
-    return certifications;
-  }
-
   /* (non-Javadoc)
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
@@ -715,7 +538,7 @@ public class CertificationService implements ICertificationService {
     PeriodoDipendente periodoDipendente = certificationsComunication
         .getPeriodoDipendente(statoAttestatoMese.id);
 
-    log.info(periodoDipendente.toString());
+    log.debug(periodoDipendente.toString());
 
     //scarico il cruscotto
     CruscottoDipendente cruscottoDipendente = certificationsComunication

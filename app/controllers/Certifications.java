@@ -1,7 +1,6 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -13,8 +12,6 @@ import dao.ShiftTypeMonthDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.CacheValues;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,10 +29,8 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.ShiftTypeMonth;
-import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import play.Play;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;

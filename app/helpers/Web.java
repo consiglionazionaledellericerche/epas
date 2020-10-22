@@ -6,11 +6,9 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import play.i18n.Messages;
 
 /**
@@ -82,6 +80,7 @@ public final class Web {
   }
 
   /**
+   * Serializza gli attributi.
    * @return gli attributi serializzati.
    */
   public static String serialize(Map<String, ?> attributes, String... unless) {

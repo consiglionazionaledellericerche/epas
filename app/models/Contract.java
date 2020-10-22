@@ -3,7 +3,11 @@ package models;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import helpers.validators.ContractBeforeSourceResidualAndOverlapingCheck;
+import helpers.validators.ContractEndContractCheck;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,16 +18,19 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -34,7 +41,7 @@ import play.data.validation.Required;
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
-
+  
   public String perseoId;
 
   /**
@@ -48,6 +55,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
    */
+  @CheckWith(ContractBeforeSourceResidualAndOverlapingCheck.class)
   @Getter
   public LocalDate sourceDateResidual = null;
   
@@ -99,6 +107,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
+  @CheckWith(ContractEndContractCheck.class)
   @Getter
   public LocalDate endContract;
 
@@ -108,6 +117,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OrderBy("beginDate")
   public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
+  @Getter
+  @NotAudited
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @OrderBy("beginDate")
+  public Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
+  
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
@@ -122,7 +137,26 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
-
+   
+  @Getter
+  @Setter
+  @OneToOne
+  private Contract previousContract;
+  
+  /**
+   * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
+   * 
+   */
+  @Transient
+  public List<VacationPeriod> getExtendedVacationPeriods() {
+    List<VacationPeriod> vp = new ArrayList<VacationPeriod>(getVacationPeriods());
+    if (getPreviousContract() != null) {
+      vp.addAll(getPreviousContract().getVacationPeriods());
+    }
+    return vp;
+  }
+  
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
@@ -171,7 +205,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
       return Sets.newHashSet(contractStampProfile);
     }
     if (type.equals(VacationPeriod.class)) {
-      return Sets.newHashSet(vacationPeriods);
+      return Sets.newHashSet(getVacationPeriods());
+    }
+    if (type.equals(ContractMandatoryTimeSlot.class)) {
+      return Sets.newHashSet(contractMandatoryTimeSlots);
     }
     return null;
   }
@@ -179,7 +216,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Override
   public Collection<Object> types() {
     return ImmutableSet.of(ContractWorkingTimeType.class, ContractStampProfile.class,
-        VacationPeriod.class);
+        VacationPeriod.class, ContractMandatoryTimeSlot.class);
   }
 
   @Override
@@ -187,6 +224,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return computeEnd(endDate, endContract);
   }
 
+  /**
+   * Ritorna la data di fine contratto.
+   * @param endDate la data di terminazione contratto (per T.D.)
+   * @param endContract la data di fine esperienza (per T.I. -> pensione)
+   * @return la data di fine contratto.
+   */
   public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
     if (endContract != null) {
       return endContract;
@@ -194,6 +237,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return endDate;
   }
 
+  /**
+   * true se il contratto è correttamente sincronizzato, false altrimenti.
+   * @return true se il contratto è correttamente sincronizzato, false altrimenti.
+   */
   @Transient
   public boolean isProperSynchronized() {
     if (calculatedEnd() == null || !calculatedEnd().isBefore(LocalDate.now())) {
@@ -202,5 +249,29 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return true;
   }
 
+  /**
+   * Il Range che comprende le date di inizio e fine/chiusura del contratto.
+   */
+  public Range<LocalDate> getRange() {
+    if (calculatedEnd() != null) {
+      return Range.closed(beginDate, calculatedEnd());
+    }
+    return Range.atLeast(beginDate);
+  }
 
+  /**
+   * Verifica di sovrapposizione con il range di questo contratto.
+   * @return true se il range passato si sovrappone a quello definito
+   *     in questo contratto.
+   */
+  public boolean overlap(Range<LocalDate> otherRange) {
+    return getRange().isConnected(otherRange);
+  }
+  
+  /**
+   * Verifica di sovrapposizione tra due contratti.
+   */
+  public boolean overlap(Contract otherContract) {
+    return overlap(otherContract.getRange());
+  }
 }

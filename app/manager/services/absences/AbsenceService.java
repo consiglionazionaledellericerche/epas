@@ -76,14 +76,10 @@ public class AbsenceService {
    * @param personChildrenDao injected
    */
   @Inject
-  public AbsenceService(
-      ConfigurationManager configurationManager,
-      AbsenceEngineUtility absenceEngineUtility,
-      ServiceFactories serviceFactories,
-      AbsenceComponentDao absenceComponentDao,
-      PersonChildrenDao personChildrenDao,
-      ConfigurationManager confManager,
-      SecureManager secureManager,
+  public AbsenceService(ConfigurationManager configurationManager,
+      AbsenceEngineUtility absenceEngineUtility, ServiceFactories serviceFactories,
+      AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao,
+      ConfigurationManager confManager, SecureManager secureManager,
       EnumAllineator enumAllineator) {
     this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
@@ -108,13 +104,12 @@ public class AbsenceService {
       GroupAbsenceType groupAbsenceType) {
 
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
-      groupAbsenceType = absenceComponentDao
-          .categoriesByPriority().get(0)
-          .groupAbsenceTypes.iterator().next();
+      groupAbsenceType =
+          absenceComponentDao.categoriesByPriority().get(0).groupAbsenceTypes.iterator().next();
     }
 
-    AbsenceForm form = buildAbsenceForm(person, date, null, null, null,
-        groupAbsenceType, true, null, null, null, null, true, false);
+    AbsenceForm form = buildAbsenceForm(person, date, null, null, null, groupAbsenceType, true,
+        null, null, null, null, true, false);
 
     return form;
   }
@@ -136,13 +131,12 @@ public class AbsenceService {
    * @param readOnly se richiesta sola lettura
    * @return form
    */
-  public AbsenceForm buildAbsenceForm(
-      Person person, LocalDate from, CategoryTab categoryTab,                            //tab 
-      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
-      boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,         //reconf 
+  public AbsenceForm buildAbsenceForm(Person person, LocalDate from, CategoryTab categoryTab, // tab
+      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType, boolean switchGroup,
+      AbsenceType absenceType, JustifiedType justifiedType, // reconf
       Integer hours, Integer minutes, boolean readOnly, boolean fromWorkFlow) {
 
-    //clean entities
+    // clean entities
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
       groupAbsenceType = null;
       switchGroup = true;
@@ -157,14 +151,14 @@ public class AbsenceService {
       categoryTab = null;
     }
 
-    // TODO: in base al parametro passato al metodo verifico come popolare la lista dei 
+    // TODO: in base al parametro passato al metodo verifico come popolare la lista dei
     // groupsPermitted
     List<GroupAbsenceType> groupsPermitted = Lists.newArrayList();
     if (fromWorkFlow) {
-      //provengo dal flusso di approvazione ferie/permessi
+      // provengo dal flusso di approvazione ferie/permessi
       groupsPermitted = groupsPermittedFlow();
     } else {
-      //iter normale di inserimento assenze
+      // iter normale di inserimento assenze
       groupsPermitted = groupsPermitted(person, readOnly);
     }
 
@@ -173,11 +167,11 @@ public class AbsenceService {
       categoryTab = groupAbsenceType.category.tab;
     } else {
       if (categoryTab != null) {
-        groupAbsenceType = categoryTab.firstByPriority()
-            .orderedGroupsInCategory(true).iterator().next();
+        groupAbsenceType =
+            categoryTab.firstByPriority().orderedGroupsInCategory(true).iterator().next();
         Verify.verify(groupsPermitted.contains(groupAbsenceType));
       } else {
-        //selezionare missione?
+        // selezionare missione?
         for (GroupAbsenceType group : groupsPermitted) {
           if (group.name.equals(DefaultGroup.MISSIONE_GIORNALIERA.name())) {
             groupAbsenceType = group;
@@ -198,15 +192,16 @@ public class AbsenceService {
       minutes = null;
     }
 
-    //Errore grave
+    // Errore grave
     Verify.verifyNotNull(groupAbsenceType);
 
-    //TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
+    // TODO: Preconditions se groupAbsenceType presente verificare che permesso per la persona
 
     return new AbsenceForm(person, from, to, recoveryDate, groupAbsenceType, absenceType,
-        justifiedType, hours, minutes, groupsPermitted,
-        absenceComponentDao, absenceEngineUtility);
+        justifiedType, hours, minutes, groupsPermitted, absenceComponentDao, absenceEngineUtility);
   }
+
+
 
   /**
    * Effettua la simulazione dell'inserimento. Genera il report di inserimento.
@@ -222,21 +217,19 @@ public class AbsenceService {
    * @param absenceManager absenceManager inject (circular dependency)
    * @return insert report
    */
-  public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType,
-      LocalDate from, LocalDate to,
-      AbsenceType absenceType, JustifiedType justifiedType,
-      Integer hours, Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
+  public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+      LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
+      Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
 
-    //Inserimento forzato (nessun controllo)
+    // Inserimento forzato (nessun controllo)
     if (forceInsert) {
       Preconditions.checkNotNull(absenceType);
-      return forceInsert(person, from, to,
-          absenceType, justifiedType, hours, minutes);
+      return forceInsert(person, from, to, absenceType, justifiedType, hours, minutes);
     }
 
     if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
-      InsertReport insertReport = temporaryInsertCompensatoryRest(person,
-          groupAbsenceType, from, to, null, absenceManager);
+      InsertReport insertReport =
+          temporaryInsertCompensatoryRest(person, groupAbsenceType, from, to, null, absenceManager);
       return insertReport;
     }
 
@@ -247,7 +240,7 @@ public class AbsenceService {
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
     while (true) {
 
-      //Preparare l'assenza da inserire
+      // Preparare l'assenza da inserire
       Absence absenceToInsert = new Absence();
       absenceToInsert.date = currentDate;
       absenceToInsert.absenceType = absenceType;
@@ -257,14 +250,13 @@ public class AbsenceService {
       }
 
       List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
-      List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+      List<Contract> fetchedContracts = person.contracts; // TODO: fetch
       List<InitializationGroup> initializationGroups =
           absenceComponentDao.personInitializationGroups(person);
 
-      PeriodChain periodChain = serviceFactories
-          .buildPeriodChain(person, groupAbsenceType, currentDate,
-              previousInserts, absenceToInsert,
-              orderedChildren, fetchedContracts, initializationGroups);
+      PeriodChain periodChain =
+          serviceFactories.buildPeriodChain(person, groupAbsenceType, currentDate, previousInserts,
+              absenceToInsert, orderedChildren, fetchedContracts, initializationGroups);
 
       criticalErrors.addAll(periodChain.criticalErrors());
 
@@ -295,33 +287,33 @@ public class AbsenceService {
 
     InsertReport insertReport = new InsertReport();
 
-    //Se una catena contiene errori critici il report è vuoto.
+    // Se una catena contiene errori critici il report è vuoto.
     if (!criticalErrors.isEmpty()) {
       insertReport.criticalErrors = criticalErrors;
       return insertReport;
     }
 
-    //Gli esiti sotto forma di template rows
+    // Gli esiti sotto forma di template rows
     List<TemplateRow> insertTemplateRows = Lists.newArrayList();
     for (PeriodChain periodChain : chains) {
 
-      //caso particolare di errore figli.
+      // caso particolare di errore figli.
       if (periodChain.childIsMissing()) {
         TemplateRow templateRow = new TemplateRow();
         templateRow.date = periodChain.date;
-        templateRow.absenceErrors.add(AbsenceError.builder()
-            .absenceProblem(AbsenceProblem.NoChildExist).build());
+        templateRow.absenceErrors
+            .add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
         insertTemplateRows.add(templateRow);
       }
 
       AbsencePeriod lastPeriod = periodChain.lastPeriod();
       for (AbsencePeriod absencePeriod : periodChain.periods) {
         boolean addResult = false;
-        //Aggiungo il risultato in caso di fallimento per il solo ultimo periodo
+        // Aggiungo il risultato in caso di fallimento per il solo ultimo periodo
         if (periodChain.successPeriodInsert == null && absencePeriod.equals(lastPeriod)) {
           addResult = true;
         }
-        //Aggiungo il risultato in caso di successo per il solo periodo di successo
+        // Aggiungo il risultato in caso di successo per il solo periodo di successo
         if (periodChain.successPeriodInsert != null
             && periodChain.successPeriodInsert.equals(absencePeriod)) {
           addResult = true;
@@ -348,8 +340,7 @@ public class AbsenceService {
     // le assenze da persistere
     for (PeriodChain periodChain : chains) {
       if (periodChain.successPeriodInsert != null) {
-        insertReport.absencesToPersist.add(periodChain
-            .successPeriodInsert.attemptedInsertAbsence);
+        insertReport.absencesToPersist.add(periodChain.successPeriodInsert.attemptedInsertAbsence);
       }
     }
 
@@ -368,10 +359,8 @@ public class AbsenceService {
    * @param minutes minuti
    * @return insert report
    */
-  public InsertReport forceInsert(Person person,
-      LocalDate from, LocalDate to,
-      AbsenceType absenceType, JustifiedType justifiedType,
-      Integer hours, Integer minutes) {
+  public InsertReport forceInsert(Person person, LocalDate from, LocalDate to,
+      AbsenceType absenceType, JustifiedType justifiedType, Integer hours, Integer minutes) {
     InsertReport insertReport = new InsertReport();
 
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
@@ -379,7 +368,7 @@ public class AbsenceService {
 
     while (true) {
 
-      //Preparare l'assenza da inserire
+      // Preparare l'assenza da inserire
       Absence absenceToInsert = new Absence();
       absenceToInsert.date = currentDate;
       absenceToInsert.absenceType = absenceType;
@@ -393,8 +382,7 @@ public class AbsenceService {
       TemplateRow templateRow = new TemplateRow();
       templateRow.absence = absenceToInsert;
       templateRow.date = currentDate;
-      templateRow.absenceWarnings.add(AbsenceError.builder()
-          .absence(absenceToInsert)
+      templateRow.absenceWarnings.add(AbsenceError.builder().absence(absenceToInsert)
           .absenceProblem(AbsenceProblem.ForceInsert).build());
       insertReport.insertTemplateRows.add(templateRow);
 
@@ -428,10 +416,10 @@ public class AbsenceService {
 
     log.debug("Lanciata procedura scan assenze person={}, from={}", person.fullName(), from);
 
-    List<Absence> absencesToScan = absenceComponentDao.orderedAbsences(person, from,
-        null, Sets.newHashSet());
+    List<Absence> absencesToScan =
+        absenceComponentDao.orderedAbsences(person, from, null, Sets.newHashSet());
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
-    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<Contract> fetchedContracts = person.contracts; // TODO: fetch
     List<InitializationGroup> initializationGroups =
         absenceComponentDao.personInitializationGroups(person);
 
@@ -439,6 +427,7 @@ public class AbsenceService {
         orderedChildren, fetchedContracts, initializationGroups);
 
     // scan dei gruppi
+    log.info("Chiamata la scan delle assenze per {} a partire dalla data {}", person, from);
     absenceScan.scan();
 
     log.debug("");
@@ -462,19 +451,19 @@ public class AbsenceService {
     }
 
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
-    List<Contract> fetchedContracts = person.contracts; //TODO: fetch
+    List<Contract> fetchedContracts = person.contracts; // TODO: fetch
     List<InitializationGroup> initializationGroups =
         absenceComponentDao.personInitializationGroups(person);
 
     PeriodChain periodChain = serviceFactories.buildPeriodChain(person, groupAbsenceType, date,
-        Lists.newArrayList(), null,
-        orderedChildren, fetchedContracts, initializationGroups);
+        Lists.newArrayList(), null, orderedChildren, fetchedContracts, initializationGroups);
 
     return periodChain;
 
   }
 
   /**
+   * Ritorna la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    * @return la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    */
   public List<GroupAbsenceType> groupsPermittedFlow() {
@@ -483,8 +472,14 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
     final GroupAbsenceType compensatory =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
+    final GroupAbsenceType permissions =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    final GroupAbsenceType vacationPostDeadLine =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_PROROGA.name()).get();
     groupsPermitted.add(vacation);
     groupsPermitted.add(compensatory);
+    groupsPermitted.add(permissions);
+    groupsPermitted.add(vacationPostDeadLine);
     return groupsPermitted;
   }
 
@@ -498,37 +493,43 @@ public class AbsenceService {
    */
   public List<GroupAbsenceType> groupsPermitted(Person person, boolean readOnly) {
     List<GroupAbsenceType> groupsPermitted = absenceComponentDao.allGroupAbsenceType(false);
-    log.info("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}",
-        readOnly, groupsPermitted);
+    log.debug("Configurazione groupsPermitted, readOnly = {}, groupsPermitted = {}", readOnly,
+        groupsPermitted);
     if (readOnly) {
       return groupsPermitted;
     }
 
-    //Fetch special groups
-    final GroupAbsenceType employeeVacation = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
-    final GroupAbsenceType employeeCompensatory = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
-    final GroupAbsenceType employeeOffseat = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
-    final GroupAbsenceType telework = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
-    final GroupAbsenceType disabledPersonAbsence = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTI.name()).get();
-    final GroupAbsenceType disabledPersonAbsenceTwoHours = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_26_DIPENDENTI.name()).get();
-    final GroupAbsenceType rightToStudy = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
+    // Fetch special groups
+    final GroupAbsenceType employeeVacation =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeCompensatory =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeOffseat =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
+    final GroupAbsenceType telework =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
+    final GroupAbsenceType disabledPersonAbsence =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTI.name()).get();
+    final GroupAbsenceType disabledPersonAbsenceTwoHours =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_26_DIPENDENTI.name()).get();
+    final GroupAbsenceType rightToStudy =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
+    final GroupAbsenceType covid19 =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
+    final GroupAbsenceType additionalHours =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
+    final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
-    final boolean officeWriteAdmin = secureManager
-        .officesWriteAllowed(currentUser).contains(person.office);
+    final boolean officeWriteAdmin =
+        secureManager.officesWriteAllowed(currentUser).contains(person.office);
 
-    log.info("officeWriteAdmin = {}, officeWriteAllowed = {}",
-        officeWriteAdmin, secureManager.officesWriteAllowed(currentUser));
+    log.debug("officeWriteAdmin = {}, officeWriteAllowed = {}", officeWriteAdmin,
+        secureManager.officesWriteAllowed(currentUser));
 
-    //Utente di sistema o amministratore della persona
+    // Utente di sistema o amministratore della persona
     if (currentUser.isSystemUser() || officeWriteAdmin) {
       groupsPermitted.remove(employeeVacation);
       groupsPermitted.remove(employeeOffseat);
@@ -536,19 +537,23 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsence);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
-      //groupsPermitted.remove(telework);
+      groupsPermitted.remove(covid19);
+      groupsPermitted.remove(disabledRelativeAbsence);
+      groupsPermitted.remove(additionalHours);
+      // groupsPermitted.remove(telework);
       return groupsPermitted;
     }
 
-    //Persona stessa non autoamministrata
+    // Persona stessa non autoamministrata
     if (currentUser.person.equals(person) && !officeWriteAdmin) {
 
-      log.info("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
-      //vedere le configurazioni
+      log.debug("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
+      // vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
-          && (Boolean) confManager.configValue(person, EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
+          && (Boolean) confManager.configValue(person,
+              EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
         groupsPermitted.add(employeeOffseat);
       }
 
@@ -561,21 +566,33 @@ public class AbsenceService {
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_PERSON_PERMISSION)) {
         groupsPermitted.add(disabledPersonAbsence);
         groupsPermitted.add(disabledPersonAbsenceTwoHours);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.RIGHT_TO_STUDY)) {
-        groupsPermitted.add(rightToStudy);        
+        groupsPermitted.add(rightToStudy);
       }
 
-      log.info("groupPermitted = {}", groupsPermitted);
+      if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
+        groupsPermitted.add(covid19);
+      }
+
+      if ((Boolean) confManager.configValue(person, EpasParam.ADDITIONAL_HOURS)) {
+        groupsPermitted.add(additionalHours);
+      }
+
+      if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_RELATIVE_PERMISSION)) {
+        groupsPermitted.add(disabledRelativeAbsence);
+      }
+
+      log.debug("groupPermitted = {}", groupsPermitted);
       return groupsPermitted;
     }
 
@@ -584,17 +601,17 @@ public class AbsenceService {
 
   @Deprecated
   private InsertReport temporaryInsertCompensatoryRest(Person person,
-      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to,
-      AbsenceType absenceType, AbsenceManager absenceManager) {
+      GroupAbsenceType groupAbsenceType, LocalDate from, LocalDate to, AbsenceType absenceType,
+      AbsenceManager absenceManager) {
 
     if (absenceType == null || !absenceType.isPersistent()) {
       absenceType = absenceComponentDao.absenceTypeByCode("91").get();
     }
 
     return insertReportFromOldReport(
-        absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to),
-            absenceType, Optional.absent(),
-            Optional.absent(), Optional.absent()), groupAbsenceType);
+        absenceManager.insertAbsenceSimulation(person, from, Optional.fromNullable(to), absenceType,
+            Optional.absent(), Optional.absent(), Optional.absent()),
+        groupAbsenceType);
 
   }
 
@@ -614,8 +631,7 @@ public class AbsenceService {
         insertReport.insertTemplateRows.add(templateRow);
         insertReport.absencesToPersist.add(templateRow.absence);
         if (absenceResponse.isDayInReperibilityOrShift()) {
-          templateRow.absenceWarnings.add(AbsenceError.builder()
-              .absence(templateRow.absence)
+          templateRow.absenceWarnings.add(AbsenceError.builder().absence(templateRow.absence)
               .absenceProblem(AbsenceProblem.InReperibilityOrShift).build());
         }
         continue;
@@ -624,15 +640,13 @@ public class AbsenceService {
       templateRow.date = absenceResponse.getDate();
       templateRow.absence = absenceResponse.getAbsenceInError();
       if (absenceResponse.isHoliday()) {
-        templateRow.absenceErrors.add(AbsenceError.builder()
-            .absence(absenceResponse.getAbsenceAdded())
-            .absenceProblem(AbsenceProblem.NotOnHoliday)
-            .build());
+        templateRow.absenceErrors
+            .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+                .absenceProblem(AbsenceProblem.NotOnHoliday).build());
       } else {
-        templateRow.absenceErrors.add(AbsenceError.builder()
-            .absence(absenceResponse.getAbsenceAdded())
-            .absenceProblem(AbsenceProblem.LimitExceeded)
-            .build());
+        templateRow.absenceErrors
+            .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+                .absenceProblem(AbsenceProblem.LimitExceeded).build());
       }
       insertReport.insertTemplateRows.add(templateRow);
     }
@@ -754,7 +768,7 @@ public class AbsenceService {
    */
   public void enumAllineator() {
 
-    //enumAllineator.patchGroupsProduction();
+    // enumAllineator.patchGroupsProduction();
 
     enumAllineator.handleTab(false);
     enumAllineator.handleCategory(false);
@@ -794,7 +808,6 @@ public class AbsenceService {
    * @param vacationGroup injected
    * @param residualDate data per maturazione giorni
    * @param cache se prelevare i dati dalla cache
-   * @param vacationsService per costruire il vecchio ripilogo da confrontare col nuovo
    * @return situazione
    */
   public VacationSituation buildVacationSituation(Contract contract, int year,
@@ -805,7 +818,7 @@ public class AbsenceService {
     situation.contract = contract;
     situation.year = year;
 
-    //La data target per il riepilogo contrattuale
+    // La data target per il riepilogo contrattuale
     LocalDate date = vacationResidualDate(contract, residualDate, year);
     if (date == null) {
       return situation;
@@ -816,26 +829,27 @@ public class AbsenceService {
     final String currentYearKey = vacationCacheKey(contract, year, TypeSummary.VACATION);
     final String permissionsKey = vacationCacheKey(contract, year, TypeSummary.PERMISSION);
 
-    //Provo a prelevare la situazione dalla cache
+    // Provo a prelevare la situazione dalla cache
     if (cache) {
       situation.lastYearCached = (VacationSummaryCached) Cache.get(lastYearKey);
       situation.currentYearCached = (VacationSummaryCached) Cache.get(currentYearKey);
       situation.permissionsCached = (VacationSummaryCached) Cache.get(permissionsKey);
-      if (situation.lastYearCached != null //&& situation.lastYearCached.date.isEqual(date)
-          && situation.currentYearCached != null //&& situation.currentYearCached.date.isEqual(date)
-          && situation.permissionsCached != null //&& situation.permissionsCached.date.isEqual(date)
+      if (situation.lastYearCached != null // && situation.lastYearCached.date.isEqual(date)
+          && situation.currentYearCached != null // &&
+          // situation.currentYearCached.date.isEqual(date)
+          && situation.permissionsCached != null // &&
+      // situation.permissionsCached.date.isEqual(date)
       ) {
-        //Tutto correttamente cachato.
+        // Tutto correttamente cachato.
         return situation;
       } else {
-        log.info("La situazione di {} non era cachata", contract.person.fullName());
+        log.debug("La situazione di {} non era cachata", contract.person.fullName());
       }
     }
     PeriodChain periodChain = residual(contract.person, vacationGroup, date);
     if (!periodChain.vacationSupportList.get(0).isEmpty()) {
       situation.lastYear = new VacationSummary(contract,
-          periodChain.vacationSupportList.get(0).get(0),
-          year - 1, date, TypeSummary.VACATION);
+          periodChain.vacationSupportList.get(0).get(0), year - 1, date, TypeSummary.VACATION);
     }
     if (!periodChain.vacationSupportList.get(1).isEmpty()) {
       situation.currentYear = new VacationSummary(contract,
@@ -847,33 +861,18 @@ public class AbsenceService {
     }
 
     if (cache) {
-      situation.lastYearCached = new VacationSummaryCached(situation.lastYear,
-          contract, year - 1, date, TypeSummary.VACATION);
-      situation.currentYearCached = new VacationSummaryCached(situation.currentYear,
-          contract, year, date, TypeSummary.VACATION);
-      situation.permissionsCached = new VacationSummaryCached(situation.permissions,
-          contract, year, date, TypeSummary.PERMISSION);
+      situation.lastYearCached = new VacationSummaryCached(situation.lastYear, contract, year - 1,
+          date, TypeSummary.VACATION);
+      situation.currentYearCached = new VacationSummaryCached(situation.currentYear, contract, year,
+          date, TypeSummary.VACATION);
+      situation.permissionsCached = new VacationSummaryCached(situation.permissions, contract, year,
+          date, TypeSummary.PERMISSION);
 
       Cache.set(lastYearKey, situation.lastYearCached);
       Cache.set(currentYearKey, situation.currentYearCached);
       Cache.set(permissionsKey, situation.permissionsCached);
     }
 
-    //    try {
-    //      CruscottoDipendente cruscottoDipendente = certService
-    //        .getCruscottoDipendente(person, year);
-    //      CertificationYearSituation yearSituation = 
-    //          new CertificationYearSituation(absenceComponentDao, person, cruscottoDipendente);
-    //      comparedVacation.certLastYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_PRECEDENTE);
-    //      comparedVacation.certCurrentYear = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.FERIE_ANNO_CORRENTE);
-    //      comparedVacation.certPermission = yearSituation
-    //          .getAbsenceSituation(AbsenceImportType.PERMESSI_LEGGE);
-    //      
-    //    } catch (Exception e) {
-    //      log.info("Impossibile scaricare l'informazione da attestati di {}", person.fullName());
-    //    }
     return situation;
 
   }
@@ -898,7 +897,7 @@ public class AbsenceService {
    * @param contract cotratto
    */
   public void emptyVacationCache(Contract contract) {
-    //per ogni anno fino a quello successivo l'attuale
+    // per ogni anno fino a quello successivo l'attuale
     int year = contract.beginDate.getYear();
     if (contract.sourceDateVacation != null) {
       year = contract.sourceDateVacation.getYear() - 1;
@@ -920,23 +919,22 @@ public class AbsenceService {
   /**
    * La data per cui fornire il residuo. Se non l'ho fornita ritorno un default.
    */
-  private LocalDate vacationResidualDate(Contract contract,
-      Optional<LocalDate> residualDate, int year) {
+  private LocalDate vacationResidualDate(Contract contract, Optional<LocalDate> residualDate,
+      int year) {
     if (!residualDate.isPresent()) {
       LocalDate date = LocalDate.now();
       if (date.getYear() > year) {
         date = new LocalDate(year, 12, 31);
       }
-      if (contract.calculatedEnd() != null
-          && contract.calculatedEnd().getYear() == year
+      if (contract.calculatedEnd() != null && contract.calculatedEnd().getYear() == year
           && !DateUtility.isDateIntoInterval(date, contract.periodInterval())) {
         date = contract.calculatedEnd();
       }
       return date;
     } else {
-      //La data che passo deve essere una data contenuta nell'anno.
+      // La data che passo deve essere una data contenuta nell'anno.
       if (residualDate.get().getYear() != year) {
-        log.info("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
+        log.debug("VacationSummary: anno={} data={}: la data deve appartenere all'anno.");
         return null;
       }
       return residualDate.get();
@@ -945,11 +943,10 @@ public class AbsenceService {
 
   private LocalDate vacationsLastYearExpireDate(int year, Office office) {
 
-    MonthDay dayMonthExpiryVacationPastYear = (MonthDay) configurationManager
-        .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year);
+    MonthDay dayMonthExpiryVacationPastYear = (MonthDay) configurationManager.configValue(office,
+        EpasParam.EXPIRY_VACATION_PAST_YEAR, year);
 
-    LocalDate expireDate = LocalDate.now()
-        .withYear(year)
+    LocalDate expireDate = LocalDate.now().withYear(year)
         .withMonthOfYear(dayMonthExpiryVacationPastYear.getMonthOfYear())
         .withDayOfMonth(dayMonthExpiryVacationPastYear.getDayOfMonth());
 
@@ -967,9 +964,9 @@ public class AbsenceService {
     LocalDate today = LocalDate.now();
 
     LocalDate expireDate = vacationsLastYearExpireDate(year, office);
-    if (year < today.getYear()) {        //query anni passati
+    if (year < today.getYear()) { // query anni passati
       return true;
-    } else if (year == today.getYear() && today.isAfter(expireDate)) {    //query anno attuale
+    } else if (year == today.getYear() && today.isAfter(expireDate)) { // query anno attuale
       return true;
     }
     return false;

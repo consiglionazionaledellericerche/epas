@@ -11,24 +11,25 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.EpasParam;
 import models.absences.InitializationGroup;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 import models.enumerate.CertificationType;
+import models.flows.Affiliation;
 import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -41,14 +42,15 @@ import play.data.validation.Unique;
 
 /**
  * Entity per le persone.
- *
+ * 
  * @author cristian
  */
 
-/**
+/*
  * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le informazioni della
  * persona in fase di personDao.list. Necessaria comunque la join con le relazioni OneToOne.
  */
+@Slf4j
 @Entity
 @Audited
 @Table(name = "persons")
@@ -65,6 +67,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public String surname;
 
   public String othersSurnames;
+
+  @Unique
+  @As(binder = NullStringBinder.class)
+  public String fiscalCode;
 
   public LocalDate birthday;
 
@@ -104,11 +110,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean wantEmail;
 
   /**
-   * nuova relazione tra Person e Groups relativa ai responsabili e ai gruppi.
+   * Le affiliazioni di una persona sono le appartenenze ai gruppi con percentuale
+   * e date.
    */
-  @ManyToMany(mappedBy = "people")
-  public List<Group> groups = Lists.newArrayList();
-
+  @OneToMany(mappedBy = "person")
+  public List<Affiliation> affiliations = Lists.newArrayList();
+  
   @OneToMany(mappedBy = "manager")
   public List<Group> groupsPeople = Lists.newArrayList();
 
@@ -179,6 +186,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public List<PersonShift> personShifts = Lists.newArrayList();
 
+  @Getter
   @ManyToOne
   @Required
   public Qualification qualification;
@@ -201,6 +209,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * restituito un solo elemento (effettivamente per noi è lo stesso badge).Quindi person.badges non
    * restituisce i duplicati
    */
+  @Getter
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
   public Set<Badge> badges = Sets.newHashSet();
 
@@ -248,6 +257,28 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
+  /**
+   * Lista dei gruppi di una persona alla data odierna.
+   * @return la lista dei gruppi a cui appartiente oggi una persona. 
+   */
+  @Transient
+  public List<Group> getGroups() {
+    return getGroups(java.time.LocalDate.now());
+  }
+  
+  /**
+   * Lista dei gruppi di una persona alla data indicata.
+   * @return la lista dei gruppi a cui appartiente una persona ad una data
+   *     passata per parametro.
+   */
+  @Transient
+  public List<Group> getGroups(java.time.LocalDate date) {
+    return affiliations.stream()
+        .filter(a -> a.getBeginDate().isBefore(date) 
+            && (a.getEndDate() == null || a.getEndDate().isAfter(date)))
+        .map(a -> a.getGroup()).collect(Collectors.toList());
+  }
+  
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
 
@@ -279,6 +310,16 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
   }
 
+  @PreRemove
+  private void onDelete() {
+    this.getGroups().stream().forEach(g -> { 
+      g.getAffiliations().stream().filter(a -> a.getPerson().equals(this)).forEach(a -> {
+        a.delete();
+        log.info("Rimossa associazione {} a gruppo {}", getFullname(), g.name);
+      });
+    });
+  }
+  
   /**
    * Comparatore di persone per fullname e poi id.
    *
@@ -362,4 +403,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return user.hasRoles(Role.SEAT_SUPERVISOR);
   }
 
+  public List<Person> getPersonsInCharge() {
+    return groupsPeople.stream().flatMap(g -> g.getPeople().stream()).collect(Collectors.toList());
+  }
 }

@@ -8,6 +8,7 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -28,6 +29,7 @@ import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.query.QConfiguration;
+import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -37,12 +39,14 @@ public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
   private final PeriodManager periodManager;
+  private final PersonDao personDao;
 
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager) {
+      PeriodManager periodManager, PersonDao personDao) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
+    this.personDao = personDao;
   }
 
   /**
@@ -59,6 +63,22 @@ public class ConfigurationManager {
     return (List<Configuration>) query.fetch();
   }
 
+  /**
+   * 
+   * @param epasParam
+   * @param value
+   * @return
+   */
+  public List<PersonConfiguration> configurationWithTypeAndValue(
+      EpasParam epasParam, String value) {
+    final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
+    
+    final JPQLQuery query = queryFactory.selectFrom(configuration)
+        .where(configuration.epasParam.eq(epasParam)
+            .and(configuration.fieldValue.eq(value)));
+    return query.fetch();
+  }
+  
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
@@ -637,6 +657,17 @@ public class ConfigurationManager {
     for (Office office : offices) {
       log.debug("Fix parametri di configurazione della sede {}", office);
       updateConfigurations(office);
+    }
+  }
+  
+  /**
+   * Aggiorna la configurazione di tutte le persone.
+   */
+  public void updatePeopleConfigurations() {
+    List<Person> people = personDao.peopleWithoutConfiguration();
+    for (Person person: people) {
+      log.debug("Fix parametri di configurazione della persona {}", person.fullName());
+      updateConfigurations(person);
     }
   }
 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+<body>
+<div class="container">
+
+  #{title title: 'Calendario reperibilità' /}
+  <h2>${reperibilityTypeMonth.yearMonth.asText()} - ${reperibilityTypeMonth.personReperibilityType}</h2>
+  
+  <p>
+    Le reperibilità per il mese ${reperibilityTypeMonth.yearMonth.asText()}
+    
+  </p>
+  
+
+  
+<div class="col-sm-6">
+  	<span class="text-success">
+  	<h4>Reperibilità feriali</h4>
+  	</span>
+  	<ul class="list-group">
+    #{list items:listWorkdaysRep, as:'item'}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${item.person.fullname}
+
+      </h4>
+      <p class="list-group-item-text">Giorni previsti: 
+          #{list items:item.workdaysPeriods, as:'item2'}
+          	${item2.lowerEndpoint().getDayOfMonth()}-${item2.upperEndpoint().getDayOfMonth()}/${item2.lowerEndpoint().monthOfYear().getAsText()}
+          #{/list}</p>
+    </li>
+    #{/list}
+  </ul>
+  </div>
+  <div class="col-sm-6">
+  	<span class="text-danger">
+  	<h4>Reperibilità festive</h4>
+  	</span>
+  	<ul class="list-group">
+    #{list items:listHolidaysRep, as:'item'}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${item.person.fullname}
+ 
+      </h4>
+      <p class="list-group-item-text">Giorni previsti: 
+          #{list items:item.holidaysPeriods, as:'item2'}
+          	${item2.lowerEndpoint().getDayOfMonth()}-${item2.upperEndpoint().getDayOfMonth()}/${item2.lowerEndpoint().monthOfYear().getAsText()}
+          #{/list}</p>
+    </li>
+    #{/list}
+  </ul>
+  </div>
+  
+    
+<div class="date">
+	<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+</div>
+
+<div class="firma dir">
+	<strong>Il Direttore</strong> <br />
+	Dott. ${seatSupervisor}
+</div>
+
+<div class="firma resp">
+	<strong>Il Responsabile</strong><br />
+	Dott. ${supervisor}
+</div>
+
+</div>
+</body>
+</html>

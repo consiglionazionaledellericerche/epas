@@ -2,10 +2,8 @@ package manager.attestati.service;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.Map;
 import java.util.Set;
-
 import models.Certification;
 import models.Person;
 import models.enumerate.CertificationType;
@@ -44,6 +42,10 @@ public class PersonCertData {
   public Map<String, Certification> toSendCertifications = Maps.newHashMap();
   public Certification attestatiMealToOverwrite;
 
+  /**
+   * La certificazione dei dati della persona.
+   * @return la certificazione dei dati della persona.
+   */
   public PersonCertData computeStaticStatus() {
 
     staticView = true;
@@ -125,6 +127,10 @@ public class PersonCertData {
     return this;
   }
 
+  /**
+   * La certificazione dei dati della persona.
+   * @return la certificazione dei dati della persona.
+   */
   public PersonCertData computeProcessStatus() {
 
     if (incompleteProcessable) {

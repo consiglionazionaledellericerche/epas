@@ -3,13 +3,10 @@ package manager.recaps;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -58,6 +55,7 @@ public class YearlyAbsencesRecap {
   }
 
   /**
+   * Il nome del mese a partire dal numero.
    * @return il nome del mese con valore monthNumber null in caso di argomento non valido.
    */
   public String fromIntToStringMonth(Integer monthNumber) {
@@ -67,6 +65,7 @@ public class YearlyAbsencesRecap {
   }
 
   /**
+   * La tabella contenente i codici di assenza effettuati nel giorno.
    * @return la tabella contenente in ogni cella i codici delle assenze effettuate in quel giorno.
    */
   private Table<Integer, Integer, List<Absence>> buildYearlyAbsenceTable(
@@ -95,6 +94,7 @@ public class YearlyAbsencesRecap {
   }
 
   /**
+   * La mappa tipo assenza-quantità.
    * @return la mappa contenente i tipi di assenza effettuate nell'anno con il relativo numero di
    *     occorrenze.
    */

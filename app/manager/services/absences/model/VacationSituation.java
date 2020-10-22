@@ -79,6 +79,8 @@ public class VacationSituation {
       return computeTotal(absencePeriod);
     }
     
+
+    
     /**
      * Nuova implementazione: posPartum anno passato.
      */
@@ -97,6 +99,18 @@ public class VacationSituation {
       return isContractLowerLimit(absencePeriod.from);
     }
     
+    /**
+     * Verifica la data di partenza del contratto in base a date.
+     * @param date la data da verificare
+     * @return true se date è il limite inferiore del contratto, false altrimenti.
+     */
+    private boolean isContractLowerLimit(LocalDate date) {
+      if (contract.beginDate.isEqual(date)) {
+        return true;
+      }
+      return false;
+    }
+    
     public LocalDate lowerLimit() {
       return absencePeriod.from;
     }
@@ -105,6 +119,20 @@ public class VacationSituation {
       return isContractUpperLimit(lastNaturalSubPeriod(absencePeriod).to);
     }
     
+    /**
+     * Verifica la data di terminazione del contratto in base a date.
+     * @param date la data da verificare
+     * @return true se date è il limite superiore del contratto, false altrimenti.
+     */
+    private boolean isContractUpperLimit(LocalDate date) {
+      if (contract.calculatedEnd() != null 
+          && contract.calculatedEnd().isEqual(date)) {
+        return true;
+      }
+      return false;
+    }
+
+
     public LocalDate upperLimit() {
       return lastNaturalSubPeriod(absencePeriod).to;
     }
@@ -157,21 +185,7 @@ public class VacationSituation {
               TakeCountBehaviour.sumAllPeriod, lastSubPeriod(period).to) / 100;
     }
     
-    private boolean isContractUpperLimit(LocalDate date) {
-      if (contract.calculatedEnd() != null 
-          && contract.calculatedEnd().isEqual(date)) {
-        return true;
-      }
-      return false;
-    }
 
-    private boolean isContractLowerLimit(LocalDate date) {
-      if (contract.beginDate.isEqual(date)) {
-        return true;
-      }
-      return false;
-    }
-    
     /**
      * L'ultimo subPeriodo non prorogato (per la data fine). 
      * Se l'ultimo subPeriod è l'estensione 37 seleziono quello ancora precedente.
@@ -266,6 +280,11 @@ public class VacationSituation {
       return days;
     }
     
+    /**
+     * Verifica se dopo un anno di contratto la data ricade nel periodo.
+     * @param period il periodo da considerare per l'assenza
+     * @return la data in cui termina il primo anno di contratto se ricade nel periodo.
+     */
     public LocalDate contractEndFirstYearInPeriod(AbsencePeriod period) {
       if (DateUtility
           .isDateIntoInterval(contract.beginDate.plusYears(1), period.periodInterval())) {
@@ -418,10 +437,11 @@ public class VacationSituation {
   /**
    * Versione cachata del riepilogo.
    * @author alessandro
-   *
    */
   public static class VacationSummaryCached implements Serializable {
-    
+
+    private static final long serialVersionUID = -8968069510648138668L;
+
     public boolean exists = true;
     public TypeSummary type;
     public int year;

@@ -1,21 +1,15 @@
 package manager;
 
 import com.google.common.base.Optional;
-
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-
-import controllers.ReperibilityCalendar;
 import controllers.Security;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
-import dao.ReperibilityTypeMonthDao;
 import dao.history.HistoricalDao;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,11 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -35,21 +26,14 @@ import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
 import models.Role;
-import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.User;
 import models.dto.HolidaysReperibilityDto;
 import models.dto.WorkDaysReperibilityDto;
-import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.i18n.Messages;
 
 /**
@@ -68,11 +52,19 @@ public class ReperibilityManager2 {
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
   private final CompetenceCodeDao competenceCodeDao;
-  
+
   private final CompetenceDao competenceDao;
   private final PersonReperibilityDayDao reperibilityDao;
 
-
+  /**
+   * Injection.
+   * @param reperibilityDayDao il dao sui giorni di reperibilità
+   * @param personDayDao il dao sui personday
+   * @param personDayManager il manager coi metodi sul personday
+   * @param competenceCodeDao il dao sui codici di competenza
+   * @param competenceDao il dao sulle competenze
+   * @param reperibilityDao il dao sulla reperibilità
+   */
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
@@ -87,7 +79,7 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * 
+   * la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
    */
   public List<PersonReperibilityType> getUserActivities() {
@@ -113,7 +105,7 @@ public class ReperibilityManager2 {
         activities.addAll(currentUser.usersRolesOffices.stream()
             .flatMap(uro -> uro.office.personReperibilityTypes.stream().filter(prt -> !prt.disabled)
                 .sorted(Comparator.comparing(o -> o.description)))
-                .collect(Collectors.toList()));
+            .collect(Collectors.toList()));
       }
     } else {
       if (currentUser.isSystemUser()) {
@@ -124,6 +116,8 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
+   * specificato.
    * @param reperibilityType attività di reperibilità
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
@@ -219,7 +213,7 @@ public class ReperibilityManager2 {
    */
   public Optional<String> reperibilityPermitted(PersonReperibilityDay personReperibilityDay) {
 
-    /**
+    /*
      * 0. Verificare se la persona è segnata in quell'attività in quel giorno
      *    return shift.personInactive
      * 1. La Persona non deve essere già reperibile per quel giorno
@@ -270,7 +264,7 @@ public class ReperibilityManager2 {
     return Optional.absent();
   }
 
-  
+
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
@@ -286,7 +280,7 @@ public class ReperibilityManager2 {
   }
 
   /**
-   *
+   * Ritorna una mappa con i giorni maturati di reperibilità per persona.
    * @param reperibility attività sulla quale effettuare i calcoli
    * @param from data di inizio da cui calcolare
    * @param to data di fine
@@ -319,6 +313,8 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * Una lista di persone che sono effettivamente coinvolte in reperibilità in un 
+   * determinato periodo (Dipendenti con le reperibilità attive in quel periodo).
    * @param reperibility attività di reperibilità
    * @param from data di inizio
    * @param to data di fine
@@ -332,6 +328,8 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * Il numero di giorni di competenza maturati in base alle reperibilità effettuate
+   * nel periodo selezionato (di norma serve calcolarli su un intero mese al massimo).
    * @param reperibility attività di turno
    * @param person Persona sulla quale effettuare i calcoli
    * @param from data iniziale
@@ -361,7 +359,7 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * 
+   * la mappa contenente i giorni di reperibilità festiva per ogni dipendente reperibile.
    * @param reperibility il tipo di reperibilità 
    * @param start la data di inizio da cui conteggiare
    * @param end la data di fine entro cui conteggiare
@@ -467,12 +465,10 @@ public class ReperibilityManager2 {
       log.info("Salvata {}", workdayCompetence);
     });
 
-
-
   }
 
   /**
-   * 
+   * la lista dei range di date in cui un dipendente è stato reperibile.
    * @param person il reperibile
    * @param begin la data da cui cercare i giorni di reperibilità
    * @param end la data entro cui cercare i giorni di reperibilità
@@ -518,7 +514,7 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * 
+   * la stringa formattata contenente le date dei giorni di reperibilità effettuati.
    * @param list la lista dei periodi di reperibilità all'interno del mese
    * @return la stringa formattata contenente le date dei giorni di reperibilità effettuati.
    */

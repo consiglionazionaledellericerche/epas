@@ -3,12 +3,12 @@ package jobs;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import models.ShiftType;
 import models.ShiftTypeMonth;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
@@ -28,6 +28,13 @@ public class ShiftMonthStatus extends Job<Void> {
    */
   @Override
   public void doJob() {
+    
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
+    
     final List<ShiftType> shiftTypes = ShiftType.findAll();
     final YearMonth currentMonth = YearMonth.now();
 
@@ -37,7 +44,7 @@ public class ShiftMonthStatus extends Job<Void> {
             .min(Comparator.comparing(shift -> shift.date))
             .map(personShiftDay -> personShiftDay.date);
         if (!oldestShift.isPresent()) {
-          log.info("activita {} senza personShiftDays, monthStatus non creato.", activity);
+          log.debug("attività {} senza personShiftDays, monthStatus non creato.", activity);
           return;
         }
         YearMonth month = new YearMonth(oldestShift.get());

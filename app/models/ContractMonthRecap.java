@@ -216,7 +216,7 @@ public class ContractMonthRecap extends BaseModel {
   public boolean expireInMonth() {
     if (this.contract.endDate != null 
         && this.contract.endDate.isBefore(
-            new LocalDate(year, month,1).dayOfMonth().withMaximumValue())) {
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) {
       return true;
     }
     return false;

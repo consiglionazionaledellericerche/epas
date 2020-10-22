@@ -122,6 +122,14 @@
            
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661) }
+      <p>Abilitando questa funzionalità sarà possibile notificare al <u>responsabile di gruppo</u> di un dipendente, 
+      qualora i gruppi siano stati definiti, l'avvenuta terminazione di un flusso di richiesta di permesso personale (661) 
+      da parte del dipendente stesso.<br>
+      Per la configurazione del flusso di approvazione vedi la scheda: <strong>"Flussi di lavoro"</strong>.<p>
+           
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
       <p>Esempio: <em>impostando il valore 31/8 per l'anno 2016 si otterrà che le ferie dell'anno 2015 si
@@ -181,15 +189,41 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TELEWORK_STAMPINGS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente gli orari di lavoro relativi al Telelavoro (103). <strong>NOTA BENE: </strong>questi orari non concorrono in alcun
+      modo alla formazione del residuo orario del giorno.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.RIGHT_TO_STUDY) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi ai permessi per diritto allo studio.
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.COVID_19) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi all'emergenza COVID-19.
+	  </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ADDITIONAL_HOURS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi alle ore aggiuntive effettuate presso strutture terze e di cui il CNR non è tenuto a 
+      corrispondere emolumenti.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLED_PERSON_PERMISSION) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente il codice di assenza per legge 104 per dipendente disabile (19).
+	  </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLED_RELATIVE_PERMISSION) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza per legge 104 per parente disabile del dipendente (18).
 	  </p> 
     #{/if}
 	
@@ -211,6 +245,15 @@
       di approvazione delle richieste di assenza. <br>
       Esso permette di far richiedere al dipendente un'assenza di tipo <strong>ferie</strong> o <strong>riposo compensativo</strong> direttamente 
       al proprio responsabile di gruppo o al proprio responsabile di sede o a entrambi in sequenza (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).</p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_37_FLOW) }
+      <p>Abilitando questo paramentro si permette ai dipendenti della sede <strong>${configuration.office.name}</strong> di usufruire della possibilità
+      di utilizzare i flussi di richiesta assenza anche per le ferie dell'anno passato post data di scadenza delle stesse 
+      (vedi parametro Annuale "<em>Giorno massimo utilizzo ferie dell'anno precedente</em>").<br>
+      Esso permette di far richiedere al dipendente un'assenza di tipo <strong>ferie anno passato</strong> anche successivamente alla data di 
+      termine utilizzo delle stesse, utilizzando il codice <strong>37</strong>.<br>
+      La richiesta seguirà lo stesso iter definito nella configurazione utilizzata per l'approvazione delle ferie standard.</p>
     #{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }

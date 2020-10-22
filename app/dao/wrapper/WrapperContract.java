@@ -3,13 +3,10 @@ package dao.wrapper;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import models.Contract;
 import models.ContractMonthRecap;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -268,6 +265,7 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
+   * La data più recente tra creazione del contratto e creazione della persona.
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
@@ -288,6 +286,7 @@ public class WrapperContract implements IWrapperContract {
   }
   
   /**
+   * La data più recente per l'inizializzazione.
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
@@ -355,7 +354,6 @@ public class WrapperContract implements IWrapperContract {
 
     return false;
   }
-
 
 
 }

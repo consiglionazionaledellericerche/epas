@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
+ * Il dao sui riepiloghi di turno mensili.
  * @author daniele
  * @since 10/06/17.
  */
@@ -28,12 +29,23 @@ public class ShiftTypeMonthDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Il riepilogo di turno mensile con id passato come parametro.
+   * @param id l'id del riepilogo.
+   * @return Il riepilogo di turno mensile con id passato come parametro.
+   */
   public Optional<ShiftTypeMonth> byId(long id) {
     final QShiftTypeMonth stm = QShiftTypeMonth.shiftTypeMonth;
 
     return Optional.fromNullable(getQueryFactory().selectFrom(stm).where(stm.id.eq(id)).fetchOne());
   }
 
+  /**
+   * Il riepilogo di turno mensile relativo all'attività shiftType alla data date.
+   * @param shiftType l'attività di turno
+   * @param date la data
+   * @return il riepilogo di turno mensile relativo all'attività shiftType alla data date.
+   */
   public Optional<ShiftTypeMonth> byShiftTypeAndDate(ShiftType shiftType, LocalDate date) {
     final QShiftTypeMonth stm = QShiftTypeMonth.shiftTypeMonth;
     final YearMonth yearMonth = new YearMonth(date);
@@ -66,6 +78,12 @@ public class ShiftTypeMonthDao extends DaoBase {
             .and(stm.yearMonth.eq(month).and(stm.approved.isTrue()))).distinct().fetch();
   }
 
+  /**
+   * La lista dei riepiloghi mensili di turno della sede office nell'anno/mese.
+   * @param office la sede su cui cercare i riepiloghi
+   * @param month l'anno/mese su cui cercare i riepiloghi
+   * @return la lista dei riepiloghi mensili di turno della sede office nell'anno/mese.
+   */
   public List<ShiftTypeMonth> byOfficeInMonth(Office office, YearMonth month) {
     final QShiftTypeMonth stm = QShiftTypeMonth.shiftTypeMonth;
     final QShiftCategories sc = QShiftCategories.shiftCategories;

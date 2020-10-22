@@ -116,7 +116,7 @@ public class AbsenceType extends BaseModel {
   public String documentation; 
   
   /**
-   * per il controllo della prendibilità della reperibilità sul giorno di assenza
+   * per il controllo della prendibilità della reperibilità sul giorno di assenza.
    */
   @Column(name = "reperibility_compatible")
   public boolean reperibilityCompatible;
@@ -344,7 +344,8 @@ public class AbsenceType extends BaseModel {
       for (GroupAbsenceType group : behaviour.groupAbsenceTypes) {  //quasi sempre 1
         if (group.automatic == true || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
             || group.name.equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()) 
-            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
+            || group.name.equals(DefaultGroup.LAVORO_FUORI_SEDE.name())
+            || group.name.equals(DefaultGroup.G_OA_DIPENDENTI.name())) {
           //TODO: questi gruppi (anche in groups permitted) vanno taggati
           continue;
         }
@@ -445,6 +446,12 @@ public class AbsenceType extends BaseModel {
     return Optional.absent();
   }
   
+  /**
+   * Controlla se due interi sono uguali.
+   * @param a intero
+   * @param b intero
+   * @return true se due interi sono uguali, false altrimenti.
+   */
   public static boolean safeEqual(Integer a, Integer b) {
     if (a == null && b == null) {
       return true;

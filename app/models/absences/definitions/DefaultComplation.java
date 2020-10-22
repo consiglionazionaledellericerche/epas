@@ -2,13 +2,10 @@ package models.absences.definitions;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
-
 import org.assertj.core.util.Lists;
 
 /**
@@ -87,6 +84,17 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_92H5, 
           DefaultAbsenceType.A_92H6, 
           DefaultAbsenceType.A_92H7)),
+  
+  C_20(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_20M), 
+      ImmutableSet.of(DefaultAbsenceType.A_20H1, 
+          DefaultAbsenceType.A_20H2, 
+          DefaultAbsenceType.A_20H3, 
+          DefaultAbsenceType.A_20H4, 
+          DefaultAbsenceType.A_20H5, 
+          DefaultAbsenceType.A_20H6, 
+          DefaultAbsenceType.A_20H7)),
+  
   C_92E(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_92E),
       ImmutableSet.of(DefaultAbsenceType.A_92E)),  
@@ -135,6 +143,7 @@ public enum DefaultComplation {
   C_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24M), 
       ImmutableSet.of(DefaultAbsenceType.A_24H7)),
+ 
   
   C_25P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25PM), 
@@ -158,7 +167,17 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_253H7)),
   C_243(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_243M), 
-      ImmutableSet.of(DefaultAbsenceType.A_243H7));
+      ImmutableSet.of(DefaultAbsenceType.A_243H7)),
+  
+  C_234(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_234M), 
+      ImmutableSet.of(DefaultAbsenceType.A_234H7)),
+  C_254(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254M), 
+      ImmutableSet.of(DefaultAbsenceType.A_254H7)),
+  C_244(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_244M), 
+      ImmutableSet.of(DefaultAbsenceType.A_244H7));
   
   public AmountType amountType;
   public Set<DefaultAbsenceType> complationCodes;

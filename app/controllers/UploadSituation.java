@@ -67,6 +67,7 @@ public class UploadSituation extends Controller {
    * @param year   anno
    * @param month  mese
    */
+  @SuppressWarnings("deprecation")
   public static void computeCreateFile(@Valid Office office,
       @Required Integer year, @Required Integer month) {
 

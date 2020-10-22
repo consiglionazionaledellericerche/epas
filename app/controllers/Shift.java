@@ -11,7 +11,9 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
+import dao.RoleDao;
 import dao.ShiftDao;
+import dao.UsersRolesOfficesDao;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,9 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager;
 import manager.ShiftManager2;
 import models.Competence;
+import models.Office;
 import models.Person;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
+import models.Role;
 import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
@@ -75,6 +79,10 @@ public class Shift extends Controller {
   private static ShiftManager2 shiftManager2;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static UsersRolesOfficesDao uroDao;
+  @Inject
+  private static RoleDao roleDao;
 
 
   /**
@@ -242,10 +250,13 @@ public class Shift extends Controller {
    * @author arianna
    */
   //@BasicAuth
-  public static void exportMonthAsPDF() {
-    int year = params.get("year", Integer.class);
-    int month = params.get("month", Integer.class);
-    Long shiftCategoryId = params.get("type", Long.class);
+  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
+    //    int year = params.get("year", Integer.class);
+    //    int month = params.get("month", Integer.class);
+    if (shiftCategoryId == null) {
+      shiftCategoryId = params.get("type", Long.class);
+    }
+    
 
     log.debug("sono nella exportMonthAsPDF con shiftCategory={} year={} e month={}",
         shiftCategoryId, year, month);
@@ -267,10 +278,7 @@ public class Shift extends Controller {
         TreeBasedTable.<Person, String, List<String>>create(Person.personComparator(),
             nullSafeStringComparator);
 
-    // Contains the number of the effective hours of worked shifts
-    Table<Person, String, Integer> totalPersonShiftWorkedTime =
-        TreeBasedTable.<Person, String, Integer>create(
-            Person.personComparator(), nullSafeStringComparator);
+
 
     ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
     if (shiftCategory == null) {
@@ -279,6 +287,10 @@ public class Shift extends Controller {
 
     log.debug("shiftCategory = {}", shiftCategory);
 
+    // Contains the number of the effective hours of worked shifts
+    Table<Person, String, Integer> totalPersonShiftWorkedTime =
+        TreeBasedTable.<Person, String, Integer>create(
+            Person.personComparator(), nullSafeStringComparator);
     // Legge i turni associati alla categoria (es: A, B)
     List<ShiftType> shiftTypes = shiftDao.getTypesByCategory(shiftCategory);
     
@@ -352,11 +364,20 @@ public class Shift extends Controller {
 
     LocalDate today = new LocalDate();
     String shiftDesc = shiftCategory.description;
-    String supervisor =
-        shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+    final String supervisor = shiftCategory.supervisor.getFullname();
+    String seatSupervisor = "";
+    Office office = shiftCategory.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
+    
 
     renderPDF(options, today, firstOfMonth, totalShiftInfo, personsShiftInconsistentAbsences,
-        thInconsistence, thShift, shiftDesc, supervisor);
+        thInconsistence, thShift, shiftDesc, supervisor, seatSupervisor, office);
   }
 
 
@@ -429,14 +450,14 @@ public class Shift extends Controller {
             new LocalDate(yearTo, monthTo, dayTo));
     List<Person> personList = people.stream()
         .<Person>map(psst -> psst.personShift.person).collect(Collectors.toList());
-//    List<Person> personList =
-//        JPA.em().createQuery(
-//            "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
-//                + "WHERE psst.shiftType.type = :type "
-//                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
-//                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
-//            .setParameter("type", type)
-//            .getResultList();
+    //    List<Person> personList =
+    //        JPA.em().createQuery(
+    //          "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
+    //                + "WHERE psst.shiftType.type = :type "
+    //                + "AND (psst.beginDate IS NULL OR psst.beginDate <= now()) "
+    //                + "AND (psst.endDate IS NULL OR psst.endDate >= now())")
+    //            .setParameter("type", type)
+    //            .getResultList();
     
 
     log.debug("Shift personList called, found {} shift person", personList.size());
@@ -502,7 +523,7 @@ public class Shift extends Controller {
       Optional<Calendar> calendar =
           shiftManager.createCalendar(type, Optional.fromNullable(personId), year);
       if (!calendar.isPresent()) {
-        log.info("Impossible to create shift calendar for personId = {}, type = {}, year = {}",
+        log.warn("Impossible to create shift calendar for personId = {}, type = {}, year = {}",
             personId, type, year);
         notFound(
             String.format("Person id = %d is not associated to a shift of type = %s",

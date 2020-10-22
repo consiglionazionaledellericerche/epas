@@ -4,12 +4,25 @@
 
 
 <div class="container">
-	#{title title:'Riepilogo del mese ' + month+'/'+year +  ' - ' + office?.name /}
+	#{title title:'Riepilogo del mese di ' + templateUtility.monthName(month) + ' ' + year +  ' - ' + office?.name /}
 </div>
 
 #{stampings.presenceDashboardTabs activeAction:'showRecaps' /}
 
 <div class="container">
+	
+	<blockquote>
+		#{alert color:'warning'}
+		Per estrarre il riepilogo mensile relativo a presenza a lavoro e in smart working clicca qui
+  		    <div class="pull-right btn-group">            
+      		
+            <a class="btn btn-sm btn-default" href="@{MonthRecaps.generateSmartWorkingMonthlyRecap(month, year, office.id)}">
+            <i class="fa fa-calendar"></i> Scarica</a>            
+    		
+          </div>
+  		
+  		#{/alert}
+</blockquote>
 
 	<table class="table table-striped table-hover" width="100%" datatable>
    <thead>

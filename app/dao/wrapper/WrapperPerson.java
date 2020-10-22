@@ -6,22 +6,17 @@ import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.SortedMap;
-
 import manager.CompetenceManager;
 import manager.PersonManager;
-
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
@@ -33,11 +28,12 @@ import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
+ * Wrapper per la person.
+ * 
  * @author marco.
  */
 public class WrapperPerson implements IWrapperPerson {
@@ -54,6 +50,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   private List<Contract> sortedContracts;
   private Optional<Contract> currentContract;
+  private Optional<Contract> previousContract;
   private Optional<WorkingTimeType> currentWorkingTimeType;
   private Optional<VacationPeriod> currentVacationPeriod;
   private Optional<ContractStampProfile> currentContractStampProfile;
@@ -165,6 +162,9 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * L'ultimo contratto attivo nel mese, se esiste.
+   * @param year l'anno
+   * @param month il mese
    * @return l'ultimo contratto attivo nel mese.
    */
   @Override
@@ -180,6 +180,9 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * Il primo contratto attivo nel mese se esiste.
+   * @param year l'anno
+   * @param month il mese
    * @return il primo contratto attivo nel mese.
    */
   @Override
@@ -507,5 +510,18 @@ public class WrapperPerson implements IWrapperPerson {
       }
     }
     return Optional.of(last);
+  }
+
+  @Override
+  public Optional<Contract> getPreviousContract() {
+    
+    if (previousContract != null) {
+      return previousContract;
+    }
+    
+    if (previousContract == null) {
+      previousContract = contractDao.getPreviousContract(getCurrentContract().get());
+    }
+    return previousContract;
   }
 }

@@ -8,28 +8,28 @@ import play.jobs.OnApplicationStart;
 
 @OnApplicationStart(async = true)
 @Slf4j
-public class WorkingTimeTypeAdjust extends Job<Void>{
+public class WorkingTimeTypeAdjust extends Job<Void> {
 
-  private final String MATERNITA = "Maternita";
-  private final String MATERNITA_ACCENTO = "Maternità";
-  private final String MATERNITA_LOWER_CASE = "maternita";
-  private final String MATERNITA_LOWER_CASE_ACCENTO = "maternità";
-  private final String ALLATTAMENTO = "Allattamento";
-  private final String ALLATTAMENTO_LOWER_CASE = "allattamento";
+  private final String maternita = "Maternita";
+  private final String maternitaAccento = "Maternità";
+  private final String maternitaLowerCase = "maternita";
+  private final String maternitaLowerCaseAccento = "maternità";
+  private final String allattamento = "Allattamento";
+  private final String allattamentoLowerCase = "allattamento";
   
   @Override
   public void doJob() {
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
-      if (wtt.description.contains(MATERNITA) || wtt.description.contains(MATERNITA_ACCENTO) 
-          || wtt.description.contains(MATERNITA_LOWER_CASE) 
-          || wtt.description.contains(MATERNITA_LOWER_CASE_ACCENTO)
-          || wtt.description.contains(ALLATTAMENTO)
-          || wtt.description.contains(ALLATTAMENTO_LOWER_CASE)) {
+      if ((wtt.description.contains(maternita) || wtt.description.contains(maternitaAccento) 
+          || wtt.description.contains(maternitaLowerCase) 
+          || wtt.description.contains(maternitaLowerCaseAccento)
+          || wtt.description.contains(allattamento)
+          || wtt.description.contains(allattamentoLowerCase)) 
+          && wtt.enableAdjustmentForQuantity == true) {
         wtt.enableAdjustmentForQuantity = false;
-        log.info("Messo a true il campo enableAdjustmentForQuantity per l'orario %s della sede %s", wtt.description, wtt.office);
-      } else {
-        wtt.enableAdjustmentForQuantity = true;
+        log.info("Messo a false il campo enableAdjustmentForQuantity per l'orario {} "
+            + "della sede {}", wtt.description, wtt.office);
       }
       wtt.save();
     }

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
@@ -14,32 +13,25 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-
 import manager.PersonMonthsManager;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import security.SecurityRules;
 
 @With({Resecure.class})
@@ -208,6 +200,10 @@ public class PersonMonths extends Controller {
         dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
+  /**
+   * Modifica le ore di formazione di una persona.
+   * @param personMonthSituationId l'identificativo delle ore di formazione da modificare
+   */
   public static void modifyPeopleTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -243,6 +239,11 @@ public class PersonMonths extends Controller {
     render(pm);
   }
   
+  /**
+   * Permette la cancellazione delle ore di formazione.
+   * @param personMonthRecapId l'identificativo delle ore di formazione da cancellare
+   * @param officeId l'identificativo della sede
+   */
   public static void deletePeopleTrainingHours(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -275,7 +276,12 @@ public class PersonMonths extends Controller {
     PersonMonths.trainingHours(pm.year); 
 
   }
-  
+
+  /**
+   * Permette la cancellazione delle ore di formazione da parte dell'amministratore del personale.
+   * @param personMonthRecapId l'identificativo delle ore di formazione da eliminare
+   * @param officeId l'identificativo della sede
+   */
   public static void deletePeopleTrainingHoursConfirmed(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -369,7 +375,7 @@ public class PersonMonths extends Controller {
           ImmutableSet.of(person.office), false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
-          person, month, year, begin, end, value,simplePersonList);
+          person, month, year, begin, end, value, simplePersonList);
     }
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);

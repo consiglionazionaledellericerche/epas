@@ -24,6 +24,8 @@ public class PersonChildrenDao extends DaoBase {
 
 
   /**
+   * Il personChildren con id passato come parametro.
+   * @param id l'identificativo del figlio del dipendente
    * @return il personChildren relativo all'id passato come parametro.
    */
   public PersonChildren getById(Long id) {
@@ -35,6 +37,8 @@ public class PersonChildrenDao extends DaoBase {
 
 
   /**
+   * La lista dei figli di una persona passata come parametro.
+   * @param person la persona di cui si vogliono i figli
    * @return la lista di tutti i figli della persona.
    */
   public List<PersonChildren> getAllPersonChildren(Person person) {

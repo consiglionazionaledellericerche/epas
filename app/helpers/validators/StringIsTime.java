@@ -1,7 +1,6 @@
 package helpers.validators;
 
 import java.util.regex.Pattern;
-
 import play.data.validation.Check;
 
 public class StringIsTime extends Check {

@@ -1,18 +1,14 @@
 package models;
 
+import com.google.common.collect.Range;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import com.google.common.collect.Range;
-
 import models.base.BaseModel;
-
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 
@@ -48,6 +44,10 @@ public class PersonShiftShiftType extends BaseModel {
 
   public boolean jolly;
 
+  /**
+   * Il range di date di appartenenza della persona all'attività.
+   * @return il range di date di appartenenza della persona all'attività.
+   */
   @Transient
   public Range<LocalDate> dateRange() {
     if (beginDate == null && endDate == null) {

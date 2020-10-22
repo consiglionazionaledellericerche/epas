@@ -36,6 +36,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.CompetenceCodeGroup;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
@@ -253,33 +254,27 @@ public class CompetenceManager {
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
    *     personList nell'anno year.
    */
-  public FileInputStream getOvertimeInYear(int year, List<Person> personList) throws IOException {
+  public FileInputStream getCompetenceGroupInYearMonth(int year, int month,
+      List<Person> personList, CompetenceCodeGroup group) throws IOException {
     FileInputStream inputStream = null;
-    File tempFile = File.createTempFile("straordinari" + year, ".csv");
+    File tempFile = File.createTempFile(group.label + '_' + DateUtility.fromIntToStringMonth(month) 
+        + '_' + year, ".csv");
     inputStream = new FileInputStream(tempFile);
     FileWriter writer = new FileWriter(tempFile, true);
     BufferedWriter out = new BufferedWriter(writer);
-    out.write("Cognome Nome,Totale straordinari" + ' ' + year);
-    out.newLine();
-    List<CompetenceCode> codeList = Lists.newArrayList();
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("S1"));
+    
+    out.write("Cognome Nome,Codice competenza,Quantità" + ' ' 
+        + DateUtility.fromIntToStringMonth(month) + ' ' + year);
+    out.newLine();    
     for (Person p : personList) {
-      Long totale = null;
-      Optional<Integer> result =
-          competenceDao.valueOvertimeApprovedByMonthAndYear(
-              year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList);
-      if (result.isPresent()) {
-        totale = result.get().longValue();
-      }
-
-      log.debug("Totale per {} vale {}", p.getFullname(), totale);
-      out.write(p.surname + ' ' + p.name + ',');
-      if (totale != null) {
-        out.append(totale.toString());
-      } else {
-        out.append("0");
-      }
-      out.newLine();
+      
+      List<Competence> competenceList = competenceDao
+          .getCompetenceInMonthForUploadSituation(p, year, month, Optional.fromNullable(group));
+      for (Competence comp : competenceList) {
+        out.write(p.surname + ' ' + p.name + ',' + comp.competenceCode 
+            + ',' + comp.valueApproved);        
+        out.newLine();
+      }      
     }
     out.close();
     return inputStream;
@@ -306,7 +301,7 @@ public class CompetenceManager {
         Optional<ContractMonthRecap> recap =
             wrContract.getContractMonthRecap(new YearMonth(year, month));
         if (recap.isPresent()) {
-          /**
+          /*
            * FIXME: in realtà bisogna controllare che la persona nell'arco
            * del mese non sia stata in turno. In quel caso nei giorni
            * in cui la persona è in turno e fa un tempo di lavoro
@@ -364,7 +359,7 @@ public class CompetenceManager {
             return result;
           }
         }
-        if (sum + value > comp.competenceCode.competenceCodeGroup.limitValue) {
+        if (sum - comp.valueApproved + value > comp.competenceCode.competenceCodeGroup.limitValue) {
           result = Messages.get("CompManager.overGroupLimit");
           return result;
         }
@@ -393,7 +388,7 @@ public class CompetenceManager {
         }
         break;
       case entireMonth:
-        /**
+        /*
          * in questo caso il valore deve essere per forza = 1 perchè rappresenta l'intero mese 
          * assegnato come competenza (caso tipico: cod. 303 Ind.ta' Risc. Rad. Ion. Com.1)
          */
@@ -479,7 +474,7 @@ public class CompetenceManager {
         comp.month, groupCodes, comp.person.office, false);
     int peopleSum = peopleMonthList.stream()
         .filter(competence -> competence.id != comp.id).mapToInt(i -> i.valueApproved).sum();
-    if (peopleSum + value > maxDays) {
+    if (peopleSum - comp.valueApproved + value > maxDays) {
       return false;
     }
     return true;
@@ -509,7 +504,7 @@ public class CompetenceManager {
     boolean servicesInitialized = true;
     if (competenceCodeList.stream().anyMatch(isReperibility())) {
       List<PersonReperibilityType> prtList = reperibilityDao
-          .getReperibilityTypeByOffice(office, Optional.fromNullable(new Boolean(false)));
+          .getReperibilityTypeByOffice(office, Optional.fromNullable(Boolean.FALSE));
       if (prtList.isEmpty()) {
         servicesInitialized = false;
       }
@@ -645,7 +640,7 @@ public class CompetenceManager {
             // esiste un solo personcompetencecodes 
             if (!pccRecent.beginDate.isAfter(date) 
                 && (pccRecent.endDate == null || pccRecent.endDate.isAfter(date))) {
-              log.info("Si intende creare un personCompetenceCode sovrascrivendo "
+              log.debug("Si intende creare un personCompetenceCode sovrascrivendo "
                   + "la data di inizio di uno già esistente.");
             } else if (pccRecent.beginDate.isAfter(date)) {
               updatePersonCompetenceCode(pccRecent, Optional.fromNullable(date), 
@@ -959,7 +954,7 @@ public class CompetenceManager {
    * @param code il codice di competenza da riconteggiare
    */
   public void applyBonusPerPerson(Person person, YearMonth yearMonth, CompetenceCode code) {
-    LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(),1);
+    LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
         .getByPersonAndCodeAndDate(person, code, date);
     if (pcc.isPresent()) {
@@ -1023,7 +1018,7 @@ public class CompetenceManager {
     PersonShift personShift = null;
     personShift = personShiftDayDao.getPersonShiftByPerson(person, date);
     if (personShift != null) {
-      log.info("L'utente {} è già presente in tabella person_shift", person.fullName());
+      log.debug("L'utente {} è già presente in tabella person_shift", person.fullName());
 
     } else {
       personShift = new PersonShift();

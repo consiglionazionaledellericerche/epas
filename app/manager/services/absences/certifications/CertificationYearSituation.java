@@ -2,15 +2,12 @@ package manager.services.absences.certifications;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import models.absences.Absence;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 
 /**
@@ -19,7 +16,9 @@ import org.joda.time.LocalDate;
  *
  */
 public class CertificationYearSituation implements Serializable {
-  
+
+  private static final long serialVersionUID = -8220636622879573718L;
+
   public int year;
   
   public LocalDate beginDate;
@@ -118,6 +117,8 @@ public class CertificationYearSituation implements Serializable {
    *
    */
   public static class AbsenceSituation implements Serializable {
+
+    private static final long serialVersionUID = -4945653666009422856L;
 
     public AbsenceSituationType type;
     

@@ -51,15 +51,17 @@
 	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
 		<!-- Form input -->
 		#{if !confirmed }
-			#{f.date 'beginDate', value:beginDate?.format() /}
-	    	#{f.date 'endDate', value:endDate?.format() /}
-	    	#{f.date 'endContract', value:endContract?.format() /}
-	    	#{f.booleanRadio 'onCertificate', value:onCertificate /}
+			#{f.date 'contract.beginDate', value:contract.beginDate?.format() /}
+	    	#{f.date 'contract.endDate', value:contract.endDate?.format() /}
+	    	#{f.date 'contract.endContract', value:contract.endContract?.format() /}
+	    	#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate /}
+    		#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract /}
+	    	
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
 	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
 	    	#{/secure.check}
 	    	#{secure.check 'Contracts.updatePersonId'}
-	    		#{f.input 'perseoId', label:'contract.perseoId', value:perseoId /}
+	    		#{f.input 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId /}
 	    	#{/secure.check}
 	    	#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
 	    		#{f.date 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format() /}
@@ -80,15 +82,16 @@
 		<!-- Form di conferma -->
 		#{else}
 		
-			#{f.simpleView 'beginDate', value:beginDate?.format(), hidden:true /}
-			#{f.simpleView 'endDate', value:endDate?.format(), hidden:true /}
-			#{f.simpleView 'endContract', value:endContract?.format(), hidden:true /}
-			#{f.booleanRadio 'onCertificate', value:onCertificate, readOnly:true /}
+			#{f.simpleView 'contract.beginDate', value:contract.beginDate?.format(), hidden:true /}
+			#{f.simpleView 'contract.endDate', value:contract.endDate?.format(), hidden:true /}
+			#{f.simpleView 'contract.endContract', value:contract.endContract?.format(), hidden:true /}
+			#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate, readOnly:true /}
+			#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
 			#{/secure.check}
 			#{secure.check 'Contracts.updatePersonId'}
-				#{f.simpleView 'perseoId', label:'contract.perseoId', value:perseoId, hidden:true /}
+				#{f.simpleView 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId, hidden:true /}
 			#{/secure.check}
 			#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
 	    		#{f.simpleView 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format(), hidden:true /}

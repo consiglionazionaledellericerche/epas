@@ -295,13 +295,14 @@ public class MissionManager {
     GroupAbsenceType group = null;
     switch (body.destinazioneMissione) {
       case "ITALIA":
-        group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
+        group = absComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
         break;
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     List<LocalDate> dates = datesToCompute(body);
     //lista assenze da rimuovere
@@ -376,13 +377,14 @@ public class MissionManager {
     GroupAbsenceType group = null;
     switch (body.destinazioneMissione) {
       case "ITALIA":
-        group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
+        group = absComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
         break;
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     if (!performDeleteMission(missions, group)) {
       return false;
@@ -425,15 +427,16 @@ public class MissionManager {
     GroupAbsenceType group = null;
     switch (destination) {
       case "ITALIA":
-        group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
+        group = absComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
         mission = absenceTypeDao.getAbsenceTypeByCode("92").get(); 
         break;
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
         mission = absenceTypeDao.getAbsenceTypeByCode("92E").get();
         break;
-        default:
-          break;
+      default:
+        break;
     }
     int quantity = 0;
     if (hours != null && minutes != null) {
@@ -479,9 +482,9 @@ public class MissionManager {
         } else {
           absence.externalIdentifier = id;
         }
-        absence.note = "Missione: " + numero +'\n' 
-            + "Anno: " +anno+'\n' 
-            + "(Identificativo: " +absence.externalIdentifier +")";
+        absence.note = "Missione: " + numero + '\n' 
+            + "Anno: " + anno + '\n' 
+            + "(Identificativo: " + absence.externalIdentifier + ")";
                 
         absence.save();
         
@@ -571,7 +574,8 @@ public class MissionManager {
     return absenceForm;
   }
 
-  private AbsenceForm buildAbsenceForm(Person person, LocalDate dataInizio, LocalDate dataFine, GroupAbsenceType group) {
+  private AbsenceForm buildAbsenceForm(Person person, LocalDate dataInizio, 
+      LocalDate dataFine, GroupAbsenceType group) {
     return absenceService.buildAbsenceForm(person, dataInizio, null, dataFine, null, group, false, 
         null, null, null, null, false, false);
   }

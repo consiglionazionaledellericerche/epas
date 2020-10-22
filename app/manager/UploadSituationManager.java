@@ -2,24 +2,20 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContractMonthRecap;
-
 import java.util.List;
-
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
-
 import models.Competence;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.absences.Absence;
-
 import play.Play;
 
 public class UploadSituationManager {
@@ -73,14 +69,15 @@ public class UploadSituationManager {
       }
       //la parte delle competenze
       List<Competence> competenceList = competenceDao
-          .getCompetenceInMonthForUploadSituation(person, year, month);
+          .getCompetenceInMonthForUploadSituation(person, year, month, 
+              Optional.<CompetenceCodeGroup>absent());
       for (Competence comp : competenceList) {
         body = body + person.number + " C " + comp.competenceCode.code + " " 
             + comp.valueApproved + " \r\n";
       }
       List<PersonMonthRecap> pmrList = 
           personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
-              person, year, Optional.fromNullable(month),Optional.<Boolean>absent());
+              person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
       for (PersonMonthRecap pmr : pmrList) {
         body = body + person.number + " F " + pmr.fromDate.getDayOfMonth() + " " 
             + pmr.toDate.getDayOfMonth() + " " + pmr.trainingHours + " \r\n";

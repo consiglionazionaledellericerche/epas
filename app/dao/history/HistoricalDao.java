@@ -57,6 +57,7 @@ public class HistoricalDao {
     return HistoryViews.historicalViewOf(cls, current, history, date);
   }
 
+  @SuppressWarnings("rawtypes")
   public static HistoryValue lastRevisionOf(Class<? extends BaseModel> cls, long id) {
     List<HistoryValue> lastRevisions = lastRevisionsOf(cls, id);
     if (lastRevisions.isEmpty()) {

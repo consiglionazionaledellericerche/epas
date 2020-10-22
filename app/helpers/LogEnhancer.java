@@ -1,9 +1,7 @@
 package helpers;
 
 import controllers.Security;
-
 import org.slf4j.MDC;
-
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;

@@ -1,34 +1,21 @@
 package controllers.rest;
 
 import com.google.common.base.Optional;
-
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import controllers.Resecure.NoCheck;
-
 import dao.OfficeDao;
-
 import helpers.JsonResponse;
-
 import it.cnr.iit.epas.JsonMissionBinder;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.MissionManager;
-import manager.StampingManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Office;
 import models.exports.MissionFromClient;
-
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import security.SecurityRules;
 
 
 @Slf4j
@@ -100,7 +87,7 @@ public class Missions extends Controller {
     }
     
     // Check if integration ePAS-Missions is enabled
-    if (!(Boolean)configurationManager
+    if (!(Boolean) configurationManager
         .configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
       logInfo(String.format("Non verrà processato il messaggio in quanto la sede %s "
           + "cui appartiene il destinatario %s ha l'integrazione con Missioni disabilitata",
