@@ -2,6 +2,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -12,6 +13,7 @@ import com.google.common.base.Verify;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
@@ -24,6 +26,7 @@ import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
+import models.PersonReperibilityType;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -71,6 +74,8 @@ public class CompetenceRequests extends Controller{
   static UsersRolesOfficesDao uroDao;
   @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static PersonReperibilityDayDao repDao;
   
 
   public static void changeReperibility() {
@@ -171,9 +176,18 @@ public class CompetenceRequests extends Controller{
      * TODO: completare il modulo per la richiesta di nuovo cambio di reperibilità
      */
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-      isOvertime = true;
-      psDto = stampingsRecapFactory.create(person,
-          year, month, true);  
+      List<PersonReperibilityType> types = 
+          repDao.getReperibilityTypeByOffice(person.office, Optional.of(true))
+          .stream().filter(prt -> prt.personReperibilities.stream()
+              .anyMatch(pr -> pr.person.equals(person) 
+                  && !pr.startDate.isAfter(LocalDate.now()) 
+                  && (!pr.endDate.isBefore(LocalDate.now()) || pr.endDate == null)))
+          .collect(Collectors.toList());
+      for (PersonReperibilityType type : types) {
+        
+      }
+      
+      //List<PersonReperibility> personReperibilityList = 
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
     render("@edit", psDto, competenceRequest, isOvertime, competenceType, year, month);

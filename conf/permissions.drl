@@ -78,6 +78,35 @@ then
 end
 
 /*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceHandleFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+
+/*
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
  *  (Ricalca il più possibile la struttura del dropdown menu della persona
  *  oltre i calendari iCal e le azioni REST)
@@ -424,7 +453,7 @@ end
 
 
 
-/*Ruolo per vedere il calendario per i reperibili*/
+/*Ruolo per vedere il calendario per i reperibili e le richieste di cambio reperibilità*/
 
 rule isAvailable_general
 when 
@@ -434,6 +463,12 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
+  		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
        	"ReperibilityCalendar.events",
@@ -450,10 +485,16 @@ when
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
 	$c: PermissionCheck(action in (
-       "ReperibilityCalendar.show",
-       "ReperibilityCalendar.reperibilityPeople",
-       "ReperibilityCalendar.events",
-       "ReperibilityCalendar.recap"), target == $prt, granted == false)
+		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
+        "ReperibilityCalendar.show",
+        "ReperibilityCalendar.reperibilityPeople",
+        "ReperibilityCalendar.events",
+        "ReperibilityCalendar.recap"), target == $prt, granted == false)
 then
 $c.grant();
 end
