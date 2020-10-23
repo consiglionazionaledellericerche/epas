@@ -72,6 +72,8 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
 
     public final models.query.QPerson person;
 
+    public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
+
     public final DateTimePath<org.joda.time.LocalDateTime> startAt = createDateTime("startAt", org.joda.time.LocalDateTime.class);
 
     public final EnumPath<models.flows.enumerate.CompetenceRequestType> type = createEnum("type", models.flows.enumerate.CompetenceRequestType.class);
