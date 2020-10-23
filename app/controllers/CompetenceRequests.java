@@ -73,11 +73,11 @@ public class CompetenceRequests extends Controller{
   private static PersonStampingRecapFactory stampingsRecapFactory;
   
 
-  public static void overtimes() {
+  public static void changeReperibility() {
     list(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
   }
 
-  public static void overtimesToApprove() {
+  public static void changeReperibilityToApprove() {
     listToApprove(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
   }
 
@@ -135,9 +135,7 @@ public class CompetenceRequests extends Controller{
         .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-    boolean overtimesQuantityEnabled = (Boolean)configurationManager
-        .configValue(person.office, EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
-    render(config, results, type, onlyOwn, approvedResults, myResults, overtimesQuantityEnabled);
+    render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
   public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType competenceType) {
@@ -171,10 +169,6 @@ public class CompetenceRequests extends Controller{
     boolean isOvertime = false;
     if (competenceType.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       isOvertime = true;
-//      if (year == null || month == null) {
-//        year = LocalDate.now().getYear();
-//        month = LocalDate.now().getMonthOfYear();
-//      }
       psDto = stampingsRecapFactory.create(person,
           year, month, true);  
     }

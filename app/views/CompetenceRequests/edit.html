@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceRequest.type.toString() + 'S') /}
+#{set title:('ePAS - ' + competenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + competenceRequest.type.label()) /}
+
+#{switcher year:true, month:true, competenceType:true /}
+
+#{set breadcrumbs:[(competenceRequestTypeLabel):@CompetenceRequests.list(competenceRequest.type), ('Modifica'):null] /}
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:(competenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + competenceRequest.type.label()) /}
+</div>
+
+
+<div class="container">
+	#{include './_form.html' /}
+</div>

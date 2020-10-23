@@ -1,0 +1,65 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set competenceRequestTypeLabel: 'Visualizza flusso' /}
+#{set title:('ePAS - ' + competenceRequestTypeLabel) /}
+#{switcher year:true, month:true, competenceType:true /}
+#{if competenceRequest.person != user.person }
+#{set breadcrumbs:['Richieste competenza':@CompetenceRequests.listToApprove(competenceRequest.type), ('Visualizza'):null] /}
+#{/if}
+#{else}
+#{set breadcrumbs:['Mie richieste':@CompetenceRequests.list(competenceRequest.type), ('Visualizza'):null] /}
+#{/else}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+#{title title: 'Richiesta di '+ competenceRequest.value + ' ore per ' + templateUtility.monthName(competenceRequest.month) + ' ' + competenceRequest.year /}
+
+<br>
+ #{alert color:'info'}
+    <p>Elenco degli stati di approvazione della <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
+    per <strong>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</strong>:</p>
+ #{/alert}
+ <div class="container-fluid center color:info">
+ 
+ 	#{f.view 'competenceRequest.startAt', value:competenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'competenceRequest.endTo', value:competenceRequest.endTo?.format("dd/MM/yyyy") /}
+</div>	
+<table class="table table-striped">
+<tr>
+	<th>Autore</th>
+	<th>Data e ora sottomissione</th>
+	<th>Tipo evento</th>
+	<th>Descrizione</th>
+	
+</tr>
+#{list items:competenceRequest.events, as:'item'}
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+	>
+	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
+	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
+	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
+</tr>
+#{/list}
+</table>
+
+	#{b.buttons center:true}
+		#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
+			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
+			#{b.link @approval(competenceRequest.id), color:'success', title:'Approva'/}
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
+			#{b.link @disapproval(competenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
+		#{/secure.check}
+	#{/b.buttons}
+</div>

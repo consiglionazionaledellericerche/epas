@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import models.Person;
 import models.base.MutableModel;
+import models.enumerate.ShiftSlot;
 import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
 
@@ -58,6 +59,12 @@ public class CompetenceRequest extends MutableModel {
    * L'eventuale data da cambiare
    */
   public LocalDate dateToChange;
+  
+  /**
+   * Lo slot per cui richiedere il cambio
+   */
+  @Enumerated(EnumType.STRING)
+  public ShiftSlot shiftSlot;
   
   /**
    * Data e ora di inizio.

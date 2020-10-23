@@ -12,6 +12,7 @@ import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
+import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
 import dao.GroupDao;
 import dao.MemoizedCollection;
@@ -62,9 +63,12 @@ import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 
@@ -101,6 +105,7 @@ public class TemplateUtility {
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
   private final TimeSlotDao timeSlotDao;
+  private final CompetenceRequestDao competenceRequestDao;
    
   
   /**
@@ -118,7 +123,8 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
+      CompetenceRequestDao competenceRequestDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -140,6 +146,7 @@ public class TemplateUtility {
     this.uroDao = uroDao;
     this.groupDao = groupDao;
     this.timeSlotDao = timeSlotDao;
+    this.competenceRequestDao = competenceRequestDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -238,6 +245,27 @@ public class TemplateUtility {
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
 
+    return results.size();
+  }
+
+  /**
+   * Metodo di utilità per far comparire il badge con la quantità di richieste di cambio di 
+   * reperibilità da approvare nel template.
+   * @return la quantità di richieste di cambio di reperibilità attive.
+   */
+  public final int changeReperibilityRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent(), 
+        Optional.absent());
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
+            groups, user.person);
     return results.size();
   }
 
