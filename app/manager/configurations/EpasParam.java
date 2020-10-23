@@ -641,10 +641,7 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
-
-  ;
+      Office.class);
 
   public final String name;
   public final EpasParamCategory category;

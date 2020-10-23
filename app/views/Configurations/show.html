@@ -21,7 +21,7 @@
       flowsActive = true;
     }
     if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.COMPETENCE_FLOWS)) {
-      flowsActive = true;
+      competenceflowsActive = true;
     }
     
   }%
@@ -36,6 +36,10 @@
   #{if templateUtility.isFlowsActive()}
   #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
   #{/if}
+  #{if templateUtility.isFlowsActive()}
+  #{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta competenze', active:competenceflowsActive /}
+  #{/if}
+  
   #{/tabList}
 
   <br>
@@ -252,15 +256,12 @@
   #{/tabContentItem}
   #{/if}
   
-  #{if templateUtility.isFlowsActive()}
-  	#{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta straordinari', active:flowsActive /}
-  #{/if}
   
   #{if templateUtility.isFlowsActive()}	
-  #{tabContentItem id:'COMPETENCE_FLOWS', active:flowsActive}
+  #{tabContentItem id:'COMPETENCE_FLOWS', active:competenceflowsActive}
   <div id="editFlows">
     #{alert color:'info'}
-    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di richiesta straordinari per la sede
+    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di richiesta competenze per la sede
       <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
     #{/alert}
 
@@ -269,7 +270,7 @@
         <th>Attivazione</th>
         <th>Valore</th>
       </tr>
-      #{list competence_flows.findAll({it.epasParam.general}), as:'conf'}
+      #{list competenceFlows.findAll({it.epasParam.general}), as:'conf'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
@@ -287,7 +288,7 @@
         <th>Dal</th>
         <th>Al</th>
       </tr>
-      #{list competence_flows.findAll({!it.epasParam.general}), as:'conf'}
+      #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
