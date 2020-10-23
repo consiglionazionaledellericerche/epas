@@ -230,13 +230,17 @@ public class Configurations extends Controller {
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.FLOWS)
         .collect(Collectors.toList());
     
+    final List<Configuration> competenceFlows = configurations.stream()
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
+        .collect(Collectors.toList());
+    
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     final Attachment autocert = office.attachments.stream()
         .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
     render(office, paramCategory, generals, yearlies, periodics, 
-        autocertifications, autocert, flows);
+        autocertifications, autocert, flows, competenceFlows);
   }
 
   /**

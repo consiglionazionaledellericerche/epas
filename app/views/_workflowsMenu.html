@@ -59,8 +59,8 @@
       #{secure.check 'CompetenceRequests.handleEnabled'}
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
         <i class="fa fa-plane" aria-hidden="true"></i>
-       	#{if templateUtility.overtimeRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
+       	#{if templateUtility.changeReperibilityRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.changeReperibilityRequests()}</span>
     	#{/if} 
       #{/secure.li}
       #{/secure.check}

@@ -1128,6 +1128,11 @@ PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
+ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
+CHANGE_REPERIBILITY_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione del responsabile di sede per cambio giorno di reperibilità
+CHANGE_REPERIBILITY_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile di gruppo di lavoro per cambio giorno di reperibilità
+CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
+
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
 configurationDto.validityBegin=Validità Inizio
