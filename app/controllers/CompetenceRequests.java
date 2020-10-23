@@ -167,7 +167,10 @@ public class CompetenceRequests extends Controller{
     competenceRequest.person = person;
     PersonStampingRecap psDto = null;
     boolean isOvertime = false;
-    if (competenceType.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+    /*
+     * TODO: completare il modulo per la richiesta di nuovo cambio di reperibilità
+     */
+    if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       isOvertime = true;
       psDto = stampingsRecapFactory.create(person,
           year, month, true);  
