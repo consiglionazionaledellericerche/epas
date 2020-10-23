@@ -34,10 +34,19 @@ public enum NotificationSubject {
    * Notifiche relative alle assenze inserite o modificate
    */
   ABSENCE,
+  /*
+   * Notifiche relative alle competenze inserite o modificate
+   */
+  COMPETENCE,
+
   /**
    * Notifiche per i flussi di lavoro. 
    */
   ABSENCE_REQUEST,
+  /*
+   * Notifiche relative ai flussi di lavoro per competenza.
+   */
+  COMPETENCE_REQUEST,
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
    */
