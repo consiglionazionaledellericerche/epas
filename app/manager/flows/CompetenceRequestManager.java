@@ -453,7 +453,10 @@ public class CompetenceRequestManager {
     CompetenceCode code = null;
     Optional<Competence> competence = Optional.absent();
     Competence comp = null;
-    if (competenceRequest.type == CompetenceRequestType.OVERTIME_REQUEST) {
+    /*
+     * TODO: cosa fare con il completamento del flusso per richiesta reperibilità
+     */
+    if (competenceRequest.type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
       code = competenceCodeDao.getCompetenceCodeByCode(DAILY_OVERTIME);      
       competence = competenceDao.getCompetence(competenceRequest.person, 
           competenceRequest.year, competenceRequest.month, code);
