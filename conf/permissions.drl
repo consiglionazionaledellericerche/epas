@@ -476,7 +476,6 @@ when
        	"ReperibilityCalendar.events",
        	"ReperibilityCalendar.recap"), target == null, granted == false)
 then
- System.out.println("Puppare");
  $c.grant();
 end
 
