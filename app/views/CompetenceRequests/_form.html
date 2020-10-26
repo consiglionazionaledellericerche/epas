@@ -43,8 +43,10 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 	#{f.hidden 'competenceRequest.startAt', value:competenceRequest.startAt?.format() /}
 	#{f.hidden 'competenceRequest.endTo', value:competenceRequest.endTo?.format() /}
 	#{f.hidden 'competenceRequest.note' /}
-	
-           
+	#{f.hidden 'type.id', value:type?.id /}
+	#{f.hidden 'teamMate.id', value:teamMate?.id /}
+    #{f.hidden 'day.id', value:day?.id /}
+               
     #{b.buttons center:true}
 		 #{b.link @list(competenceRequest.type), color:'default', title:'Indietro' /}
 		 #{if insertable}
