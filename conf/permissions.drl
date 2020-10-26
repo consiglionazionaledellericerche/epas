@@ -469,12 +469,14 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
   		"CompetenceRequests.changeReperibilityToApprove",
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
        	"ReperibilityCalendar.events",
        	"ReperibilityCalendar.recap"), target == null, granted == false)
 then
+ System.out.println("Puppare");
  $c.grant();
 end
 
@@ -492,6 +494,7 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
   		"CompetenceRequests.changeReperibilityToApprove",
         "ReperibilityCalendar.show",
         "ReperibilityCalendar.reperibilityPeople",
@@ -547,6 +550,10 @@ when
 		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
+		
+		/*Richiesta competenza*/
+		"CompetenceRequests.save",
+		"CompetenceRequests.list",
 		
 		
      	/* Ferie */
