@@ -210,7 +210,7 @@ public class CompetenceRequests extends Controller {
    * @param month il mese di riferimento
    * @param type il servizio di reperibilità
    * @param teamMate la persona selezionata per il cambio di reperibilità
-   * @param date la data da cambiare
+   * @param day la data da cambiare
    */
   public static void edit(CompetenceRequest competenceRequest, int year, int month, 
       PersonReperibilityType type, Person teamMate, PersonReperibilityDay day) {
@@ -236,25 +236,26 @@ public class CompetenceRequests extends Controller {
   }
 
   /**
-   * 
-   * @param competenceRequest
-   * @param value
-   * @param year
-   * @param month
+   * Metodo che permette il salvataggio di una richiesta di competenza.
+   * @param competenceRequest la richiesta di competenza da salvare
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param teamMate la persona destinataria della richiesta
+   * @param day il giorno da scambiare
    */
-  public static void save(@Required @Valid CompetenceRequest competenceRequest, 
-      Integer value, int year, int month) {
+  public static void save(@Required @Valid CompetenceRequest competenceRequest, int year, 
+      int month, Person teamMate, PersonReperibilityDay day, PersonReperibilityType type) {
     log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
 
-    if (!Security.getUser().get().person.equals(competenceRequest.person)) {
-      rules.check("CompetenceRequests.blank4OtherPerson");
-    } 
+    rules.checkIfPermitted(type);
 
     notFoundIfNull(competenceRequest.person);
         
     competenceRequest.year = year;
     competenceRequest.month = month;    
     competenceRequest.startAt = LocalDateTime.now();
+    competenceRequest.teamMate = teamMate;
+    competenceRequest.dateToChange = day.date;
         
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
