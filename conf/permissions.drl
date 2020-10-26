@@ -2712,7 +2712,13 @@ when
         
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
-        "rest.v2.PersonDays.getDaySituation"
+        "rest.v2.PersonDays.getDaySituation",
+        
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson"
+        
 
        ), target == null, granted == false)
 then
@@ -2736,7 +2742,13 @@ when
  		
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
-		"rest.v2.PersonDays.getDaySituation"
+		"rest.v2.PersonDays.getDaySituation",
+		
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson"
+		
 
        ), target == $o, granted == false)
 then
