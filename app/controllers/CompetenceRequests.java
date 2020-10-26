@@ -1,15 +1,10 @@
 
 package controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -17,8 +12,11 @@ import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
-import lombok.val;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -26,6 +24,7 @@ import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
+import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.Role;
 import models.User;
@@ -37,6 +36,9 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -52,7 +54,7 @@ import security.SecurityRules;
  */
 @Slf4j
 @With(Resecure.class)
-public class CompetenceRequests extends Controller{
+public class CompetenceRequests extends Controller {
 
   @Inject
   static PersonDao personDao;
@@ -73,8 +75,6 @@ public class CompetenceRequests extends Controller{
   @Inject
   static UsersRolesOfficesDao uroDao;
   @Inject
-  private static PersonStampingRecapFactory stampingsRecapFactory;
-  @Inject
   private static PersonReperibilityDayDao repDao;
   
 
@@ -88,7 +88,7 @@ public class CompetenceRequests extends Controller{
 
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
-   * @param type
+   * @param competenceType il tipo di competenza
    */
   public static void list(CompetenceRequestType competenceType) {
     Verify.verifyNotNull(competenceType);
@@ -128,7 +128,8 @@ public class CompetenceRequests extends Controller{
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}",
         type, fromDate);
-    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent(), Optional.absent());
+    List<Group> groups = groupDao
+        .groupsByOffice(person.office, Optional.absent(), Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
@@ -143,7 +144,15 @@ public class CompetenceRequests extends Controller{
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
-  public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType competenceType) {
+  /**
+   * Ritorna la form di richiesta di nuova competenza.
+   * @param personId l'id della persona che sta richiedendo la competenza
+   * @param year l'anno
+   * @param month il mese
+   * @param competenceType il tipo di richiesta competenza
+   */
+  public static void blank(Optional<Long> personId, int year, int month, 
+      CompetenceRequestType competenceType) {
     Verify.verifyNotNull(competenceType);
     Person person;
     if (personId.isPresent()) {
@@ -166,42 +175,73 @@ public class CompetenceRequests extends Controller{
       list(competenceType);
       return;
     }
-
+    
     val competenceRequest = new CompetenceRequest();
     competenceRequest.type = competenceType;
     competenceRequest.person = person;
-    PersonStampingRecap psDto = null;
-    boolean isOvertime = false;
-    /*
-     * TODO: completare il modulo per la richiesta di nuovo cambio di reperibilità
-     */
+    PersonReperibilityType type = null;
+    List<Person> teamMates = Lists.newArrayList();
+    List<PersonReperibilityType> types = Lists.newArrayList();
+    boolean insertable = false; 
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-      List<PersonReperibilityType> types = 
-          repDao.getReperibilityTypeByOffice(person.office, Optional.of(true))
+      types = repDao.getReperibilityTypeByOffice(person.office, Optional.of(false))      
           .stream().filter(prt -> prt.personReperibilities.stream()
               .anyMatch(pr -> pr.person.equals(person) 
-                  && !pr.startDate.isAfter(LocalDate.now()) 
-                  && (!pr.endDate.isBefore(LocalDate.now()) || pr.endDate == null)))
+                  /*&& !pr.startDate.isAfter(LocalDate.now()) 
+                  && (!pr.endDate.isBefore(LocalDate.now()) || pr.endDate == null)*/))
           .collect(Collectors.toList());
-      for (PersonReperibilityType type : types) {
-        
-      }
+      //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
+      
+      type = types.get(0);
+      teamMates = type.personReperibilities.stream().map(pr -> pr.person)
+          .filter(p -> p.id != person.id).collect(Collectors.toList());
       
       //List<PersonReperibility> personReperibilityList = 
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
-    render("@edit", psDto, competenceRequest, isOvertime, competenceType, year, month);
+    render("@edit", competenceRequest, insertable, competenceType, 
+        year, month, type, teamMates, types);
   }
 
-  public static void edit(CompetenceRequest competenceRequest, int year, int month) {
+  /**
+   * Ritorna la form di richiesta cambio di reperibilità aggiornata coi dati richiesti.
+   * @param competenceRequest la richiesta di competenza
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param type il servizio di reperibilità
+   * @param teamMate la persona selezionata per il cambio di reperibilità
+   * @param date la data da cambiare
+   */
+  public static void edit(CompetenceRequest competenceRequest, int year, int month, 
+      PersonReperibilityType type, Person teamMate, PersonReperibilityDay day) {
 
-    rules.checkIfPermitted(competenceRequest);
+    rules.checkIfPermitted(type);
+    LocalDate begin = new LocalDate(year, month, 1);
+    LocalDate to = begin.dayOfMonth().withMaximumValue();
+    List<PersonReperibilityDay> reperibilityDates = repDao
+        .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+        
+    List<PersonReperibilityType> types = repDao
+        .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+        .stream().filter(prt -> prt.personReperibilities.stream()
+            .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
+        .collect(Collectors.toList());
+    List<Person> teamMates = type.personReperibilities.stream().map(pr -> pr.person)
+        .filter(p -> p.id != competenceRequest.person.id).collect(Collectors.toList());
     boolean insertable = true;
     
-    render(competenceRequest, insertable);
+    render(competenceRequest, insertable, reperibilityDates, type, teamMate, 
+        month, year, teamMates, types, day);
     
   }
 
+  /**
+   * 
+   * @param competenceRequest
+   * @param value
+   * @param year
+   * @param month
+   */
   public static void save(@Required @Valid CompetenceRequest competenceRequest, 
       Integer value, int year, int month) {
     log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
@@ -218,7 +258,8 @@ public class CompetenceRequests extends Controller{
         
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("competenceRequest.value", "Esiste già una richiesta di questo tipo per questo anno/mese");
+      Validation.addError("competenceRequest.value", 
+          "Esiste già una richiesta di questo tipo per questo anno/mese");
       response.status = 400;      
       render("@edit", competenceRequest, existing);
     }
@@ -230,14 +271,7 @@ public class CompetenceRequests extends Controller{
       response.status = 400;      
       render("@edit", competenceRequest);
     }
-    
-//    if (Validation.hasErrors()) {
-//      response.status = 400;      
-//      flash.error(Web.msgHasErrors());
-//      render("@edit", competenceRequest);
-//      return;
-//    }
-//    
+
     competenceRequestManager.configure(competenceRequest);
 
     if (competenceRequest.endTo == null) {
@@ -267,6 +301,10 @@ public class CompetenceRequests extends Controller{
     CompetenceRequests.list(competenceRequest.type);
   }
 
+  /**
+   * 
+   * @param id
+   */
   public static void delete(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -278,6 +316,11 @@ public class CompetenceRequests extends Controller{
     list(competenceRequest.type);
   }
 
+  /**
+   * 
+   * @param id
+   * @param type
+   */
   public static void show(long id, CompetenceRequestType type) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -287,6 +330,11 @@ public class CompetenceRequests extends Controller{
     render(competenceRequest, type, user, disapproval);
   }
   
+  /**
+   * 
+   * @param id
+   * @param approval
+   */
   public static void approval(long id, boolean approval) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     User user = Security.getUser().get();
@@ -316,6 +364,12 @@ public class CompetenceRequests extends Controller{
     CompetenceRequests.listToApprove(competenceRequest.type);
   }
   
+  /**
+   * 
+   * @param id
+   * @param disapproval
+   * @param reason
+   */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     User user = Security.getUser().get();

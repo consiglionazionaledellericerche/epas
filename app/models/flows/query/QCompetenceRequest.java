@@ -76,6 +76,8 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
 
     public final DateTimePath<org.joda.time.LocalDateTime> startAt = createDateTime("startAt", org.joda.time.LocalDateTime.class);
 
+    public final models.query.QPerson teamMate;
+
     public final EnumPath<models.flows.enumerate.CompetenceRequestType> type = createEnum("type", models.flows.enumerate.CompetenceRequestType.class);
 
     //inherited
@@ -107,6 +109,7 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
     public QCompetenceRequest(Class<? extends CompetenceRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new models.query.QPerson(forProperty("person"), inits.get("person")) : null;
+        this.teamMate = inits.isInitialized("teamMate") ? new models.query.QPerson(forProperty("teamMate"), inits.get("teamMate")) : null;
     }
 
 }

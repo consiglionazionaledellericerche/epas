@@ -86,7 +86,7 @@ when
   $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
-  $c: PermissionCheck(action == "CompetenceRequests.enabled", granted == false, target == null)
+  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -469,10 +469,11 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.changeReperibilityToApprove",
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
        	"ReperibilityCalendar.events",
-       	"ReperibilityCalendar.recap"	), target == null, granted == false)
+       	"ReperibilityCalendar.recap"), target == null, granted == false)
 then
  $c.grant();
 end
@@ -491,6 +492,7 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.changeReperibilityToApprove",
         "ReperibilityCalendar.show",
         "ReperibilityCalendar.reperibilityPeople",
         "ReperibilityCalendar.events",

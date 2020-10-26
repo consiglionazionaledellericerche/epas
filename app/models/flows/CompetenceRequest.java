@@ -41,6 +41,12 @@ public class CompetenceRequest extends MutableModel {
   public String note;
   
   /**
+   * Destinatario della richiesta di cambio turno/reperibilità
+   */
+  @ManyToOne(optional = true)
+  public Person teamMate;
+  
+  /**
    * L'eventuale valore da salvare
    */
   public Integer value;
