@@ -1,6 +1,8 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import helpers.JodaConverters;
+import injection.StaticInject;
 import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
@@ -16,6 +18,7 @@ import org.modelmapper.ModelMapper;
  * @author cristian
  *
  */
+@StaticInject
 @Data
 public class AbsenceShowTerseDto {
 
@@ -38,6 +41,7 @@ public class AbsenceShowTerseDto {
     val absenceDto = modelMapper.map(absence, AbsenceShowTerseDto.class);
     absenceDto.setJustifiedTime(absence.justifiedTime());
     absenceDto.setJustifiedType(absence.justifiedType.name.name());
+    absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
     return absenceDto;
   }
 }

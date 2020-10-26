@@ -2,6 +2,7 @@ package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
+import injection.StaticInject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ import lombok.val;
 import models.PersonDay;
 import org.modelmapper.ModelMapper;
 
-
+@StaticInject
 @Data
 @EqualsAndHashCode(of = "id")
 public class PersonDayShowTerseDto {

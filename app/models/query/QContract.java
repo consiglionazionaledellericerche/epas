@@ -63,6 +63,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final QContract previousContract;
 
+    public final SimplePath<com.google.common.collect.Range<org.joda.time.LocalDate>> range = createSimple("range", com.google.common.collect.Range.class);
+
     public final BooleanPath sourceByAdmin = createBoolean("sourceByAdmin");
 
     public final DatePath<org.joda.time.LocalDate> sourceDateMealTicket = createDate("sourceDateMealTicket", org.joda.time.LocalDate.class);
