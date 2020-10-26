@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import manager.PersonDayManager;
-import models.CertificatedData;
 import models.Certification;
 import models.Competence;
 import models.CompetenceCodeGroup;

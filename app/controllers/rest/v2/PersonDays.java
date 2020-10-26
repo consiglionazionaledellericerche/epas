@@ -49,34 +49,26 @@ public class PersonDays extends Controller {
   static GsonBuilder gsonBuilder;
 
   /**
-   * Metodo rest che ritorna la situazione della persona (passata per email o eppn) in un giorno 
-   * specifico (date).
-   * Nel caso venga passato sia eppn che email la precedenza nella ricerca della persona va al 
-   * campo eppn.
+   * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
+   * personPerseoId o fiscalCode) in un giorno specifico (date).
    */
   @BasicAuth
   public static void getDaySituation(
       Long id, String email, String eppn, 
-      Long personPersoId, String fiscalCode, LocalDate date) {
-    log.debug("getDaySituation -> email={}, eppn={}, date={}", email, date);
-    if ((email == null && eppn == null) || date == null) {
-      notFound();
+      Long personPerseoId, String fiscalCode, LocalDate date) {
+    log.debug(
+        "getDaySituation -> id={}, email={}, eppn={}, personPerseoId={}, fiscalCode={}, date={}", 
+        id, email, eppn, personPerseoId, fiscalCode, date);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    if (date == null) {
+      JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPersoId, fiscalCode);
+    rules.checkIfPermitted(person.office);
 
-    if (!person.isPresent()) {
-      JsonResponse.notFound("Indirizzo email incorretto. Non è presente in ePAS la "
-              + "mail che serve per la ricerca.");
-    }
-
-    rules.checkIfPermitted(person.get().office);
-
-    PersonDay pd = personDayDao.getPersonDay(person.get(), date).orNull();
+    PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
     if (pd == null) {
       JsonResponse.notFound("Non sono presenti informazioni per "
-              + person.get().name + " " + person.get().surname + " nel giorno " + date);
+              + person.name + " " + person.surname + " nel giorno " + date);
     }
     PersonDayDto pdDto = generateDayDto(pd);
     val gson = gsonBuilder.create();

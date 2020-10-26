@@ -1,13 +1,18 @@
 package manager;
 
 import dao.PersonDayDao;
+import helpers.CacheValues;
 import it.cnr.iit.epas.DateUtility;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.attestati.service.PersonCertData;
 import models.Person;
 import org.joda.time.YearMonth;
 
@@ -17,11 +22,37 @@ public class CertificationManager {
   
   private PersonDayManager personDayManager;
   private PersonDayDao personDayDao;
+  private CacheValues cacheValues;
   
+  /**
+   * Construttore di default per l'injection.
+   */
   @Inject
-  public CertificationManager(PersonDayManager personDayManager, PersonDayDao personDayDao) {
+  public CertificationManager(PersonDayManager personDayManager, PersonDayDao personDayDao,
+      CacheValues cacheValues) {
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
+    this.cacheValues = cacheValues;
+  }
+  
+  /**
+   * Informazioni sui dati mensili inviati ad Attestati prelevati
+   * da attestati stesso.
+   * 
+   */
+  public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {    
+    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(person, new YearMonth(year, month));
+    try {
+      return cacheValues.personStatus.get(cacheKey);
+    } catch (ExecutionException ex) {
+      log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}",
+          person.getFullname(), ex);
+      throw new RuntimeException(
+          String.format("Impossibile recuperare la percentuale di avanzamento per la persona %s",
+          person.getFullname()));
+    }
+    
   }
   
   /**

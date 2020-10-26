@@ -19,6 +19,7 @@ import models.PersonDay;
 import models.Stamping;
 import models.ZoneToZones;
 import models.absences.Absence;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -84,8 +85,8 @@ public class PersonDays extends Controller {
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.onHoliday) {
-      validation.addError("hours", "Valore non consentito.");
-      validation.addError("minutes", "Valore non consentito.");
+      Validation.addError("hours", "Valore non consentito.");
+      Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
       render("@workingHoliday", personDay, hours, minutes);
     }
@@ -137,8 +138,8 @@ public class PersonDays extends Controller {
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.outOpening) {
-      validation.addError("hours", "Valore non consentito.");
-      validation.addError("minutes", "Valore non consentito.");
+      Validation.addError("hours", "Valore non consentito.");
+      Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
       render("@workingOutOpening", personDay, hours, minutes);
     }
