@@ -187,7 +187,7 @@ public class Persons extends Controller {
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
     if (id == null && email == null && eppn == null 
         && personPerseoId == null && fiscalCode == null) {
-      JsonResponse.badRequest();
+      JsonResponse.badRequest("I parametri per individuare la persona non sono presenti");
     }
 
     Optional<Person> person = 

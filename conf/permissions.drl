@@ -2505,22 +2505,13 @@ when
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
-        "rest.Persons.peopleList",
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
 		"manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId",
-        "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-        
-        "rest.v2.Certifications.getMonthSituation",
-        "rest.v2.Certifications.getMonthSituationByOffice",
-        "rest.v2.PersonDays.getDaySituationByOffice",
-        "rest.v2.PersonDays.getMonthSituationByOffice",
-        "rest.v2.PersonDays.getDaySituation"        
+        "rest.Absences.insertAbsenceByPerseoId"
 
        ), target == null, granted == false)
 then
@@ -2540,15 +2531,7 @@ when
 		"manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId",
-        "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-
-		"rest.v2.Certifications.getMonthSituation",
-		"rest.v2.Certifications.getMonthSituationByOffice",
-		"rest.v2.PersonDays.getDaySituationByOffice",
-		"rest.v2.PersonDays.getMonthSituationByOffice",
-		"rest.v2.PersonDays.getDaySituation"
+        "rest.Absences.insertAbsenceByPerseoId"
 		
        ), target == $o, granted == false)
 then
@@ -2718,14 +2701,24 @@ when
  $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $c: PermissionCheck(action in (
 
+        "rest.Persons.peopleList",
         "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation",
+
         "rest.v2.Certifications.getMonthSituation",
         "rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
+        
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-        "rest.Persons.peopleList"
+        
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson"
+        
 
        ), target == null, granted == false)
 then
@@ -2737,14 +2730,25 @@ when
  $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $o: Office() from $uro.office
  $c: PermissionCheck(action in (
+ 
+        "rest.PersonDays.getDaySituation",
+        "rest.PersonDays.getMonthSituation",
+        "rest.Persons.peopleList",
+ 
  		"rest.v2.Certifications.getMonthSituation",
  		"rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
+ 		
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
-        "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-        "rest.Persons.peopleList"
+		
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson"
+		
 
        ), target == $o, granted == false)
 then

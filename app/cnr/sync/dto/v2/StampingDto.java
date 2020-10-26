@@ -29,6 +29,10 @@ public class StampingDto {
   private boolean markedByEmployee;
   private String note;
 
+  /**
+   * Nuova instanza di un StampingDto contenente i valori 
+   * dell'oggetto stamping passato.
+   */
   public static StampingDto build(Stamping stamping) {
     return StampingDto.builder()
         .date(stamping.date.toString())
