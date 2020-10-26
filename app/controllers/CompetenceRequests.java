@@ -194,9 +194,8 @@ public class CompetenceRequests extends Controller {
       
       type = types.get(0);
       teamMates = type.personReperibilities.stream().map(pr -> pr.person)
-          .filter(p -> p.id != person.id).collect(Collectors.toList());
+          .filter(p -> p.id != person.id).collect(Collectors.toList());      
       
-      //List<PersonReperibility> personReperibilityList = 
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
     render("@edit", competenceRequest, insertable, competenceType, 
