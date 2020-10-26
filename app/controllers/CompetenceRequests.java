@@ -215,6 +215,7 @@ public class CompetenceRequests extends Controller {
       PersonReperibilityType type, Person teamMate, PersonReperibilityDay day) {
 
     rules.checkIfPermitted(type);
+    competenceRequest.person = Security.getUser().get().person;
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate to = begin.dayOfMonth().withMaximumValue();
     List<PersonReperibilityDay> reperibilityDates = repDao
@@ -255,6 +256,7 @@ public class CompetenceRequests extends Controller {
     competenceRequest.startAt = LocalDateTime.now();
     competenceRequest.teamMate = teamMate;
     competenceRequest.dateToChange = day.date;
+    competenceRequest.person = Security.getUser().get().person;
         
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
