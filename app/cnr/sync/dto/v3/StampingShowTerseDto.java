@@ -1,7 +1,8 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.time.LocalDate;
+import injection.StaticInject;
+import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
@@ -13,17 +14,18 @@ import org.modelmapper.ModelMapper;
 /**
  * DTO per l'esportazione via REST delle informazioni 
  * principali di una timbratura.
- * @version 2
+ * @version 3
  * 
  * @author cristian
  *
  */
+@StaticInject
 @ToString
 @Data
 public class StampingShowTerseDto {
 
   private Long id;
-  private LocalDate date;
+  private LocalDateTime date;
   private WayType way;
   private StampTypes stampType;
   private String place;

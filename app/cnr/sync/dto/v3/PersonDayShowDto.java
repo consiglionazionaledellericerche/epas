@@ -2,6 +2,7 @@ package cnr.sync.dto.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import injection.StaticInject;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +15,7 @@ import org.modelmapper.ModelMapper;
  * @author cristian
  *
  */
+@StaticInject
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PersonDayShowDto extends PersonDayShowTerseDto {
