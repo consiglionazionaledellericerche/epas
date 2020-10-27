@@ -10,6 +10,7 @@ import models.Office;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import security.SecurityRules;
 
 @Slf4j
 @With(Resecure.class)
@@ -17,6 +18,8 @@ public class Offices extends Controller {
 
   @Inject
   static OfficeDao officeDao;
+  @Inject 
+  static SecurityRules rules;
   
   /**
    * Cerca l'ufficio in funzione dei parametri passati.
@@ -45,6 +48,8 @@ public class Offices extends Controller {
       JsonResponse.notFound("Non è stato possibile individuare l'ufficio in ePAS con "
           + "i parametri passati.");
     }
+
+    rules.checkIfPermitted(office.get());
 
     return office.get();
   }
