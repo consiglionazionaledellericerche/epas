@@ -2714,11 +2714,13 @@ when
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
         
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+        
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
         "rest.v3.PersonDays.getMonthSituationByPerson"
-        
 
        ), target == null, granted == false)
 then
@@ -2744,6 +2746,9 @@ when
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
 		
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+		
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
@@ -2765,12 +2770,24 @@ when
  $c: PermissionCheck(action in (
  		"rest.v2.Certifications.getMonthSituation",
  		"rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
+         		
 		"rest.v2.PersonDays.getDaySituationByOffice",
 		"rest.v2.PersonDays.getMonthSituationByOffice",
 		"rest.v2.PersonDays.getDaySituation",
+		
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+		
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList",
+
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson",
 
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
