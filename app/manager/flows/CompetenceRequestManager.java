@@ -196,17 +196,17 @@ public class CompetenceRequestManager {
                 LocalDate.now());  
       }
     }
-    if (requestType.alwaysSkipOfficeHeadApproval) {
-      competenceRequestConfiguration.officeHeadApprovalRequired = false;
-    } else {
-      if (!person.isTopQualification() 
-          && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
-        competenceRequestConfiguration.officeHeadApprovalRequired = 
-            (Boolean) configurationManager.configValue(
-                person.office, requestType.officeHeadApprovalRequiredTechnicianLevel.get(), 
-                LocalDate.now());  
-      }
-    }
+//    if (requestType.alwaysSkipOfficeHeadApproval) {
+//      competenceRequestConfiguration.officeHeadApprovalRequired = false;
+//    } else {
+//      if (!person.isTopQualification() 
+//          && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
+//        competenceRequestConfiguration.officeHeadApprovalRequired = 
+//            (Boolean) configurationManager.configValue(
+//                person.office, requestType.officeHeadApprovalRequiredTechnicianLevel.get(), 
+//                LocalDate.now());  
+//      }
+//    }
     if (requestType.alwaysSkipEmployeeApproval) {
       competenceRequestConfiguration.employeeApprovalRequired = false;
     } else {

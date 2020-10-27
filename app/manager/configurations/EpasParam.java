@@ -604,19 +604,6 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
-   
-  /**
-   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte del 
-   * responsabile di sede.
-   */
-  CHANGE_REPERIBILITY_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "change_reperibility_request_office_head_approval_required",
-      EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.PERIODIC,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
   
   /**
    * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte dell'eventuale
