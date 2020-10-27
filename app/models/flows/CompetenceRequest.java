@@ -62,9 +62,21 @@ public class CompetenceRequest extends MutableModel {
   public Integer month;
   
   /**
-   * L'eventuale data da cambiare
+   * L'eventuale data inizio da chiedere
    */
-  public LocalDate dateToChange;
+  public LocalDate beginDateToAsk;
+  /**
+   * L'eventuale data fine da chiedere
+   */
+  public LocalDate endDateToAsk;
+  /**
+   * L'eventuale data inizio da dare
+   */
+  public LocalDate beginDateToGive;
+  /**
+   * L'eventuale data fine da dare
+   */
+  public LocalDate endDateToGive;
   
   /**
    * Lo slot per cui richiedere il cambio

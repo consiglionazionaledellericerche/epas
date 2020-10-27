@@ -23,8 +23,10 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 	        items:types, required:true /}
 	    #{f.selectModel 'teamMate', items:teamMates, required:true /}
 	    #{if insertable}
-	    	#{f.selectModel 'dayToGive', items:myReperibilityDates /}
-	    	#{f.selectModel 'dayToAsk', items:reperibilityDates /}
+	    	#{f.selectModel 'beginDayToGive', items:myReperibilityDates /}
+	    	#{f.selectModel 'endDayToGive', items:myReperibilityDates /}
+	    	#{f.selectModel 'beginDayToAsk', items:reperibilityDates /}
+	    	#{f.selectModel 'endDayToAsk', items:reperibilityDates /}
 	    #{/if}
 	</div>
 #{/form}
@@ -44,8 +46,10 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 	#{f.hidden 'competenceRequest.note' /}
 	#{f.hidden 'type.id', value:type?.id /}
 	#{f.hidden 'teamMate.id', value:teamMate?.id /}
-	#{f.hidden 'dayToGive.id', value:dayToGive?.id /}
-    #{f.hidden 'dayToAsk.id', value:dayToAsk?.id /}
+	#{f.hidden 'beginDayToGive.id', value:beginDayToGive?.id /}
+	#{f.hidden 'endDayToGive.id', value:endDayToGive?.id /}
+    #{f.hidden 'beginDayToAsk.id', value:beginDayToAsk?.id /}
+    #{f.hidden 'endDayToAsk.id', value:endDayToAsk?.id /}
                
     #{b.buttons center:true}
 		 #{b.link @list(competenceRequest.type), color:'default', title:'Indietro' /}

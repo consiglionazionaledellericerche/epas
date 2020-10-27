@@ -30,14 +30,20 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
 
     public final DateTimePath<org.joda.time.LocalDateTime> administrativeApproved = createDateTime("administrativeApproved", org.joda.time.LocalDateTime.class);
 
+    public final DatePath<org.joda.time.LocalDate> beginDateToAsk = createDate("beginDateToAsk", org.joda.time.LocalDate.class);
+
+    public final DatePath<org.joda.time.LocalDate> beginDatetoGive = createDate("beginDatetoGive", org.joda.time.LocalDate.class);
+
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
-
-    public final DatePath<org.joda.time.LocalDate> dateToChange = createDate("dateToChange", org.joda.time.LocalDate.class);
 
     public final BooleanPath employeeApprovalRequired = createBoolean("employeeApprovalRequired");
 
     public final DateTimePath<org.joda.time.LocalDateTime> employeeApproved = createDateTime("employeeApproved", org.joda.time.LocalDateTime.class);
+
+    public final DatePath<org.joda.time.LocalDate> endDateToAsk = createDate("endDateToAsk", org.joda.time.LocalDate.class);
+
+    public final DatePath<org.joda.time.LocalDate> endDateToGive = createDate("endDateToGive", org.joda.time.LocalDate.class);
 
     public final DateTimePath<org.joda.time.LocalDateTime> endTo = createDateTime("endTo", org.joda.time.LocalDateTime.class);
 

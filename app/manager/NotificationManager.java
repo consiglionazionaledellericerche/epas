@@ -970,13 +970,13 @@ public class NotificationManager {
       .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
       //...e all'amministratore del personale
       if (competenceRequest.type.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-        if (DateUtility.isGeneralHoliday(Optional.absent(), competenceRequest.dateToChange)
-            || competenceRequest.dateToChange.dayOfWeek().equals(DateTimeConstants.SATURDAY)
-            || competenceRequest.dateToChange.dayOfWeek().equals(DateTimeConstants.SUNDAY)) {
-          code = competenceCodeDao.getCompetenceCodeByCode(HOLIDAY_REPERIBILITY);
-        } else {
-          code = competenceCodeDao.getCompetenceCodeByCode(WORKDAY_REPERIBILITY);
-        }        
+//        if (DateUtility.isGeneralHoliday(Optional.absent(), competenceRequest.dateToChange)
+//            || competenceRequest.dateToChange.dayOfWeek().equals(DateTimeConstants.SATURDAY)
+//            || competenceRequest.dateToChange.dayOfWeek().equals(DateTimeConstants.SUNDAY)) {
+//          code = competenceCodeDao.getCompetenceCodeByCode(HOLIDAY_REPERIBILITY);
+//        } else {
+//          code = competenceCodeDao.getCompetenceCodeByCode(WORKDAY_REPERIBILITY);
+//        }        
       }
       
       Optional<Competence> competence = competenceDao
