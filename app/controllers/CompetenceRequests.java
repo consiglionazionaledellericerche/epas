@@ -36,6 +36,7 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
@@ -209,12 +210,13 @@ public class CompetenceRequests extends Controller {
    * @param month il mese di riferimento
    * @param type il servizio di reperibilità
    * @param teamMate la persona selezionata per il cambio di reperibilità
-   * @param dayToAsk la data da chiedere
-   * @param dayToGive la data da cedere
+   * @param beginDayToAsk la data da chiedere
+   * @param beginDayToGive la data da cedere
    */
   public static void edit(CompetenceRequest competenceRequest, int year, int month, 
-      PersonReperibilityType type, Person teamMate, PersonReperibilityDay dayToAsk,
-      PersonReperibilityDay dayToGive) {
+      PersonReperibilityType type, Person teamMate, PersonReperibilityDay beginDayToAsk,
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive, 
+      PersonReperibilityDay endDayToAsk) {
 
     rules.checkIfPermitted(type);
     competenceRequest.person = Security.getUser().get().person;
@@ -235,7 +237,8 @@ public class CompetenceRequests extends Controller {
     boolean insertable = true;
     
     render(competenceRequest, insertable, reperibilityDates, type, teamMate, 
-        month, year, teamMates, types, dayToAsk, myReperibilityDates, dayToGive);
+        month, year, teamMates, types, beginDayToAsk, myReperibilityDates, beginDayToGive,
+        endDayToGive, endDayToAsk);
     
   }
 
@@ -248,34 +251,43 @@ public class CompetenceRequests extends Controller {
    * @param day il giorno da scambiare
    */
   public static void save(@Required @Valid CompetenceRequest competenceRequest, int year, 
-      int month, Person teamMate, PersonReperibilityDay day, PersonReperibilityType type) {
+      int month, Person teamMate, @Valid PersonReperibilityDay beginDayToAsk,
+      @Valid PersonReperibilityDay beginDayToGive, @Valid PersonReperibilityDay endDayToGive, 
+      @Valid PersonReperibilityDay endDayToAsk, @Valid PersonReperibilityType type) {
     log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
 
-    rules.checkIfPermitted(type);
-
-    notFoundIfNull(competenceRequest.person);
+    //rules.checkIfPermitted(type);
         
     competenceRequest.year = year;
     competenceRequest.month = month;    
     competenceRequest.startAt = LocalDateTime.now();
     competenceRequest.teamMate = teamMate;
-    competenceRequest.dateToChange = day.date;
     competenceRequest.person = Security.getUser().get().person;
+    notFoundIfNull(competenceRequest.person);
         
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("competenceRequest.value", 
-          "Esiste già una richiesta di questo tipo per questo anno/mese");
-      response.status = 400;      
-      render("@edit", competenceRequest, existing);
+      Validation.addError("teamMate", 
+          "Esiste già una richiesta di questo tipo");      
+    }
+    if (Days.daysBetween(beginDayToAsk.date, endDayToAsk.date).getDays() 
+        != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
+      Validation.addError("beginDayToAsk", "La quantità di giorni da chiedere e da dare deve coincidere");      
     }
     if (!competenceRequest.person.checkLastCertificationDate(
         new YearMonth(competenceRequest.year,
             competenceRequest.month))) {
-      Validation.addError("competenceRequest.value",
-          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
-      response.status = 400;      
-      render("@edit", competenceRequest);
+      Validation.addError("beginDayToAsk",
+          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");      
+    }
+    if (validation.hasErrors()) {
+      /*
+       * TODO: inserire qui le query per popolare i campi della richiesta
+       */
+      boolean insertable = true;
+      response.status = 400;
+      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive, 
+          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable);
     }
 
     competenceRequestManager.configure(competenceRequest);
