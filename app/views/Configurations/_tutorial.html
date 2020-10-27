@@ -326,16 +326,11 @@
       (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).
       </p>
     #{/if}
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED) }
-      <p>Abilitando questo paramentro si fa in modo che sia il responsabile di sede a dover approvare una richiesta 
-      di cambio di reperibilità.
-      </p>
-    #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_MANAGER_APPROVAL_REQUIRED) }
-      <p>Abilitando questo paramentro si fa in modo che sia il responsabile di gruppo di lavoro a dover approvare una richiesta 
+      <p>Abilitando questo paramentro si fa in modo che sia il supervisore del servizio a dover approvare una richiesta 
       di cambio di reperibilità.
-      Questo parametro va abilitato SOLO nel caso in cui siano presenti gruppi nella sede e il responsabile di quei gruppi 
-      sia anche il responsabile del servizio di reperibilità di cui si vuole il cambio.
+      Questo parametro va abilitato SOLO nel caso in cui le decisioni sui cambi di reperibilità debbano essere concordate
+      anche con il supervisore del servizio.
       </p>
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED) }

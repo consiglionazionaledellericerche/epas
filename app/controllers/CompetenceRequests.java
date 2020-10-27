@@ -209,10 +209,12 @@ public class CompetenceRequests extends Controller {
    * @param month il mese di riferimento
    * @param type il servizio di reperibilità
    * @param teamMate la persona selezionata per il cambio di reperibilità
-   * @param day la data da cambiare
+   * @param dayToAsk la data da chiedere
+   * @param dayToGive la data da cedere
    */
   public static void edit(CompetenceRequest competenceRequest, int year, int month, 
-      PersonReperibilityType type, Person teamMate, PersonReperibilityDay day) {
+      PersonReperibilityType type, Person teamMate, PersonReperibilityDay dayToAsk,
+      PersonReperibilityDay dayToGive) {
 
     rules.checkIfPermitted(type);
     competenceRequest.person = Security.getUser().get().person;
@@ -220,6 +222,8 @@ public class CompetenceRequests extends Controller {
     LocalDate to = begin.dayOfMonth().withMaximumValue();
     List<PersonReperibilityDay> reperibilityDates = repDao
         .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+    List<PersonReperibilityDay> myReperibilityDates = repDao
+        .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
         
     List<PersonReperibilityType> types = repDao
         .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
@@ -231,7 +235,7 @@ public class CompetenceRequests extends Controller {
     boolean insertable = true;
     
     render(competenceRequest, insertable, reperibilityDates, type, teamMate, 
-        month, year, teamMates, types, day);
+        month, year, teamMates, types, dayToAsk, myReperibilityDates, dayToGive);
     
   }
 
