@@ -55,7 +55,7 @@ public class Contracts extends Controller {
   /**
    * Contratti di una persona.
    * La persona è individuata tramite una delle chiavi della persona passate come
-   * parametro (uniformemente agli metodi REST sulle persone). 
+   * parametro (uniformemente ai metodi REST sulle persone). 
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
       String fiscalCode) {
@@ -74,7 +74,7 @@ public class Contracts extends Controller {
   public static void show(Long id) {
     RestUtil.checkMethod(request, HttpMethod.GET);
     val contract = getContractFromRequest(id);
-    renderJSON(gsonBuilder.create().toJson(ContractShowTerseDto.build(contract)));
+    renderJSON(gsonBuilder.create().toJson(ContractShowDto.build(contract)));
   }
   
   /**

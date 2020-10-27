@@ -27,7 +27,7 @@ public class ContractShowTerseDto {
   static ModelMapper modelMapper;
 
   /**
-   * Nuova instanza di un ContractShowDto contenente i valori 
+   * Nuova instanza di un ContractShowTerseDto contenente i valori 
    * dell'oggetto contract passato.
    */
   public static ContractShowTerseDto build(Contract contract) {
