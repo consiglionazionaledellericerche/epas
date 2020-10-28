@@ -272,22 +272,38 @@ public class CompetenceRequests extends Controller {
     }
     if (Days.daysBetween(beginDayToAsk.date, endDayToAsk.date).getDays() 
         != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
-      Validation.addError("beginDayToAsk", "La quantità di giorni da chiedere e da dare deve coincidere");      
+      Validation.addError("beginDayToAsk", 
+          "La quantità di giorni da chiedere e da dare deve coincidere");  
+      Validation.addError("beginDayToGive", 
+          "La quantità di giorni da chiedere e da dare deve coincidere"); 
     }
     if (!competenceRequest.person.checkLastCertificationDate(
         new YearMonth(competenceRequest.year,
             competenceRequest.month))) {
       Validation.addError("beginDayToAsk",
-          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");      
+          "Non è possibile fare una richiesta per una data di un mese già "
+          + "processato in Attestati");      
     }
     if (validation.hasErrors()) {
-      /*
-       * TODO: inserire qui le query per popolare i campi della richiesta
-       */
+      LocalDate begin = new LocalDate(year, month, 1);
+      LocalDate to = begin.dayOfMonth().withMaximumValue();
+      List<PersonReperibilityDay> reperibilityDates = repDao
+          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+      List<PersonReperibilityDay> myReperibilityDates = repDao
+          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
+          
+      List<PersonReperibilityType> types = repDao
+          .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+          .stream().filter(prt -> prt.personReperibilities.stream()
+              .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
+          .collect(Collectors.toList());
+      List<Person> teamMates = type.personReperibilities.stream().map(pr -> pr.person)
+          .filter(p -> p.id != competenceRequest.person.id).collect(Collectors.toList());
       boolean insertable = true;
       response.status = 400;
       render("@edit", competenceRequest, beginDayToAsk, beginDayToGive, 
-          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable);
+          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable, 
+          teamMates, types, reperibilityDates, myReperibilityDates);
     }
 
     competenceRequestManager.configure(competenceRequest);
