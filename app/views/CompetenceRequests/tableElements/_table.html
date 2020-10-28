@@ -8,9 +8,13 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
+			#{if approvalRequired}
+				<th colspan="2">Date richieste</th>
+			#{/if}
+			#{if approvalRequired}
+				<th colspan="2">Date offerte</th>
+			#{/if}
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -21,7 +25,13 @@
 				
 		</tr>			
 		#{if approvalRequired}
-			<tr>
+
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal </th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al  </th>
+
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al </th>
+			
 				#{if config.managerApprovalRequired}
 					<th width="20%">Responsabile di gruppo</th>
 				#{/if}						
