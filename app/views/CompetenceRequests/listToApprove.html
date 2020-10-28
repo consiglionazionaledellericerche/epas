@@ -9,13 +9,11 @@
 
 %{
 	approvalsRequired = 0;
-	if (config.officeHeadApprovalRequired) {
+	
+	if (config.reperibilityManagerApprovalRequired) {
 	 approvalsRequired++;
 	}
-	if (config.managerApprovalRequired) {
-	 approvalsRequired++;
-	}
-	if (config.administrativeApprovalRequired) {
+	if (config.employeeApprovalRequired) {
 	  approvalsRequired++;
 	}
 	approvalRequired = approvalsRequired > 0

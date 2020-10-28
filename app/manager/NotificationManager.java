@@ -685,27 +685,14 @@ public class NotificationManager {
   private Role getProperRole(CompetenceRequest competenceRequest) {
     Role role = null;
 
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null) {
-      role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    if (competenceRequest.reperibilityManagerApprovalRequired 
+        && competenceRequest.reperibilityManagerApproved == null) {
+      role = roleDao.getRoleByName(Role.REPERIBILITY_MANAGER);
     }
-    if (competenceRequest.administrativeApprovalRequired 
-        && competenceRequest.administrativeApproved == null
-        && (competenceRequest.managerApproved != null 
-        || !competenceRequest.managerApprovalRequired)) {
-      role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-    }
-    if (competenceRequest.officeHeadApprovalRequired 
-        && competenceRequest.officeHeadApproved == null 
-        && ((!competenceRequest.managerApprovalRequired 
-            && !competenceRequest.administrativeApprovalRequired) 
-            || (competenceRequest.managerApproved != null 
-            && !competenceRequest.administrativeApprovalRequired)
-            || (competenceRequest.managerApproved != null 
-            && competenceRequest.administrativeApproved != null)
-            || (!competenceRequest.managerApprovalRequired 
-                && competenceRequest.administrativeApproved != null))        
-        ) {
-      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    
+    if (competenceRequest.employeeApprovalRequired 
+        && competenceRequest.employeeApproved == null) {
+      role = roleDao.getRoleByName(Role.EMPLOYEE);
     }
     return role;
   }

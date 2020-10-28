@@ -79,10 +79,7 @@ public class CompetenceRequestManager {
     final Person person;
     final CompetenceRequestType type;
     boolean employeeApprovalRequired;
-    boolean officeHeadApprovalRequired;
-    boolean managerApprovalRequired;
-    boolean administrativeApprovalRequired; 
-    boolean overtimesQuantityEnabled;
+    boolean reperibilityManagerApprovalRequired;
   }
 
   @Inject
@@ -123,18 +120,9 @@ public class CompetenceRequestManager {
     if (person.user.hasRoles(Role.GROUP_MANAGER, Role.SEAT_SUPERVISOR)) {
       return Lists.newArrayList();
     }
-    if (config.isAdministrativeApprovalRequired() 
-        && uroDao.getUsersWithRoleOnOffice(
-            roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office).isEmpty()) {
-      problems.add(
-          String.format("Approvazione dell'amministratore del personale richiesta. "
-              + "L'ufficio %s non ha impostato nessun amministratore del personale. "
-              + "Contattare l'ufficio del personale.",
-              person.office.getName())); 
-    }
     
-    if (config.isManagerApprovalRequired() 
-         
+    
+    if (config.isReperibilityManagerApprovalRequired()         
         && groupDao.myGroups(person).isEmpty()) {
       problems.add(
           String.format("Approvazione del responsabile di gruppo richiesta. "
@@ -142,16 +130,6 @@ public class CompetenceRequestManager {
               + "e non appartiene ad alcun gruppo. "
               + "Contattare l'ufficio del personale.",
               person.getFullname())); 
-    }
-
-    if (config.isOfficeHeadApprovalRequired() 
-        && uroDao.getUsersWithRoleOnOffice(
-            roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office).isEmpty()) {
-      problems.add(
-          String.format("Approvazione del responsabile di sede richiesta. "
-              + "L'ufficio %s non ha impostato nessun responsabile di sede. "
-              + "Contattare l'ufficio del personale.",
-              person.office.getName())); 
     }
     
     if (config.isEmployeeApprovalRequired() 
@@ -175,38 +153,18 @@ public class CompetenceRequestManager {
   public CompetenceRequestConfiguration getConfiguration(
       CompetenceRequestType requestType, Person person) {
     val competenceRequestConfiguration = new CompetenceRequestConfiguration(person, requestType);
-    if (requestType.alwaysSkipAdministrativeApproval) {
-      competenceRequestConfiguration.administrativeApprovalRequired = false;
-    } else {        
-      if (requestType.administrativeApprovalRequiredTechnicianLevel.isPresent()) {
-        competenceRequestConfiguration.administrativeApprovalRequired = 
-            (Boolean) configurationManager.configValue(
-                person.office, requestType.administrativeApprovalRequiredTechnicianLevel.get(), 
-                LocalDate.now()); 
-      }
-    }
-    if (requestType.alwaysSkipManagerApproval || person.isGroupManager()) {
-      competenceRequestConfiguration.managerApprovalRequired = false;
+    if (requestType.alwaysSkipReperibilityManagerApproval || person.isGroupManager()) {
+      competenceRequestConfiguration.reperibilityManagerApprovalRequired = false;
     } else {
       if (!person.isTopQualification() 
-          && requestType.managerApprovalRequiredTechnicianLevel.isPresent()) {
-        competenceRequestConfiguration.managerApprovalRequired = 
+          && requestType.reperibilityManagerApprovalRequired.isPresent()) {
+        competenceRequestConfiguration.reperibilityManagerApprovalRequired = 
             (Boolean) configurationManager.configValue(
-                person.office, requestType.managerApprovalRequiredTechnicianLevel.get(), 
+                person.office, requestType.reperibilityManagerApprovalRequired.get(), 
                 LocalDate.now());  
       }
     }
-//    if (requestType.alwaysSkipOfficeHeadApproval) {
-//      competenceRequestConfiguration.officeHeadApprovalRequired = false;
-//    } else {
-//      if (!person.isTopQualification() 
-//          && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
-//        competenceRequestConfiguration.officeHeadApprovalRequired = 
-//            (Boolean) configurationManager.configValue(
-//                person.office, requestType.officeHeadApprovalRequiredTechnicianLevel.get(), 
-//                LocalDate.now());  
-//      }
-//    }
+
     if (requestType.alwaysSkipEmployeeApproval) {
       competenceRequestConfiguration.employeeApprovalRequired = false;
     } else {
@@ -234,10 +192,10 @@ public class CompetenceRequestManager {
     Verify.verifyNotNull(competenceRequest.person);
 
     val config = getConfiguration(competenceRequest.type, competenceRequest.person);
-
-    competenceRequest.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
-    competenceRequest.managerApprovalRequired = config.managerApprovalRequired;
-    competenceRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
+    
+    competenceRequest.reperibilityManagerApprovalRequired = 
+        config.reperibilityManagerApprovalRequired;
+    
     competenceRequest.employeeApprovalRequired = 
         config.employeeApprovalRequired;
   }
@@ -250,9 +208,7 @@ public class CompetenceRequestManager {
    */
   public void resetFlow(CompetenceRequest competenceRequest) {
     competenceRequest.flowStarted = false;
-    competenceRequest.managerApproved = null;
-    competenceRequest.administrativeApproved = null;
-    competenceRequest.officeHeadApproved = null;
+    competenceRequest.reperibilityManagerApproved = null;
     competenceRequest.employeeApproved = null;
   }
 
@@ -267,9 +223,9 @@ public class CompetenceRequestManager {
       }
     }
     
-    if (eventType == CompetenceRequestEventType.MANAGER_APPROVAL 
-        || eventType == CompetenceRequestEventType.MANAGER_REFUSAL) {
-      if (!competenceRequest.managerApprovalRequired) {
+    if (eventType == CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL 
+        || eventType == CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL) {
+      if (!competenceRequest.reperibilityManagerApprovalRequired) {
         return Optional.of("Questa richiesta non prevede approvazione/rifiuto "
             + "da parte del responsabile di gruppo.");
       }
@@ -278,44 +234,7 @@ public class CompetenceRequestManager {
             + "da parte del responsabile di gruppo.");
       }
     }
-    
-    if (eventType == CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL 
-        || eventType == CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL) {
-      if (!competenceRequest.administrativeApprovalRequired) {
-        return Optional.of("Questa richiesta non prevede approvazione/rifiuto "
-            + "da parte dell'amministrazione del personale.");
-      }
-      if (competenceRequest.isAdministrativeApproved()) {
-        return Optional.of("Questa richiesta è già stata approvata "
-            + "da parte dell'amministrazione del personale.");
-      }
-      if (!uroDao.getUsersRolesOffices(
-          competenceRequest.person.user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN),
-          competenceRequest.person.office).isPresent()) {
-        return Optional.of(
-            String.format("L'evento %s non può essere eseguito da %s perché non ha"
-                + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
-      }
-    }
-    
-    if (eventType == CompetenceRequestEventType.OFFICE_HEAD_APPROVAL 
-        || eventType == CompetenceRequestEventType.OFFICE_HEAD_REFUSAL) {
-      if (!competenceRequest.officeHeadApprovalRequired) {
-        return Optional.of("Questa richiesta non prevede approvazione/rifiuto "
-            + "da parte del responsabile di sede.");
-      }
-      if (competenceRequest.isOfficeHeadApproved()) {
-        return Optional.of("Questa richiesta è già stata approvata "
-            + "da parte del responsabile di sede.");
-      }
-      if (!uroDao.getUsersRolesOffices(
-          approver.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
-          competenceRequest.person.office).isPresent()) {
-        return Optional.of(
-            String.format("L'evento %s non può essere eseguito da %s perché non ha"
-                + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
-      }
-    }
+
     
     if (eventType == CompetenceRequestEventType.EMPLOYEE_APPROVAL
         || eventType == CompetenceRequestEventType.EMPLOYEE_REFUSAL) {
@@ -361,33 +280,11 @@ public class CompetenceRequestManager {
         competenceRequest.flowStarted = true;
         break;
 
-      case MANAGER_APPROVAL:
-        competenceRequest.managerApproved = LocalDateTime.now();
+      case REPERIBILITY_MANAGER_APPROVAL:
+        competenceRequest.reperibilityManagerApproved = LocalDateTime.now();
         break;
 
-      case MANAGER_REFUSAL:
-        //si riparte dall'inizio del flusso.
-        //resetFlow(absenceRequest);
-        competenceRequest.flowEnded = true;
-        notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
-        break;
-
-      case ADMINISTRATIVE_APPROVAL:
-        competenceRequest.administrativeApproved = LocalDateTime.now();
-        break;
-
-      case ADMINISTRATIVE_REFUSAL:
-        //si riparte dall'inizio del flusso.
-        //resetFlow(absenceRequest);
-        competenceRequest.flowEnded = true;
-        notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
-        break;
-
-      case OFFICE_HEAD_APPROVAL:
-        competenceRequest.officeHeadApproved = LocalDateTime.now();
-        break;
-
-      case OFFICE_HEAD_REFUSAL:
+      case REPERIBILITY_MANAGER_REFUSAL:
         //si riparte dall'inizio del flusso.
         //resetFlow(absenceRequest);
         competenceRequest.flowEnded = true;
@@ -395,7 +292,7 @@ public class CompetenceRequestManager {
         break;
 
       case COMPLETE:
-        competenceRequest.managerApproved = LocalDateTime.now();
+        competenceRequest.reperibilityManagerApproved = LocalDateTime.now();
         break;
 
       case DELETE:
@@ -490,13 +387,13 @@ public class CompetenceRequestManager {
    * Approvazione richiesta competenza da parte del responsabile di gruppo.
    * @param id id della richiesta di competenza.
    */
-  public void managerApproval(long id, User user) {
+  public void reperibilityManagerApproval(long id, User user) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         competenceRequest, currentPerson, 
-        CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+        CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.",
         competenceRequest, currentPerson.getFullname());
     
@@ -507,19 +404,19 @@ public class CompetenceRequestManager {
    * Approvazione richiesta competenza da parte del responsabile di sede.
    * @param id id della richiesta di competenza.
    */
-  public void officeHeadApproval(long id, User user) {
+  public void employeeApproval(long id, User user) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null) {
+    if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null) {
       executeEvent(competenceRequest, currentPerson, 
-          CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+          CompetenceRequestEventType.EMPLOYEE_APPROVAL, Optional.absent());
       log.info("{} approvata dal responsabile di sede {} nelle veci del responsabile di gruppo.",
           competenceRequest, currentPerson.getFullname());
     }
     executeEvent(
         competenceRequest, currentPerson, 
-        CompetenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+        CompetenceRequestEventType.EMPLOYEE_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.",
         competenceRequest, currentPerson.getFullname());   
     notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
@@ -530,13 +427,13 @@ public class CompetenceRequestManager {
    * Metodo che permette la disapprovazione della richiesta.
    * @param id l'identificativo della richiesta di competenza
    */
-  public void managerDisapproval(long id, String reason) {
+  public void reperibilityManagerDisapproval(long id, String reason) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         competenceRequest, currentPerson, 
-        CompetenceRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
+        CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di gruppo {}.",
         competenceRequest, currentPerson.getFullname());
 
@@ -546,13 +443,13 @@ public class CompetenceRequestManager {
    * Approvazione richiesta assenza da parte del responsabile di sede.
    * @param id id della richiesta di assenza.
    */
-  public void officeHeadDisapproval(long id, String reason) {
+  public void employeeDisapproval(long id, String reason) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().person;
     executeEvent(
         competenceRequest, currentPerson, 
-        CompetenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
+        CompetenceRequestEventType.EMPLOYEE_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.",
         competenceRequest, currentPerson.getFullname());   
 
