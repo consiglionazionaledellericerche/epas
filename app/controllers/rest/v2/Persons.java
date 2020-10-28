@@ -9,9 +9,10 @@ import com.google.common.base.Optional;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.PersonDao;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -46,9 +47,8 @@ public class Persons extends Controller {
    */
   @BasicAuth
   public static void list(Long id, String code, String codeId) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val office = Offices.getOfficeFromRequest(id, code, codeId);
-    rules.checkIfPermitted(office);
     
     val list = 
         office.persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
@@ -61,7 +61,7 @@ public class Persons extends Controller {
    */
   public static void show(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
 
     rules.checkIfPermitted(person.office);
@@ -77,7 +77,7 @@ public class Persons extends Controller {
   @BasicAuth
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.POST);
+    RestUtils.checkMethod(request, HttpMethod.POST);
 
     log.debug("Create person -> request.body = {}", body);
 
@@ -114,7 +114,7 @@ public class Persons extends Controller {
   public static void update(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
       String body) throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.PUT);
+    RestUtils.checkMethod(request, HttpMethod.PUT);
 
     log.debug("Update person -> request.body = {}", body);
 
@@ -156,7 +156,7 @@ public class Persons extends Controller {
   @BasicAuth
   public static void delete(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
-    RestUtil.checkMethod(request, HttpMethod.DELETE);
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
     

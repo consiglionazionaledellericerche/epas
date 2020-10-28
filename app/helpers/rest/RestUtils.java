@@ -1,9 +1,9 @@
-package controllers.rest.v2;
+package helpers.rest;
 
 import helpers.JsonResponse;
 import play.mvc.Http.Request;
 
-public class RestUtil {
+public class RestUtils {
 
   /**
    * Metodi HTTP utilizzati e verificati 
