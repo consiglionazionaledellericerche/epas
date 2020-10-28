@@ -8,9 +8,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.GroupDao;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -45,7 +46,7 @@ public class Groups extends Controller {
    * @param codeId sedeId di attestati
    */
   public static void list(Long id, String code, String codeId) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val office = Offices.getOfficeFromRequest(id, code, codeId);
     rules.checkIfPermitted(office);
 
@@ -59,7 +60,7 @@ public class Groups extends Controller {
    * Restituisce il JSON con il gruppo cercato per id. 
    */
   public static void show(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     if (id == null) {
       JsonResponse.notFound();
     }
@@ -78,7 +79,7 @@ public class Groups extends Controller {
    */
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.POST);
+    RestUtils.checkMethod(request, HttpMethod.POST);
 
     log.debug("Create affiliation -> request.body = {}", body);
 
@@ -112,7 +113,7 @@ public class Groups extends Controller {
    */
   public static void update(Long id, String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.PUT);
+    RestUtils.checkMethod(request, HttpMethod.PUT);
     
     notFoundIfNull(id);
     log.debug("Update group -> request.body = {}", body);
@@ -153,7 +154,7 @@ public class Groups extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void delete(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.DELETE);
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
     val group = groupDao.byId(id).orNull();
     notFoundIfNull(group);
     rules.checkIfPermitted(group.office);
