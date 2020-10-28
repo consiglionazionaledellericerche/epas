@@ -7,10 +7,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.AffiliationDao;
 import dao.GroupDao;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class Affiliations extends Controller {
    *     questo momento, se false (il default) le include tutte.
    */
   public static void byGroup(Long id, boolean includeInactive) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     if (id == null) {
       JsonResponse.notFound();
     }
@@ -83,7 +84,7 @@ public class Affiliations extends Controller {
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
       String fiscalCode, boolean includeInactive) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
 
@@ -105,7 +106,7 @@ public class Affiliations extends Controller {
    * Restituisce il JSON con l'affiliazione cercata per id. 
    */
   public static void show(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val affiliation = getAffiliationFromRequest(id);
     renderJSON(gsonBuilder.create().toJson(AffiliationShowDto.build(affiliation)));
   }
@@ -116,7 +117,7 @@ public class Affiliations extends Controller {
    */
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.POST);
+    RestUtils.checkMethod(request, HttpMethod.POST);
     log.debug("Create affiliation -> request.body = {}", body);
     if (body == null) {
       JsonResponse.badRequest();
@@ -152,7 +153,7 @@ public class Affiliations extends Controller {
    */
   public static void update(Long id, String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.PUT);
+    RestUtils.checkMethod(request, HttpMethod.PUT);
     log.debug("Update affiliation -> request.body = {}", body);
     val affiliation = getAffiliationFromRequest(id);
 
@@ -192,7 +193,7 @@ public class Affiliations extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void delete(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.DELETE);
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
     val affiliation = getAffiliationFromRequest(id);
 
     affiliation.delete();

@@ -1834,8 +1834,11 @@ when
      	"rest.v2.Contracts.update",
      	"rest.v2.Contracts.setPreviousContract",
      	"rest.v2.Contracts.unsetPreviousContract",
-     	"rest.v2.Contracts.delete"
+     	"rest.v2.Contracts.delete",
      	
+     	"rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"
+
      	), target == null, granted == false)
 then
  $c.grant();
@@ -1928,8 +1931,11 @@ when
      	"rest.v2.Contracts.update",
      	"rest.v2.Contracts.setPreviousContract",
      	"rest.v2.Contracts.unsetPreviousContract",
-     	"rest.v2.Contracts.delete"
-     	
+     	"rest.v2.Contracts.delete",
+
+     	"rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"     	
+
      	), target == $o, granted == false)
 then
  $c.grant();
@@ -2720,8 +2726,11 @@ when
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
-        "rest.v3.PersonDays.getMonthSituationByPerson"
+        "rest.v3.PersonDays.getMonthSituationByPerson",
 
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show"
+     	
        ), target == null, granted == false)
 then
  $c.grant();
@@ -2752,8 +2761,10 @@ when
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
-        "rest.v3.PersonDays.getMonthSituationByPerson"
+        "rest.v3.PersonDays.getMonthSituationByPerson",
 		
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show"
 
        ), target == $o, granted == false)
 then

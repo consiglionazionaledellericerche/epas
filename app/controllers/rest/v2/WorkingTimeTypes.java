@@ -4,9 +4,10 @@ import cnr.sync.dto.v2.WorkingTimeTypeShowDto;
 import cnr.sync.dto.v2.WorkingTimeTypeShowTerseDto;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class WorkingTimeTypes extends Controller {
    * @param id identificativo in ePAS della tipologia di orario di lavoro 
    */
   public static void show(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     if (id == null) {
       JsonResponse.badRequest("Il campo id è obbligatorio");
     }

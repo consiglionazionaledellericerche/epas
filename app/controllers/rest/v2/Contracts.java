@@ -9,12 +9,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import controllers.rest.v2.RestUtil.HttpMethod;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import it.cnr.iit.epas.DateInterval;
 import java.io.IOException;
 import java.util.List;
@@ -59,7 +60,7 @@ public class Contracts extends Controller {
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
       String fiscalCode) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
     List<ContractShowTerseDto> contracts = 
@@ -72,7 +73,7 @@ public class Contracts extends Controller {
    * Restituisce il JSON con il contratto cercato per id. 
    */
   public static void show(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.GET);
+    RestUtils.checkMethod(request, HttpMethod.GET);
     val contract = getContractFromRequest(id);
     renderJSON(gsonBuilder.create().toJson(ContractShowDto.build(contract)));
   }
@@ -83,7 +84,7 @@ public class Contracts extends Controller {
    */
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.POST);
+    RestUtils.checkMethod(request, HttpMethod.POST);
     log.debug("Create contract -> request.body = {}", body);
     if (body == null) {
       JsonResponse.badRequest();
@@ -126,7 +127,7 @@ public class Contracts extends Controller {
    */
   public static void update(Long id, String body) 
       throws JsonParseException, JsonMappingException, IOException {
-    RestUtil.checkMethod(request, HttpMethod.PUT);
+    RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = getContractFromRequest(id);
 
     val gson = gsonBuilder.create();
@@ -187,7 +188,7 @@ public class Contracts extends Controller {
    */
   @Util
   private void applyPreviousContract(Long id, boolean linkedToPreviousContract) {
-    RestUtil.checkMethod(request, HttpMethod.PUT);
+    RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = getContractFromRequest(id);  
 
     if (!contractManager.applyPreviousContractLink(contract, linkedToPreviousContract)) {
@@ -206,7 +207,7 @@ public class Contracts extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void delete(Long id) {
-    RestUtil.checkMethod(request, HttpMethod.DELETE);
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
     val contract = getContractFromRequest(id);
 
     contract.delete();
