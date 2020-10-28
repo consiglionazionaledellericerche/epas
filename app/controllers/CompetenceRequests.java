@@ -306,6 +306,11 @@ public class CompetenceRequests extends Controller {
           teamMates, types, reperibilityDates, myReperibilityDates);
     }
 
+    competenceRequest.beginDateToAsk = beginDayToAsk.date;
+    competenceRequest.beginDateToGive = beginDayToGive.date;
+    competenceRequest.endDateToAsk = endDayToAsk.date;
+    competenceRequest.endDateToGive = endDayToGive.date;
+    
     competenceRequestManager.configure(competenceRequest);
 
     if (competenceRequest.endTo == null) {
@@ -322,11 +327,11 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
 
       //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager
-      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-      // invio anche la mail
-      notificationManager
-      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+//      notificationManager
+//      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+//      // invio anche la mail
+//      notificationManager
+//      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
 
 
     }
@@ -336,8 +341,8 @@ public class CompetenceRequests extends Controller {
   }
 
   /**
-   * 
-   * @param id
+   * Metodo per l'eliminazione della richiesta di competenza.
+   * @param id l'identificativo della richiesta d competenza da eliminare
    */
   public static void delete(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
