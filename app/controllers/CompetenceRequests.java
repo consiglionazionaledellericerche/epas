@@ -129,17 +129,17 @@ public class CompetenceRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}",
         type, fromDate);
-    List<Group> groups = groupDao
-        .groupsByOffice(person.office, Optional.absent(), Optional.absent());
+//    List<Group> groups = groupDao
+//        .groupsByOffice(person.office, Optional.absent(), Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
+        .allResults(roleList, fromDate, Optional.absent(), type, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            type, groups, person);
+            type, person);
     List<CompetenceRequest> approvedResults =
         competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
+        .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
     render(config, results, type, onlyOwn, approvedResults, myResults);
@@ -381,21 +381,22 @@ public class CompetenceRequests extends Controller {
       approval = true;
       render(competenceRequest, approval);
     }
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      competenceRequestManager.managerApproval(id, user);
+    if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
+        && user.hasRoles(Role.EMPLOYEE)) {
+      //TODO: caso di approvazione da parte dell'impiegato reperibile.
+      competenceRequestManager.reperibilityManagerApproval(id, user);
       if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
-          && competenceRequest.officeHeadApprovalRequired) {
-        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-        competenceRequestManager.officeHeadApproval(id, user);
+          .anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))
+          && competenceRequest.reperibilityManagerApprovalRequired) {
+        //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
+        competenceRequestManager.employeeApproval(id, user);
       }
     }
-    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      competenceRequestManager.officeHeadApproval(id, user);
+    if (competenceRequest.reperibilityManagerApprovalRequired 
+        && competenceRequest.reperibilityManagerApproved == null
+        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+      //TODO: caso di approvazione da parte del supervisore del servizio
+      competenceRequestManager.employeeApproval(id, user);
     }
     notificationManager.sendEmailToUser(Optional.<AbsenceRequest>absent(), 
         Optional.of(competenceRequest));
@@ -404,10 +405,10 @@ public class CompetenceRequests extends Controller {
   }
   
   /**
-   * 
-   * @param id
-   * @param disapproval
-   * @param reason
+   * Metodo che permette il rifiuto della richiesta.
+   * @param id identificativo della richiesta di competenza
+   * @param disapproval true se si rifiuta, false altrimenti
+   * @param reason la motivazione al rifiuto
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
@@ -416,17 +417,18 @@ public class CompetenceRequests extends Controller {
       disapproval = true;
       render(competenceRequest, disapproval);
     }
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      competenceRequestManager.managerDisapproval(id, reason);
+    if (competenceRequest.reperibilityManagerApprovalRequired 
+        && competenceRequest.reperibilityManagerApproved == null
+        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+      //TODO: caso di disapprovazione da parte del supervisore del servizio.
+      competenceRequestManager.reperibilityManagerDisapproval(id, reason);
       flash.error("Richiesta respinta");
       render("@show", competenceRequest, user);
     }
-    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      competenceRequestManager.officeHeadDisapproval(id, reason);
+    if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
+        && user.hasRoles(Role.EMPLOYEE)) {
+      //TODO: caso di disapprovazione da parte del dipendente reperibile
+      competenceRequestManager.employeeDisapproval(id, reason);
       flash.error("Richiesta respinta");
       render("@show", competenceRequest, user);
     }

@@ -97,19 +97,12 @@ public class CompetenceRequest extends MutableModel {
   
   public LocalDateTime employeeApproved;
   
-  public LocalDateTime managerApproved;
-  
-  public LocalDateTime officeHeadApproved;
-  
-  public LocalDateTime administrativeApproved;
+  public LocalDateTime reperibilityManagerApproved;
   
   public boolean employeeApprovalRequired = true;
   
-  public boolean managerApprovalRequired = true;
+  public boolean reperibilityManagerApprovalRequired = true;
   
-  public boolean officeHeadApprovalRequired = true;
-  
-  public boolean administrativeApprovalRequired = true;
   
   @NotAudited
   @OneToMany(mappedBy = "competenceRequest")
@@ -143,18 +136,9 @@ public class CompetenceRequest extends MutableModel {
   
   @Transient
   public boolean isManagerApproved() {
-    return managerApproved != null;
+    return reperibilityManagerApproved != null;
   }
 
-  @Transient
-  public boolean isAdministrativeApproved() {
-    return administrativeApproved != null;
-  }
-
-  @Transient
-  public boolean isOfficeHeadApproved() {
-    return officeHeadApproved != null;
-  }
   
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
@@ -163,9 +147,8 @@ public class CompetenceRequest extends MutableModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired) 
-        && (managerApproved == null || !managerApprovalRequired)
-        && (administrativeApproved == null || !administrativeApprovalRequired)
+    return !flowStarted  
+        && (reperibilityManagerApproved == null || !reperibilityManagerApprovalRequired)
         && (employeeApproved == null || !employeeApprovalRequired);
   }
   
@@ -176,10 +159,7 @@ public class CompetenceRequest extends MutableModel {
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {
-    return (!this.managerApprovalRequired || this.isManagerApproved()) 
-        && (!this.administrativeApprovalRequired 
-            || this.isAdministrativeApproved())
-        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
+    return (!this.reperibilityManagerApprovalRequired || this.isManagerApproved()) 
         && (!this.employeeApprovalRequired
             || this.isEmployeeApproved());
   }

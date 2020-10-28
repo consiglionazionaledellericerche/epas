@@ -609,8 +609,8 @@ public enum EpasParam {
    * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte dell'eventuale
    * responsabile del gruppo di lavoro.
    */
-  CHANGE_REPERIBILITY_REQUEST_MANAGER_APPROVAL_REQUIRED(
-      "change_reperibility_request_manager_approval_required",
+  CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED(
+      "change_reperibility_request_reperibility_manager_approval_required",
       EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

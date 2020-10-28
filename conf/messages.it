@@ -89,8 +89,10 @@ CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibi
 type =Servizio di reperibilità
 teamMate =Reperibile da contattare
 activityType =Servizio di reperibilità
-dayToGive = Giorni da cedere
-dayToAsk = Giorni da chiedere
+beginDayToGive = Giorno iniziale da dare
+beginDayToAsk = Giorno iniziale da chiedere
+endDayToGive = Giorno finale da dare
+endDayToAsk = Giorno finale da chiedere
 
 activity =Attività di turno
 ADD= Inserimento
@@ -1138,7 +1140,7 @@ PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approva
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
-CHANGE_REPERIBILITY_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
+CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 
 configurationDto.validityYear=Anno
