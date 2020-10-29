@@ -14,7 +14,7 @@
 
 <div class="container">
 
-#{title title: 'Richiesta di '+ competenceRequest.value + ' ore per ' + templateUtility.monthName(competenceRequest.month) + ' ' + competenceRequest.year /}
+#{title title: 'Richiesta di '+ competenceRequest.type  /}
 
 <br>
  #{alert color:'info'}
@@ -23,8 +23,8 @@
  #{/alert}
  <div class="container-fluid center color:info">
  
- 	#{f.view 'competenceRequest.startAt', value:competenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'competenceRequest.endTo', value:competenceRequest.endTo?.format("dd/MM/yyyy") /}
+ 	#{f.view 'competenceRequest.beginDateToAsk', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'competenceRequest.endDateToAsk', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
 </div>	
 <table class="table table-striped">
 <tr>
@@ -35,13 +35,10 @@
 	
 </tr>
 #{list items:competenceRequest.events, as:'item'}
-<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_REFUSAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL)
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_REFUSAL))
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_REFUSAL))} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))} class="success" #{/if}	
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>

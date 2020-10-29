@@ -127,7 +127,7 @@ public class CompetenceRequests extends Controller {
 
     val person = Security.getUser().get().person;
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    log.debug("Prelevo le richieste da approvare di tipo {} a partire da {}",
+    log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
         type, fromDate);
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<CompetenceRequest> results = competenceRequestDao
@@ -140,7 +140,8 @@ public class CompetenceRequests extends Controller {
         .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-    render(config, results, type, onlyOwn, approvedResults, myResults);
+    val available = person.user.hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
+    render(config, results, type, onlyOwn, available, approvedResults, myResults);
   }
 
   /**
