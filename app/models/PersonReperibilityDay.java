@@ -10,7 +10,6 @@ import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
-import helpers.validators.DateValidation;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
@@ -36,7 +35,6 @@ public class PersonReperibilityDay extends BaseModel {
   public PersonReperibility personReperibility;
 
   @Required
-  @CheckWith(DateValidation.class)
   public LocalDate date;
 
   @Column(name = "holiday_day")

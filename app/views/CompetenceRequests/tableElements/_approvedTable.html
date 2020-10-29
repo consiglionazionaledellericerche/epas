@@ -18,15 +18,13 @@
 		</tr>			
 		#{if approvalRequired}
 			<tr>
-				#{if config.officeHeadApprovalRequired}
-					<th width="20%">Responsabile di sede</th>
+				#{if config.employeeApprovalRequired}
+					<th width="20%">Reperibile</th>
 				#{/if}
-				#{if config.managerApprovalRequired}
-					<th width="20%">Responsabile di gruppo</th>
+				#{if config.reperibilityManagerApprovalRequired}
+					<th width="20%">Supervisore del servizio</th>
 				#{/if}			
-				#{if config.administrativeApprovalRequired}
-					<th width="20%">&{'absenceRequest.administrativeApproved'}</th>
-				#{/if}			
+	
 		#{/if}
 	</thead>
 

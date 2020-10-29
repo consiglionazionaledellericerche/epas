@@ -127,10 +127,8 @@ public class CompetenceRequests extends Controller {
 
     val person = Security.getUser().get().person;
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}",
+    log.debug("Prelevo le richieste da approvare di tipo {} a partire da {}",
         type, fromDate);
-//    List<Group> groups = groupDao
-//        .groupsByOffice(person.office, Optional.absent(), Optional.absent());
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), type, person);
@@ -187,9 +185,7 @@ public class CompetenceRequests extends Controller {
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       types = repDao.getReperibilityTypeByOffice(person.office, Optional.of(false))      
           .stream().filter(prt -> prt.personReperibilities.stream()
-              .anyMatch(pr -> pr.person.equals(person) 
-                  /*&& !pr.startDate.isAfter(LocalDate.now()) 
-                  && (!pr.endDate.isBefore(LocalDate.now()) || pr.endDate == null)*/))
+              .anyMatch(pr -> pr.person.equals(person)))
           .collect(Collectors.toList());
       //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
       
@@ -250,10 +246,10 @@ public class CompetenceRequests extends Controller {
    * @param teamMate la persona destinataria della richiesta
    * @param day il giorno da scambiare
    */
-  public static void save(@Required @Valid CompetenceRequest competenceRequest, int year, 
-      int month, Person teamMate, @Valid PersonReperibilityDay beginDayToAsk,
-      @Valid PersonReperibilityDay beginDayToGive, @Valid PersonReperibilityDay endDayToGive, 
-      @Valid PersonReperibilityDay endDayToAsk, @Valid PersonReperibilityType type) {
+  public static void save(@Required CompetenceRequest competenceRequest, int year, 
+      int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive, 
+      PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
     log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
 
     //rules.checkIfPermitted(type);
@@ -263,12 +259,17 @@ public class CompetenceRequests extends Controller {
     competenceRequest.startAt = LocalDateTime.now();
     competenceRequest.teamMate = teamMate;
     competenceRequest.person = Security.getUser().get().person;
+    
     notFoundIfNull(competenceRequest.person);
         
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
       Validation.addError("teamMate", 
           "Esiste già una richiesta di questo tipo");      
+    }
+    if (beginDayToAsk.date.isAfter(endDayToAsk.date) 
+        || beginDayToGive.date.isAfter(endDayToGive.date)) {
+      Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
     }
     if (Days.daysBetween(beginDayToAsk.date, endDayToAsk.date).getDays() 
         != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
@@ -284,7 +285,7 @@ public class CompetenceRequests extends Controller {
           "Non è possibile fare una richiesta per una data di un mese già "
           + "processato in Attestati");      
     }
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       LocalDate begin = new LocalDate(year, month, 1);
       LocalDate to = begin.dayOfMonth().withMaximumValue();
       List<PersonReperibilityDay> reperibilityDates = repDao
@@ -327,11 +328,11 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
 
       //invio la notifica al primo che deve validare la mia richiesta 
-//      notificationManager
-//      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-//      // invio anche la mail
-//      notificationManager
-//      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+      notificationManager
+      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+      // invio anche la mail
+      notificationManager
+      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
 
 
     }

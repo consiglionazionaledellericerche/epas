@@ -28,6 +28,7 @@ import models.flows.query.QCompetenceRequest;
 import models.flows.query.QGroup;
 import models.query.QOffice;
 import models.query.QPerson;
+import models.query.QPersonReperibility;
 
 public class CompetenceRequestDao extends DaoBase {
 
@@ -128,7 +129,7 @@ public class CompetenceRequestDao extends DaoBase {
       Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
-    final QGroup group = QGroup.group;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
     BooleanBuilder conditions = new BooleanBuilder();
 
@@ -151,9 +152,13 @@ public class CompetenceRequestDao extends DaoBase {
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          //.join(person.groups, group)
-          .where(group.manager.eq(signer).and(conditions))
+          .join(person.reperibility, pr)
+          .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
           .fetch();
+      results.addAll(queryResults);
+    } else {
+      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+          .where(competenceRequest.teamMate.eq(signer)).fetch();
       results.addAll(queryResults);
     }
     return results;
