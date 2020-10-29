@@ -153,7 +153,7 @@ public class CompetenceRequestManager {
   public CompetenceRequestConfiguration getConfiguration(
       CompetenceRequestType requestType, Person person) {
     val competenceRequestConfiguration = new CompetenceRequestConfiguration(person, requestType);
-    if (requestType.alwaysSkipReperibilityManagerApproval || person.isGroupManager()) {
+    if (requestType.alwaysSkipReperibilityManagerApproval) {
       competenceRequestConfiguration.reperibilityManagerApprovalRequired = false;
     } else {
       if (!person.isTopQualification() 

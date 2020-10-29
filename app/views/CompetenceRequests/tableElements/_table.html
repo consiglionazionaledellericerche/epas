@@ -14,7 +14,9 @@
 			#{if approvalRequired}
 				<th colspan="2">Date offerte</th>
 			#{/if}
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
+			
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
+		    
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -32,14 +34,11 @@
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al </th>
 			
-				#{if config.managerApprovalRequired}
-					<th width="20%">Responsabile di gruppo</th>
+				#{if config.reperibilityManagerApprovalRequired}
+					<th width="20%">Supervisore del servizio</th>
 				#{/if}						
-				#{if config.administrativeApprovalRequired}
-					<th width="20%">&{'absenceRequest.administrativeApproved'}</th>
-				#{/if}
-				#{if config.officeHeadApprovalRequired}
-					<th width="20%">Responsabile di sede</th>
+				#{if config.employeeApprovalRequired}
+					<th width="20%">Reperibile</th>
 				#{/if}			
 		#{/if}
 	</thead>
@@ -52,18 +51,16 @@
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
 								
-				<td>#{f.value 'item.year', value:item.year /}</td>	    
-				<td>#{f.value 'item.month', value:item.month /}</td>
-				<td>#{f.value 'item.value', value:item.value /}</td>
-								
-				#{if config.managerApprovalRequired}
-					<td>#{f.value 'item.managerApproved', value:item.managerApproved ?: 'non ancora approvata' /}</td>
+				<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    
+				<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
+				<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
+				<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
+				<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>	
+				#{if config.reperibilityManagerApprovalRequired}
+					<td>#{f.value 'item.reperibilityManagerApproved', value:item.reperibilityManagerApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
-				#{if config.administrativeApprovalRequired}
-					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved ?: 'non ancora approvata' /}</td>
-				#{/if}
-				#{if config.officeHeadApprovalRequired}
-					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>
+				#{if config.employeeApprovalRequired}
+					<td>#{f.value 'item.employeeApproved', value:item.employeeApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>

@@ -10,7 +10,7 @@ import manager.configurations.EpasParam;
 public enum CompetenceRequestType {
 
 //Richiesta straordinario
-  CHANGE_REPERIBILITY_REQUEST(true, false,
+  CHANGE_REPERIBILITY_REQUEST(false, false,
       Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED),
       Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED));  
   

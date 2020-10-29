@@ -80,6 +80,7 @@ CompetenceRequestEventType.EXPIRING=Richiesta scaduta
 
 CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST =Cambio di reperibilità
 CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST_TO_APPROVE =Richieste di cambio di reperibilità
+CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST.blank =nuova richiesta cambio reperibilità
 
 CompetenceRequests.changeReperibility =Mie richieste di cambio di reperibilità
 CompetenceRequests.changeReperibilityToApprove = Richieste di cambio reperibilità
