@@ -35,6 +35,7 @@ import models.ReperibilityTypeMonth;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
+import models.flows.CompetenceRequest;
 
 import security.PermissionCheck;
 
@@ -503,6 +504,31 @@ then
 $c.grant();
 end
 
+/** Regola per approvazione/disapprovazione cambi di reperibilità per reperibile**/
+rule approveDisapproveChangeForEmployee
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person (reperibility != null) from currentOperator.person
+  $cr: CompetenceRequest(teamMate == $p)
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval", 
+  		"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
+
+/* Regola per visualizzazione richiesta di cambio reperibilità*/
+rule isEmployeeForCompetenceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $cr: CompetenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "CompetenceRequests.show"), target == $cr, granted == false)
+then
+$c.grant();
+end
 
 rule isEmployeeForFlows
 when
