@@ -290,6 +290,17 @@ public class CompetenceRequestManager {
         competenceRequest.flowEnded = true;
         notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
         break;
+        
+      case EMPLOYEE_APPROVAL:
+        competenceRequest.employeeApproved = LocalDateTime.now();
+        break;
+
+      case EMPLOYEE_REFUSAL:
+        //si riparte dall'inizio del flusso.
+        //resetFlow(absenceRequest);
+        competenceRequest.flowEnded = true;
+        notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
+        break;
 
       case COMPLETE:
         competenceRequest.reperibilityManagerApproved = LocalDateTime.now();
