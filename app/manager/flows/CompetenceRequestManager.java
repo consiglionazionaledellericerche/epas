@@ -372,6 +372,11 @@ public class CompetenceRequestManager {
     return true;
   }
   
+  /**
+   * Metodo di utilità per la verifica dell'esistenza di una richiesta di competenza.
+   * @param competenceRequest la richiesta di competenza da controllare
+   * @return la richiesta di competenza se esiste già con i parametri passati.
+   */
   public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {
     List<CompetenceRequest> existingList = competenceRequestDao.existingCompetenceRequests(competenceRequest);
     for (CompetenceRequest request : existingList) {
@@ -382,6 +387,36 @@ public class CompetenceRequestManager {
     }
     return null;
   }
+  
+  /**
+   * Metodo di approvazione delle richieste.
+   * @param competenceRequest la richiesta di competenza
+   * @param user l'utente
+   * @return true se l'approvazione dell'utente è andata a buon fine, false altrimenti
+   */
+  public boolean approval(CompetenceRequest competenceRequest, User user) {
+    if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
+        && user.hasRoles(Role.EMPLOYEE)) {
+      //TODO: caso di approvazione da parte dell'impiegato reperibile.
+      employeeApproval(competenceRequest.id, user);      
+      if (user.usersRolesOffices.stream()
+          .anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))
+          && competenceRequest.reperibilityManagerApprovalRequired) {
+        //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
+        reperibilityManagerApproval(competenceRequest.id, user);
+      }
+      return true;
+    }
+    if (competenceRequest.reperibilityManagerApprovalRequired 
+        && competenceRequest.reperibilityManagerApproved == null
+        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+      //TODO: caso di approvazione da parte del supervisore del servizio
+      reperibilityManagerApproval(competenceRequest.id, user);
+      return true;
+    }
+    return false;
+  }
+  
   
   /**
    * Approvazione richiesta competenza da parte del responsabile di gruppo.
