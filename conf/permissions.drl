@@ -518,6 +518,23 @@ then
 $c.grant();
 end
 
+/* Approvazione/disapprovazione reperibile */
+
+rule approveDisapproveTargetChangeForEmployee
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == $cr, granted == false)
+then
+  $c.grant();
+end
+
+
+
 /* Regola per visualizzazione richiesta di cambio reperibilità*/
 rule isEmployeeForCompetenceFlows
 when
@@ -528,6 +545,15 @@ when
        "CompetenceRequests.show"), target == $cr, granted == false)
 then
 $c.grant();
+end
+
+rule showAbsenceRequestForAvailable
+when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person != currentOperator.person && teamMate == currentOperator.person)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
 end
 
 /* Regole per cancellazione richiesta di cambio reperibilità */

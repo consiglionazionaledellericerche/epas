@@ -329,8 +329,7 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
 
       //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager
-      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+      notificationManager.notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
       // invio anche la mail
       notificationManager
       .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
@@ -376,13 +375,11 @@ public class CompetenceRequests extends Controller {
    * @param id
    * @param approval
    */
-  public static void approval(long id, boolean approval) {
+  public static void approval(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
-    if (!approval) {
-      approval = true;
-      render(competenceRequest, approval);
-    }
+
     if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
         && user.hasRoles(Role.EMPLOYEE)) {
       //TODO: caso di approvazione da parte dell'impiegato reperibile.

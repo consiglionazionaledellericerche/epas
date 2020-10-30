@@ -15,10 +15,12 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 		<i class="fa fa-recycle fa-fw"></i>  
 		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0 
-		    	|| templateUtility.personalPermissionRequests() > 0 || templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
+		    	|| templateUtility.personalPermissionRequests() > 0 || templateUtility.vacationPastYearAfterDeadlineRequests() > 0
+		    	|| templateUtility.changeReperibilityRequests() > 0}
       			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
       				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()
-      				+ templateUtility.vacationPastYearAfterDeadlineRequests()}
+      				+ templateUtility.vacationPastYearAfterDeadlineRequests()
+      				+ templateUtility.changeReperibilityRequests()}
       			</span>
     		#{/if}       
 	     <!-- visualizza l'username -->
