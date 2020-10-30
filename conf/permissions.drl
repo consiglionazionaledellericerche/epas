@@ -530,6 +530,31 @@ then
 $c.grant();
 end
 
+/* Regole per cancellazione richiesta di cambio reperibilità */
+
+rule EmployCanEditOrDeleteCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person == currentOperator.person, flowEnded == false,
+  		reperibilityManagerApproved == null, employeeApproved == null)
+  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+
+
+
 rule isEmployeeForFlows
 when
   $uro: UsersRolesOffices()
@@ -579,6 +604,7 @@ when
 		/*Richiesta competenza*/
 		"CompetenceRequests.save",
 		"CompetenceRequests.list",
+		"CompetenceRequests.delete",
 		
 		
      	/* Ferie */
