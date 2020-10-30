@@ -631,6 +631,8 @@ when
 		"CompetenceRequests.save",
 		"CompetenceRequests.list",
 		"CompetenceRequests.delete",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval",
 		
 		
      	/* Ferie */

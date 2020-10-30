@@ -379,27 +379,18 @@ public class CompetenceRequests extends Controller {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
+    rules.checkIfPermitted(competenceRequest);
+    
+    boolean approved = competenceRequestManager.approval(competenceRequest, user);
+    
+    if (approved) {
+      notificationManager.sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
 
-    if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
-        && user.hasRoles(Role.EMPLOYEE)) {
-      //TODO: caso di approvazione da parte dell'impiegato reperibile.
-      competenceRequestManager.reperibilityManagerApproval(id, user);
-      if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))
-          && competenceRequest.reperibilityManagerApprovalRequired) {
-        //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
-        competenceRequestManager.employeeApproval(id, user);
-      }
+      flash.success("Operazione conclusa correttamente");
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (competenceRequest.reperibilityManagerApprovalRequired 
-        && competenceRequest.reperibilityManagerApproved == null
-        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
-      //TODO: caso di approvazione da parte del supervisore del servizio
-      competenceRequestManager.employeeApproval(id, user);
-    }
-    notificationManager.sendEmailToUser(Optional.<AbsenceRequest>absent(), 
-        Optional.of(competenceRequest));
-    flash.success("Operazione conclusa correttamente");
+
     CompetenceRequests.listToApprove(competenceRequest.type);
   }
   
