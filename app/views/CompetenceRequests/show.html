@@ -22,9 +22,14 @@
     per <strong>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</strong>:</p>
  #{/alert}
  <div class="container-fluid center color:info">
- 
- 	#{f.view 'competenceRequest.beginDateToAsk', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'competenceRequest.endDateToAsk', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
+ 	#{alert color: 'info'}
+ 	#{f.view 'Chiesto Da', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'Chiesto A', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
+	#{/alert}
+	#{alert color:'warning'}
+ 	#{f.view 'Offerto Da', value:competenceRequest.beginDateToGive?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'Offerto A', value:competenceRequest.endDateToGive?.format("dd/MM/yyyy") /}
+	#{/alert}
 </div>	
 <table class="table table-striped">
 <tr>

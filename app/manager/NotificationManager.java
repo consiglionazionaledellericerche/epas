@@ -906,12 +906,13 @@ public class NotificationManager {
    */
   private User getProperUser(CompetenceRequest competenceRequest) {
 
+    User user = null;
     if (competenceRequest.reperibilityManagerApprovalRequired 
         && competenceRequest.reperibilityManagerApproved == null) {
       for (PersonReperibility pr : competenceRequest.person.reperibility) {
         for (PersonReperibility tmPr : competenceRequest.teamMate.reperibility) {
           if(pr.personReperibilityType.equals(tmPr.personReperibilityType)) {
-            return pr.personReperibilityType.supervisor.user;
+            user = pr.personReperibilityType.supervisor.user;
           }
         }
       }
@@ -920,10 +921,10 @@ public class NotificationManager {
 
     if (competenceRequest.employeeApprovalRequired 
         && competenceRequest.employeeApproved == null) {
-      return competenceRequest.teamMate.user;
+      user = competenceRequest.teamMate.user;
       
     }
-    return null;
+    return user;
   }
 
   /**
