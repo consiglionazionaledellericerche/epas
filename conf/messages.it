@@ -1146,6 +1146,7 @@ ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 
+CHANGE_REPERIBILITY_REQUEST =Richiesta cambio reperibilità
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
 configurationDto.validityBegin=Validità Inizio

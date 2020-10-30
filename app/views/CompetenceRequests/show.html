@@ -14,11 +14,11 @@
 
 <div class="container">
 
-#{title title: 'Richiesta di '+ competenceRequest.type  /}
+#{title title: 'Richiesta di '+ competenceRequest.type.toString()  /}
 
 <br>
  #{alert color:'info'}
-    <p>Elenco degli stati di approvazione della <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
+    <p>Elenco degli stati di approvazione di <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
     per <strong>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</strong>:</p>
  #{/alert}
  <div class="container-fluid center color:info">
