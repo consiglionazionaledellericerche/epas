@@ -12,6 +12,7 @@ import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.query.QPerson;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
@@ -284,6 +285,5 @@ public class PersonReperibilityDayDao extends DaoBase {
         .fetchOne();
     return Optional.fromNullable(result);
   }
-
 
 }
