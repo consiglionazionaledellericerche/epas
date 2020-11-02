@@ -16,6 +16,7 @@ import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
@@ -29,6 +30,7 @@ import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.PersonDayManager;
+import manager.ReperibilityManager2;
 import manager.configurations.ConfigurationManager;
 import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
 import manager.services.absences.AbsenceForm;
@@ -38,6 +40,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibilityDay;
 import models.Role;
 import models.User;
 import models.absences.Absence;
@@ -58,7 +61,7 @@ import play.db.jpa.JPAPlugin;
 @Slf4j
 public class CompetenceRequestManager {
   
-  private static final String DAILY_OVERTIME = "S1";
+
 
   private ConfigurationManager configurationManager;
   private UsersRolesOfficesDao uroDao;
@@ -69,8 +72,8 @@ public class CompetenceRequestManager {
   private GroupDao groupDao;
   private PersonDao personDao;
   private CompetenceManager competenceManager;
-  private CompetenceDao competenceDao;
-  private CompetenceCodeDao competenceCodeDao;
+  private PersonReperibilityDayDao repDao;
+  private ReperibilityManager2 repManager2;
 
   @Data
   @RequiredArgsConstructor
@@ -87,8 +90,8 @@ public class CompetenceRequestManager {
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       CompetenceRequestDao competenceRequestDao, ConsistencyManager consistencyManager, 
       GroupDao groupDao, PersonDao personDao,
-      CompetenceManager competenceManager, CompetenceDao competenceDao, 
-      CompetenceCodeDao competenceCodeDao) {
+      CompetenceManager competenceManager, PersonReperibilityDayDao repDao,
+      ReperibilityManager2 repManager2) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -98,8 +101,8 @@ public class CompetenceRequestManager {
     this.groupDao = groupDao;
     this.personDao = personDao;
     this.competenceManager = competenceManager;
-    this.competenceDao = competenceDao;
-    this.competenceCodeDao = competenceCodeDao;
+    this.repDao = repDao;
+    this.repManager2 = repManager2;
   }
   
   /**
@@ -356,22 +359,37 @@ public class CompetenceRequestManager {
     competenceRequest.flowEnded = true;
     competenceRequest.save();
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
-    CompetenceCode code = null;
-    Optional<Competence> competence = Optional.absent();
-    Competence comp = null;
-    /*
-     * TODO: cosa fare con il completamento del flusso per richiesta reperibilità
-     */
+
     if (competenceRequest.type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
-      code = competenceCodeDao.getCompetenceCodeByCode(DAILY_OVERTIME);      
-      competence = competenceDao.getCompetence(competenceRequest.person, 
-          competenceRequest.year, competenceRequest.month, code);
-      if (!competence.isPresent()) {
-        comp = new Competence(competenceRequest.person, code, competenceRequest.year, competenceRequest.month);
-      } else {
-        comp = competence.get();
-      }       
-      competenceManager.saveCompetence(comp, competenceRequest.value);
+      LocalDate temp = competenceRequest.beginDateToGive;
+      PersonReperibilityDay repDayAsker = null;
+      PersonReperibilityDay repDayGiver = null;
+      while (!temp.isAfter(competenceRequest.endDateToGive)) {
+        //elimino le mie reperibilità
+        Optional<PersonReperibilityDay> prd = 
+            repDao.getPersonReperibilityDay(competenceRequest.person, temp);
+        if (prd.isPresent()) {
+          repDayGiver = prd.get();
+        } else {
+          throw new IllegalArgumentException();
+        }
+        repManager2.delete(repDayGiver);
+        temp = temp.plusDays(1);
+      }
+      temp = competenceRequest.beginDateToAsk;
+      while(!temp.isAfter(competenceRequest.endDateToAsk)) {
+        //elimino le reperibilità dell'altro reperibile
+        Optional<PersonReperibilityDay> prd =
+            repDao.getPersonReperibilityDay(competenceRequest.teamMate, temp);
+        if (prd.isPresent()) {
+          repDayAsker = prd.get();
+        } else {
+          throw new IllegalArgumentException();
+        }
+        repManager2.delete(repDayAsker);
+        temp = temp.plusDays(1);
+      }
+      //TODO: completare con l'inserimento delle reperibilità per richiedente e cedente
       
       consistencyManager.updatePersonSituation(competenceRequest.person.id,
           new LocalDate(competenceRequest.year, competenceRequest.month, 1));
@@ -406,10 +424,9 @@ public class CompetenceRequestManager {
   public boolean approval(CompetenceRequest competenceRequest, User user) {
     if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
         && user.hasRoles(Role.EMPLOYEE)) {
-      //TODO: caso di approvazione da parte dell'impiegato reperibile.
       employeeApproval(competenceRequest.id, user);      
-      if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))
+      if (competenceRequest.person.reperibility.stream()
+          .anyMatch(pr -> pr.personReperibilityType.supervisor.equals(user.person))
           && competenceRequest.reperibilityManagerApprovalRequired) {
         //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
         reperibilityManagerApproval(competenceRequest.id, user);
@@ -418,8 +435,9 @@ public class CompetenceRequestManager {
     }
     if (competenceRequest.reperibilityManagerApprovalRequired 
         && competenceRequest.reperibilityManagerApproved == null
-        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
-      //TODO: caso di approvazione da parte del supervisore del servizio
+        && competenceRequest.person.reperibility.stream()
+        .anyMatch(pr -> pr.personReperibilityType.supervisor.equals(user.person))) {
+      
       reperibilityManagerApproval(competenceRequest.id, user);
       return true;
     }
