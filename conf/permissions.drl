@@ -533,9 +533,31 @@ then
   $c.grant();
 end
 
+/* Regole per approvazione disapprovazione supervisore del servizio*/
+rule approveDisapproveChangeForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
 
+rule approveDisapproveTargetChangeForSupervisor
+when
+  $p: Person() from currentOperator.person
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  $rep: PersonReperibility() from $prt.personReperibilities
+  $cr: CompetenceRequest(person == $rep.person)
+  $c: PermissionCheck(action in ("CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+then
+System.out.println("PersonReperibilityType:" +$prt);
+$c.grant();
+end
 
-/* Regola per visualizzazione richiesta di cambio reperibilità*/
+/* Regole per visualizzazione richiesta di cambio reperibilità*/
 rule isEmployeeForCompetenceFlows
 when
   $uro: UsersRolesOffices()
@@ -547,10 +569,19 @@ then
 $c.grant();
 end
 
-rule showAbsenceRequestForAvailable
+rule showCompetenceRequestForAvailable
 when 
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $cr: CompetenceRequest(person != currentOperator.person && teamMate == currentOperator.person)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+rule showCompetenceRequestForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $cr: CompetenceRequest(person != $p)
   $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
 then
   $c.grant();

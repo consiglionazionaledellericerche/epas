@@ -156,8 +156,7 @@ public class CompetenceRequestManager {
     if (requestType.alwaysSkipReperibilityManagerApproval) {
       competenceRequestConfiguration.reperibilityManagerApprovalRequired = false;
     } else {
-      if (!person.isTopQualification() 
-          && requestType.reperibilityManagerApprovalRequired.isPresent()) {
+      if (requestType.reperibilityManagerApprovalRequired.isPresent()) {
         competenceRequestConfiguration.reperibilityManagerApprovalRequired = 
             (Boolean) configurationManager.configValue(
                 person.office, requestType.reperibilityManagerApprovalRequired.get(), 
@@ -168,8 +167,7 @@ public class CompetenceRequestManager {
     if (requestType.alwaysSkipEmployeeApproval) {
       competenceRequestConfiguration.employeeApprovalRequired = false;
     } else {
-      if (!person.isTopQualification() 
-          && requestType.employeeApprovalRequired.isPresent()) {
+      if (requestType.employeeApprovalRequired.isPresent()) {
         competenceRequestConfiguration.employeeApprovalRequired = 
             (Boolean) configurationManager.configValue(
                 person.office, requestType.employeeApprovalRequired.get(), 
