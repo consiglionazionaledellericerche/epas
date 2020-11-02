@@ -134,7 +134,7 @@ public class CompetenceRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
 
     if (roleList.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
-        || uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
+        || !signer.reperibilityTypes.isEmpty())) {
       return Lists.newArrayList();
     }
     conditions.and(competenceRequest.startAt.after(fromDate))
@@ -147,7 +147,7 @@ public class CompetenceRequestDao extends DaoBase {
 
     List<CompetenceRequest> results = new ArrayList<>();
 
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
+    if (!signer.reperibilityTypes.isEmpty()) {
       List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
