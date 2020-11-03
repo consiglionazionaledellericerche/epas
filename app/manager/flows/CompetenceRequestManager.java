@@ -38,6 +38,7 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
+import models.PersonReperibilityType;
 import models.Role;
 import models.User;
 import models.absences.Absence;
@@ -384,6 +385,7 @@ public class CompetenceRequestManager {
       LocalDate temp = competenceRequest.beginDateToGive;
       PersonReperibilityDay repDayAsker = null;
       PersonReperibilityDay repDayGiver = null;
+      
       while (!temp.isAfter(competenceRequest.endDateToGive)) {
         //elimino le mie reperibilità
         Optional<PersonReperibilityDay> prd = 
@@ -393,24 +395,8 @@ public class CompetenceRequestManager {
         } else {
           throw new IllegalArgumentException();
         }
-
-        //creo la nuova reperibilità per il vecchio
-        PersonReperibilityDay day = new PersonReperibilityDay();
-        day.date = temp;
-        day.reperibilityType = repDayGiver.reperibilityType;
-        day.holidayDay = repDayGiver.holidayDay;
-        if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
-            repDayGiver.reperibilityType).isPresent()) {
-          day.personReperibility = 
-              repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
-                  repDayGiver.reperibilityType).get();
-        } else {
-          throw new IllegalArgumentException("Non è stato possibile inserire la "
-              + "giornata di reperibilità");
-        }
+        
         repDayGiver.delete();
-        JPA.em().flush();
-        day.save();
         temp = temp.plusDays(1);
       }
 
@@ -424,25 +410,64 @@ public class CompetenceRequestManager {
         } else {
           throw new IllegalArgumentException();
         }
-        PersonReperibilityDay day = new PersonReperibilityDay();
-        day.date = temp;
-        day.reperibilityType = repDayAsker.reperibilityType;
-        day.holidayDay = repDayAsker.holidayDay;
-        if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
-            repDayAsker.reperibilityType).isPresent()) {
-          day.personReperibility = 
-              repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
-                  repDayAsker.reperibilityType).get();
-        } else {
-          throw new IllegalArgumentException("Non è stato possibile inserire la "
-              + "giornata di reperibilità");
-        }
+        
         repDayAsker.delete();
-        JPA.em().flush();
-        day.save();
         temp = temp.plusDays(1);
       }
       
+      JPA.em().flush();
+      
+      final List<Promise<Void>> results = new ArrayList<>();
+      
+      results.add(new Job<Void>() {
+        
+        @Override
+        public void doJob() {
+          List<Person> repList = Lists.newArrayList();
+          repList.add(competenceRequest.person);
+          repList.add(competenceRequest.teamMate);
+          LocalDate temp = competenceRequest.beginDateToGive;
+          while(!temp.isAfter(competenceRequest.endDateToGive)) {
+            PersonReperibilityDay day = new PersonReperibilityDay();
+            day.date = temp;
+            day.reperibilityType = repDao.byListOfPerson(repList).get();
+            
+            if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                day.reperibilityType).isPresent()) {
+              day.personReperibility = 
+                  repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                      day.reperibilityType).get();
+            } else {
+              throw new IllegalArgumentException("Non è stato possibile inserire la "
+                  + "giornata di reperibilità");
+            }
+            day.save();
+            temp = temp.plusDays(1);
+          }
+          
+          temp = competenceRequest.beginDateToAsk;
+          while (!temp.isAfter(competenceRequest.endDateToAsk)) {
+            PersonReperibilityDay day = new PersonReperibilityDay();
+            day.date = temp;
+            day.reperibilityType = repDao.byListOfPerson(repList).get();
+            
+            if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                day.reperibilityType).isPresent()) {
+              day.personReperibility = 
+                  repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                      day.reperibilityType).get();
+            } else {
+              throw new IllegalArgumentException("Non è stato possibile inserire la "
+                  + "giornata di reperibilità");
+            }
+            
+            day.save();
+            temp = temp.plusDays(1);
+          }
+          
+        }
+      }.afterRequest());
+      Promise.waitAll(results);
     }
     
     return true;
