@@ -1,11 +1,5 @@
 package manager.flows;
 
-
-import java.util.List;
-import javax.inject.Inject;
-import org.apache.commons.compress.utils.Lists;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import controllers.Security;
@@ -20,11 +14,14 @@ import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
@@ -55,8 +52,13 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
+import org.apache.commons.compress.utils.Lists;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
+import play.libs.F.Promise;
 
 @Slf4j
 public class CompetenceRequestManager {
@@ -71,7 +73,6 @@ public class CompetenceRequestManager {
   private ConsistencyManager consistencyManager;  
   private GroupDao groupDao;
   private PersonDao personDao;
-  private CompetenceManager competenceManager;
   private PersonReperibilityDayDao repDao;
   private ReperibilityManager2 repManager2;
 
@@ -85,12 +86,25 @@ public class CompetenceRequestManager {
     boolean reperibilityManagerApprovalRequired;
   }
 
+  /**
+   * Injector.
+   * @param configurationManager configurationManager per la sede
+   * @param uroDao dao per gli usersRolesOffices
+   * @param roleDao dao per i ruoli
+   * @param notificationManager manager per le notifiche
+   * @param competenceRequestDao dao per le richieste di competenza
+   * @param consistencyManager manager per il conteggio dei residui
+   * @param groupDao dao per i gruppi
+   * @param personDao dao per la persona
+   * @param repDao dao per la reperibiltà 
+   * @param repManager2 manager per la reperibilità
+   */
   @Inject
   public CompetenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       CompetenceRequestDao competenceRequestDao, ConsistencyManager consistencyManager, 
       GroupDao groupDao, PersonDao personDao,
-      CompetenceManager competenceManager, PersonReperibilityDayDao repDao,
+      PersonReperibilityDayDao repDao,
       ReperibilityManager2 repManager2) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
@@ -100,7 +114,6 @@ public class CompetenceRequestManager {
     this.consistencyManager = consistencyManager;    
     this.groupDao = groupDao;
     this.personDao = personDao;
-    this.competenceManager = competenceManager;
     this.repDao = repDao;
     this.repManager2 = repManager2;
   }
@@ -213,6 +226,13 @@ public class CompetenceRequestManager {
     competenceRequest.employeeApproved = null;
   }
 
+  /**
+   * Metodo che verifica se la richiesta può essere approvata o se non è necessario.
+   * @param competenceRequest la richiesta di competenza
+   * @param approver chi deve approvarla
+   * @param eventType che tipo di evento stiamo considerando
+   * @return una stringa opzionale che contiene lo stato della richiesta.
+   */
   public Optional<String> checkCompetenceRequestEvent(CompetenceRequest competenceRequest, 
       Person approver, CompetenceRequestEventType eventType) {
     if (eventType == CompetenceRequestEventType.STARTING_APPROVAL_FLOW) {
@@ -259,7 +279,7 @@ public class CompetenceRequestManager {
   /**
    * Approvazione di una richiesta di assenza.
    * 
-   * @param absenceRequest la richiesta di assenza. 
+   * @param competenceRequest la richiesta di assenza. 
    * @param person la persona che effettua l'approvazione.
    * @param eventType il tipo di evento.
    * @param note eventuali note da aggiungere all'evento generato.
@@ -336,7 +356,7 @@ public class CompetenceRequestManager {
    * Controlla se una richiesta di competenza può essere terminata con successo,
    * in caso positivo effettua l'inserimento della competenza o evento.
    * 
-   * @param absenceRequest la richiesta da verificare e da utilizzare per i dati
+   * @param competenceRequest la richiesta da verificare e da utilizzare per i dati
    *     dell'inserimento assenza.
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
    */
@@ -373,11 +393,29 @@ public class CompetenceRequestManager {
         } else {
           throw new IllegalArgumentException();
         }
-        repManager2.delete(repDayGiver);
+
+        //creo la nuova reperibilità per il vecchio
+        PersonReperibilityDay day = new PersonReperibilityDay();
+        day.date = temp;
+        day.reperibilityType = repDayGiver.reperibilityType;
+        day.holidayDay = repDayGiver.holidayDay;
+        if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+            repDayGiver.reperibilityType).isPresent()) {
+          day.personReperibility = 
+              repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                  repDayGiver.reperibilityType).get();
+        } else {
+          throw new IllegalArgumentException("Non è stato possibile inserire la "
+              + "giornata di reperibilità");
+        }
+        repDayGiver.delete();
+        JPA.em().flush();
+        day.save();
         temp = temp.plusDays(1);
       }
+
       temp = competenceRequest.beginDateToAsk;
-      while(!temp.isAfter(competenceRequest.endDateToAsk)) {
+      while (!temp.isAfter(competenceRequest.endDateToAsk)) {
         //elimino le reperibilità dell'altro reperibile
         Optional<PersonReperibilityDay> prd =
             repDao.getPersonReperibilityDay(competenceRequest.teamMate, temp);
@@ -386,13 +424,24 @@ public class CompetenceRequestManager {
         } else {
           throw new IllegalArgumentException();
         }
-        repManager2.delete(repDayAsker);
+        PersonReperibilityDay day = new PersonReperibilityDay();
+        day.date = temp;
+        day.reperibilityType = repDayAsker.reperibilityType;
+        day.holidayDay = repDayAsker.holidayDay;
+        if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+            repDayAsker.reperibilityType).isPresent()) {
+          day.personReperibility = 
+              repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                  repDayAsker.reperibilityType).get();
+        } else {
+          throw new IllegalArgumentException("Non è stato possibile inserire la "
+              + "giornata di reperibilità");
+        }
+        repDayAsker.delete();
+        JPA.em().flush();
+        day.save();
         temp = temp.plusDays(1);
       }
-      //TODO: completare con l'inserimento delle reperibilità per richiedente e cedente
-      
-      consistencyManager.updatePersonSituation(competenceRequest.person.id,
-          new LocalDate(competenceRequest.year, competenceRequest.month, 1));
       
     }
     
@@ -405,7 +454,8 @@ public class CompetenceRequestManager {
    * @return la richiesta di competenza se esiste già con i parametri passati.
    */
   public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {
-    List<CompetenceRequest> existingList = competenceRequestDao.existingCompetenceRequests(competenceRequest);
+    List<CompetenceRequest> existingList = 
+        competenceRequestDao.existingCompetenceRequests(competenceRequest);
     for (CompetenceRequest request : existingList) {
       if (request.month == competenceRequest.month 
           && request.year == competenceRequest.year && request.type == competenceRequest.type) {

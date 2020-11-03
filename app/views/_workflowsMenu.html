@@ -35,10 +35,12 @@
       #{secure.check 'CompetenceRequests.enabled'}
       #{secure.li @CompetenceRequests.changeReperibility()}
         <i class="fa fa-money" aria-hidden="true"></i>
+        
       #{/secure.li}
+      <li class="divider"></li>
       #{/secure.check}
     
-      <li class="divider"></li>
+      
 
       #{secure.li @AbsenceRequests.vacations()}
         <i class="fa fa-plane" aria-hidden="true"></i>
@@ -56,21 +58,22 @@
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
       #{/secure.li}
+      <li class="divider"></li>
       #{/secure.check}
       
-      <li class="divider"></li>
-      
-      
+            
       #{secure.check 'CompetenceRequests.handleEnabled'}
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
         <i class="fa fa-money" aria-hidden="true"></i>
+         
        	#{if templateUtility.changeReperibilityRequests() > 0}
       		<span class="label label-danger label-badge">${templateUtility.changeReperibilityRequests()}</span>
     	#{/if} 
+    	
       #{/secure.li}
       #{/secure.check}
       
-      <li class="divider"></li>
+     <li class="divider"></li>
       
 	  #{secure.li @AbsenceRequests.vacationsToApprove()}
         <i class="fa fa-plane" aria-hidden="true"></i>

@@ -1,11 +1,5 @@
 package dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import org.joda.time.LocalDateTime;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -13,6 +7,11 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import lombok.val;
 import models.Office;
 import models.Person;
@@ -29,6 +28,7 @@ import models.flows.query.QGroup;
 import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
+import org.joda.time.LocalDateTime;
 
 public class CompetenceRequestDao extends DaoBase {
 
@@ -36,15 +36,15 @@ public class CompetenceRequestDao extends DaoBase {
   CompetenceRequestDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-  
+
   /**
    * Lista delle richiesta di assenza per persona e data.
    *
-   * @param person La persona della quale recuperare le richieste di assenza
+   * @param person La persona della quale recuperare le richieste di competenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
-   * @param absenceRequestType Il tipo di richiesta di assenza specifico
-   * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
+   * @param competenceRequestType Il tipo di richiesta di competenza specifico
+   * @return La lista delle richieste di competenza sull'intervallo e la persona specificati.
    */
   public List<CompetenceRequest> findByPersonAndDate(Person person,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
@@ -69,15 +69,14 @@ public class CompetenceRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(competenceRequest)
         .where(conditions).orderBy(competenceRequest.startAt.desc()).fetch();
   }
-  
+
   /**
    * Metodo che ritorna la lista di tutte le richieste di assenza attive.
    *
    * @param uros la lista dei ruoli della persona che deve approvare
    * @param fromDate da quando cercare le richieste
    * @param toDate a quando cercare le richieste (opzionale)
-   * @param absenceRequestType il tipo della richiesta
-   * @param groups la lista dei gruppi di cui fa parte il dipendente che fa la richiesta
+   * @param competenceRequestType il tipo della richiesta
    * @param signer il dipendente deputato all'approvazione
    * @return la lista di tutte le richieste di assenza attive.
    */
@@ -88,42 +87,52 @@ public class CompetenceRequestDao extends DaoBase {
 
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
-    final QGroup group = QGroup.group;
+
+    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
+        || !signer.reperibilityTypes.isEmpty())) {
+      return Lists.newArrayList();
+    }
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
-      return Lists.newArrayList();
-    }
     val results = Lists.<CompetenceRequest>newArrayList();
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
         .and(competenceRequest.type.eq(competenceRequestType)
-            .and(competenceRequest.flowStarted.isTrue())
-            .and(competenceRequest.flowEnded.isFalse())
-            .and(competenceRequest.person.office.in(officeList)));
-    if (toDate.isPresent()) {
-      conditions.and(competenceRequest.endTo.before(toDate.get()));
-    }
+        .and(competenceRequest.flowStarted.isTrue())
+        .and(competenceRequest.flowEnded.isFalse())
+        .and(competenceRequest.person.office.in(officeList)));
+
 
     JPQLQuery<CompetenceRequest> query;
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
-      conditions.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-          .and(competenceRequest.reperibilityManagerApproved.isNotNull())
+    if (!signer.reperibilityTypes.isEmpty()) {
+      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
+      .and(competenceRequest.employeeApproved.isNull())
           .and(person.office.eq(signer.office));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          //.join(person.groups, group)
-          .where(group.manager.eq(signer).and(conditions));
+          .where(conditions);
     } else {
+      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
+          .and(competenceRequest.employeeApproved.isNotNull()
+              .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue()
+              .and(competenceRequest.reperibilityManagerApproved.isNull())));
       query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
     }
     results.addAll(query.fetch());
     return results;
   }
-  
 
 
+  /**
+   * Metodo che ritorna le richieste da approvare.
+   * @param roleList la lista dei ruoli sulla sede
+   * @param fromDate da quando ricercare le richieste
+   * @param toDate fino a quando ricercare le richieste
+   * @param type il tipo di richiesta
+   * @param signer chi deve firmare la richiesta
+   * @return la lista di richieste di competenza da approvare.
+   */
   public List<CompetenceRequest> toApproveResults(List<UsersRolesOffices> roleList,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
       Person signer) {
@@ -137,10 +146,9 @@ public class CompetenceRequestDao extends DaoBase {
         || !signer.reperibilityTypes.isEmpty())) {
       return Lists.newArrayList();
     }
-    conditions.and(competenceRequest.startAt.after(fromDate))
-        .and(competenceRequest.type.eq(type)
-            .and(competenceRequest.flowStarted.isTrue())
-            .and(competenceRequest.flowEnded.isFalse()));
+    conditions.and(competenceRequest.type.eq(type)
+        .and(competenceRequest.flowStarted.isTrue())
+        .and(competenceRequest.flowEnded.isFalse()));
     if (toDate.isPresent()) {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
     }
@@ -157,19 +165,28 @@ public class CompetenceRequestDao extends DaoBase {
           .fetch();
       results.addAll(queryResults);
     } else {
+      conditions = employeeQuery(conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
-          .where(competenceRequest.teamMate.eq(signer)).fetch();
+          .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
       results.addAll(queryResults);
     }
     return results;
   }
 
+  /**
+   * Metodo che ritorna la lista delle richieste totalmente approvate.
+   * @param roleList la lista dei ruoli sulla sede
+   * @param fromDate da quando ricercare le richieste
+   * @param toDate fino a quando ricercare le richieste
+   * @param type il tipo di richiesta
+   * @param signer la persona che deve approvare
+   * @return la lista delle richieste totalmente approvate.
+   */
   public List<CompetenceRequest> totallyApproved(List<UsersRolesOffices> roleList,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
       Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
-    final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
     List<CompetenceRequest> results = new ArrayList<>();
@@ -183,36 +200,34 @@ public class CompetenceRequestDao extends DaoBase {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
     }
 
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
-      results
-          .addAll(totallyApprovedAsReperibilityManager(
-              roleList, fromDate, toDate, type, signer));
-    }
-
-    if (roleList.stream().anyMatch(uro -> uro.role.name.equals(Role.EMPLOYEE))) {
+    if (!signer.reperibilityTypes.isEmpty()) {
+      conditions.andAnyOf((competenceRequest.reperibilityManagerApprovalRequired.isTrue())
+      .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
+          competenceRequest.reperibilityManagerApprovalRequired.isFalse());
+      
+      query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
+      results.addAll(query.fetch());
+    } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
-          .and(competenceRequest.employeeApproved.isNotNull())
+        .and(competenceRequest.employeeApproved.isNotNull())
           .and(person.office.in(officeList));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          //.join(person.groups, group)
           .where(person.eq(signer).and(conditions));
-    } else {
-      query = getQueryFactory()
-          .selectFrom(competenceRequest).where(conditions);
+      results.addAll(query.fetch());
     }
-    results.addAll(query.fetch());
+    
     return results;
   }
-  
+
   /**
    * Ritorna la lista delle richieste di competenza non ancora validate che presentano date di
    * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta d'assenza da
    * validare.
    *
    * @param request la richiesta di competenza da far validare
-   * @return la lista delle richieste di competenza che hanno parametri che non permettono la corretta
-   *     creazione della richiesta di competenza passata come parametro.
+   * @return la lista delle richieste di competenza che hanno parametri che non permettono 
+   *     la corretta creazione della richiesta di competenza passata come parametro.
    */
   public List<CompetenceRequest> existingCompetenceRequests(CompetenceRequest request) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
@@ -221,50 +236,31 @@ public class CompetenceRequestDao extends DaoBase {
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
   }
-  
-  private List<CompetenceRequest> totallyApprovedAsReperibilityManager(List<UsersRolesOffices> uros,
-      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
-      CompetenceRequestType competenceRequestType, Person signer) {
-    Preconditions.checkNotNull(fromDate);
 
-    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
-    final QPerson person = QPerson.person;
-    final QOffice office = QOffice.office;
-    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
-    BooleanBuilder conditions = new BooleanBuilder();
-    conditions.and(competenceRequest.startAt.after(fromDate))
-        .and(competenceRequest.type.eq(competenceRequestType).and(competenceRequest.flowEnded.isTrue())
-            .and(competenceRequest.person.office.eq(signer.office)));
-
-    if (toDate.isPresent()) {
-      conditions.and(competenceRequest.endTo.before(toDate.get()));
-    }
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.REPERIBILITY_MANAGER))) {
-      conditions.and(
-          competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-          .and(competenceRequest.reperibilityManagerApproved.isNotNull())
-          .and(person.office.in(officeList));
-      return getQueryFactory().selectFrom(competenceRequest)
-          .join(competenceRequest.person, person)
-          .join(person.office, office)
-          .where(office.in(uros.stream().map(
-              userRoleOffices -> userRoleOffices.office)
-              .collect(Collectors.toSet())).and(conditions))
-          .fetch();
-    } else {
-      return Lists.newArrayList();
-    }
-
-  }
   
 
-  private BooleanBuilder managerQuery(List<Office> officeList, BooleanBuilder condition, Person signer) {
+  /**
+   * Metodo che aggiorna le condizioni di ricerca per il responsabile del servizio.
+   * @param officeList la lista delle sedi
+   * @param condition le condizioni passate dal chiamante
+   * @param signer la persona che deve autorizzare la richiesta
+   * @return le condizioni aggiornate per il responsabile del servizio.
+   */
+  private BooleanBuilder managerQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
         .and(competenceRequest.reperibilityManagerApproved.isNull())
-        .and(competenceRequest.person.office.in(officeList));
+          .and(competenceRequest.person.office.in(officeList));
     return condition;
 
+  }
+
+  private BooleanBuilder employeeQuery(BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.employeeApprovalRequired.isTrue())
+        .and(competenceRequest.employeeApproved.isNull());
+    return condition;
   }
 
 }
