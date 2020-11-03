@@ -286,4 +286,18 @@ public class PersonReperibilityDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+  /**
+   * Ricerca, se esiste, l'attività di reperibilità che praticano la lista di persone 
+   *     passata come parametro.
+   * @param list la lista di persone di cui cercare l'attività di reperibilità
+   * @return l'attività, se esiste, di cui fanno parte le persone della lista passata.
+   */
+  public Optional<PersonReperibilityType> byListOfPerson(List<Person> list) {
+    final QPersonReperibilityType type = QPersonReperibilityType.personReperibilityType;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
+    final PersonReperibilityType result = getQueryFactory()
+        .selectFrom(type).leftJoin(type.personReperibilities, pr)
+        .where(pr.person.in(list)).fetchOne();
+    return Optional.fromNullable(result);
+  }
 }
