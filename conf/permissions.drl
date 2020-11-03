@@ -554,7 +554,6 @@ when
   $c: PermissionCheck(action in ("CompetenceRequests.approval",
 			"CompetenceRequests.disapproval"), target == $cr, granted == false)
 then
-System.out.println("PersonReperibilityType:" +$prt);
 $c.grant();
 end
 
