@@ -451,10 +451,10 @@ public class CompetenceRequestManager {
             day.date = temp;
             day.reperibilityType = repDao.byListOfPerson(repList).get();
             
-            if (repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+            if (repDao.byPersonDateAndType(competenceRequest.person, temp, 
                 day.reperibilityType).isPresent()) {
               day.personReperibility = 
-                  repDao.byPersonDateAndType(competenceRequest.teamMate, temp, 
+                  repDao.byPersonDateAndType(competenceRequest.person, temp, 
                       day.reperibilityType).get();
             } else {
               throw new IllegalArgumentException("Non è stato possibile inserire la "
