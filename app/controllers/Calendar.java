@@ -225,6 +225,7 @@ public class Calendar extends Controller {
       int index = 0;
       // prende i turni associati alle persone attive in quel turno
       for (PersonShiftShiftType personShift : people) {
+        log.debug("Turnista: {}", personShift.personShift.person);
         final Person person = personShift.personShift.person;
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
         events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
@@ -442,18 +443,15 @@ public class Calendar extends Controller {
  
         personShiftDay.personShift = shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
-        Optional<String> error;
+        Optional<String> error = Optional.of("");
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
-        } else {
-          if (!organizationShiftslot.isPersistent() && shiftSlot == null) {
-            error = Optional.of(Messages.get("shift.notSlotSpecified"));
-          } else {
-            error = Optional.of(Messages.get("validation.invalid"));
-          }
-          
-        }
+        } 
 
+        if (!organizationShiftslot.isPersistent() && shiftSlot == null) {
+          error = Optional.of(Messages.get("shift.notSlotSpecified"));
+        } 
+        
         if (error.isPresent()) {
           response.status = 409;
 
