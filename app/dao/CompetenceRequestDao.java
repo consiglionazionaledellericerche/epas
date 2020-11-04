@@ -87,6 +87,7 @@ public class CompetenceRequestDao extends DaoBase {
 
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
     if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
         || !signer.reperibilityTypes.isEmpty())) {
@@ -108,10 +109,14 @@ public class CompetenceRequestDao extends DaoBase {
     if (!signer.reperibilityTypes.isEmpty()) {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
       .and(competenceRequest.employeeApproved.isNull())
+      .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
+      .and(competenceRequest.reperibilityManagerApproved.isNull())
           .and(person.office.eq(signer.office));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
-          .where(conditions);
+          .leftJoin(person.reperibility, pr)
+          .where(pr.personReperibilityType.in(signer.reperibilityTypes).and(conditions));
+          
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
           .and(competenceRequest.employeeApproved.isNotNull()
@@ -187,6 +192,7 @@ public class CompetenceRequestDao extends DaoBase {
       Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
     BooleanBuilder conditions = new BooleanBuilder();
     List<CompetenceRequest> results = new ArrayList<>();
@@ -202,10 +208,14 @@ public class CompetenceRequestDao extends DaoBase {
 
     if (!signer.reperibilityTypes.isEmpty()) {
       conditions.andAnyOf((competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-      .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
+          .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
           competenceRequest.reperibilityManagerApprovalRequired.isFalse());
       
-      query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
+      query = getQueryFactory().selectFrom(competenceRequest)
+          .leftJoin(competenceRequest.person, person)
+          .leftJoin(person.reperibility, pr)
+          .where(pr.personReperibilityType.in(signer.reperibilityTypes)
+              .and(conditions));
       results.addAll(query.fetch());
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())

@@ -89,6 +89,7 @@ CompetenceRequests.changeReperibilityToApprove = Richieste di cambio reperibilit
 
 CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibilita'
 
+
 type =Servizio di reperibilità
 teamMate =Reperibile da contattare
 activityType =Servizio di reperibilità
