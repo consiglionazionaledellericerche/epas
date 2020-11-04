@@ -550,7 +550,8 @@ when
   $p: Person() from currentOperator.person
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
-  $cr: CompetenceRequest(person == $rep.person)
+  $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
+  		&& reperibilityManagerApproved == null, flowEnded == false)
   $c: PermissionCheck(action in ("CompetenceRequests.approval",
 			"CompetenceRequests.disapproval"), target == $cr, granted == false)
 then

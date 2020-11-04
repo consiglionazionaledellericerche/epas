@@ -74,7 +74,7 @@
 				</td>
 				<td>
 				#{secure.check 'CompetenceRequests.approval', target: item }
-				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
+				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}">
         		Approva 
       			</a>
       			#{/secure.check}
