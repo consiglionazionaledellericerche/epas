@@ -870,11 +870,11 @@ public class NotificationManager {
         .append(String.format("Gentile %s,\r\n", user.person.fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
         competenceRequest.person.fullName()));
-    message.append(String.format("\r\n per una competenza di tipo: %s", requestType));
+    message.append(String.format("\r\ndi tipo: %s", requestType));
     if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
-      message.append(String.format("\r\n per il giorno: %s", 
+      message.append(String.format("\r\nper il giorno: %s", 
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
-      message.append(String.format("\r\n in cambio del giorno: %s", 
+      message.append(String.format("\r\nin cambio del giorno: %s", 
           competenceRequest.beginDateToGive));
     } else {
       message.append(String.format("\r\n dal: %s", 
@@ -886,6 +886,7 @@ public class NotificationManager {
       message.append(String.format("  al: %s", 
           competenceRequest.endDateToGive.toString(dateFormatter)));
     }
+    message.append(String.format("\r\ncondestinatario: %s", competenceRequest.teamMate.fullName()));
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
