@@ -10,9 +10,9 @@
 			#{if approvalRequired}
 				<th colspan="2">Date offerte</th>
 			#{/if}
-			#{if !available}
+
 		    <th width="10%" #{if approvalRequired}rowspan="4"#{/if}>Destinatario</th>
-		    #{/if}
+
 			<th #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
@@ -41,10 +41,8 @@
 				<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
 				<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
 				<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
-				#{if !available}
-				<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>	
-				#{/if}
 
+				<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>	
 
 				<td>${item.note}</td>
 				<td>${item.actualEvent().eventType.label()}</td>

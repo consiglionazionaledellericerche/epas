@@ -14,9 +14,9 @@
 			#{if approvalRequired}
 				<th colspan="2">Date offerte</th>
 			#{/if}
-			#{if !available}
+
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
-		    #{/if}
+
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -55,9 +55,9 @@
 				<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
 				<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
 				<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
-				#{if !available}
+
 				<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>	
-				#{/if}
+
 				#{if config.reperibilityManagerApprovalRequired}
 					<td>#{f.value 'item.reperibilityManagerApproved', value:item.reperibilityManagerApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
