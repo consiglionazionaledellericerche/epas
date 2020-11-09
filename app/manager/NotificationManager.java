@@ -937,6 +937,7 @@ public class NotificationManager {
     Verify.verifyNotNull(competenceRequest);
     final Person person = competenceRequest.person;
     final String template;
+    String typeOfRequest ="";
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova richiesta di: %s";
     } else if (Crud.UPDATE == operation) {
@@ -946,8 +947,11 @@ public class NotificationManager {
     } else {
       template = null;
     }
+    if (competenceRequest.type.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      typeOfRequest = "cambio reperibilità";
+    }
     final String message = 
-        String.format(template, person.fullName(), competenceRequest.type.name());
+        String.format(template, person.fullName(), typeOfRequest);
 
     //se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (competenceRequest.isFullyApproved()) {
