@@ -374,8 +374,10 @@ public class Calendar extends Controller {
         event = ShiftEvent.builder()
             .allDay(true)
             .title(abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day) 
-                ? "Smart working di " + abs.personDay.person.fullName() : 
-                  "Telelavoro di " + abs.personDay.person.fullName())
+                ? "Attività lavorativa di " +abs.absenceType.code + " di "
+                + abs.personDay.person.fullName() : 
+                  "Attività lavorativa di " +abs.absenceType.description + " di "
+                + abs.personDay.person.fullName())
             .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
             .editable(false)
             .color(EventColor.YELLOW.backgroundColor)
