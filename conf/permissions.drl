@@ -35,6 +35,7 @@ import models.ReperibilityTypeMonth;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
+import models.flows.CompetenceRequest;
 
 import security.PermissionCheck;
 
@@ -76,6 +77,36 @@ when
 then
  $c.grant();
 end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3 
+  		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceHandleFlowsVisible
+when
+  $p: Person(qualification != null && qualification.qualification <= 3 
+  		&& reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
 
 /*
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
@@ -258,7 +289,7 @@ when
   
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -280,7 +311,7 @@ rule reperibilitySupervisorCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -337,7 +368,7 @@ rule isReperibilityManager_generic
 when 
   $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person	
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -356,7 +387,7 @@ rule reperibilityManagerCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -424,7 +455,7 @@ end
 
 
 
-/*Ruolo per vedere il calendario per i reperibili*/
+/*Ruolo per vedere il calendario per i reperibili e le richieste di cambio reperibilità*/
 
 rule isAvailable_general
 when 
@@ -432,12 +463,20 @@ when
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person (reperibility != null) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
+  		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
+  		"CompetenceRequests.changeReperibilityToApprove",
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
        	"ReperibilityCalendar.events",
-       	"ReperibilityCalendar.recap"	), target == null, granted == false)
+       	"ReperibilityCalendar.recap"), target == null, granted == false)
 then
  $c.grant();
 end
@@ -446,17 +485,132 @@ rule isAvailable_personReperibilityType
 when
 	$p: Person (reperibility != null) from currentOperator.person
 	$o: Office() from $p.office
-  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
 	$c: PermissionCheck(action in (
-       "ReperibilityCalendar.show",
-       "ReperibilityCalendar.reperibilityPeople",
-       "ReperibilityCalendar.events",
-       "ReperibilityCalendar.recap"), target == $prt, granted == false)
+		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
+  		"CompetenceRequests.changeReperibilityToApprove",
+        "ReperibilityCalendar.show",
+        "ReperibilityCalendar.reperibilityPeople",
+        "ReperibilityCalendar.events",
+        "ReperibilityCalendar.recap"), target == $prt, granted == false)
 then
 $c.grant();
 end
+
+/** Regola per approvazione/disapprovazione cambi di reperibilità per reperibile**/
+rule approveDisapproveChangeForEmployee
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person (reperibility != null) from currentOperator.person
+  $cr: CompetenceRequest(teamMate == $p)
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval", 
+  		"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
+
+/* Approvazione/disapprovazione reperibile */
+
+rule approveDisapproveTargetChangeForEmployee
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == $cr, granted == false)
+then
+  $c.grant();
+end
+
+/* Regole per approvazione disapprovazione supervisore del servizio*/
+rule approveDisapproveChangeForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
+
+rule approveDisapproveTargetChangeForSupervisor
+when
+  $p: Person() from currentOperator.person
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  $rep: PersonReperibility() from $prt.personReperibilities
+  $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
+  		&& reperibilityManagerApproved == null, flowEnded == false)
+  $c: PermissionCheck(action in ("CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
+/* Regole per visualizzazione richiesta di cambio reperibilità*/
+rule isEmployeeForCompetenceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $cr: CompetenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "CompetenceRequests.show"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
+rule showCompetenceRequestForAvailable
+when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person != currentOperator.person && teamMate == currentOperator.person)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+rule showCompetenceRequestForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $cr: CompetenceRequest(person != $p)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+/* Regole per cancellazione richiesta di cambio reperibilità */
+
+rule EmployCanEditOrDeleteCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person == currentOperator.person, flowEnded == false,
+  		reperibilityManagerApproved == null, employeeApproved == null)
+  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+
 
 
 rule isEmployeeForFlows
@@ -504,6 +658,13 @@ when
 		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
+		
+		/*Richiesta competenza*/
+		"CompetenceRequests.save",
+		"CompetenceRequests.list",
+		"CompetenceRequests.delete",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval",
 		
 		
      	/* Ferie */

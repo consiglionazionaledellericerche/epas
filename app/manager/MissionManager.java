@@ -150,7 +150,8 @@ public class MissionManager {
         .of(JustifiedTypeName.complete_day_and_add_overtime, JustifiedTypeName.specified_minutes);
     List<Absence> existingMissionWithoutId = 
         absenceDao.filteredByTypes(body.person, body.dataInizio.toLocalDate(), 
-            body.dataFine.toLocalDate(), types, Optional.<Boolean>absent());
+            body.dataFine.toLocalDate(), types, Optional.<Boolean>absent(), 
+            Optional.<Boolean>absent());
     if (!existingMissionWithoutId.isEmpty()  
         && existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
             || abs.absenceType.code.equals("92M"))) {

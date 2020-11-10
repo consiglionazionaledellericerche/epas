@@ -6,6 +6,7 @@ import models.Person;
 import models.Stamping;
 import models.absences.Absence;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import play.mvc.Router;
 
 /**
@@ -34,10 +35,19 @@ public enum NotificationSubject {
    * Notifiche relative alle assenze inserite o modificate
    */
   ABSENCE,
+  /*
+   * Notifiche relative alle competenze inserite o modificate
+   */
+  COMPETENCE,
+
   /**
    * Notifiche per i flussi di lavoro. 
    */
   ABSENCE_REQUEST,
+  /*
+   * Notifiche relative ai flussi di lavoro per competenza.
+   */
+  COMPETENCE_REQUEST,
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
    */
@@ -88,6 +98,11 @@ public enum NotificationSubject {
         params.put("id", absenceRequest.id);
         params.put("type", absenceRequest.type);
         return toUrl("AbsenceRequests.show", params);
+      case COMPETENCE_REQUEST:
+         final CompetenceRequest competenceRequest = CompetenceRequest.findById(referenceId);
+         params.put("id", competenceRequest.id);
+         params.put("type", competenceRequest.type);
+         return toUrl("CompetenceRequests.show", params);
       case PERSON_HAS_CHANGED_OFFICE:
         //Se non c'è riferimento alla persona allora vuol dire che non è 
         //più gestita dal precedente ufficio.

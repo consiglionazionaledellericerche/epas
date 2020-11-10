@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
+import models.flows.Group;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
@@ -30,6 +31,14 @@ import play.data.validation.Unique;
 public class CompetenceCode extends BaseModel {
 
   private static final long serialVersionUID = 9211205948423608460L;
+  
+  @NotAudited
+  @OneToMany(mappedBy = "workdaysCode")
+  public List<MonthlyCompetenceType> workdaysCodes = Lists.newArrayList();
+  
+  @NotAudited
+  @OneToMany(mappedBy = "holidaysCode")
+  public List<MonthlyCompetenceType> holidaysCodes = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "competenceCode")

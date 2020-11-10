@@ -5,10 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
 
@@ -33,7 +35,6 @@ public class PersonReperibilityDay extends BaseModel {
   public PersonReperibility personReperibility;
 
   @Required
-
   public LocalDate date;
 
   @Column(name = "holiday_day")
@@ -42,5 +43,10 @@ public class PersonReperibilityDay extends BaseModel {
   @ManyToOne
   @JoinColumn(name = "reperibility_type")
   public PersonReperibilityType reperibilityType;
+  
+  @Transient
+  public String getLabel() {
+    return this.date.dayOfMonth().getAsText() + " " + this.date.monthOfYear().getAsText();
+  }
 
 }

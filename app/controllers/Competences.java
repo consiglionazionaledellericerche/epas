@@ -12,6 +12,7 @@ import com.google.common.collect.Table;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.MonthlyCompetenceTypeDao;
 import dao.OfficeDao;
 import dao.OrganizationShiftTimeTableDao;
 import dao.PersonDao;
@@ -53,6 +54,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
+import models.MonthlyCompetenceType;
 import models.Office;
 import models.OrganizationShiftTimeTable;
 import models.Person;
@@ -125,6 +127,8 @@ public class Competences extends Controller {
   private static ShiftOrganizationManager shiftOrganizationManager;
   @Inject
   private static OrganizationShiftTimeTableDao shiftTimeTableDao;
+  @Inject
+  private static MonthlyCompetenceTypeDao monthlyDao;
 
 
   /**
@@ -855,8 +859,9 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+    List<MonthlyCompetenceType> types = MonthlyCompetenceType.findAll();
 
-    render("@editReperibility", officePeople, office);
+    render("@editReperibility", officePeople, office, types);
   }
 
   /**
@@ -969,8 +974,10 @@ public class Competences extends Controller {
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
+    //TODO: caricare la lista delle competenze mensili
+    List<MonthlyCompetenceType> types = monthlyDao.listTypes();
 
-    render(type, officePeople, office);
+    render(type, officePeople, office, types);
   }
 
 
@@ -1459,7 +1466,6 @@ public class Competences extends Controller {
 
     }
     type.shiftCategories = cat;
-    //type.shiftCategories = cat;
     type.shiftTimeTable = timeTable;
     type.save();
 
@@ -1510,9 +1516,8 @@ public class Competences extends Controller {
     List<PersonReperibility> personAssociated = 
         reperibilityDao.byOffice(type.office, LocalDate.now());
 
-    List<CompetenceCode> codeList = Lists.newArrayList();
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
-    codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
+    List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
+
     List<Person> available = competenceCodeDao
         .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
         .stream().filter(e -> (personAssociated.stream()

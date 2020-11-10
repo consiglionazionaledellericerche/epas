@@ -48,6 +48,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final BooleanPath internalUse = createBoolean("internalUse");
 
+    public final BooleanPath isRealAbsence = createBoolean("isRealAbsence");
+
     public final SetPath<models.absences.AbsenceTypeJustifiedBehaviour, QAbsenceTypeJustifiedBehaviour> justifiedBehaviours = this.<models.absences.AbsenceTypeJustifiedBehaviour, QAbsenceTypeJustifiedBehaviour>createSet("justifiedBehaviours", models.absences.AbsenceTypeJustifiedBehaviour.class, QAbsenceTypeJustifiedBehaviour.class, PathInits.DIRECT2);
 
     public final NumberPath<Integer> justifiedTime = createNumber("justifiedTime", Integer.class);
