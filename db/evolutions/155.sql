@@ -85,4 +85,3 @@ INSERT INTO groups_people_history (_revision, _revision_type, groups_id, people_
  
 DROP TABLE affiliation_history;
 DROP TABLE affiliation;
-
