@@ -2,7 +2,7 @@
 Action = (type != null && type.persistent) ? 'Modifica ' : 'Nuovo '
 }%
 #{modalAsync id:'modalActivateService', 
-title:(Action + ' servizio per reperibilità')}
+title:(Action + ' servizio giornaliero')}
 
 <div id="absenceCodeData">
   #{form action:@Competences.saveReperibility(), method:'POST', autocomplete:false,
@@ -16,6 +16,7 @@ title:(Action + ' servizio per reperibilità')}
   #{/if}
   
   #{f.view 'type.office', value:office /}
+  #{f.selectModel 'type.monthlyCompetenceType', items: types, required:true /}
   #{f.selectModel 'type.supervisor', items: officePeople, required:true /}
   #{f.selectMultipleModel 'type.managers', values: officePeople /}
 	#{secure.check 'Competences.saveReperibility'}

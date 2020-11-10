@@ -250,6 +250,7 @@
       <th>Dal</th>
       <th>Al</th>
       <th>Comp. reper.</th>
+      <th>Assenza effettiva</th>
      </tr>
     </thead>
     <tbody> 
@@ -277,6 +278,7 @@
         <td>${absenceType.validFrom?.format()}</td>
         <td>${absenceType.validTo?.format()}</td>
         <td>${absenceType.reperibilityCompatible}</td>
+        <td>${absenceType.isRealAbsence}</td>
       </tr>
       #{/if}
      #{/list}

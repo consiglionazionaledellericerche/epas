@@ -38,6 +38,8 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public final ListPath<models.Person, QPerson> managers = this.<models.Person, QPerson>createList("managers", models.Person.class, QPerson.class, PathInits.DIRECT2);
 
+    public final QMonthlyCompetenceType monthlyCompetenceType;
+
     public final SetPath<models.ReperibilityTypeMonth, QReperibilityTypeMonth> monthsStatus = this.<models.ReperibilityTypeMonth, QReperibilityTypeMonth>createSet("monthsStatus", models.ReperibilityTypeMonth.class, QReperibilityTypeMonth.class, PathInits.DIRECT2);
 
     public final QOffice office;
@@ -70,6 +72,7 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public QPersonReperibilityType(Class<? extends PersonReperibilityType> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.monthlyCompetenceType = inits.isInitialized("monthlyCompetenceType") ? new QMonthlyCompetenceType(forProperty("monthlyCompetenceType"), inits.get("monthlyCompetenceType")) : null;
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.supervisor = inits.isInitialized("supervisor") ? new QPerson(forProperty("supervisor"), inits.get("supervisor")) : null;
     }

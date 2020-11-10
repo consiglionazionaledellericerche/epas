@@ -45,8 +45,8 @@ import play.i18n.Messages;
 @Slf4j
 public class ReperibilityManager2 {
 
-  private static final String REPERIBILITY_WORKDAYS = "207";
-  private static final String REPERIBILITY_HOLIDAYS = "208";
+//  private static final String REPERIBILITY_WORKDAYS = "207";
+//  private static final String REPERIBILITY_HOLIDAYS = "208";
 
   private final PersonReperibilityDayDao reperibilityDayDao;
   private final PersonDayDao personDayDao;
@@ -291,7 +291,6 @@ public class ReperibilityManager2 {
 
     final Map<Person, Integer> reperibilityWorkDaysCompetences = new HashMap<>();
 
-
     final LocalDate today = LocalDate.now();
 
     final LocalDate lastDay;
@@ -301,9 +300,8 @@ public class ReperibilityManager2 {
     } else {
       lastDay = to;
     }
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    CompetenceCode code = reperibility.monthlyCompetenceType.workdaysCode;        
     involvedReperibilityWorkers(reperibility, from, to).forEach(person -> {
-
       int competences = 
           calculatePersonReperibilityCompetencesInPeriod(reperibility, person, from, lastDay, code);
       reperibilityWorkDaysCompetences.put(person, competences);
@@ -347,7 +345,7 @@ public class ReperibilityManager2 {
     final List<PersonReperibilityDay> reperibilities = reperibilityDayDao
         .getPersonReperibilityDaysByPeriodAndType(from, to, reperibility, person);
 
-    if (code.codeToPresence.equalsIgnoreCase(REPERIBILITY_WORKDAYS)) {
+    if (code.equals(reperibility.monthlyCompetenceType.workdaysCode)) {
       reperibilityCompetences = (int) reperibilities.stream()
           .filter(rep -> !personDayManager.isHoliday(person, rep.date)).count();
     } else {
@@ -379,9 +377,8 @@ public class ReperibilityManager2 {
     } else {
       lastDay = end;
     }
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    CompetenceCode code = reperibility.monthlyCompetenceType.holidaysCode;        
     involvedReperibilityWorkers(reperibility, start, end).forEach(person -> {
-
       int competences = calculatePersonReperibilityCompetencesInPeriod(reperibility, 
           person, start, lastDay, code);
       reperibilityHolidaysCompetences.put(person, competences);
@@ -420,10 +417,11 @@ public class ReperibilityManager2 {
     //cerco le persone reperibili nel periodo di interesse
     final List<Person> involvedReperibilityPeople = involvedReperibilityWorkers(
         reperibilityTypeMonth.personReperibilityType, monthBegin, monthEnd);
-    CompetenceCode reperibilityHoliday = competenceCodeDao
-        .getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
-    CompetenceCode reperibilityWorkdays = competenceCodeDao
-        .getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    CompetenceCode reperibilityHoliday = reperibilityTypeMonth.personReperibilityType
+        .monthlyCompetenceType.holidaysCode;        
+    CompetenceCode reperibilityWorkdays = reperibilityTypeMonth.personReperibilityType
+        .monthlyCompetenceType.workdaysCode;
+
     //per ogni persona approvo le reperibilità feriali e festive 
     involvedReperibilityPeople.forEach(person ->  {
       WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();

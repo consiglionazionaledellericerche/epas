@@ -57,6 +57,11 @@ public class PersonReperibilityType extends BaseModel {
   
   @ManyToMany
   public List<Person> managers = Lists.newArrayList();
+  
+  /*Tipo di competenza mensile*/
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @NotNull
+  public MonthlyCompetenceType monthlyCompetenceType;
 
   @Override
   public String toString() {
