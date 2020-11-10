@@ -54,9 +54,6 @@ import security.SecurityRules;
 @Slf4j
 public class ReperibilityCalendar extends Controller {
 
-//  private static final String REPERIBILITY_WORKDAYS = "207";
-//  private static final String REPERIBILITY_HOLIDAYS = "208";
-
   @Inject
   static SecurityRules rules;
   @Inject
@@ -429,7 +426,7 @@ public class ReperibilityCalendar extends Controller {
             JustifiedTypeName.complete_day_and_add_overtime);
 
     List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
-        Optional.fromNullable(false));
+        Optional.fromNullable(false), Optional.<Boolean>absent());
     List<ReperibilityEvent> events = new ArrayList<>();
     ReperibilityEvent event = null;
 
