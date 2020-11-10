@@ -32,6 +32,7 @@ import models.ShiftType;
 import models.ShiftTypeMonth;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
 import models.dto.PNotifyObject;
 import models.dto.ShiftEvent;
 import models.enumerate.EventColor;
@@ -226,9 +227,10 @@ public class Calendar extends Controller {
       // prende i turni associati alle persone attive in quel turno
       for (PersonShiftShiftType personShift : people) {
         final Person person = personShift.personShift.person;
-        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 2)];
         events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
         events.addAll(absenceEvents(person, start, end));
+        events.addAll(notAbsenceEvents(person, start, end));
         index++;
       }
     }
@@ -309,7 +311,7 @@ public class Calendar extends Controller {
             JustifiedTypeName.complete_day_and_add_overtime);
 
     List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
-        Optional.<Boolean>absent());
+        Optional.<Boolean>absent(), Optional.of(true));
     List<ShiftEvent> events = new ArrayList<>();
     ShiftEvent event = null;
 
@@ -336,6 +338,49 @@ public class Calendar extends Controller {
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
             .borderColor(EventColor.RED.borderColor)
+            .build();
+
+        events.add(event);
+      } else {
+        event.setEnd(abs.personDay.date.plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
+      }
+
+    }
+    return events;
+  }
+  
+  /**
+   * Ritorna lista di DTO contenente le assenze per telelavoro e smart working.
+   * @param person la persona di cui si cercano le assenze
+   * @param start la data di inizio
+   * @param end la data di fine
+   * @return la lista di eventi di assenza "non assenza" come i casi di telelavoro o smart working.
+   */
+  private static List<ShiftEvent> notAbsenceEvents(Person person, LocalDate start, LocalDate end) {
+    final List<JustifiedTypeName> types = ImmutableList
+        .of(JustifiedTypeName.assign_all_day, 
+            JustifiedTypeName.complete_day_and_add_overtime);
+
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
+        Optional.<Boolean>absent(), Optional.of(Boolean.FALSE));
+    List<ShiftEvent> events = new ArrayList<>();
+    ShiftEvent event = null;
+    for (Absence abs : absences) {
+      if (event == null
+          || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
+          .equals(abs.personDay.date)
+          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.personDay.date)) {
+
+        event = ShiftEvent.builder()
+            .allDay(true)
+            .title(abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day) 
+                ? "Smart working di " + abs.personDay.person.fullName() : 
+                  "Telelavoro di " + abs.personDay.person.fullName())
+            .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
+            .editable(false)
+            .color(EventColor.YELLOW.backgroundColor)
+            .textColor(EventColor.YELLOW.textColor)
+            .borderColor(EventColor.YELLOW.borderColor)
             .build();
 
         events.add(event);
