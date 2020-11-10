@@ -23,12 +23,12 @@
  #{/alert}
  <div class="container-fluid center color:info">
  	#{alert color: 'info'}
- 	#{f.view 'Chiesto Da', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'Chiesto A', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
+ 	#{f.view 'Chiesto Dal', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'Chiesto Al', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
 	#{/alert}
 	#{alert color:'warning'}
- 	#{f.view 'Offerto Da', value:competenceRequest.beginDateToGive?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'Offerto A', value:competenceRequest.endDateToGive?.format("dd/MM/yyyy") /}
+ 	#{f.view 'Offerto Dal', value:competenceRequest.beginDateToGive?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'Offerto Al', value:competenceRequest.endDateToGive?.format("dd/MM/yyyy") /}
 	#{/alert}
 </div>	
 <table class="table table-striped">
