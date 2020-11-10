@@ -261,6 +261,8 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
         .and(competenceRequest.reperibilityManagerApproved.isNull())
+        .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
+            competenceRequest.employeeApprovalRequired.isFalse())
           .and(competenceRequest.person.office.in(officeList));
     return condition;
 
