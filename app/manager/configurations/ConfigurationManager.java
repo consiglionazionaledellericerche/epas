@@ -64,10 +64,10 @@ public class ConfigurationManager {
   }
 
   /**
-   * 
-   * @param epasParam
-   * @param value
-   * @return
+   * La lista delle configurazioni delle persone con parametro epasParam e valore value.
+   * @param epasParam il parametro da cercare
+   * @param value il valore da cercare
+   * @return la lista di configurazioni della persona.
    */
   public List<PersonConfiguration> configurationWithTypeAndValue(
       EpasParam epasParam, String value) {

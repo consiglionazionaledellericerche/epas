@@ -72,7 +72,8 @@ public class PeriodManager {
           propertyInPeriod.getOwner(), propertyInPeriod.getType(),
           propertyInPeriod.getBeginDate(),
           propertyInPeriod.calculatedEnd());
-      return propertyInPeriod.getOwner().periods(propertyInPeriod.getType()).stream().collect(Collectors.toList());
+      return propertyInPeriod.getOwner().periods(propertyInPeriod.getType())
+          .stream().collect(Collectors.toList());
     }
     
     //copia dei periodi ordinata

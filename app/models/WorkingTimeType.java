@@ -160,6 +160,10 @@ public class WorkingTimeType extends BaseModel {
     return percent;
   }
   
+  /**
+   * Ritorna la media dei minuti lavorati in una settimana.
+   * @return la media dei minuti lavorati in una settimana.
+   */
   public int averageMinutesInWeek() {
     int totalMinutes = 0;
     int totalDays = 0;

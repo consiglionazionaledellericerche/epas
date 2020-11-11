@@ -71,11 +71,9 @@ public class CompetenceRequestManager {
   private RoleDao roleDao;
   private NotificationManager notificationManager;
   private CompetenceRequestDao competenceRequestDao;  
-  private ConsistencyManager consistencyManager;  
   private GroupDao groupDao;
   private PersonDao personDao;
   private PersonReperibilityDayDao repDao;
-  private ReperibilityManager2 repManager2;
 
   @Data
   @RequiredArgsConstructor
@@ -94,29 +92,25 @@ public class CompetenceRequestManager {
    * @param roleDao dao per i ruoli
    * @param notificationManager manager per le notifiche
    * @param competenceRequestDao dao per le richieste di competenza
-   * @param consistencyManager manager per il conteggio dei residui
    * @param groupDao dao per i gruppi
    * @param personDao dao per la persona
    * @param repDao dao per la reperibiltà 
-   * @param repManager2 manager per la reperibilità
    */
   @Inject
   public CompetenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
-      CompetenceRequestDao competenceRequestDao, ConsistencyManager consistencyManager, 
+      CompetenceRequestDao competenceRequestDao, 
       GroupDao groupDao, PersonDao personDao,
-      PersonReperibilityDayDao repDao,
-      ReperibilityManager2 repManager2) {
+      PersonReperibilityDayDao repDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.notificationManager = notificationManager;
     this.competenceRequestDao = competenceRequestDao;    
-    this.consistencyManager = consistencyManager;    
     this.groupDao = groupDao;
     this.personDao = personDao;
     this.repDao = repDao;
-    this.repManager2 = repManager2;
+
   }
   
   /**
@@ -427,7 +421,7 @@ public class CompetenceRequestManager {
           repList.add(competenceRequest.person);
           repList.add(competenceRequest.teamMate);
           LocalDate temp = competenceRequest.beginDateToGive;
-          while(!temp.isAfter(competenceRequest.endDateToGive)) {
+          while (!temp.isAfter(competenceRequest.endDateToGive)) {
             PersonReperibilityDay day = new PersonReperibilityDay();
             day.date = temp;
             day.reperibilityType = repDao.byListOfPerson(repList).get();

@@ -375,9 +375,9 @@ public class Calendar extends Controller {
         event = ShiftEvent.builder()
             .allDay(true)
             .title(abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day) 
-                ? "Attività lavorativa di " +abs.absenceType.code + " di "
+                ? "Attività lavorativa di " + abs.absenceType.code + " di "
                 + abs.personDay.person.fullName() : 
-                  "Attività lavorativa di " +abs.absenceType.description + " di "
+                  "Attività lavorativa di " + abs.absenceType.description + " di "
                 + abs.personDay.person.fullName())
             .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
             .editable(false)

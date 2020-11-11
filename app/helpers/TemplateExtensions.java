@@ -111,6 +111,11 @@ public class TemplateExtensions extends JavaExtensions {
     return time.toString("HH:mm");
   }
 
+  /**
+   * Metodo statico per la formattazione dell'oggetto passato.
+   * @param obj l'oggetto da formattare
+   * @return la formattazione dell'oggetto passato.
+   */
   public static String format(Object obj) {
     if (obj instanceof LocalDate) {
       return format((LocalDate) obj);
@@ -127,6 +132,13 @@ public class TemplateExtensions extends JavaExtensions {
     return new DecimalFormat("##.### %").format(value);
   }
 
+  /**
+   * Ritorna l'applicazione del metodo getField sul campo del modello.
+   * @param <T> generico oggetto
+   * @param models generico
+   * @param fieldName il nome del campo
+   * @return la stringa corrispondente al campo dell'oggetto.
+   */
   public static <T extends GenericModel> String joinOnField(
       final Iterable<T> models, final String fieldName) {
 
@@ -139,6 +151,11 @@ public class TemplateExtensions extends JavaExtensions {
     }));
   }
 
+  /**
+   * Trasforma i campi con i message.
+   * @param fields la lista di campi
+   * @return l'applicazione del message sull'oggetto.
+   */
   public static String i18nJoin(final Iterable<Enum<?>> fields) {
     return COMMAJ.join(Iterables.transform(fields, new Function<Enum<?>, String>() {
 
@@ -150,12 +167,19 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
-   * @return la traduzione dei valori di un enum è composta da NomeSempliceEnum.valore
+   * Traduce l'enumerato.
+   * @param item l'enumerato da tradurre
+   * @return la traduzione dei valori di un enum è composta da NomeSempliceEnum.valore.
    */
   public static String label(Enum<?> item) {
     return Messages.get(item.getClass().getSimpleName() + "." + item.name());
   }
 
+  /**
+   * Formatta l'oggetto in formato stringa.
+   * @param obj l'oggetto da considerare
+   * @return la formattazione in stringa dell'oggetto passato.
+   */
   public static String label(Object obj) {
     if (obj instanceof JustifiedType) {
       return Messages.get(obj.toString());
@@ -182,6 +206,11 @@ public class TemplateExtensions extends JavaExtensions {
     return obj.toString();
   }
 
+  /**
+   * Traduce il range passato come parametro.
+   * @param obj il range da tradurre
+   * @return la traduzione in stringa del range passato come parametro.
+   */
   public static String label(Range<?> obj) {
     if (obj.isEmpty()) {
       return Messages.get("range.empty");
@@ -203,6 +232,12 @@ public class TemplateExtensions extends JavaExtensions {
     return label(label, new Object[]{});
   }
 
+  /**
+   * Traduce un oggetto.
+   * @param label la label da tradurre
+   * @param args la lista di argomenti
+   * @return l'oggetto tradotto
+   */
   public static Object label(String label, Object... args) {
     if (label.contains("%")) {
       return label;

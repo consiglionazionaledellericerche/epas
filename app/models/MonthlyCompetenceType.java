@@ -37,6 +37,10 @@ public class MonthlyCompetenceType extends BaseModel {
   @JoinColumn(name = "holidays_code", nullable = false)
   public CompetenceCode holidaysCode;
   
+  /**
+   * Transiente che ritorna i codici associati all'attività.
+   * @return la lista di codici di competenza feriale e festivo per l'attività.
+   */
   @Transient
   public List<CompetenceCode> getCodesForActivity() {
     List<CompetenceCode> list = Lists.newArrayList();
