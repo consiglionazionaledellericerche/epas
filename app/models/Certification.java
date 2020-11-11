@@ -102,6 +102,7 @@ public class Certification extends BaseModel {
   }
 
   /**
+   * Comparatore.
    * @return un Comparator che compara per fullname poi id.
    */
   public static Comparator<Certification> comparator() {

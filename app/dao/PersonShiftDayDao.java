@@ -129,7 +129,8 @@ public class PersonShiftDayDao extends DaoBase {
     final QPersonShift personShift = QPersonShift.personShift;
     return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)
         .and(personShift.beginDate.loe(LocalDate.now())
-            .andAnyOf(personShift.endDate.isNull(), personShift.endDate.goe(LocalDate.now())))).fetch();
+            .andAnyOf(personShift.endDate.isNull(), 
+                personShift.endDate.goe(LocalDate.now())))).fetch();
   }
 
   /**

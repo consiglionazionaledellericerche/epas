@@ -12,13 +12,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import models.Person;
 import models.base.MutableModel;
 import models.enumerate.ShiftSlot;
 import models.flows.enumerate.CompetenceRequestType;
+import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
 @Entity
@@ -35,50 +35,50 @@ public class CompetenceRequest extends MutableModel {
   @ManyToOne(optional = false)
   public Person person;
   
-  /**
+  /*
    * Descrizione della richiesta
    */
   public String note;
   
-  /**
+  /*
    * Destinatario della richiesta di cambio turno/reperibilità
    */
   @ManyToOne(optional = true)
   public Person teamMate;
   
-  /**
+  /*
    * L'eventuale valore da salvare
    */
   public Integer value;
   
-  /**
+  /*
    * L'eventuale anno in cui salvare la competenza
    */
   public Integer year;
   
-  /**
+  /*
    * L'eventuale mese in cui salvare la competenza
    */
   public Integer month;
   
-  /**
+  /*
    * L'eventuale data inizio da chiedere
    */
   public LocalDate beginDateToAsk;
-  /**
+  /*
    * L'eventuale data fine da chiedere
    */
   public LocalDate endDateToAsk;
-  /**
+  /*
    * L'eventuale data inizio da dare
    */
   public LocalDate beginDateToGive;
-  /**
+  /*
    * L'eventuale data fine da dare
    */
   public LocalDate endDateToGive;
   
-  /**
+  /*
    * Lo slot per cui richiedere il cambio
    */
   @Enumerated(EnumType.STRING)
