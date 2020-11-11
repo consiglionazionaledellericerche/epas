@@ -245,7 +245,11 @@ public class CompetenceRequests extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param teamMate la persona destinataria della richiesta
-   * @param day il giorno da scambiare
+   * @param beginDayToAsk il giorno iniziale da chiedere
+   * @param beginDayToGive il giorno iniziale da dare
+   * @param endDayToGive il giorno finale da dare
+   * @param endDayToAsk il giorno finale da chiedere
+   * @param type il servizio su cui chiedere il cambio
    */
   public static void save(@Required CompetenceRequest competenceRequest, int year, 
       int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
@@ -329,7 +333,8 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
 
       //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager.notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+      notificationManager
+      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
       // invio anche la mail
       notificationManager
       .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
@@ -357,9 +362,9 @@ public class CompetenceRequests extends Controller {
   }
 
   /**
-   * 
-   * @param id
-   * @param type
+   * Renderizza la form in cui viene mostrata la richiesta.
+   * @param id l'identificativo della richiesta
+   * @param type il tipo di richiesta
    */
   public static void show(long id, CompetenceRequestType type) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
@@ -371,9 +376,8 @@ public class CompetenceRequests extends Controller {
   }
   
   /**
-   * 
-   * @param id
-   * @param approval
+   * Permette l'approvazione della richiesta.
+   * @param id l'identificativo della richiesta
    */
   public static void approval(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
@@ -384,7 +388,8 @@ public class CompetenceRequests extends Controller {
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
     
     if (approved) {
-      notificationManager.sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
+      notificationManager
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
 
       flash.success("Operazione conclusa correttamente");
     } else {

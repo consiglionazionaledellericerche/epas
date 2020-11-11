@@ -45,14 +45,9 @@ import play.i18n.Messages;
 @Slf4j
 public class ReperibilityManager2 {
 
-//  private static final String REPERIBILITY_WORKDAYS = "207";
-//  private static final String REPERIBILITY_HOLIDAYS = "208";
-
   private final PersonReperibilityDayDao reperibilityDayDao;
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
-  private final CompetenceCodeDao competenceCodeDao;
-
   private final CompetenceDao competenceDao;
   private final PersonReperibilityDayDao reperibilityDao;
 
@@ -61,19 +56,17 @@ public class ReperibilityManager2 {
    * @param reperibilityDayDao il dao sui giorni di reperibilità
    * @param personDayDao il dao sui personday
    * @param personDayManager il manager coi metodi sul personday
-   * @param competenceCodeDao il dao sui codici di competenza
    * @param competenceDao il dao sulle competenze
    * @param reperibilityDao il dao sulla reperibilità
    */
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
-      CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao, 
+      CompetenceDao competenceDao, 
       PersonReperibilityDayDao reperibilityDao) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
-    this.personDayManager = personDayManager;
-    this.competenceCodeDao = competenceCodeDao;    
+    this.personDayManager = personDayManager;   
     this.competenceDao = competenceDao;
     this.reperibilityDao = reperibilityDao;
   }

@@ -61,7 +61,7 @@ public class AbsenceRequest extends MutableModel {
   @Column(name = "end_to")
   public LocalDateTime endTo;
 
-  /**
+  /*
    * Campi ore e minuti per le assenze orarie
    */
   public Integer hours;

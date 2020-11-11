@@ -99,10 +99,10 @@ public enum NotificationSubject {
         params.put("type", absenceRequest.type);
         return toUrl("AbsenceRequests.show", params);
       case COMPETENCE_REQUEST:
-         final CompetenceRequest competenceRequest = CompetenceRequest.findById(referenceId);
-         params.put("id", competenceRequest.id);
-         params.put("type", competenceRequest.type);
-         return toUrl("CompetenceRequests.show", params);
+        final CompetenceRequest competenceRequest = CompetenceRequest.findById(referenceId);
+        params.put("id", competenceRequest.id);
+        params.put("type", competenceRequest.type);
+        return toUrl("CompetenceRequests.show", params);
       case PERSON_HAS_CHANGED_OFFICE:
         //Se non c'è riferimento alla persona allora vuol dire che non è 
         //più gestita dal precedente ufficio.

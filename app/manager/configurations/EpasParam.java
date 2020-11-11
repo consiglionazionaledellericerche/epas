@@ -606,8 +606,8 @@ public enum EpasParam {
   
   
   /**
-   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte dell'eventuale
-   * responsabile del gruppo di lavoro.
+   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte 
+   * dell'eventuale responsabile del servizio di reperibilità.
    */
   CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED(
       "change_reperibility_request_reperibility_manager_approval_required",
@@ -619,7 +619,8 @@ public enum EpasParam {
       Office.class),
   
   /**
-   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte di un impiegato.
+   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità 
+   * da parte di un reperibile.
    */
   CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED(
       "change_reperibility_request_employee_approval_required",

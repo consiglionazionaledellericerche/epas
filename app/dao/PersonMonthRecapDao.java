@@ -33,7 +33,7 @@ public class PersonMonthRecapDao extends DaoBase {
    * @param person la persona per cui cercare i riepiloghi
    * @param year l'anno da cercare
    * @param month (opzionale) il mese da cercare
-   * @param hoursApproved(opzionale) se sono stati approvati
+   * @param hoursApproved (opzionale) se sono stati approvati
    * @return la lista di personMonthRecap relativa all'anno year per la persona person.
    */
   public List<PersonMonthRecap> getPersonMonthRecapInYearOrWithMoreDetails(Person person,
@@ -57,7 +57,7 @@ public class PersonMonthRecapDao extends DaoBase {
   }
 
   /**
-   * Il personMonthRecap con id passato al metodo
+   * Il personMonthRecap con id passato al metodo.
    * @param id l'identificativo del personMonthRecap
    * @return il personMonthRecap relativo all'id passato come parametro.
    */

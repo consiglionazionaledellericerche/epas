@@ -129,19 +129,19 @@ public class NotificationManager {
         verso, stamping.place, stamping.reason);
 
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      if (operation != Crud.DELETE) {
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING, stamping.id).create();
-      } else {
-        // per la notifica delle delete niente redirect altrimenti tocca
-        // andare a prelevare l'entity dallo storico
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING).create();
-      }
-    });
+        .map(uro -> uro.user).forEach(user -> {
+          if (operation != Crud.DELETE) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING, stamping.id).create();
+          } else {
+            // per la notifica delle delete niente redirect altrimenti tocca
+            // andare a prelevare l'entity dallo storico
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING).create();
+          }
+        });
   }
 
   /**
@@ -178,12 +178,12 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
-        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE, absence.id).create();
-    });
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+          || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.ABSENCE, absence.id).create();
+        });
     /*
      * Verifico se si tratta di un 661 e invio la mail al responsabile di gruppo se esiste...
      */
@@ -489,11 +489,11 @@ public class NotificationManager {
     });
 
     person.office.usersRolesOffices.stream().filter(uro -> uro.role.name.equals(role.name))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message.toString())
-      .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id)
-      .create();
-    });
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message.toString())
+          .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id)
+          .create();
+        });
   }
 
   /**
@@ -553,38 +553,38 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
-    .map(uro -> uro.user).forEach(user -> {
-      SimpleEmail simpleEmail = new SimpleEmail();
-      // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
-      if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
-        Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
-        if (!group.isPresent()) {
-          return;
-        }
-        if (!group.get().sendFlowsEmail) {
-          log.info("Non verrà inviata la mail al responsabile del gruppo {} "
-              + "poichè l'invio è stato disattivato.", user.person.fullName());
-          return;
-        }
-      }
-      try {
-        simpleEmail.addTo(user.person.email);
-      } catch (EmailException e) {
-        e.printStackTrace();
-      }
-      simpleEmail.setSubject("ePas Approvazione flusso");
-      val mailBody = createAbsenceRequestEmail(absenceRequest, user);
-      try {
-        simpleEmail.setMsg(mailBody);
-      } catch (EmailException e) {
-        e.printStackTrace();
-      }
-      Mail.send(simpleEmail);
-      log.info(
-          "Inviata email per richiesta di flusso richiesta: {}. "
-              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-              absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
-    });
+        .map(uro -> uro.user).forEach(user -> {
+          SimpleEmail simpleEmail = new SimpleEmail();
+          // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+          if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+            Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
+            if (!group.isPresent()) {
+              return;
+            }
+            if (!group.get().sendFlowsEmail) {
+              log.info("Non verrà inviata la mail al responsabile del gruppo {} "
+                  + "poichè l'invio è stato disattivato.", user.person.fullName());
+              return;
+            }
+          }
+          try {
+            simpleEmail.addTo(user.person.email);
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          simpleEmail.setSubject("ePas Approvazione flusso");
+          val mailBody = createAbsenceRequestEmail(absenceRequest, user);
+          try {
+            simpleEmail.setMsg(mailBody);
+          } catch (EmailException e) {
+            e.printStackTrace();
+          }
+          Mail.send(simpleEmail);
+          log.info(
+              "Inviata email per richiesta di flusso richiesta: {}. "
+                  + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+                  absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+        });
   }
 
   /**
@@ -731,12 +731,12 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.user).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.COMPETENCE, competence.id).create();
-    });
+        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.user).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.COMPETENCE, competence.id).create();
+        });
 
     //sendEmailAbsenceRequestConfirmation(absenceRequest);
 
@@ -912,7 +912,7 @@ public class NotificationManager {
         && competenceRequest.reperibilityManagerApproved == null) {
       for (PersonReperibility pr : competenceRequest.person.reperibility) {
         for (PersonReperibility tmPr : competenceRequest.teamMate.reperibility) {
-          if(pr.personReperibilityType.equals(tmPr.personReperibilityType)) {
+          if (pr.personReperibilityType.equals(tmPr.personReperibilityType)) {
             user = pr.personReperibilityType.supervisor.user;
           }
         }
@@ -937,7 +937,7 @@ public class NotificationManager {
     Verify.verifyNotNull(competenceRequest);
     final Person person = competenceRequest.person;
     final String template;
-    String typeOfRequest ="";
+    String typeOfRequest = "";
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova richiesta di: %s";
     } else if (Crud.UPDATE == operation) {
@@ -1084,16 +1084,16 @@ public class NotificationManager {
     message.append(String.format("\r\n per il dipendente %s", absenceRequest.person.getFullname()));
     if (dates.size() == 1) {
       message
-      .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", 
-          dates.get(0), type));
+          .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", 
+              dates.get(0), type));
     } else {
       String datesToCheck = "";
       for (LocalDate date : dates) {
         datesToCheck = datesToCheck + date.toString() + " ";
       }
       message
-      .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", 
-          datesToCheck, type));
+          .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", 
+              datesToCheck, type));
     }
 
     message.append(String.format("\r\n per il servizio %s", service));

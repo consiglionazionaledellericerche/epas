@@ -57,7 +57,7 @@ public class TeleworkDto {
   
   @Override
   public String toString() {
-    return "Id timbratura: "+ id + ", PersonDayId: " + personDayId + ", Causale: " 
+    return "Id timbratura: " + id + ", PersonDayId: " + personDayId + ", Causale: " 
         + stampType + ", Data: " + date + ", Note: " + note;
   }
 }
