@@ -23,6 +23,11 @@ public class AbsenceDto {
   private String justifiedType;
   private String note;
   
+  /**
+   * Builder del dto.
+   * @param absence l'assenza da trasformare in dto
+   * @return il dto costruito.
+   */
   public static AbsenceDto build(Absence absence) {
     return AbsenceDto.builder()
         .date(absence.date)

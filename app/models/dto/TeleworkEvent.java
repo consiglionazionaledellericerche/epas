@@ -2,11 +2,12 @@ package models.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import org.joda.time.LocalDate;
 import lombok.Builder;
 import lombok.Data;
 import models.dto.ReperibilityEvent.ReperibilityEventBuilder;
 import models.enumerate.EventColor;
+import org.joda.time.LocalDate;
+
 
 @Data
 @Builder

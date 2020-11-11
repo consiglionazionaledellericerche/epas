@@ -359,7 +359,7 @@ public class PersonManager {
    * non passato.
    * 
    * @param person l'oggetto Person da configurare con
-   *    gli attributi ed oggetti correlati opportuni.
+   *     gli attributi ed oggetti correlati opportuni.
    */
   public void properPersonCreate(Person person) {
     userManager.createUser(person);

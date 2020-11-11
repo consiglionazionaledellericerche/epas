@@ -117,7 +117,8 @@ public class Absences extends Controller {
       String absenceCode, LocalDate begin, 
       LocalDate end, Integer hours, Integer minutes) {
     Person person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, eppn, email, personPerseoId, fiscalCode).orNull();
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, 
+            eppn, email, personPerseoId, fiscalCode).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");

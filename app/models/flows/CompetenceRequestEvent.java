@@ -9,12 +9,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import org.joda.time.LocalDateTime;
 import lombok.Builder;
 import lombok.ToString;
 import models.User;
 import models.base.BaseModel;
 import models.flows.enumerate.CompetenceRequestEventType;
+import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
 @Builder

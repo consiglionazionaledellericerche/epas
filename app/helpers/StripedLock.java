@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Wrapper per gli Striped<Lock> perché non funziona
+ * Wrapper per gli Striped Lock perché non funziona
  * la @Inject nei controller di un oggetto con i generic.
  * 
  * @author cristian
