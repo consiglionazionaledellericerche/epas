@@ -43,13 +43,17 @@
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
     #{/if}
     
+    #{secure.check 'Configurations.disableDateStartMealTicket'}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.DATE_START_MEAL_TICKET) }
+   
       <p>Tramite questo parametro è possibile specificare la data in cui <strong>${configuration.office.name}</strong> 
       ha iniziato ad utilizzare i Ticket Restaurant.</p>
       <p> A partire da tale data i dipendenti inizieranno a maturare i buoni pasto.</p>
       <p><i class="fa fa-info-circle"></i> Sarà possibile definire il residuo di buoni pasto iniziale per ciascun dipendente
       modificando i loro dati iniziali da Lista Persone.</p>
+      
     #{/if}
+    #{/secure.check}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.EMAIL_TO_CONTACT) }
       <p>Tramite questo parametro è possibile specificare l'indirizzo email di risposta nelle email inviate dal sistema.</p>
@@ -60,31 +64,6 @@
       <p>Tramite questo parametro è possibile specificare se l'amministratore del personale deve essere notificato o meno,
       attraverso i banner in alto sulla barra di menu, ogni qualvolta viene effettuata una timbratura per lavoro fuori sede.</p>
       
-    #{/if}
-    
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.RECOMPUTATION_LIMIT) }
-
-      <p>   
-         L'inserimento o la modifica da parte dell'amministratore di assenze o timbrature per un dipendente 
-         impone ad epas la riesecuzione dell'algoritmo di calcolo per ottenere il nuovo stato del giorno interessato e di 
-         conseguenza di tutte le entità residuali coinvolte fino a oggi.<br><br>
-         *{ solo per cnr ... }*
-         <u>Esempio:</u> Effettuare modifiche pregresse è spesso necessario per riallineare la situazione centrale con quella
-         epas successivamente all'analisi dello schedone riepilogativo.<br><br>
-         Poichè l'algoritmo di calcolo epas è in continua evoluzione esiste la possibilità seppur remota 
-         che decisioni passate differiscano da quelle della versione attuale dell'algoritmo. 
-         <em>Questa differenza potrebbe modificare lo stato consolidato del dipendente.</em><br>
-      </p>
-      <p>
-        <br>
-        <i class="fa fa-info-circle"></i> Impostando ad esempio il valore 6, nei giorni oltre i sei mesi precedenti le decisioni inerenti <br>
-           <ul>
-             <li>le ore lavorate nel giorno</li>
-             <li>il diritto al buono pasto nel giorno</li>
-           </ul>
-           saranno non più modificabili.
-      </p>
     #{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.WORKING_OFF_SITE) }

@@ -195,18 +195,6 @@ public enum EpasParam {
       Office.class),
 
 
-
-  /**
-   * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
-   */
-  RECOMPUTATION_LIMIT("recomputation_limit",
-      EpasParamCategory.GENERAL,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.INTEGER,
-      EpasParamValueType.formatValue(6),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema.
    */
