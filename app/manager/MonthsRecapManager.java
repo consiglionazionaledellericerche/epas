@@ -89,10 +89,11 @@ public class MonthsRecapManager {
           || date.getDayOfWeek() == DateTimeConstants.SATURDAY 
           || date.getDayOfWeek() == DateTimeConstants.SUNDAY) {
         log.debug("Applico lo stile per il festivo");
-        CellStyle cs = wb.createCellStyle();
-        cs.setAlignment(CellStyle.ALIGN_CENTER);
-        cs.setFillForegroundColor(IndexedColors.RED.getIndex());
-        cell.setCellStyle(cs);
+//        CellStyle cs = wb.createCellStyle();
+//        cs.setAlignment(CellStyle.ALIGN_CENTER);
+//        cs.setFillForegroundColor(IndexedColors.RED.getIndex());
+//        cell.setCellStyle(cs);
+        cell.setCellStyle(createHoliday(wb));
         
       } else {
         cell.setCellStyle(createWorkingday(wb));
@@ -147,9 +148,9 @@ public class MonthsRecapManager {
         if (!day.personDay.absences.isEmpty() 
             && (day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19) 
             || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19bp))) {
-          cell.setCellValue("0");
+          cell.setCellValue("In sede");
         } else if (!day.personDay.stampings.isEmpty()) {
-          cell.setCellValue("1");
+          cell.setCellValue("SW");
         } else {
           cell.setCellValue("-");
         }        
@@ -217,8 +218,8 @@ public class MonthsRecapManager {
     CellStyle cs = wb.createCellStyle();
     cs.setAlignment(CellStyle.ALIGN_CENTER);
     cs.setFillForegroundColor(IndexedColors.RED.getIndex());
-
-    //cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+    cs.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+    cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
     return cs;
   }
