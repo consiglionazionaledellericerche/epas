@@ -129,7 +129,7 @@ public class MonthRecaps extends Controller {
     }
     InputStream file = null;
     try {
-      file = monthsRecapManager.buildFile(yearMonth, simplePersonList);
+      file = monthsRecapManager.buildFile(yearMonth, simplePersonList, office);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
