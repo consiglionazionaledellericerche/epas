@@ -18,9 +18,12 @@ import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.charts.ChartsManager.PersonStampingDayRecapHeader;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import models.Office;
 import models.Person;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -44,10 +47,13 @@ import org.joda.time.YearMonth;
 public class MonthsRecapManager {
 
   private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final ConfigurationManager configurationManager;
 
   @Inject
-  public MonthsRecapManager(PersonStampingRecapFactory stampingsRecapFactory) {
+  public MonthsRecapManager(PersonStampingRecapFactory stampingsRecapFactory,
+      ConfigurationManager configurationManager) {
     this.stampingsRecapFactory = stampingsRecapFactory;
+    this.configurationManager = configurationManager;
   }
 
   private final String covid19 = "COVID19";
@@ -59,7 +65,8 @@ public class MonthsRecapManager {
    * @return il file contenente le info su smart working/lavoro in sede.
    * @throws IOException eccezione di input/output
    */
-  public InputStream buildFile(YearMonth yearMonth, List<Person> personList) throws IOException {
+  public InputStream buildFile(YearMonth yearMonth, List<Person> personList, Office office) 
+      throws IOException {
     LocalDate beginDate = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
     
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -80,25 +87,15 @@ public class MonthsRecapManager {
     row.setHeightInPoints(30);
     Cell cell = row.createCell(0);
     cell.setCellValue("DIPENDENTE");
-    cell.setCellStyle(createHeader(wb));
+    cell.setCellStyle(createHeader(wb, Optional.absent(), office));
     LocalDate endDate = beginDate.dayOfMonth().withMaximumValue();
     for (int cellnum = 1; cellnum <= endDate.getDayOfMonth(); cellnum++) {
       cell = row.createCell(cellnum);
       LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), cellnum);     
-      if (DateUtility.isGeneralHoliday(Optional.of(new MonthDay(6, 17)), date) 
-          || date.getDayOfWeek() == DateTimeConstants.SATURDAY 
-          || date.getDayOfWeek() == DateTimeConstants.SUNDAY) {
-        log.debug("Applico lo stile per il festivo");
-        CellStyle cs = wb.createCellStyle();
-        cs.setAlignment(CellStyle.ALIGN_CENTER);
-        cs.setFillForegroundColor(IndexedColors.RED.getIndex());
-        cell.setCellStyle(cs);
-        
-      } else {
-        cell.setCellStyle(createWorkingday(wb));
-      }
-      cell.setCellStyle(createHeader(wb));
+
+      cell.setCellStyle(createHeader(wb, Optional.of(date), office));
       cell.setCellValue(date.dayOfWeek().getAsShortText() + "\n" + date.dayOfMonth().getAsText()); 
+      
       
     }
     int rownum = 1;
@@ -135,6 +132,25 @@ public class MonthsRecapManager {
 
   private File createFileXlsToExport(PersonStampingRecap psDto, File file, Workbook wb, Row row)
       throws IOException {
+    
+    CellStyle holiday = wb.createCellStyle();
+    holiday.setAlignment(CellStyle.ALIGN_CENTER);
+    holiday.setBorderLeft(CellStyle.VERTICAL_BOTTOM);
+    holiday.setBorderRight(CellStyle.VERTICAL_BOTTOM);
+    holiday.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+    holiday.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+    holiday.setFillPattern(CellStyle.SOLID_FOREGROUND);
+    
+    CellStyle workingDay = wb.createCellStyle();    
+    workingDay.setAlignment(CellStyle.ALIGN_CENTER);
+
+    
+    Font font = wb.createFont();
+    font.setFontHeightInPoints((short) 12);
+    CellStyle cs = wb.createCellStyle();
+    cs.setFont(font);
+    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
+    cs.setAlignment(CellStyle.ALIGN_CENTER);
     try {
       FileOutputStream out = new FileOutputStream(file);
       Cell cell = row.createCell(0);
@@ -143,13 +159,18 @@ public class MonthsRecapManager {
 
       for (PersonStampingDayRecap day : psDto.daysRecap) {
         cell = row.createCell(day.personDay.date.getDayOfMonth());
-        cell.setCellStyle(createCell(wb));
+        cell.setCellStyle(cs);
+        if (day.personDay.isHoliday) {
+          cell.setCellStyle(holiday);
+        } else {
+          cell.setCellStyle(workingDay);
+        }
         if (!day.personDay.absences.isEmpty() 
             && (day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19) 
             || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19bp))) {
-          cell.setCellValue("0");
+          cell.setCellValue("SW");
         } else if (!day.personDay.stampings.isEmpty()) {
-          cell.setCellValue("1");
+          cell.setCellValue("In sede");
         } else {
           cell.setCellValue("-");
         }        
@@ -180,8 +201,6 @@ public class MonthsRecapManager {
 
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
-    //font.setColor((short) 0xa);
-    //font.setBoldweight(Font.BOLDWEIGHT_BOLD);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
     cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
@@ -194,45 +213,31 @@ public class MonthsRecapManager {
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
-  private CellStyle createHeader(Workbook wb) {
+  private CellStyle createHeader(Workbook wb, Optional<LocalDate> date, Office office) {
 
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
-    //font.setColor((short) 0xa);
     font.setBoldweight(Font.BOLDWEIGHT_BOLD);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
     cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
     cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setBorderLeft(CellStyle.VERTICAL_BOTTOM);
+    cs.setBorderRight(CellStyle.VERTICAL_BOTTOM); 
+    if (date.isPresent()) {
+      MonthDay patron = (MonthDay) configurationManager
+          .configValue(office, EpasParam.DAY_OF_PATRON, date.get());
+      if (DateUtility.isGeneralHoliday(Optional.of(patron), date.get()) 
+          || date.get().getDayOfWeek() == DateTimeConstants.SATURDAY 
+          || date.get().getDayOfWeek() == DateTimeConstants.SUNDAY) {
+        log.debug("Applico lo stile per il festivo");        
+        cs.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        cs.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        cs.setFillPattern(CellStyle.SOLID_FOREGROUND);        
+      } 
+    }
+    
     return cs;
   }
   
-
-  /**
-   * Genera lo stile per una cella di giorno di vacanza.
-   * @param wb il workbook su cui applicare lo stile
-   * @return lo stile per una cella che identifica un giorno di vacanza.
-   */
-  private final CellStyle createHoliday(Workbook wb) {
-    CellStyle cs = wb.createCellStyle();
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
-    cs.setFillForegroundColor(IndexedColors.RED.getIndex());
-
-    //cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
-
-    return cs;
-  }
-
-  /**
-   * Genera lo stile per una cella di un giorno lavorativo.
-   * @param wb il workbook su cui applicare lo stile
-   * @return lo stile per una cella che identifica un giorno lavorativo.
-   */
-  private final CellStyle createWorkingday(Workbook wb) {
-    CellStyle cs = wb.createCellStyle();
-    Font font = wb.createFont();
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
-    cs.setFont(font);
-    return cs;
-  }
 }
