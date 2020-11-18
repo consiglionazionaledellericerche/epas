@@ -300,7 +300,8 @@ when
                                  "ReperibilityCalendar.editable",
                                  "ReperibilityCalendar.monthReperibilityApprovement",
                                  "ReperibilityCalendar.approveReperibilityInMonth",
-  								 "ReperibilityCalendar.removeApprovation")
+  								 "ReperibilityCalendar.removeApprovation",
+  								 "Reperibility.exportMonthAsPDF")
         , target == null, granted == false)
 then
  $c.grant();
@@ -321,7 +322,8 @@ when
                                  "ReperibilityCalendar.newReperibility",
                                  "ReperibilityCalendar.recap",
                                  "ReperibilityCalendar.editable",
-                                 "ReperibilityCalendar.monthReperibilityApprovement"), 
+                                 "ReperibilityCalendar.monthReperibilityApprovement",
+                                 "Reperibility.exportMonthAsPDF"), 
           target == $prt, granted == false)
 then
  $c.grant();
@@ -331,7 +333,7 @@ rule canManageReperibilityMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
@@ -347,11 +349,12 @@ rule canEditReperibilityTypeMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth(personReperibilityType == $prt)
   $c: PermissionCheck(action in ("ReperibilityCalendar.approveReperibilityInMonth",
-  								 "ReperibilityCalendar.removeApprovation")
+  								 "ReperibilityCalendar.removeApprovation",
+  								 "Reperibility.exportMonthAsPDF")
   , target == $target, granted == false)
 then
  $c.grant();
