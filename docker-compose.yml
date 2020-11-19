@@ -61,6 +61,7 @@ services:
       #### Autenticazione LDAP ####
       #- LDAP_LOGIN=true                       # default: false. Impostare a true per attivare l'autenticazione tramite LDAP
       #- LDAP_URL=${LDAP_URL}                  # url del server LDAP, per esempio ldap://ldap.cnr.it:389
+      #- LDAP_STARTTLS=${LDAP_STARTTLS}        # default: false. Se impostato a true attiva la connessione cifrata tramite il protocollo starttls
       #      - LDAP_TIMEOUT=${LDAP_TIMEOUT}          # default: 1000. Time in millisecondi della connessione LDAP.
       #- LDAP_DN_BASE=${LDAP_DN_BASE}          # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it
       #      - LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.
