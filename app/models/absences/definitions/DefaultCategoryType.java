@@ -17,7 +17,7 @@ public enum DefaultCategoryType {
   MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
   MISSIONE_CNR_ESTERO("Missioni CNR Estero", 2, DefaultTab.MISSIONE), 
   FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI), 
-  ESENZIONE_COVID19("Esenzione da lavoro causa COVID19", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
+  //ESENZIONE_COVID19("Esenzione da lavoro causa COVID19", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
 
   ASTENSIONE_POSTPARTUM("Astensione post partum", 5, DefaultTab.CONGEDI_PARENTALI), 
