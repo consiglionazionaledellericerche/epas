@@ -48,6 +48,8 @@ public class LdapService {
    * @return l'email dell'utente se autenticato e se l'email è presente.
    */
   public Optional<LdapUser> authenticate(String username, String password) {
+    log.info("Autenticazione LDAP in corso per username {}. LdapUrl = {}. StartTLS = {}", 
+        username, ldapUrl, ldapStartTls);
     val authEnv = new Hashtable<String, String>();
 
     String usernameForBind = username;
@@ -57,14 +59,13 @@ public class LdapService {
 
     String dn = bindWithOnlyUid
         ? usernameForBind : ldapUniqueIdentifier + "=" + usernameForBind + "," + baseDn;
-
+    log.info("DN utilizzato per il login: {}", dn);
+    
     authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + timeout * 1000);
 
     authEnv.put(Context.PROVIDER_URL, ldapUrl);
     authEnv.put(Context.SECURITY_AUTHENTICATION, "none");
-    //authEnv.put(Context.SECURITY_PRINCIPAL, dn);
-    //authEnv.put(Context.SECURITY_CREDENTIALS, password);
 
     Optional<LdapUser> ldapUser = Optional.absent(); 
 
@@ -72,7 +73,7 @@ public class LdapService {
     ctrls.setReturningAttributes(
         new String[]{ldapUniqueIdentifier, "givenName", "sn", "mail",
             getEppnAttributeName()});
-    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);   
 
     try {
       LdapContext authContext = new InitialLdapContext(authEnv, null);
