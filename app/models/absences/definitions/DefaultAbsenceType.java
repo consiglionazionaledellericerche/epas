@@ -409,7 +409,7 @@ public enum DefaultAbsenceType {
   A_ESENZ19("ESENZ19",
       "esenzione dal servizo per Covid-19", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, true, true),
+      Sets.newHashSet(), null, new LocalDate(2020, 11, 1), true, true),
 
   A_37("37", "ferie anno precedente (dopo il 31/8)", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
@@ -447,7 +447,7 @@ public enum DefaultAbsenceType {
       + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 
       0, true, false, 0, null, Sets.newHashSet(), null, null, false, true),
 
-  A_COVID50("COVID50", "Congedo parentale straordinario per un massimo di  30 gg. lavorativi.", 
+  A_COVID50("COVID50", "Congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
       Sets.newHashSet(), null, null, false, true), 
   
@@ -1601,17 +1601,17 @@ public enum DefaultAbsenceType {
       null, false, true),
 
   A_35R("35R", "dottorato di ricerca retribuito", false, ImmutableSet.of(JustifiedTypeName.all_day),
-      0, false, false, 0, null, Sets.newHashSet(), null, null, false, true),
+      0, true, false, 0, null, Sets.newHashSet(), null, null, false, true),
 
-  A_62("62", "distacco sindacale", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
+  A_62("62", "distacco sindacale", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true,
       false, 0, null, Sets.newHashSet(), null, null, false, true),
 
   A_62A("62A", "aspettativa sindacale non retribuita", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true),
 
   A_62D("62D", "perm. sind. cumul. sotto forma distac.", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true),
 
   A_50("50", "aspettativa per ricongiungimento familiare all'estero", false,
