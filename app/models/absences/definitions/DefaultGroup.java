@@ -114,9 +114,9 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
   
-  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, null,
-      null, false, false), 
+//  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
+//      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, null,
+//      null, false, false), 
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -174,15 +174,16 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_6, DefaultTakable.T_25, DefaultComplation.C_25, DefaultGroup.G_24,
       false, true), 
-  G_COVID50("COVID50 - Congedo parentale straordinario per un massimo di  15 gg. lavorativi.",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.child1_0_12, DefaultTakable.T_COVID50, null, DefaultGroup.G_25,
-      false, true), 
+  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_COVID50, null, null,
+      false, true),   
+  
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
-      "23/25/24 (+COVID50) - Astensione facoltativa post partum primo figlio",
+      "23/25/24 - Astensione facoltativa post partum primo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_23, DefaultComplation.C_23,
-      DefaultGroup.G_COVID50, false, true),
+      DefaultGroup.G_25, false, true),
   
 
 
