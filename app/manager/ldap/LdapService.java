@@ -62,27 +62,33 @@ public class LdapService {
     authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + timeout * 1000);
 
     authEnv.put(Context.PROVIDER_URL, ldapUrl);
-    authEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-    authEnv.put(Context.SECURITY_PRINCIPAL, dn);
-    authEnv.put(Context.SECURITY_CREDENTIALS, password);
+    authEnv.put(Context.SECURITY_AUTHENTICATION, "none");
+    //authEnv.put(Context.SECURITY_PRINCIPAL, dn);
+    //authEnv.put(Context.SECURITY_CREDENTIALS, password);
 
     Optional<LdapUser> ldapUser = Optional.absent(); 
 
-    try {
-      SearchControls ctrls = new SearchControls();
-      ctrls.setReturningAttributes(
-          new String[]{ldapUniqueIdentifier, "givenName", "sn", "mail",
-              getEppnAttributeName()});
-      ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    SearchControls ctrls = new SearchControls();
+    ctrls.setReturningAttributes(
+        new String[]{ldapUniqueIdentifier, "givenName", "sn", "mail",
+            getEppnAttributeName()});
+    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
+    try {
       LdapContext authContext = new InitialLdapContext(authEnv, null);
+
       StartTlsResponse tls = null;
-      
+
       if (ldapStartTls) {
         // Start TLS
+        log.info("Starting TLS...");
         tls = (StartTlsResponse) authContext.extendedOperation(new StartTlsRequest());
         tls.negotiate();
+        log.info("....Negoziazione TLS avvenuta");
       }
+      authContext.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
+      authContext.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
+      authContext.addToEnvironment(Context.SECURITY_CREDENTIALS, password);     
       
       NamingEnumeration<SearchResult> answers =
           authContext.search(baseDn, "(" + ldapUniqueIdentifier + "=" + username + ")", ctrls);
