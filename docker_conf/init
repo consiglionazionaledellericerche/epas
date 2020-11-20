@@ -304,6 +304,8 @@ LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}
 LDAP_BIND_USE_ONLY_UID=${LDAP_BIND_USE_ONLY_UID:-false}
 LDAP_UNIQUE_IDENTIFIER=${LDAP_UNIQUE_IDENTIFIER:-uid}
 LDAP_UNIQUE_IDENTIFIER_POSTFIX=${LDAP_UNIQUE_IDENTIFIER_POSTFIX}
+LDAP_ADMIN_PRINCIPAL=${LDAP_ADMIN_PRINCIPAL}
+LDAP_ADMIN_CREDENTIALS=${LDAP_ADMIN_CREDENTIALS}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
@@ -311,6 +313,16 @@ if [ ${LDAP_LOGIN} = "true" ]; then
   sed 's#{{LDAP_URL}}#'"${LDAP_URL}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_STARTTLS}}#'"${LDAP_STARTTLS}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_TIMEOUT}}#'"${LDAP_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
+  if [ -z "${LDAP_ADMIN_PRINCIPAL}" ]; then
+    sed -n '/LDAP_ADMIN_PRINCIPAL/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{LDAP_ADMIN_PRINCIPAL}}#'"${LDAP_ADMIN_PRINCIPAL}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+  if [ -z "${LDAP_ADMIN_CREDENTIALS}" ]; then
+    sed -n '/LDAP_ADMIN_CREDENTIALS/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{LDAP_ADMIN_CREDENTIALS}}#'"${LDAP_ADMIN_CREDENTIALS}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
   sed 's#{{LDAP_DN_BASE}}#'"${LDAP_DN_BASE}"'#' -i ${APP_HOME}/conf/prod.conf
   sed 's#{{LDAP_LOGIN_RETURN}}#'"${LDAP_LOGIN_RETURN}"'#' -i ${APP_HOME}/conf/prod.conf    
   if [ -z "${LDAP_EPPN_ATTRIBUTE_NAME}" ]; then
