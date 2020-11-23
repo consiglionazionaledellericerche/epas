@@ -33,12 +33,12 @@ public class LdapService {
       Boolean.parseBoolean(Play.configuration.getProperty("ldap.startTls", "false"));
 
   private static final String adminPrincipal = 
-      Play.configuration.getProperty("ldap.admin.principal");
+      Play.configuration.getProperty("ldap.bind.dn");
   private static final String adminCredentials = 
-      Play.configuration.getProperty("ldap.admin.credentials");
+      Play.configuration.getProperty("ldap.bind.credentials");
   private static final String authenticateUserSearchDn = 
-      Play.configuration.getProperty("ldap.authenticate.user.searchDn", "o=cnr,c=it");
-  
+      Play.configuration.getProperty("ldap.authenticate.user.search.dn");
+
   public static final String ldapUniqueIdentifier =
       Play.configuration.getProperty("ldap.uniqueIdentifier", "uid");
 
@@ -62,7 +62,7 @@ public class LdapService {
    * @return l'utente Ldap con i suoi attributi
    */
   public Optional<LdapUser> authenticate(String username, String password) {
-    log.info("LDAP authentication -> autenticazione LDAP in corso per username {}. "
+    log.debug("LDAP authentication -> autenticazione LDAP in corso per username {}. "
         + "LdapUrl = {}. StartTLS = {}, adminPrincipal = {}, adminCredentials = {}", 
         username, ldapUrl, ldapStartTls, adminPrincipal, adminCredentials);
 
@@ -76,7 +76,7 @@ public class LdapService {
     // Se è impostato un utente LDAP amministratore la prima connessione viene
     // effettuata con questo utente.
     if (adminPrincipal != null && adminCredentials != null) {
-      log.info("LDAP authentication -> Effettuo la prima connessione LDAP con "
+      log.debug("LDAP authentication -> Effettuo la prima connessione LDAP con "
           + "utente admin = {}", adminPrincipal);
 
       val authAdminEnv = baseAuthEnv();
@@ -169,13 +169,11 @@ public class LdapService {
       startTlsIfNecessary(authContext);
       addAuthInfo(authContext, principal, password);
 
-      val ldapSearchResult = 
-          authContext.search(
-              authenticateUserSearchDn, null);
+      // Se la search non solleva un'eccezione allora
+      // l'utente è autenticato
+      authContext.search(authenticateUserSearchDn, null);
       
-      if (ldapSearchResult.hasMoreElements()) {
-        authenticated = true;
-      }
+      authenticated = true;
       log.info("LDAP authentication -> LDAP Authentication Success for dn={}", principal);
        
     } catch (AuthenticationException authEx) {
@@ -259,10 +257,10 @@ public class LdapService {
     StartTlsResponse tls = null;
     if (ldapStartTls) {
       // Start TLS
-      log.info("LDAP authentication -> starting TLS ...");
+      log.trace("LDAP authentication -> starting TLS ...");
       tls = (StartTlsResponse) authContext.extendedOperation(new StartTlsRequest());
       tls.negotiate();
-      log.info("LDAP authentication -> ....negoziazione TLS avvenuta");
+      log.trace("LDAP authentication -> ....negoziazione TLS avvenuta");
       return Optional.of(tls);
     }
     return Optional.absent();
@@ -298,12 +296,12 @@ public class LdapService {
       return Optional.absent();
     }
     SearchResult result = ldapSearchResult.nextElement();
-    log.info("LDAP authentication -> found user: {}", result.getNameInNamespace());
+    log.debug("LDAP authentication -> found user: {}", result.getNameInNamespace());
     return Optional.of(
         LdapUser.create(
             result.getNameInNamespace(), result.getAttributes(), getEppnAttributeName()));
   }
-  
+
   /**
    * Mappa con l'Environment di base comune.
    * @return una mappa con l'Environment di base comune per le connessioni LDAP
@@ -340,7 +338,7 @@ public class LdapService {
 
     String dn = bindWithOnlyUid
         ? usernameForBind : ldapUniqueIdentifier + "=" + usernameForBind + "," + baseDn;
-    log.info("LDAP authentication -> DN dell'utente utilizzato per il login: {}", dn);
+    log.debug("LDAP authentication -> DN dell'utente utilizzato per il login: {}", dn);
     return dn;
   }
   
