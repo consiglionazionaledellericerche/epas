@@ -18,8 +18,6 @@ import lombok.ToString;
 public class LdapUser {
 
   private String uid;
-  private String givenName;
-  private String sn;
   private String mail;
   private String eppn;
   
@@ -36,8 +34,6 @@ public class LdapUser {
       throws NamingException {    
     return new LdapUser(
         attributes.get(LdapService.ldapUniqueIdentifier).get().toString(), 
-        attributes.get("givenName") != null ? attributes.get("givenName").get().toString() : null, 
-        attributes.get("sn") != null ? attributes.get("sn").get().toString() : null, 
         attributes.get("mail") != null ? attributes.get("mail").get().toString() : null,
         attributes.get(eppnAttributeName) != null 
           ? attributes.get(eppnAttributeName).get().toString() : null);

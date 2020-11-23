@@ -187,7 +187,7 @@ public class LdapService {
   private SearchControls searchControls() {
     SearchControls ctrls = new SearchControls();
     ctrls.setReturningAttributes(
-        new String[]{ldapUniqueIdentifier, "givenName", "sn", "mail",
+        new String[]{ldapUniqueIdentifier, "mail",
             getEppnAttributeName()});
     ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE); 
     return ctrls;
