@@ -66,9 +66,12 @@ services:
       #- LDAP_DN_BASE=${LDAP_DN_BASE}          # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it
       ##- LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.
       ##- LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}  # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.      
-      ## I due parametri successivi sono da impostare solo nel caso sia necessario effettuare la prima connessione ad LDAP con un utente privilegiato.
-      #- LDAP_ADMIN_PRINCIPAL=${LDAP_ADMIN_PRINCIPAL}      # Eventuale DN dell'utente LDAP privilegato
-      #- LDAP_ADMIN_CREDENTIALS=${LDAP_ADMIN_CREDENTIALS}  # Eventuale password dell'utente LDAP privilegato
+      ### I due parametri successivi sono da impostare solo nel caso sia necessario effettuare la prima connessione ad LDAP con un utente privilegiato.
+      ##- LDAP_BIND_DN=${LDAP_BIND_DN}                                           # Eventuale DN dell'utente LDAP privilegato
+      ##- LDAP_BIND_CREDENTIALS=${LDAP_BIND_CREDENTIALS}                         # Eventuale password dell'utente LDAP privilegato
+      ##- LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}   # Da utilizzare solo è presente un LDAP_BIND_DN. L'utente viene cercato su LDAP con 
+                                                                                 # l'utente amministratore e poi verificata l'autenticazione facendo una search LDAP 
+                                                                                 # con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it
       #### Invio Segnalazioni via email
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
