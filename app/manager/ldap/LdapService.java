@@ -36,6 +36,8 @@ public class LdapService {
       Play.configuration.getProperty("ldap.admin.principal");
   private static final String adminCredentials = 
       Play.configuration.getProperty("ldap.admin.credentials");
+  private static final String authenticateUserSearchDn = 
+      Play.configuration.getProperty("ldap.authenticate.user.searchDn", "o=cnr,c=it");
   
   public static final String ldapUniqueIdentifier =
       Play.configuration.getProperty("ldap.uniqueIdentifier", "uid");
@@ -69,6 +71,8 @@ public class LdapService {
     LdapContext authAdminContext = null;
     Optional<StartTlsResponse> tlsAdmin = Optional.absent();
 
+    Optional<LdapUser> ldapUser = Optional.absent();
+    
     // Se è impostato un utente LDAP amministratore la prima connessione viene
     // effettuata con questo utente.
     if (adminPrincipal != null && adminCredentials != null) {
@@ -89,9 +93,35 @@ public class LdapService {
             adminPrincipal, username, e);
         return Optional.absent();
       }
-    }
+      
+      // Per l'autenticazione nell'LDAP del CNR è necessario effettuare una 
+      // search come utente admin per trovare l'utente e poi una search in un 
+      // contesto più largo.
+      if (authenticateUserSearchDn != null) {
+        try {
+          ldapUser = searchUserbyAdmin(authAdminContext, username);
+          if (!ldapUser.isPresent()) {
+            log.info("LDAP authentication -> username {} not found on LDAP", username);
+            return Optional.absent();
+          }
+        } catch (NamingException e) {
+          log.error("LDAP authentication -> something went wrong during LDAP "
+              + "admin search for user {}", username);
+          return Optional.absent();
+        }
+        // Verifica dell'autenticazione utente tramite una search generica nel contesto 
+        // dell'organizzazione (quello generico, non quello specifico dei dipendenti).
+        if (!authenticateUserByGenericSearch(ldapUser.get().getPrincipal(), password)) {
+          ldapUser = Optional.absent();
+        }
+      } else {
+        ldapUser = authenticateUser(username, password);
+      }
 
-    val ldapUser = authenticateUser(username, password);
+    // questo è il caso senza una pre-autenticazione come utente admin.
+    } else {
+      ldapUser = authenticateUser(username, password);
+    }
 
     try {
       // Le due close successive sono solo nel caso ci sia autenticati 
@@ -111,6 +141,64 @@ public class LdapService {
     return ldapUser;
   }
 
+  /**
+   * Effettua la ricerca dell'utente nel DN dove sono presenti gli utenti.
+   * La ricerca deve essere effettuata tramite il context dove si è autenticati com
+   * admin.
+   */
+  private Optional<LdapUser> searchUserbyAdmin(LdapContext adminAuthContext, String username) 
+      throws NamingException {
+    val ldapSearchResult = 
+        adminAuthContext.search(
+            baseDn, String.format("(%s=%s)", ldapUniqueIdentifier, username), 
+            searchControls());
+    return userFromSearchResults(username, ldapSearchResult);
+  }
+  
+  private boolean authenticateUserByGenericSearch(String principal, String password) {
+    LdapContext authContext = null;
+    Optional<StartTlsResponse> tls = Optional.absent();
+    
+    val authEnv = baseAuthEnv();
+    
+    boolean authenticated = false;
+    
+    try {
+      authContext = new InitialLdapContext(authEnv, null);    
+
+      startTlsIfNecessary(authContext);
+      addAuthInfo(authContext, principal, password);
+
+      val ldapSearchResult = 
+          authContext.search(
+              authenticateUserSearchDn, null);
+      
+      if (ldapSearchResult.hasMoreElements()) {
+        authenticated = true;
+      }
+      log.info("LDAP authentication -> LDAP Authentication Success for dn={}", principal);
+       
+    } catch (AuthenticationException authEx) {
+      log.info("LDAP authentication -> Authentication failed for dn={}",
+          principal, authEx);
+    } catch (Exception ex) {
+      log.error("LDAP authentication -> something went wrong during LDAP authentication "
+          + "for dn = {}", principal, ex);
+    } finally {
+      try {
+        if (tls.isPresent()) {
+          tls.get().close();
+        }
+        if (authContext != null) {
+          authContext.close();
+        }
+      } catch (Exception e) {
+        log.error("LDAP authentication -> something went wront during LDAP connection closing");
+      }
+    }
+    return authenticated;
+  }
+  
   /**
    * Effettua una ricerca dell'utente su LDAP effettuando la query con le
    * credenziali dell'utente per verificare che siano corrispondenti a quelle
@@ -143,6 +231,7 @@ public class LdapService {
               searchControls());
 
       ldapUser = userFromSearchResults(username, ldapSearchResult);
+      log.info("LDAP authentication -> LDAP Authentication Success for {}", username);
 
     } catch (AuthenticationException authEx) {
       log.info("LDAP authentication -> Authentication failed for {}. dn={}",
@@ -208,11 +297,11 @@ public class LdapService {
           ldapUniqueIdentifier, username, baseDn);
       return Optional.absent();
     }
-    log.info("LDAP authentication -> LDAP Authentication Success for {}", username);
     SearchResult result = ldapSearchResult.nextElement();
-
-    return Optional.of(LdapUser.create(result.getAttributes(), getEppnAttributeName()));
-
+    log.info("LDAP authentication -> found user: {}", result.getNameInNamespace());
+    return Optional.of(
+        LdapUser.create(
+            result.getNameInNamespace(), result.getAttributes(), getEppnAttributeName()));
   }
   
   /**
