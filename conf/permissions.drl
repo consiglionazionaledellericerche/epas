@@ -698,6 +698,9 @@ when
      	"Persons.changePassword",
      	"Persons.savePassword",
      	"Persons.resetPassword",
+     	
+     	/* Esportazione excel*/
+     	"Charts.excelFile",
 
      	/* Stampa cartellino */
      	"PrintTags.showTag",

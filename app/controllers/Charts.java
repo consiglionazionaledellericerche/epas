@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -23,6 +24,8 @@ import manager.recaps.charts.RenderResult;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+import models.Role;
+import models.User;
 import models.exports.PersonOvertime;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
@@ -238,6 +241,18 @@ public class Charts extends Controller {
 
     render(personList, date, office, forAll, onlyMission);
   }
+  
+  /**
+   * Ritorna la schermata di richiesta dell'export periodico.
+   */
+  public static void excelFile(int year, int month) {
+    User user = Security.getUser().get();
+    notFoundIfNull(user);
+    LocalDate date = new LocalDate(year, month, 1);
+    boolean onlyMission = true;
+    Office office = user.person.office;
+    render(date, onlyMission, office);
+  }
 
 
   /**
@@ -253,7 +268,11 @@ public class Charts extends Controller {
       @Required ExportFile exportFile, boolean forAll, boolean onlyMission,
       @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
-    rules.checkIfPermitted(office);
+    
+    if (Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      rules.checkIfPermitted(office);
+    }
+    
     
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate", "La data di fine non può precedere la data di inizio!");      
