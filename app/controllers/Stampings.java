@@ -57,7 +57,6 @@ import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
