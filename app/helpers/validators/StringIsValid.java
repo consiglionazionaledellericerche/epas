@@ -1,15 +1,15 @@
 package helpers.validators;
 
-import lombok.extern.slf4j.Slf4j;
-import models.Stamping;
 import play.data.validation.Check;
-import play.data.validation.Validation;
 
 public class StringIsValid extends Check {
 
   @Override
   public boolean isSatisfied(Object validatedObject, Object value) {
 
+    if (value == null) {
+      return true;
+    }    
     if (!(value instanceof String)) {
       return false;
     }
