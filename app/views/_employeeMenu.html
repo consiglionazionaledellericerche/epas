@@ -10,6 +10,7 @@
   'PersonMonths.trainingHours',
   'PersonMonths.hourRecap',
   'MealTickets.mealTickets',
+  'Charts.excelFile',
   'PrintTags.showTag',
   'Persons.changePassword',
   'Absences.absencesVisibleForEmployee'] /}
@@ -105,6 +106,10 @@
       <li class="divider"></li>
       #{/secure.check}
 
+	  #{secure.li @Charts.excelFile(session.get("yearSelected"), session.get("monthSelected"))}
+	  <i class="fa fa-print" aria-hidden="true"></i>
+	  #{/secure.li}
+      
       #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}

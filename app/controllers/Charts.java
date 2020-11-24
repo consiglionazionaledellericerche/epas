@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -23,6 +24,8 @@ import manager.recaps.charts.RenderResult;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+import models.Role;
+import models.User;
 import models.exports.PersonOvertime;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
@@ -234,9 +237,21 @@ public class Charts extends Controller {
     List<Person> personList = personDao.list(
         Optional.<String>absent(), set, false, date, 
         date.dayOfMonth().withMaximumValue(), true).list();
-    
+
 
     render(personList, date, office, forAll, onlyMission);
+  }
+
+  /**
+   * Ritorna la schermata di richiesta dell'export periodico.
+   */
+  public static void excelFile(int year, int month) {
+    User user = Security.getUser().get();
+    notFoundIfNull(user);
+    LocalDate date = new LocalDate(year, month, 1);
+    boolean onlyMission = true;
+    Person person = user.person;
+    render(date, onlyMission, person);
   }
 
 
@@ -253,19 +268,20 @@ public class Charts extends Controller {
       @Required ExportFile exportFile, boolean forAll, boolean onlyMission,
       @Required LocalDate beginDate, @Required LocalDate endDate, Long officeId) {   
     Office office = officeDao.getOfficeById(officeId);
+
     rules.checkIfPermitted(office);
-    
+
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate", "La data di fine non può precedere la data di inizio!");      
     }
     if (Validation.hasErrors()) {      
-      
+
       Set<Office> set = Sets.newHashSet(office);
       LocalDate date = LocalDate.now();
       List<Person> personList = personDao.list(
           Optional.<String>absent(), set, false, beginDate, 
           endDate, true).list();
-      
+
       render("@listForExcelFile", office, exportFile,
           date, personList, forAll, beginDate, endDate);
     }
@@ -278,9 +294,45 @@ public class Charts extends Controller {
       listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
       log.error("Errore durante l'esportazione del tempo al lavoro", ex);
     }
-    
+
     renderBinary(file, "export.zip", false);
-    
+
+  }
+
+  /**
+   * Metodo che permette la stampa di un resoconto periodico contenente le informazioni utili
+   * alla rendicontazione.
+   * @param exportFile il formato dell'esportazione
+   * @param onlyMission se si considera il tempo della missione
+   * @param beginDate la data di inizio periodo
+   * @param endDate la data di fine periodo
+   * @param personId l'identificativo della persona
+   */
+  public static void exportPersonalTimesheetSituation(@Required ExportFile exportFile, 
+      boolean onlyMission, @Required LocalDate beginDate, @Required LocalDate endDate, 
+      Long personId) {
+    Person person = personDao.getPersonById(personId);
+    if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
+      Validation.addError("endDate", "La data di fine non può precedere la data di inizio!");      
+    }
+    if (Validation.hasErrors()) {      
+      
+      LocalDate date = LocalDate.now();
+      render("@excelFile", exportFile,
+          date, onlyMission, beginDate, endDate, person);
+    }
+    InputStream file = null;
+    try {
+      List<Long> peopleIds = Lists.newArrayList();
+      peopleIds.add(personId);
+      file = chartsManager
+          .buildFile(person.office, false, onlyMission, peopleIds, beginDate, endDate, exportFile);
+    } catch (ArchiveException | IOException ex) {
+      flash.error("Errore durante l'esportazione del tempo al lavoro");
+      excelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+      log.error("Errore durante l'esportazione del tempo al lavoro", ex);
+    }
+    renderBinary(file, "export.zip", false);
   }
 
   public enum ExportFile {
