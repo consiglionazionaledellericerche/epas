@@ -701,6 +701,7 @@ when
      	
      	/* Esportazione excel*/
      	"Charts.excelFile",
+     	"Charts.exportPersonalTimesheetSituation",
 
      	/* Stampa cartellino */
      	"PrintTags.showTag",

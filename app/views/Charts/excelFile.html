@@ -14,10 +14,10 @@
   	#{/alert}
 
 
-#{form @Charts.exportTimesheetSituation(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+#{form @Charts.exportPersonalTimesheetSituation(), method:'POST', autocomplete:false, class:'form form-horizontal'}
   	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
   	<input type="hidden" name="year" value="${date.getYear()}"/>
-  	<input type="hidden" name="officeId" value="${office.id}"/>
+  	<input type="hidden" name="personId" value="${person.id}"/>
 	
   	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
 		value:exportFile, byEquals:true /}
