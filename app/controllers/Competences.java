@@ -1482,12 +1482,15 @@ public class Competences extends Controller {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
     rules.checkIfPermitted(type.office);
-    List<PersonReperibility> people = type.personReperibilities.stream()
+    List<CompetenceCode> codesList = type.monthlyCompetenceType.getCodesForActivity();
+    List<PersonCompetenceCodes> people = competenceCodeDao
+        .listByCodesAndOffice(codesList, type.office, Optional.fromNullable(LocalDate.now()));
+    List<PersonReperibility> linkedPeople = type.personReperibilities.stream()
         .filter(pr -> pr.startDate != null 
         && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
-    render(people, type, date);
+    render(people, type, date, linkedPeople);
   }
 
   /**
@@ -1502,25 +1505,25 @@ public class Competences extends Controller {
     }
 
     rules.checkIfPermitted(type.office);
-    List<PersonReperibility> people = type.personReperibilities.stream()
+    
+    List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
+    List<PersonCompetenceCodes> people = competenceCodeDao
+        .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()));
+    List<PersonReperibility> linkedPeople = type.personReperibilities.stream()
         .filter(pr -> pr.startDate != null 
         && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
-
+    
     if (Validation.hasErrors()) {
+      
       response.status = 400;     
       LocalDate date = LocalDate.now();
-      render("@manageReperibility", type, date, people);
+      render("@manageReperibility", type, date, people, linkedPeople);
     }
     type.save();
-    List<PersonReperibility> personAssociated = 
-        reperibilityDao.byOffice(type.office, LocalDate.now());
 
-    List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
-
-    List<Person> available = competenceCodeDao
-        .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
-        .stream().filter(e -> (personAssociated.stream()
+    List<Person> available = people
+        .stream().filter(e -> (linkedPeople.stream()
             .noneMatch(d -> d.person.equals(e.person))))        
         .map(pcc -> pcc.person).distinct()
         .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
