@@ -27,22 +27,22 @@ services:
     environment:
       - VIRTUAL_HOST=${HOST_NAME}
       #- PROTOCOL=https                         # default: http  -- (http,https)
-      #      - EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
+      ##- EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
       #- JOBS_ACTIVE=true                       # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
-      #      - SKIP_IP_CHECK=                        # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
+      #- SKIP_IP_CHECK=                         # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
       - FLOWS_ACTIVE=true
-      #      - URL_ATTESTATI=                        # default: https://attestativ2.rm.cnr.it
-      #      - URL_USER=
-      #      - URL_PASS=
+      #- URL_ATTESTATI=                         # default: https://attestativ2.rm.cnr.it
+      #- URL_USER=
+      #- URL_PASS=
       ######## LOGS ###########
-      #      - LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
-      - APPENDERS=file                        # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog
-      #      - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull'appender graylog2. default: null
-      #      - GRAYLOG_PORT=                         # Opzionale. default: 3514
-      #      - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST
+      #- LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
+      - APPENDERS=file                         # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog
+      #- GRAYLOG_HOST=                         # Obbligatorio se attivato log sull'appender graylog2. default: null
+      #- GRAYLOG_PORT=                         # Opzionale. default: 3514
+      #- GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST
       ###### Container ########
-      #      - BACKUP_CRON=                          # default: disattivato. (utilizzare il format del crontab. Es. 0 0 * * *)
-      #      - CERT_NAME=                            # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
+      #- BACKUP_CRON=                          # default: disattivato. (utilizzare il format del crontab. Es. 0 0 * * *)
+      #- CERT_NAME=                            # default: valore specificato in VIRTUAL_HOST -- Specifica un nome diverso per i file del certificato SSL
       - TZ=Europe/Rome
       #### Connessione DB ####
       - DB_HOST=${DB_HOST}                     # default: indirizzo assegnato al container postgres linkato
@@ -53,7 +53,7 @@ services:
       #### server SMTP ####
       - SMTP_HOST=${SMTP_HOST}                # default: smtp.cnr.it
       #- SMTP_PORT=${SMTP_PORT}                # default: 25 se SMTP_CHANNEL è impostato clear o starttls; 465 se impostato su ssl
-#      - SMTP_CHANNEL=${SMTP_CHANNEL}          # default: clear -- (clear, ssl ,starttls)
+      ##- SMTP_CHANNEL=${SMTP_CHANNEL}          # default: clear -- (clear, ssl ,starttls)
       #- SMTP_FROM=${SMTP_FROM}                # default: epas@cnr.it -- Indirizzo utilizzato per il campo mittente delle mail inviate dal sistema
       #- SMTP_PROTOCOL=${SMTP_PROTOCOL}        # default: smtp -- (smtp, smtps)
       #- SMTP_USER=${SMTP_USER}                # user utilizzato per l'autenticazione sul server smtp (se necessario)
@@ -61,10 +61,17 @@ services:
       #### Autenticazione LDAP ####
       #- LDAP_LOGIN=true                       # default: false. Impostare a true per attivare l'autenticazione tramite LDAP
       #- LDAP_URL=${LDAP_URL}                  # url del server LDAP, per esempio ldap://ldap.cnr.it:389
-      #      - LDAP_TIMEOUT=${LDAP_TIMEOUT}          # default: 1000. Time in millisecondi della connessione LDAP.
+      #- LDAP_STARTTLS=${LDAP_STARTTLS}        # default: false. Se impostato a true attiva la connessione cifrata tramite il protocollo starttls
+      ##- LDAP_TIMEOUT=${LDAP_TIMEOUT}          # default: 1000. Time in millisecondi della connessione LDAP.
       #- LDAP_DN_BASE=${LDAP_DN_BASE}          # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it
-      #      - LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.
-      #      - LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}  # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.
+      ##- LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.
+      ##- LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}  # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.      
+      ### I due parametri successivi sono da impostare solo nel caso sia necessario effettuare la prima connessione ad LDAP con un utente privilegiato.
+      ##- LDAP_BIND_DN=${LDAP_BIND_DN}                                           # Eventuale DN dell'utente LDAP privilegato
+      ##- LDAP_BIND_CREDENTIALS=${LDAP_BIND_CREDENTIALS}                         # Eventuale password dell'utente LDAP privilegato
+      ##- LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}   # Da utilizzare solo è presente un LDAP_BIND_DN. L'utente viene cercato su LDAP con 
+                                                                                 # l'utente amministratore e poi verificata l'autenticazione facendo una search LDAP 
+                                                                                 # con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it
       #### Invio Segnalazioni via email
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
