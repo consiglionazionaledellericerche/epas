@@ -17,11 +17,10 @@ import lombok.ToString;
 @ToString
 public class LdapUser {
 
-  private String uid;
-  private String givenName;
-  private String sn;
-  private String mail;
-  private String eppn;
+  private final String uid;
+  private final String mail;
+  private final String eppn;
+  private final String principal;
   
   /**
    * Builder from LDAP attributes.
@@ -32,14 +31,13 @@ public class LdapUser {
    * @return un LDAPUser con i valori estratti dagli attributi passati.
    * @throws NamingException sollevata nel caso non ci siano tutti gli attributi LDAP richiesti
    */
-  public static LdapUser create(Attributes attributes, String eppnAttributeName) 
+  public static LdapUser create(String principal, Attributes attributes, String eppnAttributeName) 
       throws NamingException {    
     return new LdapUser(
         attributes.get(LdapService.ldapUniqueIdentifier).get().toString(), 
-        attributes.get("givenName") != null ? attributes.get("givenName").get().toString() : null, 
-        attributes.get("sn") != null ? attributes.get("sn").get().toString() : null, 
         attributes.get("mail") != null ? attributes.get("mail").get().toString() : null,
         attributes.get(eppnAttributeName) != null 
-          ? attributes.get(eppnAttributeName).get().toString() : null);
+          ? attributes.get(eppnAttributeName).get().toString() : null,
+        principal);
   }
 }

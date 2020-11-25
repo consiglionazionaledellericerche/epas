@@ -1,24 +1,43 @@
 package manager.ldap;
 
 import com.google.common.base.Optional;
+import java.io.IOException;
 import java.util.Hashtable;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
+import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.StartTlsRequest;
+import javax.naming.ldap.StartTlsResponse;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import play.Play;
 
+/**
+ * Gestire la connessione e l'interrogazione dell'LDAP per
+ * l'autenticazione degli utenti.
+ * 
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 public class LdapService {
 
-  //ldap://ldap.iit.cnr.it:389
+  private static final String ldapUrl = Play.configuration.getProperty("ldap.url");
 
-  public static final String ldapUrl = Play.configuration.getProperty("ldap.url");
+  private static final boolean ldapStartTls = 
+      Boolean.parseBoolean(Play.configuration.getProperty("ldap.startTls", "false"));
+
+  private static final String adminPrincipal = 
+      Play.configuration.getProperty("ldap.bind.dn");
+  private static final String adminCredentials = 
+      Play.configuration.getProperty("ldap.bind.credentials");
+  private static final String authenticateUserSearchDn = 
+      Play.configuration.getProperty("ldap.authenticate.user.search.dn");
 
   public static final String ldapUniqueIdentifier =
       Play.configuration.getProperty("ldap.uniqueIdentifier", "uid");
@@ -36,15 +55,282 @@ public class LdapService {
       Boolean.parseBoolean(Play.configuration.getProperty("ldap.bind.useOnlyUid", "false"));
 
   /**
-   * Esempio autenticazione LDAP.
+   * Autenticazione tramite LDAP.
    *
    * @param username utente ldap
    * @param password password ldap
-   * @return l'email dell'utente se autenticato e se l'email è presente.
+   * @return l'utente Ldap con i suoi attributi
    */
   public Optional<LdapUser> authenticate(String username, String password) {
-    val authEnv = new Hashtable<String, String>();
+    log.debug("LDAP authentication -> autenticazione LDAP in corso per username {}. "
+        + "LdapUrl = {}. StartTLS = {}, adminPrincipal = {}, adminCredentials = {}", 
+        username, ldapUrl, ldapStartTls, adminPrincipal, adminCredentials);
 
+    // Variabili usate solo se viene effettuata la prima connessione da 
+    // utente amministatore 
+    LdapContext authAdminContext = null;
+    Optional<StartTlsResponse> tlsAdmin = Optional.absent();
+
+    Optional<LdapUser> ldapUser = Optional.absent();
+    
+    // Se è impostato un utente LDAP amministratore la prima connessione viene
+    // effettuata con questo utente.
+    if (adminPrincipal != null && adminCredentials != null) {
+      log.debug("LDAP authentication -> Effettuo la prima connessione LDAP con "
+          + "utente admin = {}", adminPrincipal);
+
+      val authAdminEnv = baseAuthEnv();
+
+      try {
+        authAdminContext = new InitialLdapContext(authAdminEnv, null);
+
+        tlsAdmin = startTlsIfNecessary(authAdminContext);
+        addAuthInfo(authAdminContext, adminPrincipal, adminCredentials);
+
+      } catch (Exception e) {
+        log.error("LDAP authentication -> connection using admin user {} failed. "
+            + "Something went wrong during LDAP authentication for username = {}",
+            adminPrincipal, username, e);
+        return Optional.absent();
+      }
+      
+      // Per l'autenticazione nell'LDAP del CNR è necessario effettuare una 
+      // search come utente admin per trovare l'utente e poi una search in un 
+      // contesto più largo.
+      if (authenticateUserSearchDn != null) {
+        try {
+          ldapUser = searchUserbyAdmin(authAdminContext, username);
+          if (!ldapUser.isPresent()) {
+            log.info("LDAP authentication -> username {} not found on LDAP", username);
+            return Optional.absent();
+          }
+        } catch (NamingException e) {
+          log.error("LDAP authentication -> something went wrong during LDAP "
+              + "admin search for user {}", username);
+          return Optional.absent();
+        }
+        // Verifica dell'autenticazione utente tramite una search generica nel contesto 
+        // dell'organizzazione (quello generico, non quello specifico dei dipendenti).
+        if (!authenticateUserByGenericSearch(ldapUser.get().getPrincipal(), password)) {
+          ldapUser = Optional.absent();
+        }
+      } else {
+        ldapUser = authenticateUser(username, password);
+      }
+
+    // questo è il caso senza una pre-autenticazione come utente admin.
+    } else {
+      ldapUser = authenticateUser(username, password);
+    }
+
+    try {
+      // Le due close successive sono solo nel caso ci sia autenticati 
+      // preventivamente con un utente admin di LDAP
+      if (tlsAdmin.isPresent()) {
+        tlsAdmin.get().close();
+      }
+      if (authAdminContext != null) {
+        authAdminContext.close();
+      }      
+    } catch (Exception ex) {
+      log.error("LDAP authentication -> something went wrong during LDAP admin "
+          + "connection closing for {}={}", ldapUniqueIdentifier, username, ex);
+      return Optional.absent();
+    }
+
+    return ldapUser;
+  }
+
+  /**
+   * Effettua la ricerca dell'utente nel DN dove sono presenti gli utenti.
+   * La ricerca deve essere effettuata tramite il context dove si è autenticati com
+   * admin.
+   */
+  private Optional<LdapUser> searchUserbyAdmin(LdapContext adminAuthContext, String username) 
+      throws NamingException {
+    val ldapSearchResult = 
+        adminAuthContext.search(
+            baseDn, String.format("(%s=%s)", ldapUniqueIdentifier, username), 
+            searchControls());
+    return userFromSearchResults(username, ldapSearchResult);
+  }
+  
+  private boolean authenticateUserByGenericSearch(String principal, String password) {
+    LdapContext authContext = null;
+    Optional<StartTlsResponse> tls = Optional.absent();
+    
+    val authEnv = baseAuthEnv();
+    
+    boolean authenticated = false;
+    
+    try {
+      authContext = new InitialLdapContext(authEnv, null);    
+
+      startTlsIfNecessary(authContext);
+      addAuthInfo(authContext, principal, password);
+
+      // Se la search non solleva un'eccezione allora
+      // l'utente è autenticato
+      authContext.search(authenticateUserSearchDn, null);
+      
+      authenticated = true;
+      log.info("LDAP authentication -> LDAP Authentication Success for dn={}", principal);
+       
+    } catch (AuthenticationException authEx) {
+      log.info("LDAP authentication -> Authentication failed for dn={}",
+          principal, authEx);
+    } catch (Exception ex) {
+      log.error("LDAP authentication -> something went wrong during LDAP authentication "
+          + "for dn = {}", principal, ex);
+    } finally {
+      try {
+        if (tls.isPresent()) {
+          tls.get().close();
+        }
+        if (authContext != null) {
+          authContext.close();
+        }
+      } catch (Exception e) {
+        log.error("LDAP authentication -> something went wront during LDAP connection closing");
+      }
+    }
+    return authenticated;
+  }
+  
+  /**
+   * Effettua una ricerca dell'utente su LDAP effettuando la query con le
+   * credenziali dell'utente per verificare che siano corrispondenti a quelle
+   * LDAP.
+   * 
+   * @param username username dell'utente da autenticare
+   * @param password password dell'utente da autenticare
+   * 
+   * @return un LdapUser con le informazioni dell'utente, Optional.absent() se
+   *     se l'autenticazione non va a buon fine.
+   */
+  private Optional<LdapUser> authenticateUser(String username, String password) {
+    
+    val authEnv = baseAuthEnv();
+    String dn = userDn(username);
+    
+    Optional<LdapUser> ldapUser = Optional.absent(); 
+    LdapContext authContext = null;
+    Optional<StartTlsResponse> tls = Optional.absent();
+    
+    try {
+      authContext = new InitialLdapContext(authEnv, null);    
+
+      startTlsIfNecessary(authContext);
+      addAuthInfo(authContext, dn, password);
+
+      val ldapSearchResult = 
+          authContext.search(
+              baseDn, String.format("(%s=%s)", ldapUniqueIdentifier, username), 
+              searchControls());
+
+      ldapUser = userFromSearchResults(username, ldapSearchResult);
+      log.info("LDAP authentication -> LDAP Authentication Success for {}", username);
+
+    } catch (AuthenticationException authEx) {
+      log.info("LDAP authentication -> Authentication failed for {}. dn={}",
+          username, dn, authEx);
+    } catch (Exception ex) {
+      log.error("LDAP authentication -> something went wrong during LDAP authentication "
+          + "for {}={}, dn = {}", ldapUniqueIdentifier, username, dn, ex);
+    } finally {
+      try {
+        if (tls.isPresent()) {
+          tls.get().close();
+        }
+        if (authContext != null) {
+          authContext.close();
+        }
+      } catch (Exception e) {
+        log.error("LDAP authentication -> something went wront during LDAP connection closing");
+      }
+    }
+    return ldapUser;
+  }
+
+  private Optional<StartTlsResponse> startTlsIfNecessary(LdapContext authContext) 
+      throws NamingException, IOException {
+    StartTlsResponse tls = null;
+    if (ldapStartTls) {
+      // Start TLS
+      log.trace("LDAP authentication -> starting TLS ...");
+      tls = (StartTlsResponse) authContext.extendedOperation(new StartTlsRequest());
+      tls.negotiate();
+      log.trace("LDAP authentication -> ....negoziazione TLS avvenuta");
+      return Optional.of(tls);
+    }
+    return Optional.absent();
+  }
+  
+  /**
+   * Costruisce le informazioni di ricerca da passare alla query LDAP per prelevare
+   * le info degli utenti.
+   * @return SearchControls per prelevare gli attributi dell'utente.
+   */
+  private SearchControls searchControls() {
+    SearchControls ctrls = new SearchControls();
+    ctrls.setReturningAttributes(
+        new String[]{ldapUniqueIdentifier, "mail",
+            getEppnAttributeName()});
+    ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE); 
+    return ctrls;
+  }
+  
+  /**
+   * Costruisce un LdapUser dai risultati della ricerca LDAP.
+   * @param username lo username dell'utente di cui costruire i dati
+   * @param ldapSearchResult il risultato della query LDAP
+   * @return un LdapUser con le info dell'utente prelevate da LDAP se presente, 
+   *     Optional.absent() altrimenti.
+   * @throws NamingException  sollevata per problemi di accesso ai campi ldap
+   */
+  private Optional<LdapUser> userFromSearchResults(
+      String username, NamingEnumeration<SearchResult> ldapSearchResult) throws NamingException {
+    if (ldapSearchResult == null || !ldapSearchResult.hasMoreElements()) {
+      log.info("LDAP authentication -> LdapSearch failed for {}={} using baseDn={}",
+          ldapUniqueIdentifier, username, baseDn);
+      return Optional.absent();
+    }
+    SearchResult result = ldapSearchResult.nextElement();
+    log.debug("LDAP authentication -> found user: {}", result.getNameInNamespace());
+    return Optional.of(
+        LdapUser.create(
+            result.getNameInNamespace(), result.getAttributes(), getEppnAttributeName()));
+  }
+
+  /**
+   * Mappa con l'Environment di base comune.
+   * @return una mappa con l'Environment di base comune per le connessioni LDAP
+   */
+  private Hashtable<String, String> baseAuthEnv() {
+    val authEnv = new Hashtable<String, String>();
+    authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+    authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + timeout * 1000);
+    authEnv.put(Context.PROVIDER_URL, ldapUrl);
+    return authEnv;
+  } 
+
+  /**
+   * Aggiunge all'LdapContext il tipo di autenticazione, l'utente e la password.
+   */
+  private void addAuthInfo(
+      LdapContext authContext, String principal, String credentials) throws NamingException {
+    authContext.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
+    authContext.addToEnvironment(Context.SECURITY_PRINCIPAL, principal);
+    authContext.addToEnvironment(Context.SECURITY_CREDENTIALS, credentials);   
+  }
+  
+  /**
+   * Costruisce il distinguished name (DN) dell'utente in funzione dei parametri LDAP.
+   * 
+   * @param username username dell'utente
+   * @return dn dell'utente da utilizzare nelle query ldap
+   */
+  private String userDn(String username) {
     String usernameForBind = username;
     if (ldapUniqueIdentifierPostfix.isPresent()) {
       usernameForBind += ldapUniqueIdentifierPostfix.get();
@@ -52,46 +338,10 @@ public class LdapService {
 
     String dn = bindWithOnlyUid
         ? usernameForBind : ldapUniqueIdentifier + "=" + usernameForBind + "," + baseDn;
-
-    authEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-    authEnv.put("com.sun.jndi.ldap.connect.timeout", "" + timeout * 1000);
-
-    authEnv.put(Context.PROVIDER_URL, ldapUrl);
-    authEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-    authEnv.put(Context.SECURITY_PRINCIPAL, dn);
-    authEnv.put(Context.SECURITY_CREDENTIALS, password);
-
-    try {
-      SearchControls ctrls = new SearchControls();
-      ctrls.setReturningAttributes(
-          new String[]{ldapUniqueIdentifier, "givenName", "sn", "mail",
-              getEppnAttributeName()});
-      ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-      DirContext authContext = new InitialDirContext(authEnv);
-      log.info("LDAP Authentication Success for {}", username);
-
-      NamingEnumeration<SearchResult> answers =
-          authContext.search(baseDn, "(" + ldapUniqueIdentifier + "=" + username + ")", ctrls);
-      if (answers == null || !answers.hasMoreElements()) {
-        log.info("LdapSearch failed for {}={} using baseDn={}",
-            ldapUniqueIdentifier, username, baseDn);
-        return Optional.absent();
-      }
-      SearchResult result = answers.nextElement();
-
-      return Optional.of(LdapUser.create(result.getAttributes(), getEppnAttributeName()));
-    } catch (AuthenticationException authEx) {
-      log.info("LDAP Authentication failed for {}. {}={}, dn={}",
-          usernameForBind, ldapUniqueIdentifier, username, dn, authEx);
-      return Optional.absent();
-    } catch (Exception ex) {
-      log.error("Something went wrong during LDAP authentication for {}={}, dn = {}",
-          ldapUniqueIdentifier, username, dn, ex);
-      return Optional.absent();
-    }
+    log.debug("LDAP authentication -> DN dell'utente utilizzato per il login: {}", dn);
+    return dn;
   }
-
+  
   /**
    * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping con l'attributo
    * eppn presente in ePAS.
