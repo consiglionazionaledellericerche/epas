@@ -22,6 +22,10 @@ public class ContractBeforeSourceResidualAndOverlapingCheck extends Check {
       return false;
     }
     final Contract contract = (Contract) validatedObject;
+    // sto creando una perosna, non ci sono contratti che si intersecano
+    if (contract.person == null || !contract.person.isPersistent()) {
+      return true;
+    }
     if (contract.person.contracts.stream()
         .filter(c -> !c.id.equals(contract.getId()))
         .anyMatch(con -> con.overlap(contract))) {
