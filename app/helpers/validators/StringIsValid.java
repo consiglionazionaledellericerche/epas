@@ -15,7 +15,7 @@ public class StringIsValid extends Check {
     }
     final String string = (String) value;    
 
-    if (!string.matches("^[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]*$")) {
+    if (!string.matches("^[A-Za-zÀ-ÖØ-öø-ÿ0-9 _]*$")) {
       setMessage("Inserisci una stringa valida");
       return false;
     }
