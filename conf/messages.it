@@ -874,6 +874,7 @@ BadgeSystems.list= Gruppi Badge
 BadgeSystems.personBadges= Badge
 Certifications.certifications= Invio Attestati
 Charts.checkLastYearAbsences= Controlli ed Esportazioni
+Charts.excelFile=Esportazione periodica in excel
 Competences.approvedCompetenceInYear= Competenza Assegnate nell'anno
 Competences.competences= Competenze
 Competences.enabledCompetences= Abilita Competenze
