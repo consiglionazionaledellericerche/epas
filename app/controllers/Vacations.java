@@ -16,7 +16,9 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
@@ -24,6 +26,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.User;
+import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
@@ -78,8 +81,16 @@ public class Vacations extends Controller {
           vacationGroup, Optional.absent(), false);
       vacationSituations.add(vacationSituation);
     }
+    
+    GroupAbsenceType permissionGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    PeriodChain periodChain = absenceService
+        .residual(person.getValue(), permissionGroup, LocalDate.now());
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCategorySwitch(person.getValue(), LocalDate.now(), permissionGroup);
+    
     boolean showVacationPeriods = true;
-    render(vacationSituations, year, showVacationPeriods);
+    render(vacationSituations, year, showVacationPeriods, periodChain, categorySwitcher);
   }
   
   /**
