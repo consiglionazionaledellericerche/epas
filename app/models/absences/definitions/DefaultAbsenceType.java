@@ -1589,12 +1589,19 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, false, true),
 
-  A_409("409", "Ferie missione Antartide anno corrente", false,
+  A_409("409", "Ferie missione Antartide anno precedente", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false, true), 
   A_419("419", "Riposo compensativo missione Antartide", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(),
+      null, new LocalDate(2019, 12, 31), false, true),
+  A_400("400", "Ferie missione Antartide anno corrente", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
+      null, false, true), 
+  A_410("410", "Riposo compensativo missione Antartide", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(),
       null, null, false, true),
+  
 
   A_NC("NC", "Giorno non conteggiato ai fini del tempo a lavoro", true,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
