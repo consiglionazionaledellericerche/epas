@@ -29,6 +29,7 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 import models.Contract;
 import models.Person;
@@ -270,6 +271,10 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
+    GroupAbsenceType permissionGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    PeriodChain periodChain = absenceService
+        .residual(person, permissionGroup, LocalDate.now());
 
     boolean showVacationPeriods = false;
     boolean retroactiveAbsence = false;
@@ -287,7 +292,7 @@ public class AbsenceRequests extends Controller {
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
-        retroactiveAbsence, absenceForm);
+        retroactiveAbsence, absenceForm, periodChain);
 
   }
 
@@ -302,6 +307,10 @@ public class AbsenceRequests extends Controller {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
+    GroupAbsenceType permissionGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    PeriodChain periodChain = absenceService
+        .residual(absenceRequest.person, permissionGroup, LocalDate.now());
 
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt",
@@ -311,7 +320,7 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, retroactiveAbsence, 
-          groupAbsenceType, absenceType, justifiedType, hours, minutes);
+          groupAbsenceType, absenceType, justifiedType, hours, minutes, periodChain);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
       Validation.addError("absenceRequest.startAt",
@@ -326,7 +335,7 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence);
+      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain);
     }
     if (!absenceRequest.person
         .checkLastCertificationDate(new YearMonth(absenceRequest.startAtAsDate().getYear(),
@@ -335,7 +344,7 @@ public class AbsenceRequests extends Controller {
           "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, retroactiveAbsence);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
     }
 
     if (Validation.hasErrors()) {
@@ -343,7 +352,7 @@ public class AbsenceRequests extends Controller {
       insertable = false;
       flash.error(Web.msgHasErrors());
 
-      render("@edit", absenceRequest, insertable, retroactiveAbsence);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
       //return;
     }
 
@@ -354,7 +363,7 @@ public class AbsenceRequests extends Controller {
             "Inserire una motivazione per l'assenza nel passato");
         response.status = 400;
         insertable = false;
-        render("@edit", absenceRequest, insertable, retroactiveAbsence);
+        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
       }
     }
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -399,7 +408,7 @@ public class AbsenceRequests extends Controller {
 
 
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
-        compensatoryRestAvailable, retroactiveAbsence);
+        compensatoryRestAvailable, retroactiveAbsence, periodChain);
   }
 
   /**
