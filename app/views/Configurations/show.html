@@ -29,15 +29,27 @@
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
 
   #{tabList}
+  
   #{tabItem id:'GENERAL', title:'Generali', active:generalActive /}
+  
+  #{secure.check 'Persons.list'}
   #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
+  #{/secure.check}
+  #{secure.check 'Persons.list'}
   #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
+  #{/secure.check}
+  #{secure.check 'Persons.list'}
   #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
+  #{/secure.check}  
   #{if templateUtility.isFlowsActive()}
+  #{secure.check 'Persons.list'}
   #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
+  #{/secure.check}
   #{/if}
   #{if templateUtility.isFlowsActive()}
+  #{secure.check 'Persons.list'}
   #{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta competenze', active:competenceflowsActive /}
+  #{/secure.check}
   #{/if}
   
   #{/tabList}
@@ -112,7 +124,7 @@
       </tr>
       #{list yearlies , as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -138,7 +150,7 @@
       </tr>
       #{list periodics, as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link} 
           #{if conf.epasParam.equals(manager.configurations.EpasParam.WORK_INTERVAL_MISSION_DAY)}
            <p style="color:red;">New! <i class="fa fa-check"></i></p>
@@ -237,7 +249,7 @@
       </tr>
       #{list flows.findAll({it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -255,7 +267,7 @@
       </tr>
       #{list flows.findAll({!it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -284,7 +296,7 @@
       </tr>
       #{list competenceFlows.findAll({it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -302,7 +314,7 @@
       </tr>
       #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
