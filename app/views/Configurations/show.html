@@ -32,22 +32,22 @@
   
   #{tabItem id:'GENERAL', title:'Generali', active:generalActive /}
   
-  #{secure.check 'Persons.list'}
+  #{secure.check 'Configurations.administrativeEditParams'}
   #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
   #{/secure.check}
-  #{secure.check 'Persons.list'}
+  #{secure.check 'Configurations.administrativeEditParams'}
   #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
   #{/secure.check}
-  #{secure.check 'Persons.list'}
+  #{secure.check 'Configurations.administrativeEditParams'}
   #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
   #{/secure.check}  
   #{if templateUtility.isFlowsActive()}
-  #{secure.check 'Persons.list'}
+  #{secure.check 'Configurations.administrativeEditParams'}
   #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
   #{/secure.check}
   #{/if}
   #{if templateUtility.isFlowsActive()}
-  #{secure.check 'Persons.list'}
+  #{secure.check 'Configurations.administrativeEditParams'}
   #{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta competenze', active:competenceflowsActive /}
   #{/secure.check}
   #{/if}

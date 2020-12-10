@@ -1563,6 +1563,10 @@ rule OnlyForPersonnelAdmin_Generic
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $c: PermissionCheck(action in (
+ 
+ 		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
  		/* Vecchio permesso editPerson */
 
@@ -1727,6 +1731,10 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $o: Office( usersRolesOffices contains $uro)
  $c: PermissionCheck(action in (
+ 
+ 		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
  		/* Vecchio permesso editPerson */
         "AbsenceGroups.insertAssisted",
