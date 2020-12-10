@@ -1013,6 +1013,9 @@ when
     "Competences.editShift",
     "Configurations.personShow",
     "Configurations.show",
+    /* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 	"Configurations.administrativeEditParams",
     "Contracts.edit",
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
@@ -1431,6 +1434,9 @@ when
         "Configurations.show",
         "Configurations.edit",
         "Configurations.removeAttachment",
+   		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
@@ -1509,6 +1515,9 @@ when
 
      	"Configurations.show",
         "Configurations.edit",
+        /* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
