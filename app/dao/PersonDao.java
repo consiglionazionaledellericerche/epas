@@ -280,7 +280,7 @@ public final class PersonDao extends DaoBase {
    */
   public List<Person> listForCompetenceGroup(CompetenceCodeGroup group, 
       Set<Office> offices, boolean onlyTechnician,
-      LocalDate start, LocalDate end) {
+      LocalDate start, LocalDate end, boolean temporary) {
     
     Preconditions.checkState(!offices.isEmpty());
     Preconditions.checkNotNull(group);
@@ -299,6 +299,10 @@ public final class PersonDao extends DaoBase {
     filterOffices(condition, offices);
     filterOnlyTechnician(condition, onlyTechnician);
     filterContract(condition, Optional.fromNullable(start), Optional.fromNullable(end));
+    if (temporary) {
+      filterTemporary(condition);
+    }
+    
 
     filterCompetenceCodeGroupEnabled(condition, Optional.fromNullable(group), start);
     
@@ -871,6 +875,15 @@ public final class PersonDao extends DaoBase {
           .and(pcc.beginDate.loe(date)
           .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull())));
     }
+  }
+  
+  /**
+   * Filtro sui tempi determinati.
+   * @param condition la condition che mi porto dietro da altre restrizioni
+   */
+  private void filterTemporary(BooleanBuilder condition) {
+    final QContract contract = QContract.contract;
+    condition.and(contract.endDate.isNotNull());
   }
 
 
