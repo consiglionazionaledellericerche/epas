@@ -654,7 +654,8 @@ public class Competences extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     rules.checkIfPermitted();
     List<CompetenceCodeGroup> list = competenceCodeDao.getAllGroups();
-    render(office, list, year, month);
+    boolean temporary = false;
+    render(office, list, year, month, temporary);
   }
 
   /**
@@ -664,7 +665,7 @@ public class Competences extends Controller {
    * @param year anno
    */
   public static void getCompetenceGroupInYearMonth(int year, int month, Long officeId, 
-      CompetenceCodeGroup group) throws IOException {
+      CompetenceCodeGroup group, boolean temporary) throws IOException {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -674,7 +675,7 @@ public class Competences extends Controller {
 
     List<Person> personList = personDao
         .listForCompetenceGroup(group, set, false, new LocalDate(year, month, 1), 
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), temporary);
 
     FileInputStream inputStream = competenceManager
         .getCompetenceGroupInYearMonth(year, month, personList, group);
