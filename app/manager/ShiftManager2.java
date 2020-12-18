@@ -745,7 +745,7 @@ public class ShiftManager2 {
 
         break;
       case holiday:
-        timeInterval = Optional.<TimeInterval>absent();
+        timeInterval = Optional.fromNullable(daily);
         timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
           return personDayManager.isHoliday(day.personShift.person, day.date, 
@@ -773,6 +773,7 @@ public class ShiftManager2 {
 
           if (shift.organizationShiftSlot.shiftTimeTable.calculationType
               .equals(CalculationType.percentage)) {
+            //FIXME: che succede se siamo nel festivo e ci sono timbrature notturne?
             int quantity = isIntervalTotallyInSlot(pd, shift, timeInterval)
                 - (shift.exceededThresholds * SIXTY_MINUTES);
             if (quantity < 0) {
