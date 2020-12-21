@@ -1,0 +1,38 @@
+#{modalAsync id:'defaultModal',  title:'Storico competenza' }
+
+<div class="container-fluid">
+
+#{if found}
+	#{accordionGroup 'info'}
+	  #{accordionItem 'competences', parent:'info', title:'Storico Competenza '+competence.competenceCode.description, open:true}
+	  #{if historyCompetence.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
+	  #{else}
+	  <!-- Tabella riepilogativa -->	  
+	
+	  <table class="table table-condensed table-bordered">
+	
+	    <tr class="success">
+	      <th>Codice</th>
+	      <th>&{'modification.date'}</th>
+	      <th>&{'done.by'}</th>
+	      <th>&{'modification.type'}</th>
+	    </tr>
+	
+	    #{list items:historyCompetence, as:'competence'}
+	    <tr class="warning">
+	      <td>${competence.value.competenceCode?.code}</td>
+	      <td>${competence.formattedRevisionDate()}</td>
+	      <td>${competence.formattedOwner()}</td>
+	      <td class="${absence.type}">&{competence.type}</td>
+	    </tr>
+	    #{/list}
+	  </table>
+	  #{/else}
+	  #{/accordionItem}
+	#{/accordionGroup}
+#{/if}
+
+
+</div>
+
+#{/modalAsync}
