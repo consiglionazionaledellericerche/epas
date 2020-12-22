@@ -23,6 +23,7 @@ vostra sede tipo *istituto_xxx_person_day_reader* (cambiate il nome o in futuro 
 conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli il 
 ruolo *Lettore informazioni*.
 
+L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 Cartellino byPerson (giornaliero e/o mensile)
 =============================================
