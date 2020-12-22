@@ -27,6 +27,6 @@ public class Historicals extends Controller {
     List<HistoryValue<Competence>> historyCompetence = competenceHistoryDao
         .competences(competenceId);
     
-    render(historyCompetence, competence);
+    render(historyCompetence, competence, found);
   }
 }
