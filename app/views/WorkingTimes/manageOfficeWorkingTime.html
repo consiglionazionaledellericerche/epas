@@ -44,6 +44,9 @@
 			          <th class="center">Contratti attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			          #{secure.check 'WorkingTimeType.externalId'}
+			            <th class="center">&{'externalId'}</th>
+			          #{/secure.check}
 			          #{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
 			          <th class="center">Cambia orario<br>a tutti</th>
 			          #{/secure.check}
@@ -91,6 +94,9 @@
 				    	    #{/secure.check}
 				    	  #{/if}
 				    	</td>
+				    	#{secure.check 'WorkingTimeType.externalId'}
+				    	  <td class="center">${wtt.value.externalId}</td>
+				    	#{/secure.check}
 				    	#{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
                         <td class="center">
                           <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">

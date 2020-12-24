@@ -8,7 +8,6 @@ import com.google.common.collect.Range;
 import edu.emory.mathcs.backport.java.util.Collections;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
