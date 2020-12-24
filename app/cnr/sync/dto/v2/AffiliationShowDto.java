@@ -22,6 +22,7 @@ public class AffiliationShowDto {
   private BigDecimal percentage;
   private LocalDate beginDate;
   private LocalDate endDate;
+  private String externalId;
 
   /**
    * Nuova instanza di un GroupShowTerseDto contenente i valori 

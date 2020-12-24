@@ -25,6 +25,8 @@ import play.data.validation.Required;
 @Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {
   
+  private static final long serialVersionUID = -2458580703574435339L;
+
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)

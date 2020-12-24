@@ -168,7 +168,7 @@ public class WorkingTimes extends Controller {
    * @param workingTimeTypePattern tipo di orario di lavoro (orizzontale/verticale).
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute,
-      String name, WorkingTimeTypePattern workingTimeTypePattern) {
+      String name, String externalId, WorkingTimeTypePattern workingTimeTypePattern) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -191,13 +191,13 @@ public class WorkingTimes extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      render(office, name, workingTimeTypePattern);
+      render(office, name, externalId, workingTimeTypePattern);
     }
 
     if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
-      render("@insertWorkingTime", horizontalPattern, office, name);
+      render("@insertWorkingTime", horizontalPattern, office, name, externalId);
     } else {
       final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
       List<VerticalWorkingTime> vwtProcessedList = processed(key);
@@ -205,7 +205,7 @@ public class WorkingTimes extends Controller {
       int step = 1;
       VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
 
-      render("@insertVerticalWorkingTime", office, vwt, name, step, daysProcessed);
+      render("@insertVerticalWorkingTime", office, vwt, name, externalId, step, daysProcessed);
     }
   }
 
@@ -267,7 +267,8 @@ public class WorkingTimes extends Controller {
    * @param submit  booleano per completare la procedura
    * @param vwt Orario di lavoro verticale.
    */
-  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step,
+  public static void insertVerticalWorkingTime(Long officeId, @Required String name, 
+      String externalId, int step,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
     flash.clear();
@@ -290,16 +291,17 @@ public class WorkingTimes extends Controller {
     //Persistenza ...
     if (submit) {
       // TODO: validatore
-      workingTimeTypeManager.saveVerticalWorkingTimeType(vwtProcessedList, office, name);
+      workingTimeTypeManager.saveVerticalWorkingTimeType(
+          vwtProcessedList, office, name, externalId);
       flash.success("Il nuovo tipo orario è stato inserito correttamente.");
       manageOfficeWorkingTime(office.id);
     }
 
     Preconditions.checkNotNull(vwt);
     // Validazione dto
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
-      render(office, vwt, name, step, daysProcessed);
+      render(office, vwt, name, externalId, step, daysProcessed);
     }
 
     // Next step
@@ -311,7 +313,7 @@ public class WorkingTimes extends Controller {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     }
-    render(vwt, step, name, office, daysProcessed);
+    render(vwt, step, name, externalId, office, daysProcessed);
 
 
   }
@@ -534,16 +536,16 @@ public class WorkingTimes extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     if (wttNew == null || !wttNew.isPersistent()) {
-      validation.addError("wttNew", "Campo obbligatorio.");
+      Validation.addError("wttNew", "Campo obbligatorio.");
     }
     if (dateFrom == null) {
-      validation.addError("dateFrom", "Campo obbligatorio.");
+      Validation.addError("dateFrom", "Campo obbligatorio.");
     } else {
       validation.future(dateFrom.toDate(), 
           LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue().minusDays(1).toDate())
       .key("dateFrom").message("validation.after");
       if (dateTo != null && dateFrom.isAfter(dateTo)) {
-        validation.addError("dateTo", "Deve essere sucessivo alla data iniziale");
+        Validation.addError("dateTo", "Deve essere sucessivo alla data iniziale");
       }
     }
     if (Validation.hasErrors()) {
