@@ -33,7 +33,7 @@ public class WorkingTimeTypeManager {
    * @param name il nome del nuovo orario di lavoro
    */
   public void saveVerticalWorkingTimeType(List<VerticalWorkingTime> list, 
-      Office office, String name) {
+      Office office, String name, String externalId) {
     
     Preconditions.checkState(list.size() == WorkingTimes.NUMBER_OF_DAYS);
     for (int i = 1; i <= WorkingTimes.NUMBER_OF_DAYS; i++) {
@@ -51,6 +51,7 @@ public class WorkingTimeTypeManager {
     wtt.office = office;
     wtt.horizontal = false;
     wtt.description = name;
+    wtt.externalId = externalId;
     wtt.save();
     
     for (VerticalWorkingTime vwt : list) {
