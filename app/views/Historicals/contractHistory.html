@@ -4,7 +4,7 @@
 
 #{if found}
 	#{panel title:'Storico contratto ' + contract.person.surname + '-' +contract.person.name, color:'primary'}
-	#{if historyCompetence.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
+	#{if historyContract.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
 	#{else}
 	  <!-- Tabella riepilogativa -->	  
 	
@@ -13,18 +13,23 @@
 	    <tr class="success">
 	      
 	      <th>&{'modification.date'}</th>
-	      <th>Quantità</th>
 	      <th>&{'done.by'}</th>
 	      <th>&{'modification.type'}</th>
+	      <th>Data inizializzazione</th>
+	      <th>Residuo anno passato</th>
+	      <th>Residuo anno corrente</th>
+	      
 	    </tr>
 	
-	    #{list items:historyCompetence, as:'competence'}
+	    #{list items:historyContract, as:'contract'}
 	    <tr class="warning">
 	      
-	      <td>${competence.formattedRevisionDate()}</td>
-	      <td>${competence.value.valueApproved}</td>
-	      <td>${competence.formattedOwner()}</td>
-	      <td class="${competence.type}">&{competence.type}</td>
+	      <td>${contract.formattedRevisionDate()}</td>
+	      <td>${contract.formattedOwner()}</td>
+	      <td class="${contract.type}">&{contract.type}</td>
+	      <td>${contract.value.sourceDateResidual}</td>
+	      <td>${contract.value.sourceRemainingMinutesLastYear.toHourTime()}</td>
+	      <td>${contract.value.sourceRemainingMinutesCurrentYear.toHourTime()}</td>
 	    </tr>
 	    #{/list}
 	  </table>
