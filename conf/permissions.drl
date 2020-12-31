@@ -1013,6 +1013,9 @@ when
     "Competences.editShift",
     /* Storico delle modifiche alle competenze */
     "Historicals.competenceHistory",
+    
+    /* Storico delle modifiche ai contratti*/
+    "Historicals.contractHistory",
         
     "Configurations.personShow",
     "Configurations.show",
@@ -1459,6 +1462,8 @@ when
         
         /* Storico delle modifiche alle competenze */
         "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1549,6 +1554,8 @@ when
         
         /* Storico delle modifiche alle competenze */
         "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1672,6 +1679,8 @@ when
         
         /* Storico delle modifiche alle competenze */
         "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1826,6 +1835,8 @@ when
         
         /* Storico delle modifiche alle competenze */
         "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
