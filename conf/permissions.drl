@@ -369,7 +369,7 @@ end
 
 rule isReperibilityManager_generic
 when 
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person	
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person	
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
@@ -388,7 +388,7 @@ end
 
 rule reperibilityManagerCanManagePersonReperibilityType
 when
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
@@ -407,9 +407,9 @@ end
 
 rule reperibilityManagercanManageReperibilityMonth
 when
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",

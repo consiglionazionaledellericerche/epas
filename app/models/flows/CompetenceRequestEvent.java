@@ -23,6 +23,8 @@ import play.data.validation.Required;
 @Table(name = "competence_request_events")
 public class CompetenceRequestEvent extends BaseModel {
 
+  private static final long serialVersionUID = 7592753994383456988L;
+
   @NotNull
   @Column(name = "created_at")
   public LocalDateTime createdAt;

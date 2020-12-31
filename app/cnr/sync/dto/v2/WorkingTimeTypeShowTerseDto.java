@@ -23,7 +23,8 @@ public class WorkingTimeTypeShowTerseDto {
   private Boolean horizontal;
   private OfficeDto office;
   private boolean disabled;
-  
+  private String externalId;
+
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;

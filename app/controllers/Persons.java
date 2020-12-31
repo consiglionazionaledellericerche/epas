@@ -8,7 +8,9 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
+import dao.RoleDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -32,7 +34,9 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import org.apache.commons.lang.WordUtils;
@@ -86,6 +90,10 @@ public class Persons extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static RoleDao roleDao;
 
 
   /**
@@ -217,6 +225,18 @@ public class Persons extends Controller {
     }
 
     rules.checkIfPermitted(person.office);
+    //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
+    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.user);
+    if (uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.EMPLOYEE) 
+        && !uro.office.equals(person.office))) {
+      for (UsersRolesOffices uro : uroList) {
+        if (uro.role.name.equals(Role.EMPLOYEE)) {
+          uro.delete();
+        }
+      }
+      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
+      officeManager.setUro(person.user, person.office, employee); 
+    }
 
     person.save();
     flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);

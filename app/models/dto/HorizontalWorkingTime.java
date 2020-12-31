@@ -56,7 +56,8 @@ public class HorizontalWorkingTime {
 
   @Required
   public String name;
-
+  public String externalId;
+  
   /**
    * Costruisce il pattern di default per la costruzione di un nuovo tipo orario orizzontale.
    */
@@ -135,6 +136,7 @@ public class HorizontalWorkingTime {
     wtt.description = this.name;
     wtt.office = office;
     wtt.disabled = false;
+    wtt.externalId = this.externalId;
 
     wtt.save();
 
