@@ -27,6 +27,7 @@ public class ContractCreateDto {
   private LocalDate endDate;
   private LocalDate endContract;
   private String perseoId;
+  private String externalId;
   private Boolean onCertificate = Boolean.TRUE;
 
   //utilizzato per indicare alla classe ContractManager il tipo di

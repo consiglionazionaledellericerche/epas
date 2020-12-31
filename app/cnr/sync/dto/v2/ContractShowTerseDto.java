@@ -18,6 +18,7 @@ public class ContractShowTerseDto {
   private LocalDate beginDate;
   private LocalDate endDate;
   private LocalDate endContract;
+  private String externalId;
   
   private Boolean onCertificate;
   private ContractShowTerseDto previousContract;

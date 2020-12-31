@@ -44,6 +44,8 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   
   public String perseoId;
 
+  public String externalId;
+  
   /**
    * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
    * determinato senza data fine specificata.

@@ -22,6 +22,9 @@
 	        <th>Percentuale</th>
 	        <th>Data di inizio</th>
 	        <th>Data di fine</th>
+	        #{secure.check 'Affiliation.externalId'}
+	          <th>External Id</th>
+	        #{/secure.check}
 	        <th></th>
 	      </tr>
 	      </thead>
@@ -32,6 +35,7 @@
 	      <td>${affiliation.percentage}</td>
 	      <td>${affiliation.beginDate.format()}</td>
 	      <td>${affiliation.endDate?.format()}</td>
+	      #{secure.check 'Affiliation.externalId'}<td>${affiliation.externalId}</td>#{/secure.check}
 	      <td class="col-xs-3">
 	        <div class="btn-group pull-right" role="group" >
 	            <a role="button" class="btn btn-primary" href="@{Affiliations.edit(affiliation.id)}" data-async-modal="#defaultModal">Modifica</a>

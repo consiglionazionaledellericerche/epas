@@ -28,6 +28,7 @@ public class AffiliationCreateDto {
   @Required
   private LocalDate beginDate;
   private LocalDate endDate;
+  private String externalId;
   
   /**
    * Nuova istanza di un oggetto affiliation a partire dai 
