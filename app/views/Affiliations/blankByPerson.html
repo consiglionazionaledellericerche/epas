@@ -25,7 +25,11 @@
 
 	  #{f.date 'affiliation.beginDate' /}
 	  #{f.date 'affiliation.endDate' /}
-	  
+
+	  #{secure.check 'Affiliation.externalId'}
+	  	#{f.input 'affiliation.externalId' /}
+	  #{/secure.check}
+
 	  #{b.buttons center:true}
 	   #{if affiliation.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
 	   #{else}<input class="text-center btn btn-primary" type="submit" value="Inserisci" />#{/else}

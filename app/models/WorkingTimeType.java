@@ -74,6 +74,9 @@ public class WorkingTimeType extends BaseModel {
   
   public boolean enableAdjustmentForQuantity = true;
 
+  @Unique(value = "office, externalId")
+  public String externalId;
+  
   @Override
   public String toString() {
     return description;

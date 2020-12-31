@@ -15,14 +15,15 @@
       #{form @WorkingTimes.saveHorizontal(), class:'form-horizontal'}
 	  
       <input type="hidden" name="office.id" value="${office.id}"/>
-  
+      <input type="hidden" name="horizontalPattern.externalId" value="${externalId}"/>
+
 	  #{f.simpleView 'horizontalPattern.name', label:'Nome Orario', hidden:true /}  
-	  	  
+
 	  <div class="alert alert-success">
 	   Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
 	   della settimana ad eccezione dei giorni festivi.
       </div>	 
-	
+
 	  <!-- Tempo a lavoro -->	 
 
 	  #{workingTime.legend tempoALavoro:'true', wttTips:'true' /}			  

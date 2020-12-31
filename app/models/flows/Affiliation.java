@@ -14,6 +14,7 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -22,7 +23,7 @@ import play.data.validation.Required;
 public class Affiliation extends BaseModel {
 
   private static final long serialVersionUID = -8101378323853245726L;
-  
+
   @Required
   @CheckWith(AffiliationCheck.class)
   @ManyToOne
@@ -41,6 +42,11 @@ public class Affiliation extends BaseModel {
 
   private LocalDate endDate;
 
+  //Il controllo di unicità degli externalId dovrebbe essere sugli office
+  //non su group
+  @Unique(value = "group, externalId")
+  public String externalId;
+  
   /**
    * Il Range che comprende le date di inizio e fine dell'assegnazione.
    */
