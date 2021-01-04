@@ -405,9 +405,18 @@ public class Reperibility extends Controller {
     final String description = reperibilityType.description;
     String supervisor =
         reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+    String seatSupervisor = "";
+    Office office = reperibilityType.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
 
     renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, 
-        description, supervisor);
+        description, supervisor, seatSupervisor);
   }
 
 

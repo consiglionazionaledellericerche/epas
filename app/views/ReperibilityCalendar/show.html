@@ -12,6 +12,30 @@
 
 <!-- Switcher delle attività di turno-->
 #{title title:'Calendario ' + reperibilitySelected.monthlyCompetenceType.name /}
+
+#{secure.check 'Reperibility.exportMonthAsPDF'}
+<!-- Stampa dei calendari mensile e annuale -->
+<div class="container">
+<div class="col-sm-6 col-sm-offset-3">
+
+<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  <div class="btn-group" role="group">
+  <a href="@{Reperibility.exportMonthAsPDF(currentDate.getYear(), 
+          			currentDate.getMonthOfYear(), reperibilitySelected.id)}">
+      <input value="Stampa calendario mensile" class="btn btn-primary" type="button">
+    </a>
+    
+  </div>
+  <div class="btn-group" role="group">
+    <a href="@{Reperibility.exportYearAsPDF(currentDate.getYear(), reperibilitySelected.id)}">
+      <input value="Stampa calendario annuale" class="btn btn-default" type="button">
+    </a>
+  </div>
+</div>
+</div>
+</div>
+#{/secure.check}
+<br><br>
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3">
         #{form action:@ReperibilityCalendar.show(), method:'POST', class:'form form-horizontal',
