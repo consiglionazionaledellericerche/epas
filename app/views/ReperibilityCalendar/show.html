@@ -13,16 +13,6 @@
 <!-- Switcher delle attività di turno-->
 #{title title:'Calendario ' + reperibilitySelected.monthlyCompetenceType.name /}
 
-#{secure.check 'Reperibility.exportMonthAsPDF'}
-<!-- Stampa dei calendari mensile e annuale -->
-<div class="container">
-<div class="col-sm-6 col-sm-offset-3">
-
-
-</div>
-</div>
-#{/secure.check}
-<br><br>
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3">
         #{form action:@ReperibilityCalendar.show(), method:'POST', class:'form form-horizontal',

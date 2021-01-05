@@ -1,3 +1,7 @@
+
+#{secure.check 'Reperibility.exportMonthAsPDF'}
+<!-- Stampa dei calendari mensile e annuale -->
+
 #{form @Reperibility.exportMonthAsPDF(), class:'form-horizontal'}
 
 #{f.hidden 'type', value:reperibility.id /}
@@ -22,6 +26,7 @@
     #{/b.buttons}		
 
 #{/form}
+#{/secure.check}
 
 <h3>Giorni di ${reperibility.monthlyCompetenceType.name} feriale validi</h3>
 <br>
