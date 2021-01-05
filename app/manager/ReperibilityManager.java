@@ -680,58 +680,7 @@ public class ReperibilityManager {
       }
       log.debug("ReasonFS={} ReasonFR={}", fsReason, frReason);
 
-      log.debug("Cerca Competence FS per person={} id={}, year={}, month={} competenceCodeId={}",
-          person.surname, person.id, year, month, competenceCodeFs.id);
 
-      // save the FS reperibility competences in the DB
-      Optional<Competence> fsCompetence =
-          competenceDao.getCompetence(person, year, month, competenceCodeFs);
-
-      if (fsCompetence.isPresent()) {
-        log.debug("Trovato competenza FS ={}", fsCompetence);
-        // update the requested hours
-        fsCompetence.get().valueApproved = numOfFsDays;
-        fsCompetence.get().reason = fsReason;
-        fsCompetence.get().save();
-
-        log.debug("Aggiornata competenza {}", fsCompetence);
-        numSavedCompetences++;
-      } else {
-        log.debug("Trovato nessuna competenza FS");
-        // insert a new competence with the requested hours and reason
-        Competence competence =
-            new Competence(person, competenceCodeFs, year, month, numOfFsDays, fsReason);
-        competence.save();
-
-        log.debug("Salvata competenza {}", competence);
-        numSavedCompetences++;
-      }
-
-      log.debug("Cerca Competence FR per person={} id={}, year={}, month={} competenceCodeId={}",
-          person.surname, person.id, year, month, competenceCodeFr.id);
-      // save the FR reperibility competences in the DB
-      Optional<Competence> frCompetence =
-          competenceDao.getCompetence(person, year, month, competenceCodeFr);
-
-      if (frCompetence.isPresent()) {
-        // update the requested hours
-        log.debug("Trovato competenza FR ={}", fsCompetence);
-        frCompetence.get().valueApproved = numOfFrDays;
-        frCompetence.get().reason = frReason;
-        frCompetence.get().save();
-
-        log.debug("Aggiornata competenza {}", frCompetence);
-        numSavedCompetences++;
-
-      } else {
-        // insert a new competence with the requested hours an reason
-        log.debug("Trovato nessuna competenza FR");
-        Competence competence =
-            new Competence(person, competenceCodeFr, year, month, numOfFrDays, fsReason);
-        competence.save();
-        log.debug("Salvata competenza {}", competence);
-        numSavedCompetences++;
-      }
     }
 
     // return the number of saved competences
