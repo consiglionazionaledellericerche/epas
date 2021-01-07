@@ -2,6 +2,7 @@ package cnr.sync.dto.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
+import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import models.WorkingTimeType;
@@ -24,6 +25,7 @@ public class WorkingTimeTypeShowTerseDto {
   private OfficeDto office;
   private boolean disabled;
   private String externalId;
+  private LocalDateTime updatedAt;
 
   @JsonIgnore
   @Inject
