@@ -9,6 +9,7 @@ public enum VacationCode {
   // Part time verticale 2 giorni
   CODE_11_2("11+2", 11, 2),
   CODE_10_2("10+2", 10, 2),
+  CODE_9_1("9+1", 9, 1),
   
   // Part-time verticali 3 giorni
   CODE_16_2("16+2", 16, 2),
@@ -40,6 +41,9 @@ public enum VacationCode {
    */
   public int accruedVacations(int days) {
 
+    if (this.vacations == 9) {
+      return accruedProgression9(days);
+    }
     if (this.vacations == 10) {
       return accruedProgression10(days);
     }
@@ -88,6 +92,9 @@ public enum VacationCode {
     }
     if (this.permissions == 2) {
       return accruedProgression2(days);
+    }
+    if (this.permissions == 1) {
+      return accruedProgression1(days);
     }
     return 0;
   }
@@ -572,6 +579,43 @@ public enum VacationCode {
     }
     return 11;
   }
+  
+  /**
+   * Progressione su 9 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression9(int days) {
+    if (days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 1;
+    }
+    if (days >= 46 && days <= 106) {
+      return 2;
+    }
+    if (days >= 107 && days <= 136) {
+      return 3;
+    }
+    if (days >= 137 && days <= 167) {
+      return 4;
+    }
+    if (days >= 168 && days <= 197) {
+      return 5;
+    }
+    if (days >= 198 && days <= 227) {
+      return 6;
+    }
+    if (days >= 228 && days <= 258) {
+      return 7;
+    }
+    if (days >= 259 && days <= 319) {
+      return 8;
+    }
+    return 9;
+  }
 
   /**
    * Progressione su 4 giorni.
@@ -617,7 +661,7 @@ public enum VacationCode {
   }
 
   /**
-   * Progressione su 3 giorni.
+   * Progressione su 2 giorni.
    *
    * @param days giorni passati
    * @return giorni maturati
@@ -631,6 +675,21 @@ public enum VacationCode {
       return 2;
     }
     return 0;
+  }
+  
+  /**
+   * Progressione su 1 giorno.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression1(int days) {
+
+    if (days <= 225) {
+      return 0;
+    }
+
+    return 1;
   }
 
 }

@@ -144,7 +144,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_92RE),
       ImmutableSet.of(DefaultAbsenceType.A_92RE),
       -1, null),
-
+  
   T_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, //taken
           DefaultAbsenceType.A_32,
@@ -154,6 +154,11 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_32, 
           DefaultAbsenceType.A_94), 
       -1, null),
+
+  T_FERIE_CNR_PROROGA_2019(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_31_2019), 
+      ImmutableSet.of(DefaultAbsenceType.A_31_2019), 
+      22, null),
 
   T_FERIE_CNR_PROROGA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, 
