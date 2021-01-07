@@ -2,6 +2,7 @@ package cnr.sync.dto.v2;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.val;
 import models.flows.Affiliation;
@@ -23,6 +24,7 @@ public class AffiliationShowDto {
   private LocalDate beginDate;
   private LocalDate endDate;
   private String externalId;
+  private LocalDateTime updatedAt;
 
   /**
    * Nuova instanza di un GroupShowTerseDto contenente i valori 

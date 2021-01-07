@@ -1,15 +1,19 @@
 package models;
 
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -95,6 +99,14 @@ public class WorkingTimeTypeDay extends BaseModel {
    */
   public Integer timeMealTo;
 
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
   /**
    * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo

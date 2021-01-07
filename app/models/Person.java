@@ -3,6 +3,7 @@ package models;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -19,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
@@ -229,6 +231,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<InitializationGroup> initializationGroups;
 
+  @NotAudited
+  public LocalDateTime updatedAt;
 
   public String getName() {
     return this.name;
@@ -304,10 +308,16 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
         .filter(conf -> conf.epasParam == epasPersonParam).collect(Collectors.toSet());
   }
 
+  @PreUpdate
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
   @PrePersist
   private void onCreation() {
     // TODO meglio rendere non necessario questo barbatrucco...
     this.beginDate = LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31);
+    this.updatedAt = LocalDateTime.now();
   }
 
   @PreRemove

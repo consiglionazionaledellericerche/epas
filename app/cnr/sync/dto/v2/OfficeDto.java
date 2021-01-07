@@ -1,5 +1,6 @@
 package cnr.sync.dto.v2;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -15,4 +16,5 @@ public class OfficeDto {
   private String name;
   private String code;
   private String codeId;
+  private LocalDateTime updatedAt;
 }
