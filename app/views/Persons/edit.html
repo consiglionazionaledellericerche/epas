@@ -28,6 +28,10 @@
 			#{secure.check 'Persons.updateBeginDate'}
 				#{f.date 'person.beginDate' /}
 			#{/secure.check}
+			#{secure.check 'Persons.updatedAt'}
+				#{f.simpleView 'person.updatedAt', value:person.updatedAt?.format() /}
+			#{/secure.check}
+
 	      #{f.booleanRadio 'person.wantEmail' /}
 	<div class="col-sm-6 col-sm-offset-3">
 		#{alert color:'info'}

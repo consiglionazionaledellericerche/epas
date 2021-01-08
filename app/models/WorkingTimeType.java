@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.collect.Lists;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
@@ -10,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
@@ -76,7 +79,16 @@ public class WorkingTimeType extends BaseModel {
 
   @Unique(value = "office, externalId")
   public String externalId;
-  
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
   @Override
   public String toString() {
     return description;
