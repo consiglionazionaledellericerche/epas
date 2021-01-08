@@ -1,15 +1,19 @@
 package models;
 
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
+import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 
 
@@ -36,6 +40,15 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "working_time_type_id")
   public WorkingTimeType workingTimeType;
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
   @Override
   public Object getValue() {
