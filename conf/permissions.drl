@@ -2909,22 +2909,25 @@ when
         "rest.v2.Certifications.getMonthSituationByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByPerson",
-        
+
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
         
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
-        
+
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
         "rest.v3.PersonDays.getMonthSituationByPerson",
 
-     	"rest.v2.Contracts.byPerson",
-     	"rest.v2.Contracts.show"
-     	
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
+
        ), target == null, granted == false)
 then
  $c.grant();
@@ -2940,25 +2943,28 @@ when
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList",
  
- 		"rest.v2.Certifications.getMonthSituation",
- 		"rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByPerson",
- 		
-		"rest.v2.PersonDays.getDaySituationByOffice",
-		"rest.v2.PersonDays.getMonthSituationByOffice",
-		"rest.v2.PersonDays.getDaySituation",
-		
+
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
+        "rest.v2.PersonDays.getDaySituation",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
-		
+
         "rest.v3.PersonDays.getDaySituationByOffice",
         "rest.v3.PersonDays.getMonthSituationByOffice",
         "rest.v3.PersonDays.getDaySituation",
         "rest.v3.PersonDays.getMonthSituationByPerson",
-		
-     	"rest.v2.Contracts.byPerson",
-     	"rest.v2.Contracts.show"
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show"
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
 
        ), target == $o, granted == false)
 then
@@ -2973,18 +2979,18 @@ rule AccountRole_PersonDaysReader
 when
  AccountRole(this in (AccountRole.PERSON_DAYS_READER)) 
  $c: PermissionCheck(action in (
- 		"rest.v2.Certifications.getMonthSituation",
- 		"rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByOffice",
         "rest.v2.Certifications.getMonthValidationStatusByPerson",
-         		
-		"rest.v2.PersonDays.getDaySituationByOffice",
-		"rest.v2.PersonDays.getMonthSituationByOffice",
-		"rest.v2.PersonDays.getDaySituation",
-		
+
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
+        "rest.v2.PersonDays.getDaySituation",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
-		
+
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList",
@@ -2997,6 +3003,10 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
         "rest.Absences.checkAbsenceByPerseoId"
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
+
        ), granted == false)
 then
  $c.grant();
