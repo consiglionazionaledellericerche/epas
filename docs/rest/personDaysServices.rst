@@ -50,7 +50,7 @@ Cartellino byOffice (giornaliero e/o mensile)
 
 Analogamente ai metodi precedenti è possibile avere le informazioni giornaliere o mensili di tutti 
 i dipendenti di una sede. 
-La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde è *233400*.
+La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *233400*.
 Negli esempio successivi sostituite *233400* con il *sedeId* della vostra sede.
 
 ::
