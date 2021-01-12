@@ -3002,7 +3002,7 @@ when
 
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
-        "rest.Absences.checkAbsenceByPerseoId"
+        "rest.Absences.checkAbsenceByPerseoId",
 
         "rest.v2.Leaves.byPersonAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show"
