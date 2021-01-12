@@ -2961,7 +2961,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
 
         "rest.v2.Contracts.byPerson",
-        "rest.v2.Contracts.show"
+        "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show"
