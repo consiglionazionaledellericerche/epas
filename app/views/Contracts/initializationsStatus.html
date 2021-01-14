@@ -79,7 +79,7 @@
 	      
 	      </td>
 		  #{/secure.check}
-		  <td>#{secure.link @Historicals.contractHistory(contract.value.id), 'data-async-modal':'#defaultModal'}
+		  <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
 				  	Consulta storico
 				  #{/secure.link}</td>
 	    </tr>
@@ -141,7 +141,7 @@
       
       </td>
 	  #{/secure.check}
-	  <td>#{secure.link @Historicals.contractHistory(contract.value.id), 'data-async-modal':'#defaultModal'}
+	  <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
 				  	Consulta storico
 				  #{/secure.link}</td>
     </tr>
@@ -204,7 +204,7 @@
      
       </td>
 	   #{/secure.check}
-	   <td>#{secure.link @Historicals.contractHistory(contract.value.id), 'data-async-modal':'#defaultModal'}
+	   <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
 				  	Consulta storico
 				  #{/secure.link}</td>
     </tr>
