@@ -15,26 +15,21 @@
 	      <th>&{'modification.date'}</th>
 	      <th>&{'done.by'}</th>
 	      <th>&{'modification.type'}</th>
-	      <th>Data inizio</th>
-	      <th>Data fine</th>
-	      <th>Data terminazione contratto</th>
-	      <th>In attestati</th>
-	      <th>Continuazione di contratto precedente</th>
-	      
+	      <th>Data inizializzazione</th>
+	      <th>Residuo anno passato</th>
+	      <th>Residuo anno corrente</th>
 	      
 	    </tr>
 	
-	    #{list items:contractModifications, as:'contract'}
+	    #{list items:historyContract, as:'contract'}
 	    <tr class="warning">
 	      
 	      <td>${contract.formattedRevisionDate()}</td>
 	      <td>${contract.formattedOwner()}</td>
 	      <td class="${contract.type}">&{contract.type}</td>
-	      <td>${contract.value.beginDate}</td>
-	      <td>${contract.value.endDate}</td>
-	      <td>${contract.value.endContract}</td>
-	      <td>${contract.value.onCertificate}</td>
-	      <td>${contract.value.getPreviousContract() != null ? 'SI' : 'NO'}</td>
+	      <td>${contract.value.sourceDateResidual}</td>
+	      <td>${contract.value.sourceRemainingMinutesLastYear.toHourTime()}</td>
+	      <td>${contract.value.sourceRemainingMinutesCurrentYear.toHourTime()}</td>
 	    </tr>
 	    #{/list}
 	  </table>

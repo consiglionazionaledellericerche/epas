@@ -124,7 +124,7 @@
         			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
       			#{/b.buttons}
 		</td>
-		<td>#{secure.link @Historicals.contractHistory(contract.value.id), 'data-async-modal':'#defaultModal'}
+		<td>#{secure.link @Historicals.contractHistory(contract.value.id, 'CONTRACT'), 'data-async-modal':'#defaultModal'}
 				  	Consulta storico
 				  #{/secure.link}</td>
 		</tr>
