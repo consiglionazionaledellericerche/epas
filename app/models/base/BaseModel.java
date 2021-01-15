@@ -61,7 +61,7 @@ public abstract class BaseModel extends GenericModel {
    * @return wrapper model
    */
   @Transient
-  public IWrapperModel getWrapper(IWrapperFactory wrapperFactory) {
+  public IWrapperModel<?> getWrapper(IWrapperFactory wrapperFactory) {
     if (this instanceof Person) {
       return wrapperFactory.create((Person) this);
     }
