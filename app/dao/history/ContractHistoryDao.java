@@ -12,12 +12,12 @@ import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 
 
-public class HistoryDao {
+public class ContractHistoryDao {
 
   private final Provider<AuditReader> auditReader;
 
   @Inject
-  HistoryDao(Provider<AuditReader> auditReader) {
+  ContractHistoryDao(Provider<AuditReader> auditReader) {
     this.auditReader = auditReader;
   }
 
