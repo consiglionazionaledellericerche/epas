@@ -3,6 +3,7 @@ package models;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import manager.configurations.EpasParam;
@@ -108,6 +111,15 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "office")
   public List<MealTicket> tickets = Lists.newArrayList();
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
   @Transient
   private Boolean isEditable = null;

@@ -1,5 +1,6 @@
 package cnr.sync.dto.v2;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 import models.Person;
 import org.modelmapper.ModelMapper;
@@ -19,7 +20,8 @@ public class PersonShowTerseDto {
   private String email;
   private String number; //Matricola
   private String eppn;
-  
+  private LocalDateTime updatedAt;
+
   /**
    * Nuova instanza di un PersonShowTerseDto contenente i valori 
    * dell'oggetto person passato.
