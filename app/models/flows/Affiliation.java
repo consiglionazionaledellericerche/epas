@@ -4,14 +4,18 @@ import com.google.common.collect.Range;
 import helpers.validators.AffiliationCheck;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.Person;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -46,7 +50,16 @@ public class Affiliation extends BaseModel {
   //non su group
   @Unique(value = "group, externalId")
   public String externalId;
-  
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
   /**
    * Il Range che comprende le date di inizio e fine dell'assegnazione.
    */

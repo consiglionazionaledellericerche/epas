@@ -7,6 +7,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import helpers.validators.ContractBeforeSourceResidualAndOverlapingCheck;
 import helpers.validators.ContractEndContractCheck;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +21,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
@@ -144,7 +147,16 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Setter
   @OneToOne
   private Contract previousContract;
-  
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
   /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.

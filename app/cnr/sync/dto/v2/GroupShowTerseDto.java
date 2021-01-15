@@ -1,6 +1,9 @@
 package cnr.sync.dto.v2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
 import models.flows.Group;
@@ -20,13 +23,17 @@ public class GroupShowTerseDto {
   private String description;
   private LocalDate endDate;
   private PersonShowTerseDto manager;
+  private LocalDateTime updatedAt;
 
+  @JsonIgnore
+  @Inject
+  static ModelMapper modelMapper;
+  
   /**
    * Nuova instanza di un GroupShowTerseDto contenente i valori 
    * dell'oggetto group passato.
    */
   public static GroupShowTerseDto build(Group group) {
-    ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val groupDto = modelMapper.map(group, GroupShowTerseDto.class);
     groupDto.setManager(PersonShowTerseDto.build(group.manager));
