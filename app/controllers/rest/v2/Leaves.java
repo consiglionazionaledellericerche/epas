@@ -19,6 +19,7 @@ package controllers.rest.v2;
 
 import cnr.sync.dto.v2.AbsencePeriodDto;
 import cnr.sync.dto.v2.PersonShowTerseDto;
+import cnr.sync.dto.v3.AbsenceShowTerseDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
@@ -64,7 +65,7 @@ public class Leaves extends Controller {
    * @param year anno in cui cercare le aspettative
    */
   public static void byPersonAndYear(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode, Integer year) {
+      String fiscalCode, Integer year, boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     rules.checkIfPermitted(person.office);
@@ -77,7 +78,7 @@ public class Leaves extends Controller {
     }
     val absences = absenceDao.getAbsencesByDefaultGroup(
         Optional.of(person), start, Optional.of(end), DefaultGroup.G_ASPETTATIVA);
-    val absencePeriods = toAbsencesPeriods(absences);
+    val absencePeriods = toAbsencesPeriods(absences, includeDetails);
 
     renderJSON(gsonBuilder.create().toJson(absencePeriods));
   }
@@ -90,7 +91,8 @@ public class Leaves extends Controller {
    * @param codeId sedeId di attestati
    * @param year anno in cui cercare le aspettative
    */
-  public static void byOfficeAndYear(Long id, String code, String codeId, Integer year) {
+  public static void byOfficeAndYear(Long id, String code, String codeId, Integer year,
+      boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = Offices.getOfficeFromRequest(id, code, codeId);
     rules.checkIfPermitted(office);
@@ -102,7 +104,7 @@ public class Leaves extends Controller {
     }
     val absences = absenceDao.getAbsencesByDefaultGroup(
         Optional.absent(), start, Optional.of(end), DefaultGroup.G_ASPETTATIVA);
-    val absencePeriods = toAbsencesPeriods(absences);
+    val absencePeriods = toAbsencesPeriods(absences, includeDetails);
 
     renderJSON(gsonBuilder.create().toJson(absencePeriods));
   }
@@ -112,7 +114,8 @@ public class Leaves extends Controller {
    * persona e data.
    */ 
   @Util
-  private static List<AbsencePeriodDto> toAbsencesPeriods(List<Absence> absences) {
+  private static List<AbsencePeriodDto> toAbsencesPeriods(List<Absence> absences,
+      boolean includeDetails) {
     List<AbsencePeriodDto> aps = Lists.newArrayList();
     LocalDate previousDate = null;
     String previousCode = null;
@@ -134,6 +137,9 @@ public class Leaves extends Controller {
         aps.add(currentAbsencePeriod);
       } else {
         currentAbsencePeriod.setEnd(JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
+      }
+      if (includeDetails) {
+        currentAbsencePeriod.getAbsences().add(AbsenceShowTerseDto.build(absence));
       }
       previousPerson = absence.personDay.person;
       previousCode = absence.absenceType.code;

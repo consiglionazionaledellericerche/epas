@@ -17,7 +17,10 @@
 
 package cnr.sync.dto.v2;
 
+import cnr.sync.dto.v3.AbsenceShowTerseDto;
+import com.google.common.collect.Lists;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -35,5 +38,5 @@ public class AbsencePeriodDto {
   private final String code;
   private final LocalDate start;
   private LocalDate end;
-
+  private List<AbsenceShowTerseDto> absences = Lists.newArrayList();
 }

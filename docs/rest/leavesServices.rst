@@ -1,5 +1,5 @@
-Consultazione situazione giornaliera dipendenti via REST
-========================================================
+Consultazione Periodi di Aspettativa dei dipendenti via REST
+============================================================
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione dei periodi di 
 aspettativa del personale di una sede. 
@@ -25,8 +25,8 @@ ruolo *Lettore informazioni*.
 
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
-Congedi per persona e anno (byPersonAndYer)
-=============================================
+Aspettative per persona e anno (byPersonAndYer)
+===============================================
 Le informazioni relative alle aspettative di un singolo dipendente in uno spefico anno sono 
 disponibili tramite una HTTP GET all'indirizzo */rest/v2/leaves/byPersonAndYear*.
 
@@ -51,8 +51,12 @@ l'anno selezionato
       "end":"2020-06-02"}
   ]
 
-Congedi per ufficio e anno (byOfficeAndYear)
-=============================================
+Per avere anche la lista delle assenze associate al periodo di aspettativa utilizzare nella chiamata
+REST il parametro *includeDetails=true*, nel JSON di risposta sarà popolato per ogni periodo di 
+aspettativa il campo *absences* con la lista delle assenze nel periodo. 
+
+Aspettative per ufficio e anno (byOfficeAndYear)
+================================================
 
 Analogamente ai metodi precedenti è possibile avere le informazioni annuali di tutte le aspettative 
 dei dipendenti di una sede tramite una HTTP GET all'indirizzo */rest/v2/leaves/byOfficeAndYear*.
@@ -83,3 +87,8 @@ sede per l'anno selezionato.
       "end":"2020-09-23"
     }
   ]
+
+Anche in questo caso per avere anche la lista delle assenze associate al periodo di aspettativa 
+utilizzare nella chiamata REST il parametro *includeDetails=true*, nel JSON di risposta sarà 
+popolato per ogni periodo di aspettativa il campo *absences* con la lista delle assenze nel 
+periodo.
