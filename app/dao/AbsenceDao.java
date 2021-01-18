@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Joiner;
@@ -15,12 +32,15 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import lombok.val;
 import models.Contract;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QJustifiedType;
@@ -31,7 +51,8 @@ import org.joda.time.LocalDate;
 /**
  * Dao per l'accesso alle informazioni delle Absence.
  *
- * @author dario
+ * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
  */
 public class AbsenceDao extends DaoBase {
 
@@ -434,8 +455,41 @@ public class AbsenceDao extends DaoBase {
         .where(absence.externalIdentifier.eq(externalId)).fetch();
   }
   
-  
-  
+  /**
+   * La lista di assenze filtrata per persona, data inizio, fine, defaultGroup a cui 
+   * apparte le assenze da cercare.
+   * @param person la persona di cui si vogliono le assenze
+   * @param start la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @param defaultGroup i tipi di assenza
+   * @return la lista di assenze filtrata per persona, data inizio, data fine e defaultGroup.
+   */
+  public List<Absence> getAbsencesByDefaultGroup(
+      Optional<Person> person, LocalDate start, Optional<LocalDate> end,
+      DefaultGroup defaultGroup) {
+    final QAbsence absence = QAbsence.absence;
 
+    BooleanBuilder condition = 
+        new BooleanBuilder(
+            absence.personDay.date.goe(start));
+    if (person.isPresent()) {
+      condition.and(absence.personDay.person.eq(person.get()));
+    }
+    if (end.isPresent()) {
+      condition.and(absence.personDay.date.loe(end.get()));
+    }
+    condition.and(absence.absenceType.code.in(
+        defaultGroup.takable.takableCodes
+          .stream().map(tc -> tc.getCode()).collect(Collectors.toList())));
+    
+    val query = getQueryFactory().selectFrom(absence).where(condition); 
+    if (person.isPresent()) {
+      return query.orderBy(absence.personDay.date.asc()).fetch();
+    }
+    return query.orderBy(absence.personDay.person.surname.asc(), 
+        absence.personDay.person.name.asc(), 
+        absence.personDay.person.id.asc(), 
+        absence.personDay.date.asc()).fetch();
+  }
 
 }
