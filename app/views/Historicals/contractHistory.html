@@ -3,8 +3,8 @@
 <div class="container-fluid">
 
 #{if found}
-	#{panel title:'Storico contratto ' + contract.person.surname + '-' +contract.person.name, color:'primary'}
-	#{if historyContract.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
+	#{panel title:'Storico contratto ' + contract.person.surname + ' ' +contract.person.name, color:'primary'}
+	#{if contractModifications == null || contractModifications.empty } Non ci sono modifiche al contratto in oggetto presenti nello storico. #{/if}
 	#{else}
 	  <!-- Tabella riepilogativa -->	  
 	

@@ -1,10 +1,10 @@
-#{modalAsync id:'defaultModal',  title:'Storico contratto' }
+#{modalAsync id:'defaultModal',  title:'Storico inizializzazione' }
 
 <div class="container-fluid">
 
 #{if found}
-	#{panel title:'Storico contratto ' + contract.person.surname + '-' +contract.person.name, color:'primary'}
-	#{if historyContract.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
+	#{panel title:'Storico inizializzazione ' + contract.person.surname + '-' +contract.person.name, color:'primary'}
+	#{if initializationModifications.empty } Non ci sono modifiche alla inizializzazione in oggetto. #{/if}
 	#{else}
 	  <!-- Tabella riepilogativa -->	  
 	
@@ -21,7 +21,7 @@
 	      
 	    </tr>
 	
-	    #{list items:historyContract, as:'contract'}
+	    #{list items:initializationModifications, as:'contract'}
 	    <tr class="warning">
 	      
 	      <td>${contract.formattedRevisionDate()}</td>
