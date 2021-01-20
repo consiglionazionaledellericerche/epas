@@ -88,11 +88,12 @@
       #{/secure.check}
   	  <table class="table table-hover">
 		<tr class="warning">
-			<th>Data inizio contratto</th>
-			<th>Data fine contratto</th>
-			<th>Data terminazione<br>esperienza</th>
-			<th>Continuativo del precedente</th>
+			<th>Inizio contratto</th>
+			<th>Fine contratto</th>
+			<th>Terminazione<br>esperienza</th>
+			<th>Continuativo del<br> precedente</th>
 			<th>Gestisci</th>
+			<th>Storico</th>
 		</tr>
     #{list items:contractList, as:'contract'}
  		<tr>
@@ -123,6 +124,9 @@
         			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
       			#{/b.buttons}
 		</td>
+		<td>#{secure.link @Historicals.contractHistory(contract.value.id, 'CONTRACT'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
 		</tr>
 	  #{/list}
 	  </table>

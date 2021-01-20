@@ -30,6 +30,7 @@ public class HistoricalDao {
   private static Provider<EntityManager> emp;
 
   /**
+   * Ritorna l'oggetto revisione.
    * @param id the id to search.
    * @return the Revision object.
    */
@@ -41,6 +42,7 @@ public class HistoricalDao {
 
 
   /**
+   * Ritorna l'istanza di un'entità ad una specifica revisione.
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @param revisionId the revision id
@@ -57,6 +59,12 @@ public class HistoricalDao {
     return HistoryViews.historicalViewOf(cls, current, history, date);
   }
 
+  /**
+   * Ritorna l'ultima revisione di una specifica entità.
+   * @param cls Entity Class to search
+   * @param id the entity primary key
+   * @return last revision of specified entity.
+   */
   @SuppressWarnings("rawtypes")
   public static HistoryValue lastRevisionOf(Class<? extends BaseModel> cls, long id) {
     List<HistoryValue> lastRevisions = lastRevisionsOf(cls, id);
@@ -67,6 +75,7 @@ public class HistoricalDao {
   }
 
   /**
+   * La lista di revisioni della specifica entità.
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return List of revisions for the specified entity instance.
@@ -83,6 +92,7 @@ public class HistoricalDao {
 
 
   /**
+   * La versione precedente.
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return la versione precedente del istanza individuata da cls e id.
