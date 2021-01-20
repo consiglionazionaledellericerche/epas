@@ -57,15 +57,6 @@ public class Group extends MutableModel {
 
   public LocalDate endDate;
 
-  @NotAudited
-  public LocalDateTime updatedAt;
-
-  @PreUpdate
-  @PrePersist
-  private void onUpdate() {
-    this.updatedAt = LocalDateTime.now();
-  }
-
   /**
    * Verificat se un gruppo è sempre attivo alla data attuale.
    * @return true se il gruppo non ha una data di fine passata.
