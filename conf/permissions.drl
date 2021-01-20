@@ -1020,6 +1020,12 @@ when
     "Competences.totalOvertimeHours",
     "Competences.editReperibility",
     "Competences.editShift",
+    /* Storico delle modifiche alle competenze */
+    "Historicals.competenceHistory",
+    
+    /* Storico delle modifiche ai contratti*/
+    "Historicals.contractHistory",
+        
     "Configurations.personShow",
     "Configurations.show",
     /* Permesso per la visualizzazione delle tab di configurazione */
@@ -1462,6 +1468,11 @@ when
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1549,6 +1560,11 @@ when
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1669,6 +1685,11 @@ when
         "Competences.deletePersonReperibility",
         "Competences.saveReperibilityConfiguration",
         "Competences.manageReperibility",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
         
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1820,6 +1841,11 @@ when
         "Competences.deletePersonReperibility",
         "Competences.saveReperibilityConfiguration",
         "Competences.manageReperibility",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",

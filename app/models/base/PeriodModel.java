@@ -8,10 +8,12 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
+@Audited
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel 
     implements IPeriodModel, Comparable<PeriodModel> {
