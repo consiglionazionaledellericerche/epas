@@ -7,7 +7,6 @@ import dao.history.HistoryValue;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import manager.HistoricalManager;
 import models.Competence;
 import models.Contract;
@@ -64,7 +63,7 @@ public class Historicals extends Controller {
       for (HistoryValue<Contract> story : historyContract) {
         
         Contract con = story.value;
-        log.info("Contract id = {}, revision = {}, perseoId = {}, "
+        log.debug("Contract id = {}, revision = {}, perseoId = {}, "
             + "beginDate = {}, endDate = {}, endContract = {}", 
             contract.id, story.revision.id, con.perseoId, con.beginDate, con.endDate, 
             con.endContract);  

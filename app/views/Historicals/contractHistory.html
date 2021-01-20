@@ -33,8 +33,8 @@
 	      <td>${contract.value.beginDate}</td>
 	      <td>${contract.value.endDate}</td>
 	      <td>${contract.value.endContract}</td>
-	      <td>${contract.value.onCertificate}</td>
-	      <td>${contract.value.getPreviousContract() != null ? 'SI' : 'NO'}</td>
+	      <td>${messages.get('contract.onCertificate.' + contract.value.onCertificate)}</td>
+	      <td>${contract.value.getPreviousContract() != null ? 'Si' : 'No'}</td>
 	    </tr>
 	    #{/list}
 	  </table>
