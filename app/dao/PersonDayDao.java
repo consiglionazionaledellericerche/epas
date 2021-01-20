@@ -14,6 +14,7 @@ import models.PersonDay;
 import models.absences.Absence;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.enumerate.StampTypes;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
@@ -269,7 +270,7 @@ public class PersonDayDao extends DaoBase {
   }
   
   /**
-   * Metodo che ritorna la lista dei giorni di lavoro tra begin e date per i dipendenti della 
+   * Metodo che ritorna la lista dei giorni di lavoro tra begin ed end per i dipendenti della 
    * sede office.
    * Usato nel controllers.rest persondays.
    * @param office la sede per cui si cercano i giorni di lavoro
@@ -286,6 +287,39 @@ public class PersonDayDao extends DaoBase {
         .leftJoin(personDay.person, person)
         .where(person.office.eq(office).and(personDay.date.between(begin, end)))
         .orderBy(personDay.date.asc()).fetch();
-        
   }
+  
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e emd
+   * e che abbia almeno una timbratura per lavoro fuori sede.
+   */
+  public List<PersonDay> getOffSitePersonDaysByPersonInPeriod(
+      Person person, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.eq(person),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e emd
+   * e che abbia almeno una timbratura per lavoro fuori sede.
+   */
+  public List<PersonDay> getOffSitePersonDaysByOfficeInPeriod(
+      Office office, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.office.eq(office),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }  
 }
