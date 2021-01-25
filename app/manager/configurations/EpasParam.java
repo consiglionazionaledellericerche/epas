@@ -577,11 +577,11 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
-//#####################################################################
+  //#####################################################################
   //FLOWS PARAMS COMPETENCES
   
   /**
-   * Attivazione o meno delle richieste di straordinario
+   * Attivazione o meno delle richieste di straordinario.
    */
   ENABLE_COMPETENCE_FLOWS(
       "enable_competence_flows",
