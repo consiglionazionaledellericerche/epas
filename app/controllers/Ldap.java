@@ -48,7 +48,9 @@ public class Ldap extends Controller {
    * Autenticazione tramite LDAP.
    * 
    */
-  public static void authenticate(String username, String password) {
+  public static void authenticate(String username, String password, 
+      Optional<String> failedLoginRedirect,
+      Optional<String> successLoginRedirect) {
     log.debug("Richiesta autenticazione tramite credenziali LDAP username={}", username);
 
     Optional<LdapUser> ldapUser = ldapService.authenticate(username, password);
@@ -56,7 +58,7 @@ public class Ldap extends Controller {
     if (!ldapUser.isPresent()) {
       log.info("Failed login for {}", username);
       flash.error("Oops! Username o password sconosciuti");
-      redirect("/login");
+      redirect(failedLoginRedirect.or("/login"));
     }
 
     val eppn = ldapUser.get().getEppn();
@@ -66,7 +68,7 @@ public class Ldap extends Controller {
           username, ldapService.getEppnAttributeName());
       flash.error("Oops! %s per %s non presente in LDAP. Contattare l'helpdesk.", 
           ldapService.getEppnAttributeName(), username);
-      redirect("/login");
+      redirect(failedLoginRedirect.or("/login"));
     }
 
     log.debug("LDAP user = {}", ldapUser.get());
@@ -87,14 +89,18 @@ public class Ldap extends Controller {
       log.trace("Permission list for {} {}: {}",
           person.name, person.surname, person.user.usersRolesOffices);
       
-      redirectToOriginalUrl();
-      
+      if (successLoginRedirect.isPresent()) {
+        redirect(successLoginRedirect.get());
+      } else {
+        redirectToOriginalUrl();
+      }
+
     } else {
       log.warn("Person with {} {} successfully logged in LDAP but unknonw to ePAS", 
           ldapService.getEppnAttributeName(), eppn);
       flash.error("Oops! %s %s non riconosciuto da ePAS. Contattare l'helpdesk.", 
           ldapService.getEppnAttributeName(), eppn);
-      redirect("/login");
+      redirect(failedLoginRedirect.or("/login"));
     }
   }
 }
