@@ -31,6 +31,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Util;
 import play.mvc.With;
 
 @With(Resecure.class)
@@ -121,6 +122,16 @@ public class Clocks extends Controller {
     }
   }
 
+  @NoCheck
+  public static void clockLdapLogin(Person person, String password) {
+    
+  }
+  
+  @Util
+  private static void checkIpEnabled() {
+    
+  }
+  
   /**
    * Ritorna la situazione giornaliera della persona loggata.
    */
