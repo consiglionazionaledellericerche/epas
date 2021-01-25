@@ -11,10 +11,12 @@ import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import java.util.List;
 import javax.persistence.EntityManager;
+import manager.configurations.EpasParam;
 import models.Institute;
 import models.Office;
 import models.Role;
 import models.User;
+import models.query.QConfiguration;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
@@ -76,7 +78,22 @@ public class OfficeDao extends DaoBase {
     return getQueryFactory().selectFrom(office).where(office.endDate.isNull()).fetch();
   }
 
-  
+  /**
+   * Uffici che hanno abilitato il parametro per effettuare le timbrature
+   * via web.
+   */
+  public List<Office> getOfficesWebStampingEnabled() {
+    final QOffice office = QOffice.office;
+    final QConfiguration configuration = QConfiguration.configuration;
+    return getQueryFactory().selectFrom(office)
+        .join(office.configurations, configuration)
+        .where(
+            office.endDate.isNull(), 
+            configuration.epasParam.eq(EpasParam.WEB_STAMPING_ALLOWED),
+            configuration.fieldValue.equalsIgnoreCase("true"))
+        .distinct().fetch();
+  }
+
   /**
    * L'ufficio con il codice code.
    * @param code il codice della sede

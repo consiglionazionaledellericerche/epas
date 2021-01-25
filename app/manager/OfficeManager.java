@@ -9,6 +9,7 @@ import dao.UsersRolesOfficesDao;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType;
@@ -20,6 +21,7 @@ import models.User;
 import models.UsersRolesOffices;
 import play.Play;
 
+@Slf4j
 public class OfficeManager {
 
   public static final String SKIP_IP_CHECK = "skip.ip.check";
@@ -66,7 +68,8 @@ public class OfficeManager {
 
 
   /**
-   * Le sedi che hanno almeno uno degli ip abilitato per timbrature.
+   * Le sedi che hanno la timbratura web abilitata ed almeno uno degli ip 
+   * abilitato per timbrature.
    *
    * @param ipAddresses indirizzi ip da verificare
    * @return Set di uffici abilitati dagli indirizzi ip passati come parametro
@@ -77,9 +80,13 @@ public class OfficeManager {
     Preconditions.checkState(!ipAddresses.isEmpty());
 
     if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
+      log.debug("Skipped IP check");
       return new HashSet<>(officeDao.getAllOffices());
     }
 
+    List<Office> officesWebStampingEnabled = officeDao.getOfficesWebStampingEnabled();
+    log.debug("officesWebStampingEnabled= {}", officesWebStampingEnabled);
+    
     Set<Office> offices = Sets.newHashSet();
     List<Configuration> configurationWithType = configurationManager
         .configurationWithType(EpasParam.ADDRESSES_ALLOWED);
@@ -88,7 +95,8 @@ public class OfficeManager {
       IpList ipList = (IpList) EpasParamValueType.parseValue(EpasParamValueType.IP_LIST,
           (String) configuration.getValue());
       for (String ip : ipAddresses) {
-        if (ipList != null && ipList.ipList.contains(ip)) {
+        if (ipList != null && ipList.ipList.contains(ip) 
+            && officesWebStampingEnabled.contains(configuration.office)) {
           offices.add(configuration.office);
         }
       }
