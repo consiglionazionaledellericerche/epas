@@ -2567,6 +2567,37 @@ then
  $c.grant();
 end
 
+
+/*******************************************************************************
+ * Un dipendente può entrare nella modifica delle proprie timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanEditServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ Stamping(personDay.person == $p && StampType == StampTypes.MOTIVI_DI_SERVIZIO) from $p.personDays
+ $c: PermissionCheck(action == "Stampings.edit", target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanModifyServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $target: Stamping(personDay.person == $p && StampType == StampTypes.MOTIVI_DI_SERVIZIO)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
+  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
+ //eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+ System.out.print("Grant= "+$c);
+end
+
+
 /*******************************************************************************
  * Un ricercatore tecnologo se può gestirsi le ferie può accedere alle actions:
  * (no target)
