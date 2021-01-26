@@ -1,6 +1,6 @@
 <div id="login-idp">
   #{if ldapAuthEnabled}
-	  #{form @Ldap.authenticate(), id:'login-form-idp', role:'form'}
+	  #{form @Clocks.ldapLogin(), id:'login-form-idp', role:'form'}
 	    <!-- User e Password -->
 	    <label>Username</label>
 	    <input class="form-control margin-bottom" placeholder="Username"
