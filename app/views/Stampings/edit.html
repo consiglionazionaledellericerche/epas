@@ -52,6 +52,11 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{else}
 	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
 	  #{/else}
+	  
+	  #{if stampTypes.size() == 1 && stampTypes.get(0).equals(models.enumerate.StampTypes.MOTIVI_DI_SERVIZIO)}
+	  	#{f.input 'stamping.reason' /}
+	  	#{f.input 'stamping.place' /}
+	  #{/if}
 
 	  #{f.input 'stamping.note' /}
 
