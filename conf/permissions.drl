@@ -2575,7 +2575,7 @@ rule employeeCanEditServiceStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $c: PermissionCheck(action == "Stampings.edit", target == null, granted == false)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == null, granted == false)
 then
  $c.grant();
 end
@@ -2593,7 +2593,6 @@ when
  //eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
 then
  $c.grant();
- System.out.print("Grant= "+$c + ". CurrentPerson = " + $p + ". stamping.personDay.person = " + $target.personDay.person);
 end
 
 
