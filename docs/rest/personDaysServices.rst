@@ -28,7 +28,7 @@ L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic 
 Cartellino byPerson (giornaliero e/o mensile)
 =============================================
 Le informazioni di un singolo giorno sulle timbrature e assenze di una persona è fruibile tramite 
-una HTTP GET all'indirizzo */rest/v3/personDays/getDaySituation*.
+una HTTP GET all'indirizzo **/rest/v3/personDays/getDaySituation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone: 
 *id, email, eppn, perseoPersonId, fiscalCode*, la data tramite il campo *date*.
@@ -40,7 +40,7 @@ cambiatelo con un utente appropriato per la vostra sede.
 
 Le informazioni mensili di una persona si ottengono in modo simile al precedente passando al posto 
 del parametro *date* i parametri *year* e *month* con un GET all'indirizzo 
-*/rest/v3/personDays/getMonthSituationByPerson*.
+**/rest/v3/personDays/getMonthSituationByPerson**.
 
 ::
   $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getMonthSituationByPerson email==galileo.galilei@cnr.it year==2020 month==10
