@@ -217,6 +217,20 @@
       </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.PARENTAL_LEAVE) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le assenze per congedo parentale.
+      Assicurarsi che per il dipendente sia presente in anagrafica almeno un figlio. In caso contrario, inserirlo.
+      </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHILD_ILLNESS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le assenze per malattia figlio.
+      Assicurarsi che per il dipendente sia presente in anagrafica almeno un figlio. In caso contrario, inserirlo.
+      </p> 
+    #{/if}
+    
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
     #{/if}

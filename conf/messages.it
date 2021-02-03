@@ -1129,6 +1129,8 @@ DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 parente disabile
 RIGHT_TO_STUDY=Permessi per diritto allo studio
 COVID_19=Auto inserimento codice per emergenza COVID-19
 ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
+PARENTAL_LEAVE=Auto inserimento congedi parentali
+CHILD_ILLNESS=Auto inserimento malattia figlio
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
