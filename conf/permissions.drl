@@ -2567,6 +2567,33 @@ then
  $c.grant();
 end
 
+
+/*******************************************************************************
+ * Un dipendente può entrare nella modifica delle proprie timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanEditServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanModifyServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $target: Stamping(this.getOwner() == $p && stampType == StampTypes.MOTIVI_DI_SERVIZIO)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
+then
+ $c.grant();
+end
+
+
 /*******************************************************************************
  * Un ricercatore tecnologo se può gestirsi le ferie può accedere alle actions:
  * (no target)
