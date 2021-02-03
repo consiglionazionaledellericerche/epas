@@ -55,7 +55,7 @@ persone:
      "number": "9802",
      "office": {
        "code": "044000",
-       "codeId": "233400",
+       "codeId": "223400",
        "id": 101,
        "name": "IIT - Pisa"
      },

@@ -54,7 +54,7 @@ La risposta alla creazione del gruppo sarà del tipo:
     "name": "Gruppo Test",
     "office": {
         "code": "044000",
-        "codeId": "233400",
+        "codeId": "223400",
         "id": 101,
         "name": "IIT - Pisa"
     },

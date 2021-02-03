@@ -20,7 +20,6 @@ public class PersonShowTerseDto {
   private String email;
   private String number; //Matricola
   private String eppn;
-  private LocalDateTime updatedAt;
 
   /**
    * Nuova instanza di un PersonShowTerseDto contenente i valori 
