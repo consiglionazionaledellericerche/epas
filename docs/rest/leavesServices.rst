@@ -28,7 +28,7 @@ L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic 
 Aspettative per persona e anno (byPersonAndYer)
 ===============================================
 Le informazioni relative alle aspettative di un singolo dipendente in uno spefico anno sono
-disponibili tramite una HTTP GET all'indirizzo */rest/v2/leaves/byPersonAndYear*.
+disponibili tramite una HTTP GET all'indirizzo **/rest/v2/leaves/byPersonAndYear**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
 *id, email, eppn, perseoPersonId, fiscalCode*, l'anno tramite il campo *year*.
@@ -45,7 +45,14 @@ l'anno selezionato
   [
     {
       "person":
-        {"id":9999,"fullname":"Galileo Galilei","fiscalCode":null,"email":"galileo.galilei@.cnr.it","number":"99999","eppn":null,"updatedAt":"2021-01-07T16:38:54.223763"},
+        {
+          "id":9999, 
+          "fullname":"Galileo Galilei",
+          "fiscalCode":null,
+          "email":"galileo.galilei@cnr.it",
+          "number":"9802",
+          "eppn":"galileo.galilei@cnr.it",
+        },
       "code":"54A17",
       "start":"2020-01-01",
       "end":"2020-06-02"}
@@ -55,17 +62,18 @@ Per avere anche la lista delle assenze associate al periodo di aspettativa utili
 REST il parametro *includeDetails=true*, nel JSON di risposta sarà popolato per ogni periodo di
 aspettativa il campo *absences* con la lista delle assenze nel periodo.
 
+
 Aspettative per ufficio e anno (byOfficeAndYear)
 ================================================
 
 Analogamente ai metodi precedenti è possibile avere le informazioni annuali di tutte le aspettative
 dei dipendenti di una sede tramite una HTTP GET all'indirizzo **/rest/v2/leaves/byOfficeAndYear**.
 
-La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *233400*.
-Negli esempio successivi sostituite *233400* con il *sedeId* della vostra sede.
+La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *223400*.
+Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
 ::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/leaves/byOfficeAndYear sedeId==233400 year==2020
+  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/leaves/byOfficeAndYear sedeId==223400 year==2020
 
 Il JSON restituto contiene una lista con le eventuali aspettative di tutti i dipendenti della
 sede per l'anno selezionato.
@@ -74,14 +82,28 @@ sede per l'anno selezionato.
   [
     {
       "person":
-        {"id":9999, "fullname":"Galileo Galilei", "fiscalCode":null, "email":"galileo.galilei@cnr.it", "number":"99999", "eppn":null, "updatedAt":"2021-01-07T16:38:54.223763"},
+        {
+          "id" : 1234,
+          "fullname" : "Galileo Galilei",
+          "fiscalCode" : "GLLGLL74P10G702B",
+          "email" : "galileo.galilei@cnr.it" 
+          "number" : "9802",
+          "eppn" : "galileo.galilei@cnr.it"
+        },
       "code":"54A17",
       "start":"2020-01-01",
       "end":"2020-06-02"
     },
     {
       "person":
-        {"id":9999, "fullname":"Leonardo Fibonacci","fiscalCode":null,"email":"leonardo.fibonacci@cnr.it","number":"99998","eppn":null,"updatedAt":"2021-01-07T16:38:54.223763"},
+        {
+          "id" : 1235, 
+          "fullname" : "Leonardo Fibonacci",
+          "fiscalCode" : "FBNLRD74P10G702G",
+          "email" : "leonardo.fibonacci@cnr.it",
+          "number":"9801",
+          "eppn":"leonardo.fibonacci@cnr.it",
+        },
       "code":"54A17",
       "start":"2020-03-06",
       "end":"2020-09-23"
