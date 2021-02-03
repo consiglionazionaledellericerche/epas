@@ -269,13 +269,19 @@ public class Stampings extends Controller {
     final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
         .stampings(stamping.id);
 
+    boolean ownStamping = false;
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
+
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
     }
+    if (Security.getUser().isPresent() && person.equals(Security.getUser().get().person)
+        && !Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      ownStamping = true;
+    }
 
-    render(stamping, person, date, historyStamping);
+    render(stamping, person, date, historyStamping, ownStamping);
   }
 
   /**
