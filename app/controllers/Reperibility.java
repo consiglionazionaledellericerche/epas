@@ -305,6 +305,7 @@ public class Reperibility extends Controller {
     log.debug("update: Received reperebilityPeriods {}", body);
     if (body == null) {
       badRequest();
+      return;
     }
 
     //PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);

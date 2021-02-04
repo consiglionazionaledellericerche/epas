@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest.v2;
 
 import cnr.sync.dto.v2.WorkingTimeTypeShowDto;
@@ -50,10 +67,10 @@ public class WorkingTimeTypes extends Controller {
     if (wtt.office != null) {
       rules.checkIfPermitted(wtt.office);
     }
- 
+
     renderJSON(gsonBuilder.create().toJson(WorkingTimeTypeShowDto.build(wtt)));
   }
-  
+
   /**
    * Lista JSON delle tipologie di orario di lavoro che appartengono alla sede
    * individuata con i parametri passati. 
@@ -65,5 +82,5 @@ public class WorkingTimeTypes extends Controller {
           .map(WorkingTimeTypeShowTerseDto::build).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
   }
-  
+
 }

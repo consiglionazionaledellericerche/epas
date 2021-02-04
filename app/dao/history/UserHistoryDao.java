@@ -26,6 +26,9 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 
+/**
+ * DAO per la UserHistory.
+ */
 public class UserHistoryDao {
 
   private final Provider<AuditReader> auditReader;
@@ -37,7 +40,7 @@ public class UserHistoryDao {
   
   /**
    * La lista delle revisioni di un utente.
-   * 
+   *
    * @param userId l'identificativo dell'utente
    * @return la lista delle revisioni sulla modifica di un utente.
    */

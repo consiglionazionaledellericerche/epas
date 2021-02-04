@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest.v2;
 
 
@@ -38,6 +55,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per consultazione via REST dei dati dei riepiloghi mensili.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Certifications extends Controller {
@@ -110,6 +130,7 @@ public class Certifications extends Controller {
   /**
    * Metodo rest che permette di ritornare una lista contenente le informazioni mensili
    * del dipendente (assenze, competenze, ore di formazione, buoni pasto).
+   *
    * @param email l'indirizzo mail della persona
    * @param eppn il campo eppn della persona
    * @param personPersoId l'identificativo anagrafico della persona
@@ -142,11 +163,12 @@ public class Certifications extends Controller {
     renderJSON(gson.toJson(dto));
 
   }
-  
+
   /**
    * Metodo che ritorna la lista degli oggetti contenenti le info mensili per la generazione
    * delle buste paga verso sistemi esterni per tutti i dipendenti della sede identificata
    * da sedeId nell'anno year e nel mese month.
+   *
    * @param sedeId l'identificativo della sede
    * @param year l'anno
    * @param month il mese
@@ -177,6 +199,7 @@ public class Certifications extends Controller {
   /**
    * Metodo privato che permette la generazione di un dto contenente informazioni
    * mensili del dipendente.
+   *
    * @param map la mappa contenente le informazioni mensili da rielaborare
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -243,6 +266,7 @@ public class Certifications extends Controller {
   
   /**
    * Metodo privato per la ricerca delle assenze.
+   *
    * @param person la persona di cui cercare le assenze
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -323,4 +347,3 @@ public class Certifications extends Controller {
     return absences;
   }
 }
-

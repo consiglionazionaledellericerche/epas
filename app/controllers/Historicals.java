@@ -53,6 +53,7 @@ public class Historicals extends Controller {
     final Contract contract = Contract.findById(contractId);
     if (contract == null) {
       render(found);
+      return;
     }
     found = true;
     List<HistoryValue<Contract>> historyContract = contractHistoryDao.contracts(contractId);
