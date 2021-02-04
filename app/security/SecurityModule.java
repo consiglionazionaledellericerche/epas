@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package security;
 
 import com.google.common.base.Optional;
@@ -16,7 +33,7 @@ import play.mvc.Http;
 /**
  * Unione di injection con il play.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @AutoRegister
 public class SecurityModule implements Module {
@@ -31,6 +48,9 @@ public class SecurityModule implements Module {
     return Http.Request.current().action;
   }
 
+  /**
+   * Fornisce la mappa con l'esito dei controlli correnti per l'injection.
+   */
   @Named(REQUESTS_CHECKS)
   @Provides
   public Map<PermissionCheckKey, Boolean> currentChecks() {
@@ -53,6 +73,9 @@ public class SecurityModule implements Module {
     return SecureRulesPlugin.knowledgeBase;
   }
 
+  /**
+   * Fornisce l'operatore corrente per l'injection.
+   */
   @Provides
   public Optional<User> currentOperator() {
     if (Http.Request.current() != null) {

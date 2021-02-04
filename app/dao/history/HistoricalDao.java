@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.history;
 
 import com.google.common.base.Verify;
@@ -31,6 +48,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'oggetto revisione.
+   * 
    * @param id the id to search.
    * @return the Revision object.
    */
@@ -43,6 +61,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'istanza di un'entità ad una specifica revisione.
+   * 
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @param revisionId the revision id
@@ -61,6 +80,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'ultima revisione di una specifica entità.
+   * 
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return last revision of specified entity.
@@ -76,6 +96,7 @@ public class HistoricalDao {
 
   /**
    * La lista di revisioni della specifica entità.
+   * 
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return List of revisions for the specified entity instance.
@@ -93,6 +114,7 @@ public class HistoricalDao {
 
   /**
    * La versione precedente.
+   * 
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return la versione precedente del istanza individuata da cls e id.

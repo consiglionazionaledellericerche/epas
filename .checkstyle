@@ -5,7 +5,7 @@
     <property name="org.checkstyle.google.suppressionfilter.config" value="checkstyle-suppressions.xml"/>
     <property name="org.checkstyle.google.suppressionxpathfilter.config" value="checkstyle-xpath-suppressions.xml"/>
   </local-check-config>
-  <fileset name="all" enabled="false" check-config-name="Google Checks" local="false">
+  <fileset name="all" enabled="true" check-config-name="Google Checks" local="false">
     <file-match-pattern match-pattern="\.java" include-pattern="true"/>
     <file-match-pattern match-pattern="modules" include-pattern="false"/>
     <file-match-pattern match-pattern="docviewer" include-pattern="false"/>

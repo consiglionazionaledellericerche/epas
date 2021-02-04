@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package common.metrics;
 
 import com.google.common.base.Splitter;
@@ -35,7 +52,7 @@ import play.db.jpa.JPA;
 /**
  * Configurazione del sistema di metriche.
  * 
- * @author marco
+ * @author Marco Andreini
  # @see https://github.com/besmartbeopen/play1-base
  */
 @AutoRegister
@@ -52,6 +69,9 @@ public class MetricsModule extends AbstractModule {
    */
   public static final long DEFAULT_MIN_DURATION_REQUEST = 500_000_000L;
 
+  /**
+   * Fornisce il PrometheusMeterRegistry per l'injection.
+   */
   @Singleton
   @Provides
   public PrometheusMeterRegistry registry() {
@@ -76,6 +96,9 @@ public class MetricsModule extends AbstractModule {
         JPA.DEFAULT, ImmutableList.of());
   }
 
+  /**
+   * DataSource costruito tramite EntityManager.
+   */
   public DataSource getDataSource(Provider<EntityManager> emp) {
     val entityManagerFactory = emp.get().getEntityManagerFactory();
     ConnectionProvider cp = ((SessionFactory) entityManagerFactory).getSessionFactoryOptions()
@@ -94,6 +117,9 @@ public class MetricsModule extends AbstractModule {
     return new PostgreSQLDatabaseMetrics(getDataSource(emp), getDatabaseName());
   }
   
+  /**
+   * Fornisce una implementazione di IMinDurationCheck.
+   */
   @Provides
   @Singleton
   public IMinDurationCheck checker() {
