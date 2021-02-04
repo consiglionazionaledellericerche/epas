@@ -34,7 +34,7 @@ import play.mvc.Util;
 /**
  * Contiene i metodi per l'autentication tramite LDAP.
  * 
- * @author Cristian Lucchesi <cristian.lucchesi@iit.cnr.it>
+ * @author Cristian Lucchesi
  *
  */
 @Slf4j
@@ -87,7 +87,7 @@ public class Ldap extends Controller {
       flash.success("Benvenuto " + person.name + ' ' + person.surname);
       log.info("user {} successfully logged in using LDAP from ip {}", person.getFullname(),
           Http.Request.current().remoteAddress);
-        redirectToOriginalUrl();
+      redirectToOriginalUrl();
     }
   }
   
@@ -99,7 +99,7 @@ public class Ldap extends Controller {
    * 
    * @param ldapUser utente ldap di cui verificare l'esistenza su ePAS
    * @param failedLoginRedirect url a cui fare il login se non è stato
-   *    possibile trovare una Person corrispondente all'ldapUser passato.
+   *      possibile trovare una Person corrispondente all'ldapUser passato.
    */
   @Util
   public static Person getPersonByLdapUser(LdapUser ldapUser, 

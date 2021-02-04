@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package cnr.sync.consumers;
 
 import cnr.sync.deserializers.PersonDeserializer;
@@ -24,6 +41,8 @@ public class PeopleConsumer {
       .getProperty("perseo.rest.people");
 
   /**
+   * Preleva la persona da un endpoint REST presente in configurazione.
+   * 
    * @param id l'id della persona da cercare.
    * @return il ListenableFuture contenete la persona prelevata via REST da perseo.
    * @throws IllegalStateException nel caso la persona non si trovata.
@@ -43,6 +62,9 @@ public class PeopleConsumer {
     }, MoreExecutors.directExecutor());
   }
 
+  /**
+   * Preleva la lista delle persona da un endpoint REST presente in configurazione.
+   */
   public ListenableFuture<List<SimplePersonDto>> getPeople() throws IllegalStateException {
 
     ListenableFuture<WS.HttpResponse> future = JdkFutureAdapters
@@ -61,6 +83,9 @@ public class PeopleConsumer {
     }, MoreExecutors.directExecutor());
   }
 
+  /**
+   * Preleva l'associazione delle persone  di una sede da un endpoint REST.
+   */
   public ListenableFuture<Set<Person>> seatPeople(String code) throws IllegalStateException {
 
     final String url = URL_BASE + PEOPLE_ENDPOINT + Play.configuration
