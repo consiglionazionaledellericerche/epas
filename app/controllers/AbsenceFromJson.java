@@ -37,8 +37,8 @@ import play.mvc.Controller;
  *     "cristian.lucchesi@iit.cnr.it"},{"email" : "stefano.ruberti@iit.cnr.it"}]}'
  *     http://localhost:8888/absenceFromJson/absenceInPeriod .
  *
- * @author dario
- * @author arianna
+ * @author Dario Tagliaferri
+ * @author Arianna Del Soldato
  */
 @Slf4j
 public class AbsenceFromJson extends Controller {

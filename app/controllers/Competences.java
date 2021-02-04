@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -83,6 +100,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle competenze.
+ */
 @With({Resecure.class})
 @Slf4j
 public class Competences extends Controller {
@@ -507,6 +527,7 @@ public class Competences extends Controller {
 
   /**
    * Ritorna la form di inserimento della competenza alla persona.
+   *
    * @param personId l'id della persona
    * @param competenceId l'id della competenza
    * @param month        il mese
@@ -648,7 +669,7 @@ public class Competences extends Controller {
 
 
   /**
-   * Report. Esporta in formato .csv la situazione annuale degli straordinari
+   * Report. Esporta in formato .csv la situazione annuale degli straordinari.
    */
   public static void exportCompetences(Long officeId, int year, int month) {
     Office office = officeDao.getOfficeById(officeId);
@@ -772,7 +793,7 @@ public class Competences extends Controller {
 
   /**
    * restituisce il template per il responsabile di gruppo di lavoro contenente le informazioni su
-   * giorni di presenza, straordinari, ore a lavoro...
+   * giorni di presenza, straordinari, ore a lavoro.
    *
    * @param year  l'anno di riferimento
    * @param month il mese di riferimento
@@ -802,8 +823,9 @@ public class Competences extends Controller {
 
   /**
    * ricalcola tutti i valori del codice di competenza a presenza mensile recuperato dall'id 
-   *     passato come parametro per tutti i dipendenti della sede recuperata dall'id passato 
-   *     come parametro per l'anno e il mese passati come parametro.
+   * passato come parametro per tutti i dipendenti della sede recuperata dall'id passato 
+   * come parametro per l'anno e il mese passati come parametro.
+   *
    * @param officeId l'id della sede per cui fare i conteggi
    * @param codeId l'id del codice di competenza da controllare
    * @param year l'anno di riferimento
@@ -867,7 +889,8 @@ public class Competences extends Controller {
 
   /**
    * Metodo che renderizza la form di inserimento di un nuovo servizio da attivare
-   *     per la reperibilità.
+   * per la reperibilità.
+   *
    * @param officeId l'id dell'ufficio a cui associare il servizio
    */
   public static void addShift(Long officeId) {
@@ -906,6 +929,7 @@ public class Competences extends Controller {
 
   /**
    * Salva il servizio di turno.
+   *
    * @param cat il servizio per turno
    * @param office la sede a cui si vuole collegare il servizio
    *     metodo che persiste il servizio associandolo alla sede.
@@ -984,6 +1008,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che controlla e poi persiste la disabilitazione/abilitazione di un servizio.
+   *
    * @param shiftCategoryId l'id del servizio da disabilitare/abilitare
    * @param confirmed il booleano per consentire la persistenza di una modifica
    */
@@ -1044,6 +1069,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna la form di inserimento/modifica di un servizio.
+   *
    * @param shiftCategoryId l'id del servizio da editare
    */
   public static void editShift(Long shiftCategoryId) {
@@ -1116,6 +1142,7 @@ public class Competences extends Controller {
 
   /**
    * form che salva la nuova timetable e la associa alla sede passata come parametro.
+   *
    * @param timeTable la timetable da creare
    * @param officeId l'id della sede a cui associare la nuova timetable
    */
@@ -1134,6 +1161,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.
+   *
    * @param shiftCategoryId l'id del servzio da configurare
    */
   public static void configureShift(Long shiftCategoryId, int step, Long organizationShift,  
@@ -1262,6 +1290,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che ritorna al template le informazioni sull'attività passata come parametro.
+   *
    * @param shiftTypeId l'id dell'attività da configurare
    */
   public static void manageShiftType(Long shiftTypeId) {
@@ -1285,6 +1314,7 @@ public class Competences extends Controller {
 
   /**
    * Ritorna la form di associazione tra persona e turno.
+   *
    * @param id identificativo dell'associazione tra persona e turno
    */
   public static void handlePersonShiftShiftType(Long id) {
@@ -1296,6 +1326,7 @@ public class Competences extends Controller {
 
   /**
    * metodo per il salvataggio dell'associazione.
+   *
    * @param psst l'oggetto associazione tra persona e turno.
    */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
@@ -1307,6 +1338,7 @@ public class Competences extends Controller {
 
   /**
    * modifica i parametri dell'attività passata tramite id.
+   *
    * @param type l'attività di cui si vogliono modificare i parametri
    */
   public static void editActivity(ShiftType type, boolean considerEverySlot) {
@@ -1322,6 +1354,7 @@ public class Competences extends Controller {
 
   /**
    * Elimina l'attività di turno passata come parametro.
+   *
    * @param type l'attovità di turno
    */
   public static void deleteActivity(ShiftType type) {
@@ -1348,6 +1381,7 @@ public class Competences extends Controller {
 
   /**
    * ritorna la form di inserimento del personale da assegnare all'attività passata come parametro.
+   *
    * @param typeId l'id della attività a cui assegnare personale
    */
   public static void linkPeopleToShift(Long typeId) {
@@ -1383,6 +1417,7 @@ public class Competences extends Controller {
 
   /**
    * metodo che associa la persona all'attività.
+   *
    * @param person la persona in turno che deve prendere parte a un'attività
    * @param activity l'attività in turno in cui inserire la persona
    * @param beginDate la data di inizio partecipazione della persona all'attività in turno
@@ -1421,6 +1456,7 @@ public class Competences extends Controller {
 
   /**
    * rimuove una persona da una attività applicando la data di terminazione al periodo.
+   *
    * @param personShiftShiftTypeId l'id del personShiftShiftType da eliminare
    * @param confirmed booleano che determina se siamo alla prima chiamata del metodo o 
    *     alla conferma della rimozione
@@ -1448,6 +1484,7 @@ public class Competences extends Controller {
 
   /**
    * assegna la timetable al turno.
+   *
    * @param shift l'id del turno
    * @param cat il servizio a cui associare il turno
    * @param type l'attività di turno
@@ -1477,6 +1514,7 @@ public class Competences extends Controller {
 
   /**
    * genera la form di assegnamento delle persone al servizio di reperibilità.
+   *
    * @param reperibilityTypeId l'id del servizio di reperibilità
    */
   public static void manageReperibility(Long reperibilityTypeId) {
@@ -1496,6 +1534,7 @@ public class Competences extends Controller {
 
   /**
    * ritorna la form di gestione del personale afferente all'attività di reperibilità.
+   *
    * @param reperibilityTypeId l'id dell'attività di reperibilità
    */
   public static void linkPeopleToReperibility(Long reperibilityTypeId) {
@@ -1534,7 +1573,7 @@ public class Competences extends Controller {
 
   /**
    * impone una data di terminazione nell'associazione tra persona e attività.
-   * 
+   *
    * @param personReperibilityId l'id della persona associata all'attività
    * @param endDate data di fine esperienza
    * @param confirmed true se confermato, false se siamo alla prima fase di accesso al metodo
@@ -1564,6 +1603,7 @@ public class Competences extends Controller {
 
   /**
    * salva l'associazione persona-attività di reperibilità.
+   *
    * @param type l'attività di reperibilità
    * @param person la persona da associare all'attività in reperibilità
    * @param beginDate la data di inizio appartenenza all'attività

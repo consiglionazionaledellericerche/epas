@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -38,6 +55,7 @@ public class PrintTagsManager {
 
   /**
    * Injection.
+   *
    * @param stampingHistoryDao il dao dello storico delle timbrature
    * @param personDayHistoryDao il dao dello storico dei personday
    * @param personDayDao il dao dei personday
@@ -57,6 +75,7 @@ public class PrintTagsManager {
 
   /**
    * Metodo che ritorna le informazioni sullo storico delle timbrature del dipendente.
+   *
    * @param psDto il person stamping recap delle timbrature del dipendente
    * @return la lista di liste contenente le informazioni sullo storico delle timbrature.
    */
@@ -77,6 +96,7 @@ public class PrintTagsManager {
 
   /**
    * Metodo che ritorna le informazioni sulle timbrature fuori sede.
+   *
    * @param psDto il personStampingRecap contenente il recap delle timbrature del dipendente
    * @return la lista contenente tutte le timbrature fuori sede per la persona.
    */
@@ -104,6 +124,7 @@ public class PrintTagsManager {
   /**
    * Metodo che ritorna la mappa utente-insieme di date contenente le info su chi ha fatto 
    * le timbrature per ciascun giorno.
+   *
    * @param person la persona di cui considerare le timbrature
    * @param yearMonth l'anno/mese di riferimento
    * @return la mappa di utente-set di giorni contenente le informazioni su chi ha fatto le 
@@ -134,6 +155,7 @@ public class PrintTagsManager {
 
   /**
    * Ritorna La lista dei giorni festivi lavorati in turno.
+   *
    * @param psDto il personStampingRecap contenente le informazioni del mese
    * @return la lista di giorni festivi lavorati in turno.
    */

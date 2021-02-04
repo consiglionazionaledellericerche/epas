@@ -65,8 +65,8 @@ import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di straordinario dei dipendenti.
- * 
- * @author dario
+ *
+ * @author Dario Tagliaferri
  *
  */
 @Slf4j
@@ -105,7 +105,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
-   * 
+   *
    * @param competenceType il tipo di competenza
    */
   public static void list(CompetenceRequestType competenceType) {
@@ -163,7 +163,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Ritorna la form di richiesta di nuova competenza.
-   * 
+   *
    * @param personId l'id della persona che sta richiedendo la competenza
    * @param year l'anno
    * @param month il mese
@@ -220,7 +220,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Ritorna la form di richiesta cambio di reperibilità aggiornata coi dati richiesti.
-   * 
+   *
    * @param competenceRequest la richiesta di competenza
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -260,7 +260,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Metodo che permette il salvataggio di una richiesta di competenza.
-   * 
+   *
    * @param competenceRequest la richiesta di competenza da salvare
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -368,7 +368,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Metodo per l'eliminazione della richiesta di competenza.
-   * 
+   *
    * @param id l'identificativo della richiesta d competenza da eliminare
    */
   public static void delete(long id) {
@@ -384,7 +384,7 @@ public class CompetenceRequests extends Controller {
 
   /**
    * Renderizza la form in cui viene mostrata la richiesta.
-   * 
+   *
    * @param id l'identificativo della richiesta
    * @param type il tipo di richiesta
    */
@@ -399,7 +399,7 @@ public class CompetenceRequests extends Controller {
   
   /**
    * Permette l'approvazione della richiesta.
-   * 
+   *
    * @param id l'identificativo della richiesta
    */
   public static void approval(long id) {
@@ -424,7 +424,7 @@ public class CompetenceRequests extends Controller {
   
   /**
    * Metodo che permette il rifiuto della richiesta.
-   * 
+   *
    * @param id identificativo della richiesta di competenza
    * @param disapproval true se si rifiuta, false altrimenti
    * @param reason la motivazione al rifiuto

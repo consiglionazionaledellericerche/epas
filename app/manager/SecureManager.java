@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Preconditions;
@@ -9,10 +26,15 @@ import models.Office;
 import models.Role;
 import models.User;
 
+/**
+ * Manager per la gestione della sicurezza su uffici e persone.
+ *
+ */
 public class SecureManager {
 
   /**
    * La lista degli uffici permessi per l'utente user passato.
+   *
    * @param user l'utente 
    * @param rolesNames la lista dei ruoli
    * @return la lista degli uffici permessi per l'utente user passato come parametro.
@@ -75,7 +97,8 @@ public class SecureManager {
   }
 
   /**
-   * l'insieme degli uffici su cui user è Amm. tecnico.
+   * L'insieme degli uffici su cui user è Amm. tecnico.
+   *
    * @param user l'utente per cui si cercano gli uffici su cui è Amm. Tecnico
    * @return l'insieme degli uffici su cui user è Amm. tecnico.
    */
@@ -87,6 +110,7 @@ public class SecureManager {
 
   /**
    * Metodo usato per individuare sedi e persone amministrate da visualizzare nella navbar.
+   *
    * @param user l'utente
    * @return set
    */

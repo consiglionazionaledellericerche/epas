@@ -40,9 +40,12 @@ import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
 
+/**
+ * Classe per l'interfacciamento con il servizio REST di Timbrature per telelavoro.
+ *
+ */
 @Slf4j
 public class TeleworkStampingManager {
-
 
   private TeleworkComunication comunication;
 
@@ -54,6 +57,7 @@ public class TeleworkStampingManager {
   /**
    * Ritorna la lista di timbrature in telelavoro nel giorno pd con causale appartenente a quelle
    * riportate nella lista di causali da ricercare.
+   *
    * @param pd il personDay di riferimento
    * @param stampTypes la lista di causali da cercare
    * @return la lista di timbrature di lavoro in telelavoro con causale quelle passate come 
@@ -83,6 +87,7 @@ public class TeleworkStampingManager {
   /**
    * Chiama il metodo di comunicazione con l'applicazione esterna per salvare la timbratura
    * da telelavoro.
+   *
    * @param stamping la timbratura in telelavoro da salvare
    * @return 201 se la timbratura è stata salvata correttamente, altro numero altrimenti.
    */
@@ -98,6 +103,7 @@ public class TeleworkStampingManager {
 
   /**
    * Metodo che modifica una timbratura in telelavoro.
+   *
    * @param stamping la timbratura in telelavoro da modificare
    * @return il codice HTTP con il risultato della update della timbratura.
    */
@@ -114,6 +120,7 @@ public class TeleworkStampingManager {
 
   /**
    * Chiama la funzionalità di cancellazione della timbratura da telelavoro.
+   *
    * @param stampingId l'identificativo della timbratura da eliminare
    * @return 200 se la timbratura è stata eliminata correttamente, altro numero altrimenti.
    */
@@ -131,6 +138,7 @@ public class TeleworkStampingManager {
 
   /**
    * Ritorna la timbratura in telelavoro con id specificato.
+   *
    * @param stampingId l'identificativo della timbratura da ricercare
    * @return la timbratura in telelavoro con id passato come parametro.
    * @throws ExecutionException eccezione in esecuzione
@@ -147,6 +155,7 @@ public class TeleworkStampingManager {
 
   /**
    * Ritorna la lista di dto contenente la lista delle timbrature in telelavoro per ogni personDay.
+   *
    * @param psDto il personStampingRecap mensile da cui prendere le info sui personDay
    * @return la lista di dto da ritornare alla vista.
    * @throws NoSuchFieldException eccezione di mancanza di parametro
@@ -215,6 +224,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se l'inserimento di una timbratura in un giorno può dare origine ad un errore di 
    * malformazione della lista di timbrature.
+   *
    * @param stamping la timbratura in telelavoro
    * @param pd il personday del giorno
    * @return l'opzionale contenente l'errore rilevato dal possibile inserimento della timbratura
@@ -263,6 +273,7 @@ public class TeleworkStampingManager {
 
   /**
    * Il localDateTime dell'inizio della giornata.
+   *
    * @param date la data di riferimento
    * @return il localdatetime rappresentante l'inizio della giornata.
    */
@@ -272,6 +283,7 @@ public class TeleworkStampingManager {
 
   /**
    * Il localDateTime della fine della giornata.
+   *
    * @param date la data di riferimento
    * @return il localdatetime rappresentante la fine della giornata.
    */
@@ -282,6 +294,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -320,6 +333,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -358,6 +372,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * pranzo in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -407,6 +422,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 

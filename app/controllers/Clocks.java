@@ -110,7 +110,7 @@ public class Clocks extends Controller {
 
   /**
    * Mostra la pagina di login per la timbratura web.
-   * 
+   *
    * @param person la persona che intende loggarsi
    * @param password la password con cui intende loggarsi
    */
@@ -144,7 +144,6 @@ public class Clocks extends Controller {
 
   /**
    * Effettua il login tramite ldap.
-   * 
    */
   @NoCheck
   public static void ldapLogin(String username, String password) {
@@ -217,7 +216,7 @@ public class Clocks extends Controller {
 
   /**
    * Ritorna la form di inserimento della timbratura.
-   * 
+   *
    * @param wayType verso timbratura.
    */
   public static void webStamping(@Required WayType wayType) {
@@ -234,7 +233,7 @@ public class Clocks extends Controller {
 
   /**
    * Inserisce la timbratura.
-   * 
+   *
    * @param way       verso timbratura
    * @param stampType Causale timbratura
    * @param note      eventuali note.

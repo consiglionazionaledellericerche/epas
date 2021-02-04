@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -7,6 +24,7 @@ import dao.AbsenceDao;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -15,9 +33,15 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Managerr per la gestione delle YearlyAbsences.
+ */
+@Slf4j
 public class YearlyAbsencesManager {
 
-  private static final Logger log = LoggerFactory.getLogger(YearlyAbsencesManager.class);
+  /**
+   * Comparatore dei nomi di persona (ignorando il case).
+   */
   public Comparator<Person> personNameComparator = new Comparator<Person>() {
 
     public int compare(Person person1, Person person2) {
@@ -33,11 +57,13 @@ public class YearlyAbsencesManager {
     }
 
   };
-  public Comparator<AbsenceType> absenceCodeComparator = new Comparator<AbsenceType>() {
 
+  /**
+   * Comparatore dei codice di un absenceCode.
+   */
+  public Comparator<AbsenceType> absenceCodeComparator = new Comparator<AbsenceType>() {
     public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2) {
       return absenceCode1.code.compareTo(absenceCode2.code);
-
     }
 
   };
@@ -47,6 +73,7 @@ public class YearlyAbsencesManager {
 
   /**
    * Genera la tabella con la tripla persona-tipo assenza-quantità.
+   *
    * @param persons la lista delle persone
    * @param abt il tipo di assenza
    * @param begin la data di inizio
@@ -84,67 +111,4 @@ public class YearlyAbsencesManager {
     return tableMonthlyAbsences;
   }
 
-  /*Non è molto chiaro cosa facesse questa classe innestata all'interno di YearlyAbsences*/
-  public static final class AbsenceTypeDays {
-    public String absenceCode;
-    public Integer number;
-
-    public AbsenceTypeDays(String absenceCode, Integer i) {
-      this.absenceCode = absenceCode;
-      this.number = i;
-    }
-
-    public AbsenceTypeDays(String absenceCode) {
-      this.absenceCode = absenceCode;
-      this.number = null;
-    }
-
-    public AbsenceTypeDays() {
-      this.absenceCode = null;
-      this.number = null;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result
-          + ((absenceCode == null) ? 0 : absenceCode.hashCode());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      AbsenceTypeDays other = (AbsenceTypeDays) obj;
-      if (absenceCode == null) {
-        if (other.absenceCode != null) {
-          return false;
-        }
-      } else if (!absenceCode.equals(other.absenceCode)) {
-        return false;
-      }
-      return true;
-    }
-
-  }
-
-  /*Così come non è chiaro cosa ci facesse questa...*/
-  public static final class AbsenceTypeDate {
-    public AbsenceType absenceType;
-    public LocalDate date;
-
-    public AbsenceTypeDate(AbsenceType absenceType, LocalDate date) {
-      this.absenceType = absenceType;
-      this.date = date;
-    }
-  }
 }
