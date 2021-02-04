@@ -27,7 +27,6 @@ import it.cnr.iit.epas.NullStringBinder;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
@@ -47,7 +46,6 @@ import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Minutes;
-import play.cache.Cache;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -59,8 +57,8 @@ import play.mvc.With;
 /**
  * Controller per la gestione delle timbrature via WEB.
  * 
- * @author Cristian Lucchesi <cristian.lucchesi@iit.cnr.it>
- * @author Dario Tagliaferri <dario.tagliaferri@iit.cnr.it>
+ * @author Cristian Lucchesi
+ * @author Dario Tagliaferri
  *
  */
 @Slf4j
@@ -112,6 +110,7 @@ public class Clocks extends Controller {
 
   /**
    * Mostra la pagina di login per la timbratura web.
+   * 
    * @param person la persona che intende loggarsi
    * @param password la password con cui intende loggarsi
    */
@@ -143,6 +142,10 @@ public class Clocks extends Controller {
     }
   }
 
+  /**
+   * Effettua il login tramite ldap.
+   * 
+   */
   @NoCheck
   public static void ldapLogin(String username, String password) {
     log.debug("Richiesta autenticazione su Timbrature via WEB con credenziali "
@@ -214,6 +217,7 @@ public class Clocks extends Controller {
 
   /**
    * Ritorna la form di inserimento della timbratura.
+   * 
    * @param wayType verso timbratura.
    */
   public static void webStamping(@Required WayType wayType) {
@@ -230,6 +234,7 @@ public class Clocks extends Controller {
 
   /**
    * Inserisce la timbratura.
+   * 
    * @param way       verso timbratura
    * @param stampType Causale timbratura
    * @param note      eventuali note.

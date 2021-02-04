@@ -42,8 +42,8 @@ import org.testng.util.Strings;
 /**
  * Dao per gli uffici.
  *
- * @author Dario Tagliaferri <dario.tagliaferri@iit.cnr.it>
- * @author Cristian Lucchesi <cristian.lucchesi@iit.cnr.it>
+ * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
  */
 public class OfficeDao extends DaoBase {
 

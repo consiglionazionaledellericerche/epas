@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -118,6 +135,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che genera la lista di stringhe contenente i codici per straordinari.
+   * 
    * @return la lista di stringhe popolata con i codici dei vari tipi di straordinario prendibili.
    */
   public List<String> populateListWithOvertimeCodes() {
@@ -130,6 +148,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che conteggia il monte ore di straordinari.
+   * 
    * @return il quantitativo di straordinari totali.
    */
   public Integer getTotalOvertime(List<TotalOvertime> total) {
@@ -142,6 +161,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che conteggia il quantitativo annuale degli straordinari.
+   * 
    * @return il quantitativo su base annuale di straordinari.
    */
   public int getTotalYearlyOvertime(List<Competence> competenceYearList) {
@@ -155,6 +175,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che conteggia il quantitativo mensile degli straordinari.
+   * 
    * @return il quantitativo su base mensile di straordinari.
    */
   public int getTotalMonthlyOvertime(List<Competence> competenceMonthList) {
@@ -185,10 +206,10 @@ public class CompetenceManager {
     try {
       if (numeroOre.startsWith("-")) {
 
-        total.numberOfHours = -new Integer(numeroOre.substring(1, numeroOre.length()));
+        total.numberOfHours = - Integer.valueOf(numeroOre.substring(1, numeroOre.length()));
       } else if (numeroOre.startsWith("+")) {
 
-        total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+        total.numberOfHours = Integer.valueOf(numeroOre.substring(1, numeroOre.length()));
       } else {
         return false;
       }
@@ -202,6 +223,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che genera la tabella per la visualizzazione degli straordinari.
+   * 
    * @return la tabella formata da persone, dato e valore intero relativi ai quantitativi orari su
    *     orario di lavoro, straordinario, riposi compensativi per l'anno year e il mese month per le
    *     persone dell'ufficio office.
@@ -251,6 +273,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per la creazione del file per l'esportazione degli straordinari.
+   * 
    * @return il file contenente tutti gli straordinari effettuati dalle persone presenti nella lista
    *     personList nell'anno year.
    */
@@ -321,6 +344,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che verifica la possibilità di aggiungere la competenza.
+   * 
    * @param comp  la competenza da aggiornare
    * @param value il quantitativo per quella competenza da aggiornare
    * @return La stringa contenente il messaggio da far visualizzare come errore, se riscontrato.
@@ -420,6 +444,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per il conteggio dei giorni di reperibilità massimi in un mese/anno.
+   * 
    * @param yearMonth l'anno/mese di riferimento
    * @param office    la sede per cui si cercano i servizi per reperibilità abilitati
    * @return il numero di giorni di reperibilità disponibili sulla base di quanti servizi per
@@ -437,6 +462,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per la verifica sui servizi abilitati.
+   * 
    * @param office la sede su cui cercare.
    * @return true se ci sono servizi attivi per la reperibilità. False altrimenti.
    */
@@ -452,7 +478,8 @@ public class CompetenceManager {
 
   /**
    * Metodo che verifica la pertinenza della quantità di giorni di reperibilità assegnati 
-   *    in base ai limiti previsti.
+   * in base ai limiti previsti.
+   *
    * @param comp  la competenza
    * @param value il quantitativo per la competenza
    * @param group il gruppo di codici di competenza
@@ -481,6 +508,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per il controllo dell'abilitazione di una competenza a una persona.
+   * 
    * @param comp la competenza
    * @return true se la competenza è abilitata per la persona. False altrimenti.
    */
@@ -496,6 +524,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per il controllo sull'esistenza di un servizio di reperibilità.
+   * 
    * @return true se esiste almeno un servizio per reperibilità inizializzato, false altrimenti.
    */
   public boolean isServiceForReperibilityInitialized(
@@ -514,6 +543,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che ritorna la lista dei codici di competenza da salvare.
+   * 
    * @param pccList     la lista di PersonCompetenceCodes di partenza
    * @param codeListIds la lista di id di codici competenza da confrontare
    * @return la lista dei codici di assenza da aggiungere alla configurazione dei
@@ -546,6 +576,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che ritorna la lista dei codici di competenza da rimuovere.
+   * 
    * @param pccList     la lista di personcompetencecode
    * @param codeListIds la lista di id che rappresentano i codici di assenza
    * @return la lista dei codici di competenza da rimuovere da quelli associati alla persona a cui
@@ -688,6 +719,7 @@ public class CompetenceManager {
 
   /**
    * persiste il personShiftShiftType con i parametri passati al metodo.
+   * 
    * @param person la persona in turno da associare all'attività
    * @param beginDate la data di inizio partecipazione all'attività in turno
    * @param type l'attività su cui far aderire la persona
@@ -707,6 +739,7 @@ public class CompetenceManager {
 
   /**
    * persiste il personReperibility con i parametri passati al metodo.
+   * 
    * @param person la persona in reperibilità da associare all'attività
    * @param beginDate la data di inizio partecipazione all'attività in reperibilità
    * @param type l'attività su cui far aderire la persona
@@ -723,6 +756,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per la creazione della lista di competenze.
+   * 
    * @param personList la lista di persone attive
    * @param date       la data in cui si richiedono le competenze
    * @return la creazione della lista di competenze per il mese/anno.
@@ -750,6 +784,7 @@ public class CompetenceManager {
 
   /**
    * Metodo per creazione della mappa che associa la persona alle competenze assegnate.
+   * 
    * @param competenceList la lista delle competenze assegnate nell'anno/mese a una persona
    * @return una mappa già formata per la visualizzazione della situazione mensile delle competenze
    *     della singola persona.
@@ -771,6 +806,7 @@ public class CompetenceManager {
 
   /**
    * Metodo che ritorna la lista dei dto modellati per esigenza di template.
+   * 
    * @param list la lista contenente tutte le timetable dei turni disponibili
    * @return una lista di dto modellati per esigenze di template.
    */
@@ -809,6 +845,7 @@ public class CompetenceManager {
 
   /**
    * persiste l'attività di turno con tutte le info corredate.
+   * 
    * @param service il dto da cui estrarre le informazioni per il salvataggio dell'attività di turno
    * @param stt la shifttimetable associata all'attività di turno
    * @param cat il turno a cui associare l'attività
@@ -864,6 +901,7 @@ public class CompetenceManager {
 
   /**
    * crea la timetable da associare al turno.
+   * 
    * @param timeTable il dto da cui creare la ShiftTimeTable
    * @param office la sede a cui associare la timeTable
    */
@@ -910,8 +948,9 @@ public class CompetenceManager {
 
 
   /**
-   * chiama il metodo su ciascuna persona della sede per cui fare i conteggi del codice di
-   *     competenza a presenza mensile.
+   * Chiama il metodo su ciascuna persona della sede per cui fare i conteggi del codice di
+   * competenza a presenza mensile.
+   *
    * @param office la sede opzionale per cui fare i conteggi 
    * @param code il codice di competenza a presenza mensile da conteggiare
    * @param yearMonth l'anno/mese per cui fare i conteggi
@@ -946,8 +985,9 @@ public class CompetenceManager {
   }
 
   /**
-   * effettua automaticamente l'aggiornamento del valore per la competenza a presenza mensile 
-   *     passata come parametro.
+   * Effettua automaticamente l'aggiornamento del valore per la competenza a presenza mensile 
+   * passata come parametro.
+   *
    * @param person la persona su cui fare i conteggi
    * @param yearMonth l'anno/mese in cui fare i conteggi
    * @param code il codice di competenza da riconteggiare
@@ -978,6 +1018,7 @@ public class CompetenceManager {
 
   /**
    * assegna le competenze speciali (su presenza mensile o assegnano interamente un mese).
+   * 
    * @param person la persona a cui assegnare la competenza
    * @param yearMonth l'anno mese per cui assegnare la competenza
    * @param code il codice competenza da assegnare
@@ -1011,6 +1052,7 @@ public class CompetenceManager {
 
   /**
    * crea un personShift a partire dalla persona passata come parametro.
+   * 
    * @param person la persona di cui si vuole creare l'istanza di personShift
    */
   private void createPersonShift(Person person, LocalDate date) {
@@ -1033,6 +1075,7 @@ public class CompetenceManager {
 
   /**
    * persiste sul db un personcompetencecode.
+   * 
    * @param person la persona che ha associata la competenza
    * @param date la data da cui è valida quella competenza
    * @param code la competenza da abilitare
@@ -1052,6 +1095,7 @@ public class CompetenceManager {
 
   /**
    * modifica il personcompetencecode con le date passate come parametro.
+   * 
    * @param pcc il personcompetencecode da modificare
    * @param beginDate la data di inizio con cui modificare il pcc
    * @param endDate l'eventuale data fine con cui modificare il pcc

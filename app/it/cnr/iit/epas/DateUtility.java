@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
@@ -24,6 +41,7 @@ public class DateUtility {
 
   /**
    * Metodo che calcola la data della pasqua nell'anno passato come parametro.
+   * 
    * @param year l'anno di riferimento
    * @return la data in cui cade la pasqua.
    */
@@ -63,6 +81,7 @@ public class DateUtility {
 
   /**
    * Festività generale.
+   * 
    * @param officePatron giorno del patrono
    * @param date data da verificare
    * @return esito
@@ -80,8 +99,6 @@ public class DateUtility {
             && date.getMonthOfYear() == easterMonday.getMonthOfYear()) {
       return true;
     }
-    // if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
-    // return true;
     if ((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25)) {
       return true;
     }
@@ -131,6 +148,7 @@ public class DateUtility {
 
   /**
    * Metodo che ritorna la lista dei giorni contenuti nell'intervallo begin-end.
+   * 
    * @param begin data iniziale.
    * @param end   data finale
    * @return lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi,
@@ -152,6 +170,7 @@ public class DateUtility {
 
   /**
    * Se la data è contenuta nell'intervallo.
+   * 
    * @param date     data
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
@@ -174,6 +193,7 @@ public class DateUtility {
 
   /**
    * L'intervallo di date contenente l'intersezione fra inter1 e inter2.
+   * 
    * @param inter1 primo intervallo
    * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
@@ -216,6 +236,7 @@ public class DateUtility {
   
   /**
    * L'intervallo orario contenente l'intersezione fra inter1 e inter2.
+   * 
    * @param inter1 primo intervallo
    * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
@@ -257,6 +278,7 @@ public class DateUtility {
   
   /**
    * Conta il numero di giorni appartenenti all'intervallo estremi compresi.
+   * 
    * @param inter l'intervallo
    * @return numero di giorni
    */
@@ -276,6 +298,7 @@ public class DateUtility {
 
   /**
    * Conta il numero di mesi appartenenti all'intervallo, estremi compresi.
+   * 
    * @param inter intervallo
    * @return numero di mesi
    */
@@ -285,6 +308,7 @@ public class DateUtility {
 
   /**
    * Se il primo intervallo di date è contenuto nel secondo intervallo.
+   * 
    * @param first  il primo intervallo
    * @param second il secondo intervallo
    * @return se il primo intervallo di date è contenuto nel secondo intervallo.
@@ -300,6 +324,7 @@ public class DateUtility {
   
   /**
    * Se il primo intervallo di orari è contenuto nel secondo intervallo.
+   * 
    * @param first  il primo intervallo
    * @param second il secondo intervallo
    * @return se il primo intervallo di orari è contenuto nel secondo intervallo.
@@ -315,6 +340,7 @@ public class DateUtility {
   
   /**
    * Se i due inervalli coincidono.
+   * 
    * @param first first
    * @param second second
    * @return esito
@@ -329,6 +355,7 @@ public class DateUtility {
 
   /**
    * La data massima che equivale a infinito.
+   * 
    * @return la data infinito
    */
   public static LocalDate setInfinity() {
@@ -337,6 +364,7 @@ public class DateUtility {
 
   /**
    * Controlla se la data passata come parametro è molto lontana nel tempo.
+   * 
    * @param date la data da confrontare
    * @return se la data è molto molto lontana...
    */
@@ -346,6 +374,7 @@ public class DateUtility {
   
   /**
    * L'intervallo dell'anno.
+   * 
    * @param year anno
    * @return l'intervallo
    */
@@ -355,6 +384,7 @@ public class DateUtility {
   
   /**
    * L'intervallo del mese.
+   * 
    * @param year anno
    * @param month mese
    * @return intervallo
@@ -366,6 +396,7 @@ public class DateUtility {
 
   /**
    * Trasforma in nome il numero del mese passato come parametro.
+   * 
    * @param monthNumber mese da formattare.
    * @return il nome del mese con valore monthNumber, null in caso di argomento non valido.
    */
@@ -376,6 +407,7 @@ public class DateUtility {
   
   /**
    * Trasforma in stringa il numero del mese aggiungendo '""' davanti.
+   * 
    * @param month il mese da formattare
    * @return il mese se maggiore di 10, con lo 0 davanti se minore di 10.
    */
@@ -389,6 +421,7 @@ public class DateUtility {
 
   /**
    * Ritorna la stringa nel formato HH:MM della quantità di minuti passata come parametro.
+   * 
    * @param minute minuti da formattare.
    * @return stringa contente la formattazione -?HH:MM
    */
@@ -422,6 +455,7 @@ public class DateUtility {
 
   /**
    * Parser della stringa contenente la data in un oggetto LocalDate.
+   * 
    * @param date data.
    * @param pattern : default dd/MM
    * @return effettua il parsing di una stringa che contiene solo giorno e Mese
@@ -439,6 +473,7 @@ public class DateUtility {
 
   /**
    * Ritorna la data del primo giorno del mese.
+   * 
    * @param yearMonth il mese da considerare.
    * @return il primo giorno del mese da considerare formato LocalDate.
    */
@@ -448,6 +483,7 @@ public class DateUtility {
 
   /**
    * Ritorna la data dell'ultimo giorno del mese.
+   * 
    * @param yearMonth il mese da considerare.
    * @return l'ultimo giorno del mese da considerare formato LocalDate.
    */
@@ -458,6 +494,7 @@ public class DateUtility {
 
   /**
    * Ritorna la quantità di minuti trascorsi dall'inizio del giorno all'ora.
+   * 
    * @param time ora.
    * @return il numero di minuti trascorsi dall'inizio del giorno all'ora.
    */
@@ -467,7 +504,8 @@ public class DateUtility {
   
   
   /**
-   * Il tempo dalla mezzanotte. 
+   * Il tempo dalla mezzanotte.
+   * 
    * @param time orario
    * @return tempo
    */
@@ -483,6 +521,7 @@ public class DateUtility {
 
   /**
    * Ritorna la differenza in minuti tra due orari.
+   * 
    * @param begin orario di ingresso.
    * @param end   orario di uscita.
    * @return minuti lavorati.
