@@ -49,6 +49,7 @@ public class MetricsProbe extends Controller {
    */
   private static final String PROBE = "_probe";
   private static final long NANOS_TO_MS = 1_000_000;
+
   /**
    * Elementi da saltare nella serializzazione dei parametri delle azioni.
    */
@@ -89,6 +90,7 @@ public class MetricsProbe extends Controller {
 
   /**
    * Tempo di esecuzione in nanosecondi.
+   *
    * @return il tempo in nanosecondi dall'inizio dell'esecuzione dell'azione.
    */
   public static long elapsedNanosec() {

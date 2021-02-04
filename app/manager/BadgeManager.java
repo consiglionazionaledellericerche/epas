@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.collect.Lists;
@@ -28,7 +45,7 @@ import synch.perseoconsumers.people.PersonBadge;
  * TODO: In questo manager andrebbero spostati i metodi che gestiscono i controllers BadgeReaders e
  * BadgeSystems.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class BadgeManager {
@@ -114,7 +131,7 @@ public class BadgeManager {
   /**
    * Rimuove da tutte le altre persone il badge indicato.
    * Il badge da rimuovere viene cercato in tutti quelli appartenenti al badgeSystem.
-   * 
+   *
    * @return la lista dei badge rimossi  
    */
   private List<Badge> checkBadgeTransfer(Person person, String code, BadgeSystem badgeSystem) {
@@ -193,6 +210,7 @@ public class BadgeManager {
   
   /**
    * Importa/aggiorna i badge di un ufficio.
+   *
    * @param office l'Ufficio di cui importare i badge.
    * @return la lista dei badge importati/aggiornati.
    */

@@ -28,7 +28,7 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per il PersonDay completi di persona.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

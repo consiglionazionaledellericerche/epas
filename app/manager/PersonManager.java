@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Function;
@@ -32,6 +49,9 @@ import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
+/**
+ * Manager per la gestione delle persone.
+ */
 @Slf4j
 public class PersonManager {
 
@@ -120,7 +140,8 @@ public class PersonManager {
   
   /**
    * Metodo utile per il calcolo dei codici di assenza presenti in un certo arco temporale
-   *     derivante dalla lista dei personday.
+   * derivante dalla lista dei personday.
+   *
    * @param personDays la lista dei personDay
    * @return la lista dei codici di assenza presenti nella lista dei personDay.
    */
@@ -137,8 +158,9 @@ public class PersonManager {
 
   /**
    * Metodo che determina quanti giorni di lavoro in sede sono stati effettuati. Controlla anche
-   *     che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
-   *     dal conteggio.
+   * che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
+   * dal conteggio.
+   *
    * @param personDays la lista dei personDay
    * @param contracts la lista dei contratti
    * @param end la data di fine
@@ -280,6 +302,7 @@ public class PersonManager {
   /**
    * Metodo che ritorna la lista delle assenze di tipo recover_time non ancora evase nell'arco 
    * temporale compreso tra from e to.
+   *
    * @param person la persona di cui si cercano le assenze
    * @param from la data da cui si cercano le assenze
    * @param to la data fino a cui si cercano le assenze
@@ -304,6 +327,7 @@ public class PersonManager {
   
   /**
    * Metodo di utilità per trasformare una lista di assenze in lista di dto per il template.
+   *
    * @param list lista di assenze a giustificazione recover_time
    * @return la lista di dto da ritornare alla vista.
    */
@@ -332,7 +356,7 @@ public class PersonManager {
    * eppn viene calcolato come username @ ultimi due livelli 
    * del nome a dominio dell'email.
    * Per esempio se l'username è giuseppe.verdi e l'mail è g.verdi@iit.cnr.it
-   * il campo ePPN viene impostato a giuseppe.verdi@cnr.it
+   * il campo ePPN viene impostato a giuseppe.verdi@cnr.it.
   */ 
   public String eppn(String username, String email) {
     Verify.verifyNotNull(username);
@@ -357,7 +381,7 @@ public class PersonManager {
    * Si occupa di creare l'utente collegato alla persona,
    * di impostare i ruoli corretti e creare l'epp se
    * non passato.
-   * 
+   *
    * @param person l'oggetto Person da configurare con
    *     gli attributi ed oggetti correlati opportuni.
    */

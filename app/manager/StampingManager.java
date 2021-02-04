@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -33,6 +50,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.i18n.Messages;
 
+/**
+ * Manager per la gestione delle timbrature.
+ */
 @Slf4j
 public class StampingManager {
 
@@ -47,6 +67,7 @@ public class StampingManager {
 
   /**
    * Injection.
+   *
    * @param personDayDao il dao per cercare i personday
    * @param personDao il dao per cercare le persone
    * @param personDayManager il manager per lavorare sui personday
@@ -75,9 +96,10 @@ public class StampingManager {
 
   /**
    * Metodo che verifica se la timbratura precedente a quella che si vuole inserire è con 
-   *     causale lavoro fuori sede per permettere al chiamante di inserire una timbratura
-   *     "fittizia" di fine lavoro fuori sede un minuto prima di quella che si sta inserendo
-   *     nel caso in cui la precedente e l'attuale abbiano lo stesso verso (ingresso).
+   * causale lavoro fuori sede per permettere al chiamante di inserire una timbratura
+   * "fittizia" di fine lavoro fuori sede un minuto prima di quella che si sta inserendo
+   * nel caso in cui la precedente e l'attuale abbiano lo stesso verso (ingresso).
+   *
    * @param personDay il personDay a cui si vuole associare la timbratura
    * @param stampingFromClient il dto creato a partire dalla timbratura ricevuta dal client
    * @return true se la timbratura precedente a quella che si sta per inserire è con causale
@@ -154,6 +176,7 @@ public class StampingManager {
 
   /**
    * Metodo che salva la timbratura.
+   *
    * @param stamping la timbratura da persistere
    * @param date la data della timbratura
    * @param time l'orario della timbratura
@@ -286,6 +309,7 @@ public class StampingManager {
 
   /**
    * Metodo per formare una mappa di riepilogo nella presenza giornaliera.
+   *
    * @param daysRecap la lista dei personStampingDayRecap per stabilire chi è presente
    *     e chi no in uno specifico giorno
    * @return la mappa contenente le motivazioni delle assenze e quanti hanno quella motivazione
@@ -324,6 +348,7 @@ public class StampingManager {
   /**
    * Controlla se lo stamptype è da inserire tra quelli per la timbratura fuori sede, 
    * false altrimenti.
+   *
    * @param stamping la timbratura da controllare
    * @param user l'utente che vuole inserire la timbratura
    * @param employee la persona per cui si vuole inserire la timbratura
@@ -369,5 +394,4 @@ public class StampingManager {
     return person;
   }
 
-  
 }

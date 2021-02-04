@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
-import com.beust.jcommander.internal.Lists;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.GeneralSettingDao;
@@ -51,6 +69,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 
+/**
+ * Controller per la gestione dei calendari di reperibilità.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
@@ -75,6 +96,9 @@ public class Calendar extends Controller {
   private static String holidayCode = "T3";
   private static String nightCode = "T2";
   
+  /**
+   * Tipologie di periodo di turno.
+   */
   public enum ShiftPeriod {
     daily,
     nightly,
@@ -299,6 +323,7 @@ public class Calendar extends Controller {
 
   /**
    * Ritorna lista di DTO contenenti le assenze di una persona nell'intervallo specificato.
+   *
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -352,6 +377,7 @@ public class Calendar extends Controller {
   
   /**
    * Ritorna lista di DTO contenente le assenze per telelavoro e smart working.
+   *
    * @param person la persona di cui si cercano le assenze
    * @param start la data di inizio
    * @param end la data di fine
@@ -597,6 +623,7 @@ public class Calendar extends Controller {
 
   /**
    * True se l'attività è modificabile, false altrimenti.
+   *
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.

@@ -66,6 +66,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle assenze.
+ */
 @With({Resecure.class})
 public class Absences extends Controller {
 
@@ -160,7 +163,7 @@ public class Absences extends Controller {
   
   /**
    * Aggiunge al tempo a lavoro il quantitativo di ore e minuti inserito per quel giorno.
-   * 
+   *
    * @param absenceId l'identificativo dell'assenza
    * @param hours le ore da salvare
    * @param minutes i minuti da salvare
@@ -483,9 +486,9 @@ public class Absences extends Controller {
 
   /**
    * Metodo che ritorna le assenze nell'anno per una persona.
+   *
    * @param year l'anno di riferimento
    */
-
   public static void absencesPerPerson(Integer year) {
 
     //controllo sui parametri
@@ -571,6 +574,9 @@ public class Absences extends Controller {
     render(pdList, person, date);
   }
 
+  /**
+   * DTO per contenere le assenze dello stesso tipo.
+   */
   public static class AttachmentsPerCodeRecap {
 
     List<Absence> absenceSameType = new ArrayList<Absence>();

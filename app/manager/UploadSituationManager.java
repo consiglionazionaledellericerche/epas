@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -18,6 +35,9 @@ import models.PersonMonthRecap;
 import models.absences.Absence;
 import play.Play;
 
+/**
+ * Manager per la generazione del file da caricare su Attestati.
+ */
 public class UploadSituationManager {
 
   
@@ -31,7 +51,7 @@ public class UploadSituationManager {
   private PersonStampingRecapFactory stampingsRecapFactory;
   
   /**
-   * Generatore del file da carica su attestati con le assenze/compentenze del personale.
+   * Generatore del file da caricare su attestati con le assenze/compentenze del personale.
    */
   @Inject
   public UploadSituationManager(PersonDao personDao, AbsenceDao absenceDao, 
@@ -46,7 +66,8 @@ public class UploadSituationManager {
   
   /**
    * Produce il contenuto del file per attestati circa mese e anno per tutti i dipendenti della
-   *  sede passata come paramemtro.
+   * sede passata come paramemtro.
+   *
    * @param office office
    * @param year anno 
    * @param month mese 
