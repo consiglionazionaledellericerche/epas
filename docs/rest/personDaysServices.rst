@@ -28,7 +28,7 @@ L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic 
 Cartellino byPerson (giornaliero e/o mensile)
 =============================================
 Le informazioni di un singolo giorno sulle timbrature e assenze di una persona è fruibile tramite 
-una HTTP GET all'indirizzo */rest/v3/personDays/getDaySituation*.
+una HTTP GET all'indirizzo **/rest/v3/personDays/getDaySituation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone: 
 *id, email, eppn, perseoPersonId, fiscalCode*, la data tramite il campo *date*.
@@ -40,7 +40,7 @@ cambiatelo con un utente appropriato per la vostra sede.
 
 Le informazioni mensili di una persona si ottengono in modo simile al precedente passando al posto 
 del parametro *date* i parametri *year* e *month* con un GET all'indirizzo 
-*/rest/v3/personDays/getMonthSituationByPerson*.
+**/rest/v3/personDays/getMonthSituationByPerson**.
 
 ::
   $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getMonthSituationByPerson email==galileo.galilei@cnr.it year==2020 month==10
@@ -50,29 +50,11 @@ Cartellino byOffice (giornaliero e/o mensile)
 
 Analogamente ai metodi precedenti è possibile avere le informazioni giornaliere o mensili di tutti 
 i dipendenti di una sede. 
-La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *233400*.
-Negli esempio successivi sostituite *233400* con il *sedeId* della vostra sede.
+La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *223400*.
+Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
 ::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituationbyoffice sedeId==233400 date==2020-10-28
+  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituationbyoffice sedeId==223400 date==2020-10-28
 
 ::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice sedeId==233400 year==2020 month==10
-
-
-Verifica validazione attestati
-==============================
-
-Sono disponibili anche due metodi relativi ai servizi REST della parte _certifications_, 
-questi metodi sono solamente un _proxy_ rispetto ad *Attestati* nel senso che ePAS effettua 
-le chiamate REST ad attestati per sapere se i cartellini sono stati validati o meno.
-
-*QUESTI DUE METODI HANNO SENSO SOLO PER IL CNR DOVE E' PRESENTE IL SERVIZIO ATTESTATI*.
-
-I due metodi sono:
-
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson email==galileo.galilei@cnr.it year==2020 month==10
-
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice sedeId==233400 year==2020 month==10
+  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice sedeId==223400 year==2020 month==10
