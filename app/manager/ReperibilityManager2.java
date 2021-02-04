@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -37,9 +54,9 @@ import org.joda.time.YearMonth;
 import play.i18n.Messages;
 
 /**
- * Gestiore delle operazioni sulla reperibilità ePAS.
+ * Gestore delle operazioni sulla reperibilità ePAS.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 
 @Slf4j
@@ -53,6 +70,7 @@ public class ReperibilityManager2 {
 
   /**
    * Injection.
+   *
    * @param reperibilityDayDao il dao sui giorni di reperibilità
    * @param personDayDao il dao sui personday
    * @param personDayManager il manager coi metodi sul personday
@@ -72,7 +90,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
+   * La lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
+   *
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
    */
   public List<PersonReperibilityType> getUserActivities() {
@@ -111,6 +130,7 @@ public class ReperibilityManager2 {
   /**
    * La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
    * specificato.
+   *
    * @param reperibilityType attività di reperibilità
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
@@ -131,7 +151,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * salva il personReperibilityDay ed effettua i ricalcoli.
+   * Salva il personReperibilityDay ed effettua i ricalcoli.
+   *
    * @param personReperibilityDay il personReperibilityDay da salvare
    */
   public void save(PersonReperibilityDay personReperibilityDay) {
@@ -141,7 +162,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * cancella il personReperibilityDay.
+   * Cancella il personReperibilityDay.
+   *
    * @param personReperibilityDay il personReperibilityDay da cancellare
    */
   public void delete(PersonReperibilityDay personReperibilityDay) {
@@ -274,6 +296,7 @@ public class ReperibilityManager2 {
 
   /**
    * Ritorna una mappa con i giorni maturati di reperibilità per persona.
+   *
    * @param reperibility attività sulla quale effettuare i calcoli
    * @param from data di inizio da cui calcolare
    * @param to data di fine
@@ -306,6 +329,7 @@ public class ReperibilityManager2 {
   /**
    * Una lista di persone che sono effettivamente coinvolte in reperibilità in un 
    * determinato periodo (Dipendenti con le reperibilità attive in quel periodo).
+   *
    * @param reperibility attività di reperibilità
    * @param from data di inizio
    * @param to data di fine
@@ -321,6 +345,7 @@ public class ReperibilityManager2 {
   /**
    * Il numero di giorni di competenza maturati in base alle reperibilità effettuate
    * nel periodo selezionato (di norma serve calcolarli su un intero mese al massimo).
+   *
    * @param reperibility attività di turno
    * @param person Persona sulla quale effettuare i calcoli
    * @param from data iniziale
@@ -350,7 +375,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * la mappa contenente i giorni di reperibilità festiva per ogni dipendente reperibile.
+   * La mappa contenente i giorni di reperibilità festiva per ogni dipendente reperibile.
+   *
    * @param reperibility il tipo di reperibilità 
    * @param start la data di inizio da cui conteggiare
    * @param end la data di fine entro cui conteggiare
@@ -459,7 +485,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * la lista dei range di date in cui un dipendente è stato reperibile.
+   * La lista dei range di date in cui un dipendente è stato reperibile.
+   *
    * @param person il reperibile
    * @param begin la data da cui cercare i giorni di reperibilità
    * @param end la data entro cui cercare i giorni di reperibilità
@@ -505,7 +532,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * la stringa formattata contenente le date dei giorni di reperibilità effettuati.
+   * La stringa formattata contenente le date dei giorni di reperibilità effettuati.
+   *
    * @param list la lista dei periodi di reperibilità all'interno del mese
    * @return la stringa formattata contenente le date dei giorni di reperibilità effettuati.
    */

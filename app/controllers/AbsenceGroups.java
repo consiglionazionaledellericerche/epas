@@ -93,6 +93,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei gruppi di assenze.
+ */
 @Slf4j
 @With({Resecure.class, RequestInit.class})
 public class AbsenceGroups extends Controller {

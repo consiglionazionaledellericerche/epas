@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Joiner;
@@ -43,6 +60,9 @@ import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
 
 
+/**
+ * Manager per la gestione dei riepiloghi mensili.
+ */
 @Slf4j
 public class MonthsRecapManager {
 
@@ -62,6 +82,7 @@ public class MonthsRecapManager {
   /**
    * Genera il file da esportare contenente la situazione riepilogativa sulla sede nell'anno/mese
    * relativa a smart working.
+   *
    * @return il file contenente le info su smart working/lavoro in sede.
    * @throws IOException eccezione di input/output
    */
@@ -194,6 +215,7 @@ public class MonthsRecapManager {
 
   /**
    * Genera lo stile delle celle di intestazione.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -207,9 +229,10 @@ public class MonthsRecapManager {
     cs.setAlignment(CellStyle.ALIGN_CENTER);
     return cs;
   }
-  
+
   /**
    * Genera lo stile delle celle di intestazione.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -239,5 +262,5 @@ public class MonthsRecapManager {
     
     return cs;
   }
-  
+
 }

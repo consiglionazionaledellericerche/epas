@@ -30,7 +30,7 @@ import org.modelmapper.ModelMapper;
 /**
  * DTO per l'esportazione via REST delle informazioni 
  * principali di un'assenza.
- * 
+ *
  * @since versione 3 dell'API REST
  * @author Cristian Lucchesi
  *

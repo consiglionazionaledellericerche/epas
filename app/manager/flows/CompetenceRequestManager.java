@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.flows;
 
 import com.google.common.base.Optional;
@@ -75,6 +92,9 @@ public class CompetenceRequestManager {
   private PersonDao personDao;
   private PersonReperibilityDayDao repDao;
 
+  /**
+   * DTO per la configurazione delle CompenteRequest.
+   */
   @Data
   @RequiredArgsConstructor
   @ToString
@@ -87,6 +107,7 @@ public class CompetenceRequestManager {
 
   /**
    * Injector.
+   *
    * @param configurationManager configurationManager per la sede
    * @param uroDao dao per gli usersRolesOffices
    * @param roleDao dao per i ruoli
@@ -116,7 +137,7 @@ public class CompetenceRequestManager {
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per
    * poter richiedere il tipo di competenza. 
-   * 
+   *
    * @param requestType il tipo di competenza da controllare
    * @param person la persona per cui controllare il tipo di assenza
    * @return la lista degli eventuali problemi riscontrati.
@@ -155,10 +176,10 @@ public class CompetenceRequestManager {
   /**
    * Verifica quali sono le approvazioni richiesta per questo tipo di competenza
    * per questa persona.
-   * 
+   *
    * @param requestType il tipo di richiesta di competenza
    * @param person la persona.
-   * 
+   *
    * @return la configurazione con i tipi di approvazione necessari.
    */
   public CompetenceRequestConfiguration getConfiguration(
@@ -193,7 +214,7 @@ public class CompetenceRequestManager {
    * Imposta nella richiesta di competenza i tipi di approvazione necessari
    * in funzione del tipo di competenza e della configurazione specifica della
    * sede del dipendente.
-   * 
+   *
    * @param competenceRequest la richiesta di assenza.
    */
   public void configure(CompetenceRequest competenceRequest) {
@@ -212,7 +233,7 @@ public class CompetenceRequestManager {
   /**
    * Rimuove tutte le eventuali approvazioni ed impostata il flusso come
    * da avviare.
-   * 
+   *
    * @param competenceRequest la richiesta di competenza
    */
   public void resetFlow(CompetenceRequest competenceRequest) {
@@ -223,6 +244,7 @@ public class CompetenceRequestManager {
 
   /**
    * Metodo che verifica se la richiesta può essere approvata o se non è necessario.
+   *
    * @param competenceRequest la richiesta di competenza
    * @param approver chi deve approvarla
    * @param eventType che tipo di evento stiamo considerando
@@ -273,7 +295,7 @@ public class CompetenceRequestManager {
   
   /**
    * Approvazione di una richiesta di assenza.
-   * 
+   *
    * @param competenceRequest la richiesta di assenza. 
    * @param person la persona che effettua l'approvazione.
    * @param eventType il tipo di evento.
@@ -350,7 +372,7 @@ public class CompetenceRequestManager {
   /**
    * Controlla se una richiesta di competenza può essere terminata con successo,
    * in caso positivo effettua l'inserimento della competenza o evento.
-   * 
+   *
    * @param competenceRequest la richiesta da verificare e da utilizzare per i dati
    *     dell'inserimento assenza.
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
@@ -364,7 +386,7 @@ public class CompetenceRequestManager {
   
   /**
    * Effettua l'inserimento dell'assenza.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza da cui prelevare i
    *     dati per l'inserimento. 
    * @return il report con i codici di assenza inseriti.
@@ -469,6 +491,7 @@ public class CompetenceRequestManager {
   
   /**
    * Metodo di utilità per la verifica dell'esistenza di una richiesta di competenza.
+   *
    * @param competenceRequest la richiesta di competenza da controllare
    * @return la richiesta di competenza se esiste già con i parametri passati.
    */
@@ -486,6 +509,7 @@ public class CompetenceRequestManager {
   
   /**
    * Metodo di approvazione delle richieste.
+   *
    * @param competenceRequest la richiesta di competenza
    * @param user l'utente
    * @return true se l'approvazione dell'utente è andata a buon fine, false altrimenti
@@ -516,6 +540,7 @@ public class CompetenceRequestManager {
   
   /**
    * Approvazione richiesta competenza da parte del responsabile di gruppo.
+   *
    * @param id id della richiesta di competenza.
    */
   public void reperibilityManagerApproval(long id, User user) {
@@ -533,6 +558,7 @@ public class CompetenceRequestManager {
   
   /**
    * Approvazione richiesta competenza da parte del responsabile di sede.
+   *
    * @param id id della richiesta di competenza.
    */
   public void employeeApproval(long id, User user) {
@@ -556,6 +582,7 @@ public class CompetenceRequestManager {
   
   /**
    * Metodo che permette la disapprovazione della richiesta.
+   *
    * @param id l'identificativo della richiesta di competenza
    */
   public void reperibilityManagerDisapproval(long id, String reason) {
@@ -572,6 +599,7 @@ public class CompetenceRequestManager {
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
+   *
    * @param id id della richiesta di assenza.
    */
   public void employeeDisapproval(long id, String reason) {

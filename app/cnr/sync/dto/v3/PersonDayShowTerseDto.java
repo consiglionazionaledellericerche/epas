@@ -30,6 +30,12 @@ import lombok.val;
 import models.PersonDay;
 import org.modelmapper.ModelMapper;
 
+/**
+ * DTO per esportare via JSON le informazioni principali di un PersonDay.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 @Data
 @EqualsAndHashCode(of = "id")
@@ -51,7 +57,6 @@ public class PersonDayShowTerseDto {
   @Inject
   static ModelMapper modelMapper;
 
-  
   /**
    * Nuova instanza di un PersonDayShowTerseDto contenente i valori 
    * dell'oggetto personDay passato.

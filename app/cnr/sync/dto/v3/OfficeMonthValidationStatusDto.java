@@ -22,6 +22,12 @@ import java.util.List;
 import lombok.Data;
 import org.testng.collections.Lists;
 
+/**
+ * DTO per contenere le informazioni di validazione degli attestati
+ * validati su Attestati.
+ *
+ * @author Cristian Lucchesi
+ */
 @Data
 public class OfficeMonthValidationStatusDto {
 

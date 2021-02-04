@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import dao.PersonDayDao;
@@ -17,6 +34,11 @@ import models.Person;
 import org.joda.time.YearMonth;
 
 
+/**
+ * Manager per le certification (attestati mensili).
+ *
+ * @author Alessandro Martelli
+ */
 @Slf4j
 public class CertificationManager {
   
@@ -38,7 +60,6 @@ public class CertificationManager {
   /**
    * Informazioni sui dati mensili inviati ad Attestati prelevati
    * da attestati stesso.
-   * 
    */
   public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {    
     final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
@@ -57,6 +78,7 @@ public class CertificationManager {
   
   /**
    * Metodo che genera il file .csv con le informazioni da esportare per i buoni pasto.
+   *
    * @param people la lista di persone di cui cercare i buoni pasto
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -100,6 +122,7 @@ public class CertificationManager {
   
   /**
    * Metodo privato di normalizzazione della matricola a 6 caratteri.
+   *
    * @param number la matricola da normalizzare
    * @return la matricola addizionata di "0" in cima per normalizzarla a 6 cifre.
    */
