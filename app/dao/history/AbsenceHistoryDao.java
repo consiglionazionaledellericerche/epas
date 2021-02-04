@@ -43,7 +43,7 @@ public class AbsenceHistoryDao {
 
   /**
    * Lista delle revisioni sull'assenza con identificativo absenceId.
-   * 
+   *
    * @param absenceId id dell'assenza della quale recuperare lo storico
    * @return La lista delle revisioni relative all'assenza specificata.
    */
@@ -59,6 +59,5 @@ public class AbsenceHistoryDao {
             .transform(HistoryValue.fromTuple(Absence.class))
             .toList();
   }
-
 
 }

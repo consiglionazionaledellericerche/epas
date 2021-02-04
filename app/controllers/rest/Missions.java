@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import com.google.common.base.Optional;
@@ -18,6 +35,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 
+/**
+ * Controller per la ricezione via REST delle informazioni sulle nuove missioni.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Missions extends Controller {
@@ -43,6 +63,7 @@ public class Missions extends Controller {
   
   /**
    * metodo che processa il messaggio ricevuto dal kraken-listener.
+   *
    * @param body il dto costruito a partire dal binder
    */
   @BasicAuth
@@ -54,6 +75,7 @@ public class Missions extends Controller {
     if (body == null || body.dataInizio == null || body.dataFine == null) {
       logWarn("Messaggio, dataInizio o dataFine vuoti, messaggio scartato", body);
       JsonResponse.badRequest();
+      return;
     }
     
     if (body.dataInizio.isAfter(body.dataFine)) {

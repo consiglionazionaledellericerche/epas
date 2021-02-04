@@ -104,6 +104,10 @@ import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per alcuni metodi di amministrazione dell'applicazione.
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class Administration extends Controller {
@@ -372,6 +376,7 @@ public class Administration extends Controller {
 
   /**
    * Salvataggio delle impostazioni generali.
+   *
    * @param generalSetting impostazioni generali da salvare.
    */
   public static void saveGeneralSetting(@Required @Valid GeneralSetting generalSetting) {
@@ -450,6 +455,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che permette di salvare la configurazione.
+   *
    * @param name     Nome del parametro
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
@@ -652,6 +658,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
+   *
    * @param office la sede 
    * @param code il codice di assenza
    * @param year l'anno
@@ -677,7 +684,8 @@ public class Administration extends Controller {
    * Imposta la data fine per i soli contratti attivi epas:
    * - con stessa data inizio
    * - con data fine nulla
-   * - segnalati come temporary
+   * - segnalati come temporary.
+   *
    * @param office sede
    */
   @SuppressWarnings("deprecation")
@@ -887,6 +895,7 @@ public class Administration extends Controller {
 
   /**
    * Aggiorna la configurazione di tutti gli uffici.
+   *
    * @see: manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
@@ -902,6 +911,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che riposiziona una sede in un nuovo istituto in caso di accorpamenti.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
@@ -923,6 +933,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo privato che fa il cambio di appartenenza di una sede.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */

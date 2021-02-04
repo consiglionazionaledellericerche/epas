@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -22,6 +39,9 @@ import models.query.QUsersRolesOffices;
 import org.testng.collections.Maps;
 import org.testng.collections.Sets;
 
+/**
+ * DAO per UsersRolesOffices.
+ */
 public class UsersRolesOfficesDao extends DaoBase {
 
   @Inject
@@ -30,6 +50,9 @@ public class UsersRolesOfficesDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Preleva lo UsersRolesOffices per id.
+   */
   public UsersRolesOffices getById(Long id) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     return getQueryFactory().selectFrom(uro).where(uro.id.eq(id)).fetchOne();
@@ -51,6 +74,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
   /**
    * L'userRoleOffice associato ai parametri passati.
+   *
    * @param user l'utente
    * @param role il ruolo
    * @param office la sede
@@ -68,6 +92,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
   /**
    * La lista di tutti gli userRoleOffice legati all'utente passato.
+   *
    * @param user l'utente
    * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
    */
@@ -121,6 +146,7 @@ public class UsersRolesOfficesDao extends DaoBase {
 
   /**
    * Il conteggio di quanti sono gli utenti con ruolo role già presenti nel db.
+   *
    * @param role il ruolo da ricercare negli Uro
    * @return quanti sono gli utenti con ruolo role già inseriti nel db.
    */
@@ -129,9 +155,11 @@ public class UsersRolesOfficesDao extends DaoBase {
     return getQueryFactory().selectFrom(uro).where(uro.role.eq(role)).fetchCount();
   }
 
+  /**
+   * Formatta come stringa le info sullo UsersRolesOffices.
+   */
   public String formatUro(UsersRolesOffices uro) {
     return uro.role.toString() + " - " + uro.office.name;
   }
-
 
 }

@@ -96,6 +96,7 @@ public class StampingsFromClient extends Controller {
 
     if (body == null) {
       badRequest();
+      return;
     }
 
     AbsenceType abt = absenceTypeManager.getAbsenceType(body.code);
