@@ -1,6 +1,7 @@
 package cnr.sync.dto.v2;
 
 import com.beust.jcommander.internal.Sets;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class PersonShowDto extends PersonShowTerseDto {
   private Integer qualification;
   private Set<String> badges = Sets.newHashSet();
   private OfficeDto office;
+  private LocalDateTime updatedAt;
 
   /**
    * Nuova instanza di un PersonShowDto contenente i valori 

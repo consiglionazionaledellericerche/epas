@@ -30,11 +30,12 @@ public class LocalDateBinder implements TypeBinder<LocalDate> {
       log.debug("Exception during binding LocalDate {} format dd/MM/YYYY", value, ignored);
     }
     try {
-      return LocalDate.parse(value, DateTimeFormat.forPattern("YYYY-mm-dd"));
+      return LocalDate.parse(value, DateTimeFormat.forPattern("YYYY-MM-dd"));
     } catch (Exception e) {
       log.debug("Exception during binding LocalDate {} as ISO", value);
     }
 
     return new LocalDate(DATE_BINDER.bind(name, annotations, value, actualClass, genericType));
   }
+
 }

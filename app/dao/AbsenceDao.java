@@ -109,7 +109,7 @@ public class AbsenceDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(absence)
-        .where(condition).orderBy(absence.absenceType.code.asc()).fetch();
+        .where(condition).orderBy(absence.personDay.date.asc()).fetch();
 
   }
 
