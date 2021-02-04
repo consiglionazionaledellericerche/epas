@@ -51,7 +51,7 @@ import play.db.jpa.JPA;
 
 /**
  * Configurazione del sistema di metriche.
- * 
+ *
  * @author Marco Andreini
  # @see https://github.com/besmartbeopen/play1-base
  */
@@ -64,6 +64,7 @@ public class MetricsModule extends AbstractModule {
    * Il valore è espresso in millisecondi.
    */
   public static final String LOG_MIN_DURATION_REQUEST = "log_min_duration_request";
+
   /**
    * Durata minima predefinta: 0.5 secondi
    */
@@ -107,11 +108,17 @@ public class MetricsModule extends AbstractModule {
     return cp.unwrap(DataSource.class);
   }
   
+  /**
+   * Nome del db prelevato dalla configurazione.
+   */
   public String getDatabaseName() {
     val databaseUrl = Splitter.on("/").splitToList(Play.configuration.getProperty("db"));
     return databaseUrl.get(databaseUrl.size() - 1);
   }
   
+  /**
+   * Fornisce l'istanza PostgreSQLDatabaseMetrics per l'injection.
+   */
   @Provides
   public PostgreSQLDatabaseMetrics postgresqlMetrics(Provider<EntityManager> emp) {
     return new PostgreSQLDatabaseMetrics(getDataSource(emp), getDatabaseName());

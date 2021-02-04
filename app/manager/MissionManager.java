@@ -103,7 +103,7 @@ public class MissionManager {
   /**
    * Metodo che verifica se al numero di matricola passato come parametro nel dto corrisponde
    * effettivamente una persona in anagrafica.
-   * 
+   *
    * @param mission il dto creato dal json arrivato dal listener
    * @return la person, se esiste, associata alla matricola contenuta nel dto.
    */
@@ -131,7 +131,7 @@ public class MissionManager {
 
   /**
    * Metodo che crea la missione a partire dai dati del dto inviato da Missioni.
-   * 
+   *
    * @param body il dto ricavato dal json arrivato dal listener
    * @param recompute se deve essere avviato il ricalcolo
    * @return true se riesce a inserire la missione con i parametri esplicitati nel body, 
@@ -210,7 +210,7 @@ public class MissionManager {
   
   /**
    * Metodo di utilità per calcolare la situazione delle ore da giustificare per la missione.
-   * 
+   *
    * @param actualDate la data che si sta considerando
    * @param body l'oggetto contenente le info di missione
    * @param workInterval l'intervallo di inizio/fine attività lavorativa per missione
@@ -265,7 +265,7 @@ public class MissionManager {
 
   /**
    * Metodo di utilità.
-   * 
+   *
    * @param body il dto proveniente da Missioni
    * @param actualDate il giorno di missione
    * @return il workingTimeTypeDay dell'ultimo giorno di missione.
@@ -291,7 +291,7 @@ public class MissionManager {
   /**
    * Metodo che ricontrolla le date della missione dopo le info pervenute da Missioni in occasione
    * del rimborso.
-   * 
+   *
    * @param body il dto contenente i dati della missione
    * @param recompute se deve essere effettuato il ricalcolo
    * @return true se la gestione della missione è andata a buon fine, false altrimenti.
@@ -387,7 +387,7 @@ public class MissionManager {
 
   /**
    * Metodo che cancella una missione inviata precedentemente da Missioni.
-   * 
+   *
    * @param body il dto contenente i dati della missione
    * @param recompute se devono essere effettuati i ricalcoli
    * @return true se la missione viene cancellata, false altrimenti.
@@ -419,7 +419,7 @@ public class MissionManager {
 
   /**
    * Metodo privato che ritorna la lista delle date su cui fare i controlli.
-   * 
+   *
    * @param body il dto contenente i dati della missione
    * @return la lista delle date da considerare per gestire la missione.
    */
@@ -435,7 +435,7 @@ public class MissionManager {
 
   /**
    * Metodo privato che inserisce i giorni di missione.
-   * 
+   *
    * @param body il dto contenente le informazioni della missione
    * @param absenceForm l'absenceForm relativo alla missione
    * @param hours le ore 
@@ -538,7 +538,7 @@ public class MissionManager {
 
   /**
    * Metodo che si occupa di cancellare i singoli giorni di missione.
-   * 
+   *
    * @param missions la lista delle assenze da cancellare
    * @param absenceForm l'absenceForm per notificare la cancellazione dell'assenza
    * @return true se la cancellazione è andata a buon fine, false altrimenti.
@@ -567,7 +567,7 @@ public class MissionManager {
 
   /**
    * Metodo che cancella dal personDay l'assenza.
-   * 
+   *
    * @param abs l'assenza (missione) da cancellare
    * @param result se la rimozione precedente è andata a buon fine
    * @return true se l'assenza è stata cancellata, false altrimenti.
@@ -588,7 +588,7 @@ public class MissionManager {
 
   /**
    * ricalcola la situazione del dipendente.
-   * 
+   *
    * @param body il dto contenente le info dell'ordine/rimborso di missione
    */
   private void recalculate(MissionFromClient body, Optional<List<Absence>> missions) {
@@ -607,6 +607,7 @@ public class MissionManager {
   /**
    * Metodo privato che ritorna la localDateTime associata alla data passata come parametro
    * da ricercare all'interno del periodo inizio/fine missione del body.
+   *
    * @param date la data che si sta cercando
    * @param body l'oggetto mission from client
    * @return il localDateTime relativo alla data passata come parametro calcolato internamente
@@ -628,6 +629,7 @@ public class MissionManager {
   
   /**
    * Metodo che consente l'inserimento di un'assenza per missione sul giorno indicato.
+   *
    * @param situation l'oggetto contenente la situazione relativa al giorno di missione
    * @param body l'oggetto dto proveniente dal mission manager
    * @param actualDate la data attuale su cui lavorare
@@ -675,7 +677,7 @@ public class MissionManager {
   
   /**
    * Classe privata di aiuto.
-   * 
+   *
    * @author Dario Tagliaferri
    */
   private static class Situation {

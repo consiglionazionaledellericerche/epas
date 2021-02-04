@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -258,6 +275,7 @@ public class ContractManager {
 
   /**
    * Builder dell'oggetto vacationPeriod.
+   *
    * @param contract contratto
    * @param vacationCode vacationCode
    * @param beginFrom da
@@ -278,7 +296,7 @@ public class ContractManager {
   /**
    * Ritorna i vacation period di default per il contratto applicando la normativa
    * vigente.
-   * 
+   *
    * @param contract contract
    * @return i vacation period
    */
@@ -419,6 +437,7 @@ public class ContractManager {
   /**
    * Sistema le durate dei piani ferie in relazione alle date dei piani ferie del contratto 
    * precedente.
+   *
    * @param contract il contratto attuale
    * @param previousContract il contratto precedente
    */
@@ -479,6 +498,7 @@ public class ContractManager {
 
   /**
    * Ripristina i normali piani ferie del nuovo contratto come non continuativo del precedente.
+   *
    * @param actualContract il contratto attuale
    */
   public void splitVacationPeriods(Contract actualContract) {
@@ -511,7 +531,7 @@ public class ContractManager {
   /**
    * Inserisce il collegamento al contratto precedente se il parametro linkedToPreviousContract
    * è true.
-   * 
+   *
    * @param contract il contratto su cui impostare o rimuovere il collegamento al contratto 
    *     precedente.
    * @param linkedToPreviousContract indica se il contratto precedente deve essere collegato o meno.

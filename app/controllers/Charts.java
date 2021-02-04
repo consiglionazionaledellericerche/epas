@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -37,6 +54,9 @@ import security.SecurityRules;
 
 
 
+/**
+ * Controller per la generazione dei resoconti.
+ */
 @With({Resecure.class})
 @Slf4j
 public class Charts extends Controller {
@@ -59,6 +79,7 @@ public class Charts extends Controller {
   /**
    * Ritorna la pagina del confronto tra straordinari e residui positivi per le persone appartenenti
    * all'ufficio con identificativo officeId nell'anno year e nel mese month.
+   *
    * @param year l'anno da considerare
    * @param month il mese da considerare
    * @param officeId l'identificativo della sede da controllare
@@ -221,6 +242,7 @@ public class Charts extends Controller {
 
   /**
    * ritorna la lista delle persone attive nell'anno e nel mese.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
@@ -257,6 +279,7 @@ public class Charts extends Controller {
 
   /**
    * ritorna l'esportazione dei dati per rendicontazione secondo i parametri passati.
+   *
    * @param peopleIds l'eventuale lista di id dei dipendenti di cui fare l'esportazione
    * @param exportFile il formato dell'esportazione
    * @param forAll se per tutti i dipendenti o no
@@ -302,6 +325,7 @@ public class Charts extends Controller {
   /**
    * Metodo che permette la stampa di un resoconto periodico contenente le informazioni utili
    * alla rendicontazione.
+   *
    * @param exportFile il formato dell'esportazione
    * @param onlyMission se si considera il tempo della missione
    * @param beginDate la data di inizio periodo
@@ -335,6 +359,9 @@ public class Charts extends Controller {
     renderBinary(file, "export.zip", false);
   }
 
+  /**
+   * Tipologie di file per l'esportazione.
+   */
   public enum ExportFile {
     CSV, XLS;
   }

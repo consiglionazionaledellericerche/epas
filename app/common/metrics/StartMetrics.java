@@ -39,9 +39,8 @@ public class StartMetrics extends Job<Void> {
 
   /**
    * Questa classe è utile subito per avviare la configurazione delle metriche.
-   * 
-   * @author Marco Andreini
    *
+   * @author Marco Andreini
    */
   public static class Starter {
 
