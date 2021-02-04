@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
@@ -13,7 +30,7 @@ import org.joda.time.YearMonth;
 /**
  * Contract con alcune funzionalità aggiuntive.
  *
- * @author marco
+ * @author Marco Andreini
  */
 public class WrapperContract implements IWrapperContract {
 
@@ -165,7 +182,8 @@ public class WrapperContract implements IWrapperContract {
   }
   
   /**
-   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento. 
+   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento.
+   * 
    * @param yearMonth mese
    * @return esito
    */
@@ -266,6 +284,7 @@ public class WrapperContract implements IWrapperContract {
 
   /**
    * La data più recente tra creazione del contratto e creazione della persona.
+   *
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
@@ -287,6 +306,7 @@ public class WrapperContract implements IWrapperContract {
   
   /**
    * La data più recente per l'inizializzazione.
+   *
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override

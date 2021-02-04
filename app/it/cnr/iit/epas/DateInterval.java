@@ -22,6 +22,9 @@ import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
 import org.joda.time.LocalDate;
 
+/**
+ * Rappresenta un intervallo di date.
+ */
 @NoArgsConstructor
 public class DateInterval {
 
@@ -33,7 +36,6 @@ public class DateInterval {
    * 
    * @param begin data inizio intervallo.
    * @param end da fine intervallo.
-   * @return
    */
   public static DateInterval withBegin(LocalDate begin, Optional<LocalDate> end) {
     DateInterval dateInterval = new DateInterval();
@@ -56,7 +58,6 @@ public class DateInterval {
    * 
    * @param begin data inizio intervallo, se null impostata a MIN_DATE
    * @param end data fine intervallo, se null impostata a MAX_DATE
-   * @return
    */
   public static DateInterval build(LocalDate begin, LocalDate end) {
 

@@ -61,7 +61,7 @@ public class Leaves extends Controller {
 
   /**
    * Periodi di tipo aspettativa di una persona in un anno in formato JSON.
-   * 
+   *
    * @param year anno in cui cercare le aspettative
    */
   public static void byPersonAndYear(Long id, String email, String eppn, Long personPerseoId, 
@@ -85,7 +85,7 @@ public class Leaves extends Controller {
 
   /**
    * Periodi di tipo aspettativa di una sede in un anno in formato JSON. 
-   * 
+   *
    * @param id id in ePAS dell'Ufficio.
    * @param code codice cds dell'ufficio
    * @param codeId sedeId di attestati

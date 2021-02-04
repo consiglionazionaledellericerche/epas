@@ -485,6 +485,13 @@ public class MissionManager {
           .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);      
     }
 
+    if (mission == null) {
+      log.error("Impossibile determinare il tipo di missione 92/92E/92NG/... "
+          + "Missione per {}, numero {}, dal {} al {}, orario {}:{}",
+          person.getFullname(), numero, from, to, hours, minutes);
+      return false;
+    }
+    
     log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
         + "tempo {}:{}", person, mission.code, from, to, hours, minutes);
     

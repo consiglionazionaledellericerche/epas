@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest.v2;
 
 import cnr.sync.dto.v2.AffiliationCreateDto;
@@ -27,7 +44,7 @@ import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei gruppi di persone.
- * 
+ *
  * @author cristian
  *
  */
@@ -78,7 +95,7 @@ public class Affiliations extends Controller {
    * Affiliazioni alla persona.
    * La persona è individuate tramite una delle chiavi della persona passate come
    * parametro (uniformemente agli metodi REST sulle persone).
-   * 
+   *
    * @param includeInactive se true include anche quelle non attive in 
    *     questo momento, se false (il default) le include tutte.
    */
@@ -203,7 +220,7 @@ public class Affiliations extends Controller {
   
   /**
    * Cerca l'affiliazione in funzione del id passato.
-   * 
+   *
    * @return l'l'affiliazione se trovata, altrimenti torna direttamente 
    *     una risposta HTTP 404.
    * 

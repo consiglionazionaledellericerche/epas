@@ -25,7 +25,7 @@ import org.joda.time.LocalDateTime;
 
 /**
  * Rappresenta il valore di un Entity ad una specifica revisione.
- * 
+ *
  * @author Marco Andreini
  */
 public class HistoryValue<T extends BaseModel> {
@@ -78,10 +78,16 @@ public class HistoryValue<T extends BaseModel> {
     }
   }
 
+  /**
+   * Verifica se si tratta di una cancellazione.
+   */
   public boolean typeIsDel() {
     return type.name().equals("DEL");
   }
 
+  /**
+   * Verifica se si tratta di una creazione.
+   */
   public boolean typeIsAdd() {
     return type.name().equals("ADD");
   }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
@@ -55,7 +72,7 @@ import org.testng.util.Strings;
 /**
  * DAO per le person.
  *
- * @author marco
+ * @author Marco Andreini
  */
 public final class PersonDao extends DaoBase {
 
@@ -271,6 +288,7 @@ public final class PersonDao extends DaoBase {
   
   /**
    * La lista di persone che rispondono ai criteri di ricerca.
+   *
    * @param group il gruppo di codici di competenza
    * @param offices l'insieme delle sedi
    * @param onlyTechnician se si vogliono solo i tecnici
@@ -422,6 +440,7 @@ public final class PersonDao extends DaoBase {
 
   /**
    * Preleva la persona passata per id.
+   *
    * @param personId l'id della persona.
    * @return la persona corrispondente all'id passato come parametro.
    */
@@ -440,6 +459,7 @@ public final class PersonDao extends DaoBase {
 
   /**
    * Matricola per persona ed ufficio.
+   *
    * @param number la matricola passata come parametro.
    * @return la persona corrispondente alla matricola passata come parametro.
    */
@@ -863,6 +883,7 @@ public final class PersonDao extends DaoBase {
   
   /**
    * Filtro su codice competenza abilitato appartenente a gruppo.
+   *
    * @param condition la condition che mi porto dietro da altre restrizioni
    * @param group il gruppo da controllare
    * @param date la data da cui cercare
@@ -879,6 +900,7 @@ public final class PersonDao extends DaoBase {
   
   /**
    * Filtro sui tempi determinati.
+   *
    * @param condition la condition che mi porto dietro da altre restrizioni
    */
   private void filterTemporary(BooleanBuilder condition) {
@@ -1131,6 +1153,7 @@ public final class PersonDao extends DaoBase {
   
   /**
    * La lista di persone senza configurazione.
+   *
    * @return la lista di persone senza configurazione.
    */
   public List<Person> peopleWithoutConfiguration() {
