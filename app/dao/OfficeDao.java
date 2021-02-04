@@ -73,7 +73,7 @@ public class OfficeDao extends DaoBase {
   
   /**
    * Preleva l'office dal suo id.
-   * 
+   *
    * @return l'ufficio identificato dall'id passato come parametro.
    */
   public Office getOfficeById(Long id) {
@@ -86,7 +86,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * Tutti gli Uffici presenti.
-   * 
+   *
    * @return la lista di tutti gli uffici presenti sul database.
    */
   public List<Office> getAllOffices() {
@@ -114,6 +114,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'ufficio con il codice code.
+   *
    * @param code il codice della sede
    * @return l'ufficio associato al codice passato come parametro.
    */
@@ -128,6 +129,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'ufficio, se esiste, con il codeId passato come parametro.
+   *
    * @param codeId il codice della sede 
    * @return l'ufficio associato al codice passato come parametro.
    */
@@ -141,6 +143,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'ufficio, se esiste, con perseoId uguale a quello passato come parametro.
+   *
    * @param perseoId l'id dell'anagrafica
    * @return l'ufficio associato al perseoId.
    */
@@ -268,6 +271,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'istituto con cds passato come parametro.
+   *
    * @param cds centro di spesa
    * @return l'istituto, se esiste, con centro di spesa uguale a quello passato.
    */
@@ -281,6 +285,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'istituto con id passato come parametro.
+   *
    * @param id l'identificativo dell'istituto
    * @return l'istituto, se esiste, con id passato come parametro
    */
@@ -292,6 +297,9 @@ public class OfficeDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+  /**
+   * Lista degli uffici dell'istituto passato come parametro.
+   */
   public List<Office> byInstitute(Institute institute) {
     final QOffice office = QOffice.office;
     return queryFactory.selectFrom(office).where(office.institute.eq(institute)).fetch();

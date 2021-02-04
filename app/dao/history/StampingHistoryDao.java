@@ -28,7 +28,7 @@ import org.hibernate.envers.query.AuditQuery;
 
 /**
  * Dao sullo storico delle timbrature.
- * 
+ *
  * @author Marco Andreini
  */
 public class StampingHistoryDao {
@@ -42,7 +42,7 @@ public class StampingHistoryDao {
 
   /**
    * La lista delle revisioni sulla timbratura con id passato.
-   * 
+   *
    * @param stampingId l'identificativo della timbratura
    * @return la lista delle revisioni sulla timbratura con id passato.
    */

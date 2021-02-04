@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -27,6 +44,9 @@ import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
 
+/**
+ * DAO per gli User.
+ */
 public class UserDao extends DaoBase {
 
   @Inject
@@ -38,6 +58,7 @@ public class UserDao extends DaoBase {
 
   /**
    * L'user identificato dall'id passato come parametro.
+   *
    * @param id l'identificativo dell'utente
    * @param password (opzionale) la password dell'utente
    * @return lo user  identificato dall'id passato come parametro.
@@ -55,6 +76,7 @@ public class UserDao extends DaoBase {
 
   /**
    * L'utente cui il token appartiene.
+   *
    * @param recoveryToken la stringa con il token per ricreare la password
    * @return l'user corrispondente al recoveryToken inviato per il recovery della password.
    */
@@ -66,6 +88,7 @@ public class UserDao extends DaoBase {
 
   /**
    * L'user corrispondente all'username e alla password (opzionale) passati.
+   *
    * @param username l'username dell'utente
    * @param password (opzionale) la password dell'utente
    * @return l'user corrispondente a username e password passati come parametro.
@@ -103,6 +126,7 @@ public class UserDao extends DaoBase {
 
   /**
    * La lista degli utenti per sede.
+   *
    * @param name Filtro sul nome
    * @param offices Gli uffici che hanno qualche tipo di relazione con gli user restituiti
    * @param onlyEnable filtra solo sugli utenti abilitati
@@ -137,6 +161,7 @@ public class UserDao extends DaoBase {
 
   /**
    * la lista degli utenti "orfani".
+   *
    * @param name (opzionale) l'eventuale nome su cui fare la restrizione di ricerca
    * @return La lista degli utenti senza legami con una sede.
    */

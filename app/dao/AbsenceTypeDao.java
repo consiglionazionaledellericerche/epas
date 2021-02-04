@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
@@ -22,7 +39,7 @@ import org.joda.time.LocalDate;
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 public class AbsenceTypeDao extends DaoBase {
 
@@ -33,6 +50,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna una lista di dto di tipi assenza che non è chiaro dove venga usata...
+   *
    * @return la lista dei dto.
    */
   public List<AbsenceTypeDto> countersDto() {
@@ -50,6 +68,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna la mappa di tipo assenza/quantità.
+   *
    * @return la mappa dei tipi assenza relazionata alla quantità di quei tipi presa
    */
   public Map<AbsenceType, Long> counters() {
@@ -96,6 +115,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna la lista dei tipi assenza che vanno ad Attestati.
+   *
    * @return la lista degli AbsenceType che non siano di internalUse.
    */
   public List<AbsenceType> certificateTypes() {
@@ -108,6 +128,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna l'absenceType appartenente all'id passato come parametro.
+   *
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public AbsenceType getAbsenceTypeById(Long long1) {
@@ -122,6 +143,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna la lista dei tipi assenza validi a partire dalla data date.
+   *
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
    *     codice di assenza crescente.
    */
@@ -138,6 +160,7 @@ public class AbsenceTypeDao extends DaoBase {
 
   /**
    * Ritorna l'absenceType (opzionale) relativo al codice stringa passato come parametro.
+   *
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> getAbsenceTypeByCode(String string) {
@@ -186,6 +209,9 @@ public class AbsenceTypeDao extends DaoBase {
         .transform(groupBy(absenceType).as(absence.count()));
   }
 
+  /**
+   * DTO per le informazioni dell'absenceType.
+   */
   public class AbsenceTypeDto {
 
     public String code;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import cnr.sync.dto.PersonDayDto;
@@ -24,6 +41,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la visualizzazione via REST dei dati delle giornate lavorative.
+ */
 @With(Resecure.class)
 public class PersonDays extends Controller {
 
@@ -108,6 +128,7 @@ public class PersonDays extends Controller {
 
   /**
    * Metodo che costruisce il dto sulla base del personDay passato come parametro.
+   *
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
    *     alle funzioni rest.
    */
@@ -132,6 +153,7 @@ public class PersonDays extends Controller {
 
   /**
    * Metodo che genera il dto sulla base del contractMonthRecap passato come parametro.
+   *
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
    *     parametro da ritornare alle funzioni rest.
    */

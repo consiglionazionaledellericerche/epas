@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -16,6 +33,9 @@ import models.flows.Group;
 import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 
+/**
+ * DAO per i gruppi.
+ */
 public class GroupDao extends DaoBase {
 
   @Inject
@@ -32,7 +52,7 @@ public class GroupDao extends DaoBase {
     return Optional.fromNullable(
         getQueryFactory().selectFrom(group).where(group.id.eq(id)).fetchFirst());
   }
-  
+
   /**
    * Restisce il gruppo da prelevare per externalId e office.
    */
@@ -43,7 +63,7 @@ public class GroupDao extends DaoBase {
           .where(group.office.eq(office), group.externalId.eq(externalId))
           .fetchFirst());
   }
-  
+
   /**
    * Metodo che ritorna la lista dei gruppi attivi che appartengono alla sede passata 
    * come parametro.

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import cnr.sync.dto.CompetenceDto;
@@ -32,6 +49,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la visualizzazione via REST di alcuni dati dei dipendenti.
+ */
 @With(Resecure.class)
 @Slf4j
 public class Persons extends Controller {
@@ -54,6 +74,7 @@ public class Persons extends Controller {
   /**
    * Ritorna le informazioni sui giorni nel periodo richiesto per la persona identificata
    * dal parametro email.
+   *
    * @param email la mail della persona di cui si vogliono le informazioni sui giorni
    * @param start l'inizio del periodo
    * @param end la fine del periodo
@@ -93,6 +114,7 @@ public class Persons extends Controller {
   /**
    * Ritorna il json contenente le missioni presenti nel periodo da start a end per la persona 
    * identificata dalla mail email.
+   *
    * @param email la mail che identifica la persona
    * @param start la data di inizio della ricerca
    * @param end la data di fine della ricerca
@@ -128,6 +150,7 @@ public class Persons extends Controller {
   /**
    * Il json contenente le competenze assegnate nel periodo da start a end relative ai codici 
    * presenti nella lista code per la persona identificata dalla mail email.
+   *
    * @param email la mail che identifica la persona
    * @param start la data di inizio da cui cercare
    * @param end la data di fine fino a cui cercare
@@ -170,6 +193,7 @@ public class Persons extends Controller {
 
   /**
    * Ritorna la lista delle persone appartenenti alla sede sedeId alla data date.
+   *
    * @param sedeId l'identificativo della sede di cui si vogliono le persone
    * @param date la data a cui si vuole la lista
    */

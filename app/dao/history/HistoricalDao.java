@@ -35,6 +35,9 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
 import org.joda.time.LocalDateTime;
 
+/**
+ * DAO per le interrogazioni sullo storico.
+ */
 @StaticInject
 @Slf4j
 public class HistoricalDao {
@@ -48,7 +51,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'oggetto revisione.
-   * 
+   *
    * @param id the id to search.
    * @return the Revision object.
    */
@@ -61,7 +64,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'istanza di un'entità ad una specifica revisione.
-   * 
+   *
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @param revisionId the revision id
@@ -80,7 +83,7 @@ public class HistoricalDao {
 
   /**
    * Ritorna l'ultima revisione di una specifica entità.
-   * 
+   *
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return last revision of specified entity.
@@ -96,7 +99,7 @@ public class HistoricalDao {
 
   /**
    * La lista di revisioni della specifica entità.
-   * 
+   *
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return List of revisions for the specified entity instance.
@@ -114,7 +117,7 @@ public class HistoricalDao {
 
   /**
    * La versione precedente.
-   * 
+   *
    * @param cls Entity Class to search
    * @param id the entity primary key
    * @return la versione precedente del istanza individuata da cls e id.
@@ -136,6 +139,9 @@ public class HistoricalDao {
     return valueAtRevision(cls, id, previousRevision);
   }
 
+  /**
+   * L'utente che ha effettuato l'ultima revisione dell'entity passata.
+   */
   public static User lastRevisionOperator(BaseModel entity) {
     return lastRevisionOf(entity.getClass(), entity.id).revision.owner;
   }

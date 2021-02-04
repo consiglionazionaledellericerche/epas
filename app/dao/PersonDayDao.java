@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -24,7 +41,8 @@ import org.joda.time.YearMonth;
 
 /**
  * Il dao dei personDay.
- * @author dario.
+ *
+ * @author Dario Tagliaferri
  */
 public class PersonDayDao extends DaoBase {
 
@@ -35,6 +53,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * Il personday relativo all'id passato come parametro.
+   *
    * @param personDayId l'id del personday
    * @return il personday relativo all'id passato come parametro.
    */
@@ -50,6 +69,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * Il personday, se esiste, per una persona a una certa data.
+   *
    * @param person la persona
    * @param date la data
    * @return un personday se esiste per quella persona in quella data.
@@ -68,6 +88,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * Il primo personDay esistente precedente a date per person.
+   *
    * @param person la persona da cercare
    * @param date la data da cui cercare indietro
    * @return Il primo personDay esistente precedente a date per person.
@@ -85,6 +106,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * La lista di tutti i personday di una persona.
+   *
    * @param person la persona di cui cercare i personday
    * @return tutti i personDay relativi alla persona person passata come parametro.
    */
@@ -164,6 +186,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * La lista dei personday di una persona tra begin e end.
+   *
    * @param person la persona
    * @param begin la data inizio da cui cercare
    * @param end la data fino a cui cercare
@@ -177,6 +200,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * La lista dei personday di una persona tra begin e end (opzionale).
+   *
    * @param person la persona di cui si vogliono i personday
    * @param begin la data di inizio da cui cercare i personday
    * @param end la data di fine (opzionale)
@@ -236,6 +260,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * La lista dei personday di un singolo giorno di una lista di persone.
+   *
    * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
    *     lista.
    */
@@ -248,6 +273,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * Il più vecchio personday presente sul db.
+   *
    * @return il personday facente riferimento al giorno più vecchio presente sul db.
    */
   public PersonDay getOldestPersonDay() {
@@ -258,6 +284,7 @@ public class PersonDayDao extends DaoBase {
 
   /**
    * Il personday, se esiste, che contiene l'assenza passata come parametro.
+   *
    * @param abs l'assenza di cui si cerca il personday che la conteneva
    * @return il personDay che conteneva l'assenza passata come parametro.
    */
@@ -270,8 +297,9 @@ public class PersonDayDao extends DaoBase {
   
   /**
    * Metodo che ritorna la lista dei giorni di lavoro tra begin e date per i dipendenti della 
-   * sede office.
+   * sede office. 
    * Usato nel controllers.rest persondays.
+   *
    * @param office la sede per cui si cercano i giorni di lavoro
    * @param begin la data di inizio da cui cercare
    * @param end la data di fine fino a cui cercare
