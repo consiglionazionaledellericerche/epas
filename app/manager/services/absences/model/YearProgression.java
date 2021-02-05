@@ -1,9 +1,29 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import models.enumerate.VacationCode;
 
+/**
+ * Rappresenta la progessione temporale di maturazione delle ferie.
+ */
 public enum YearProgression {
   
   vacation32(32, ImmutableList.of(
@@ -215,6 +235,9 @@ public enum YearProgression {
     this.yearPortions = yearPortions;
   }
   
+  /**
+   * Rappresenta una porzione di anno (un periodo temporale all'interno di un anno).
+   */
   public static class YearPortion {
     public final int from;
     public final int to;
@@ -223,6 +246,7 @@ public enum YearProgression {
     
     /**
      * Costruttore.
+     *
      * @param from giorno di inizio
      * @param to giorno di fine
      * @param amount quantità di giorni
@@ -237,6 +261,7 @@ public enum YearProgression {
   
   /**
    * Ritorna la progressione dei giorni di ferie in base al vacationCode.
+   *
    * @param vacationCode il vacationCode da considerare
    * @return la progressione dei giorni di ferie in base al vacationCode.
    */
@@ -251,6 +276,7 @@ public enum YearProgression {
   
   /**
    * Ritorna la progressione dei giorni di ex P.L. in base al vacationCode.
+   *
    * @param vacationCode il vacationCode da considerare
    * @return la progressione dei giorni di ex P.L. in base al vacationCode.
    */

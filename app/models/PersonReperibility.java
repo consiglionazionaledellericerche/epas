@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Range;
@@ -21,7 +38,7 @@ import play.data.validation.Required;
 /**
  * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @ToString
 @Audited
@@ -56,6 +73,7 @@ public class PersonReperibility extends BaseModel {
 
   /**
    * il range di date di validità dell'appartenenza di una persona al servizio di reperibilità.
+   *
    * @return il range di date di validità dell'appartenenza di una persona al servizio di 
    *     reperibilità.
    */
@@ -73,18 +91,17 @@ public class PersonReperibility extends BaseModel {
     return Range.closed(startDate, endDate);
   }
 
-  public static Comparator<PersonReperibility> PersonReperibilityComparator 
-      = new Comparator<PersonReperibility>() {
+  public static Comparator<PersonReperibility> PersonReperibilityComparator = 
+      new Comparator<PersonReperibility>() {
 
-        public int compare(PersonReperibility pr1, PersonReperibility pr2) {
+    public int compare(PersonReperibility pr1, PersonReperibility pr2) {
 
-            String prName1 = pr1.personReperibilityType.description.toUpperCase();
-            String prName2 = pr2.personReperibilityType.description.toUpperCase();
-
-
-            return prName1.compareTo(prName2);
-        }
+      String prName1 = pr1.personReperibilityType.description.toUpperCase();
+      String prName2 = pr2.personReperibilityType.description.toUpperCase();
 
 
-      };
+      return prName1.compareTo(prName2);
+    }
+
+  };
 }

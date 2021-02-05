@@ -1,26 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.telework.service;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import helpers.rest.ApiRequestException;
-import java.net.ConnectException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import manager.attestati.dto.show.ListaDipendenti;
-import manager.attestati.service.AttestatiApis;
-import models.Office;
-import models.User;
 import models.dto.TeleworkDto;
 import play.Play;
 import play.libs.WS;
@@ -47,6 +52,7 @@ public class TeleworkComunication {
   
   /**
    * L'url base dell'applicazione Telework.
+   *
    * @return l'url base dell'applicazione.
    * @throws NoSuchFieldException eccezione su mancanza del campo
    */
@@ -59,6 +65,7 @@ public class TeleworkComunication {
   
   /**
    * L'user che si collega all'applicazione Telework.
+   *
    * @return l'user che si collega all'applicazione Telework.
    * @throws NoSuchFieldException eccezione su mancanza del campo
    */
@@ -71,6 +78,7 @@ public class TeleworkComunication {
 
   /**
    * La password con cui l'utente si collega all'applicazione Telework.
+   *
    * @return la password con cui l'utente si collega all'applicazione Telework.
    * @throws NoSuchFieldException eccezione su mancanza del campo
    */
@@ -150,6 +158,7 @@ public class TeleworkComunication {
   
   /**
    * Salva l'oggetto sull'applicazione Telework.
+   *
    * @param dto l'oggetto da andare a salvare 
    * @throws NoSuchFieldException eccezione di assenza di un campo nel metodo che crea il messaggio
    *     da inviare all'applicazione Telework.
@@ -182,6 +191,7 @@ public class TeleworkComunication {
   /**
    * Comunica con la applicazione telework-stamping la richiesta di modifica di una 
    * timbratura in telelavoro.
+   *
    * @param dto l'oggetto dto da inviare per permettere la modifica della timbratura relativa
    * @return il risultato dell'operazione.
    * @throws NoSuchFieldException eccezione di mancanza di parametro
@@ -204,6 +214,7 @@ public class TeleworkComunication {
   
   /**
    * Metodo che cancella la timbratura su applicazione esterna.
+   *
    * @param stampingId l'identificativo della timbratura da eliminare
    * @return 204 se l'eliminazione è andata a buon fine
    * @throws NoSuchFieldException eccezione di mancanza di parametro

@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import lombok.val;
 import models.PersonDay;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.TeleworkStampTypes;
@@ -37,8 +36,7 @@ public class TeleworkPersonDayDto {
   public List<TeleworkDto> interruptions;
 
   /**
-   * @return true se non ci sono timbrature per telelavoro, 
-   *     false altrimenti.
+   * Verifica se non ci sono timbrature per telelavoro.
    */
   public boolean isEmpty() {
     return beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty();
@@ -66,6 +64,7 @@ public class TeleworkPersonDayDto {
 
   /**
    * Controlla se le timbrature in telelavoro sono ben formate.
+   *
    * @return true se le timbrature di telelavoro sono ben formate, false altrimenti.
    */
   public boolean hasTeleworkStampingsWellFormed() {

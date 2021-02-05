@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
@@ -8,12 +25,10 @@ import models.MealTicket;
 import models.Office;
 import org.joda.time.LocalDate;
 
-
-
 /**
  * Servizio meal tickets.
  * 
- * @author alessandro
+ * @author Alessandro Martelli
  *
  */
 public interface IMealTicketsService {
@@ -33,6 +48,7 @@ public interface IMealTicketsService {
   /**
    * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock e dagli
    * estremi.
+   *
    * @param codeBlock codice blocco
    * @param first il primo codice
    * @param last l'ultimo codice
