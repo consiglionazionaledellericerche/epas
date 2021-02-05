@@ -355,7 +355,7 @@ public enum DefaultGroup {
 
   /**
    * Ricerca i gruppi modellati e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultGroup> missing(List<GroupAbsenceType> allGroup) {
@@ -377,7 +377,7 @@ public enum DefaultGroup {
 
   /**
    * L'enumerato corrispettivo del group (se esiste...)
-   * 
+   *
    * @return optional dell'enumerato
    */
   public static Optional<DefaultGroup> byName(GroupAbsenceType group) {
@@ -391,7 +391,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo ferie per dipendenti.
-   * 
+   *
    * @return list
    */
   public static List<String> employeeVacationCodes() {
@@ -400,7 +400,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo riposi compensativi per dipendenti.
-   * 
+   *
    * @return list
    */
   public static List<String> employeeCompensatoryCodes() {
@@ -409,7 +409,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo lavoro fuori sede per dipendenti. (105BP)
-   * 
+   *
    * @return list
    */
   public static List<String> employeeOffSeatCodes() {
@@ -418,7 +418,7 @@ public enum DefaultGroup {
 
   /**
    * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
-   * 
+   *
    * @return list
    */
   public static List<String> employeeTeleworkCodes() {
