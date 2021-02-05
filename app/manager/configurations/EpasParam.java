@@ -137,7 +137,7 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Person.class),
   
-  PARENTAL_LEAVE("parental_leave",
+  PARENTAL_LEAVE_AND_CHILD_ILLNESS("parental_leave_and_child_illness",
 
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -145,15 +145,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
-  CHILD_ILLNESS("child_illness",
 
-      EpasParamCategory.GENERAL,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Person.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
