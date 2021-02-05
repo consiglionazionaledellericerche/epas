@@ -1130,6 +1130,7 @@ RIGHT_TO_STUDY=Permessi per diritto allo studio
 COVID_19=Auto inserimento codice per emergenza COVID-19
 ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
 PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
+SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
 
 
 DAYS=Ricalcoli giornalieri.

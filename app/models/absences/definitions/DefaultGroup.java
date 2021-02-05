@@ -46,6 +46,10 @@ public enum DefaultGroup {
   G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre gg. mese", "",
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_182, DefaultComplation.C_182, null, false, false), 
+  G_182_PARENTI_DIPENDENTI("182 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182, 
+      DefaultComplation.C_182, null, false, false),
   G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
@@ -429,6 +433,10 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
   }
 
+  public static List<String> employeeSecondDisabledRelativeCodes() {
+    return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
@@ -437,6 +445,33 @@ public enum DefaultGroup {
     List<String> g26 = getCodes(DefaultGroup.G_26_DIPENDENTI);
 
     return Stream.of(g19, g26).flatMap(x -> x.stream()).collect(Collectors.toList());
+  }
+  
+  /**
+   * Ritorna la lista di codici da considerare per gli impiegati con congedo parentale
+   * e malattia figlio abilitato.
+   */
+  public static List<String> parentalLeaveAndChildIllnessCodes() {
+    List<String> g23 = getCodes(DefaultGroup.G_23);
+    List<String> g232 = getCodes(DefaultGroup.G_232);
+    List<String> g233 = getCodes(DefaultGroup.G_233);
+    List<String> g234 = getCodes(DefaultGroup.G_234);
+    List<String> g24 = getCodes(DefaultGroup.G_24);
+    List<String> g242 = getCodes(DefaultGroup.G_242);
+    List<String> g243 = getCodes(DefaultGroup.G_243);
+    List<String> g244 = getCodes(DefaultGroup.G_244);
+    List<String> g25 = getCodes(DefaultGroup.G_25);
+    List<String> g252 = getCodes(DefaultGroup.G_252);
+    List<String> g253 = getCodes(DefaultGroup.G_253);
+    List<String> g254 = getCodes(DefaultGroup.G_254);
+    List<String> g25P = getCodes(DefaultGroup.G_25P);
+    List<String> gmal1 = getCodes(DefaultGroup.MALATTIA_FIGLIO_1);
+    List<String> gmal2 = getCodes(DefaultGroup.MALATTIA_FIGLIO_2);
+    List<String> gmal3 = getCodes(DefaultGroup.MALATTIA_FIGLIO_3);
+    List<String> gmal4 = getCodes(DefaultGroup.MALATTIA_FIGLIO_4);    
+
+    return Stream.of(g23, g232, g233, g234, g24, g242, g243, g244, g25, g252, g253, g254,
+        g25P, gmal1, gmal2, gmal3, gmal4).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
 
   public static List<String> employeeRightToStudyCodes() {
