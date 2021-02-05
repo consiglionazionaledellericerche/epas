@@ -228,7 +228,7 @@ public enum DefaultGroup {
       false, true), 
   G_234("234 - Astensione facoltativa post partum 100% quarto figlio 0-12 anni 30 giorni",
       "234/254/244 - Astensione facoltativa post partum quarto figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_12, DefaultTakable.T_234, DefaultComplation.C_234,
       DefaultGroup.G_254, false, true),
 

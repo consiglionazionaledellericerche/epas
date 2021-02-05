@@ -27,10 +27,11 @@ public enum DefaultTab {
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11), 
   TELELAVORO("Telelavoro", 12), 
   LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
-  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 8), 
+  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 14), 
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
-  COVID19("Emergenza covid-19", 14), 
+  COVID19("Emergenza covid-19", 16), 
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
+  CONGEDI_PARENTALI_DIPENDENTI("Congedi Parentali dipendenti", 24),
   AUTOMATICI("Codici Automatici", 11);
 
   public String description;
