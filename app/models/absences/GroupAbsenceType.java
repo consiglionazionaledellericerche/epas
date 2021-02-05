@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Optional;
@@ -21,6 +38,9 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
+/**
+ * Tipologia di gruppo di assenze.
+ */
 @Audited
 @Entity
 @Table(name = "group_absence_types")
@@ -89,6 +109,7 @@ public class GroupAbsenceType extends BaseModel {
     
   /**
    * Label.
+   *
    * @return label
    */
   public String getLabel() {
@@ -97,6 +118,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * La stringa che rappresenta la catena cui appartiene il gruppo.
+   *
    * @return chainDescription
    */
   public String computeChainDescription() {
@@ -109,6 +131,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Il primo gruppo della catena (quando ho un modo univoco di raggiungerlo).
+   *
    * @return primo gruppo
    */
   public GroupAbsenceType firstOfChain() {
@@ -158,6 +181,7 @@ public class GroupAbsenceType extends BaseModel {
     
     /**
      * L'intervallo figlio.
+     *
      * @param birthDate data di nascita
      * @return intervallo
      */
@@ -181,6 +205,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se la tab non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -227,7 +252,8 @@ public class GroupAbsenceType extends BaseModel {
     return Optional.absent();
     
   }
-  
+
+  @Override
   public String toString() {
     return description;
   }

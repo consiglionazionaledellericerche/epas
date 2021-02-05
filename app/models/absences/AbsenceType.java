@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Joiner;
@@ -34,6 +51,9 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
+/**
+ * Tipologia di assenza.
+ */
 @Entity
 @Table(name = "absence_types")
 @Audited
@@ -126,6 +146,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Descrizione limitata a 60 caratteri.
+   *
    * @return short description
    */
   @Transient
@@ -139,6 +160,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * La validità.
+   *
    * @return dateInterval
    */
   @Transient
@@ -148,6 +170,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se il codice è scaduto.
+   *
    * @return esito
    */
   @Transient
@@ -157,6 +180,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se il codice è scaduto alla data.
+   *
    * @return esito
    */
   @Transient
@@ -171,6 +195,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se fra i tipi giustificativi c'è quello all day.
+   *
    * @return esito
    */
   @Transient
@@ -185,6 +210,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se fra i tipi giustificativi c'è quello absence type minutes.
+   *
    * @return esito
    */  
   @Transient
@@ -199,6 +225,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se fra i tipi giustificativi c'è quello specified minutes.
+   *
    * @return esito
    */
   @Transient
@@ -213,6 +240,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se fra i tipi giustificativi c'è quello nothing.
+   *
    * @return esito
    */
   @Transient
@@ -227,6 +255,7 @@ public class AbsenceType extends BaseModel {
 
   /**
    * Se il tipo ha quel comportamento.
+   *
    * @param behaviour comportamento
    * @return il payload del comportamento se esiste
    */
@@ -241,6 +270,7 @@ public class AbsenceType extends BaseModel {
 
   /**
    * Se il codice di assenza è utilizzabile per tutte le qualifiche del mapping.
+   *
    * @param mapping mapping
    * @return esito
    */
@@ -262,7 +292,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * I gruppi coinvolti dal tipo assenza.
-   * 
+   *
    * @param onlyProgrammed non filtrare i soli programmati
    * @return entity set
    */
@@ -297,7 +327,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * I gruppi coinvolti dal tipo assenza nella parte taken.
-   * 
+   *
    * @param onlyProgrammed non filtrare i soli programmati
    * @return entity set
    */
@@ -323,6 +353,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se il codice è coinvolto solo in gruppi semplici.
+   *
    * @return esito
    */
   public boolean onlySimpleGroupInvolved() {
@@ -337,6 +368,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Il gruppo con priorità più alta di cui il tipo è takable.
+   *
    * @return gruppo
    */
   public GroupAbsenceType defaultTakableGroup() {
@@ -364,6 +396,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se il completamento non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -449,6 +482,7 @@ public class AbsenceType extends BaseModel {
   
   /**
    * Controlla se due interi sono uguali.
+   *
    * @param a intero
    * @param b intero
    * @return true se due interi sono uguali, false altrimenti.
