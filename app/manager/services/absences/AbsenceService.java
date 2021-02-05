@@ -57,7 +57,7 @@ import play.cache.Cache;
 /**
  * Interfaccia epas per il componente assenze. le richieste via form.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class AbsenceService {
@@ -468,6 +468,7 @@ public class AbsenceService {
 
   /**
    * Ritorna la lista dei gruppi di assenza abilitati per il flusso di approvazione.
+   *
    * @return la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    */
   public List<GroupAbsenceType> groupsPermittedFlow() {
@@ -692,6 +693,9 @@ public class AbsenceService {
     return insertReport;
   }
 
+  /**
+   * Report con le informazioni derivante da un inserimento assenza.
+   */
   @ToString
   public static class InsertReport {
 
@@ -704,6 +708,9 @@ public class AbsenceService {
 
     public List<String> warningsPreviousVersion = Lists.newArrayList();
 
+    /**
+     * Numero di inserimenti di assenze con successo.
+     */
     public int howManySuccess() {
       return insertTemplateRows.size() - howManyReplacing() - howManyError() - howManyIgnored();
     }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Lists;
@@ -44,19 +61,19 @@ import play.data.validation.Unique;
 
 /**
  * Entity per le persone.
- * 
- * @author cristian
- */
-
-/*
- * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le informazioni della
- * persona in fase di personDao.list. Necessaria comunque la join con le relazioni OneToOne.
+ *
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @Entity
 @Audited
 @Table(name = "persons")
 public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
+
+  /*
+   * IMPORTANTE: relazione con user impostata a LAZY per non scaricare tutte le informazioni della
+   * persona in fase di personDao.list. Necessaria comunque la join con le relazioni OneToOne.
+   */
 
   private static final long serialVersionUID = -2293369685203872207L;
 
@@ -263,6 +280,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Lista dei gruppi di una persona alla data odierna.
+   *
    * @return la lista dei gruppi a cui appartiente oggi una persona. 
    */
   @Transient
@@ -272,6 +290,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   
   /**
    * Lista dei gruppi di una persona alla data indicata.
+   *
    * @return la lista dei gruppi a cui appartiente una persona ad una data
    *     passata per parametro.
    */

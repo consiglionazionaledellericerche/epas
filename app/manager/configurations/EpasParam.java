@@ -657,6 +657,9 @@ public enum EpasParam {
   public final Object defaultValue;
   public final Class<?> target;
 
+  /**
+   * Costruttore per inizializzazione configurazione parametri.
+   */
   EpasParam(String name, EpasParamCategory category, EpasParamTimeType epasParamTimeType,
       EpasParamValueType epasParamValueType, Object defaultValue,
       List<RecomputationType> recomputationTypes, Class<?> target) {
@@ -669,15 +672,24 @@ public enum EpasParam {
     this.target = target;
   }
 
+  /**
+   * Verifica se il parametro è annuale.
+   */
   public boolean isYearly() {
     return this.epasParamTimeType.equals(EpasParamTimeType.YEARLY);
   }
 
+  /**
+   * Verifica se il parametro è generale.
+   */
   public boolean isGeneral() {
     return this.epasParamTimeType.equals(EpasParamTimeType.GENERAL);
   }
 
 
+  /**
+   * Verifica se il parametro è periodico.
+   */
   public boolean isPeriodic() {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
   }
@@ -686,14 +698,23 @@ public enum EpasParam {
     GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
   }
 
+  /**
+   * Tipologie di periodicità temporale del parametro.
+   */
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;
 
+    /**
+     * Verifica se la periodicità è GENERAL.
+     */
     public boolean isGeneral() {
       return this == GENERAL;
     }
   }
 
+  /**
+   * Tipologie di ricalcolo.
+   */
   public enum RecomputationType {
     DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS
   }
@@ -701,18 +722,23 @@ public enum EpasParam {
   /**
    * Enumerato con i tipi di valori che può assumere un parametro di configurazione.
    *
-   * @author alessandro
+   * @author Alessandro Martelli
    */
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
 
+    /**
+     * Rappresenta un intervallo di LocalTime.
+     */
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
 
-      // TODO: validation
+      /**
+       * Costruttore.
+       */
       public LocalTimeInterval(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
@@ -724,11 +750,17 @@ public enum EpasParam {
       }
     }
 
+    /**
+     * Rappresenta una lista di IP.
+     */
     public static class IpList {
       public List<String> ipList;
 
       // TODO: validation
 
+      /**
+       * Costruttore.
+       */
       public IpList(List<String> ipList) {
         this.ipList = ipList;
       }
@@ -839,7 +871,7 @@ public enum EpasParam {
   /**
    * Verifica la lista dei cds non abilitati a visualizzare la 
    * "Presenze automatica".
-   * 
+   *
    * @return la lista dei cds che non sono abilitati a visualizzare la 
    *     "Presenza automatica" sui contratti dei dipendenti.
    */

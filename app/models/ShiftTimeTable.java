@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import java.util.ArrayList;
@@ -16,6 +33,9 @@ import models.base.BaseModel;
 import models.enumerate.CalculationType;
 import org.joda.time.LocalTime;
 
+/**
+ * Tabella orario di un turno.
+ */
 @Entity
 @Table(name = "shift_time_table")
 public class ShiftTimeTable extends BaseModel {
@@ -89,6 +109,7 @@ public class ShiftTimeTable extends BaseModel {
 
   /**
    * Quanti slot ci sono nella timetable.
+   *
    * @return la quantità di slot presenti nella timetable.
    */
   @Transient
