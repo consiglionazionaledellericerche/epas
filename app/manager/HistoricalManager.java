@@ -17,8 +17,6 @@
 
 package manager;
 
-import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import org.joda.time.LocalDate;
 

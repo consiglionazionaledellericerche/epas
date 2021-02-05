@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.recaps;
 
 import com.google.common.collect.Lists;
@@ -16,7 +33,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
  * Classe da utilizzare per il rendering delle assenze annuali effettuate da una persona
  * in un anno.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class YearlyAbsencesRecap {
 
@@ -28,7 +45,8 @@ public class YearlyAbsencesRecap {
   Table<Integer, Integer, List<Absence>> absenceTable;
 
   /**
-   * Costruttore riepilogo. 
+   * Costruttore riepilogo.
+   *
    * @param person persona
    * @param year anno
    * @param yearlyAbsence assenze annuali
@@ -56,6 +74,7 @@ public class YearlyAbsencesRecap {
 
   /**
    * Il nome del mese a partire dal numero.
+   *
    * @return il nome del mese con valore monthNumber null in caso di argomento non valido.
    */
   public String fromIntToStringMonth(Integer monthNumber) {
@@ -66,6 +85,7 @@ public class YearlyAbsencesRecap {
 
   /**
    * La tabella contenente i codici di assenza effettuati nel giorno.
+   *
    * @return la tabella contenente in ogni cella i codici delle assenze effettuate in quel giorno.
    */
   private Table<Integer, Integer, List<Absence>> buildYearlyAbsenceTable(
@@ -95,6 +115,7 @@ public class YearlyAbsencesRecap {
 
   /**
    * La mappa tipo assenza-quantità.
+   *
    * @return la mappa contenente i tipi di assenza effettuate nell'anno con il relativo numero di
    *     occorrenze.
    */

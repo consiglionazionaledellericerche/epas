@@ -22,7 +22,6 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import controllers.Security;
-import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
