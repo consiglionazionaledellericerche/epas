@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.recaps.personstamping;
 
 import com.google.common.base.Optional;
@@ -23,10 +40,10 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDateTime;
 
 /**
- * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -.
- * dailyPresence - clocks
+ * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -
+ * dailyPresence - clocks.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class PersonStampingDayRecap {
@@ -238,7 +255,7 @@ public class PersonStampingDayRecap {
 
   /**
    * N.B. deve essere stata precedentemente chiamata la computeValidStamping per la lista stampings.
-   * 
+   *
    * <br> Crea le timbrature da visualizzare nel tabellone timbrature. 
    * <br> 
    * 1) Riempita di timbrature fittizie nelle celle vuote, fino ad arrivare alla dimensione di 

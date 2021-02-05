@@ -45,6 +45,9 @@ import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
 
+/**
+ * Service per i Contratti.
+ */
 public class ContractService {
 
   private final AbsenceDao absenceDao;
@@ -58,7 +61,7 @@ public class ContractService {
 
   /**
    * Injection.
-   * 
+   *
    * @param absenceDao il dao sulle assenze
    * @param personDayManager il manager del personDay
    * @param absenceCertificationService il servizio di recupero assenze da attestati
@@ -83,7 +86,7 @@ public class ContractService {
 
   /**
    * La mappa con associazione data-lista tipi di assenza.
-   * 
+   *
    * @param person la persona per cui si recuperano le assenze
    * @param from da quando recuperarle
    * @param to (opzionale) fino a quando recuperarle
@@ -99,7 +102,7 @@ public class ContractService {
   /**
    * Si collega ad Attestati e scarica le assenze dell'anno di updateFrom.
    * Poi le persiste ignorando quelle esistenti.
-   * 
+   *
    * @param person la persona il cui contratto è stato splittato
    * @param updateFrom la data da cui far partire i ricalcoli
    */
@@ -138,7 +141,7 @@ public class ContractService {
 
   /**
    * Ritorna il nuovo contratto con i parametri passati.
-   * 
+   *
    * @param person la persona di cui si sta creando il contratto
    * @param dateToSplit la data da cui ripartire col nuovo contratto
    * @param wtt l'orario di lavoro
@@ -157,7 +160,7 @@ public class ContractService {
 
   /**
    * Ripristina le assenze salvate in precedenza sul nuovo contratto.
-   * 
+   *
    * @param absences la lista di assenze da ripristinare
    */
   public void resetAbsences(List<Absence> absences) {

@@ -3,6 +3,9 @@ package manager.recaps.traininghours;
 import models.Person;
 import org.joda.time.LocalDate;
 
+/**
+ * Riepilogo delle ore di formazione.
+ */
 public class TrainingHoursRecap {
 
   public Person person;
@@ -13,6 +16,7 @@ public class TrainingHoursRecap {
 
   /**
    * Costruttore.
+   *
    * @param person la persona
    * @param trainingHours le ore di formazione
    * @param begin la data di inizio

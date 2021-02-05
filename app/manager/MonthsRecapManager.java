@@ -17,7 +17,6 @@
 
 package manager;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateUtility;
 import java.io.ByteArrayInputStream;
@@ -29,12 +28,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import manager.charts.ChartsManager.PersonStampingDayRecapHeader;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -42,13 +39,9 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
-import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
