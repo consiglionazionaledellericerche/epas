@@ -31,7 +31,6 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;

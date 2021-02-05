@@ -18,16 +18,12 @@
 package manager;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import models.CompetenceCode;
 import models.Office;
 import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.Person;
-import models.PersonShiftDay;
 import models.ShiftTimeTable;
 import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.dto.OrganizationTimeTable;
 import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;

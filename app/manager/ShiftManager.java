@@ -77,7 +77,7 @@ import play.i18n.Messages;
 /**
  * Gestiore delle operazioni sui turni.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 public class ShiftManager {

@@ -15,26 +15,17 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package manager.recaps.charts;
+package manager.competences;
 
-import lombok.EqualsAndHashCode;
+import models.CompetenceCode;
 import org.joda.time.LocalDate;
 
 /**
- * Result.
- *
- * @author Daniele Murgia
- * @since 05/07/16
+ * DTO per i CompetenceCode.
  */
-@EqualsAndHashCode
-public class ResultFromFile {
+public class CompetenceCodeDto {
 
-  public String codice;
-  public LocalDate dataAssenza;
-
-  public ResultFromFile(String codice, LocalDate dataAssenza) {
-    this.codice = codice;
-    this.dataAssenza = dataAssenza;
-  }
-
+  public CompetenceCode code;
+  public LocalDate beginDate;
+  public LocalDate endDate;
 }

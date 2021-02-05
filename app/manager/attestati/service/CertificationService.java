@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.service;
 
 import com.google.common.base.Optional;
@@ -24,12 +41,8 @@ import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.Certification;
-//import models.Competence;
-import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
-//import models.PersonMonthRecap;
-//import models.absences.Absence;
 import models.enumerate.CertificationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -39,7 +52,7 @@ import play.mvc.Http;
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class CertificationService implements ICertificationService {
@@ -64,7 +77,9 @@ public class CertificationService implements ICertificationService {
     this.monthData = monthData;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Verifica se il token è abilitato alla sede.
+   * 
    * @see manager.attestati.service.ICertificationService#authentication(models.Office, boolean)
    */
   @Override
@@ -143,7 +158,9 @@ public class CertificationService implements ICertificationService {
     return certifications;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Costruisce la situazione attestati di una persona.
+   *
    * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(
    *    models.Person, int, int)
    */
@@ -259,7 +276,9 @@ public class CertificationService implements ICertificationService {
 
   }
 
-  /* (non-Javadoc)
+  /**
+   * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
+   *
    * @see manager.attestati.service.ICertificationService#certificationsEquivalent(
    *    java.util.Map, java.util.Map)
    */
@@ -288,7 +307,9 @@ public class CertificationService implements ICertificationService {
     return true;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Elaborazione persona.
+   *
    * @see manager.attestati.service.ICertificationService#process(
    *    manager.attestati.service.PersonCertData)
    */
@@ -359,7 +380,9 @@ public class CertificationService implements ICertificationService {
   }
 
 
-  /* (non-Javadoc)
+  /**
+   * Invia la certificazione ad attestati.
+   *
    * @see manager.attestati.service.ICertificationService#sendCertification(models.Certification)
    */
   @Override
@@ -423,7 +446,9 @@ public class CertificationService implements ICertificationService {
     }
   }
 
-  /* (non-Javadoc)
+  /**
+   * Rimuove il record in attestati. (Non usare per buoni pasto).
+   *
    * @see manager.attestati.service.ICertificationService#removeAttestati(models.Certification)
    */
   @Override
@@ -463,7 +488,9 @@ public class CertificationService implements ICertificationService {
 
   }
 
-  /* (non-Javadoc)
+  /**
+   * La lista dei codici assenza.
+   *
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
   @Override
@@ -477,6 +504,9 @@ public class CertificationService implements ICertificationService {
     return map;
   }
 
+  /**
+   * I dati contrattuali in attestati.
+   */
   @Override
   public Map<String, ContrattoAttestati> getCertificationContracts(Office office, int year,
       int month) throws ExecutionException, NoSuchFieldException {
@@ -500,6 +530,10 @@ public class CertificationService implements ICertificationService {
 
   }
 
+  /**
+   * Il periodo dipendente, solo per fare le prove. Questo metodo dovrà progressivamente 
+   * diventare il metodo che scarica le assenze degli ultimi due anni di una persona.
+   */
   @Override
   public CruscottoDipendente getCruscottoDipendente(Person person, int year)
       throws ExecutionException, NoSuchFieldException {

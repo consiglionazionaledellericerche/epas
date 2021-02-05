@@ -20,17 +20,12 @@ package manager.flows;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import controllers.Security;
-import dao.AbsenceRequestDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
-import dao.absences.AbsenceComponentDao;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -39,45 +34,29 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import manager.AbsenceManager;
-import manager.CompetenceManager;
-import manager.ConsistencyManager;
 import manager.NotificationManager;
-import manager.PersonDayManager;
-import manager.ReperibilityManager2;
 import manager.configurations.ConfigurationManager;
-import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
-import manager.services.absences.AbsenceForm;
-import manager.services.absences.AbsenceService;
-import manager.services.absences.AbsenceService.InsertReport;
-import models.Competence;
-import models.CompetenceCode;
 import models.Person;
-import models.PersonDay;
 import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
 import models.Role;
 import models.User;
-import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.flows.AbsenceRequest;
-import models.flows.AbsenceRequestEvent;
 import models.flows.CompetenceRequest;
 import models.flows.CompetenceRequestEvent;
-import models.flows.enumerate.AbsenceRequestEventType;
-import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 import play.jobs.Job;
 import play.libs.F.Promise;
 
+/**
+ * Operazioni sulle richieste di compenteze.
+ *
+ * @author cristian
+ *
+ */
 @Slf4j
 public class CompetenceRequestManager {
   

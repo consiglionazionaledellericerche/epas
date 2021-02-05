@@ -75,7 +75,7 @@ import play.db.jpa.JPA;
 
 /**
  * Operazioni sulle richiesta di assenza.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
