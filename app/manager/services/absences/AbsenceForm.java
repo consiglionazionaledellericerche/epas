@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Verify;
@@ -18,7 +35,10 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 
-//@Slf4j
+/**
+ * Contiene le informazioni per generare e controlla la
+ * form di inserimento/modifica assenze.
+ */
 public class AbsenceForm {
   
   public Person person;
@@ -64,6 +84,7 @@ public class AbsenceForm {
   
   /**
    * Constructor.
+   *
    * @param person person
    * @param from from 
    * @param to to
@@ -187,6 +208,7 @@ public class AbsenceForm {
   
   /**
    * Le categorie (ordinate per priorità).
+   *
    * @return list
    */
   public List<CategoryGroupAbsenceType> categories() {
@@ -199,6 +221,7 @@ public class AbsenceForm {
   
   /**
    * I gruppi della categoria (già ordinati per priorità).
+   *
    * @param category categoria
    */
   public List<GroupAbsenceType> groupsForCategory(CategoryGroupAbsenceType category) {
@@ -207,7 +230,6 @@ public class AbsenceForm {
   
   /**
    * I gruppi.
-   * @return list
    */
   public List<GroupAbsenceType> groups() {
     List<GroupAbsenceType> groups = Lists.newArrayList();
@@ -223,6 +245,7 @@ public class AbsenceForm {
   
   /**
    * Se la form ha una scelta sul tipo assenza.
+   *
    * @return esito
    */
   public boolean hasAbsenceTypeChoice() {
@@ -230,27 +253,38 @@ public class AbsenceForm {
     return choices > 1;
   }
   
+  /**
+   * Verifica se ha un unico tipo di assenza impostato.
+   */
   public AbsenceType theOnlyAbsenceType() {
     Verify.verify(!hasAbsenceTypeChoice());
     return this.absenceTypes.get(0);
   }
   
+  /**
+   * Verifica se ci sono più tipologie di giustificazione dell'orario.
+   */
   public boolean hasJustifiedTypeChoice() {
     return justifiedTypes.size() > 1;
   }
   
+  /**
+   * Verifica se la giustificazione oraria selezionata è con minuti e ore.
+   */
   public boolean hasHourMinutesChoice() {
     return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes)
         || justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes_limit);
   }
   
+  /**
+   * Verifica se la giustificazione selezionata è quella che assegna tutto il giorno.
+   */
   public boolean hasToChoice() {
     return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
   }
   
   /**
    * Le ore inseribili per questa richiesta.
-   * @return list
    */
   public List<Integer> selectableHours() {
     List<Integer> hours = Lists.newArrayList();
@@ -262,7 +296,6 @@ public class AbsenceForm {
   
   /**
    * I minuti inseribili per questa richiesta.
-   * @return list
    */
   public List<Integer> selectableMinutes() {
     List<Integer> hours = Lists.newArrayList();
