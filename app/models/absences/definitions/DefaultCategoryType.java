@@ -66,6 +66,8 @@ public enum DefaultCategoryType {
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI), 
   COVID_19("Emergenza Covid-19", 22, DefaultTab.COVID19), 
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 23, DefaultTab.ORE_AGGIUNTIVE_DIPENDENTI), 
+  ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
+      24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;
