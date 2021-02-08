@@ -63,6 +63,7 @@ public class Affiliations extends Controller {
 
   /**
    * Affiliazioni al gruppo.
+   *
    * @param id id del gruppo.
    * @param includeInactive se true include anche quelle non attive in 
    *     questo momento, se false (il default) le include tutte.

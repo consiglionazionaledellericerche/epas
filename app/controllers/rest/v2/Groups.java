@@ -40,7 +40,7 @@ import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei gruppi di persone.
- * 
+ *
  * @author cristian
  *
  */

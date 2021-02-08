@@ -335,8 +335,9 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
-   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e emd
-   * e che abbia almeno una timbratura per lavoro fuori sede.
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura per lavoro fuori sede o per motivi di servizio con
+   * impostato luogo o motivazione.
    */
   public List<PersonDay> getOffSitePersonDaysByOfficeInPeriod(
       Office office, LocalDate begin, LocalDate end) {
@@ -346,8 +347,11 @@ public class PersonDayDao extends DaoBase {
         .leftJoin(personDay.stampings, stamping)
         .where(personDay.person.office.eq(office),
             personDay.date.between(begin, end),
-            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE))
+            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE)
+              .or(
+                  stamping.stampType.eq(StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE)
+                    .and(stamping.reason.isNotEmpty()).or(stamping.place.isNotEmpty())))
         .distinct()
         .orderBy(personDay.date.asc()).fetch();
-  }  
+  }
 }
