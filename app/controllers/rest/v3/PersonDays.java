@@ -22,17 +22,20 @@ import cnr.sync.dto.v3.PersonDayShowDto;
 import cnr.sync.dto.v3.PersonDayShowTerseDto;
 import cnr.sync.dto.v3.PersonMonthRecapDto;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
+import controllers.rest.v2.Offices;
 import controllers.rest.v2.Persons;
-import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.JodaConverters;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -63,8 +66,6 @@ public class PersonDays extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   private static SecurityRules rules;
-  @Inject
-  private static OfficeDao officeDao;
   @Inject
   static GsonBuilder gsonBuilder;
 
@@ -103,22 +104,22 @@ public class PersonDays extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
-  public static void getMonthSituationByOffice(String sedeId, Integer year, Integer month) {
-    log.debug("getMonthSituationByOffice -> sedeId={}, year={}, month={}", sedeId, year, month);
-    if (year == null || month == null || sedeId == null) {
-      JsonResponse.badRequest("I parametri sedeId, year e month sono tutti obbligatori");
+  public static void getMonthSituationByOffice(Long id, String code, String codeId,
+      String sedeId, Integer year, Integer month) {
+    log.debug("getMonthSituationByOffice -> id={}, sedeId={}, year={}, month={}", 
+        id, sedeId, year, month);
+    if (year == null || month == null) {
+      JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    Optional<Office> office = officeDao.byCodeId(sedeId);
-    if (!office.isPresent()) {
-      JsonResponse.notFound("Office non trovato con il sedeId passato per parametro");
-    }
-    rules.checkIfPermitted(office.get());    
+    val office = 
+        Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
+    rules.checkIfPermitted(office);    
     
     org.joda.time.LocalDate date = new org.joda.time.LocalDate(year, month, 1);
 
     List<PersonDay> personDays = 
         personDayDao.getPersonDaysByOfficeInPeriod(
-            office.get(), date, date.dayOfMonth().withMaximumValue());
+            office, date, date.dayOfMonth().withMaximumValue());
     
     val personDayMap = 
         personDays.stream().collect(Collectors.groupingBy(PersonDay::getPerson));
@@ -145,17 +146,15 @@ public class PersonDays extends Controller {
    * @param sedeId l'identificativo della sede di cui cercare le persone
    * @param date la data per cui cercare i dati
    */
-  public static void getDaySituationByOffice(String sedeId, LocalDate date) {
+  public static void getDaySituationByOffice(Long id, String code, String codeId,
+      String sedeId, LocalDate date) {
     log.debug("getDaySituationByOffice -> sedeId={}, data={}", sedeId, date);
     if (sedeId == null || date == null) {
       JsonResponse.badRequest("I parametri sedeId e date sono obbligatori.");
     }
-    Optional<Office> office = officeDao.byCodeId(sedeId);
-    if (!office.isPresent()) {
-      JsonResponse.notFound("Office non trovato con il sedeId passato per parametro");
-    }
-    rules.checkIfPermitted(office.get());
-    Set<Office> offices = Sets.newHashSet(office.get());
+    val office = 
+        Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
+    Set<Office> offices = Sets.newHashSet(office);
     
     List<Person> personList = personDao
         .list(Optional.<String>absent(), offices, false, 
@@ -197,6 +196,48 @@ public class PersonDays extends Controller {
         .build();
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(monthRecap));    
+  }
+
+  /**
+   * Metodo rest che ritorna un json contenente la lista dei person day di un dipendente
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
+   * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
+   */
+  public static void offSiteWorkByPersonAndMonth(Long id, String email, String eppn,
+      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    if (year == null || month == null) {
+      JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
+    }
+    rules.checkIfPermitted(person.office);
+    val gson = gsonBuilder.create();
+    val yearMonth = new YearMonth(year, month);
+    val personDays = personDayDao.getOffSitePersonDaysByPersonInPeriod(
+        person, yearMonth.toLocalDate(1), 
+        yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
+    renderJSON(gson.toJson(personDays.stream().map(
+        pd -> PersonDayShowTerseDto.build(pd)).collect(Collectors.toList())));
+  }
+  
+  /**
+   * Metodo rest che ritorna un json contenente la lista dei person day di una sede
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
+   * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
+   */
+  public static void offSiteWorkByOfficeAndMonth(Long id, String code, String codeId,
+      String sedeId, Integer year, Integer month) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office =
+        Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
+    val gson = gsonBuilder.create();
+    val yearMonth = new YearMonth(year, month);
+    val personDays = personDayDao.getOffSitePersonDaysByOfficeInPeriod(
+        office, yearMonth.toLocalDate(1), 
+        yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
+    renderJSON(gson.toJson(personDays.stream().map(
+        pd -> PersonDayShowDto.build(pd)).collect(Collectors.toList())));
   }
 
 }

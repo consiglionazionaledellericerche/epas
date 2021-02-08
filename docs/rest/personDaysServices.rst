@@ -49,7 +49,7 @@ Cartellino byOffice (giornaliero e/o mensile)
 =============================================
 
 Analogamente ai metodi precedenti è possibile avere le informazioni giornaliere o mensili di tutti 
-i dipendenti di una sede. 
+i dipendenti di una sede.
 La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *223400*.
 Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
@@ -58,3 +58,149 @@ Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
 ::
   $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice sedeId==223400 year==2020 month==10
+
+
+Timbrature per lavoro fuori sede o per motivi di servizio con luogo e/o motivazione
+===================================================================================
+
+Sono disponibili due endpoint per prelevare le informazioni relative alla timbrature per lavori
+fuori o per motivi di servizio con impostato luogo e/o motivazione.
+Queste informazioni possono per esempio essere utilizzate da un eventuale sistema esterno di
+rendicontazione dei progetti.
+
+Per prelevare la lista delle giornate con timbrature per lavoro fuori sede o per motivi di
+servizio con luogo e/o motivazione di un dipendente è possibile utilizzare una GET alll'endpoint
+**/rest/v3/personDays/offSiteWorkByPersonAndMonth**.
+
+La persona può essere individuata passando i parametri identificativi delle persone: 
+*id, email, eppn, perseoPersonId, fiscalCode*, i parametri *year* e *month* sono utilizzati per
+individuare l'anno ed il mese.
+
+::
+  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByPersonAndMonth email==galileo.galilei@cnr.it year==2021 month==02
+  
+Il risultato sarà del tipo:
+
+:: 
+  [
+    {
+        "absences": [],
+        "date": "2021-02-04",
+        "difference": -222,
+        "id": 363239,
+        "isHoliday": false,
+        "isTicketAvailable": false,
+        "progressive": -222,
+        "stampings": [
+            {
+                "date": "2021-02-04T09:00:00",
+                "id": 398918,
+                "markedByAdmin": false,
+                "markedByEmployee": false,
+                "note": null,
+                "place": "Torre di Pisa",
+                "reason": "Verificare ipotesi caduta dei gravi",
+                "stampType": "LAVORO_FUORI_SEDE",
+                "way": "in"
+            },
+            {
+                "date": "2021-02-04T12:30:00",
+                "id": 398919,
+                "markedByAdmin": false,
+                "markedByEmployee": false,
+                "note": null,
+                "place": "Torre di Pisa",
+                "reason": "Terminato esperimento caduta dei gravi",
+                "stampType": "LAVORO_FUORI_SEDE",
+                "way": "out"
+            }
+        ],
+        "timeAtWork": 210
+    }
+]
+
+Analogamente è possibile ottenere le stesse informazioni ma per tutto il personale dipendente
+di una sede utilizzando una GET all'indirizzo **/rest/v3/personDays/offSiteWorkByOfficeAndMonth**.
+
+La sede è individuata tramite il parametro *sedeId*.
+::
+    $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByOfficeAndMonth sedeId==223400 year==2021 month==02
+
+Un esempio di risultato è il seguente:
+
+::
+  [
+    {
+        "absences": [],
+        "date": "2021-02-04",
+        "difference": -222,
+        "id": 363239,
+        "isHoliday": false,
+        "isTicketAvailable": false,
+        "person": {
+            "email": "galileo.galilei@cnr.it",
+            "eppn": "galileo.galilei@cnr.it",
+            "fiscalCode": "GLLGLL74P10G702B",
+            "fullname": "Galilei Galileo",
+            "id": 1234,
+            "number": "9802"
+        },
+        "progressive": -222,
+        "stampings": [
+            {
+                "date": "2021-02-04T09:00:00",
+                "id": 398918,
+                "markedByAdmin": false,
+                "markedByEmployee": false,
+                "note": null,
+                "place": "Torre di Pisa",
+                "reason": "Controllore accelerazione di gravità di due corpi",
+                "stampType": "LAVORO_FUORI_SEDE",
+                "way": "in"
+            },
+            {
+                "date": "2021-02-04T12:30:00",
+                "id": 398919,
+                "markedByAdmin": false,
+                "markedByEmployee": false,
+                "note": null,
+                "place": "Torre di Pisa",
+                "reason": "Terminato esperimento caduta dei gravi",
+                "stampType": "LAVORO_FUORI_SEDE",
+                "way": "out"
+            }
+        ],
+        "timeAtWork": 210
+    },
+    {
+        "absences": [],
+        "date": "2021-02-08",
+        "difference": -432,
+        "id": 363244,
+        "isHoliday": false,
+        "isTicketAvailable": false,
+        "person": {
+            "email": "leonardo.fibonacci@cnr.it",
+            "eppn": null,
+            "fiscalCode": "FBNLRD74P10G702G",
+            "fullname": "Fibonacci Leonardo",
+            "id": 1235,
+            "number": "9801"
+        },
+        "progressive": -432,
+        "stampings": [
+            {
+                "date": "2021-02-08T08:00:00",
+                "id": 398920,
+                "markedByAdmin": false,
+                "markedByEmployee": false,
+                "note": null,
+                "place": "Lungarno Pisano",
+                "reason": "Esperimento su successioni numeriche",
+                "stampType": "LAVORO_FUORI_SEDE",
+                "way": "in"
+            }
+        ],
+        "timeAtWork": 0
+    }
+  ]
