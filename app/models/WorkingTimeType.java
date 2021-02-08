@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Lists;
@@ -27,8 +44,8 @@ import play.data.validation.Unique;
 /**
  * Modello per le tipologie di orario di lavoro.
  *
- * @author cristian
- * @author dario
+ * @author Cristian Lucchesi
+ * @author Dario Tagliaferri
  */
 @Entity
 @Audited
@@ -95,7 +112,8 @@ public class WorkingTimeType extends BaseModel {
   }
   
   /**
-   * Il tempo a lavoro medio giornaliero. 
+   * Il tempo a lavoro medio giornaliero.
+   *
    * @return tempo medio.
    */
   public int weekAverageWorkingTime() {
@@ -112,6 +130,7 @@ public class WorkingTimeType extends BaseModel {
   
   /**
    * Euristica per capire se il tipo orario è orizzontale.
+   *
    * @return esito
    */
   @Transient
@@ -163,6 +182,7 @@ public class WorkingTimeType extends BaseModel {
   
   /**
    * Calcola il tempo percentuale di part time.
+   *
    * @return percentuale
    */
   public int percentEuristic() {
@@ -177,6 +197,7 @@ public class WorkingTimeType extends BaseModel {
   
   /**
    * Ritorna la media dei minuti lavorati in una settimana.
+   *
    * @return la media dei minuti lavorati in una settimana.
    */
   public int averageMinutesInWeek() {

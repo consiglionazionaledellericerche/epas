@@ -1,6 +1,22 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateUtility;
 import java.io.ByteArrayInputStream;
@@ -12,12 +28,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import manager.charts.ChartsManager.PersonStampingDayRecapHeader;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -25,13 +39,9 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
-import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -43,6 +53,9 @@ import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
 
 
+/**
+ * Manager per la gestione dei riepiloghi mensili.
+ */
 @Slf4j
 public class MonthsRecapManager {
 
@@ -62,6 +75,7 @@ public class MonthsRecapManager {
   /**
    * Genera il file da esportare contenente la situazione riepilogativa sulla sede nell'anno/mese
    * relativa a smart working.
+   *
    * @return il file contenente le info su smart working/lavoro in sede.
    * @throws IOException eccezione di input/output
    */
@@ -194,6 +208,7 @@ public class MonthsRecapManager {
 
   /**
    * Genera lo stile delle celle di intestazione.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -207,9 +222,10 @@ public class MonthsRecapManager {
     cs.setAlignment(CellStyle.ALIGN_CENTER);
     return cs;
   }
-  
+
   /**
    * Genera lo stile delle celle di intestazione.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -239,5 +255,5 @@ public class MonthsRecapManager {
     
     return cs;
   }
-  
+
 }

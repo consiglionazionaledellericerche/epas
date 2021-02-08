@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences.definitions;
 
 import com.google.common.base.Optional;
@@ -9,7 +26,7 @@ import org.assertj.core.util.Lists;
 /**
  * Le categorie di default.
  * 
- * @author alessandro
+ * @author Alessandro Martelli
  *
  */
 public enum DefaultCategoryType {
@@ -66,6 +83,8 @@ public enum DefaultCategoryType {
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI), 
   COVID_19("Emergenza Covid-19", 22, DefaultTab.COVID19), 
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 23, DefaultTab.ORE_AGGIUNTIVE_DIPENDENTI), 
+  ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
+      24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;
@@ -80,7 +99,7 @@ public enum DefaultCategoryType {
 
   /**
    * Ricerca le categorie modellate e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultCategoryType> missing(List<CategoryGroupAbsenceType> allCategories) {
@@ -102,7 +121,7 @@ public enum DefaultCategoryType {
 
   /**
    * L'enumerato corrispettivo della categoria (se esiste...)
-   * 
+   *
    * @return optional dell'enumerato
    */
   public static Optional<DefaultCategoryType> byName(CategoryGroupAbsenceType category) {

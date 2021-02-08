@@ -305,6 +305,7 @@ public class Reperibility extends Controller {
     log.debug("update: Received reperebilityPeriods {}", body);
     if (body == null) {
       badRequest();
+      return;
     }
 
     //PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
@@ -503,7 +504,7 @@ public class Reperibility extends Controller {
 
     // update the reperibility days in the DB
     int updatedCompetences =
-        reperibilityManager.updateDBReperibilityCompetences(personReperibilityDays, year, month);
+        reperibilityManager.updateDbReperibilityCompetences(personReperibilityDays, year, month);
     log.debug("Salvate o aggiornate {} competences", updatedCompetences);
 
     // builds the table with the summary of days and reperibility periods description

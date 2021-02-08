@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
@@ -34,7 +51,7 @@ import org.joda.time.YearMonth;
 /**
  * Wrapper per la person.
  * 
- * @author marco.
+ * @author Marco Andreini
  */
 public class WrapperPerson implements IWrapperPerson {
 
@@ -163,6 +180,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   /**
    * L'ultimo contratto attivo nel mese, se esiste.
+   *
    * @param year l'anno
    * @param month il mese
    * @return l'ultimo contratto attivo nel mese.
@@ -181,6 +199,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   /**
    * Il primo contratto attivo nel mese se esiste.
+   *
    * @param year l'anno
    * @param month il mese
    * @return il primo contratto attivo nel mese.
@@ -470,6 +489,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   /**
    * Il contratto della persona con quel perseoId.
+   *
    * @param perseoId id di perseo della Persona
    * @return Contract.
    */
@@ -496,6 +516,7 @@ public class WrapperPerson implements IWrapperPerson {
   
   /**
    * L'ultimo invio attestati effettuato tramite ePAS.
+   *
    * @return mese / anno
    */
   @Override

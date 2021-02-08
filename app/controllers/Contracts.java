@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -47,6 +64,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei contratti.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Contracts extends Controller { 
@@ -128,6 +148,7 @@ public class Contracts extends Controller {
 
   /**
    * Renderizza la pagina in cui si può provvedere allo split di un contratto.
+   *
    * @param contractId l'identificativo del contratto da splittare
    */
   public static void split(Long contractId) {
@@ -143,6 +164,7 @@ public class Contracts extends Controller {
   /**
    * Provvede alla divisione del contratto contract in due contratti distinti, uno che termina il 
    * giorno precedente dateToSplit e l'altro che inizia a dateToSplit.
+   *
    * @param contract il contratto da splittare
    * @param dateToSplit la data a cui splittarlo
    */
@@ -231,6 +253,7 @@ public class Contracts extends Controller {
 
   /**
    * Renderizza la pagina in cui si può fondere l'attuale contratto col precedente, se esiste.
+   *
    * @param contractId l'identificativo del contratto da fondere
    */
   public static void merge(Long contractId) {
@@ -246,6 +269,7 @@ public class Contracts extends Controller {
 
   /**
    * Fonde insieme due contratti contigui.
+   *
    * @param contract il contratto attuale
    * @param previousContract il contratto precedente
    */
@@ -655,6 +679,7 @@ public class Contracts extends Controller {
 
   /**
    * Cancella una fascia oraria di presenza obbligatoria.
+   *
    * @param id id della fascia oraria da cancellare
    * @param confirmed se è confirmed lo cancella altrimenti mostra una pagina di
    *     riepilogo e conferma.

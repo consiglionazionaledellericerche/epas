@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -39,6 +56,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle configurazioni.
+ */
 @With({Resecure.class})
 @Slf4j
 public class Configurations extends Controller {
@@ -263,6 +283,7 @@ public class Configurations extends Controller {
 
   /**
    * Modifica la configurazione.
+   *
    * @param configuration    la configurazione da modificare.
    * @param configurationDto l'oggetto contenente la nuova configurazione.
    * @param confirmed        se siamo nel caso della conferma o no.
@@ -348,6 +369,7 @@ public class Configurations extends Controller {
 
   /**
    * Modifica la configurazione della persona.
+   *
    * @param configuration    la configurazione della persona da modificare.
    * @param configurationDto l'oggetto contenente la configurazione nuova.
    * @param confirmed        se siamo nello stato di conferma delle operazioni.
@@ -408,6 +430,7 @@ public class Configurations extends Controller {
 
   /**
    * Aggiorna il file allegato.
+   *
    * @param officeId id dell'ufficio a cui associare l'allegato.
    * @param file file allegato.
    * @throws FileNotFoundException in casi di problemi con il file allegato.
@@ -436,6 +459,7 @@ public class Configurations extends Controller {
 
   /**
    * Permette di rimuovere l'allegato all'autocertificazione per le timbrature.
+   *
    * @param attachmentId l'identificativo dell'allegato da rimuovere
    */
   public static void removeAttachment(Long attachmentId) {
@@ -455,6 +479,7 @@ public class Configurations extends Controller {
 
   /**
    * Ritorna l'allegato con identificativo attachmentId.
+   *
    * @param attachmentId l'identificativo dell'allegato da ritornare
    */
   public static void getAttachment(Long attachmentId) {

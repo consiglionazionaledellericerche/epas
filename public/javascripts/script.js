@@ -246,7 +246,7 @@ $(function($) {
   });
   $.fn.initepas = function() {
 	  
-   this.find('textarea').trumbowyg({
+   this.find('textarea[wysiwyg!="false"]').trumbowyg({
        lang: 'it',
        autogrow: true,
        btns: [

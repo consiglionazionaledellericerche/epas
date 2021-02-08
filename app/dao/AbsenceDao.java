@@ -67,7 +67,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Preleva un'assenza tramite il suo id.
-   * 
+   *
    * @param id id dell'Absence.
    * @return la Absence corrispondente all'id passato.
    */
@@ -85,6 +85,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * La lista di assenze di una persona tra due date.
+   *
    * @return la lista di assenze di una persona tra due date se e solo se il campo dateTo isPresent.
    *     In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno. Se il
    *     booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
@@ -109,7 +110,7 @@ public class AbsenceDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(absence)
-        .where(condition).orderBy(absence.absenceType.code.asc()).fetch();
+        .where(condition).orderBy(absence.personDay.date.asc()).fetch();
 
   }
 
@@ -149,6 +150,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna la lista delle assenze nel periodo.
+   *
    * @param person la persona di cui cercare le assenze.
    * @param begin la data di inizio da cui cercare le assenze (compresa)
    * @param end la data di fine fino a cui cercare le assenze (compresa
@@ -171,6 +173,7 @@ public class AbsenceDao extends DaoBase {
   
   /**
    * ritorna la lista di assenze effettuata nel periodo da from a to da person.
+   *
    * @param person la persona di cui si vogliono le assenze
    * @param from la data da cui cercare
    * @param to (opzionale) la data fino a cui cercare
@@ -193,6 +196,7 @@ public class AbsenceDao extends DaoBase {
   /**
    * Quante assenze fatte nel periodo temporale tra begin e end appartenenti alla lista di codici
    * absenceCode.
+   *
    * @return il quantitativo di assenze presenti in un certo periodo temporale delimitato da begin e
    *     end che non appartengono alla lista di codici passata come parametro nella lista di 
    *     stringhe absenceCode.
@@ -214,6 +218,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * La lista delle assenze per persona e data.
+   *
    * @param person La persona della quale recuperare le assenze
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -240,6 +245,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna la lista delle assenze NON a uso interno.
+   *
    * @return la lista delle assenze contenenti un tipo di assenza con uso interno = false relative a
    *     una persona nel periodo compreso tra begin e end ordinate per per data.
    */
@@ -257,6 +263,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Metodo per la ricerca di tutte le assenze che giustificano qualcosa.
+   *
    * @param person la persona di cui interessano le assenze
    * @param begin la data di inizio
    * @param end la data di fine
@@ -316,6 +323,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna la lista delle assenze per persona nel periodo.
+   *
    * @return la lista di assenze effettuate dalle persone presenti nella lista personList nel
    *     periodo temporale compreso tra from e to.
    */
@@ -333,6 +341,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna la lista delle assenze nell'intervallo di tempo relative al tipo ab.
+   *
    * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo
    *     temporale inter.
    */
@@ -356,6 +365,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna le assenze frequenti nel periodo da from a to.
+   *
    * @return la lista dei frequentAbsenceCode, ovvero dei codici di assenza più frequentemente usati
    *     nel periodo compreso tra 'dateFrom' e 'dateTo'.
    */
@@ -397,6 +407,7 @@ public class AbsenceDao extends DaoBase {
 
   /**
    * Ritorna le assenze della persona nell'anno.
+   *
    * @return la lista delle assenze effettuate dalla persona nell'anno.
    */
   public List<Absence> getYearlyAbsence(Person person, int year) {
@@ -408,6 +419,7 @@ public class AbsenceDao extends DaoBase {
   /**
    * La lista di assenze filtrata per persona, data inizio, fine, tipo di assenza e 
    * se compatibile con la reperibilità.
+   *
    * @param person la persona di cui si vogliono le assenze
    * @param start la data di inizio da cui cercare
    * @param end la data di fine fino a cui cercare
@@ -458,6 +470,7 @@ public class AbsenceDao extends DaoBase {
   /**
    * La lista di assenze filtrata per persona, data inizio, fine, defaultGroup a cui 
    * apparte le assenze da cercare.
+   *
    * @param person la persona di cui si vogliono le assenze
    * @param start la data di inizio da cui cercare
    * @param end la data di fine fino a cui cercare

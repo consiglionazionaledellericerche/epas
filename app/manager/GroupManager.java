@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -19,6 +36,13 @@ import models.UsersRolesOffices;
 import models.flows.Affiliation;
 import models.flows.Group;
 
+/**
+ * Manager per la gestione dei gruppi di persone.
+ *
+ * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 public class GroupManager {
 
@@ -28,6 +52,7 @@ public class GroupManager {
 
   /**
    * Injection.
+   *
    * @param roleDao il dao sui ruoli
    * @param uroDao il dao sugli usersRolesOffices
    * @param groupDao il dao sui gruppi
@@ -41,7 +66,8 @@ public class GroupManager {
 
   /**
    * Metodo di utilità per creare il ruolo manager da associare al responsabile del 
-   *     gruppo di lavoro. 
+   * gruppo di lavoro.
+   *
    * @param office la sede cui appartiene il ruolo
    * @param group il gruppo di cui fa parte il manager
    * @param uro l'user role office da creare
@@ -62,7 +88,8 @@ public class GroupManager {
 
   /**
    * Metodo che elimina il ruolo manager al responsabile di gruppo durante la fase di 
-   *     eliminazione del gruppo.
+   * eliminazione del gruppo.
+   *
    * @param group il gruppo di cui si vuole rimuvoere il ruolo di manager
    * @return true se è stato eliminato il manager del gruppo, false altrimenti.
    */

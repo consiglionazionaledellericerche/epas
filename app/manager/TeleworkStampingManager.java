@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -10,8 +27,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.telework.errors.Errors;
@@ -23,9 +40,12 @@ import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
 
+/**
+ * Classe per l'interfacciamento con il servizio REST di Timbrature per telelavoro.
+ *
+ */
 @Slf4j
 public class TeleworkStampingManager {
-
 
   private TeleworkComunication comunication;
 
@@ -37,6 +57,7 @@ public class TeleworkStampingManager {
   /**
    * Ritorna la lista di timbrature in telelavoro nel giorno pd con causale appartenente a quelle
    * riportate nella lista di causali da ricercare.
+   *
    * @param pd il personDay di riferimento
    * @param stampTypes la lista di causali da cercare
    * @return la lista di timbrature di lavoro in telelavoro con causale quelle passate come 
@@ -66,6 +87,7 @@ public class TeleworkStampingManager {
   /**
    * Chiama il metodo di comunicazione con l'applicazione esterna per salvare la timbratura
    * da telelavoro.
+   *
    * @param stamping la timbratura in telelavoro da salvare
    * @return 201 se la timbratura è stata salvata correttamente, altro numero altrimenti.
    */
@@ -81,6 +103,7 @@ public class TeleworkStampingManager {
 
   /**
    * Metodo che modifica una timbratura in telelavoro.
+   *
    * @param stamping la timbratura in telelavoro da modificare
    * @return il codice HTTP con il risultato della update della timbratura.
    */
@@ -97,6 +120,7 @@ public class TeleworkStampingManager {
 
   /**
    * Chiama la funzionalità di cancellazione della timbratura da telelavoro.
+   *
    * @param stampingId l'identificativo della timbratura da eliminare
    * @return 200 se la timbratura è stata eliminata correttamente, altro numero altrimenti.
    */
@@ -114,6 +138,7 @@ public class TeleworkStampingManager {
 
   /**
    * Ritorna la timbratura in telelavoro con id specificato.
+   *
    * @param stampingId l'identificativo della timbratura da ricercare
    * @return la timbratura in telelavoro con id passato come parametro.
    * @throws ExecutionException eccezione in esecuzione
@@ -130,6 +155,7 @@ public class TeleworkStampingManager {
 
   /**
    * Ritorna la lista di dto contenente la lista delle timbrature in telelavoro per ogni personDay.
+   *
    * @param psDto il personStampingRecap mensile da cui prendere le info sui personDay
    * @return la lista di dto da ritornare alla vista.
    * @throws NoSuchFieldException eccezione di mancanza di parametro
@@ -198,6 +224,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se l'inserimento di una timbratura in un giorno può dare origine ad un errore di 
    * malformazione della lista di timbrature.
+   *
    * @param stamping la timbratura in telelavoro
    * @param pd il personday del giorno
    * @return l'opzionale contenente l'errore rilevato dal possibile inserimento della timbratura
@@ -246,6 +273,7 @@ public class TeleworkStampingManager {
 
   /**
    * Il localDateTime dell'inizio della giornata.
+   *
    * @param date la data di riferimento
    * @return il localdatetime rappresentante l'inizio della giornata.
    */
@@ -255,6 +283,7 @@ public class TeleworkStampingManager {
 
   /**
    * Il localDateTime della fine della giornata.
+   *
    * @param date la data di riferimento
    * @return il localdatetime rappresentante la fine della giornata.
    */
@@ -265,6 +294,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -303,6 +333,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -341,6 +372,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di inizio
    * pranzo in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -390,6 +422,7 @@ public class TeleworkStampingManager {
   /**
    * Verifica se la timbratura stamping è inseribile nel giorno pd come timbratura di fine
    * lavoro in telelavoro.
+   *
    * @param pd il personday del giorno
    * @param stamping la timbratura in telelavoro da inserire
    * @return l'opzionale contenente l'eventuale errore riscontrato nell'inserire 
@@ -406,7 +439,8 @@ public class TeleworkStampingManager {
       return Optional.absent();
     }
     java.util.Optional<TeleworkDto> stamp = beginEnd.stream()
-        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)).findFirst();
+        .filter(tws -> tws.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO))
+        .findFirst();
     if (stamp.isPresent()) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_PRESENT;

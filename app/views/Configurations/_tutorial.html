@@ -30,7 +30,7 @@
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.WEB_STAMPING_ALLOWED) }
       <p>Abilitando questa funzionalità sarà possibile accedere alla timbratura via web per i dipendenti di <strong>${configuration.office.name}</strong>.<br>
-      <i class="fa fa-exclamation-triangle"></i> E' altamente consigliato impostare anche il filtro sugli indirizzi IP autorizzati alla timbratura via web. 
+      <i class="fa fa-exclamation-triangle"></i> E' necessario impostare gli indirizzi IP autorizzati alla timbratura via web. 
       </p> 
     #{/if}
     
@@ -216,6 +216,20 @@
       autonomamente le assenze che giustificano l'intera giornata per lavoro fuori sede presso sede convenzionata.
       </p> 
     #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente le assenze per congedo parentale, malattia figlio e affini.
+      Assicurarsi che per il dipendente sia presente in anagrafica almeno un figlio. In caso contrario, inserirlo.
+      </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza per legge 104 per un secondo parente disabile del dipendente (182).
+	  </p> 
+    #{/if}
+   
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>

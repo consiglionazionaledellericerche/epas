@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Sets;
@@ -22,6 +39,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.data.validation.Required;
 
+/**
+ * Giornata in turno di una persona.
+ */
 @Entity
 @Audited
 @Table(name = "person_shift_days")
@@ -33,16 +53,11 @@ public class PersonShiftDay extends BaseModel {
   @Column(name = "shift_slot")
   @Enumerated(EnumType.STRING)
   public ShiftSlot shiftSlot;
-  
-  //  @Transient
-  //  public ShiftSlot getShiftSlot() {
-  //    return ShiftSlot.valueOf(this.organizationShiftSlot.getName());
-  //}
 
   //@Required
   @ManyToOne
   public OrganizationShiftSlot organizationShiftSlot;
-  
+
   // shift date
   @Required
   public LocalDate date;
@@ -70,6 +85,7 @@ public class PersonShiftDay extends BaseModel {
 
   /**
    * Controlla l'orario di inizio dello slot.
+   *
    * @return l'orario di inizio dello slot.
    */
   @Transient
@@ -88,6 +104,7 @@ public class PersonShiftDay extends BaseModel {
 
   /**
    * Controlla l'orario di fine dello slot.
+   *
    * @return l'orario di fine dello slot.
    */
   @Transient
@@ -106,6 +123,7 @@ public class PersonShiftDay extends BaseModel {
 
   /**
    * Controlla l'inizio della pausa pranzo nel turno.
+   *
    * @return l'inizio della pausa pranzo nel turno.
    */
   @Transient
@@ -124,6 +142,7 @@ public class PersonShiftDay extends BaseModel {
 
   /**
    * Controlla la fine della pausa pranzo nel turno.
+   *
    * @return l'orario di fine pausa pranzo nel turno.
    */
   @Transient
@@ -147,6 +166,7 @@ public class PersonShiftDay extends BaseModel {
 
   /**
    * Controlla se ci sono errori nel turno.
+   *
    * @param shiftTroubles la collezione di errori sul turno
    * @return true se ci sono errori sul turno, false altrimenti.
    */

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -11,10 +28,12 @@ import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import java.util.List;
 import javax.persistence.EntityManager;
+import manager.configurations.EpasParam;
 import models.Institute;
 import models.Office;
 import models.Role;
 import models.User;
+import models.query.QConfiguration;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
@@ -23,7 +42,8 @@ import org.testng.util.Strings;
 /**
  * Dao per gli uffici.
  *
- * @author dario
+ * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
  */
 public class OfficeDao extends DaoBase {
 
@@ -53,7 +73,7 @@ public class OfficeDao extends DaoBase {
   
   /**
    * Preleva l'office dal suo id.
-   * 
+   *
    * @return l'ufficio identificato dall'id passato come parametro.
    */
   public Office getOfficeById(Long id) {
@@ -66,7 +86,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * Tutti gli Uffici presenti.
-   * 
+   *
    * @return la lista di tutti gli uffici presenti sul database.
    */
   public List<Office> getAllOffices() {
@@ -76,9 +96,25 @@ public class OfficeDao extends DaoBase {
     return getQueryFactory().selectFrom(office).where(office.endDate.isNull()).fetch();
   }
 
-  
+  /**
+   * Uffici che hanno abilitato il parametro per effettuare le timbrature
+   * via web.
+   */
+  public List<Office> getOfficesWebStampingEnabled() {
+    final QOffice office = QOffice.office;
+    final QConfiguration configuration = QConfiguration.configuration;
+    return getQueryFactory().selectFrom(office)
+        .join(office.configurations, configuration)
+        .where(
+            office.endDate.isNull(), 
+            configuration.epasParam.eq(EpasParam.WEB_STAMPING_ALLOWED),
+            configuration.fieldValue.equalsIgnoreCase("true"))
+        .distinct().fetch();
+  }
+
   /**
    * L'ufficio con il codice code.
+   *
    * @param code il codice della sede
    * @return l'ufficio associato al codice passato come parametro.
    */
@@ -93,6 +129,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'ufficio, se esiste, con il codeId passato come parametro.
+   *
    * @param codeId il codice della sede 
    * @return l'ufficio associato al codice passato come parametro.
    */
@@ -106,6 +143,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'ufficio, se esiste, con perseoId uguale a quello passato come parametro.
+   *
    * @param perseoId l'id dell'anagrafica
    * @return l'ufficio associato al perseoId.
    */
@@ -233,6 +271,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'istituto con cds passato come parametro.
+   *
    * @param cds centro di spesa
    * @return l'istituto, se esiste, con centro di spesa uguale a quello passato.
    */
@@ -246,6 +285,7 @@ public class OfficeDao extends DaoBase {
 
   /**
    * L'istituto con id passato come parametro.
+   *
    * @param id l'identificativo dell'istituto
    * @return l'istituto, se esiste, con id passato come parametro
    */
@@ -257,6 +297,9 @@ public class OfficeDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+  /**
+   * Lista degli uffici dell'istituto passato come parametro.
+   */
   public List<Office> byInstitute(Institute institute) {
     final QOffice office = QOffice.office;
     return queryFactory.selectFrom(office).where(office.institute.eq(institute)).fetch();

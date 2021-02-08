@@ -1,0 +1,10 @@
+<div id="login-form" style="display:${idpAuthEnabled? 'none' : 'auto'}; padding: 0 em 1em">
+    #{form action:@Clocks.clockLogin(), class:'form-horizontal', role:'form'}
+
+    #{f.selectModel 'person',items:personList,label:'Nome' /}
+    #{f.input 'password',type:'password',label:'Password' /}
+
+    <input type="submit" class="btn btn-success col-xs-2 col-xs-offset-5" name="submit"
+           value="Login" align="center"/>
+    #{/form}
+</div>

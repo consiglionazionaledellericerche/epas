@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -25,7 +42,7 @@ import org.joda.time.LocalDate;
 /**
  * Dao per i contract.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 public class ContractDao extends DaoBase {
 
@@ -41,7 +58,7 @@ public class ContractDao extends DaoBase {
   /**
    * Il contratto relativo all'id passato come parametro e facendo la 
    * joinFetch con la persona.
-   * 
+   *
    * @return il contratto corrispondente all'id passato come parametro.
    */
   public Contract byId(Long id) {
@@ -53,6 +70,7 @@ public class ContractDao extends DaoBase {
   
   /**
    * Il contratto relativo all'id passato come parametro.
+   *
    * @return il contratto corrispondente all'id passato come parametro.
    */
   public Contract getContractById(Long id) {
@@ -63,6 +81,7 @@ public class ContractDao extends DaoBase {
 
   /**
    * La lista di contratti che sono attivi nel periodo compreso tra begin e end.
+   *
    * @param people la lista di persone (opzionale)
    * @param begin la data di inizio
    * @param end la data di fine (opzionale)
@@ -108,6 +127,7 @@ public class ContractDao extends DaoBase {
 
   /**
    * La lista di contratti della persona.
+   *
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
    *     data inizio contratto.
    */
@@ -119,6 +139,7 @@ public class ContractDao extends DaoBase {
 
   /**
    * Il contratto di una persona ad una certa data.
+   *
    * @return il contratto attivo per quella persona alla data date.
    */
   public Contract getContract(LocalDate date, Person person) {
@@ -137,7 +158,7 @@ public class ContractDao extends DaoBase {
   /**
    * Se presente preleva l'eventuale fascia di presenza obbligatoria di una persona 
    * in una data indicata.
-   * 
+   *
    * @param date la data in cui cercare la fascia obbligatoria
    * @param personId l'id della persona di cui cercare la fascia obbligatoria
    * @return la fascia oraria obbligatoria se presente, Optional.absent() altrimenti.
@@ -168,6 +189,7 @@ public class ContractDao extends DaoBase {
   
   /**
    * La lista di contractStampProfile di una persona o di un contratto.
+   *
    * @param person la persona (opzionale)
    * @param contract il contratto (opzionale)
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
@@ -193,6 +215,7 @@ public class ContractDao extends DaoBase {
 
   /**
    * Il contractstampprofile associato all'id passato.
+   *
    * @return il contractStampProfile relativo all'id passato come parametro.
    */
   public ContractStampProfile getContractStampProfileById(Long id) {
@@ -203,6 +226,7 @@ public class ContractDao extends DaoBase {
   
   /**
    * Ritorna il contratto precedente.
+   *
    * @param actualContract il contratto attuale del dipendente
    * @return il contratto precedente
    */

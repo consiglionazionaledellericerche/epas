@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.flows;
 
 import com.google.common.base.Optional;
@@ -58,8 +75,8 @@ import play.db.jpa.JPA;
 
 /**
  * Operazioni sulle richiesta di assenza.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @Slf4j
@@ -80,6 +97,9 @@ public class AbsenceRequestManager {
   private PersonReperibilityDayDao personReperibilityDayDao;
   private PersonShiftDayDao personShiftDayDao;
 
+  /**
+   * DTO per la configurazione delle AbsenceRequest.
+   */
   @Data
   @RequiredArgsConstructor
   @ToString
@@ -95,7 +115,7 @@ public class AbsenceRequestManager {
 
   /**
    * Inizializzazione con injection dei vari componenti necessari.
-   * 
+   *
    * @param configurationManager Manager delle configurazioni
    * @param uroDao UsersRolesOfficesDao
    * @param roleDao RoleDao
@@ -130,7 +150,7 @@ public class AbsenceRequestManager {
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
    * tipo di assenza.
-   * 
+   *
    * @param requestType il tipo di assenza da controllare
    * @param person la persona per cui controllare il tipo di assenza
    * @return la lista degli eventuali problemi riscontrati.
@@ -175,10 +195,10 @@ public class AbsenceRequestManager {
 
   /**
    * Verifica quali sono le approvazioni richiesta per questo tipo di assenza per questa persona.
-   * 
+   *
    * @param requestType il tipo di richiesta di assenza
    * @param person la persona.
-   * 
+   *
    * @return la configurazione con i tipi di approvazione necessari.
    */
   public AbsenceRequestConfiguration getConfiguration(AbsenceRequestType requestType,
@@ -250,7 +270,7 @@ public class AbsenceRequestManager {
   /**
    * Imposta nella richiesta di assenza i tipi di approvazione necessari in funzione del tipo di
    * assenza e della configurazione specifica della sede del dipendente.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza.
    */
   public void configure(AbsenceRequest absenceRequest) {
@@ -268,7 +288,7 @@ public class AbsenceRequestManager {
 
   /**
    * Rimuove tutte le eventuali approvazioni ed impostata il flusso come da avviare.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza
    */
   public void resetFlow(AbsenceRequest absenceRequest) {
@@ -280,7 +300,7 @@ public class AbsenceRequestManager {
 
   /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza.
    * @param approver la persona che effettua l'approvazione.
    * @param eventType il tipo di evento.
@@ -354,7 +374,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione di una richiesta di assenza.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza.
    * @param person la persona che effettua l'approvazione.
    * @param eventType il tipo di evento.
@@ -444,7 +464,7 @@ public class AbsenceRequestManager {
   /**
    * Controlla se una richiesta di assenza può essere terminata con successo, in caso positivo
    * effettua l'inserimento delle assenze.
-   * 
+   *
    * @param absenceRequest la richiesta da verificare e da utilizzare per i dati dell'inserimento
    *        assenza.
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
@@ -458,7 +478,7 @@ public class AbsenceRequestManager {
 
   /**
    * Effettua l'inserimento dell'assenza.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza da cui prelevare i dati per l'inserimento.
    * @return il report con i codici di assenza inseriti.
    */
@@ -530,7 +550,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di gruppo.
-   * 
+   *
    * @param id id della richiesta di assenza.
    */
   public void managerApproval(long id, User user) {
@@ -547,7 +567,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
-   * 
+   *
    * @param id id della richiesta di assenza.
    */
   public void officeHeadApproval(long id, User user) {
@@ -570,7 +590,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
-   * 
+   *
    * @param id l'id della richiesta di assenza.
    */
   public void personnelAdministratorApproval(long id, User user) {
@@ -586,7 +606,7 @@ public class AbsenceRequestManager {
 
   /**
    * Metodo che permette la disapprovazione della richiesta.
-   * 
+   *
    * @param id l'identificativo della richiesta di assenza
    */
   public void managerDisapproval(long id, String reason) {
@@ -602,7 +622,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione richiesta assenza da parte del responsabile di sede.
-   * 
+   *
    * @param id id della richiesta di assenza.
    */
   public void officeHeadDisapproval(long id, String reason) {
@@ -618,7 +638,7 @@ public class AbsenceRequestManager {
 
   /**
    * Approvazione della richiesta di assenza da parte dell'amministratore del personale.
-   * 
+   *
    * @param id l'id della richiesta di assenza.
    */
   public void personnelAdministratorDisapproval(long id, String reason) {
@@ -632,7 +652,7 @@ public class AbsenceRequestManager {
 
   /**
    * Esegue l'approvazione del flusso controllando i vari casi possibili.
-   * 
+   *
    * @param absenceRequest id della richiesta di assenza
    * @param user l'utente che sta approvando il flusso
    * @return true se il flusso è stato approvato correttamente, false altrimenti
@@ -679,7 +699,7 @@ public class AbsenceRequestManager {
   /**
    * Approvazione della richiesta d'assenza da parte del manager per se stesso in caso di
    * approvazione senza passare dal responsabile di sede.
-   * 
+   *
    * @param id l'id della richiesta d'assenza
    * @param user l'utente che sta provando l'approvazione della richiesta
    */
@@ -694,7 +714,7 @@ public class AbsenceRequestManager {
 
   /**
    * Metodo che ritorna il gruppo di assenze per inoltrare la richiesta.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @return il gruppo di assenza corretto rispetto alla richiesta di assenza.
    */
@@ -737,7 +757,7 @@ public class AbsenceRequestManager {
   /**
    * Verifica che non esistano richieste d'assenza con le stesse date già in process per l'utente
    * che ha fatto la richiesta.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza da verificare
    * @return true se la richiesta d'assenza è ammissibile, false altrimenti.
    */
@@ -758,6 +778,7 @@ public class AbsenceRequestManager {
 
   /**
    * true se la persona è in turno/reperibilità nella data, false altrimenti.
+   *
    * @param person la persona da cercare
    * @param date la data su cui verificare la presenza di turno/reperibilità
    * @return true se la persona è in turno/reperibilità nella data, false altrimenti.
@@ -772,8 +793,9 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * la lista di date in cui è presente una reperibilità o un turno e su cui si vuole
-   *         inserire un'assenza.
+   * La lista di date in cui è presente una reperibilità o un turno e su cui si vuole
+   * inserire un'assenza.
+   *
    * @param absenceRequest la richiesta di assenza
    * @return la lista di date in cui è presente una reperibilità o un turno e su cui si vuole
    *         inserire un'assenza.
@@ -800,7 +822,8 @@ public class AbsenceRequestManager {
 
   /**
    * la stringa da inserire nelle note della richiesta di assenza contenente le date in cui,
-   *         inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
+   * inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
+   *
    * @param troubleDays la lista di date che generano problemi tra turni/reperibilità e assenze
    * @return la stringa da inserire nelle note della richiesta di assenza contenente le date in cui,
    *         inserendo l'assenza, si troverebbero giorni di reperibilità o di turno.
@@ -818,7 +841,7 @@ public class AbsenceRequestManager {
    * Metodo void che controlla i giorni in cui la richiesta d'assenza matcha con i giorni di
    * reperibilità e/o turno del dipendente e informa il responsabile e i gestori 
    * del servizio via mail.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    */
   public void warnSupervisorAndManager(AbsenceRequest absenceRequest) {
@@ -886,6 +909,7 @@ public class AbsenceRequestManager {
 
   /**
    * Metodo di utilità che corregge le date nella richiesta di assenza.
+   *
    * @param absenceRequest la richiesta di assenza 
    * @param insertReport il report derivante dai parametri di richiesta di assenza
    * @return l'absenceRequest con le date corrette se la richiesta contiene una data di fine che è
@@ -902,6 +926,5 @@ public class AbsenceRequestManager {
     }
     return absenceRequest;
   }
-
 
 }

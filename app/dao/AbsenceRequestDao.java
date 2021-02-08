@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -32,7 +49,7 @@ import org.joda.time.LocalDateTime;
 /**
  * Dao per l'accesso alle richiesta di assenza.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 public class AbsenceRequestDao extends DaoBase {
 
@@ -378,6 +395,7 @@ public class AbsenceRequestDao extends DaoBase {
 
   /**
    * Ritorna le condizioni con l'aggiunta di quelle relative al responsabile di sede.
+   *
    * @param officeList la lista delle sedi
    * @param condition le condizioni pregresse
    * @param signer colui che deve firmare la richiesta
@@ -413,6 +431,7 @@ public class AbsenceRequestDao extends DaoBase {
 
   /**
    * Ritorna le condizioni di firma delle richieste da parte del responsabile di gruppo.
+   *
    * @param officeList la lista delle sedi
    * @param condition le condizioni precedenti
    * @param signer il firmatario della richiesta

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.configurations;
 
 import com.google.common.base.Joiner;
@@ -18,6 +35,9 @@ import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
 import play.Play;
 
+/**
+ * I Parametri di ePAS.
+ */
 @Slf4j
 public enum EpasParam {
 
@@ -100,6 +120,15 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  SECOND_DISABLED_RELATIVE_PERMISSION("second_disabled_relative_permission",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
 
   OFF_SITE_ABSENCE_WITH_CONVENTION("off_site_absence_with_convention",
 
@@ -136,6 +165,18 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  PARENTAL_LEAVE_AND_CHILD_ILLNESS("parental_leave_and_child_illness",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+
+
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
@@ -577,11 +618,11 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
-//#####################################################################
+  //#####################################################################
   //FLOWS PARAMS COMPETENCES
   
   /**
-   * Attivazione o meno delle richieste di straordinario
+   * Attivazione o meno delle richieste di straordinario.
    */
   ENABLE_COMPETENCE_FLOWS(
       "enable_competence_flows",
@@ -627,6 +668,9 @@ public enum EpasParam {
   public final Object defaultValue;
   public final Class<?> target;
 
+  /**
+   * Costruttore per inizializzazione configurazione parametri.
+   */
   EpasParam(String name, EpasParamCategory category, EpasParamTimeType epasParamTimeType,
       EpasParamValueType epasParamValueType, Object defaultValue,
       List<RecomputationType> recomputationTypes, Class<?> target) {
@@ -639,15 +683,24 @@ public enum EpasParam {
     this.target = target;
   }
 
+  /**
+   * Verifica se il parametro è annuale.
+   */
   public boolean isYearly() {
     return this.epasParamTimeType.equals(EpasParamTimeType.YEARLY);
   }
 
+  /**
+   * Verifica se il parametro è generale.
+   */
   public boolean isGeneral() {
     return this.epasParamTimeType.equals(EpasParamTimeType.GENERAL);
   }
 
 
+  /**
+   * Verifica se il parametro è periodico.
+   */
   public boolean isPeriodic() {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
   }
@@ -656,14 +709,23 @@ public enum EpasParam {
     GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
   }
 
+  /**
+   * Tipologie di periodicità temporale del parametro.
+   */
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;
 
+    /**
+     * Verifica se la periodicità è GENERAL.
+     */
     public boolean isGeneral() {
       return this == GENERAL;
     }
   }
 
+  /**
+   * Tipologie di ricalcolo.
+   */
   public enum RecomputationType {
     DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS
   }
@@ -671,18 +733,23 @@ public enum EpasParam {
   /**
    * Enumerato con i tipi di valori che può assumere un parametro di configurazione.
    *
-   * @author alessandro
+   * @author Alessandro Martelli
    */
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
 
+    /**
+     * Rappresenta un intervallo di LocalTime.
+     */
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
 
-      // TODO: validation
+      /**
+       * Costruttore.
+       */
       public LocalTimeInterval(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
@@ -694,11 +761,17 @@ public enum EpasParam {
       }
     }
 
+    /**
+     * Rappresenta una lista di IP.
+     */
     public static class IpList {
       public List<String> ipList;
 
       // TODO: validation
 
+      /**
+       * Costruttore.
+       */
       public IpList(List<String> ipList) {
         this.ipList = ipList;
       }
@@ -809,7 +882,7 @@ public enum EpasParam {
   /**
    * Verifica la lista dei cds non abilitati a visualizzare la 
    * "Presenze automatica".
-   * 
+   *
    * @return la lista dei cds che non sono abilitati a visualizzare la 
    *     "Presenza automatica" sui contratti dei dipendenti.
    */
