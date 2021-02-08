@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.enumerate;
 
 import java.util.Arrays;
@@ -30,6 +47,7 @@ public enum TeleworkStampTypes {
   
   /**
    * La lista delle causali attive.
+   * 
    * @return la lista degli stamptypes attivi.
    */
   public static List<TeleworkStampTypes> onlyActive() {
@@ -40,6 +58,7 @@ public enum TeleworkStampTypes {
   
   /**
    * La lista delle stampTypes associatbili a timbrature in telelavoro.
+   *
    * @return la lista di stampTypes associabili a timbrature in telelavoro.
    */
   public static List<TeleworkStampTypes> onlyActiveInTelework() {
@@ -48,8 +67,7 @@ public enum TeleworkStampTypes {
   }
   
   /**
-   * 
-   * @return la lista di stampTypes di inizio e fine lavoro in telelavoro.
+   * La lista di stampTypes di inizio e fine lavoro in telelavoro.
    */
   public static List<TeleworkStampTypes> beginEndTelework() {
     return onlyActive().stream().filter(TeleworkStampTypes::isBeginEndTelework)
@@ -57,8 +75,7 @@ public enum TeleworkStampTypes {
   }
   
   /**
-   * 
-   * @return la lista di stampTypes di inizio e fine pranzo in telelavoro.
+   * La lista di stampTypes di inizio e fine pranzo in telelavoro.
    */
   public static List<TeleworkStampTypes> beginEndMealInTelework() {
     return onlyActive().stream().filter(TeleworkStampTypes::isBeginEndMealInTelework)
@@ -66,8 +83,7 @@ public enum TeleworkStampTypes {
   }
   
   /**
-   * 
-   * @return la lista di stampTypes di inizio e fine interruzione in telelavoro.
+   * La lista di stampTypes di inizio e fine interruzione in telelavoro.
    */
   public static List<TeleworkStampTypes> beginEndInterruptionInTelework() {
     return onlyActive().stream().filter(TeleworkStampTypes::isBeginEndInterruptionInTelework)
@@ -76,6 +92,7 @@ public enum TeleworkStampTypes {
   
   /**
    * Controlla se la causale è abilitata per le timbrature in telelavoro.
+   *
    * @return le causali associabili a timbrature in telelavoro
    */
   public boolean ableForTeleworkStamping() {

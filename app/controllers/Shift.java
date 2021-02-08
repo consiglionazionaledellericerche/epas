@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -59,8 +76,8 @@ import play.mvc.With;
 /**
  * Implements work shifts.
  *
- * @author arianna
- * @author dario
+ * @author Arianna Del Soldato
+ * @author Dario Tagliaferri
  */
 @Slf4j
 @With(Resecure.class)
@@ -88,7 +105,7 @@ public class Shift extends Controller {
   /**
    * Restituisce la lista delle persone in un determinato turno.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
   public static void personList(String type) {
@@ -114,7 +131,7 @@ public class Shift extends Controller {
   /**
    * Get shifts from the DB and render to the sistorg portal calendar.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
   public static void timeTable(String type) {
@@ -138,8 +155,8 @@ public class Shift extends Controller {
   /**
    * Get shifts from the DB and render to the sistorg portal calendar.
    *
-   * @author arianna
-   * @author dario
+   * @author Arianna Del Soldato
+   * @author Dario Tagliaferri
    */
   //@BasicAuth
   public static void find(
@@ -189,7 +206,7 @@ public class Shift extends Controller {
   /**
    * Update working shifts in the DB that have been red from the sistorg portal calendar.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
   public static void update(
@@ -221,7 +238,7 @@ public class Shift extends Controller {
    * turnista e le fasce di orario da rispettare per un determinato turno, in un dato periodo di
    * tempo (Person, [thNoStampings, thBadStampings, thAbsences], List [gg MMM]).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
   public static void getInconsistencyTimestamps2Timetable(
@@ -247,10 +264,10 @@ public class Shift extends Controller {
    * Crea il file PDF con il resoconto mensile dei turni dello IIT il mese 'month'
    * dell'anno 'year' (portale sistorg).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
+  public static void exportMonthAsPdf(int year, int month, Long shiftCategoryId) {
     //    int year = params.get("year", Integer.class);
     //    int month = params.get("month", Integer.class);
     if (shiftCategoryId == null) {
@@ -385,10 +402,10 @@ public class Shift extends Controller {
    * Crea il file PDF corrispondente al calendario mensile dei turni di tipo 'A, B' per il mese
    * 'month' dell'anno 'year'. (portale sistorg).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthCalAsPDF(int year, int month, Long type) {
+  public static void exportMonthCalAsPdf(int year, int month, Long type) {
 
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
         type, year, month);
@@ -430,7 +447,7 @@ public class Shift extends Controller {
    * Restituisce la lista delle assenze delle persone di un certo turno in un certo periodo di
    * tempo.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   @BasicAuth
   public static void absence(

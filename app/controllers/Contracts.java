@@ -1046,7 +1046,7 @@ public class Contracts extends Controller {
     if (confirmedResidual) {
       contract.sourceDateResidual = sourceDateResidual;
       contract.sourceRemainingMinutesCurrentYear = hoursCurrentYear * 60 + minutesCurrentYear;
-      contract.sourceRemainingMinutesLastYear = hoursLastYear * 60 + minutesLastYear;;
+      contract.sourceRemainingMinutesLastYear = hoursLastYear * 60 + minutesLastYear;
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 

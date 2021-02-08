@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -29,6 +46,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei dati degli utenti.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Users extends Controller {
@@ -70,6 +90,7 @@ public class Users extends Controller {
 
   /**
    * Lista degli utenti "orfani".
+   *
    * @param name il nome che può servire come restrizione nella ricerca degli utenti
    */
   public static void noOwnerUsers(
@@ -83,6 +104,7 @@ public class Users extends Controller {
 
   /**
    * Permette di editare gli accountRoles (ruoli di sistema).
+   *
    * @param userId l'id dell'user da editare
    */
   public static void editAccountRoles(Long userId) {
@@ -94,6 +116,7 @@ public class Users extends Controller {
 
   /**
    * Permette di salvare gli accountRoles (ruoli di sistema) ad un utente.
+   *
    * @param userId l'utente cui associare i nuovi ruoli
    * @param roles i ruoli da associare
    */
@@ -115,6 +138,7 @@ public class Users extends Controller {
 
   /**
    * Aggiunge il ruolo all'utente.
+   *
    * @param userId l'utente a cui aggiungere il ruolo
    */
   public static void addRole(Long userId) {
@@ -126,6 +150,7 @@ public class Users extends Controller {
 
   /**
    * Salva il ruolo per l'utente sulla sede.
+   *
    * @param userRoleOffice l'oggetto userRoleOffice da salvare
    */
   public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
@@ -148,6 +173,7 @@ public class Users extends Controller {
 
   /**
    * Rimuove il ruolo.
+   *
    * @param uroId l'identificativo dell'userRoleOffice da eliminare
    */
   public static void removeRole(Long uroId) {
@@ -168,6 +194,7 @@ public class Users extends Controller {
 
   /**
    * Mostra le caratteristiche dell'utente.
+   *
    * @param userId l'identificativo dell'utente da mostrare
    */
   public static void show(Long userId) {
@@ -179,6 +206,7 @@ public class Users extends Controller {
 
   /**
    * Permette l'edit dell'utente.
+   *
    * @param userId l'identificativo dell'utente da editare
    */
   public static void edit(Long userId) {
@@ -195,6 +223,7 @@ public class Users extends Controller {
 
   /**
    * Salva l'utente con la nuova password.
+   *
    * @param user l'utente da salvare
    * @param password la password da salvare
    * @param confirmPassword la password da confermare
@@ -206,7 +235,7 @@ public class Users extends Controller {
     // Nuovo utente, nessun ruolo di sistema e nessun owner specificato
     if (!user.isPersistent() && !Security.getUser().get().isSystemUser()
         && user.roles.isEmpty() && user.owner == null) {
-      validation.addError("user.owner", "Specificare una sede proprietaria");
+      Validation.addError("user.owner", "Specificare una sede proprietaria");
     }
     if (Validation.hasErrors()) {
       log.warn("validation errors for {}: {}", user, validation.errorsMap());

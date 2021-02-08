@@ -36,8 +36,6 @@ import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;

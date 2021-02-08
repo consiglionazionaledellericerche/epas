@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -34,6 +51,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei PersonMonths.
+ */
 @With({Resecure.class})
 public class PersonMonths extends Controller {
 
@@ -202,6 +222,7 @@ public class PersonMonths extends Controller {
 
   /**
    * Modifica le ore di formazione di una persona.
+   *
    * @param personMonthSituationId l'identificativo delle ore di formazione da modificare
    */
   public static void modifyPeopleTrainingHours(Long personMonthSituationId) {
@@ -241,6 +262,7 @@ public class PersonMonths extends Controller {
   
   /**
    * Permette la cancellazione delle ore di formazione.
+   *
    * @param personMonthRecapId l'identificativo delle ore di formazione da cancellare
    * @param officeId l'identificativo della sede
    */
@@ -279,6 +301,7 @@ public class PersonMonths extends Controller {
 
   /**
    * Permette la cancellazione delle ore di formazione da parte dell'amministratore del personale.
+   *
    * @param personMonthRecapId l'identificativo delle ore di formazione da eliminare
    * @param officeId l'identificativo della sede
    */
@@ -297,6 +320,7 @@ public class PersonMonths extends Controller {
   /**
    * visualizza il tabellone riepilogativo delle ore di formazione in un determinato mese e anno 
    * per l'ufficio con id officeId.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param officeId l'id dell'ufficio di riferimento
@@ -317,6 +341,7 @@ public class PersonMonths extends Controller {
 
   /**
    * visualizza la form di inserimento per l'amministratore delle ore di formazione.
+   *
    * @param officeId l'id dell'ufficio di cui si vuole inserire le ore di formazione
    * @param month il mese di riferimento
    * @param year l'anno di riferimento
@@ -335,6 +360,7 @@ public class PersonMonths extends Controller {
 
   /**
    * salvataggio delle ore di formazione inserite dall'amministratore.
+   *
    * @param begin il giorno di inizio della formazione
    * @param end il giorno di fine della formazione
    * @param value la quantità di ore di formazione
@@ -386,6 +412,7 @@ public class PersonMonths extends Controller {
   /**
    * metodo privato che aggiunge al validation eventuali errori riscontrati nel passaggio
    * dei parametri.
+   *
    * @param begin il giorno di inizio della formazione
    * @param end il giorno di fine della formazione
    * @param year l'anno di formazione
@@ -425,6 +452,7 @@ public class PersonMonths extends Controller {
   /**
    * aggiunge al validation l'eventuale errore relativo al quantitativo orario che può superare
    * le ore possibili prendibili per quel giorno.
+   *
    * @param value il quantitativo di ore di formazione
    * @param pm il personMonthRecap da modificare con le ore passate come parametro
    */

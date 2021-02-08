@@ -32,8 +32,8 @@ import play.data.binding.TypeBinder;
 
 /**
  * Classe per il binding delle timbrature ricevute via Json.
- * 
- * @author cristian.
+ *
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @Global
@@ -42,7 +42,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
   /**
    * Binding dal Json in un DTO con le info della timbratura.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

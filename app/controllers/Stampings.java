@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -66,7 +83,7 @@ import security.SecurityRules;
 /**
  * Controller per la gestione delle timbrature.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 @With({Resecure.class})
@@ -207,6 +224,7 @@ public class Stampings extends Controller {
 
   /**
    * Restituisce la form compilata secondo la modalità di chi fa la richiesta.
+   *
    * @param personId l'id della persona
    * @param date la data in cui si vuole inserire la timbratura
    */
@@ -348,6 +366,7 @@ public class Stampings extends Controller {
   
   /**
    * Metodo che permette il salvataggio della timbratura per lavoro fuori sede.
+   *
    * @param personId l'id della persona
    * @param date la data per cui si vuole salvare la timbratura
    * @param stamping la timbratura da salvare
@@ -522,7 +541,7 @@ public class Stampings extends Controller {
 
   /**
    * Lista delle timbrature inserite in un mese dall'amministratore.
-   * 
+   *
    * @param year anno 
    * @param month mese 
    * @param officeId ufficio di riferimento
@@ -592,7 +611,8 @@ public class Stampings extends Controller {
 
   /**
    * La presenza giornaliera del responsabile gruppo.
-   * TODO: da rivedere con la nuova implementazione dei gruppi   
+   * TODO: da rivedere con la nuova implementazione dei gruppi.
+   *
    * @param year  anno
    * @param month mese
    * @param day   giorno
@@ -628,8 +648,5 @@ public class Stampings extends Controller {
 
     render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office, map);
   }
-  
- 
 
 }
-

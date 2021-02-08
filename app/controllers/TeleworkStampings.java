@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -63,6 +80,7 @@ public class TeleworkStampings extends Controller {
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
    * per telelavoro nell'anno/mese passati come parametro.
+   *
    * @param year l'anno
    * @param month il mese
    * @throws ExecutionException eccezione in esecuzione
@@ -104,6 +122,7 @@ public class TeleworkStampings extends Controller {
 
   /**
    * Ritorna la situazione personale delle timbrature in telelavoro.
+   *
    * @param personId l'identificativo della persona
    * @param year l'anno 
    * @param month il mese
@@ -149,6 +168,7 @@ public class TeleworkStampings extends Controller {
 
   /**
    * Renderizza la modale per l'inserimento della timbratura in telelavoro.
+   *
    * @param personId l'identificativo della persona
    * @param date la data in cui inserire la timbratura
    */
@@ -164,6 +184,7 @@ public class TeleworkStampings extends Controller {
 
   /**
    * Cancella la timbratura in telelavoro.
+   *
    * @param teleworkStampingId l'identificativo della timbratura in telelavoro
    * @throws ExecutionException eccezione in esecuzione
    * @throws NoSuchFieldException eccezione di mancanza di parametro
@@ -210,6 +231,7 @@ public class TeleworkStampings extends Controller {
 
   /**
    * Persiste la timbratura in telelavoro.
+   *
    * @param personId l'identificativo della persona
    * @param date la data 
    * @param stamping la timbratura da salvare
@@ -250,7 +272,8 @@ public class TeleworkStampings extends Controller {
   }
 
   /**
-   * Modale di modifica della timbratura (Da terminare...)
+   * Modale di modifica della timbratura (Da terminare...).
+   *
    * @param teleworkStampingId l'identificativo della timbratura da modificare
    */
   public static void editTeleworkStamping(long teleworkStampingId) {

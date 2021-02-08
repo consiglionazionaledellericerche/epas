@@ -33,7 +33,7 @@ public class CheckMessage {
 
   /**
    * Costruttore.
-   * 
+   *
    * @param check controllo
    * @param message messaggio
    * @param absenceType tipo di assenza

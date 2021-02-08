@@ -33,7 +33,7 @@ import play.mvc.Util;
 
 /**
  * Contiene i metodi per l'autentication tramite LDAP.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
@@ -64,7 +64,6 @@ public class Ldap extends Controller {
 
   /**
    * Autenticazione tramite LDAP.
-   * 
    */
   public static void authenticate(String username, String password) {
     log.debug("Richiesta autenticazione tramite credenziali LDAP username={}", username);
@@ -96,7 +95,7 @@ public class Ldap extends Controller {
    * a quella dell'ldapUser passato.
    * <p>Se la Person non esiste effettua direttamente la login
    * su failedLoginRedirect se presente, altrimenti su /login</p>
-   * 
+   *
    * @param ldapUser utente ldap di cui verificare l'esistenza su ePAS
    * @param failedLoginRedirect url a cui fare il login se non è stato
    *      possibile trovare una Person corrispondente all'ldapUser passato.

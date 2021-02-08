@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import helpers.LogEnhancer;
@@ -14,7 +31,7 @@ import security.SecurityRules;
 /**
  * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste ai controller.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @With({RequestInit.class, LogEnhancer.class, Metrics.class})
 public class Resecure extends Controller {
@@ -43,6 +60,7 @@ public class Resecure extends Controller {
 
   /**
    * True se si può eseguire l'azione sull'istanza, false altrimenti.
+   *
    * @param action l'azione da eseguire
    * @param instance l'oggetto su cui eseguirla
    * @return se è possibile eseguire l'azione action sull'istanza instance.
@@ -58,7 +76,7 @@ public class Resecure extends Controller {
   /**
    * Con questo si evitano i controlli.
    *
-   * @author marco
+   * @author Marco Andreini
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)
@@ -69,7 +87,7 @@ public class Resecure extends Controller {
   /**
    * Con questo si adotta soltanto la basicauth.
    *
-   * @author marco
+   * @author Marco Andreini
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)

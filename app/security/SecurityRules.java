@@ -37,7 +37,7 @@ import play.mvc.results.Forbidden;
 
 /**
  * Metodi per il controllo della security.
- * 
+ *
  * @author Marco Andreini
  */
 @Singleton
@@ -98,7 +98,7 @@ public class SecurityRules {
 
   /**
    * Controlla se l'azione fornita è ammessa sull'instanza indicata.
-   * 
+   *
    * @return true se l'azione fornita è permessa sull'istanza fornita, false altrimenti.
    */
   public boolean check(String action, Object instance) {
@@ -108,7 +108,7 @@ public class SecurityRules {
 
   /**
    * Controlla se l'azione corrente è permessa.
-   * 
+   *
    * @return true se l'azione corrente è permessa, false altrimenti.
    */
   public boolean checkAction() {
@@ -117,7 +117,7 @@ public class SecurityRules {
 
   /**
    * Controlla se l'azione fornita è permessa.
-   * 
+   *
    * @return true se l'azione fornita è permessa, false altrimenti.
    */
   public boolean checkAction(String action) {

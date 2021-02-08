@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Charsets;
@@ -30,6 +47,7 @@ public class Security extends Secure.Security {
 
   /**
    * Verifica se i dati sono corretti per l'autenticazione.
+   *
    * @param username l'username che intende autenticarsi
    * @param password la password che intende autenticarsi
    * @return true se è autenticato, false altrimenti.
@@ -92,7 +110,7 @@ public class Security extends Secure.Security {
 
   /**
    * Verifica se abilitare o meno la trimbratura web.
-   * 
+   *
    * @return Vero se c'è almeno un istituto abilitato dall'ip contenuto nella richiesta HTTP
    *        ricevuta, false altrimenti.
    */

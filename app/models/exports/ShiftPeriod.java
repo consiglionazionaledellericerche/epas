@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package models.exports;
 
 import models.Person;
@@ -9,7 +27,8 @@ import org.joda.time.LocalTime;
 /**
  * Classe di supporto per l'esportazione delle informazioni relative ai turni delle persone.
  *
- * @author dario, arianna
+ * @author Dario Tagliaferri
+ * @author Arianna Del Soldato
  */
 public class ShiftPeriod {
 
@@ -24,6 +43,7 @@ public class ShiftPeriod {
 
   /**
    * Costruttore.
+   *
    * @param person la persona
    * @param start la data di inizio
    * @param end la data di fine
@@ -48,6 +68,7 @@ public class ShiftPeriod {
 
   /**
    * Costruttore.
+   *
    * @param person la persona
    * @param start la data di inizio
    * @param end la data di fine
@@ -68,6 +89,7 @@ public class ShiftPeriod {
   // for periods of 1 day where end date is null
   /**
    * Costruttore.
+   *
    * @param person la persona
    * @param start la data del turno (per 1 solo giorno, cioè quando endDate is null)
    * @param shiftType l'attività di turno
@@ -90,6 +112,7 @@ public class ShiftPeriod {
   // for cancelled shift
   /**
    * Costruttore.
+   *
    * @param start la data di inizio
    * @param end la data di fine
    * @param shiftType l'attività di turno
@@ -110,6 +133,7 @@ public class ShiftPeriod {
   // for cancelled shift
   /**
    * Costruttore.
+   *
    * @param start la data di inizio
    * @param end la data di fine
    * @param shiftType l'attività di turno

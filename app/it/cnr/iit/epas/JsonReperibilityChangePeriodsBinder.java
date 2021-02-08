@@ -52,7 +52,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 
   /**
    * Binder per il json relativo alle richieste di cambiamento di giorni di reperibilità.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    *     java.lang.String, java.lang.Class, java.lang.reflect.Type)
    *     "mail_req" : "ruberti@iit.cnr.it",  "mail_sub" : "lorenzo.rossi@iit.cnr.it",

@@ -41,7 +41,6 @@ import manager.recaps.charts.RenderResult;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
-import models.Role;
 import models.User;
 import models.exports.PersonOvertime;
 import org.apache.commons.compress.archivers.ArchiveException;
