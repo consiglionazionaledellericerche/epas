@@ -223,6 +223,12 @@
       Assicurarsi che per il dipendente sia presente in anagrafica almeno un figlio. In caso contrario, inserirlo.
       </p> 
     #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza per legge 104 per un secondo parente disabile del dipendente (182).
+	  </p> 
+    #{/if}
    
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
