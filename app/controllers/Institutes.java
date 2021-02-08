@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -14,6 +31,9 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione degli istituti.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Institutes extends Controller {
@@ -46,6 +66,7 @@ public class Institutes extends Controller {
 
   /**
    * Ritorna la form di editing dell'istituto con id passato come parametro.
+   *
    * @param id l'identificativo dell'istituto da editare
    */
   public static void edit(Long id) {
@@ -62,6 +83,7 @@ public class Institutes extends Controller {
 
   /**
    * Permette il salvataggio dell'istituto in oggetto al metodo.
+   *
    * @param institute l'oggetto da persistere
    */
   public static void save(@Valid Institute institute) {
@@ -81,6 +103,7 @@ public class Institutes extends Controller {
 
   /**
    * Cancella l'oggetto institute con id passato come parametro.
+   *
    * @param id l'identificativo dell'istituto da cancellare
    */
   public static void delete(Long id) {

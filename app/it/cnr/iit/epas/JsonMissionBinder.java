@@ -70,7 +70,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
   
   /**
    * Estrazione della data dalla stringa passata.
-   * 
+   *
    * @param string la stringa contenente la data passata nel json
    * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
    */

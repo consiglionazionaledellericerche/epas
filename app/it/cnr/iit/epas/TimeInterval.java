@@ -33,7 +33,7 @@ public class TimeInterval {
 
   /**
    * Un TimeInterval con begin obbligatorio.
-   * 
+   *
    * @param begin ora inizio intervallo.
    * @param end da fine intervallo.
    * @return
@@ -56,7 +56,7 @@ public class TimeInterval {
    * - Se begin è null viene impostata MIN_DATE. <br>
    * - Se end è null viene impostata MAX_DATE. <br>
    * Se begin è successiva a end vengono invertite.
-   * 
+   *
    * @param begin data inizio intervallo, se null impostata a MIN_DATE
    * @param end data fine intervallo, se null impostata a MAX_DATE
    * @return

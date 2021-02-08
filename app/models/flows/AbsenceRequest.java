@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package models.flows;
 
 import com.beust.jcommander.internal.Lists;
@@ -25,8 +43,8 @@ import play.db.jpa.Blob;
 
 /**
  * Richiesta di assenza.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @ToString(of = {"type", "person", "startAt", "endTo", 
@@ -164,6 +182,7 @@ public class AbsenceRequest extends MutableModel {
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
    * può cancellare o modificare la richiesta.
+   *
    * @return true se la richiesta di permesso è ancora modificabile o cancellabile.
    */
   @Transient
@@ -182,7 +201,7 @@ public class AbsenceRequest extends MutableModel {
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
-   * 
+   *
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {

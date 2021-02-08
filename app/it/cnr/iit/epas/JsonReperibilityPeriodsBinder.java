@@ -52,7 +52,7 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 
   /**
    * Binder per le informazioni dei periodi di reperibilità (ReperibilityPeriod).
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

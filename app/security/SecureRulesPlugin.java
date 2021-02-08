@@ -34,7 +34,7 @@ import play.vfs.VirtualFile;
 
 /**
  * Plugin per il caricamento dei componenti necessari alle Drools.
- * 
+ *
  * @author Marco Andreini
  */
 public class SecureRulesPlugin extends PlayPlugin {
