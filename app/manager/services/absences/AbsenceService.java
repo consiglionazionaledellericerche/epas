@@ -525,6 +525,8 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -545,6 +547,7 @@ public class AbsenceService {
       groupsPermitted.remove(covid19);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
+      groupsPermitted.remove(secondDisabledRelativeAbsence);
 
       return groupsPermitted;
     }
@@ -595,6 +598,10 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_RELATIVE_PERMISSION)) {
         groupsPermitted.add(disabledRelativeAbsence);
+        if ((Boolean) confManager.configValue(person, 
+            EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION)) {
+          groupsPermitted.add(secondDisabledRelativeAbsence);
+        }
       }
       
       if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS)) {
