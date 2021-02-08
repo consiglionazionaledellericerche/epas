@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package synch.perseoconsumers.contracts;
 
 import com.google.common.base.Function;
@@ -53,7 +70,7 @@ public class ContractPerseoConsumer {
 
   /**
    * Preleva dall'anagrafica la lista dei contratti di una persona.
-   * 
+   *
    * @param perseoId id di Perseo della persona di cui prelevare i contratti
    * @return La lista dei contratto relativi alla persona specificata.
    */
@@ -85,7 +102,7 @@ public class ContractPerseoConsumer {
 
   /**
    * Preleva dall'anagrafica il contratto relativo all'id contratto passato.
-   * 
+   *
    * @param perseoContractId id di Perseo del contratto richiesta
    * @return Il Contratto relativo all'id specificato.
    */
@@ -140,7 +157,7 @@ public class ContractPerseoConsumer {
 
   /**
    * Preleva dall'anagrafica la lista dei contratti relativi alla sede indicata.
-   * 
+   *
    * @param departmentPerseoId id (di Perseo) della sede sulla quale recuperare i contratti
    * @return La Lista dei contratti delle persone appartenenti alla sede specificata.
    */

@@ -17,14 +17,13 @@
 
 package cnr.sync.dto.v2;
 
-import java.time.LocalDateTime;
 import lombok.Data;
 import models.Person;
 import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per la Persona.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

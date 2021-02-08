@@ -1,16 +1,28 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package jobs;
 
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Maps;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.NumberPath;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.CompetenceCode;

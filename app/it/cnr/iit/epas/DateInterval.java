@@ -24,6 +24,8 @@ import org.joda.time.LocalDate;
 
 /**
  * Rappresenta un intervallo di date.
+ *
+ * @author Alessandro Martelli
  */
 @NoArgsConstructor
 public class DateInterval {
@@ -33,7 +35,7 @@ public class DateInterval {
 
   /**
    * Un DateInterval con begin obbligatorio.
-   * 
+   *
    * @param begin data inizio intervallo.
    * @param end da fine intervallo.
    */
@@ -55,7 +57,7 @@ public class DateInterval {
    * - Se begin è null viene impostata MIN_DATE. <br>
    * - Se end è null viene impostata MAX_DATE. <br>
    * Se begin è successiva a end vengono invertite.
-   * 
+   *
    * @param begin data inizio intervallo, se null impostata a MIN_DATE
    * @param end data fine intervallo, se null impostata a MAX_DATE
    */

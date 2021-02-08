@@ -27,6 +27,9 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione dei MonthlyCompetenceType.
+ */
 @With({Resecure.class})
 public class MonthlyCompetenceTypes extends Controller {
   
@@ -46,7 +49,7 @@ public class MonthlyCompetenceTypes extends Controller {
   
   /**
    * Persiste il monthlyCompetenceType.
-   * 
+   *
    * @param monthlyCompetencetype l'oggetto da persistere
    */
   public static void saveType(MonthlyCompetenceType monthlyCompetencetype) {

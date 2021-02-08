@@ -107,7 +107,7 @@ public class ContractualClauses extends Controller {
     contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
       cgat.contractualClause = null;
       cgat.save();
-    });;
+    });
     if (categoryGroupAbsenceTypes != null) {
       categoryGroupAbsenceTypes.stream().forEach(cgat -> { 
         cgat.contractualClause = contractualClause;

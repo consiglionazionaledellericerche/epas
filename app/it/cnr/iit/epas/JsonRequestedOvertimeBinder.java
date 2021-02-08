@@ -41,7 +41,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json con le richieste di straordinario.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 @Global
@@ -55,7 +55,7 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 
   /**
    * Binder per il json con le richieste di straordinario.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
