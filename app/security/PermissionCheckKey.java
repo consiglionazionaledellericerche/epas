@@ -21,7 +21,7 @@ import lombok.Data;
 
 /**
  * DTO per i dati necessari per il controllo di un permesso.
- * 
+ *
  * @since 10/12/15
  * @author Daniele Murgia
  */

@@ -57,7 +57,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
   
   /**
    * Binder per le informazioni di un periodo di turno.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

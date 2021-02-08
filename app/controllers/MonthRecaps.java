@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -38,6 +55,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei MonthRecap.
+ */
 @With({Resecure.class})
 public class MonthRecaps extends Controller {
 
@@ -108,6 +128,7 @@ public class MonthRecaps extends Controller {
   
   /**
    * Genera il file con le info su smart working / lavoro in sede.
+   *
    * @param month il mese di riferimento
    * @param year l'anno di riferimento
    * @param officeId l'id della sede
@@ -216,7 +237,8 @@ public class MonthRecaps extends Controller {
 
   /**
    *  Raccoglitore per il CustomRecap.
-   *  @author alessandro
+   * 
+   *  @author Alessandro Martelli
    */
   @Data
   public static class CustomRecapDto {

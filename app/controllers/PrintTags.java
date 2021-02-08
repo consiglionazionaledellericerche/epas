@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -51,6 +68,7 @@ public class PrintTags extends Controller {
 
   /**
    * stampa un file pdf contenente la situazione mensile della persona selezionata.
+   *
    * @param person la persona selezionata
    * @param month il mese di interesse
    * @param year l'anno di interesse
@@ -127,6 +145,7 @@ public class PrintTags extends Controller {
   /**
    * restituisce il template contenente la lista di persone attive per cui stampare il 
    * cartellino nell'anno e nel mese passati come parametro.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */

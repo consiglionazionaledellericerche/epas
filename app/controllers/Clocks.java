@@ -56,7 +56,7 @@ import play.mvc.With;
 
 /**
  * Controller per la gestione delle timbrature via WEB.
- * 
+ *
  * @author Cristian Lucchesi
  * @author Dario Tagliaferri
  *

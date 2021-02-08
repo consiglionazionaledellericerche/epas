@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -40,6 +57,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle tipologie di orario di lavoro.
+ */
 @With({Resecure.class})
 @Slf4j
 public class WorkingTimes extends Controller {
@@ -139,6 +159,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra i periodi con quel tipo orario appartenenti a contratti attualmente attivi.
+   *
    * @param wttId tipo orario
    * @param officeId sede
    */
@@ -162,6 +183,7 @@ public class WorkingTimes extends Controller {
   
   /**
    * Inserimento delle informazioni di base tipo orario.
+   *
    * @param officeId id ufficio
    * @param compute controllo degli step
    * @param name nome identificativo dell'orario di lavoro
@@ -259,7 +281,7 @@ public class WorkingTimes extends Controller {
   
   /**
    * Inserimento di un tipo part-time verticale.
-   * 
+   *
    * @param officeId id Ufficio proprietario
    * @param name nome dell'orario di lavoro
    * @param step numero dello step di creazione dell'orario verticale
@@ -396,6 +418,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra il tipo orario orizzontale.
+   *
    * @param wttId tipo orario.
    */
   public static void showHorizontal(Long wttId) {
@@ -419,6 +442,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra il tipo orario.
+   *
    * @param wttId tipo orario
    */
   public static void showWorkingTimeType(Long wttId) {
@@ -438,6 +462,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Elimina un tipo orario (non deve essere associato ad alcun contratto).
+   *
    * @param wttId tipo orario
    */
   public static void delete(Long wttId) {
@@ -504,6 +529,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Modale per il cambia orario a tutti.
+   *
    * @param wttId tipo orario
    * @param officeId sede
    */
@@ -523,6 +549,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Esegue il cambia orario a tutti.
+   *
    * @param wtt vecchio tipo
    * @param wttNew nuovo tipo
    * @param officeId sede

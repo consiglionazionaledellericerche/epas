@@ -32,7 +32,7 @@ public class CheckAbsenceInsert {
 
   /**
    * Costruttore.
-   * 
+   *
    * @param quantity la quantità
    * @param message il messaggio
    * @param insertInShiftOrReperibility se si inserisce l'assenza in turno o reperibilità

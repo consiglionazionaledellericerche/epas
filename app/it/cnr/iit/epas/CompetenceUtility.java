@@ -88,7 +88,7 @@ public class CompetenceUtility {
   /**
    * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
    * (int)(days/2) + resto; TODO: parametrico rispetto ale pre del DB (ampo ore retribuite).
-   * 
+   *
    * @author Arianna Del Soldato 
    */
   public BigDecimal calcShiftHoursFromDays(int days) {
@@ -108,7 +108,7 @@ public class CompetenceUtility {
   /**
    * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
    * (int)(days/2) + resto. TODO: parametrico rispetto ale pre del DB (ampo ore retribuite).
-   * 
+   *
    * @author Arianna Del Soldato
    */
   public BigDecimal calcShiftHoursFromDays2(int days) {

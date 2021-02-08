@@ -37,7 +37,7 @@ public class AuthInfoBinder implements TypeBinder<AuthInfo> {
 
   /**
    * Binder per le informazioni di autenticazione in formato JSON.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

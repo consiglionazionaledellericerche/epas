@@ -48,7 +48,7 @@ public class AnagraficaApis {
 
   /** 
    * Utente per autenticazione anagrafica.
-   * 
+   *
    * @return l'utente con cui autenticarsi con l'anagrafica. 
    */
   public static String getPerseoUser() throws NoSuchFieldException {
@@ -60,7 +60,7 @@ public class AnagraficaApis {
   
   /** 
    * Password per autenticazione anagrafica.
-   * 
+   *
    * @return password con cui autenticarsi con l'anagrafica. 
    */
   public static String getPerseoPass() throws NoSuchFieldException {

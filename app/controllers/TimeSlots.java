@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.collect.FluentIterable;
@@ -22,16 +39,19 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei TimeSlot.
+ */
 @Slf4j
 @With(Resecure.class)
 public class TimeSlots extends Controller {
 
   @Inject
-  private static OfficeDao officeDao;  
+  private static OfficeDao officeDao;
   @Inject
   private static TimeSlotDao timeSlotDao;
   @Inject
-  private static SecurityRules rules;  
+  private static SecurityRules rules;
   @Inject
   private static WrapperModelFunctionFactory wrapperFunctionFactory;
   @Inject
@@ -40,6 +60,7 @@ public class TimeSlots extends Controller {
   /**
    * Permette la gestione delle fasce orarie appartenenti alla sede con identificativo
    * officeId.
+   *
    * @param officeId l'identificativo della sede
    */
   public static void manageTimeSlots(Long officeId) {
@@ -53,12 +74,13 @@ public class TimeSlots extends Controller {
     
     val timeSlots = FluentIterable
         .from(timeSlotDao.getPredefinedEnabledTimeSlots())
-        .transform(wrapperFunctionFactory.timeSlot()).toList();    
+        .transform(wrapperFunctionFactory.timeSlot()).toList();
     render(timeSlots, office);
   }
   
   /**
    * Interfaccia di gestione delle fasce orarie associate da un ufficio.
+   *
    * @param officeId l'identificativo della sede
    */
   public static void manageOfficeTimeSlots(Long officeId) {
@@ -89,7 +111,7 @@ public class TimeSlots extends Controller {
   
   /**
    * Salvataggio delle fascie oraria obbligatorie.
-   * 
+   *
    * @param timeSlot la fascia oraria da salvare
    */
   public static void save(@Valid TimeSlot timeSlot) {
@@ -139,8 +161,9 @@ public class TimeSlots extends Controller {
   }
 
   /**
-   * Mostra i periodi con quella fascia di orario di lavoro appartenenti a contratti 
+   * Mostra i periodi con quella fascia di orario di lavoro appartenenti a contratti
    * attualmente attivi.
+   *
    * @param tsId id della fascia di lavoro
    * @param officeId sede
    */
@@ -166,7 +189,7 @@ public class TimeSlots extends Controller {
   
   /**
    * Cancellazione di una fascia oraria.
-   * 
+   *
    * @param id l'identificativo della fascia oraria da cancellare
    */
   public static void delete(Long id) {
@@ -197,6 +220,7 @@ public class TimeSlots extends Controller {
 
   /**
    * Abilita/Disabilita un fascia oraria.
+   *
    * @param id l'identificativo della fascia oraria da abilitare/disabilitare
    */
   public static void toogle(Long id) {

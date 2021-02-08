@@ -30,7 +30,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json delle assenze.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @Global
 @StaticInject
@@ -38,7 +38,7 @@ public class JsonAbsenceBinder implements TypeBinder<AbsenceFromClient> {
 
   /**
    * Bind delle assenze recuperate via JSON.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

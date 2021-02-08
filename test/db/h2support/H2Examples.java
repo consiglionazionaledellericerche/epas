@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package db.h2support;
 
 import com.google.common.base.Optional;
@@ -17,8 +34,8 @@ import org.joda.time.LocalDate;
 
 /**
  * Costruzione rapida di entity per test standard.
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public class H2Examples {
@@ -42,6 +59,7 @@ public class H2Examples {
 
   /**
    * Costruisce e persiste il contratto.
+   *
    * @param person person
    * @param beginDate data inizio
    * @param endDate data fine
@@ -65,6 +83,7 @@ public class H2Examples {
 
   /**
    * Costruisce e persiste una persona.
+   *
    * @param office office
    * @param username username
    * @return persisted entity
@@ -88,6 +107,7 @@ public class H2Examples {
   
   /**
    * Costruisce e persiste una sede.
+   *
    * @param beginDate inizio sede
    * @param name nome 
    * @param codeId codeId

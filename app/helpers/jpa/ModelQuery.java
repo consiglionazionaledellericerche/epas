@@ -32,7 +32,7 @@ import play.mvc.Scope;
 
 /**
  * Classe per le model query.
- * 
+ *
  * @author Marco Andreini
  */
 public class ModelQuery {
@@ -52,7 +52,7 @@ public class ModelQuery {
 
   /**
    * Le query paginate.
-   * 
+   *
    * @param query la query da paginare
    * @return le query paginate.
    */
@@ -71,7 +71,7 @@ public class ModelQuery {
 
   /**
    * Il simpleresult che wrappa la lista o i listresults.
-   * 
+   *
    * @return a simplequery object, wrap list or listResults.
    */
   public static <T> SimpleResults<T> wrap(JPQLQuery<?> query,
@@ -95,7 +95,7 @@ public class ModelQuery {
 
   /**
    * La funzione di trasformazione da modello a id.
-   * 
+   *
    * @return la funzione di trasformazione da modello a proprio id.
    */
   public static <T extends BaseModel> Function<T, Long> jpaId() {
@@ -104,7 +104,7 @@ public class ModelQuery {
 
   /**
    * Funzione di trasformazione da integer a modello.
-   * 
+   *
    * @return la funzione per ottenere un oggetto via em.find().
    */
   public static <T extends BaseModel> Function<Integer, T> jpaFind(final Class<T> model) {
@@ -113,7 +113,7 @@ public class ModelQuery {
 
   /**
    * Classe simpleResult.
-   * 
+   *
    * @author Marco Andreini
    */
   public static class SimpleResults<T> {

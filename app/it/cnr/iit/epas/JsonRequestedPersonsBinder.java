@@ -38,7 +38,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json la lista delle persone.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 @Global
@@ -50,7 +50,7 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 
   /**
    * Binder per il json la lista delle persone.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */

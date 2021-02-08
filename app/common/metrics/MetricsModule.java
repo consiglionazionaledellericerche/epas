@@ -91,6 +91,7 @@ public class MetricsModule extends AbstractModule {
     });
   }
 
+  @SuppressWarnings("resource")
   @Provides
   public HibernateMetrics hibernateMetrics(Provider<EntityManager> emp) {
     return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
@@ -102,6 +103,7 @@ public class MetricsModule extends AbstractModule {
    */
   public DataSource getDataSource(Provider<EntityManager> emp) {
     val entityManagerFactory = emp.get().getEntityManagerFactory();
+    @SuppressWarnings("resource")
     ConnectionProvider cp = ((SessionFactory) entityManagerFactory).getSessionFactoryOptions()
         .getServiceRegistry()
         .getService(ConnectionProvider.class);

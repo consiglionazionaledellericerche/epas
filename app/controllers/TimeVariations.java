@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -49,6 +66,7 @@ public class TimeVariations extends Controller {
 
   /**
    * Action che abilita la finestra di assegnamento di una variazione.
+   *
    * @param absenceId l'id dell'assenza da compensare
    */
   public static void addVariation(long absenceId) {
@@ -66,6 +84,7 @@ public class TimeVariations extends Controller {
   /**
    * Metodo che permette il salvataggio della variazione oraria da associare ai 91CE presi in 
    * precedenza.
+   *
    * @param absenceId l'id dell'assenza da giustificare
    * @param hours le ore da restituire
    * @param minutes i minuti da restituire
@@ -95,6 +114,7 @@ public class TimeVariations extends Controller {
 
   /**
    * Metodo che rimuove la variazione oraria corrispondente all'id passato come parametro.
+   *
    * @param timeVariationId l'id della variazione oraria
    */
   public static void removeVariation(long timeVariationId) {
@@ -116,6 +136,7 @@ public class TimeVariations extends Controller {
   /**
    * Metodo che genera il template per la visualizzazione della situazione dei 91CE dei
    * dipendenti di una sede.
+   *
    * @param officeId l'id della sede di cui visualizzare i dipendenti
    */
   public static void show(long officeId) {
