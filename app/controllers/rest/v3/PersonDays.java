@@ -200,10 +200,10 @@ public class PersonDays extends Controller {
 
   /**
    * Metodo rest che ritorna un json contenente la lista dei person day di un dipendente
-   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per 
-   * lavoro fuori sede.
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
+   * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
    */
-  public static void offSiteWorkByPersonAndMonth(Long id, String email, String eppn, 
+  public static void offSiteWorkByPersonAndMonth(Long id, String email, String eppn,
       Long personPerseoId, String fiscalCode, Integer year, Integer month) {
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
     if (year == null || month == null) {
@@ -215,6 +215,7 @@ public class PersonDays extends Controller {
     val personDays = personDayDao.getOffSitePersonDaysByPersonInPeriod(
         person, yearMonth.toLocalDate(1), 
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
     renderJSON(gson.toJson(personDays.stream().map(
         pd -> PersonDayShowTerseDto.build(pd)).collect(Collectors.toList())));
   }
@@ -222,7 +223,7 @@ public class PersonDays extends Controller {
   /**
    * Metodo rest che ritorna un json contenente la lista dei person day di una sede
    * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
-   * lavoro fuori sede.
+   * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
    */
   public static void offSiteWorkByOfficeAndMonth(Long id, String code, String codeId,
       String sedeId, Integer year, Integer month) {
@@ -234,8 +235,9 @@ public class PersonDays extends Controller {
     val personDays = personDayDao.getOffSitePersonDaysByOfficeInPeriod(
         office, yearMonth.toLocalDate(1), 
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
     renderJSON(gson.toJson(personDays.stream().map(
-        pd -> PersonDayShowTerseDto.build(pd)).collect(Collectors.toList())));
+        pd -> PersonDayShowDto.build(pd)).collect(Collectors.toList())));
   }
 
 }

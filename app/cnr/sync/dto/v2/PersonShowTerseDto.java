@@ -17,14 +17,13 @@
 
 package cnr.sync.dto.v2;
 
-import java.time.LocalDateTime;
 import lombok.Data;
 import models.Person;
 import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per la Persona.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
@@ -41,7 +40,7 @@ public class PersonShowTerseDto {
   /**
    * Nuova instanza di un PersonShowTerseDto contenente i valori 
    * dell'oggetto person passato.
-   */  
+   */
   public static PersonShowTerseDto build(Person person) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
