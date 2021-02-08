@@ -1,17 +1,30 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
 import dao.GroupDao;
-import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
-import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +32,6 @@ import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
-import models.CompetenceCode;
 import models.Notification;
 import models.Person;
 import models.PersonReperibility;
@@ -42,7 +54,6 @@ import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.Play;
@@ -52,8 +63,8 @@ import play.libs.Mail;
 /**
  * Genera le notifiche da inviare agl utenti.
  * 
- * @author daniele
- * @since 23/06/16.
+ * @author Daniele Murgia
+ * @since 23/06/16
  */
 @Slf4j
 public class NotificationManager {
@@ -94,7 +105,7 @@ public class NotificationManager {
 
   /**
    * Tipi di operazioni sulle entity.
-   * 
+   *
    * @author cristian
    *
    */
@@ -210,7 +221,7 @@ public class NotificationManager {
 
   /**
    * Il metodo che si occupa di generare la corretta notifica al giusto utente.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza da notificare
    * @param operation l'operazione da notificare
    */
@@ -296,7 +307,7 @@ public class NotificationManager {
 
   /**
    * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta d'assenza.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @return il ruolo a cui inviare la notifica della richiesta di assenza.
    */
@@ -331,7 +342,7 @@ public class NotificationManager {
 
   /**
    * Le politiche di notifica inserimenti/modiche di timbrature.
-   * 
+   *
    * @param currentUser user che ha eseguito la richiesta
    * @param stamping la timbratura inserita
    */
@@ -378,7 +389,7 @@ public class NotificationManager {
 
   /**
    * Le politiche di notifica riguardo l'inserimento di assenze.
-   * 
+   *
    * @param currentUser utente che esegue la richiesta
    * @param absence assenza inserita
    * @param groupAbsenceType gruppo di inserimento
@@ -422,7 +433,7 @@ public class NotificationManager {
 
   /**
    * Notifica che una richiesta di assenza è stata rifiutata da uno degli approvatori del flusso.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza
    * @param refuser la persona che ha rifiutato la richiesta di assenza.
    */
@@ -447,7 +458,7 @@ public class NotificationManager {
 
   /**
    * Notifica che una richiesta di assenza è stata approvata da uno degli approvatori del flusso.
-   * 
+   *
    * @param absenceRequest la richiesta di assenza
    * @param approver la persona che ha rifiutato la richiesta di assenza.
    */
@@ -498,7 +509,7 @@ public class NotificationManager {
 
   /**
    * Il metodo che fa partire la notifica al giusto livello della catena.
-   * 
+   *
    * @param currentUser l'utente che fa la richiesta
    * @param absenceRequest la richiesta di assenza via flusso
    * @param insert se si tratta di inserimento (per ora unico caso contemplato)
@@ -517,7 +528,7 @@ public class NotificationManager {
   /**
    * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione della richiesta
    * d'assenza.
-   * 
+   *
    * @param currentUser l'utente corrente che esegue la chiamata
    * @param absenceRequest la richiesta d'assenza da processare
    * @param insert se stiamo facendo un inserimento di una nuova richiesta d'assenza
@@ -534,7 +545,7 @@ public class NotificationManager {
 
   /**
    * Metodo che invia la mail all'utente responsabile dell'approvazione.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @param currentUser l'utente a cui inviare la mail
    */
@@ -589,7 +600,7 @@ public class NotificationManager {
 
   /**
    * Metodo privato che invia la mail al richiedente la ferie/riposo compensativo.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    */
   private void sendEmailAbsenceRequestConfirmation(AbsenceRequest absenceRequest) {
@@ -631,7 +642,7 @@ public class NotificationManager {
 
   /**
    * Metodo che compone il corpo della mail da inviare.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @param user l'utente a cui inviare la mail
    * @return il corpo della mail da inviare all'utente responsabile dell'approvazione.
@@ -676,13 +687,10 @@ public class NotificationManager {
   // Notifiche per competence request
   //////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
   /**
    * Notifica che una richiesta di competenza è stata rifiutata da uno degli 
    * approvatori del flusso.
-   * 
+   *
    * @param competenceRequest la richiesta di competenza
    * @param refuser la persona che ha rifiutato la richiesta di competenza.
    */
@@ -746,7 +754,7 @@ public class NotificationManager {
   /**
    * Metodo void che chiama il metodo privato che invia la mail al richiedente l'assenza
    * o la competenza.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza con tutti i parametri.
    * @param competenceRequest la richiesta di competenza con tutti i parametri.
    */
@@ -796,6 +804,7 @@ public class NotificationManager {
 
   /**
    * Metodo pubblico intermedio per chiamare il privato che fa la notifica.
+   *
    * @param currentUser l'utente che fa la richiesta
    * @param competenceRequest la richiesta di competenza
    * @param insert se si sta facendo un inserimento
@@ -814,6 +823,7 @@ public class NotificationManager {
 
   /**
    * Metodo pubblico che fa da interfaccia per la chiamata al metodo privato che invia la mail.
+   *
    * @param currentUser l'utente corrente
    * @param competenceRequest la richiesta di competenza
    * @param insert se si sta facendo un inserimento
@@ -902,6 +912,7 @@ public class NotificationManager {
 
   /**
    * Metodo che ritorna il corretto ruolo da chiamare in base alla richiesta di competenza.
+   *
    * @param competenceRequest la richiesta di competenza.
    * @return il ruolo corretto per l'approvazione della richiesta.
    */
@@ -930,6 +941,7 @@ public class NotificationManager {
 
   /**
    * Il metodo che si occupa di generare la corretta notifica al giusto utente.
+   *
    * @param competenceRequest la richiesta da notificare
    * @param operation l'operazione da notificare
    */
@@ -980,6 +992,7 @@ public class NotificationManager {
 
   /**
    * Le politiche di notifica riguardo l'inserimento di competenze.
+   *
    * @param currentUser utente che esegue la richiesta
    * @param competence competenza inserita
    */
@@ -1019,7 +1032,7 @@ public class NotificationManager {
   /**
    * Chiama il metodo privato per l'invio della mail al responsabile del servizio per informarlo che
    * ci sono sovrapposizioni tra le date di reperibilità/turno e la richiesta di assenza.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @param shift l'eventuale servizio di turno
    * @param rep l'eventuale servizio di reperibilità
@@ -1035,7 +1048,7 @@ public class NotificationManager {
    * Metodo privato che invia la mail al responsabile del servizio di turno/reperibilità per
    * informarlo della coincidenza della data in oggetto con quelle in cui il dipendente è in
    * turno/reperibilità.
-   * 
+   *
    * @param absenceRequest la richiesta d'assenza
    * @param shift se presente, il servizio di turno
    * @param rep se presente, il servizio di reperibilità
@@ -1116,6 +1129,7 @@ public class NotificationManager {
    * Metodo privato che invia al responsabile la mail di notifica di chiusura di un flusso
    * di richiesta per permesso personale di un dipendente appartenente al gruppo del 
    * responsabile.
+   *
    * @param manager il responsabile destinatario della mail
    * @param absence l'assenza per permesso personale da notificare
    */

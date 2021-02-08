@@ -1,0 +1,39 @@
+#{modalAsync id:'defaultModal',  title:'Storico competenza' }
+
+<div class="container-fluid">
+
+#{if found}
+	#{panel title:'Storico competenza ' + competence.competenceCode.code + '-' +competence.competenceCode.description, color:'primary'}
+	#{if historyCompetence.empty } Non ci sono modifiche alla competenza in oggetto. #{/if}
+	#{else}
+	  <!-- Tabella riepilogativa -->	  
+	
+	  <table class="table table-condensed table-bordered">
+	
+	    <tr class="success">
+	      
+	      <th>&{'modification.date'}</th>
+	      <th>Quantità</th>
+	      <th>&{'done.by'}</th>
+	      <th>&{'modification.type'}</th>
+	    </tr>
+	
+	    #{list items:historyCompetence, as:'competence'}
+	    <tr class="warning">
+	      
+	      <td>${competence.formattedRevisionDate()}</td>
+	      <td>${competence.value.valueApproved}</td>
+	      <td>${competence.formattedOwner()}</td>
+	      <td class="${competence.type}">&{competence.type}</td>
+	    </tr>
+	    #{/list}
+	  </table>
+	  #{/else}
+	#{/panel}
+
+#{/if}
+
+
+</div>
+
+#{/modalAsync}

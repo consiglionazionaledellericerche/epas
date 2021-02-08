@@ -223,6 +223,8 @@ Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
 contract.onCertificate= In attestati
+contract.onCertificate.true= Si
+contract.onCertificate.false= No
 contract.perseoId =Identificato contratto in Anagrafica
 contract.externalId =External id
 sourceDateRecoveryDay = Data inizializzazione riposi compensativi
@@ -341,6 +343,8 @@ VacationCode.CODE_21_3= 21+3
 VacationCode.CODE_30_4= 30+4
 VacationCode.CODE_32_4= 32+4
 VacationCode.CODE_9_1= 9+1
+VacationCode.CODE_13_2= 13+2
+VacationCode.CODE_14_2= 14+2
 
 date= Data
 
@@ -1125,6 +1129,9 @@ DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 parente disabile
 RIGHT_TO_STUDY=Permessi per diritto allo studio
 COVID_19=Auto inserimento codice per emergenza COVID-19
 ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
+PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
+SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
+
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

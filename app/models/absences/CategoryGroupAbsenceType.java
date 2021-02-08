@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Optional;
@@ -57,6 +74,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   /**
    * Un modo (semplificabile) per ordinare i gruppi della categoria per priorità, prendendoli 
    * (se ci sono) dallo heap.
+   *
    * @param onlyFirstOfChain se voglio solo i primi della catena.
    */
   @Transient
@@ -87,6 +105,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se la categoria non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -109,6 +128,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   /**
    * Calcola la lista di tutti i codici prendibili in ogni groupAbsenceType di questa
    * categoria.
+   *
    * @return la lista di tutti i codici prendibili in questa categoria.
    */
   @Transient

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Joiner;
@@ -59,7 +76,7 @@ import security.SecurityRules;
 /**
  * Controller per la gestione delle richieste di assenza dei dipendenti.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @With(Resecure.class)
@@ -111,43 +128,72 @@ public class AbsenceRequests extends Controller {
   static PersonReperibilityDayDao personReperibilityDayDao;
 
 
+  /**
+   * Lista delle richiesta di assenza di tipo ferie.
+   */
   public static void vacations() {
     list(AbsenceRequestType.VACATION_REQUEST);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo riposo compensativo.
+   */
   public static void compensatoryRests() {
     list(AbsenceRequestType.COMPENSATORY_REST);
   }
-  
+
+  /**
+   * Lista delle richiesta di assenza di tipo permesso personale.
+   */
   public static void personalPermissions() {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
   }
-  
+
+  /**
+   * Lista delle richiesta di assenza di tipo ferie dell'anno passato oltre la scadenza.
+   */
   public static void vacationsPastYearAfterDeadline() {
     list(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
   }
   
- 
+  /**
+   * Lista delle richiesta di assenza di tipo permesso breve.
+   */
   public static void shortTermPermit() {
     list(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo ferie da approvare.
+   */
   public static void vacationsToApprove() {
     listToApprove(AbsenceRequestType.VACATION_REQUEST);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo riposo compensativo da approvare.
+   */
   public static void compensatoryRestsToApprove() {
     listToApprove(AbsenceRequestType.COMPENSATORY_REST);
   }
   
+  /**
+   * Lista delle richiesta di assenza di tipo permesso personale da approvare.
+   */
   public static void permissionsToApprove() {
     listToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
   }
   
+  /**
+   * Lista delle richiesta di assenza di tipo ferie anno passato oltre scadenza da approvare.
+   */
   public static void vacationsPastYearAfterDeadlineToApprove() {
     listToApprove(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo permesso breve da approvare.
+   */
   public static void shortTermPermitToApprove() {
     listToApprove(AbsenceRequestType.SHORT_TERM_PERMIT);
   }

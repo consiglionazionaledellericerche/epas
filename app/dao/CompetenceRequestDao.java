@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -17,19 +34,16 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
-import models.flows.Group;
-import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
-import models.flows.query.QAbsenceRequest;
 import models.flows.query.QCompetenceRequest;
-import models.flows.query.QGroup;
-import models.query.QOffice;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
 import org.joda.time.LocalDateTime;
 
+/**
+ * DAO per le CompetenceRequest.
+ */
 public class CompetenceRequestDao extends DaoBase {
 
   @Inject
@@ -131,6 +145,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   /**
    * Metodo che ritorna le richieste da approvare.
+   *
    * @param roleList la lista dei ruoli sulla sede
    * @param fromDate da quando ricercare le richieste
    * @param toDate fino a quando ricercare le richieste
@@ -180,6 +195,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   /**
    * Metodo che ritorna la lista delle richieste totalmente approvate.
+   *
    * @param roleList la lista dei ruoli sulla sede
    * @param fromDate da quando ricercare le richieste
    * @param toDate fino a quando ricercare le richieste
@@ -251,6 +267,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   /**
    * Metodo che aggiorna le condizioni di ricerca per il responsabile del servizio.
+   *
    * @param officeList la lista delle sedi
    * @param condition le condizioni passate dal chiamante
    * @param signer la persona che deve autorizzare la richiesta

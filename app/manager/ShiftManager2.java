@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -61,7 +78,7 @@ import play.i18n.Messages;
 /**
  * Gestiore delle operazioni sui turni ePAS.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 public class ShiftManager2 {
@@ -85,6 +102,7 @@ public class ShiftManager2 {
 
   /**
    * Injector.
+   *
    * @param personDayManager il personDayManager
    * @param personShiftDayDao il dao sul personShiftDay
    * @param personDayDao il dao sul personDay
@@ -115,6 +133,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna la lista delle attività associate all'utente che ne fa richiesta.
+   * 
    * @return la lista delle attività associate all'utente che ne fa richiesta.
    */
   public List<ShiftType> getUserActivities() {
@@ -179,7 +198,7 @@ public class ShiftManager2 {
 
 
   /**
-   * popola la tabella PersonShift andando a cercare nel db tutte le persone che son già
+   * Popola la tabella PersonShift andando a cercare nel db tutte le persone che son già
    * state abilitate a usufruire dell'indennità di turno.
    */
   public void populatePersonShiftTable() {
@@ -668,6 +687,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna la lista delle persone coinvolte nei turni in un determinato periodo.
+   *
    * @param activity attività di turno
    * @param from data di inizio
    * @param to data di fine
@@ -682,6 +702,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che calcola i minuti di turno maturati in base ai turni effettuati nel periodo.
+   *
    * @param activity attività di turno
    * @param person Persona sulla quale effettuare i calcoli
    * @param from data iniziale
@@ -810,6 +831,7 @@ public class ShiftManager2 {
   /**
    * Metodo di utilità che arrotonda il quantitativo di ore di turno all'ora superiore
    * o inferiore a seconda che la divisione % 60 del quantitativo sia maggiore o minore di mezz'ora.
+   *
    * @param shiftCompetence la quantità di ore di turno (in minuti)
    * @return l'arrotondamento all'ora superiore o inferiore della quantità in minuti 
    *     di ore di turno.
@@ -829,6 +851,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna la quantità di minuti lavorata all'interno della fascia di turno.
+   *
    * @param psd il personShiftDday del giorno
    * @param pd il personDay del giorno
    * @param timeInterval (optional) l'intervallo in cui cercare il turno di un certo tipo
@@ -863,6 +886,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna la quantità di minuti da pagare in un certo slot (diurno/notturno).
+   *
    * @param pd il personday di un certo giorno
    * @param psd il personshiftday di un certo giorno
    * @param interval l'eventuale intervallo di validità dello slot (diurno/notturno)
@@ -884,6 +908,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che converte un'orario in formato stringa in un orario in formato LocalTime.
+   *
    * @param str la stringa da convertire
    * @return il LocalTime generato a partire dalla stringa passata come parametro.
    */
@@ -897,6 +922,7 @@ public class ShiftManager2 {
   /**
    * Metodo che ritorna la lista degli ShiftTroubles appartenenti a una persona sull'attività
    * di turno in un certo periodo.
+   *
    * @param activity attività di turno
    * @param person Persona
    * @param from data iniziale
@@ -918,6 +944,7 @@ public class ShiftManager2 {
   /**
    * Metodo che restituisce il residuo della competenza turno, se ne è avanzato, 
    * dal mese precedente.
+   *
    * @param person Person della quale recuperare il residuo dei turni dai mesi precedenti
    * @param yearMonth Mese rispetto al quale verificare i residui
    * @return restituisce il residuo delle competenze di turno dal mese più recente antecedente
@@ -941,6 +968,7 @@ public class ShiftManager2 {
   /**
    * Metodo che ritorna la lista di tutte le persone abilitate sull'attività nell'intervallo
    * di tempo specificato.
+   *
    * @param activity attività di turno
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
@@ -1044,6 +1072,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che salva la quantità di ore di turno.
+   *
    * @param person il dipendente per cui si vuole salvare la competenza
    * @param shiftTypeMonth il pregresso se presente con l'informazione se è già stato approvato 
    *     o meno
@@ -1080,6 +1109,7 @@ public class ShiftManager2 {
 
   /**
    * salva il personShiftDay ed effettua i ricalcoli.
+   *
    * @param personShiftDay il personshiftDay da salvare
    */
   public void save(PersonShiftDay personShiftDay) {
@@ -1090,6 +1120,7 @@ public class ShiftManager2 {
 
   /**
    * cancella il personShiftDay.
+   *
    * @param personShiftDay il personShiftDay da cancellare
    */
   public void delete(PersonShiftDay personShiftDay) {
@@ -1146,6 +1177,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna il giusto numero di slot associati all'attività.
+   *
    * @param timeTable la timetable relativa all'attività
    * @return la lista degli slot di turno attivi sulla timetable passata come parametro.
    */
@@ -1162,6 +1194,5 @@ public class ShiftManager2 {
     }
     return list;
   }
-
 
 }

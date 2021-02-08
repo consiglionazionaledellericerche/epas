@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.MoreObjects;
@@ -22,7 +39,7 @@ import play.data.validation.Required;
  * Contiene le informazioni relative alla richiesta/risposta di elaborazione dati delle
  * assenze/competenze/buoni mensa inviati al nuovo sistema degli attestati del CNR.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Audited
 @Entity
@@ -97,18 +114,21 @@ public class Certification extends BaseModel {
         .toString();
   }
 
+  /**
+   * YearMonth costruito da anno e mese.
+   */
   public YearMonth getYearMonth() {
     return new YearMonth(year, month);
   }
 
   /**
    * Comparatore.
+   *
    * @return un Comparator che compara per fullname poi id.
    */
   public static Comparator<Certification> comparator() {
     return Comparator.comparing(Certification::getYearMonth);
 
   }
-
 
 }

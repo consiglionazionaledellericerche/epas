@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -24,6 +41,7 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.Group;
+import org.testng.collections.Lists;
 import play.data.binding.As;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -31,6 +49,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei gruppi.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Groups extends Controller {
@@ -54,6 +75,7 @@ public class Groups extends Controller {
 
   /**
    * Metodo che crea il gruppo.
+   *
    * @param group il gruppo da creare
    * @param office la sede su cui crearlo
    */
@@ -87,6 +109,7 @@ public class Groups extends Controller {
 
   /**
    * Metodo che cancella il gruppo.
+   *
    * @param groupId id del gruppo da cancellare
    */
   public static void deleteGroup(long groupId) {
@@ -115,6 +138,7 @@ public class Groups extends Controller {
 
   /**
    * Metodo che mostra i gruppi appartenenti a una sede.
+   *
    * @param officeId l'id della sede di cui vedere i gruppi
    */
   public static void showGroups(Long officeId) {
@@ -122,7 +146,7 @@ public class Groups extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     User user = Security.getUser().get();
-    List<Group> groups = null;
+    List<Group> groups = Lists.newArrayList();
     if (uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.GROUP_MANAGER), office)
         .isPresent()) {
       groups = 
@@ -146,6 +170,7 @@ public class Groups extends Controller {
 
   /**
    * Metodo che permette la modifica del gruppo.
+   *
    * @param groupId id del gruppo da modificare
    */
   public static void edit(long groupId) {
@@ -159,6 +184,7 @@ public class Groups extends Controller {
 
   /**
    * Metodo che permette l'apertura della pagina di creazione del gruppo.
+   *
    * @param officeId l'id della sede su cui creare il gruppo
    */
   public static void blank(long officeId) {

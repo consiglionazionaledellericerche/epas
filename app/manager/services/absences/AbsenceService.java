@@ -1,3 +1,7 @@
+/**
+ * I Parametri di ePAS.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Optional;
@@ -53,7 +57,7 @@ import play.cache.Cache;
 /**
  * Interfaccia epas per il componente assenze. le richieste via form.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class AbsenceService {
@@ -464,6 +468,7 @@ public class AbsenceService {
 
   /**
    * Ritorna la lista dei gruppi di assenza abilitati per il flusso di approvazione.
+   *
    * @return la lista dei gruppi di assenza abilitati per il flusso di approvazione.
    */
   public List<GroupAbsenceType> groupsPermittedFlow() {
@@ -520,6 +525,8 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -540,7 +547,8 @@ public class AbsenceService {
       groupsPermitted.remove(covid19);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
-      // groupsPermitted.remove(telework);
+      groupsPermitted.remove(secondDisabledRelativeAbsence);
+
       return groupsPermitted;
     }
 
@@ -590,6 +598,16 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_RELATIVE_PERMISSION)) {
         groupsPermitted.add(disabledRelativeAbsence);
+        if ((Boolean) confManager.configValue(person, 
+            EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION)) {
+          groupsPermitted.add(secondDisabledRelativeAbsence);
+        }
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS)) {
+        List<GroupAbsenceType> groups = 
+            absenceComponentDao.groupsAbsenceTypeByName(namesOfChildGroups());
+        groupsPermitted.addAll(groups);
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);
@@ -597,6 +615,30 @@ public class AbsenceService {
     }
 
     return Lists.newArrayList();
+  }
+  
+  private List<String> namesOfChildGroups() {
+    List<String> names = Lists.newArrayList();
+    names.add(DefaultGroup.G_23.name());
+    names.add(DefaultGroup.G_24.name());
+    names.add(DefaultGroup.G_25.name());
+    names.add(DefaultGroup.G_232.name());
+    names.add(DefaultGroup.G_233.name());
+    names.add(DefaultGroup.G_242.name());
+    names.add(DefaultGroup.G_243.name());
+    names.add(DefaultGroup.G_244.name());
+    names.add(DefaultGroup.G_234.name());
+    names.add(DefaultGroup.G_252.name());
+    names.add(DefaultGroup.G_253.name());
+    names.add(DefaultGroup.G_254.name());
+    names.add(DefaultGroup.MALATTIA_FIGLIO_1.name());
+    names.add(DefaultGroup.MALATTIA_FIGLIO_2.name());
+    names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
+    names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
+    names.add(DefaultGroup.G_25P.name());
+    names.add(DefaultGroup.G_COVID50.name());
+    
+    return names;
   }
 
   @Deprecated
@@ -658,6 +700,9 @@ public class AbsenceService {
     return insertReport;
   }
 
+  /**
+   * Report con le informazioni derivante da un inserimento assenza.
+   */
   @ToString
   public static class InsertReport {
 
@@ -670,6 +715,9 @@ public class AbsenceService {
 
     public List<String> warningsPreviousVersion = Lists.newArrayList();
 
+    /**
+     * Numero di inserimenti di assenze con successo.
+     */
     public int howManySuccess() {
       return insertTemplateRows.size() - howManyReplacing() - howManyError() - howManyIgnored();
     }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
@@ -26,7 +43,7 @@ import play.data.binding.TypeBinder;
  * certain type and slot [{ id: id of the person in the shift start : start date end: end
  * date cancelled: true/false shiftSlot: slot of the shift (morning/afternoon) }]
  *
- * @author arianna
+ * @author Arianna Del Soldato
  *
  */
 @Slf4j
@@ -39,6 +56,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
   
   
   /**
+   * Binder per le informazioni di un periodo di turno.
+   * 
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
@@ -75,7 +94,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
           // validate person id
           personId = jsonObject.get("id").getAsLong();
           person = personDao.getPersonById(personId);
-          //person = Person.findById(personId);
+
           if (person == null) {
             throw new IllegalArgumentException(
                 String.format("Person with id = %s not found", personId));

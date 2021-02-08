@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.service;
 
 import com.google.common.base.Optional;
@@ -20,8 +37,9 @@ import models.enumerate.CertificationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-
-
+/**
+ * Rappresenta i dati della situazione mensile di una persona.
+ */
 public class PersonMonthlySituationData {
 
   private final PersonDayManager personDayManager;
@@ -32,6 +50,7 @@ public class PersonMonthlySituationData {
   
   /**
    * Injector.
+   *
    * @param personDayManager il persondaymanager
    * @param personMonthRecapDao il dao dei riepiloghi mensili
    * @param absenceDao il dao delle assenze
@@ -51,6 +70,7 @@ public class PersonMonthlySituationData {
   
   /**
    * Crea la mappa con le info mensili per i dipendenti.
+   *
    * @param person il dipendente di cui cercare le informazioni
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -178,6 +198,7 @@ public class PersonMonthlySituationData {
 
   /**
    * Metodo che compone la certificazione aggiungendo le competenze.
+   *
    * @param person la persona di cui si cercano le competenze
    * @param year l'anno
    * @param month il mese

@@ -1,25 +1,34 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.service.contracts;
 
-import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Optional;
 import dao.AbsenceDao;
-import dao.absences.AbsenceComponentDao;
-import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
-import manager.ContractManager;
 import manager.PersonDayManager;
-import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceCertificationService;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -32,19 +41,18 @@ import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.definitions.DefaultAbsenceType;
-import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
-import play.data.validation.Validation;
 import play.db.jpa.JPA;
 
 
-@Slf4j
+/**
+ * Service per i Contratti.
+ */
 public class ContractService {
 
   private final AbsenceDao absenceDao;
   private final PersonDayManager personDayManager;
   private final AbsenceCertificationService absenceCertificationService;
-  private final AbsenceComponentDao absenceComponentDao;
   private final ConsistencyManager consistencyManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceService absenceService;
@@ -53,10 +61,10 @@ public class ContractService {
 
   /**
    * Injection.
+   *
    * @param absenceDao il dao sulle assenze
    * @param personDayManager il manager del personDay
    * @param absenceCertificationService il servizio di recupero assenze da attestati
-   * @param absenceComponentDao il dao sul componente delle assenze
    * @param consistencyManager il manager che fa i conti
    * @param wrapperFactory il wrapperFactory che consente di incapsulare gli oggetti in 
    *     qualcosa di più corposo contenente metodi aggiuntivi
@@ -64,13 +72,12 @@ public class ContractService {
   @Inject
   public ContractService(AbsenceDao absenceDao, PersonDayManager personDayManager,
       AbsenceCertificationService absenceCertificationService, 
-      AbsenceComponentDao absenceComponentDao, ConsistencyManager consistencyManager,
+      ConsistencyManager consistencyManager,
       IWrapperFactory wrapperFactory, AbsenceService absenceService, 
       AbsenceManager absenceManager) {
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.absenceCertificationService = absenceCertificationService;
-    this.absenceComponentDao = absenceComponentDao;
     this.consistencyManager = consistencyManager;
     this.wrapperFactory = wrapperFactory;
     this.absenceService = absenceService;
@@ -79,6 +86,7 @@ public class ContractService {
 
   /**
    * La mappa con associazione data-lista tipi di assenza.
+   *
    * @param person la persona per cui si recuperano le assenze
    * @param from da quando recuperarle
    * @param to (opzionale) fino a quando recuperarle
@@ -94,6 +102,7 @@ public class ContractService {
   /**
    * Si collega ad Attestati e scarica le assenze dell'anno di updateFrom.
    * Poi le persiste ignorando quelle esistenti.
+   *
    * @param person la persona il cui contratto è stato splittato
    * @param updateFrom la data da cui far partire i ricalcoli
    */
@@ -132,6 +141,7 @@ public class ContractService {
 
   /**
    * Ritorna il nuovo contratto con i parametri passati.
+   *
    * @param person la persona di cui si sta creando il contratto
    * @param dateToSplit la data da cui ripartire col nuovo contratto
    * @param wtt l'orario di lavoro
@@ -150,6 +160,7 @@ public class ContractService {
 
   /**
    * Ripristina le assenze salvate in precedenza sul nuovo contratto.
+   *
    * @param absences la lista di assenze da ripristinare
    */
   public void resetAbsences(List<Absence> absences) {

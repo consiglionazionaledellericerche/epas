@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -11,7 +28,6 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.inject.Inject;
 import dao.ContractDao;
-import dao.GeneralSettingDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
@@ -29,7 +45,6 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
-import models.GeneralSetting;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -53,8 +68,9 @@ import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 import play.jobs.Job;
 
-
-
+/**
+ * Manager per la gestione dei PersonDay.
+ */
 @Slf4j
 public class PersonDayManager {
 
@@ -94,7 +110,6 @@ public class PersonDayManager {
   /**
    * Assenza che assegna l'intera giornata.
    */
-
   public Optional<Absence> getAssignAllDay(PersonDay personDay) {
     for (Absence absence : personDay.absences) {
       if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
@@ -120,6 +135,7 @@ public class PersonDayManager {
 
   /**
    * Metodo che controlla se esiste un'assenza a completamento giornaliero nella giornata.
+   *
    * @param personDay il personDay in cui cercare l'assenza
    * @return Assenza che giustifica il tempo che manca al raggiungimento dell'orario di lavoro.
    */
@@ -143,6 +159,7 @@ public class PersonDayManager {
   /**
    * Metodo che ritorna true se l'assenza è compatibile con la reperibilità, 
    * false altrimenti.
+   *
    * @param personDay il personDay su cui cercare le assenze
    * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
    */
@@ -156,6 +173,7 @@ public class PersonDayManager {
   /**
    * Metodo che ritorna true se nel giorno c'è un assenza a completamento giornaliero,
    * false altrimeni.
+   *
    * @param personDay il personday da verificare
    * @return se nel giorno vi è un'assenza a completamento giornaliero.
    */
@@ -645,6 +663,7 @@ public class PersonDayManager {
 
   /**
    * Metodo che controlla il tempo giustificato dalle zone di timbratura.
+   *
    * @param validPairs la lista di coppie di timbrature valide
    * @param startWork l'orario di inizio lavoro in sede
    * @param endWork l'orario di fine lavoro in sede
@@ -685,6 +704,7 @@ public class PersonDayManager {
 
   /**
    * Metodo che controlla se il gap tra due timbrature avviene tra due zone di timbratura diverse.
+   *
    * @param first la prima coppia di timbrature
    * @param second la seconda coppia di timbrature
    * @return true se il gap tra le due coppie è fatto tra due zone di timbratura associate.
@@ -702,6 +722,7 @@ public class PersonDayManager {
   /**
    * Metodo che verifica se un intervallo tra due timbrature effettuate in un link tra zone
    * sta all'interno del tempo di trasferimento previsto tra una zona e l'altra.
+   *
    * @param first la prima coppia di timbrature
    * @param second la seconda coppia di timbrature
    * @param zoneToZones il link tra zone di timbratura
@@ -833,6 +854,7 @@ public class PersonDayManager {
 
   /**
    * Se il personDay ricade nel caso del calcolo stima uscendo in questo momento.
+   *
    * @param personDay personDay
    * @return esito
    */
@@ -858,6 +880,7 @@ public class PersonDayManager {
 
   /**
    * Computa le timbrature valide e nel caso popola il tempo uscendo in questo momento.
+   *
    * @param personDay personDay
    * @param now momento exitingNow
    * @param previousForProgressive personDay precedente per progressivo
@@ -974,7 +997,8 @@ public class PersonDayManager {
   }
 
   /**
-   * Metodo che controlla se il giorno è valido rispetto a tempo a lavoro, festivo...
+   * Metodo che controlla se il giorno è valido rispetto a tempo a lavoro, festivo.
+   *
    * @param personDay il personDay relativo alla persona e al giorno di interesse
    * @param pd il wrapper contenente i metodi di utilità
    * @return true se è un giorno valido rispetto a tempo a lavoro, festivo, assenze ecc...
@@ -1024,9 +1048,9 @@ public class PersonDayManager {
 
   /**
    * - Setta il campo valid per ciascuna stamping del personDay 
-   * (sulla base del loro valore al momento della call) <br>
+   *   (sulla base del loro valore al momento della call) <br>
    * - Associa ogni stamping alla coppia valida individuata se presente
-   *    (campo stamping.pairId) 
+   *   (campo stamping.pairId).
    *
    * @param stampings la lista di timbrature
    */
@@ -1306,6 +1330,7 @@ public class PersonDayManager {
   /**
    * Metodo di utilità che determina la quantità di tempo a lavoro in eccesso nel caso 
    * una persona sia in turno.
+   *
    * @param pd il personDay da controllare
    * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno.
    */
@@ -1424,6 +1449,7 @@ public class PersonDayManager {
   /**
    * Metodo che verifica se il giorno, per la persona passata come parametro, 
    * è da considerarsi festivo o meno.
+   *
    * @param person persona interessata
    * @param date la data da controllare
    * @param saturdayHoliday se il sabato deve essere considerato festivo
@@ -1458,7 +1484,8 @@ public class PersonDayManager {
 
   /**
    * Metodo che controlla se si è trascorso abbastanza tempo in sede per essere considerati 
-   *    presenti.
+   * presenti.
+   *
    * @param stampings la lista delle timbrature
    * @return true se il tempo trascorso in sede è sufficiente, false altrimenti.
    */
@@ -1494,6 +1521,7 @@ public class PersonDayManager {
 
   /**
    * Metodo usato per calcolare quanto tempo è stato lavorato in sede dai dipendenti IV-VIII.
+   *
    * @param orderedStampings la lista ordinata delle timbrature
    * @return la lista delle coppie valide di timbratura che servono per determinare il tempo 
    *     lavorato in sede.
@@ -1552,7 +1580,7 @@ public class PersonDayManager {
   /**
    * L'insieme degli intervalli di tempo per cui non sono presenti timbrature nella fascia 
    * oraria obbligatoria.
-   * 
+   *
    * @param personDay il PersonDay di cui verificare le tibrature
    * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
    * @return l'insieme degli intervalli in cui il dipendente non è al lavoro
@@ -1586,7 +1614,7 @@ public class PersonDayManager {
   /**
    * La somma del tempo in cui il dipendente non è al lavoro durante la fascia oraria
    * obbligatoria. 
-   * 
+   *
    * @param personDay il PersonDay di cui verificare le timbrature 
    * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
    * @return il tempo (in minuti) in cui il dipendente non è al lavoro 
@@ -1602,7 +1630,7 @@ public class PersonDayManager {
   /**
    * Calcola il tempo dell'eventuale pausa pranzo durante la fascia oraria obbligatoria 
    * di presenza.
-   * 
+   *
    * @param personDay il personDay di cui verificare il tempo per la pausa pranzo
    * @param mandatoryTimeSlotRange la fascia oraria obbligatoria
    * @return il tempo della pausa pranzo duranta la fascia oraria obbligatoria
@@ -1639,7 +1667,7 @@ public class PersonDayManager {
    * durante l'orario di lavoro obbligatorio.
    * Le eventuali pause pranzo durante la fascia di oraria obbligatoria sono ammesse e non danno
    * luogo alla necessità di chiedere un permesso breve.
-   * 
+   *
    * @param personDay il PersonDay contenente le timbrature da verificare (deve essere persistente)
    * @param mandatoryTimeSlot la fascia oraria obbligatoria da utilizzare nelle verifiche orarie
    * @return un Optional contente l'assenza che rappresenta il permesso breve 
@@ -1691,7 +1719,7 @@ public class PersonDayManager {
   /**
    * Verifica e gestisce eventuali Permessi brevi legati a fascie orarie obbligatorie
    * per il dipendente.
-   * 
+   *
    * @param personDay il personday da verificare per l'eventuale permesso breve
    */
   public void checkAndManageMandatoryTimeSlot(PersonDay personDay) {

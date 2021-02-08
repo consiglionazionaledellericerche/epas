@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
@@ -45,6 +62,7 @@ public class ServiceFactories {
 
   /**
    * Constructor.
+   *
    * @param absenceEngineUtility inj
    * @param absenceComponentDao inj
    * @param personDayManager inj
@@ -65,6 +83,7 @@ public class ServiceFactories {
   
   /**
    * Costruttore per richiesta di scan.
+   *
    * @param person persona
    * @param scanFrom scanFrom
    * @param absencesToScan le assenze da scannerizzare
@@ -90,6 +109,7 @@ public class ServiceFactories {
    * Costruisce lo stato del gruppo (la periodChain). <br>
    * absenceToInsert se presente viene inserita nella computazione del gruppo per la valutazione
    * della soundness.
+   *
    * @param person persona
    * @param groupAbsenceType gruppo
    * @param date data
@@ -148,6 +168,7 @@ public class ServiceFactories {
 
   /**
    * Prima fase di costruzione (generazione dei periodi).
+   *
    * @param person person
    * @param groupAbsenceType group
    * @param date date
@@ -214,7 +235,8 @@ public class ServiceFactories {
   
   /**
    * Seconda fase di costruzione dispatch ed analisi delle assenze (esistenti, inserite e
-   * da inserire). 
+   * da inserire).
+   *
    * @param periodChain periodChain
    * @param absenceToInsert assenza da inserire
    * @param allPersistedAbsences tutte le assenze persistite nel periodo (tutti i tipi)
@@ -539,6 +561,7 @@ public class ServiceFactories {
 
   /**
    * Inserimento nel caso di GroupAbsenceTypePattern.simpleGrouping.
+   *
    * @param periodChain catena
    * @param absenceToInsert assenza da inserire
    * @return la catena con l'esito
@@ -587,6 +610,7 @@ public class ServiceFactories {
 
   /**
    * I vincoli generici assenza.
+   *
    * @param genericErrors box errori
    * @param person persona
    * @param absence assenza

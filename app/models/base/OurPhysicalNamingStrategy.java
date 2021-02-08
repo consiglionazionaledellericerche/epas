@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.base;
 
 import java.util.Locale;
@@ -8,7 +25,7 @@ import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 /**
  * Clonato da quello spring-boot.
  *
- * @author marco
+ * @author Marco Andreini
  *
  */
 public class OurPhysicalNamingStrategy implements PhysicalNamingStrategy {
@@ -60,7 +77,8 @@ public class OurPhysicalNamingStrategy implements PhysicalNamingStrategy {
   /**
    * Get an the identifier for the specified details. By default this method will return
    * an identifier with the name adapted based on the result of
-   * {@link #isCaseInsensitive(JdbcEnvironment)}
+   * {@link #isCaseInsensitive(JdbcEnvironment)}.
+   *
    * @param name the name of the identifier
    * @param quoted if the identifier is quoted
    * @param jdbcEnvironment the JDBC environment
@@ -76,6 +94,7 @@ public class OurPhysicalNamingStrategy implements PhysicalNamingStrategy {
 
   /**
    * Specify whether the database is case sensitive.
+   *
    * @param jdbcEnvironment the JDBC environment which can be used to determine case
    * @return true if the database is case insensitive sensitivity
    */

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.base.Verify;
@@ -54,6 +71,7 @@ public class Scanner {
   
   /**
    * Constructor scanner.
+   *
    * @param person persona
    * @param scanFrom scanFrom
    * @param absencesToScan le assenze da scannerizzare
@@ -204,6 +222,7 @@ public class Scanner {
   
   /**
    * Il prossimo gruppo da analizzare per la currentAbsence (se c'è).
+   *
    * @return gruppo
    */
   private GroupAbsenceType currentAbsenceNextGroup() {
@@ -221,6 +240,7 @@ public class Scanner {
   
   /**
    * Configura il prossimo gruppo da analizzare (se esiste).
+   *
    * @param iterator iteratore sulla lista di assenze da scannerizzare.
    */
   private void configureNextGroupToScan(Iterator<Absence> iterator) {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
@@ -34,6 +51,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la visualizzazione via REST di dati relativi alla situazione giornaliera.
+ */
 @Slf4j
 @With(Resecure.class)
 public class PersonDays extends Controller {
@@ -48,7 +68,7 @@ public class PersonDays extends Controller {
   private static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
- 
+
   /**
    * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
    * personPerseoId o fiscalCode) in un giorno specifico (date).
@@ -75,10 +95,11 @@ public class PersonDays extends Controller {
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(PersonDayShowTerseDto.build(pd)));
   }
-  
+
   /**
    * Metodo rest che ritorna un json contenente la lista dei person day di tutti i dipendenti
    * di una certa sede nell'anno/mese passati come parametro.
+   *
    * @param sedeId l'identificativo della sede di cui ricercare la situazione delle persone
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -117,10 +138,11 @@ public class PersonDays extends Controller {
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(monthRecaps));
   }
-  
+
   /**
    * Metodo che ritorna la lista delle situazioni giornaliere di tutti 
    * i dipendenti della sede passata come parametro alla data passata come parametro.
+   *
    * @param sedeId l'identificativo della sede di cui cercare le persone
    * @param date la data per cui cercare i dati
    */
@@ -198,14 +220,14 @@ public class PersonDays extends Controller {
   }
   
   /**
-   * Metodo rest che ritorna un json contenente la lista dei person day di un dipendente
-   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per 
+   * Metodo rest che ritorna un json contenente la lista dei person day di una sede
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
    * lavoro fuori sede.
    */
-  public static void offSiteWorkByPersonAndMonth(Long id, String code, String codeId, 
+  public static void offSiteWorkByOfficeAndMonth(Long id, String code, String codeId,
       String sedeId, Integer year, Integer month) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val office = 
+    val office =
         Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
@@ -214,6 +236,6 @@ public class PersonDays extends Controller {
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
     renderJSON(gson.toJson(personDays.stream().map(
         pd -> PersonDayShowTerseDto.build(pd)).collect(Collectors.toList())));
-
   }
+
 }

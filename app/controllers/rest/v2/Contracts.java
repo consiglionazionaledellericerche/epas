@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest.v2;
 
 import cnr.sync.dto.v2.ContractCreateDto;
@@ -34,6 +51,9 @@ import play.mvc.Util;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei contratti.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Contracts extends Controller {
@@ -165,6 +185,7 @@ public class Contracts extends Controller {
 
   /**
    * Imposta il collegamento al contratto precedente del contratto individuato con li parametro id.
+   *
    * @param id id del contratto di cui cambiare i riferimenti al contratto precedente
    */
   public void setPreviousContract(Long id) {
@@ -173,6 +194,7 @@ public class Contracts extends Controller {
 
   /**
    * Rimuove il collegamento al contratto precedente del contratto individuato con li parametro id.
+   *
    * @param id id del contratto di cui cambiare i riferimenti al contratto precedente
    */
   public void unsetPreviousContract(Long id) {
@@ -182,6 +204,7 @@ public class Contracts extends Controller {
   /**
    * Imposta o rimuove il collegamento al contratto precedente del 
    * contratto individuato con li parametro id.
+   *
    * @param id id del contratto di cui cambiare i riferimenti al contratto precedente
    * @param linkedToPreviousContract passare true per impostare il contratto precedente, passare 
    *     false altrimenti.
@@ -217,7 +240,7 @@ public class Contracts extends Controller {
   
   /**
    * Cerca il contratto in funzione del id passato.
-   * 
+   *
    * @return il contratto se trovato, altrimenti torna direttamente 
    *     una risposta HTTP 404.
    * 

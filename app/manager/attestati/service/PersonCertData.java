@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.service;
 
 import com.google.common.collect.Maps;
@@ -12,7 +29,7 @@ import models.enumerate.CertificationType;
  * La situazione inerente un mese di una persona.
  * Permette di definire lo stato e i warning se presenti.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class PersonCertData {
 
@@ -44,6 +61,7 @@ public class PersonCertData {
 
   /**
    * La certificazione dei dati della persona.
+   *
    * @return la certificazione dei dati della persona.
    */
   public PersonCertData computeStaticStatus() {
@@ -129,6 +147,7 @@ public class PersonCertData {
 
   /**
    * La certificazione dei dati della persona.
+   *
    * @return la certificazione dei dati della persona.
    */
   public PersonCertData computeProcessStatus() {

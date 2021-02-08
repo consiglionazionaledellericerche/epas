@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.sync;
 
 import com.google.common.base.Optional;
@@ -27,6 +44,11 @@ import play.data.validation.Validation;
 import synch.perseoconsumers.contracts.ContractPerseoConsumer;
 import synch.perseoconsumers.people.PeoplePerseoConsumer;
 
+/**
+ * Manager per la sincronizzazione delle informazioni tra ePAS e Perseo.
+ *
+ * @author Marco Andreini
+ */
 @Slf4j
 public class SynchronizationManager {
 
@@ -61,6 +83,7 @@ public class SynchronizationManager {
   /**
    * Sincronizza le persone di un ufficio presenti nell'anagrafica principale con 
    * quelle di ePAS.
+   *
    * @param office l'ufficio di cui sincronizzare le persone.
    */
   public SyncResult syncPeopleInOffice(Office office, boolean alsoContracts) {
@@ -212,7 +235,7 @@ public class SynchronizationManager {
    * Sincronizza i dati della persona indicata con quelli presenti 
    * nell'anagrafica.
    * Vengono sincronizzati i dati di base della persona ed i suoi contratti.
-   * 
+   *
    * @param person la persona da sincronizzare
    * @return il risultato della sincronizzazione
    */
@@ -238,7 +261,7 @@ public class SynchronizationManager {
 
   /**
    * Aggiorna la persona presente in ePAS con i dati della persona prelevata dall'anagrafica.
-   *  
+   *
    * @return una stringa con la descrizione dei cambiamenti se ci sono stati. empty altrimenti.
    */
   public SyncResult syncPersonWithPersonRegistry(Person epasPerson, Person registryPerson) {
@@ -283,7 +306,7 @@ public class SynchronizationManager {
 
   /**
    * Effettua l'importazione di un contratto di una perseo dall'anagrafica.
-   * 
+   *
    * @param perseoContractId l'id in anagrafica del contratto da importare
    * @param epasPersonId l'id della persona in ePAS
    */
@@ -330,7 +353,7 @@ public class SynchronizationManager {
 
   /**
    * Effettua l'importazione dei contratti di una persona dall'anagrafica.
-   * 
+   *
    * @param person la persona in ePAS di cui importare i contratti.
    */
   public SyncResult importContracts(Person person) {
@@ -379,7 +402,8 @@ public class SynchronizationManager {
   }
 
   /**
-   * Sincronizza i contratti presenti in ePAS con quelli presenti in anagrafica. 
+   * Sincronizza i contratti presenti in ePAS con quelli presenti in anagrafica.
+   * 
    * @param person la persona di cui sincronizzare i contratti.
    * @return il risultato della sincronizzazione.
    */
@@ -436,10 +460,10 @@ public class SynchronizationManager {
   /**
    * Verifica se tra i contratti passati c'è n'è uno che corrisponde ai contratti
    * della persona.
-   * 
+   *
    * @param contract il contratti dall'anagrafica
    * @param person persona di cui verificare i contratti
-   * @return
+   * @return i Contratti che corrispondono al match.
    */
   private Optional<MatchingContracts> matchingContracts(
       Contract contract, Person person) {

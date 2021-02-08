@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.history;
 
 import com.google.common.collect.FluentIterable;
@@ -17,7 +34,7 @@ import org.hibernate.envers.query.AuditQuery;
 /**
  * Dao per lo storico dei PersonDay.
  *
- * @author marco
+ * @author Marco Andreini
  */
 public class PersonDayHistoryDao {
 
@@ -32,6 +49,7 @@ public class PersonDayHistoryDao {
 
   /**
    * La lista delle revisioni della timbratura.
+   *
    * @param personDayId l'identificativo del personday cui appartiene la timbratura di cui
    *     si vogliono le revisioni.
    * @return la lista delle revisioni della timbratura relativa al personDay con identificativo
@@ -52,6 +70,7 @@ public class PersonDayHistoryDao {
 
   /**
    * La lista delle revisioni delle timbrature.
+   *
    * @param personDayId l'identificativo del personday
    * @return la lista delle revisioni delle timbrature alla creazione.
    */
@@ -74,6 +93,7 @@ public class PersonDayHistoryDao {
   /**
    * La lista delle revisioni delle assenze relative al personday con
    * identificativo personDayId.
+   *
    * @param personDayId l'identificativo del personday
    * @return la lista delle revisioni delle assenze relative al personday con
    *     identificativo personDayId.
@@ -93,6 +113,7 @@ public class PersonDayHistoryDao {
 
   /**
    * La lista dello storico di tutte le revisioni dei codici di missione orari.
+   *
    * @return la lista dello storico di tutti i codici di missione orari.
    */
   public List<HistoryValue<Absence>> oldMissions() {
@@ -115,12 +136,12 @@ public class PersonDayHistoryDao {
     final AuditQuery query = auditReader.get().createQuery()
         .forRevisionsOfEntity(Absence.class, false, true)
         .add(AuditEntity.or(AuditEntity.property("absenceType").eq(type),
-            AuditEntity.or(AuditEntity.property("absenceType").eq(type2),
-                AuditEntity.or(AuditEntity.property("absenceType").eq(type3),
-                    AuditEntity.or(AuditEntity.property("absenceType").eq(type4),
-                        AuditEntity.or(AuditEntity.property("absenceType").eq(type5),
-                            AuditEntity.or(AuditEntity.property("absenceType").eq(type6),
-                                AuditEntity.property("absenceType").eq(type7))))))))
+             AuditEntity.or(AuditEntity.property("absenceType").eq(type2),
+             AuditEntity.or(AuditEntity.property("absenceType").eq(type3),
+             AuditEntity.or(AuditEntity.property("absenceType").eq(type4),
+             AuditEntity.or(AuditEntity.property("absenceType").eq(type5),
+             AuditEntity.or(AuditEntity.property("absenceType").eq(type6),
+             AuditEntity.property("absenceType").eq(type7))))))))
         .addOrder(AuditEntity.property("id").asc());
 
     return FluentIterable.from(query.getResultList())
@@ -131,6 +152,7 @@ public class PersonDayHistoryDao {
 
   /**
    * La lista delle revisioni relative all'assenza con id passato.
+   *
    * @param id l'identificativo dell'assenza inserita
    * @return la lista delle revisioni dell'assenza con id passato.
    */
@@ -143,6 +165,5 @@ public class PersonDayHistoryDao {
         .transform(HistoryValue.fromTuple(Absence.class))
         .toList();
   }
-
 
 }
