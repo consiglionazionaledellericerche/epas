@@ -1039,15 +1039,15 @@ when
     "Competences.editShift",
     /* Storico delle modifiche alle competenze */
     "Historicals.competenceHistory",
-    
+
     /* Storico delle modifiche ai contratti*/
     "Historicals.contractHistory",
-        
+
     "Configurations.personShow",
     "Configurations.show",
     /* Permesso per la visualizzazione delle tab di configurazione */
- 		
- 	"Configurations.administrativeEditParams",
+
+    "Configurations.administrativeEditParams",
     "Contracts.edit",
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
@@ -1084,12 +1084,12 @@ when
     "WorkingTimes.showContractWorkingTimeType",
     "WorkingTimes.showHorizontal",
     "WorkingTimes.showWorkingTimeType",
-    
+
     "TimeSlots.manageTimeSlots",
     "TimeSlots.manageOfficeTimeSlots",
- 	"TimeSlots.showContracts",
+    "TimeSlots.showContracts",
     "TimeSlots.showContractMandatoryTimeSlot"
-        
+
     ),  granted == false)
 then
   $c.grant();
@@ -1299,25 +1299,32 @@ when
         "Vacations.list",
         "Vacations.vacationSummary",
         "Stampings.dailyPresence",
-		"AbsenceRequests.blank",
-		"AbsenceRequests.edit",
-		"AbsenceRequests.save",
-		"AbsenceRequests.list",
-		"AbsenceRequests.listToApprove",
-		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		"AbsenceRequests.permissionsToApprove",
-		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
-		
-		"AbsenceRequests.vacations",
-		"AbsenceRequests.compensatoryRests",
-		"AbsenceRequests.shortTermPermits",
-		"AbsenceRequests.personalPermissions",
-		"AbsenceRequests.vacationsPastYearAfterDeadline",
-		"AbsenceRequests.officeHeadApproval",
-		"AbsenceRequests.show",
-		"AbsenceRequests.approval",
-		"AbsenceRequests.disapproval"
+        "AbsenceRequests.blank",
+        "AbsenceRequests.edit",
+        "AbsenceRequests.save",
+        "AbsenceRequests.list",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
+
+        "AbsenceRequests.vacations",
+        "AbsenceRequests.compensatoryRests",
+        "AbsenceRequests.shortTermPermits",
+        "AbsenceRequests.personalPermissions",
+        "AbsenceRequests.vacationsPastYearAfterDeadline",
+        "AbsenceRequests.officeHeadApproval",
+        "AbsenceRequests.show",
+        "AbsenceRequests.approval",
+        "AbsenceRequests.disapproval",
+
+        "Configurations.administrativeEditParams",
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment",
+        "Configurations.removeAttachment"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -1335,21 +1342,27 @@ when
         "Vacations.vacationSummary",
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
-		"AbsenceRequests.edit",
-		"AbsenceRequests.save",
-		"AbsenceRequests.list",
-		"AbsenceRequests.listToApprove",
-		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		"AbsenceRequests.permissionsToApprove",
-		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
-		
-		"AbsenceRequests.vacations",
-		"AbsenceRequests.compensatoryRests",
-		"AbsenceRequests.shortTermPermits",
-		"AbsenceRequests.personalPermissions",
-		"AbsenceRequests.vacationsPastYearAfterDeadline",
-		"AbsenceRequests.show"
+        "AbsenceRequests.edit",
+        "AbsenceRequests.save",
+        "AbsenceRequests.list",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
+
+        "AbsenceRequests.vacations",
+        "AbsenceRequests.compensatoryRests",
+        "AbsenceRequests.shortTermPermits",
+        "AbsenceRequests.personalPermissions",
+        "AbsenceRequests.vacationsPastYearAfterDeadline",
+        "AbsenceRequests.show",
+
+        "Configurations.administrativeEditParams",
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment"
 
         ), target == $o, granted == false)
 then
@@ -1393,14 +1406,13 @@ when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
- 		
- 		/* Permesso per vedere la lista delle richieste di assenza*/
- 		"AbsenceRequests.vacationsToApprove",
- 		"AbsenceRequests.compensatoryRestsToApprove",
- 		"AbsenceRequests.listToApprove",
- 		"AbsenceRequests.permissionsToApprove",
- 		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
- 		
+
+        /* Permesso per vedere la lista delle richieste di assenza*/
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 
         /* Vecchio permesso viewPerson */
         //"Persons.list",
@@ -1408,10 +1420,10 @@ when
         "MonthRecaps.customRecap",
 
         /* Vecchio permesso viewPersonDay */
- 		"MonthRecaps.show",
+        "MonthRecaps.show",
 
- 		"Stampings.missingStamping",
- 		"Stampings.stampingsByAdmin",
+        "Stampings.missingStamping",
+        "Stampings.stampingsByAdmin",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
 
@@ -1741,17 +1753,18 @@ when
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
 
-    	"Configurations.show",
-     	"Configurations.edit",
+        "Configurations.show",
+        "Configurations.edit",
         "Configurations.update",
         "Configurations.uploadAttachment",
+        "Configurations.removeAttachment",
 
-		"BadgeSystems.joinBadgesPerson",
-		"BadgeSystems.saveBadges",
-		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge",
-		/*ore di formazione*/
-		"PersonMonths.visualizePeopleTrainingHours",
+        "BadgeSystems.joinBadgesPerson",
+        "BadgeSystems.saveBadges",
+        "BadgeSystems.deleteBadgePerson",
+        "BadgeSystems.deleteBadge",
+        /*ore di formazione*/
+        "PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
         "PersonMonths.modifyPeopleTrainingHours",
         "PersonMonths.deletePeopleTrainingHours",
@@ -1803,31 +1816,30 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences", 
-        
 
         /* Vecchio permesso editPersonDay */
-     	"Absences.addAttach",
-     	"Absences.removeAttach",
-     	"Absences.overtimeAbsence",
+        "Absences.addAttach",
+        "Absences.removeAttach",
+        "Absences.overtimeAbsence",
 
-       	"Stampings.insert",
-       	"Stampings.insertOffsite",
-       	"Stampings.edit",
-       	"Stampings.editOffSite",
-     	"Stampings.save",
-     	"Stampings.saveOffSite",
-     	"Stampings.delete",
-     	"TimeVariations.addVariation",
-     	"TimeVariations.saveVariation",
-     	"TimeVariations.removeVariation",
-     	"TimeVariations.show",
-     	"PersonDays.workingHoliday",
-     	"PersonDays.approveWorkingHoliday",
-     	"PersonDays.workingOutOpening",
-     	"PersonDays.approveWorkingOutOpening",
-     	"PersonDays.forceMealTicket",
+        "Stampings.insert",
+        "Stampings.insertOffsite",
+        "Stampings.edit",
+        "Stampings.editOffSite",
+        "Stampings.save",
+        "Stampings.saveOffSite",
+        "Stampings.delete",
+        "TimeVariations.addVariation",
+        "TimeVariations.saveVariation",
+        "TimeVariations.removeVariation",
+        "TimeVariations.show",
+        "PersonDays.workingHoliday",
+        "PersonDays.approveWorkingHoliday",
+        "PersonDays.workingOutOpening",
+        "PersonDays.approveWorkingOutOpening",
+        "PersonDays.forceMealTicket",
 
-     	/* Vecchio permesso editCompetence */
+         /* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
@@ -1858,11 +1870,16 @@ when
         "Competences.deletePersonReperibility",
         "Competences.saveReperibilityConfiguration",
         "Competences.manageReperibility",
-        
+
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment",
+
         /* Storico delle modifiche alle competenze */
         "Historicals.competenceHistory",
         /* Storico delle modifiche ai contratti*/
-    	"Historicals.contractHistory",
+        "Historicals.contractHistory",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -2004,12 +2021,12 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences",
-    	
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.getAttachment",
-        "Configurations.removeAttachment",
+
+        "Configurations.personShow",
+        "Configurations.personEdit",
+        "Configurations.personUpdate",
+        "Configurations.getAttachment",
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
@@ -2104,12 +2121,12 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences",
-    	
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.getAttachment",
-        "Configurations.removeAttachment",
+
+        "Configurations.personShow",
+        "Configurations.personEdit",
+        "Configurations.personUpdate",
+        "Configurations.getAttachment",
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
@@ -2238,7 +2255,7 @@ end
  ******************************************************************************/
 rule canEditAttachment
 when
-  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $uro: UsersRolesOffices(role.name in (Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR))
   $target: Attachment(office == $uro.office)
   $c: PermissionCheck(action in (
   "Configurations.getAttachment",
