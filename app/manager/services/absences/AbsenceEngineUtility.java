@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Optional;
@@ -32,6 +49,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.testng.collections.Lists;
 
+/**
+ * Funzioni di utilità per i calcoli sulle assenze.
+ */
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
@@ -56,7 +76,7 @@ public class AbsenceEngineUtility {
    *               un solo codice specifiedMinutes  <br>
    *               -> metto specifiedMinutes tra le opzioni <br>
    *  TODO: decidere come gestire il quanto manca               
-   *                
+   *
    * @param groupAbsenceType gruppo
    * @return entity list
    */
@@ -128,6 +148,7 @@ public class AbsenceEngineUtility {
   /**
    * Quanto giustifica l'assenza passata.
    * Se non si riesce a stabilire il tempo giustificato si ritorna un numero negativo.
+   *
    * @param person persona
    * @param absence assenza
    * @param amountType tipo di ammontare
@@ -183,21 +204,48 @@ public class AbsenceEngineUtility {
   
   /**
    * la quantità corretta prendibile in percentuale.
+   *
    * @param absence l'assenza
    * @param amount la quantità prendibile
    * @return la quantità corretta prendibile in percentuale.
    */
-  public Integer takenBehaviouralFixes(Absence absence, Integer amount) {
+  public Integer takenBehaviouralFixes(Absence absence, Integer amount,
+      List<Contract> fetchedContracts, DateInterval periodInterval, 
+      TakeAmountAdjustment adjustment) {
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
-      return amount * percentageTaken.get().getData() / 1000;
+      final int Max_Minutes_To_Cut_Back = 360;
+      boolean workTimeAdjustment = adjustment.workTime;
+
+      for (Contract contract : fetchedContracts) {
+        if (DateUtility.intervalIntersection(contract.periodInterval(), periodInterval) == null) {
+          continue;
+        }
+        for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeTypeOrderedList()) {
+          if (DateUtility.intervalIntersection(cwtt.periodInterval(), periodInterval) == null) {
+            continue;
+          }          
+          
+          if (workTimeAdjustment && cwtt.workingTimeType.enableAdjustmentForQuantity) {
+            //Adeguamento sull'incidenza del tipo orario
+            if (cwtt.getWorkingTimeType().averageMinutesInWeek() >= Max_Minutes_To_Cut_Back) {
+              return Max_Minutes_To_Cut_Back;
+            }
+            return cwtt.getWorkingTimeType().averageMinutesInWeek();
+          }          
+          
+        }
+      }
+      //return amount * percentageTaken.get().getData() / 1000;
+      
     }
     return amount;
   }
   
   /**
-   * Il tempo di lavoro nel giorno dell'assenza.<br>
+   * Il tempo di lavoro nel giorno dell'assenza.
+   *
    * @param person persona
    * @param absence assenza
    * @return tempo a lavoro assenza, 0 in caso di giorno contrattuale festivo
@@ -230,6 +278,7 @@ public class AbsenceEngineUtility {
   /**
    * Quanto completa il rimpiazzamento.
    * Se non si riesce a stabilire il tempo di completamento si ritorna un numero negativo.
+   *
    * @param absenceType tipo assenza
    * @param amountType tipo ammontare
    * @return ammontare
@@ -262,6 +311,7 @@ public class AbsenceEngineUtility {
   
   /**
    * Prova a inferire l'absenceType dell'assenza all'interno del periodo.
+   *
    * @param absencePeriod periodo
    * @param absence assenza
    * @return assenza con tipo inferito
@@ -326,7 +376,8 @@ public class AbsenceEngineUtility {
   }
  
   /**
-   * I minuti... .
+   * I minuti.
+   *
    * @param hours ore
    * @param minutes minuti
    * @return minuti
@@ -347,6 +398,7 @@ public class AbsenceEngineUtility {
   /**
    * Popola la lista ordinata in senso decrescente replacingCodesDesc a partire dal set di codici
    * replacingCodes. Popola gli eventuali errori.
+   *
    * @param complationAmountType tipo ammontare
    * @param replacingCodes i codici da analizzare
    * @param date data per errori
@@ -390,6 +442,7 @@ public class AbsenceEngineUtility {
    * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
    * I codici sono ordinati in modo decrescente in modo da testare per primi quelli col valore
    * più alto.
+   *
    * @return tipo del rimpiazzamento
    */
   public Optional<AbsenceType> whichReplacingCode(
@@ -413,6 +466,7 @@ public class AbsenceEngineUtility {
   
   /**
    * I gruppi coinvolti nel tipo di assenza.
+   *
    * @param absenceType tipo assenza
    * @return set gruppi
    */
@@ -436,6 +490,7 @@ public class AbsenceEngineUtility {
     
   /**
    * Ordina per data tutte le liste di assenze in una unica lista.
+   *
    * @param absences liste di assenze
    * @return entity list
    */
@@ -460,6 +515,7 @@ public class AbsenceEngineUtility {
   
   /**
    * Aggiunge alla mappa le assenze presenti in absences.
+   *
    * @param absences le assenze da aggiungere alla mappa
    * @param map mappa
    * @return mappa
@@ -483,6 +539,7 @@ public class AbsenceEngineUtility {
   /**
    * Calcola la riduzione in base al tempo contrattuale effettivamente lavorato ed alla % di
    * part time. (A seconda del tipo di aggiustamento richiesto).
+   *
    * @param fixed tempo fisso di partenza
    * @param adjustment tipo aggiustamento richiesto
    * @param periodInterval periodo totale
@@ -524,7 +581,7 @@ public class AbsenceEngineUtility {
       }  
     }
         
-    Double totalAssigned = new Double(0);
+    Double totalAssigned = Double.valueOf(0);
     
     //Ricerca dei periodi di attività
     for (Contract contract : contracts) {
@@ -544,7 +601,7 @@ public class AbsenceEngineUtility {
         int cwttDays = DateUtility.daysInInterval(cwttInverval);
 
         //Incidenza cwtt sul periodo totale (in giorni)
-        Double cwttPercent = ((double)cwttDays * 100) / periodDays; // (*)
+        Double cwttPercent = ((double) cwttDays * 100) / periodDays; // (*)
         
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;
@@ -560,5 +617,5 @@ public class AbsenceEngineUtility {
     
     return totalAssigned.intValue();
   }
-    
+
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package common.metrics;
 
 import com.google.common.base.Splitter;
@@ -34,8 +51,8 @@ import play.db.jpa.JPA;
 
 /**
  * Configurazione del sistema di metriche.
- * 
- * @author marco
+ *
+ * @author Marco Andreini
  # @see https://github.com/besmartbeopen/play1-base
  */
 @AutoRegister
@@ -47,11 +64,15 @@ public class MetricsModule extends AbstractModule {
    * Il valore è espresso in millisecondi.
    */
   public static final String LOG_MIN_DURATION_REQUEST = "log_min_duration_request";
+
   /**
    * Durata minima predefinta: 0.5 secondi
    */
   public static final long DEFAULT_MIN_DURATION_REQUEST = 500_000_000L;
 
+  /**
+   * Fornisce il PrometheusMeterRegistry per l'injection.
+   */
   @Singleton
   @Provides
   public PrometheusMeterRegistry registry() {
@@ -70,30 +91,44 @@ public class MetricsModule extends AbstractModule {
     });
   }
 
+  @SuppressWarnings("resource")
   @Provides
   public HibernateMetrics hibernateMetrics(Provider<EntityManager> emp) {
-      return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
-          JPA.DEFAULT, ImmutableList.of());
+    return new HibernateMetrics(emp.get().getEntityManagerFactory().unwrap(SessionFactory.class),
+        JPA.DEFAULT, ImmutableList.of());
   }
 
+  /**
+   * DataSource costruito tramite EntityManager.
+   */
   public DataSource getDataSource(Provider<EntityManager> emp) {
     val entityManagerFactory = emp.get().getEntityManagerFactory();
+    @SuppressWarnings("resource")
     ConnectionProvider cp = ((SessionFactory) entityManagerFactory).getSessionFactoryOptions()
-          .getServiceRegistry()
-          .getService(ConnectionProvider.class);
-  return cp.unwrap(DataSource.class);
+        .getServiceRegistry()
+        .getService(ConnectionProvider.class);
+    return cp.unwrap(DataSource.class);
   }
   
+  /**
+   * Nome del db prelevato dalla configurazione.
+   */
   public String getDatabaseName() {
-   val databaseUrl = Splitter.on("/").splitToList(Play.configuration.getProperty("db"));
-   return databaseUrl.get(databaseUrl.size() - 1);
+    val databaseUrl = Splitter.on("/").splitToList(Play.configuration.getProperty("db"));
+    return databaseUrl.get(databaseUrl.size() - 1);
   }
   
+  /**
+   * Fornisce l'istanza PostgreSQLDatabaseMetrics per l'injection.
+   */
   @Provides
   public PostgreSQLDatabaseMetrics postgresqlMetrics(Provider<EntityManager> emp) {
     return new PostgreSQLDatabaseMetrics(getDataSource(emp), getDatabaseName());
   }
   
+  /**
+   * Fornisce una implementazione di IMinDurationCheck.
+   */
   @Provides
   @Singleton
   public IMinDurationCheck checker() {

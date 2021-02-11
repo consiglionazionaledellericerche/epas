@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import cnr.sync.dto.AbsenceAddedRest;
@@ -34,6 +51,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione/consultazione della assenze via REST.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Absences extends Controller {
@@ -57,15 +77,17 @@ public class Absences extends Controller {
 
   /**
    * Restituisce un Json con la lista delle assenze corrispondenti ai parametri passati.
-   * 
+   *
    * @param email email della persona di cui cercare le assenze
    * @param begin data di inizio delle assenze da cercare
    * @param end data di fine della assenze da cercare
    */
   @BasicAuth
-  public static void absencesInPeriod(String eppn, String email, Long personPerseoId, 
-      LocalDate begin, LocalDate end) {
-    Person person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId).orNull();
+  public static void absencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
+      String fiscalCode, LocalDate begin, LocalDate end) {
+    Person person = 
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPerseoId, fiscalCode).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -99,7 +121,7 @@ public class Absences extends Controller {
    * Restituisce un Json con la lista dei giorni in cui è stata inserita l'assenza ed gli effetti
    * codici inseriti.
    * Il campo eppn se passato viene usato come preferenziale per cercare la persona.
-   * 
+   *
    * @param eppn eppn della persona di cui inserire l'assenza
    * @param email email della persona di cui inserire l'assenza
    * @param personPerseoId perseoId della persona di cui inserire l'assenza
@@ -111,9 +133,12 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void insertAbsence(
-      String eppn, String email, Long personPerseoId, String absenceCode, LocalDate begin, 
+      Long id, String eppn, String email, Long personPerseoId, String fiscalCode,
+      String absenceCode, LocalDate begin, 
       LocalDate end, Integer hours, Integer minutes) {
-    Person person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId).orNull();
+    Person person = 
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, 
+            eppn, email, personPerseoId, fiscalCode).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -165,7 +190,7 @@ public class Absences extends Controller {
    * Verifica se è possibile prendere il tipo di assenza passato nel periodo indicato.
    * La persona viene individuata tramite il suo indirizzo email.
    * Il campo eppn se passato viene usato come preferenziale per cercare la persona. 
-   * 
+   *
    * @param eppn eppn della persona di cui inserire l'assenza
    * @param email email della persona di cui inserire l'assenza
    * @param personPerseoId l'identificativo della persona per cui inserire l'assenza
@@ -176,12 +201,15 @@ public class Absences extends Controller {
    * @param minutes gli eventuali minuti di assenza
    */
   @BasicAuth
-  public static void checkAbsence(String eppn, String email, Long personPerseoId,
-      String absenceCode, LocalDate begin, LocalDate end, 
+  public static void checkAbsence(
+      Long id, String eppn, String email, Long personPerseoId,
+      String fiscalCode, String absenceCode, LocalDate begin, LocalDate end, 
       Integer hours, Integer minutes) 
           throws JsonProcessingException {
 
-    Optional<Person> person = personDao.byEppnOrEmailOrPerseoId(eppn, email, personPerseoId);
+    Optional<Person> person = 
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
+            id, eppn, email, personPerseoId, fiscalCode);
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");

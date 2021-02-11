@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -10,18 +27,24 @@ import models.Person;
 import models.PersonMonthRecap;
 import org.joda.time.LocalDate;
 
+/**
+ * Manager per la gestione dei PersonMonth.
+ */
 public class PersonMonthsManager {
 
   private final PersonMonthRecapDao personMonthRecapDao;  
 
+  /**
+   * Costruttore per l'injection.
+   */
   @Inject
   public PersonMonthsManager(PersonMonthRecapDao personMonthRecapDao) {
-  
     this.personMonthRecapDao = personMonthRecapDao;
   }
 
   /**
-   * salva le ore di formazione per il periodo specificato.
+   * Salva le ore di formazione per il periodo specificato.
+   *
    * @param approved se sono già approvate o no le ore di formazione
    * @param value la quantità di ore di formazione da approvare
    * @param begin data inizio del periodo di formazione
@@ -40,6 +63,7 @@ public class PersonMonthsManager {
 
   /**
    * Un insertable che controlla se posso inserire o meno un certo periodo di formazione.
+   *
    * @param begin data inizio
    * @param end data fine
    * @param value la quantità da inserire
@@ -68,6 +92,7 @@ public class PersonMonthsManager {
 
   /**
    * Un insertable che controlla se per la persona è possibile inserire un periodo di formazione.
+   *
    * @param person la persona da controllare
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -95,6 +120,7 @@ public class PersonMonthsManager {
 
   /**
    * Un insertable che controlla se il periodo di formazione è già stato mandato o no.
+   *
    * @param person la persona da controllare
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -105,7 +131,7 @@ public class PersonMonthsManager {
     Insertable rr = new Insertable(true, "");
     List<PersonMonthRecap> list = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
-            Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
+            Optional.fromNullable(month), Optional.fromNullable(Boolean.TRUE));
 
     // TODO & FIXME: lo stato di validazione deve essere intercettato da attestati.
     
@@ -121,6 +147,7 @@ public class PersonMonthsManager {
 
   /**
    * Un insertable che controlla se esiste già un personMonthRecap per la persona.
+   *
    * @param pm il personMonthRecap relativo alla formazione della persona
    * @return un Insertable che controlla se esiste nel database una entry con l'id passato come
    *     parametro per quelle ore di formazione.
@@ -161,6 +188,7 @@ public class PersonMonthsManager {
 
   /**
    * Ritorna la mappa persona-personMonthRecap per l'anno/mese della lista di persone.
+   *
    * @param personList la lista di persone
    * @param year l'anno
    * @param month il mese
@@ -182,6 +210,5 @@ public class PersonMonthsManager {
     }
     return map;
   }
-
 
 }

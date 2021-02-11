@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package common.metrics;
 
 import com.google.common.base.Joiner;
@@ -32,6 +49,7 @@ public class MetricsProbe extends Controller {
    */
   private static final String PROBE = "_probe";
   private static final long NANOS_TO_MS = 1_000_000;
+
   /**
    * Elementi da saltare nella serializzazione dei parametri delle azioni.
    */
@@ -72,6 +90,7 @@ public class MetricsProbe extends Controller {
 
   /**
    * Tempo di esecuzione in nanosecondi.
+   *
    * @return il tempo in nanosecondi dall'inizio dell'esecuzione dell'azione.
    */
   public static long elapsedNanosec() {

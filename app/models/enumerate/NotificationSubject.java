@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.enumerate;
 
 import com.google.common.collect.Maps;
@@ -6,38 +23,56 @@ import models.Person;
 import models.Stamping;
 import models.absences.Absence;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import play.mvc.Router;
 
 /**
  * Notification subject types.
  *
- * @author marco
+ * @author Marco Andrieni
  */
 public enum NotificationSubject {
+  
   /*
    * Notifiche di sistema.
    */
   SYSTEM,
+
   /*
    * Commento.
    */
   COMMENT,
+
   /*
    * Messaggio.
    */
   MESSAGE,
+
   /*
    * Notifiche relative a timbrature inserite o modificate
    */
   STAMPING,
+
   /*
    * Notifiche relative alle assenze inserite o modificate
    */
   ABSENCE,
+
+  /*
+   * Notifiche relative alle competenze inserite o modificate
+   */
+  COMPETENCE,
+
   /**
    * Notifiche per i flussi di lavoro. 
    */
   ABSENCE_REQUEST,
+
+  /*
+   * Notifiche relative ai flussi di lavoro per competenza.
+   */
+  COMPETENCE_REQUEST,
+
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
    */
@@ -88,6 +123,11 @@ public enum NotificationSubject {
         params.put("id", absenceRequest.id);
         params.put("type", absenceRequest.type);
         return toUrl("AbsenceRequests.show", params);
+      case COMPETENCE_REQUEST:
+        final CompetenceRequest competenceRequest = CompetenceRequest.findById(referenceId);
+        params.put("id", competenceRequest.id);
+        params.put("type", competenceRequest.type);
+        return toUrl("CompetenceRequests.show", params);
       case PERSON_HAS_CHANGED_OFFICE:
         //Se non c'è riferimento alla persona allora vuol dire che non è 
         //più gestita dal precedente ufficio.

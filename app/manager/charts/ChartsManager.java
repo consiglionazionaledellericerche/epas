@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.charts;
 
 import com.google.common.base.CharMatcher;
@@ -80,6 +97,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.libs.F;
 
+/**
+ * Manager per i riepiloghi.
+ */
 public class ChartsManager {
 
   private static final Logger log = LoggerFactory.getLogger(ChartsManager.class);
@@ -92,8 +112,7 @@ public class ChartsManager {
   private final AbsenceComponentDao absenceComponentDao;
 
   /**
-   * Costruttore.
-   *
+   * Costruttore per l'injection.
    */
   @Inject
   public ChartsManager(CompetenceCodeDao competenceCodeDao, PersonDao personDao,
@@ -113,7 +132,7 @@ public class ChartsManager {
   /**
    * La lista dei competenceCode che comprende tutti i codici di straordinario presenti in
    * anagrafica.
-   * 
+   *
    * @return la lista dei competenceCode.
    */
   public List<CompetenceCode> populateOvertimeCodeList() {
@@ -129,7 +148,7 @@ public class ChartsManager {
 
   /**
    * Costruisce la lista dei PersonOvertime corrispondenti ai parametri passati.
-   * 
+   *
    * @return la lista dei personOvertime.
    */
   public List<PersonOvertime> populatePersonOvertimeList(List<Person> personList,
@@ -171,7 +190,7 @@ public class ChartsManager {
 
   /**
    * La lista dei personOvertime con i valori su base annuale.
-   * 
+   *
    * @return la lista dei personOvertime con i valori su base annuale.
    */
   public List<PersonOvertime> populatePersonOvertimeListInYear(List<Person> personList,
@@ -213,7 +232,6 @@ public class ChartsManager {
   // ******* Inizio parte di business logic *********/
 
 
-
   /**
    * Javadoc da scrivere.
    *
@@ -247,7 +265,7 @@ public class ChartsManager {
   /**
    * Esporta in un file la situazione di ore in più, ore di straordinario e riposi
    * compensativi delle persone passate per parametro.
-   * 
+   *
    * @return il file contenente la situazione di ore in più, ore di straordinario e riposi
    *         compensativi per ciascuna persona della lista passata come parametro relativa all'anno
    *         year.
@@ -344,7 +362,7 @@ public class ChartsManager {
   /**
    * Esporta in un file la situazione in termini di ferie usate anno corrente e passato, permessi 
    * usati e residuo di una persona.
-   * 
+   *
    * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e
    *         residuo per la persona passata come parametro.
    */
@@ -411,6 +429,7 @@ public class ChartsManager {
   /**
    * Genera la mappa matricole-risultati dal file contenente le informazioni su assenze
    * e date in cui sono state prese.
+   *
    * @param file file da parsare per il recupero delle informazioni sulle assenze
    * @return una mappa con chiave le matricole dei dipendenti e con valori le liste di oggetti di
    *         tipo ResultFromFile che contengono l'assenza e la data in cui l'assenza è stata presa.
@@ -480,6 +499,9 @@ public class ChartsManager {
     return map;
   }
 
+  /**
+   * DTO utilizzato nel template per mostrare il resoconto.
+   */
   @Getter
   public static final class RenderChart {
     public List<PersonOvertime> personOvertime;
@@ -493,7 +515,8 @@ public class ChartsManager {
 
   /**
    * Genera un file contenente tutte le informazioni sulle ore di lavoro rispetto ai parametri
-   *         passati.
+   * passati.
+   *
    * @param forAll se si richiede la stampa per tutti
    * @param peopleIds la lista degli id delle persone selezionate per essere esportate
    * @param beginDate la data di inizio
@@ -591,6 +614,9 @@ public class ChartsManager {
   }
 
 
+  /**
+   * Intestazioni per il report con i riepiloghi mensili ore e assenze.
+   */
   @RequiredArgsConstructor
   public enum PersonStampingDayRecapHeader {
     Data("Data"), 
@@ -604,6 +630,9 @@ public class ChartsManager {
     @Getter
     private final String description;
 
+    /**
+     * Lista delle label delle intestazioni.
+     */
     public static List<String> getLabels() {
       return Stream.of(values()).map(v -> v.description).collect(Collectors.toList());
     }
@@ -611,6 +640,7 @@ public class ChartsManager {
 
   /**
    * Crea il file csv con la situazione mensile.
+   *
    * @param psDto il personStampingDayRecap da cui partire per prendere le informazioni
    * @return un file di tipo csv contenente la situazione mensile.
    */
@@ -682,8 +712,9 @@ public class ChartsManager {
   }
 
   /**
-   * Genera  il file contenente la situazione mensile della persona a cui fa riferimento il
-   *         personStampingRecap passato come parametro.
+   * Genera il file contenente la situazione mensile della persona a cui fa riferimento il
+   * personStampingRecap passato come parametro.
+   *
    * @param psDto il personStampingRecap contenente le info sul mese trascorso dalla persona
    * @param file il file in cui caricare le informazioni
    * @return il file contenente la situazione mensile della persona a cui fa riferimento il
@@ -693,9 +724,21 @@ public class ChartsManager {
       boolean onlyMission) {
     try {
       FileOutputStream out = new FileOutputStream(file);
-
-      Sheet sheet = wb.createSheet(psDto.person.fullName() + "_"
-          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year);
+      Sheet sheet = null;
+      String fullname = "";
+      if (psDto.person.name.contains(" ")) {
+        String[] names = psDto.person.name.split(" ");
+        fullname = psDto.person.surname + " " + names[0];
+      } else {
+        fullname = psDto.person.fullName();
+      }
+      String sheetname = fullname + "_"
+          + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year;
+      
+      if (sheetname != null && sheetname.length() > 31) {
+        sheetname = sheetname.substring(0, 31);
+      }
+      sheet = wb.createSheet(sheetname); 
 
       CellStyle cs = createHeader(wb);
       Row row = null;
@@ -807,7 +850,7 @@ public class ChartsManager {
         log.error("problema in chiusura stream");
         ex.printStackTrace();
       }
-    } catch (FileNotFoundException ex) {
+    } catch (IllegalArgumentException | FileNotFoundException ex) {
       log.error("Problema in riconoscimento file");
       ex.printStackTrace();
     }
@@ -816,6 +859,7 @@ public class ChartsManager {
 
   /**
    * Genera lo stile delle celle di intestazione.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella di intestazione.
    */
@@ -834,6 +878,7 @@ public class ChartsManager {
 
   /**
    * Genera lo stile per una cella di giorno di vacanza.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno di vacanza.
    */
@@ -862,6 +907,7 @@ public class ChartsManager {
 
   /**
    * Genera il tempo derivante da timbrature per lavoro fuori sede.
+   *
    * @param pd il personday
    * @return il tempo a lavoro derivante dalle timbrature identificate come lavoro fuori sede.
    */
@@ -881,5 +927,3 @@ public class ChartsManager {
 
   }
 }
-
-

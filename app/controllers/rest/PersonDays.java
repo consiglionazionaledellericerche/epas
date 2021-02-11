@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import cnr.sync.dto.PersonDayDto;
@@ -24,6 +41,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la visualizzazione via REST dei dati delle giornate lavorative.
+ */
 @With(Resecure.class)
 public class PersonDays extends Controller {
 
@@ -59,8 +79,8 @@ public class PersonDays extends Controller {
       JsonResponse.notFound("Non sono presenti informazioni per "
               + person.name + " " + person.surname + " nel giorno " + date);
     }
-    PersonDayDto pdDTO = generateDayDTO(pd);
-    renderJSON(pdDTO);
+    PersonDayDto pdDto = generateDayDto(pd);
+    renderJSON(pdDto);
   }
 
 
@@ -88,12 +108,12 @@ public class PersonDays extends Controller {
     rules.checkIfPermitted(person);
     List<Contract> monthContracts = wrapperFactory
             .create(person).orderedMonthContracts(year, month);
-    PersonMonthDto pmDTO = new PersonMonthDto();
+    PersonMonthDto pmDto = new PersonMonthDto();
     for (Contract contract : monthContracts) {
       Optional<ContractMonthRecap> cmr = wrapperFactory.create(contract)
               .getContractMonthRecap(new YearMonth(year, month));
       if (cmr.isPresent()) {
-        pmDTO = generateMonthDTO(cmr.get());
+        pmDto = generateMonthDto(cmr.get());
       } else {
         JsonResponse.notFound(
             "Non sono presenti informazioni per "
@@ -101,17 +121,18 @@ public class PersonDays extends Controller {
             + DateUtility.fromIntToStringMonth(month));
       }
     }
-    renderJSON(pmDTO);
+    renderJSON(pmDto);
 
   }
 
 
   /**
    * Metodo che costruisce il dto sulla base del personDay passato come parametro.
+   *
    * @return il personDayDTO costruito sulla base del personDay passato come parametro da ritornare
    *     alle funzioni rest.
    */
-  private static PersonDayDto generateDayDTO(PersonDay pd) {
+  private static PersonDayDto generateDayDto(PersonDay pd) {
     PersonDayDto pdDto = new PersonDayDto();
     pdDto.buonopasto = pd.isTicketAvailable;
     pdDto.differenza = pd.difference;
@@ -132,10 +153,11 @@ public class PersonDays extends Controller {
 
   /**
    * Metodo che genera il dto sulla base del contractMonthRecap passato come parametro.
+   *
    * @return il personMonthDTO costruito sulla base del COntractMonthRecap opzionale passato come
    *     parametro da ritornare alle funzioni rest.
    */
-  private static PersonMonthDto generateMonthDTO(ContractMonthRecap cmr) {
+  private static PersonMonthDto generateMonthDto(ContractMonthRecap cmr) {
     PersonMonthDto pmDto = new PersonMonthDto();
     pmDto.buoniMensa = cmr.remainingMealTickets;
     pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;

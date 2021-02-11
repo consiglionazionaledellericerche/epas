@@ -2,6 +2,7 @@
 
   #{set actions:[
   'Stampings.stampings',
+  'TeleworkStampings.teleworkStampings',
   'Absences.absences',
   'Absences.absencesPerPerson',
   'Vacations.show',
@@ -9,6 +10,7 @@
   'PersonMonths.trainingHours',
   'PersonMonths.hourRecap',
   'MealTickets.mealTickets',
+  'Charts.excelFile',
   'PrintTags.showTag',
   'Persons.changePassword',
   'Absences.absencesVisibleForEmployee'] /}
@@ -53,7 +55,12 @@
       #{secure.li @Stampings.stampings(session.get("yearSelected"), session.get("monthSelected")) }
         <i class="fa fa-calendar" aria-hidden="true"></i>
       #{/secure.li}
-
+      #{if teleworkStampingsActive}
+     	 #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
+      		<i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+         #{/secure.li}
+      #{/if}
+      
       #{secure.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
       <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/secure.li}
@@ -61,10 +68,7 @@
       #{secure.li @Absences.absencesPerPerson(session.get("yearSelected")) }
       <i class="fa fa-calendar-o" aria-hidden="true"></i>
       #{/secure.li}
-      
-      #{secure.li @TimeVariations.personShow() }
-      <i class="fa fa-search-plus" aria-hidden="true"></i>
-      #{/secure.li}
+
 
       #{secure.li @Vacations.show(session.get("yearSelected")) }
       <i class="fa fa-plane" aria-hidden="true"></i>
@@ -101,11 +105,16 @@
       #{secure.li @Groups.seatOrganizationChart() }
       <i class="fa fa-users" aria-hidden="true"></i>
       #{/secure.li}
+      
 
       #{secure.check 'PrintTags.showTag'}
       <li class="divider"></li>
       #{/secure.check}
 
+	  #{secure.li @Charts.excelFile(session.get("yearSelected"), session.get("monthSelected"))}
+	  <i class="fa fa-print" aria-hidden="true"></i>
+	  #{/secure.li}
+      
       #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}

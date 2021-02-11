@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package security;
 
 import com.google.common.base.Optional;
@@ -6,25 +23,22 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
 import java.util.List;
 import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.User;
-
 import org.drools.KnowledgeBase;
 import org.drools.command.Command;
 import org.drools.command.CommandFactory;
 import org.drools.event.rule.AfterActivationFiredEvent;
 import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.runtime.StatelessKnowledgeSession;
-
 import play.mvc.results.Forbidden;
 
 /**
- * @author marco
+ * Metodi per il controllo della security.
+ *
+ * @author Marco Andreini
  */
 @Singleton
 @Slf4j
@@ -74,6 +88,8 @@ public class SecurityRules {
   }
 
   /**
+   * Controlla che l'azione corrente sia ammessa sull'instanza indicata.
+   * 
    * @return true se l'azione corrente è permessa sull'istanza fornita, false altrimenti.
    */
   public boolean check(Object instance) {
@@ -81,6 +97,8 @@ public class SecurityRules {
   }
 
   /**
+   * Controlla se l'azione fornita è ammessa sull'instanza indicata.
+   *
    * @return true se l'azione fornita è permessa sull'istanza fornita, false altrimenti.
    */
   public boolean check(String action, Object instance) {
@@ -89,6 +107,8 @@ public class SecurityRules {
   }
 
   /**
+   * Controlla se l'azione corrente è permessa.
+   *
    * @return true se l'azione corrente è permessa, false altrimenti.
    */
   public boolean checkAction() {
@@ -96,6 +116,8 @@ public class SecurityRules {
   }
 
   /**
+   * Controlla se l'azione fornita è permessa.
+   *
    * @return true se l'azione fornita è permessa, false altrimenti.
    */
   public boolean checkAction(String action) {

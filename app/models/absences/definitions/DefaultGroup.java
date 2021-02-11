@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences.definitions;
 
 import com.google.common.base.Optional;
@@ -29,6 +46,10 @@ public enum DefaultGroup {
   G_182("182 - Permesso assistenza secondo parenti/affini disabili L. 104/92 tre gg. mese", "",
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_182, DefaultComplation.C_182, null, false, false), 
+  G_182_PARENTI_DIPENDENTI("182 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182, 
+      DefaultComplation.C_182, null, false, false),
   G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
@@ -88,7 +109,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_ORE_AGGIUNTIVE,
       DefaultComplation.C_OA, null, false, false),
 
-  G_OA_DIPENDENTI("Ore aggiuntive dipendenti", "", DefaultCategoryType.ORE_AGGIUNTIVE_DIPENDENTI, 1,
+  G_OA_DIPENDENTI("Ore aggiuntive dipendenti", "", DefaultCategoryType.ORE_AGGIUNTIVE_DIPENDENTI, 2,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_ORE_AGGIUNTIVE,
       DefaultComplation.C_OA, null, false, false),
 
@@ -113,6 +134,15 @@ public enum DefaultGroup {
   FERIE_CNR("31/94/32 - Ferie e permessi legge", "", DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
+  
+  FERIE_CNR_PROROGA_2019("31 - Proroga 2019", "", DefaultCategoryType.FERIE_CNR, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2019, null, null, false, false), 
+  
+  //  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
+  //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
+  //      null, null, false, false),
+
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -129,9 +159,9 @@ public enum DefaultGroup {
       DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_RIPOSI_CNR_FESTIVO, null, null, false, false),
 
-  RIPOSI_CNR_CHIUSURA_ENTE("91CE - Riposo compensativo per chiusura ente", "",
-      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
-      PeriodType.always, DefaultTakable.T_RIPOSI_CHIUSURA_ENTE, null, null, false, false),
+  //  RIPOSI_CNR_CHIUSURA_ENTE("91CE - Riposo compensativo per chiusura ente", "",
+  //      DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 1, GroupAbsenceTypePattern.simpleGrouping,
+  //      PeriodType.always, DefaultTakable.T_RIPOSI_CHIUSURA_ENTE, null, null, false, false),
 
   RIPOSI_CNR_DIPENDENTI("91 - Riposo compensativo", "",
       DefaultCategoryType.RIPOSI_COMPENSATIVI_DIPENDENTI, 1, // must be greater than RIPOSI_CNR
@@ -170,15 +200,16 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_6, DefaultTakable.T_25, DefaultComplation.C_25, DefaultGroup.G_24,
       false, true), 
-  G_COVID50("COVID50 - Congedo parentale straordinario per un massimo di  15 gg. lavorativi.",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.child1_0_12, DefaultTakable.T_COVID50, null, DefaultGroup.G_25,
-      false, true), 
+  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_COVID50, null, null,
+      false, true),   
+  
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
-      "23/25/24 (+COVID50) - Astensione facoltativa post partum primo figlio",
+      "23/25/24 - Astensione facoltativa post partum primo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_23, DefaultComplation.C_23,
-      DefaultGroup.G_COVID50, false, true),
+      DefaultGroup.G_25, false, true),
   
 
 
@@ -219,7 +250,7 @@ public enum DefaultGroup {
       false, true), 
   G_234("234 - Astensione facoltativa post partum 100% quarto figlio 0-12 anni 30 giorni",
       "234/254/244 - Astensione facoltativa post partum quarto figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_12, DefaultTakable.T_234, DefaultComplation.C_234,
       DefaultGroup.G_254, false, true),
 
@@ -328,7 +359,7 @@ public enum DefaultGroup {
 
   /**
    * Ricerca i gruppi modellati e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultGroup> missing(List<GroupAbsenceType> allGroup) {
@@ -350,7 +381,7 @@ public enum DefaultGroup {
 
   /**
    * L'enumerato corrispettivo del group (se esiste...)
-   * 
+   *
    * @return optional dell'enumerato
    */
   public static Optional<DefaultGroup> byName(GroupAbsenceType group) {
@@ -364,7 +395,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo ferie per dipendenti.
-   * 
+   *
    * @return list
    */
   public static List<String> employeeVacationCodes() {
@@ -373,7 +404,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo riposi compensativi per dipendenti.
-   * 
+   *
    * @return list
    */
   public static List<String> employeeCompensatoryCodes() {
@@ -382,7 +413,7 @@ public enum DefaultGroup {
 
   /**
    * Codici ferie prendibili dal gruppo lavoro fuori sede per dipendenti. (105BP)
-   * 
+   *
    * @return list
    */
   public static List<String> employeeOffSeatCodes() {
@@ -391,7 +422,7 @@ public enum DefaultGroup {
 
   /**
    * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
-   * 
+   *
    * @return list
    */
   public static List<String> employeeTeleworkCodes() {
@@ -402,6 +433,10 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
   }
 
+  public static List<String> employeeSecondDisabledRelativeCodes() {
+    return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
@@ -410,6 +445,33 @@ public enum DefaultGroup {
     List<String> g26 = getCodes(DefaultGroup.G_26_DIPENDENTI);
 
     return Stream.of(g19, g26).flatMap(x -> x.stream()).collect(Collectors.toList());
+  }
+  
+  /**
+   * Ritorna la lista di codici da considerare per gli impiegati con congedo parentale
+   * e malattia figlio abilitato.
+   */
+  public static List<String> parentalLeaveAndChildIllnessCodes() {
+    List<String> g23 = getCodes(DefaultGroup.G_23);
+    List<String> g232 = getCodes(DefaultGroup.G_232);
+    List<String> g233 = getCodes(DefaultGroup.G_233);
+    List<String> g234 = getCodes(DefaultGroup.G_234);
+    List<String> g24 = getCodes(DefaultGroup.G_24);
+    List<String> g242 = getCodes(DefaultGroup.G_242);
+    List<String> g243 = getCodes(DefaultGroup.G_243);
+    List<String> g244 = getCodes(DefaultGroup.G_244);
+    List<String> g25 = getCodes(DefaultGroup.G_25);
+    List<String> g252 = getCodes(DefaultGroup.G_252);
+    List<String> g253 = getCodes(DefaultGroup.G_253);
+    List<String> g254 = getCodes(DefaultGroup.G_254);
+    List<String> g25P = getCodes(DefaultGroup.G_25P);
+    List<String> gmal1 = getCodes(DefaultGroup.MALATTIA_FIGLIO_1);
+    List<String> gmal2 = getCodes(DefaultGroup.MALATTIA_FIGLIO_2);
+    List<String> gmal3 = getCodes(DefaultGroup.MALATTIA_FIGLIO_3);
+    List<String> gmal4 = getCodes(DefaultGroup.MALATTIA_FIGLIO_4);    
+
+    return Stream.of(g23, g232, g233, g234, g24, g242, g243, g244, g25, g252, g253, g254,
+        g25P, gmal1, gmal2, gmal3, gmal4).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
 
   public static List<String> employeeRightToStudyCodes() {
@@ -421,7 +483,7 @@ public enum DefaultGroup {
   }
 
   public static List<String> employeeAdditionalHoursCodes() {
-    return getCodes(DefaultGroup.G_OA);
+    return getCodes(DefaultGroup.G_OA_DIPENDENTI);
   }
 
   private static List<String> getCodes(DefaultGroup defaultGroup) {

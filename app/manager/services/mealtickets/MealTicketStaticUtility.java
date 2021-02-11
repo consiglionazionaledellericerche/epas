@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
@@ -11,6 +28,9 @@ import models.Contract;
 import models.MealTicket;
 
 
+/**
+ * Contiene vari metodi di utilità per la gestione dei meal ticket.
+ */
 public class MealTicketStaticUtility {
 
   /**
@@ -56,7 +76,8 @@ public class MealTicketStaticUtility {
       String actualCode = mealTicket.code.substring(actualBlockLength, mealTicket.code.length());
       BigDecimal previous = new BigDecimal(previousCode).add(BigDecimal.ONE);  
       BigDecimal actual = new BigDecimal(actualCode);
-      if (previous.compareTo(actual) == 0 && previousMealTicket.contract.equals(mealTicket.contract)
+      if (previousMealTicket.block.equals(mealTicket.block) && previous.compareTo(actual) == 0 
+          && previousMealTicket.contract.equals(mealTicket.contract)
           && previousMealTicket.returned == mealTicket.returned) {
         currentBlock.getMealTickets().add(mealTicket);
       } else {

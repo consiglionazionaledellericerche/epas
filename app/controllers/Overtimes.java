@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -33,7 +50,7 @@ import play.mvc.Controller;
 /**
  * Implements methods used by sist-org in order to keep overtime information.
  *
- * @autor arianna
+ * @autor Arianna Del Soldato
  *
  */
 @Slf4j
@@ -127,6 +144,7 @@ public class Overtimes extends Controller {
 
   /**
    * Set the overtimes requested by the responsible.
+   *
    * @param year l'anno
    * @param month il mese
    * @param body l'oggetto in cui serializzare quel che recupero dal binder
@@ -147,6 +165,7 @@ public class Overtimes extends Controller {
 
   /**
    * Set personnel overtimes requested by the supervisor.
+   *
    * @param hours ore di straordinario da impostare
    * @param email email della persona a cui impostare le ore di straordinario
    */
@@ -167,13 +186,13 @@ public class Overtimes extends Controller {
    * curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
    *    "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
    *    "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
-   * @author arianna
+   *
+   * @author Arianna Del Soldato
    *
    */
-  public static void exportMonthAsPDF(Integer year, Integer month,
+  public static void exportMonthAsPdf(Integer year, Integer month,
       @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
     response.accessControl("*");
-    //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
     log.debug("update: Received PersonsCompetences %s", body);
     if (body == null) {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package absences;
 
 import com.google.common.base.Optional;
@@ -20,8 +37,6 @@ import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.test.UnitTest;
-
-
 
 
 @StaticInject
@@ -87,7 +102,7 @@ public class Absences661Test extends UnitTest {
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
-        allPersistedAbsences, groupPersistedAbsences);
+        allPersistedAbsences, groupPersistedAbsences, person.contracts);
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);

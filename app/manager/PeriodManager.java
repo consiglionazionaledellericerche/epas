@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -10,6 +27,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -23,10 +41,9 @@ import play.db.jpa.JPA;
 /**
  * Manager per la gestione dei periodi.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  *
  */
-
 @Slf4j
 public class PeriodManager {
 
@@ -61,8 +78,17 @@ public class PeriodManager {
     boolean recomputeBeginSet = false;
 
     //controllo iniziale consistenza periodo.
-    if (propertyInPeriod.calculatedEnd() != null) {
-      Verify.verify(!propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd()));
+    if (propertyInPeriod.getBeginDate() != null 
+        &&  propertyInPeriod.calculatedEnd() != null 
+        && propertyInPeriod.getBeginDate().isAfter(propertyInPeriod.calculatedEnd())) {
+      log.warn("Scartato aggiornamento PropertyInPeriod per data inconsistente. "
+          + "propertyInPeriod.owner = {}, propertyInPeriod.type = {}. "
+          + "beginDate = {}, calculatedEnd = {}", 
+          propertyInPeriod.getOwner(), propertyInPeriod.getType(),
+          propertyInPeriod.getBeginDate(),
+          propertyInPeriod.calculatedEnd());
+      return propertyInPeriod.getOwner().periods(propertyInPeriod.getType())
+          .stream().collect(Collectors.toList());
     }
     
     //copia dei periodi ordinata
@@ -174,6 +200,7 @@ public class PeriodManager {
   
   /**
    * true se il periodo si sovrappone a quelli esistenti, false altrimenti.
+   *
    * @param period il periodo da analizzare
    * @param currentPeriods i periodi presenti sul db
    * @return true se il periodo si sovrappone a quelli esistenti, false altrimenti.
@@ -204,7 +231,8 @@ public class PeriodManager {
   
   /**
    * Preleva le data iniziale più piccola e la data finale più grande di quelle
-   * presenti nei periodi passati. 
+   * presenti nei periodi passati.
+   *
    * @param periods i periodi di cui prelevare data iniziale e finale
    * @return un DateInterval composto con data iniziale più piccola dei vari 
    *     periodi e data finale più grande dei vari periodi
@@ -238,6 +266,7 @@ public class PeriodManager {
   
   /**
    * Controlla che per ogni giorno dell'owner vi sia uno e uno solo valore.
+   *
    * @return esito
    */
   private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
@@ -255,6 +284,7 @@ public class PeriodManager {
   /**
    * Inserisce un periodo nella nuova lista ordinata. Se il periodo precedente ha lo stesso valore
    * effettua la merge.
+   *
    * @param previous previous
    * @param present present
    * @param periodList periodList
@@ -282,6 +312,7 @@ public class PeriodManager {
    *    alla nuova data inizio dell'owner.<br>
    * 3) Aggiusta l'ultimo periodo impostando la sua data fine alla nuova data fine dell'owner.<br>
    * Persiste il nuovo stato.
+   *
    * @param owner owner
    */
   public void updatePropertiesInPeriodOwner(IPropertiesInPeriodOwner owner) {
@@ -429,6 +460,7 @@ public class PeriodManager {
 
   /**
    * Assegna i giorni su cui far valere il periodo.
+   *
    * @param recomputeRecap il recomputeRecap contenente i riepiloghi
    */
   public void setDays(RecomputeRecap recomputeRecap) {

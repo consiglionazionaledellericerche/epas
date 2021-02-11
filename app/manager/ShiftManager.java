@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -60,7 +77,7 @@ import play.i18n.Messages;
 /**
  * Gestiore delle operazioni sui turni.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 public class ShiftManager {
@@ -277,9 +294,9 @@ public class ShiftManager {
 
 
   /*
-   * aggiorna il contenuto della cella di una tabella del tipo <Person, String, List<String>>
-   * tipicamente utilizzata per contenere le inconsistenze tra i turni e le timbrature
-   * 
+   * Aggiorna il contenuto della cella di una tabella del tipo <Person, String, List<String>>
+   * tipicamente utilizzata per contenere le inconsistenze tra i turni e le timbrature.
+   *
    * @param table tabella da aggiornare
    * @param th stringa identificativa della colonna
    * @param tr persona identificativa della riga
@@ -299,9 +316,8 @@ public class ShiftManager {
 
 
   /*
-   * 
+   * Controlla il tempo lavorato durante il turno.
    */
-
   WorkedParameters checkShiftWorkedMins(Optional<PersonDay> personDay,
       ShiftType shiftType, LocalTime startShift, LocalTime startLunchTime,
       LocalTime endLunchTime, LocalTime endShift) {
@@ -506,6 +522,8 @@ public class ShiftManager {
             //    endLunchTime, newLimit, diffEndLunchTime);
           }
 
+          log.trace("inTolleranceLimit = {}", inTolleranceLimit);
+          
           // FIXME: anche in questo caso occorre verificare quale sia la tolleranza applicata e, 
           // se si tratta di tolleranza in uscita, conteggiarla nei calcoli che vengono effettuati.
           // se il turnista è uscito prima del turno
@@ -672,6 +690,7 @@ public class ShiftManager {
 
   /**
    * La lista dei periodi di turno lavorati.
+   *
    * @param personShiftDays lista dei giorni di turno di un certo tipo.
    * @return la lista dei periodi di turno lavorati.
    */
@@ -719,6 +738,7 @@ public class ShiftManager {
 
   /**
    * La lista dei periodi di turno lavorati.
+   *
    * @param personShiftCancelled lista dei turni cancellati.
    * @return la lista dei periodi di turno lavorati.
    */
@@ -948,7 +968,7 @@ public class ShiftManager {
    * @param year anno di riferimento dei turni
    * @param month mese di riferimento dei turni
    * @return la lista delle competenze corrispondenti ai turni lavorati
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public List<Competence> updateDbShiftCompetences(
       Table<Person, String, Integer> personsShiftHours, int year, int month) {
@@ -1047,7 +1067,7 @@ public class ShiftManager {
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
    *        per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i 
    *        giorni di turno contenuti nella lista personShiftDays passata come parametro.
-   * @author arianna
+   * @author Arianna Del Soldato
    */
 
   public void countPersonsShiftsDays(
@@ -1170,7 +1190,7 @@ public class ShiftManager {
    * @return totalPersonShiftWorkedTime contiene per ogni persona il numero totale di giorni di
    *        turno lavorati (col thDays) e il numero totale di minuti non lavorati che non devono 
    *        essere retribuiti (col thLackTime).
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public Table<Person, String, Integer> calcShiftWorkedDaysAndLackTime(
       Table<Person, String, Integer> personsShiftsWorkedDays,
@@ -1288,7 +1308,7 @@ public class ShiftManager {
    * eccesso o per difetto a seconda dell'ultimo arrotondamento effettuato in modo che questi
    * vengano alternati.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public int[] calcShiftValueApproved(Person person, int year, int month, int requestedMins) {
     int hoursApproved = 0;
@@ -1358,7 +1378,7 @@ public class ShiftManager {
    * @param personShift opzionale, contiene la persona della quale caricare i turni, se è vuota
    *        carica tutto il turno
    * @return icsCalendar calendario
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public Calendar createicsShiftCalendar(
       int year, String type, Optional<PersonShift> personShift) {
@@ -1543,7 +1563,10 @@ public class ShiftManager {
   /* **********************************************************************************/
   /* Sezione di metodi utilizzati al bootstrap per sistemare le situazioni sui turni  */
   /* **********************************************************************************/
-  // shift day
+
+  /**
+   * Shift day.
+   */
   public static final class Sd {
 
     Person mattina;

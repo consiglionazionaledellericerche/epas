@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -7,6 +24,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +39,7 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
+import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 import models.query.QOffice;
 import models.query.QPerson;
@@ -30,7 +49,7 @@ import org.joda.time.LocalDateTime;
 /**
  * Dao per l'accesso alle richiesta di assenza.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 public class AbsenceRequestDao extends DaoBase {
 
@@ -135,9 +154,13 @@ public class AbsenceRequestDao extends DaoBase {
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = managerQuery(officeList, conditions, signer);
+      final QAffiliation affiliation = QAffiliation.affiliation;
       List<AbsenceRequest> queryResults = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
+          .join(person.affiliations, affiliation)
+            .on(affiliation.beginDate.before(LocalDate.now())
+                .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+          .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions))
           .fetch();
       results.addAll(queryResults);
@@ -225,9 +248,13 @@ public class AbsenceRequestDao extends DaoBase {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
           .and(absenceRequest.managerApproved.isNotNull())
           .and(person.office.eq(signer.office));
+      final QAffiliation affiliation = QAffiliation.affiliation;      
       query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
+          .join(person.affiliations, affiliation)
+            .on(affiliation.beginDate.before(LocalDate.now())
+              .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+          .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions));
     } else {
       query = getQueryFactory().selectFrom(absenceRequest).where(conditions);
@@ -265,6 +292,7 @@ public class AbsenceRequestDao extends DaoBase {
               uros.stream().map(
                   userRoleOffice -> userRoleOffice.office)
                   .collect(Collectors.toSet())).and(conditions))
+          .orderBy(absenceRequest.startAt.desc())
           .fetch();
     } else {
       return Lists.newArrayList();
@@ -309,15 +337,20 @@ public class AbsenceRequestDao extends DaoBase {
 
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
-          .and(absenceRequest.managerApproved.isNotNull())
+        .and(absenceRequest.managerApproved.isNotNull())
           .and(person.office.in(officeList));
+      final QAffiliation affiliation = QAffiliation.affiliation;
       query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person)
-          .join(person.groups, group)
-          .where(group.manager.eq(signer).and(conditions));
+          .join(person.affiliations, affiliation)
+          .join(affiliation.group, group)
+          .where(group.manager.eq(signer).and(conditions))
+          .orderBy(absenceRequest.startAt.desc());
     } else {
       query = getQueryFactory()
-          .selectFrom(absenceRequest).where(conditions);
+          .selectFrom(absenceRequest).where(conditions)
+          .orderBy(absenceRequest.startAt.desc())
+          ;
     }
     results.addAll(query.fetch());
     return results;
@@ -352,6 +385,7 @@ public class AbsenceRequestDao extends DaoBase {
           .where(office.in(uros.stream().map(
               userRoleOffices -> userRoleOffices.office)
               .collect(Collectors.toSet())).and(conditions))
+          .orderBy(absenceRequest.startAt.desc())
           .fetch();
     } else {
       return Lists.newArrayList();
@@ -361,6 +395,7 @@ public class AbsenceRequestDao extends DaoBase {
 
   /**
    * Ritorna le condizioni con l'aggiunta di quelle relative al responsabile di sede.
+   *
    * @param officeList la lista delle sedi
    * @param condition le condizioni pregresse
    * @param signer colui che deve firmare la richiesta
@@ -396,6 +431,7 @@ public class AbsenceRequestDao extends DaoBase {
 
   /**
    * Ritorna le condizioni di firma delle richieste da parte del responsabile di gruppo.
+   *
    * @param officeList la lista delle sedi
    * @param condition le condizioni precedenti
    * @param signer il firmatario della richiesta

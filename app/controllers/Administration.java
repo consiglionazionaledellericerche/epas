@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -87,6 +104,10 @@ import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per alcuni metodi di amministrazione dell'applicazione.
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class Administration extends Controller {
@@ -355,6 +376,7 @@ public class Administration extends Controller {
 
   /**
    * Salvataggio delle impostazioni generali.
+   *
    * @param generalSetting impostazioni generali da salvare.
    */
   public static void saveGeneralSetting(@Required @Valid GeneralSetting generalSetting) {
@@ -433,6 +455,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che permette di salvare la configurazione.
+   *
    * @param name     Nome del parametro
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
@@ -635,6 +658,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
+   *
    * @param office la sede 
    * @param code il codice di assenza
    * @param year l'anno
@@ -660,9 +684,11 @@ public class Administration extends Controller {
    * Imposta la data fine per i soli contratti attivi epas:
    * - con stessa data inizio
    * - con data fine nulla
-   * - segnalati come temporary
+   * - segnalati come temporary.
+   *
    * @param office sede
    */
+  @SuppressWarnings("deprecation")
   public static void importCertificationContracts(Office office) {
 
     notFoundIfNull(office);
@@ -869,6 +895,7 @@ public class Administration extends Controller {
 
   /**
    * Aggiorna la configurazione di tutti gli uffici.
+   *
    * @see: manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
@@ -884,6 +911,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo che riposiziona una sede in un nuovo istituto in caso di accorpamenti.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
@@ -905,6 +933,7 @@ public class Administration extends Controller {
 
   /**
    * Metodo privato che fa il cambio di appartenenza di una sede.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */

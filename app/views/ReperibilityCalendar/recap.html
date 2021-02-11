@@ -1,4 +1,34 @@
-<h3>Giorni di reperibilità feriale validi</h3>
+
+#{secure.check 'Reperibility.exportMonthAsPDF'}
+<!-- Stampa dei calendari mensile e annuale -->
+
+#{form @Reperibility.exportMonthAsPDF(), class:'form-horizontal'}
+
+#{f.hidden 'type', value:reperibility.id /}
+#{f.hidden 'start', value:start /}   
+#{f.hidden 'month', value:start.getMonthOfYear() /} 
+#{f.hidden 'year', value:start.getYear() /}    	
+	#{b.buttons}
+            
+            #{b.submit 'Calendario mensile', fa:'calendar'/}
+    #{/b.buttons}		
+
+#{/form}
+
+#{form @Reperibility.exportYearAsPDF(), class:'form-horizontal'}
+
+#{f.hidden 'type', value:reperibility.id /}
+#{f.hidden 'start', value:start /}   
+#{f.hidden 'year', value:start.getYear() /}    	
+	#{b.buttons}
+            
+            #{b.submit 'Calendario annuale', class:'btn btn-info', fa:'calendar' /}
+    #{/b.buttons}		
+
+#{/form}
+#{/secure.check}
+
+<h3>Giorni di ${reperibility.monthlyCompetenceType.name} feriale validi</h3>
 <br>
 <ul class="list-group">
   #{list workDaysReperibilityCalculatedCompetences.entrySet()}
@@ -10,7 +40,7 @@
   #{/list}
 </ul>
 <br>
-<h3>Giorni di reperibilità festiva validi</h3>
+<h3>Giorni di ${reperibility.monthlyCompetenceType.name} festiva validi</h3>
 <br>
 <ul class="list-group">
   #{list holidaysReperibilityCalculatedCompetences.entrySet()}

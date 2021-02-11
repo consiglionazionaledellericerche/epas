@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package controllers;
 
@@ -60,7 +76,7 @@ import play.mvc.With;
 /**
  * Controller con tutti i metodi per la gestione (via REST) delle reperibilità.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @With(Resecure.class)
@@ -117,8 +133,9 @@ public class Reperibility extends Controller {
    * per provarlo:
    *    curl --user sistorg -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
    * </p>
-   * @author cristian
-   * @author arianna
+   *
+   * @author Cristian Lucchesi
+   * @author Arianna Del Soldato
    *
    */
   @BasicAuth
@@ -158,7 +175,7 @@ public class Reperibility extends Controller {
    * Fornisce la lista del personale reperibile di tipo 'type' nell'intervallo di
    * tempo da 'yearFrom/monthFrom/dayFrom'  a 'yearTo/monthTo/dayTo'.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   @BasicAuth
   public static void who(Integer yearFrom, Integer monthFrom, Integer dayFrom,
@@ -194,7 +211,7 @@ public class Reperibility extends Controller {
    * Legge le assenze dei reperibili di una determinata tipologia in un dato
    * intervallo di tempo (portale sistorg).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   @BasicAuth
   public static void absence(Integer yearFrom, Integer monthFrom, Integer dayFrom,
@@ -248,7 +265,7 @@ public class Reperibility extends Controller {
    * Restituisce la lista delle persone reperibili assenti di una determinata
    * tipologia in un dato intervallo di tempo (portale sistorg).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   @BasicAuth
   public static void whoIsAbsent(Integer yearFrom, Integer monthFrom, Integer dayFrom,
@@ -294,8 +311,8 @@ public class Reperibility extends Controller {
    * "reperibility_type_id" : "1" } ]' \ http://localhost:9000/reperibility/1/update/2012/12
    * </p>
    *
-   * @author cristian
-   * @author arianna
+   * @author Cristian Lucchesi
+   * @author Arianna Del Soldato
    *
    */
   @BasicAuth
@@ -305,6 +322,7 @@ public class Reperibility extends Controller {
     log.debug("update: Received reperebilityPeriods {}", body);
     if (body == null) {
       badRequest();
+      return;
     }
 
     //PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
@@ -342,7 +360,7 @@ public class Reperibility extends Controller {
    * http://scorpio.nic.it:9001/reperibility/1/changePeriods
    * </p>
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   @BasicAuth
   public static void changePeriods(
@@ -374,11 +392,12 @@ public class Reperibility extends Controller {
    * Crea il file PDF con il calendario annuale delle reperibilità di tipi
    * 'type' per l'anno 'year' (portale sistorg).
    *
-   * @author arianna, cristian
+   * @author Arianna Del Soldato 
+   * @author Cristian Lucchesi
    *
    */
   @BasicAuth
-  public static void exportYearAsPDF(int year, Long type) {
+  public static void exportYearAsPdf(int year, Long type) {
 
     log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
@@ -405,9 +424,18 @@ public class Reperibility extends Controller {
     final String description = reperibilityType.description;
     String supervisor =
         reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+    String seatSupervisor = "";
+    Office office = reperibilityType.office;
+    List<User> directors = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+    if (!directors.isEmpty()) {
+      seatSupervisor = directors.get(0).person.getFullname();
+    } else {
+      seatSupervisor = "responsabile di sede non configurato";
+    }
 
     renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, 
-        description, supervisor);
+        description, supervisor, seatSupervisor);
   }
 
 
@@ -416,7 +444,7 @@ public class Reperibility extends Controller {
    * reperibili di un certo tipo e i turni di reperibilità svolti in un determinato periodo di tempo
    * ritorna una tabella del tipo (Person, [thNoStamping, thAbsence], List<'gg MMM'>).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public static Table<Person, String, List<String>> getInconsistencyTimestamps2Reperibilities(
       Long reperibilityId, LocalDate startDate, LocalDate endDate) {
@@ -448,11 +476,11 @@ public class Reperibility extends Controller {
    * Segnala le eventuali inconsistenze con le assenze o le mancate timbrature
    * (portale sistorg)
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    *
    */
   @BasicAuth
-  public static void exportMonthAsPDF(
+  public static void exportMonthAsPdf(
       @Required int year, @Required int month, @Required Long type) {
 
     if (Validation.hasErrors()) {
@@ -494,7 +522,7 @@ public class Reperibility extends Controller {
 
     // update the reperibility days in the DB
     int updatedCompetences =
-        reperibilityManager.updateDBReperibilityCompetences(personReperibilityDays, year, month);
+        reperibilityManager.updateDbReperibilityCompetences(personReperibilityDays, year, month);
     log.debug("Salvate o aggiornate {} competences", updatedCompetences);
 
     // builds the table with the summary of days and reperibility periods description
@@ -563,6 +591,7 @@ public class Reperibility extends Controller {
 
   /**
    * Genera il calendario iCal delle reperibilità.
+   *
    * @param type il tipo di reperibilità (solo le reperibilità di questo tipo verrano mostrate
    * @param year l'anno di cui mostrare le reperibilità
    * @param personId l'eventuale personId se si vuole mostrare il calendario di una sola persona
@@ -571,7 +600,7 @@ public class Reperibility extends Controller {
   public static void iCal(@Required Long type, @Required int year, Long personId) {
 
     if (Validation.hasErrors()) {
-      badRequest("Parametri mancanti. " + validation.errors());
+      badRequest("Parametri mancanti. " + Validation.errors());
     }
     Optional<User> currentUser = Security.getUser();
 

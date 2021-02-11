@@ -43,6 +43,7 @@
 	      #{secure.check 'Contracts.updateSourceContract'}
 	      <th>Inizializza</th>
 	      #{/secure.check}
+	      <th>Storico modifiche</th>
 	    </tr>
 	    </thead>
 	    <tbody>
@@ -78,6 +79,9 @@
 	      
 	      </td>
 		  #{/secure.check}
+		  <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
 	    </tr>
 	
 	    #{/list}
@@ -103,6 +107,7 @@
       #{secure.check 'Contracts.updateSourceContract'}
       <th>Modifica</th>
       #{/secure.check}
+      <th>Storico modifiche</th>
     </tr>
     </thead>
     <tbody>
@@ -136,6 +141,9 @@
       
       </td>
 	  #{/secure.check}
+	  <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
     </tr>
 
     #{/list}
@@ -159,6 +167,7 @@
       #{secure.check 'Contracts.updateSourceContract'}
       <th>Inizializza</th>
       #{/secure.check}
+      <th>Storico modifiche</th>
     </tr>
     </thead>
     <tbody>
@@ -195,6 +204,9 @@
      
       </td>
 	   #{/secure.check}
+	   <td>#{secure.link @Historicals.contractHistory(contract.value.id, 'INITIALIZATION'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
     </tr>
 
     #{/list}

@@ -7,7 +7,8 @@ import lombok.Getter;
 
 /**
  * Le causali delle timbrature.
- * @author cristian.
+ *
+ * @author Cristian Lucchesi
  */
 @Getter
 public enum StampTypes {
@@ -40,8 +41,9 @@ public enum StampTypes {
   MOTIVI_PERSONALI("mp", "motiviPersonali", "Motivi personali", false, false),
   REPERIBILITA("r", "reperibilita", "Reperibilità ", false, false),
   INTRAMOENIA("i", "intramoenia", "Intramoenia", false, false),
-  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica",false, false),
+  GUARDIA_MEDICA("gm", "guardiaMedica", "Guardia Medica", false, false),
   PERMESSO_BREVE("pb", "permessoBreve", "Permesso Breve", false, true);
+  
 
   private String identifier;
   private String code;
@@ -61,6 +63,7 @@ public enum StampTypes {
 
   /**
    * La causale corrispondente alla stringa passata come parametro.
+   *
    * @param code il codice proveniente dal json delle timbrature.
    * @return Lo stampType corrispondente se esiste.
    */
@@ -75,6 +78,7 @@ public enum StampTypes {
 
   /**
    * La causale corrispondente all'identificativo passato.
+   *
    * @param identifier La Stringa identificativa dello Stamptype.
    * @return Lo stampType corrispondente se esiste.
    */
@@ -89,6 +93,7 @@ public enum StampTypes {
 
   /**
    * La lista delle causali attive.
+   *
    * @return la lista degli stamptypes attivi.
    */
   public static List<StampTypes> onlyActive() {
@@ -98,14 +103,18 @@ public enum StampTypes {
 
   /**
    * Lista delle stampTypes attive ma senza il lavoro fuori sede.
+   *
    * @return lista delle stampTypes attive ma senza il lavoro fuori sede.
    */
   public static List<StampTypes> onlyActiveWithoutOffSiteWork() {
     return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
   }
   
+  
+  
   /**
    * Verifica se una causale è attiva a partire dal suo codice passato come parametro.
+   *
    * @return true se la causale passata come parametro è attiva. False altrimenti
    */
   public static boolean isActive(final String code) {
@@ -117,6 +126,7 @@ public enum StampTypes {
   
   /**
    * Controlla se questa causale è lavoro fuori sede.
+   *
    * @return true se la timbratura corrisponde ad un timbrature per lavoro effettuato fuori sede
    */
   public boolean isOffSiteWork() {
@@ -125,6 +135,7 @@ public enum StampTypes {
   
   /**
    * Controlla se questa causale non è lavoro fuori sede.
+   *
    * @return
    */
   public boolean isNotOffSiteWork() {

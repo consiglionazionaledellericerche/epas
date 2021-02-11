@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package security;
 
 import org.joda.time.LocalDate;
@@ -35,6 +52,7 @@ import models.ReperibilityTypeMonth;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
+import models.flows.CompetenceRequest;
 
 import security.PermissionCheck;
 
@@ -76,6 +94,36 @@ when
 then
  $c.grant();
 end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3 
+  		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta competenze
+ */
+rule isCompetenceHandleFlowsVisible
+when
+  $p: Person(qualification != null && qualification.qualification <= 3 
+  		&& reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
 
 /*
  *	Azioni eseguibili dagli impiegati per visualizzare la propria situazione.
@@ -258,7 +306,7 @@ when
   
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -269,7 +317,9 @@ when
                                  "ReperibilityCalendar.editable",
                                  "ReperibilityCalendar.monthReperibilityApprovement",
                                  "ReperibilityCalendar.approveReperibilityInMonth",
-  								 "ReperibilityCalendar.removeApprovation")
+  								 "ReperibilityCalendar.removeApprovation",
+  								 "Reperibility.exportMonthAsPDF",
+  								 "Reperibility.exportYearAsPDF")
         , target == null, granted == false)
 then
  $c.grant();
@@ -280,7 +330,7 @@ rule reperibilitySupervisorCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -290,7 +340,9 @@ when
                                  "ReperibilityCalendar.newReperibility",
                                  "ReperibilityCalendar.recap",
                                  "ReperibilityCalendar.editable",
-                                 "ReperibilityCalendar.monthReperibilityApprovement"), 
+                                 "ReperibilityCalendar.monthReperibilityApprovement",
+                                 "Reperibility.exportMonthAsPDF",
+                                 "Reperibility.exportYearAsPDF"), 
           target == $prt, granted == false)
 then
  $c.grant();
@@ -300,7 +352,7 @@ rule canManageReperibilityMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
@@ -316,11 +368,13 @@ rule canEditReperibilityTypeMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth(personReperibilityType == $prt)
   $c: PermissionCheck(action in ("ReperibilityCalendar.approveReperibilityInMonth",
-  								 "ReperibilityCalendar.removeApprovation")
+  								 "ReperibilityCalendar.removeApprovation",
+  								 "Reperibility.exportMonthAsPDF",
+  								 "Reperibility.exportYearAsPDF")
   , target == $target, granted == false)
 then
  $c.grant();
@@ -335,9 +389,9 @@ end
 
 rule isReperibilityManager_generic
 when 
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person	
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person	
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
@@ -345,7 +399,9 @@ when
                                  "ReperibilityCalendar.changeReperibility",
                                  "ReperibilityCalendar.newReperibility",
                                  "ReperibilityCalendar.recap",
-                                 "ReperibilityCalendar.editable") 
+                                 "ReperibilityCalendar.editable",
+                                 "Reperibility.exportMonthAsPDF",
+                                 "Reperibility.exportYearAsPDF") 
         , target == null, granted == false)
 then
  $c.grant();
@@ -354,9 +410,9 @@ end
 
 rule reperibilityManagerCanManagePersonReperibilityType
 when
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -365,7 +421,9 @@ when
                                  "ReperibilityCalendar.changeReperibility",
                                  "ReperibilityCalendar.newReperibility",
                                  "ReperibilityCalendar.recap",
-                                 "ReperibilityCalendar.editable")
+                                 "ReperibilityCalendar.editable",
+                                 "Reperibility.exportMonthAsPDF",
+                                 "Reperibility.exportYearAsPDF")
   , target == $prt, granted == false)
 then
  $c.grant();
@@ -373,15 +431,17 @@ end
 
 rule reperibilityManagercanManageReperibilityMonth
 when
-  $p: Person(reperibilityTypes != null && !reperibilities.isEmpty()) from currentOperator.person
+  $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
   $c: PermissionCheck(action in ("ReperibilityCalendar.deleteReperibility",
   								 "ReperibilityCalendar.changeReperibility",
   								 "ReperibilityCalendar.newReperibility",
-  								 "ReperibilityCalendar.editable")
+  								 "ReperibilityCalendar.editable",
+  								 "Reperibility.exportMonthAsPDF",
+  								 "Reperibility.exportYearAsPDF")
   , target == $target, granted == false)
 then
  $c.grant();
@@ -424,7 +484,7 @@ end
 
 
 
-/*Ruolo per vedere il calendario per i reperibili*/
+/*Ruolo per vedere il calendario per i reperibili e le richieste di cambio reperibilità*/
 
 rule isAvailable_general
 when 
@@ -432,12 +492,20 @@ when
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person (reperibility != null) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
+  		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
+  		"CompetenceRequests.changeReperibilityToApprove",
      	"ReperibilityCalendar.show",
      	"ReperibilityCalendar.reperibilityPeople",
        	"ReperibilityCalendar.events",
-       	"ReperibilityCalendar.recap"	), target == null, granted == false)
+       	"ReperibilityCalendar.recap"), target == null, granted == false)
 then
  $c.grant();
 end
@@ -446,17 +514,132 @@ rule isAvailable_personReperibilityType
 when
 	$p: Person (reperibility != null) from currentOperator.person
 	$o: Office() from $p.office
-  	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
+  	Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
 	$c: PermissionCheck(action in (
-       "ReperibilityCalendar.show",
-       "ReperibilityCalendar.reperibilityPeople",
-       "ReperibilityCalendar.events",
-       "ReperibilityCalendar.recap"), target == $prt, granted == false)
+		"CompetenceRequests.changeReperibility",
+  		"CompetenceRequests.list",
+  		"CompetenceRequests.blank",
+  		"CompetenceRequests.edit",
+  		"CompetenceRequests.save",
+  		"CompetenceRequests.show",
+  		"CompetenceRequests.listToApprove",
+  		"CompetenceRequests.changeReperibilityToApprove",
+        "ReperibilityCalendar.show",
+        "ReperibilityCalendar.reperibilityPeople",
+        "ReperibilityCalendar.events",
+        "ReperibilityCalendar.recap"), target == $prt, granted == false)
 then
 $c.grant();
 end
+
+/** Regola per approvazione/disapprovazione cambi di reperibilità per reperibile**/
+rule approveDisapproveChangeForEmployee
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person (reperibility != null) from currentOperator.person
+  $cr: CompetenceRequest(teamMate == $p)
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval", 
+  		"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
+
+/* Approvazione/disapprovazione reperibile */
+
+rule approveDisapproveTargetChangeForEmployee
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == $cr, granted == false)
+then
+  $c.grant();
+end
+
+/* Regole per approvazione disapprovazione supervisore del servizio*/
+rule approveDisapproveChangeForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == null, granted == false)
+then
+$c.grant();
+end
+
+rule approveDisapproveTargetChangeForSupervisor
+when
+  $p: Person() from currentOperator.person
+  $prt: PersonReperibilityType() from $p.reperibilityTypes
+  $rep: PersonReperibility() from $prt.personReperibilities
+  $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
+  		&& reperibilityManagerApproved == null, flowEnded == false)
+  $c: PermissionCheck(action in ("CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
+/* Regole per visualizzazione richiesta di cambio reperibilità*/
+rule isEmployeeForCompetenceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $cr: CompetenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "CompetenceRequests.show"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
+rule showCompetenceRequestForAvailable
+when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person != currentOperator.person && teamMate == currentOperator.person)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+rule showCompetenceRequestForSupervisor
+when
+  $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
+  $cr: CompetenceRequest(person != $p)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+/* Regole per cancellazione richiesta di cambio reperibilità */
+
+rule EmployCanEditOrDeleteCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $cr: CompetenceRequest(person == currentOperator.person, flowEnded == false,
+  		reperibilityManagerApproved == null, employeeApproved == null)
+  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$cr, granted == false)
+then
+  $c.grant();
+end
+
+
 
 
 rule isEmployeeForFlows
@@ -490,8 +673,6 @@ when
      	/* Assenze annuali */
      	"Absences.absencesPerPerson",
      	
-     	/* Gestione riposi compensativi per chiusura ente*/
-     	"TimeVariations.personShow",
 
 		/* Richieste di assenza */
 		"AbsenceRequests.blank",
@@ -502,12 +683,24 @@ when
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.personalPermissions",
+		"AbsenceRequests.vacationsPastYearAfterDeadline",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
+
 		/* Visualizzazione organigramma*/
 		"Groups.seatOrganizationChart",
 		"Groups.viewInfoRole",
+
+		/*Richiesta competenza*/
+		"CompetenceRequests.save",
+		"CompetenceRequests.list",
+		"CompetenceRequests.delete",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval",
+		
+
 		
      	/* Ferie */
      	"Vacations.show",
@@ -537,6 +730,10 @@ when
      	"Persons.changePassword",
      	"Persons.savePassword",
      	"Persons.resetPassword",
+     	
+     	/* Esportazione excel*/
+     	"Charts.excelFile",
+     	"Charts.exportPersonalTimesheetSituation",
 
      	/* Stampa cartellino */
      	"PrintTags.showTag",
@@ -566,6 +763,18 @@ when
 then
  $c.grant();
 end
+
+rule EmployeeCanAccessTeleworkStampings
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
+  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping"), granted == false, target == null)
+then
+  $c.grant();
+end
+
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
@@ -621,10 +830,14 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
+			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
@@ -659,10 +872,14 @@ when
 			"AbsenceRequests.listToApprove",
 			"AbsenceRequests.vacationsToApprove",
 			"AbsenceRequests.compensatoryRestsToApprove",
+			"AbsenceRequests.permissionsToApprove",
+			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
+			"AbsenceRequests.personalPermissions",
+			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show"
 			
@@ -826,8 +1043,17 @@ when
     "Competences.totalOvertimeHours",
     "Competences.editReperibility",
     "Competences.editShift",
+    /* Storico delle modifiche alle competenze */
+    "Historicals.competenceHistory",
+
+    /* Storico delle modifiche ai contratti*/
+    "Historicals.contractHistory",
+
     "Configurations.personShow",
     "Configurations.show",
+    /* Permesso per la visualizzazione delle tab di configurazione */
+
+    "Configurations.administrativeEditParams",
     "Contracts.edit",
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
@@ -855,6 +1081,7 @@ when
     "Stampings.missingStamping",
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
+    "TeleworkStampings.personTeleworkStampings",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -863,12 +1090,12 @@ when
     "WorkingTimes.showContractWorkingTimeType",
     "WorkingTimes.showHorizontal",
     "WorkingTimes.showWorkingTimeType",
-    
+
     "TimeSlots.manageTimeSlots",
     "TimeSlots.manageOfficeTimeSlots",
- 	"TimeSlots.showContracts",
+    "TimeSlots.showContracts",
     "TimeSlots.showContractMandatoryTimeSlot"
-        
+
     ),  granted == false)
 then
   $c.grant();
@@ -1077,21 +1304,33 @@ when
         "Stampings.personStamping",
         "Vacations.list",
         "Vacations.vacationSummary",
-		"AbsenceRequests.blank",
-		"AbsenceRequests.edit",
-		"AbsenceRequests.save",
-		"AbsenceRequests.list",
-		"AbsenceRequests.listToApprove",
-		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		
-		"AbsenceRequests.vacations",
-		"AbsenceRequests.compensatoryRests",
-		"AbsenceRequests.shortTermPermits",
-		"AbsenceRequests.officeHeadApproval",
-		"AbsenceRequests.show",
-		"AbsenceRequests.approval",
-		"AbsenceRequests.disapproval"
+        "Stampings.dailyPresence",
+        "AbsenceRequests.blank",
+        "AbsenceRequests.edit",
+        "AbsenceRequests.save",
+        "AbsenceRequests.list",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
+
+        "AbsenceRequests.vacations",
+        "AbsenceRequests.compensatoryRests",
+        "AbsenceRequests.shortTermPermits",
+        "AbsenceRequests.personalPermissions",
+        "AbsenceRequests.vacationsPastYearAfterDeadline",
+        "AbsenceRequests.officeHeadApproval",
+        "AbsenceRequests.show",
+        "AbsenceRequests.approval",
+        "AbsenceRequests.disapproval",
+
+        "Configurations.administrativeEditParams",
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment",
+        "Configurations.removeAttachment"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -1107,18 +1346,29 @@ when
         "Stampings.personStamping",
         "Vacations.list",
         "Vacations.vacationSummary",
+        "Stampings.dailyPresence",
         "AbsenceRequests.blank",
-		"AbsenceRequests.edit",
-		"AbsenceRequests.save",
-		"AbsenceRequests.list",
-		"AbsenceRequests.listToApprove",
-		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		
-		"AbsenceRequests.vacations",
-		"AbsenceRequests.compensatoryRests",
-		"AbsenceRequests.shortTermPermits",
-		"AbsenceRequests.show"
+        "AbsenceRequests.edit",
+        "AbsenceRequests.save",
+        "AbsenceRequests.list",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
+
+        "AbsenceRequests.vacations",
+        "AbsenceRequests.compensatoryRests",
+        "AbsenceRequests.shortTermPermits",
+        "AbsenceRequests.personalPermissions",
+        "AbsenceRequests.vacationsPastYearAfterDeadline",
+        "AbsenceRequests.show",
+
+        "Configurations.administrativeEditParams",
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment"
 
         ), target == $o, granted == false)
 then
@@ -1162,12 +1412,13 @@ when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
  $c: PermissionCheck(action in (
- 		
- 		/* Permesso per vedere la lista delle richieste di assenza*/
- 		"AbsenceRequests.vacationsToApprove",
- 		"AbsenceRequests.compensatoryRestsToApprove",
- 		"AbsenceRequests.listToApprove",
- 		
+
+        /* Permesso per vedere la lista delle richieste di assenza*/
+        "AbsenceRequests.vacationsToApprove",
+        "AbsenceRequests.compensatoryRestsToApprove",
+        "AbsenceRequests.listToApprove",
+        "AbsenceRequests.permissionsToApprove",
+        "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 
         /* Vecchio permesso viewPerson */
         //"Persons.list",
@@ -1175,10 +1426,10 @@ when
         "MonthRecaps.customRecap",
 
         /* Vecchio permesso viewPersonDay */
- 		"MonthRecaps.show",
+        "MonthRecaps.show",
 
- 		"Stampings.missingStamping",
- 		"Stampings.stampingsByAdmin",
+        "Stampings.missingStamping",
+        "Stampings.stampingsByAdmin",
         "Stampings.dailyPresence",
         "Stampings.mealTicketSituation",
 
@@ -1233,11 +1484,15 @@ when
         "Configurations.show",
         "Configurations.edit",
         "Configurations.removeAttachment",
+   		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
 		"PrintTags.listPersonForPrintTags",
         "PrintTags.showTag",
 
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1248,6 +1503,11 @@ when
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1310,6 +1570,9 @@ when
 
      	"Configurations.show",
         "Configurations.edit",
+        /* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
@@ -1321,6 +1584,8 @@ when
         "Stampings.missingStamping",
 		"Stampings.stampingsByAdmin",
 		
+		"TeleworkStampings.personTeleworkStampings",
+		
         "Vacations.list",
         "Vacations.vacationSummary",
 
@@ -1330,6 +1595,11 @@ when
         "Competences.totalOvertimeHours",
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
+        
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
 
         /* Vecchio permesso viewWorkingTimeType */
         "WorkingTimes.manageWorkingTime",
@@ -1362,6 +1632,10 @@ rule OnlyForPersonnelAdmin_Generic
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $c: PermissionCheck(action in (
+ 
+ 		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
  		/* Vecchio permesso editPerson */
 
@@ -1447,6 +1721,11 @@ when
         "Competences.saveReperibilityConfiguration",
         "Competences.manageReperibility",
         
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+    	"Historicals.contractHistory",
+        
         /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
         "UploadSituation.updateSession",
@@ -1480,17 +1759,18 @@ when
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
 
-    	"Configurations.show",
-     	"Configurations.edit",
+        "Configurations.show",
+        "Configurations.edit",
         "Configurations.update",
         "Configurations.uploadAttachment",
+        "Configurations.removeAttachment",
 
-		"BadgeSystems.joinBadgesPerson",
-		"BadgeSystems.saveBadges",
-		"BadgeSystems.deleteBadgePerson",
-		"BadgeSystems.deleteBadge",
-		/*ore di formazione*/
-		"PersonMonths.visualizePeopleTrainingHours",
+        "BadgeSystems.joinBadgesPerson",
+        "BadgeSystems.saveBadges",
+        "BadgeSystems.deleteBadgePerson",
+        "BadgeSystems.deleteBadge",
+        /*ore di formazione*/
+        "PersonMonths.visualizePeopleTrainingHours",
         "PersonMonths.insertPeopleTrainingHours",
         "PersonMonths.modifyPeopleTrainingHours",
         "PersonMonths.deletePeopleTrainingHours",
@@ -1500,13 +1780,21 @@ when
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
+        /*Risultati tra smart working e lavoro nella sede*/
+        "MonthRecaps.generateSmartWorkingMonthlyRecap",
         
         /*Permesso relativo alla gestione dei gruppi*/
         "Groups.createGroup",
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+        
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
         ), target == null, granted == false)
 then
@@ -1518,6 +1806,10 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $o: Office( usersRolesOffices contains $uro)
  $c: PermissionCheck(action in (
+ 
+ 		/* Permesso per la visualizzazione delle tab di configurazione */
+ 		
+ 		"Configurations.administrativeEditParams",
 
  		/* Vecchio permesso editPerson */
         "AbsenceGroups.insertAssisted",
@@ -1530,31 +1822,30 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences", 
-        
 
         /* Vecchio permesso editPersonDay */
-     	"Absences.addAttach",
-     	"Absences.removeAttach",
-     	"Absences.overtimeAbsence",
+        "Absences.addAttach",
+        "Absences.removeAttach",
+        "Absences.overtimeAbsence",
 
-       	"Stampings.insert",
-       	"Stampings.insertOffsite",
-       	"Stampings.edit",
-       	"Stampings.editOffSite",
-     	"Stampings.save",
-     	"Stampings.saveOffSite",
-     	"Stampings.delete",
-     	"TimeVariations.addVariation",
-     	"TimeVariations.saveVariation",
-     	"TimeVariations.removeVariation",
-     	"TimeVariations.show",
-     	"PersonDays.workingHoliday",
-     	"PersonDays.approveWorkingHoliday",
-     	"PersonDays.workingOutOpening",
-     	"PersonDays.approveWorkingOutOpening",
-     	"PersonDays.forceMealTicket",
+        "Stampings.insert",
+        "Stampings.insertOffsite",
+        "Stampings.edit",
+        "Stampings.editOffSite",
+        "Stampings.save",
+        "Stampings.saveOffSite",
+        "Stampings.delete",
+        "TimeVariations.addVariation",
+        "TimeVariations.saveVariation",
+        "TimeVariations.removeVariation",
+        "TimeVariations.show",
+        "PersonDays.workingHoliday",
+        "PersonDays.approveWorkingHoliday",
+        "PersonDays.workingOutOpening",
+        "PersonDays.approveWorkingOutOpening",
+        "PersonDays.forceMealTicket",
 
-     	/* Vecchio permesso editCompetence */
+         /* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
@@ -1585,6 +1876,16 @@ when
         "Competences.deletePersonReperibility",
         "Competences.saveReperibilityConfiguration",
         "Competences.manageReperibility",
+
+        "Configurations.show",
+        "Configurations.edit",
+        "Configurations.update",
+        "Configurations.uploadAttachment",
+
+        /* Storico delle modifiche alle competenze */
+        "Historicals.competenceHistory",
+        /* Storico delle modifiche ai contratti*/
+        "Historicals.contractHistory",
 
          /* Vecchio permesso uploadSituation */
         "UploadSituation.uploadData",
@@ -1636,13 +1937,21 @@ when
         "PersonMonths.saveTrainingHours",
         "Charts.listForExcelFile",
         "Charts.exportTimesheetSituation",
+        /*Risultato tra lo smart working e il lavoro nella sede*/
+        "MonthRecaps.generateSmartWorkingMonthlyRecap",
         
         /*Permesso relativo alla gestione dei gruppi*/
         "Groups.createGroup",
         "Groups.blank",
         "Groups.edit",
         "Groups.deleteGroup",
-        "Groups.showGroups"
+        "Groups.showGroups",
+
+        "Affiliations.personAffiliations",
+        "Affiliations.blankByPerson",
+        "Affiliations.save",
+        "Affiliations.delete",
+        "Affiliations.edit"
 
        ), target == $o, granted == false)
 then
@@ -1718,12 +2027,12 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences",
-    	
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.getAttachment",
-        "Configurations.removeAttachment",
+
+        "Configurations.personShow",
+        "Configurations.personEdit",
+        "Configurations.personUpdate",
+        "Configurations.getAttachment",
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
@@ -1758,7 +2067,39 @@ when
      	"Persons.removePersonFromGroup",
 
      	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail"), target == null, granted == false)
+     	"Persons.updateSendEmail",
+     	
+     	"rest.v2.Persons.show",
+     	"rest.v2.Persons.create",
+     	"rest.v2.Persons.update",
+     	"rest.v2.Persons.delete",
+     	"rest.v2.Persons.list",
+
+     	"rest.v2.Groups.show",
+     	"rest.v2.Groups.create",
+     	"rest.v2.Groups.update",
+     	"rest.v2.Groups.delete",
+     	"rest.v2.Groups.list",
+     	
+     	"rest.v2.Affiliations.show",
+     	"rest.v2.Affiliations.create",
+     	"rest.v2.Affiliations.update",
+     	"rest.v2.Affiliations.delete",
+     	"rest.v2.Affiliations.byGroup",
+     	"rest.v2.Affiliations.byPerson",
+     	
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show",
+     	"rest.v2.Contracts.create",
+     	"rest.v2.Contracts.update",
+     	"rest.v2.Contracts.setPreviousContract",
+     	"rest.v2.Contracts.unsetPreviousContract",
+     	"rest.v2.Contracts.delete",
+     	
+     	"rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"
+
+     	), target == null, granted == false)
 then
  $c.grant();
 end
@@ -1786,12 +2127,12 @@ when
         "AbsenceGroups.certificationsAbsences",
         "AbsenceGroups.reloadCertificationAbsences",
         "AbsenceGroups.syncCertificationsAbsences",
-    	
-     	"Configurations.personShow",
-     	"Configurations.personEdit",
-     	"Configurations.personUpdate",
-     	"Configurations.getAttachment",
-        "Configurations.removeAttachment",
+
+        "Configurations.personShow",
+        "Configurations.personEdit",
+        "Configurations.personUpdate",
+        "Configurations.getAttachment",
+
         "Contracts.personContracts",
         "Contracts.insert",
         "Contracts.save",
@@ -1823,7 +2164,39 @@ when
      	"Persons.confirmGroup",
      	"Persons.removePersonFromGroup",
      	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail"), target == $o, granted == false)
+     	"Persons.updateSendEmail",
+     	
+     	"rest.v2.Persons.show",
+     	"rest.v2.Persons.create",
+     	"rest.v2.Persons.update",
+     	"rest.v2.Persons.delete",
+     	"rest.v2.Persons.list",
+
+     	"rest.v2.Groups.show",
+     	"rest.v2.Groups.create",
+     	"rest.v2.Groups.update",
+     	"rest.v2.Groups.delete",
+     	"rest.v2.Groups.list",
+     	
+     	"rest.v2.Affiliations.show",
+     	"rest.v2.Affiliations.create",
+     	"rest.v2.Affiliations.update",
+     	"rest.v2.Affiliations.delete",
+     	"rest.v2.Affiliations.byGroup",
+     	"rest.v2.Affiliations.byPerson",
+
+     	"rest.v2.Contracts.byPerson",
+     	"rest.v2.Contracts.show",
+     	"rest.v2.Contracts.create",
+     	"rest.v2.Contracts.update",
+     	"rest.v2.Contracts.setPreviousContract",
+     	"rest.v2.Contracts.unsetPreviousContract",
+     	"rest.v2.Contracts.delete",
+
+     	"rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"     	
+
+     	), target == $o, granted == false)
 then
  $c.grant();
 end
@@ -1888,7 +2261,7 @@ end
  ******************************************************************************/
 rule canEditAttachment
 when
-  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $uro: UsersRolesOffices(role.name in (Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR))
   $target: Attachment(office == $uro.office)
   $c: PermissionCheck(action in (
   "Configurations.getAttachment",
@@ -2046,7 +2419,9 @@ when
  				|| (epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION && fieldValue == true)
  				|| (epasParam == EpasParam.RIGHT_TO_STUDY && fieldValue == true)
  				|| (epasParam == EpasParam.TELEWORK && fieldValue == true)
- 				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)) from $p.personConfigurations
+ 				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)
+ 				|| (epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS && fieldValue == true)
+ 				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
@@ -2168,6 +2543,38 @@ then
  $c.grant();
 end
 
+/******************************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per congedo parentale/malattia figlio se:
+ ******************************************************************************************************/
+rule EmployeeCanEditParentalLeaveAndChildIllnessAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.parentalLeaveAndChildIllnessCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*********************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per secondo parente disabile se:
+ *********************************************************************************************/
+rule EmployeeCanEditSecondDisabledRelativeAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeSecondDisabledRelativeCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
 /*******************************************************************************
  * Un dipendente può autocertificare le proprie timbrature se...
  ******************************************************************************/
@@ -2233,6 +2640,33 @@ when
 then
  $c.grant();
 end
+
+
+/*******************************************************************************
+ * Un dipendente può entrare nella modifica delle proprie timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanEditServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature di servizio se...
+ ******************************************************************************/
+rule employeeCanModifyServiceStampings
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $target: Stamping(this.getOwner() == $p && stampType == StampTypes.MOTIVI_DI_SERVIZIO)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
+then
+ $c.grant();
+end
+
 
 /*******************************************************************************
  * Un ricercatore tecnologo se può gestirsi le ferie può accedere alle actions:
@@ -2398,18 +2832,13 @@ when
         "rest.Persons.days",
         "rest.Persons.missions",
         "rest.Persons.competences",
-        "rest.Persons.peopleList",
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
 		"manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId",
-        "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-        
-        "rest.v2.PersonDays.getDaySituation"        
+        "rest.Absences.insertAbsenceByPerseoId"
 
        ), target == null, granted == false)
 then
@@ -2429,11 +2858,7 @@ when
 		"manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId",
-        "rest.PersonDays.getDaySituation",
-        "rest.PersonDays.getMonthSituation",
-
-		"rest.v2.PersonDays.getDaySituation"
+        "rest.Absences.insertAbsenceByPerseoId"
 		
        ), target == $o, granted == false)
 then
@@ -2581,6 +3006,20 @@ then
   $c.grant();
 end
 
+/*
+ * Permesso per l'abilitazione alla visualizzazione delle richieste di ferie anno passato dopo il 31/8
+ */
+rule isVacationPastYearFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
 /*******************************************************************************
  * Azioni via REST per PERSONDAY READER
  ******************************************************************************/
@@ -2589,10 +3028,34 @@ when
  $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $c: PermissionCheck(action in (
 
+        "rest.Persons.peopleList",
         "rest.PersonDays.getDaySituation",
-        "rest.v2.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
-        "rest.Persons.peopleList"
+
+        "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
+
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
+        "rest.v2.PersonDays.getDaySituation",
+        
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson",
+        "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
+        "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
 
        ), target == null, granted == false)
 then
@@ -2604,11 +3067,35 @@ when
  $uro: UsersRolesOffices(role.name in ("personDayReader", "restClient"))
  $o: Office() from $uro.office
  $c: PermissionCheck(action in (
-
-		"rest.v2.PersonDays.getDaySituation",
+ 
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
-        "rest.Persons.peopleList"
+        "rest.Persons.peopleList",
+ 
+        "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
+
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
+        "rest.v2.PersonDays.getDaySituation",
+
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson",
+        "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
+        "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
 
        ), target == $o, granted == false)
 then
@@ -2623,15 +3110,36 @@ rule AccountRole_PersonDaysReader
 when
  AccountRole(this in (AccountRole.PERSON_DAYS_READER)) 
  $c: PermissionCheck(action in (
+        "rest.v2.Certifications.getMonthSituation",
+        "rest.v2.Certifications.getMonthSituationByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByOffice",
+        "rest.v2.Certifications.getMonthValidationStatusByPerson",
 
-		"rest.v2.PersonDays.getDaySituation",
+        "rest.v2.PersonDays.getDaySituationByOffice",
+        "rest.v2.PersonDays.getMonthSituationByOffice",
+        "rest.v2.PersonDays.getDaySituation",
+
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list",
+
         "rest.PersonDays.getDaySituation",
         "rest.PersonDays.getMonthSituation",
         "rest.Persons.peopleList",
 
+        "rest.v3.PersonDays.getDaySituationByOffice",
+        "rest.v3.PersonDays.getMonthSituationByOffice",
+        "rest.v3.PersonDays.getDaySituation",
+        "rest.v3.PersonDays.getMonthSituationByPerson",
+        "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
+        "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
-        "rest.Absences.checkAbsenceByPerseoId"
+        "rest.Absences.checkAbsenceByPerseoId",
+
+        "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear.show"
+
        ), granted == false)
 then
  $c.grant();

@@ -24,7 +24,8 @@
 	      <th>Valore</th>
 	    </tr>
 	  #{list items:currentConfiguration, as:'conf'}
-	    #{if conf.epasParam.general}
+	    #{if conf.epasParam.general && 
+	    	 (conf.epasParam.name != 'telework_stampings' || teleworkStampingsActive)}
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>

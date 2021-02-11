@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -12,14 +29,13 @@ import helpers.Web;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -29,10 +45,12 @@ import play.mvc.With;
 import security.SecurityRules;
 
 
+/**
+ * Controller per la gestione dei BadgeSystem.
+ */
+@Slf4j
 @With(Resecure.class)
 public class BadgeSystems extends Controller {
-
-  private static final Logger log = LoggerFactory.getLogger(BadgeSystems.class);
 
   @Inject
   private static BadgeSystemDao badgeSystemDao;
@@ -47,6 +65,9 @@ public class BadgeSystems extends Controller {
   @Inject
   private static PersonDao personDao;
 
+  /**
+   * Lista dei gruppi badge.
+   */
   public static void index() {
     flash.keep();
     list(null);
@@ -54,6 +75,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Ritorna la lista dei gruppi badge.
+   *
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -67,6 +89,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Ritorna le informazioni del gruppo badge.
+   *
    * @param id identificativo del gruppo badge.
    */
   public static void show(Long id) {
@@ -77,6 +100,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Permette la modifica del gruppo badge.
+   *
    * @param id identificativo del gruppo badge.
    */
   public static void edit(Long id) {
@@ -95,6 +119,9 @@ public class BadgeSystems extends Controller {
 
   }
 
+  /**
+   * Form per la creazione di un nuovo gruppo badge.
+   */
   public static void blank() {
     render();
   }
@@ -102,6 +129,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Permette l'aggiornamento delle info sul gruppo badge.
+   *
    * @param badgeSystem l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeSystem badgeSystem) {
@@ -123,6 +151,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Salva il gruppo badge.
+   *
    * @param badgeSystem badgeSystem da salvare.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
@@ -143,6 +172,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Cancella il gruppo badge.
+   *
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
@@ -163,6 +193,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Permette l'apertura della pagina per il salvataggio dei badge sul gruppo.
+   *
    * @param badgeSystemId l'identificativo del gruppo badge
    */
   public static void joinBadges(Long badgeSystemId) {
@@ -187,6 +218,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Permette la join del badge alla persona.
+   *
    * @param personId l'identificativo della persona
    */
   public static void joinBadgesPerson(Long personId) {
@@ -208,6 +240,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Salva il badge alla persona nel gruppo badge.
+   *
    * @param badgeSystem il gruppo badge
    * @param code il numero del badge
    * @param person la persona cui salvare il badge
@@ -273,7 +306,7 @@ public class BadgeSystems extends Controller {
 
 
   /**
-   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number
+   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number.
    */
   public static void joinPersonNumbers(Long badgeSystemId) {
 
@@ -331,6 +364,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Render dei badge della persona.
+   *
    * @param personId l'id della persona
    */
   public static void personBadges(Long personId) {
@@ -344,6 +378,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Permette la cancellazione di un badge.
+   *
    * @param badgeId identificativo del badge
    */
   public static void deleteBadgePerson(Long badgeId) {
@@ -359,6 +394,7 @@ public class BadgeSystems extends Controller {
 
   /**
    * Cancella il badge.
+   *
    * @param badgeId l'identificativo del badge da cancellare
    * @param confirmed se è confermata la cancellazione
    * @param personFixed se la persona è fixata

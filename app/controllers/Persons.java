@@ -1,5 +1,21 @@
-package controllers;
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
+package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
@@ -8,7 +24,9 @@ import com.google.gdata.util.common.base.Preconditions;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
+import dao.RoleDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -34,6 +52,7 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import org.apache.commons.lang.WordUtils;
@@ -51,6 +70,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle persone.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Persons extends Controller {
@@ -87,6 +109,10 @@ public class Persons extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static RoleDao roleDao;
 
 
   /**
@@ -150,17 +176,8 @@ public class Persons extends Controller {
     person.name = WordUtils.capitalizeFully(person.name);
     person.surname = WordUtils.capitalizeFully(person.surname);
 
-    person.user = userManager.createUser(person);
-
-    // Se il campo eppn è vuoto viene calcolato euristicamente...
-    if (person.email != null && person.eppn == null) {
-      person.eppn = personManager.eppn(person.user.username, person.email);
-    }
-
+    personManager.properPersonCreate(person);
     person.save();
-
-    Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.user, person.office, employee);
 
     contract.person = person;
 
@@ -227,6 +244,18 @@ public class Persons extends Controller {
     }
 
     rules.checkIfPermitted(person.office);
+    //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
+    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.user);
+    if (uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.EMPLOYEE) 
+        && !uro.office.equals(person.office))) {
+      for (UsersRolesOffices uro : uroList) {
+        if (uro.role.name.equals(Role.EMPLOYEE)) {
+          uro.delete();
+        }
+      }
+      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
+      officeManager.setUro(person.user, person.office, employee); 
+    }
 
     person.save();
     flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);

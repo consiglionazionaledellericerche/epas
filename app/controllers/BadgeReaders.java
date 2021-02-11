@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -32,7 +49,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-
+/**
+ * Controller per la gestione dei BadgeReaders.
+ */
 @With({Resecure.class})
 public class BadgeReaders extends Controller {
 
@@ -51,6 +70,9 @@ public class BadgeReaders extends Controller {
   @Inject
   private static UsersRolesOfficesDao uroDao;
 
+  /**
+   * Lista dei badgeReader disponibili.
+   */
   public static void index() {
     flash.keep();
     list(null);
@@ -58,6 +80,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Ritorna la lista dei badge reader.
+   *
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -72,6 +95,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Render delle informazioni sul badgereader.
+   *
    * @param id identificativo del lettore badge.
    */
   public static void show(Long id) {
@@ -82,6 +106,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Render della pagina di modifica del lettore badge.
+   *
    * @param id identificativo del lettore badge.
    */
   public static void edit(Long id) {
@@ -105,6 +130,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Cancella il badge reader.
+   *
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
@@ -133,6 +159,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Permette l'edit delle informazioni sul badge reader.
+   *
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeReader badgeReader, @Valid Office owner) {
@@ -156,6 +183,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Permette il cambio della password per l'utente badge reader.
+   *
    * @param user Utente a cui modificare la password.
    * @param newPass nuova password da associare al lettore.
    */
@@ -183,6 +211,7 @@ public class BadgeReaders extends Controller {
 
   /**
    * Permette il salvataggio del badge reader.
+   *
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */
@@ -347,6 +376,5 @@ public class BadgeReaders extends Controller {
     index();
 
   }
-
 
 }

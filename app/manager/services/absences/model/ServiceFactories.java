@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
@@ -11,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
@@ -32,6 +50,7 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import org.joda.time.LocalDate;
 
+@Slf4j
 public class ServiceFactories {
 
   private AbsenceEngineUtility absenceEngineUtility;
@@ -43,6 +62,7 @@ public class ServiceFactories {
 
   /**
    * Constructor.
+   *
    * @param absenceEngineUtility inj
    * @param absenceComponentDao inj
    * @param personDayManager inj
@@ -63,6 +83,7 @@ public class ServiceFactories {
   
   /**
    * Costruttore per richiesta di scan.
+   *
    * @param person persona
    * @param scanFrom scanFrom
    * @param absencesToScan le assenze da scannerizzare
@@ -88,6 +109,7 @@ public class ServiceFactories {
    * Costruisce lo stato del gruppo (la periodChain). <br>
    * absenceToInsert se presente viene inserita nella computazione del gruppo per la valutazione
    * della soundness.
+   *
    * @param person persona
    * @param groupAbsenceType gruppo
    * @param date data
@@ -123,7 +145,7 @@ public class ServiceFactories {
           Sets.newHashSet());
     } else {
       allPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
-          periodChain.from, periodChain.to,Sets.newHashSet());
+          periodChain.from, periodChain.to, Sets.newHashSet());
       groupPersistedAbsences = absenceComponentDao.orderedAbsences(periodChain.person, 
           periodChain.from, periodChain.to, 
           periodChain.periodChainInvolvedCodes());
@@ -136,7 +158,7 @@ public class ServiceFactories {
 
     } else {
       buildPeriodChainPhase2(periodChain, absenceToInsert, 
-          allPersistedAbsences, groupPersistedAbsences);
+          allPersistedAbsences, groupPersistedAbsences, fetchedContracts);
     }
 
     completePeriodChain(periodChain);
@@ -146,6 +168,7 @@ public class ServiceFactories {
 
   /**
    * Prima fase di costruzione (generazione dei periodi).
+   *
    * @param person person
    * @param groupAbsenceType group
    * @param date date
@@ -212,7 +235,8 @@ public class ServiceFactories {
   
   /**
    * Seconda fase di costruzione dispatch ed analisi delle assenze (esistenti, inserite e
-   * da inserire). 
+   * da inserire).
+   *
    * @param periodChain periodChain
    * @param absenceToInsert assenza da inserire
    * @param allPersistedAbsences tutte le assenze persistite nel periodo (tutti i tipi)
@@ -220,7 +244,7 @@ public class ServiceFactories {
    */
   public void buildPeriodChainPhase2(PeriodChain periodChain, 
       Absence absenceToInsert, List<Absence> allPersistedAbsences, 
-      List<Absence> groupPersistedAbsences) {
+      List<Absence> groupPersistedAbsences, List<Contract> fetchedContracts) {
     
     periodChain.allInvolvedAbsences = absenceEngineUtility
         .mapAbsences(allPersistedAbsences, null);
@@ -236,7 +260,7 @@ public class ServiceFactories {
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       for (Absence absence : absencePeriod
           .filterAbsencesInPeriod(periodChain.involvedAbsencesInGroup)) {
-        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence);
+        dispatchAbsenceInPeriod(periodChain, absencePeriod, absence, fetchedContracts);
       }
     }
 
@@ -244,7 +268,7 @@ public class ServiceFactories {
     for (AbsencePeriod absencePeriod : periodChain.periods) {
       
       boolean successInsertInPeriod = 
-          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
+          insertAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert, fetchedContracts);
 
       // Se la situazione non è compromessa eseguo lo scan dei rimpiazzamenti
       if (!absencePeriod.containsCriticalErrors() && !absencePeriod.isCompromisedComplation()) {
@@ -391,7 +415,7 @@ public class ServiceFactories {
 
   private void dispatchAbsenceInPeriod(PeriodChain periodChain, 
       AbsencePeriod absencePeriod, 
-      Absence absence) {
+      Absence absence, List<Contract> fetchedContracts) {
     
     //se il period ha problemi critici esco
     if (absencePeriod.containsCriticalErrors()) {
@@ -434,6 +458,9 @@ public class ServiceFactories {
 
     if (isTaken) {
       
+      TakableAbsenceBehaviour takableBehaviour = 
+          absencePeriod.groupAbsenceType.getTakableAbsenceBehaviour();
+      
       int takenAmount = absenceEngineUtility.absenceJustifiedAmount(absencePeriod.person,
           absence, absencePeriod.takeAmountType);
       
@@ -444,7 +471,9 @@ public class ServiceFactories {
         return;
       }
       
-      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount);
+      takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount, 
+          fetchedContracts, absencePeriod.periodInterval(), 
+          takableBehaviour.takableAmountAdjustment);
       
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
       if (!takenAbsence.canAddTakenAbsence()) {
@@ -487,7 +516,7 @@ public class ServiceFactories {
   }
   
   private boolean insertAbsenceInPeriod(PeriodChain periodChain, AbsencePeriod absencePeriod, 
-      Absence absenceToInsert) {
+      Absence absenceToInsert, List<Contract> fetchedContracts) {
     if (absenceToInsert == null) {
       return false;
     }
@@ -510,7 +539,7 @@ public class ServiceFactories {
     
     // i vincoli dentro il periodo
     absencePeriod.attemptedInsertAbsence = absenceToInsert;
-    dispatchAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert);
+    dispatchAbsenceInPeriod(periodChain, absencePeriod, absenceToInsert, fetchedContracts);
     
     // sono riuscito a inserirla
     if (!absencePeriod.getDayInPeriod(absenceToInsert.getAbsenceDate())
@@ -532,6 +561,7 @@ public class ServiceFactories {
 
   /**
    * Inserimento nel caso di GroupAbsenceTypePattern.simpleGrouping.
+   *
    * @param periodChain catena
    * @param absenceToInsert assenza da inserire
    * @return la catena con l'esito
@@ -580,6 +610,7 @@ public class ServiceFactories {
 
   /**
    * I vincoli generici assenza.
+   *
    * @param genericErrors box errori
    * @param person persona
    * @param absence assenza
@@ -590,21 +621,24 @@ public class ServiceFactories {
       Person person, Absence absence, 
       Map<LocalDate, Set<Absence>> allCodeAbsences) {
 
-    //log.trace("L'assenza data={}, codice={} viene processata per i vincoli generici", 
-    //    absence.getAbsenceDate(), absence.getAbsenceType().getCode());
-
     final boolean isHoliday = personDayManager.isHoliday(person, absence.getAbsenceDate());
 
     //Codice non prendibile nei giorni di festa ed è festa.
     if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     } else {
+      log.info("Controllo la reperibilità per {} nel giorno {}", person, absence.getAbsenceDate());
       //check sulla reperibilità
-      if (personReperibilityDayDao
-          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent()) {
+      if (!absence.absenceType.reperibilityCompatible && personReperibilityDayDao
+          .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent() 
+          && !absence.getAbsenceType().reperibilityCompatible) {
+        log.info("Aggiungere warning di reperibilità per {} in data {}", person, 
+            absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
       }
+      log.info("Controllo i turni per {} nel giorno {}", person, absence.getAbsenceDate());
       if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
+        log.info("Aggiungere warning di turno per {} in data {}", person, absence.getAbsenceDate());
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
       }
     }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package helpers;
 
 import com.google.common.base.Optional;
@@ -12,6 +29,7 @@ import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
+import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
 import dao.GroupDao;
 import dao.MemoizedCollection;
@@ -60,17 +78,21 @@ import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.flows.AbsenceRequest;
+import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.Play;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
  * Metodi usabili nel template.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class TemplateUtility {
   
@@ -100,6 +122,7 @@ public class TemplateUtility {
   private final UsersRolesOfficesDao uroDao;
   private final GroupDao groupDao;
   private final TimeSlotDao timeSlotDao;
+  private final CompetenceRequestDao competenceRequestDao;
    
   
   /**
@@ -117,7 +140,8 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
-      UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao) {
+      UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
+      CompetenceRequestDao competenceRequestDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -139,6 +163,7 @@ public class TemplateUtility {
     this.uroDao = uroDao;
     this.groupDao = groupDao;
     this.timeSlotDao = timeSlotDao;
+    this.competenceRequestDao = competenceRequestDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -163,7 +188,8 @@ public class TemplateUtility {
   
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
-   *     compensativi da approvare nel template.
+   * compensativi da approvare nel template.
+   *
    * @return la quantità di riposi compensativi da approvare.
    */
   public final int compensatoryRestRequests() {
@@ -172,7 +198,8 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
@@ -181,7 +208,8 @@ public class TemplateUtility {
   
   /**
    * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie da approvare 
-   *     nel template.
+   * nel template.
+   *
    * @return la quantità di richieste ferie da approvare.
    */
   public final int vacationRequests() {
@@ -190,17 +218,82 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao.groupsByOffice(user.person.office, Optional.absent());
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(),Optional.absent(), 
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste di permesso personale
+   * da approvare nel template.
+   *
+   * @return la quantità di richieste di permesso personale da approvare.
+   */
+  public final int personalPermissionRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie anno passato
+   * post deadline da approvare nel template.
+   *
+   * @return la quantità di richieste ferie anno passato post deadline da approvare.
+   */
+  public final int vacationPastYearAfterDeadlineRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
+
+    return results.size();
+  }
+
+  /**
+   * Metodo di utilità per far comparire il badge con la quantità di richieste di cambio di 
+   * reperibilità da approvare nel template.
+   *
+   * @return la quantità di richieste di cambio di reperibilità attive.
+   */
+  public final int changeReperibilityRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
+            user.person);
     return results.size();
   }
 
 
   /**
    * Metodo di utilità per il nome del mese.
+   *
    * @param month numero mese nel formato stringa (ex: "1").
    * @return il nome del mese.
    */
@@ -211,6 +304,7 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per il nome del mese.
+   *
    * @param month numero mese formato integer (ex: 1).
    * @return il nome del mese.
    */
@@ -222,6 +316,7 @@ public class TemplateUtility {
   /**
    * Metodo di utilità per aggiornare il mese successivo.
    * @param month mese di partenza.
+   *
    * @return mese successivo a mese di partenza.
    */
   public final int computeNextMonth(final int month) {
@@ -233,6 +328,7 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per aggiornare all'anno successivo.
+   *
    * @param month mese di partenza.
    * @param year  anno di partenza.
    * @return anno successivo al mese/anno di partenza.
@@ -246,6 +342,7 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per aggiornare al mese precedente.
+   *
    * @param month mese di partenza.
    * @return mese precedente a mese di partenza.
    */
@@ -258,6 +355,7 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per aggiornare all'anno precedente.
+   *
    * @param month mese di partenza.
    * @param year  anno di partenza.
    * @return anno precedente al mese/anno di partenza.
@@ -327,6 +425,7 @@ public class TemplateUtility {
   
   /**
    * Controlla se i flussi sono attivi.
+   *
    * @return true se sono attivi i flussi su ePAS, false altrimenti.
    * @throws NoSuchFieldException lancia eccezione se non esiste il campo in conf.
    */
@@ -366,6 +465,7 @@ public class TemplateUtility {
 
   /**
    * Persone assegnabili ad un certo utente dall'operatore corrente.
+   *
    * @return Una lista delle persone assegnabili ad un certo utente dall'operatore corrente.
    */
   public List<PersonDao.PersonLite> assignablePeople() {
@@ -375,6 +475,7 @@ public class TemplateUtility {
 
   /**
    * Metodo che ritora la lista dei ruoli assegnabili.
+   *
    * @param office la sede per cui si cerca la lista dei ruoli
    * @return la lista dei ruoli assegnabili.
    */
@@ -398,7 +499,8 @@ public class TemplateUtility {
   }
 
   /**
-   * Metodo che ritorna la lista dei ruoli di sistema. 
+   * Metodo che ritorna la lista dei ruoli di sistema.
+   *
    * @return la lista dei ruoli di sistema.
    */
   public List<Role> allSystemRoles() {
@@ -415,6 +517,7 @@ public class TemplateUtility {
 
   /**
    * Metodo che ritorna la lista dei ruoli "fisici".
+   *
    * @return la lista dei ruoli assegnabili a persone fisiche.
    */
   public List<Role> allPhysicalRoles() {
@@ -430,6 +533,7 @@ public class TemplateUtility {
 
   /**
    * Ritorna tutti i ruoli presenti.
+   *
    * @return tutti i ruoli presenti.
    */
   public List<Role> getRoles() {
@@ -438,6 +542,7 @@ public class TemplateUtility {
 
   /**
    * Ritorna la lista degli uffici su cui l'utente ha ruolo di Technical Admin.
+   *
    * @return tutti gli uffici sul quale l'utente corrente ha il ruolo di TECHNICAL_ADMIN.
    */
   public List<Office> getTechnicalAdminOffices() {
@@ -509,6 +614,7 @@ public class TemplateUtility {
 
   /**
    * La lista dei gruppi badge per sede.
+   *
    * @param office la sede di riferimento
    * @return la lista dei gruppi badge per sede.
    */
@@ -529,6 +635,10 @@ public class TemplateUtility {
 
   public List<StampTypes> getStampTypes() {
     return UserDao.getAllowedStampTypes(Security.getUser().get());
+  }
+  
+  public List<TeleworkStampTypes> getTeleworkStampTypes() {
+    return UserDao.getAllowedTeleworkStampTypes(Security.getUser().get());
   }
 
   /**
@@ -581,6 +691,7 @@ public class TemplateUtility {
 
   /**
    * Se l'assenza è prendibile, false altrimenti.
+   *
    * @param absenceType il tipo di assenza
    * @param group il gruppo di tipi di assenza
    * @return se l'assenza è prendibile, false altrimenti
@@ -608,7 +719,7 @@ public class TemplateUtility {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0 giorni";// giorno lavorativo";
+        return "0 giorni"; // giorno lavorativo";
       }
       int units = amount / 100;
       int percent = amount % 100;
@@ -657,7 +768,7 @@ public class TemplateUtility {
   
   /**
    * Verifica se la persona è reperible in data odierna.
-   * 
+   *
    * @param person la persona di cui si intende sapere se è reperibile
    * @return se la persona è reperibile in data odierna.
    */
@@ -671,6 +782,7 @@ public class TemplateUtility {
   
   /**
    * Lista di persone appartententi all'ufficio passato (in questo anno).
+   *
    * @param office la sede per cui si ricercano le persone
    * @return la lista di persone della sede abili a far parte di un gruppo.
    */

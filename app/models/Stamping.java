@@ -1,6 +1,24 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.MoreObjects;
+import helpers.validators.StringIsValid;
 import it.cnr.iit.epas.NullStringBinder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,13 +36,14 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
 
 /**
  * Modello della Timbratura.
- * 
- * @author cristian.
+ *
+ * @author Cristian Lucchesi
  */
 @Audited
 @Entity
@@ -58,9 +77,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public String note;
   
   @As(binder = NullStringBinder.class)
+  @CheckWith(StringIsValid.class)
   public String place;
   
   @As(binder = NullStringBinder.class)
+  @CheckWith(StringIsValid.class)
   public String reason;
 
   /**
@@ -71,13 +92,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   @Column(name = "marked_by_admin")
   public boolean markedByAdmin;
+
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
   public boolean markedByEmployee;
-  
+
   /**
    * questo nuovo campo si è reso necessario per la sede centrale per capire da quale lettore 
    * proviene la timbratura così da poter applicare un algoritmo che giustifichi le timbrature 
@@ -86,6 +108,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   @Column(name = "stamping_zone")
   public String stampingZone;
+
   /**
    * true, cella bianca; false, cella gialla.
    */
@@ -118,6 +141,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Verifica se è lavoro fuori sede.
+   *
    * @return @see StampTypes::isOffSiteWork
    */
   @Transient
@@ -125,7 +149,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return stampType != null && stampType.isOffSiteWork();
   }
   
-  // costruttore di default implicitamente utilizzato dal play(controllers)
+  /**
+   * costruttore di default implicitamente utilizzato dal play(controllers).
+   */
   Stamping() {
   }
 
@@ -168,6 +194,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Orario formattato come HH:mm.
+   *
    * @return orario della timbratura formattato come HH:mm.
    */
   @Transient
@@ -181,6 +208,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Rappresentazione compatta della timbratura.
+   *
    * @return Una rappresentazione compatta della timbratura.
    */
   @Transient
@@ -209,6 +237,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return new YearMonth(date.getYear(), date.getMonthOfYear());
   }
 
+  /**
+   * Ingresso/Uscita.
+   */
   public enum WayType {
     in("in"),
     out("out");

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.configurations;
 
 import com.google.common.base.Optional;
@@ -8,7 +25,6 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -29,23 +45,28 @@ import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.query.QConfiguration;
+import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
 
+/**
+ * Manager della configurazione.
+ */
 @Slf4j
 public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
   private final PeriodManager periodManager;
-  private final PersonDao personDao;
 
+  /**
+   * Default constructor per l'injection.
+   */
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager, PersonDao personDao) {
+      PeriodManager periodManager) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
-    this.personDao = personDao;
   }
 
   /**
@@ -62,6 +83,23 @@ public class ConfigurationManager {
     return (List<Configuration>) query.fetch();
   }
 
+  /**
+   * La lista delle configurazioni delle persone con parametro epasParam e valore value.
+   *
+   * @param epasParam il parametro da cercare
+   * @param value il valore da cercare
+   * @return la lista di configurazioni della persona.
+   */
+  public List<PersonConfiguration> configurationWithTypeAndValue(
+      EpasParam epasParam, String value) {
+    final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
+    
+    final JPQLQuery query = queryFactory.selectFrom(configuration)
+        .where(configuration.epasParam.eq(epasParam)
+            .and(configuration.fieldValue.eq(value)));
+    return query.fetch();
+  }
+  
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
@@ -647,7 +685,7 @@ public class ConfigurationManager {
    * Aggiorna la configurazione di tutte le persone.
    */
   public void updatePeopleConfigurations() {
-    List<Person> people = personDao.peopleWithoutConfiguration();
+    List<Person> people = Person.findAll();
     for (Person person: people) {
       log.debug("Fix parametri di configurazione della persona {}", person.fullName());
       updateConfigurations(person);

@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 
-import com.beust.jcommander.Strings;
+//import com.beust.jcommander.Strings;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
@@ -26,6 +44,7 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.NullStringBinder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -64,7 +83,7 @@ import security.SecurityRules;
 /**
  * Controller per la gestione delle timbrature.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 @With({Resecure.class})
@@ -205,6 +224,7 @@ public class Stampings extends Controller {
 
   /**
    * Restituisce la form compilata secondo la modalità di chi fa la richiesta.
+   *
    * @param personId l'id della persona
    * @param date la data in cui si vuole inserire la timbratura
    */
@@ -267,13 +287,19 @@ public class Stampings extends Controller {
     final List<HistoryValue<Stamping>> historyStamping = stampingsHistoryDao
         .stampings(stamping.id);
 
+    boolean ownStamping = false;
     final Person person = stamping.personDay.person;
     final LocalDate date = stamping.personDay.date;
+
     if (stamping.isOffSiteWork()) {
-      render("@editOffSite", stamping,person, date, historyStamping);
+      render("@editOffSite", stamping, person, date, historyStamping);
+    }
+    if (Security.getUser().isPresent() && person.equals(Security.getUser().get().person)
+        && !Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      ownStamping = true;
     }
 
-    render(stamping, person, date, historyStamping);
+    render(stamping, person, date, historyStamping, ownStamping);
   }
 
   /**
@@ -323,7 +349,7 @@ public class Stampings extends Controller {
     final User currentUser = Security.getUser().get();
     String result = stampingManager
         .persistStamping(stamping, date, time, person, currentUser, newInsert);
-    if (!Strings.isStringEmpty(result)) {
+    if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
       flash.success(Web.msgSaved(Stampings.class));
@@ -340,6 +366,7 @@ public class Stampings extends Controller {
   
   /**
    * Metodo che permette il salvataggio della timbratura per lavoro fuori sede.
+   *
    * @param personId l'id della persona
    * @param date la data per cui si vuole salvare la timbratura
    * @param stamping la timbratura da salvare
@@ -355,13 +382,15 @@ public class Stampings extends Controller {
     if (stamping.way == null) {
       Validation.addError("stamping.way", "Obbligatorio");
     }
-    if (Strings.isStringEmpty(stamping.reason)) {
+    if (Strings.isNullOrEmpty(stamping.reason)) {
       Validation.addError("stamping.reason", "Obbligatorio");
     }
-    if (Strings.isStringEmpty(stamping.place)) {
+    if (Strings.isNullOrEmpty(stamping.place)) {
       Validation.addError("stamping.place", "Obbligatorio");
     }
-    if (Validation.hasErrors()) {
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    val validationResult = validation.valid(stamping);
+    if (!validationResult.ok) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
@@ -375,9 +404,7 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
-        
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-
+    
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
@@ -397,7 +424,7 @@ public class Stampings extends Controller {
     
     String result = stampingManager
         .persistStamping(stamping, date, time, person, currentUser, newInsert);
-    if (!Strings.isStringEmpty(result)) {
+    if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
       flash.success(Web.msgSaved(Stampings.class));
@@ -514,7 +541,7 @@ public class Stampings extends Controller {
 
   /**
    * Lista delle timbrature inserite in un mese dall'amministratore.
-   * 
+   *
    * @param year anno 
    * @param month mese 
    * @param officeId ufficio di riferimento
@@ -576,13 +603,16 @@ public class Stampings extends Controller {
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
+    
+    Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
 
-    render(daysRecap, office, date, numberOfInOut);
+    render(daysRecap, office, date, numberOfInOut, map);
   }
 
   /**
    * La presenza giornaliera del responsabile gruppo.
-   * TODO: da rivedere con la nuova implementazione dei gruppi   
+   * TODO: da rivedere con la nuova implementazione dei gruppi.
+   *
    * @param year  anno
    * @param month mese
    * @param day   giorno
@@ -598,7 +628,7 @@ public class Stampings extends Controller {
     if (uro.isPresent()) {
       
       people = groupDao.groupsByManager(Optional.fromNullable(user.person))
-          .stream().flatMap(g -> g.people.stream().distinct()).collect(Collectors.toList()); 
+          .stream().flatMap(g -> g.getPeople().stream().distinct()).collect(Collectors.toList()); 
     } else {
       flash.error("{} non sono presenti gruppi associati alla tua persona. "
           + "Rivolgiti all'amministratore del personale", user.person.fullName());
@@ -611,12 +641,12 @@ public class Stampings extends Controller {
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
     Office office = user.person.office;
+    Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;
     boolean groupView = true;
 
-    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office);
+    render("@dailyPresence", date, numberOfInOut, showLink, daysRecap, groupView, office, map);
   }
 
 }
-

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -8,7 +25,6 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
-import lombok.extern.slf4j.Slf4j;
 import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
@@ -27,8 +43,10 @@ import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
 
-
-
+/**
+ * DAO per le Compentence.
+ *
+ */
 public class CompetenceDao extends DaoBase {
 
 
@@ -40,6 +58,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La competenza con id passato come parametro.
+   *
    * @return la competenza relativa all'id passato come parametro.
    */
   public Competence getCompetenceById(Long id) {
@@ -69,6 +88,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La lista delle competenze per persona (opzionale), anno, mese (opzionale) e lista di codici.
+   *
    * @return la lista di competenze appartenenti alla lista di codici codes relative all'anno year e
    *     al mese month per la persona person.
    */
@@ -93,6 +113,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La competenza (se esiste) per persona, anno, mese, codice di competenza.
+   *
    * @return la competenza se esiste relativa all'anno year e al mese month con codice code per la
    *     persona person.
    */
@@ -165,6 +186,7 @@ public class CompetenceDao extends DaoBase {
   /**
    * La quantità di ore approvate di straordinario nell'anno, mese (opzionale), persona (opzionale)
    * e lista di codici di competenza.
+   *
    * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di
    *     straordinario (sommando i codici S1 S2 e S3).
    */
@@ -192,9 +214,9 @@ public class CompetenceDao extends DaoBase {
 
   }
 
-
   /**
    * La lista di competenze per persona, anno, mese.
+   *
    * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che
    *     abbiano un valore approvato > 0.
    */
@@ -202,9 +224,9 @@ public class CompetenceDao extends DaoBase {
     return competenceInMonth(person, year, month, Optional.<List<String>>absent());
   }
 
-
   /**
    * La lista di competenze per persona, anno, mese, lista di codici (opzionale).
+   *
    * @param person la persona per cui si cercano le competenze approvate
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -261,6 +283,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La lista di competenze per persona, gruppo di codici (opzionale), anno, mese.
+   *
    * @param person la persona di cui si cerca la lista di competenze
    * @param group il gruppo di codici di competenza
    * @param year l'anno di riferimento
@@ -275,6 +298,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La lista di competenze relative alla reperibilità nell'anno, mese, e codice.
+   *
    * @return la lista di competenze relative all'anno year, al mese month e al codice code di
    *     persone che hanno reperibilità di tipo type associata.
    */
@@ -299,6 +323,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * L'ultima competenza assegnata di un certo tipo nell'anno, mese per una persona.
+   *
    * @return l'ultima competenza assegnata din un certo typo in un determinato anno.
    */
   public Competence getLastPersonCompetenceInYear(
@@ -318,6 +343,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La lista di competenze per un certo codice di competenza.
+   *
    * @param code il codice competenza da cercare
    * @return la lista di tutte le competenze che contengono quel codice competenza.
    */
@@ -329,6 +355,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La lista di quantitativi di straordinario assegnati per la sede nell'anno.
+   *
    * @return dei quantitativi di straordinario assegnati per l'ufficio office nell'anno year.
    */
   public List<TotalOvertime> getTotalOvertime(Integer year, Office office) {
@@ -341,6 +368,7 @@ public class CompetenceDao extends DaoBase {
 
   /**
    * La quantità di ore di straordinario per la persona passata come parametro.
+   *
    * @return il personHourForOvertime relativo alla persona person passata come parametro.
    */
   public PersonHourForOvertime getPersonHourForOvertime(Person person) {

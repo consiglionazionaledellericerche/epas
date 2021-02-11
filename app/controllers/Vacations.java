@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -16,7 +33,9 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
@@ -31,6 +50,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle ferie.
+ */
 @With({Resecure.class})
 @Slf4j
 public class Vacations extends Controller {
@@ -78,12 +100,21 @@ public class Vacations extends Controller {
           vacationGroup, Optional.absent(), false);
       vacationSituations.add(vacationSituation);
     }
+    
+    GroupAbsenceType permissionGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    PeriodChain periodChain = absenceService
+        .residual(person.getValue(), permissionGroup, LocalDate.now());
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCategorySwitch(person.getValue(), LocalDate.now(), permissionGroup);
+    
     boolean showVacationPeriods = true;
-    render(vacationSituations, year, showVacationPeriods);
+    render(vacationSituations, year, showVacationPeriods, periodChain, categorySwitcher);
   }
   
   /**
    * Situazione di riepilogo contratto per il dipendente.
+   *
    * @param contractId contratto
    * @param year anno
    * @param type VACATION/PERMISSION
@@ -176,6 +207,7 @@ public class Vacations extends Controller {
   
   /**
    * Situazione di riepilogo contratto.
+   *
    * @param contractId contratto
    * @param year anno
    * @param type VACATION/PERMISSION

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="false">
+  <local-check-config name="epas google style checks" location="internal_config_1612351667261.xml" type="internal" description="">
+    <property name="org.checkstyle.google.suppressionfilter.config" value="checkstyle-suppressions.xml"/>
+    <property name="org.checkstyle.google.suppressionxpathfilter.config" value="checkstyle-xpath-suppressions.xml"/>
+  </local-check-config>
   <fileset name="all" enabled="true" check-config-name="Google Checks" local="false">
     <file-match-pattern match-pattern="\.java" include-pattern="true"/>
     <file-match-pattern match-pattern="modules" include-pattern="false"/>

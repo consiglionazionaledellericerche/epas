@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import it.cnr.iit.epas.DateInterval;
@@ -19,8 +36,8 @@ import play.data.validation.Required;
 
 /**
  * Un periodo piani ferie.
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  */
 @Entity
 @Table(name = "vacation_periods")
@@ -52,7 +69,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner target) {
-    this.contract = (Contract)target;
+    this.contract = (Contract) target;
     
   }
 
@@ -73,14 +90,14 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
 
   @Override
   public void setValue(Object value) {
-    this.vacationCode = (VacationCode)value;
+    this.vacationCode = (VacationCode) value;
     
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof VacationCode) {
-      return this.getValue().equals(((VacationCode)otherValue));
+      return this.getValue().equals(((VacationCode) otherValue));
     }
     return false;
   }

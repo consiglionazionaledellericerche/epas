@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import dao.BadgeReaderDao;
@@ -15,6 +32,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle zone di timbratura.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Zones extends Controller {
@@ -28,6 +48,7 @@ public class Zones extends Controller {
 
   /**
    * Form di inserimento di una nuova zona associata ad un sorgente timbratura.
+   *
    * @param badgeReaderId l'id della sorgente timbratura a cui associare le zone.
    */
   public static void insertZone(long badgeReaderId) {
@@ -44,6 +65,7 @@ public class Zones extends Controller {
   
   /**
    * Salvataggio di una nuova zona.
+   *
    * @param zone la zona che si intende persistere.
    */
   public static void save(Zone zone, long readerId) {
@@ -59,6 +81,7 @@ public class Zones extends Controller {
   
   /**
    * ritorna la form per collegare le zone.
+   *
    * @param badgeReaderId l'id del badgereader che preleva timbrature dalle zone.
    */
   public static void linkZones(long badgeReaderId, ZoneToZones link) {
@@ -76,7 +99,7 @@ public class Zones extends Controller {
   
   /**
    * Salva il collegamentro tra due zone di timbratura.
-   * 
+   *
    * @param link il collegamento tra zone da salvare.
    */
   public static void saveLinks(@Valid ZoneToZones link) {
@@ -115,6 +138,7 @@ public class Zones extends Controller {
   
   /**
    * Il metodo che elimina un collegamento tra zone.
+   *
    * @param linkId l'id del collegamento da eliminare
    * @param confirmed il booleano che mi identifica se devo confermare o meno la cancellazione
    */

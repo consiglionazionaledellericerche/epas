@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -49,6 +66,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle assenze.
+ */
 @With({Resecure.class})
 public class Absences extends Controller {
 
@@ -91,7 +111,7 @@ public class Absences extends Controller {
   }
 
   /**
-   * metodo che renderizza la pagina di visualizzazione delle assenze in un anno e in mese
+   * Metodo che renderizza la pagina di visualizzazione delle assenze in un anno e in mese
    * specifico.
    *
    * @param absenceCode il codice di assenza
@@ -142,7 +162,8 @@ public class Absences extends Controller {
   }
   
   /**
-   * aggiunge al tempo a lavoro il quantitativo di ore e minuti inserito per quel giorno.
+   * Aggiunge al tempo a lavoro il quantitativo di ore e minuti inserito per quel giorno.
+   *
    * @param absenceId l'identificativo dell'assenza
    * @param hours le ore da salvare
    * @param minutes i minuti da salvare
@@ -253,7 +274,7 @@ public class Absences extends Controller {
   }
 
   /**
-   * metodo che permette lo scaricamento di un determinato allegato in formato pdf.
+   * Metodo che permette lo scaricamento di un determinato allegato in formato pdf.
    *
    * @param id l'id dell'allegato da scaricare
    */
@@ -465,9 +486,9 @@ public class Absences extends Controller {
 
   /**
    * Metodo che ritorna le assenze nell'anno per una persona.
+   *
    * @param year l'anno di riferimento
    */
-
   public static void absencesPerPerson(Integer year) {
 
     //controllo sui parametri
@@ -553,6 +574,9 @@ public class Absences extends Controller {
     render(pdList, person, date);
   }
 
+  /**
+   * DTO per contenere le assenze dello stesso tipo.
+   */
   public static class AttachmentsPerCodeRecap {
 
     List<Absence> absenceSameType = new ArrayList<Absence>();

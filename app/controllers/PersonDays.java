@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Preconditions;
@@ -19,6 +36,7 @@ import models.PersonDay;
 import models.Stamping;
 import models.ZoneToZones;
 import models.absences.Absence;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -26,7 +44,7 @@ import security.SecurityRules;
 /**
  * Controller per la visualizzazione dello storico dei PersonDay.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @With({Resecure.class})
 public class PersonDays extends Controller {
@@ -84,8 +102,8 @@ public class PersonDays extends Controller {
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.onHoliday) {
-      validation.addError("hours", "Valore non consentito.");
-      validation.addError("minutes", "Valore non consentito.");
+      Validation.addError("hours", "Valore non consentito.");
+      Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
       render("@workingHoliday", personDay, hours, minutes);
     }
@@ -137,8 +155,8 @@ public class PersonDays extends Controller {
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.outOpening) {
-      validation.addError("hours", "Valore non consentito.");
-      validation.addError("minutes", "Valore non consentito.");
+      Validation.addError("hours", "Valore non consentito.");
+      Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
       render("@workingOutOpening", personDay, hours, minutes);
     }
@@ -202,6 +220,9 @@ public class PersonDays extends Controller {
 
   }
 
+  /**
+   * Decisione sul ricalcolo dei buoni pasto.
+   */
   public enum MealTicketDecision {
     COMPUTED, FORCED_TRUE, FORCED_FALSE;
   }

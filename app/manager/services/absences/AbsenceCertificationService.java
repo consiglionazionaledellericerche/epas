@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Optional;
@@ -39,7 +56,8 @@ import play.cache.Cache;
 
 /**
  * Servizi di comparazione fra assenze epas e assenze attestati.
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 @Slf4j
@@ -52,6 +70,7 @@ public class AbsenceCertificationService {
 
   /**
    * Injection.
+   *
    * @param absenceComponentDao injected
    * @param certificationService injected
    * @param absenceService injected
@@ -82,19 +101,21 @@ public class AbsenceCertificationService {
 
   /**
    * La situatione della persona dalla cache se caricata.
+   *
    * @param person person 
    * @param year anno
    */
   public Optional<CertificationYearSituation> certificationYearSituationCached(Person person, 
       int year) {
     return Optional.fromNullable(
-        (CertificationYearSituation)Cache.get(cysKey(person, year)));
-    
+        (CertificationYearSituation) Cache.get(cysKey(person, year)));
+
   }
-  
+
 
   /**
    * Situazione assenze epas/attestati.
+   *
    * @param person persona
    * @param year anno
    * @param cache prova a prelevare il certification year situation dalla cache
@@ -111,7 +132,7 @@ public class AbsenceCertificationService {
       }
     }
     
-    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
+    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente) Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);        
@@ -127,7 +148,7 @@ public class AbsenceCertificationService {
       return null;
     }
     
-    CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
+    CruscottoDipendente cruscottoPrev = (CruscottoDipendente) Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
@@ -454,7 +475,7 @@ public class AbsenceCertificationService {
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code37, year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
-    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code37,  year);
     if (vacationSituation.lastYear != null) {
       vacationPreviousYear.notPresent = absenceNotInAttestati(
           vacationSituation.lastYear.absencesUsed(),
@@ -636,6 +657,7 @@ public class AbsenceCertificationService {
    *  - tolgo il 23H7 da inserire automaticamente
    *  - tolgo il 23 da codici da rimuovere
    *  - inserisco il 23H7 ok
+   * 
    * @param situation absenceSituation
    */
   private void patchPostPartumH7(Person person, CertificationYearSituation situation) {
@@ -700,6 +722,7 @@ public class AbsenceCertificationService {
   
   /**
    * Le assenze mancanti rispetto ad attestati da persistere.
+   *
    * @param person person
    * @param year year
    * @return list
@@ -717,8 +740,6 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType completeDayAndAddOvertime = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
 
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
@@ -921,6 +942,5 @@ public class AbsenceCertificationService {
     
     return codeComparation;
   }
-  
-  
+
 }

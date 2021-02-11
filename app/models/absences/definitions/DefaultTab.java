@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences.definitions;
 
 import com.google.common.base.Optional;
@@ -9,7 +26,7 @@ import org.assertj.core.util.Lists;
 /**
  * Tab di default.
  * 
- * @author alessandro
+ * @author Alessandro Martelli
  *
  */
 public enum DefaultTab {
@@ -27,10 +44,11 @@ public enum DefaultTab {
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11), 
   TELELAVORO("Telelavoro", 12), 
   LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
-  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 8), 
+  LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 14), 
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
-  COVID19("Emergenza covid-19", 14), 
+  COVID19("Emergenza covid-19", 16), 
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
+  CONGEDI_PARENTALI_DIPENDENTI("Congedi Parentali dipendenti", 24),
   AUTOMATICI("Codici Automatici", 11);
 
   public String description;
@@ -43,7 +61,7 @@ public enum DefaultTab {
 
   /**
    * Ricerca le categorie modellate e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultTab> missing(List<CategoryTab> allTabs) {
@@ -65,7 +83,7 @@ public enum DefaultTab {
 
   /**
    * L'enumerato corrispettivo della tab (se esiste...)
-   * 
+   *
    * @return optional dell'enumerato
    */
   public static Optional<DefaultTab> byName(CategoryTab tab) {

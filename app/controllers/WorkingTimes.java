@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -40,6 +57,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle tipologie di orario di lavoro.
+ */
 @With({Resecure.class})
 @Slf4j
 public class WorkingTimes extends Controller {
@@ -139,6 +159,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra i periodi con quel tipo orario appartenenti a contratti attualmente attivi.
+   *
    * @param wttId tipo orario
    * @param officeId sede
    */
@@ -162,13 +183,14 @@ public class WorkingTimes extends Controller {
   
   /**
    * Inserimento delle informazioni di base tipo orario.
+   *
    * @param officeId id ufficio
    * @param compute controllo degli step
    * @param name nome identificativo dell'orario di lavoro
    * @param workingTimeTypePattern tipo di orario di lavoro (orizzontale/verticale).
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute,
-      String name, WorkingTimeTypePattern workingTimeTypePattern) {
+      String name, String externalId, WorkingTimeTypePattern workingTimeTypePattern) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -191,13 +213,13 @@ public class WorkingTimes extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      render(office, name, workingTimeTypePattern);
+      render(office, name, externalId, workingTimeTypePattern);
     }
 
     if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
-      render("@insertWorkingTime", horizontalPattern, office, name);
+      render("@insertWorkingTime", horizontalPattern, office, name, externalId);
     } else {
       final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
       List<VerticalWorkingTime> vwtProcessedList = processed(key);
@@ -205,7 +227,7 @@ public class WorkingTimes extends Controller {
       int step = 1;
       VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
 
-      render("@insertVerticalWorkingTime", office, vwt, name, step, daysProcessed);
+      render("@insertVerticalWorkingTime", office, vwt, name, externalId, step, daysProcessed);
     }
   }
 
@@ -259,7 +281,7 @@ public class WorkingTimes extends Controller {
   
   /**
    * Inserimento di un tipo part-time verticale.
-   * 
+   *
    * @param officeId id Ufficio proprietario
    * @param name nome dell'orario di lavoro
    * @param step numero dello step di creazione dell'orario verticale
@@ -267,7 +289,8 @@ public class WorkingTimes extends Controller {
    * @param submit  booleano per completare la procedura
    * @param vwt Orario di lavoro verticale.
    */
-  public static void insertVerticalWorkingTime(Long officeId, @Required String name, int step,
+  public static void insertVerticalWorkingTime(Long officeId, @Required String name, 
+      String externalId, int step,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
     flash.clear();
@@ -290,16 +313,17 @@ public class WorkingTimes extends Controller {
     //Persistenza ...
     if (submit) {
       // TODO: validatore
-      workingTimeTypeManager.saveVerticalWorkingTimeType(vwtProcessedList, office, name);
+      workingTimeTypeManager.saveVerticalWorkingTimeType(
+          vwtProcessedList, office, name, externalId);
       flash.success("Il nuovo tipo orario è stato inserito correttamente.");
       manageOfficeWorkingTime(office.id);
     }
 
     Preconditions.checkNotNull(vwt);
     // Validazione dto
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
-      render(office, vwt, name, step, daysProcessed);
+      render(office, vwt, name, externalId, step, daysProcessed);
     }
 
     // Next step
@@ -311,7 +335,7 @@ public class WorkingTimes extends Controller {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     }
-    render(vwt, step, name, office, daysProcessed);
+    render(vwt, step, name, externalId, office, daysProcessed);
 
 
   }
@@ -394,6 +418,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra il tipo orario orizzontale.
+   *
    * @param wttId tipo orario.
    */
   public static void showHorizontal(Long wttId) {
@@ -417,6 +442,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Mostra il tipo orario.
+   *
    * @param wttId tipo orario
    */
   public static void showWorkingTimeType(Long wttId) {
@@ -436,6 +462,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Elimina un tipo orario (non deve essere associato ad alcun contratto).
+   *
    * @param wttId tipo orario
    */
   public static void delete(Long wttId) {
@@ -502,6 +529,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Modale per il cambia orario a tutti.
+   *
    * @param wttId tipo orario
    * @param officeId sede
    */
@@ -521,6 +549,7 @@ public class WorkingTimes extends Controller {
 
   /**
    * Esegue il cambia orario a tutti.
+   *
    * @param wtt vecchio tipo
    * @param wttNew nuovo tipo
    * @param officeId sede
@@ -534,16 +563,16 @@ public class WorkingTimes extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     if (wttNew == null || !wttNew.isPersistent()) {
-      validation.addError("wttNew", "Campo obbligatorio.");
+      Validation.addError("wttNew", "Campo obbligatorio.");
     }
     if (dateFrom == null) {
-      validation.addError("dateFrom", "Campo obbligatorio.");
+      Validation.addError("dateFrom", "Campo obbligatorio.");
     } else {
       validation.future(dateFrom.toDate(), 
           LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue().minusDays(1).toDate())
       .key("dateFrom").message("validation.after");
       if (dateTo != null && dateFrom.isAfter(dateTo)) {
-        validation.addError("dateTo", "Deve essere sucessivo alla data iniziale");
+        Validation.addError("dateTo", "Deve essere sucessivo alla data iniziale");
       }
     }
     if (Validation.hasErrors()) {

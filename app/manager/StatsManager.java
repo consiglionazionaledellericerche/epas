@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.collect.Sets;
@@ -26,7 +43,7 @@ import org.joda.time.YearMonth;
 /**
  * Fornisce statistiche sui dati presenti nell'anagrafica di ePAS.
  * 
- * @author cristian
+ * @author Cristian Lucchesi
  *
  */
 public class StatsManager {
@@ -176,7 +193,7 @@ public class StatsManager {
     row.createCell(0).setCellValue("Numero dipendenti della SAC");
     row.createCell(1).setCellValue(numberOfHeadQuarterPersons);
     
-    IntStream.of(0,1).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1).forEach(column -> sheet.autoSizeColumn(column));
     
   }
   
@@ -204,7 +221,7 @@ public class StatsManager {
       cellCds = row.createCell(2);
       cellCds.setCellValue(institute.cds);
     }
-    IntStream.of(0,1,2).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2).forEach(column -> sheet.autoSizeColumn(column));
   }
   
   private void buildOfficesSheet(Workbook wb, String sheetName, Set<Office> offices) {
@@ -234,7 +251,7 @@ public class StatsManager {
       cellCds = row.createCell(3);
       cellCds.setCellValue(office.address);      
     }
-    IntStream.of(0,1,2,3).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2, 3).forEach(column -> sheet.autoSizeColumn(column));
   }
 
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.configurations;
 
 import com.google.common.base.Joiner;
@@ -18,6 +35,9 @@ import org.joda.time.format.DateTimeFormat;
 import org.testng.collections.Lists;
 import play.Play;
 
+/**
+ * I Parametri di ePAS.
+ */
 @Slf4j
 public enum EpasParam {
 
@@ -31,7 +51,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   ENABLE_CALENDARSHIFT("enable_calendar_shift",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -39,7 +59,15 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
+  ENABLE_CALENDAR_REPERIBILITY("enable_calendar_reperibility",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
   ENABLE_MISSIONS_INTEGRATION("enable_mission_integration",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -55,7 +83,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
+
 
   TELEWORK("telework",
 
@@ -65,7 +93,16 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
+
+  TELEWORK_STAMPINGS("telework_stampings",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+
   DISABLED_PERSON_PERMISSION("disabled_person_permission",
 
       EpasParamCategory.GENERAL,
@@ -74,8 +111,17 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
+
   DISABLED_RELATIVE_PERMISSION("disabled_relative_permission",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  SECOND_DISABLED_RELATIVE_PERMISSION("second_disabled_relative_permission",
 
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -92,7 +138,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
+
   RIGHT_TO_STUDY("right_to_study",
 
       EpasParamCategory.GENERAL,
@@ -101,24 +147,36 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
-  
+
   COVID_19("covid_19",
 
-    EpasParamCategory.GENERAL,
-    EpasParamTimeType.GENERAL,
-    EpasParamValueType.BOOLEAN,
-    EpasParamValueType.formatValue(false),
-    Lists.<RecomputationType>newArrayList(),
-    Person.class),
-  
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+
   ADDITIONAL_HOURS("additional_hours",
 
-    EpasParamCategory.GENERAL,
-    EpasParamTimeType.GENERAL,
-    EpasParamValueType.BOOLEAN,
-    EpasParamValueType.formatValue(false),
-    Lists.<RecomputationType>newArrayList(),
-    Person.class),
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  PARENTAL_LEAVE_AND_CHILD_ILLNESS("parental_leave_and_child_illness",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+
+
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
@@ -168,7 +226,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   SEND_ADMIN_NOTIFICATION("send_admin_notification",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -176,19 +234,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
 
-  
-  /**
-   * Di quanto indietro nel tempo effettuare il ricalcolo dei personDays.
-   */
-  RECOMPUTATION_LIMIT("recomputation_limit",
-      EpasParamCategory.GENERAL,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.INTEGER,
-      EpasParamValueType.formatValue(6),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
 
   /**
    * Viene utilizzato per popolare il campo replyTo delle mail inviate dal sistema.
@@ -212,7 +258,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
    * Tecnici e Ricercatori possono inserirsi le ferie e riposi. 
    * Con notifica al direttore / responsabile.
@@ -231,7 +277,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
    * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del
    * proprio orario di lavoro.
@@ -308,13 +354,13 @@ public enum EpasParam {
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
-  
+
   WORK_INTERVAL_MISSION_DAY("work_interval_mission_day",
       EpasParamCategory.PERIODIC,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-          .formatValue(new LocalTimeInterval(new LocalTime(7, 0), new LocalTime(19, 0))),
+      .formatValue(new LocalTimeInterval(new LocalTime(7, 0), new LocalTime(19, 0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
@@ -324,7 +370,7 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-          .formatValue(new LocalTimeInterval(new LocalTime(12, 0), new LocalTime(15, 0))),
+      .formatValue(new LocalTimeInterval(new LocalTime(12, 0), new LocalTime(15, 0))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
@@ -334,11 +380,11 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.LOCALTIME_INTERVAL,
       EpasParamValueType
-          .formatValue(new LocalTimeInterval(new LocalTime(0, 0), new LocalTime(23, 59))),
+      .formatValue(new LocalTimeInterval(new LocalTime(0, 0), new LocalTime(23, 59))),
       Lists.newArrayList(RecomputationType.DAYS, RecomputationType.RESIDUAL_HOURS,
           RecomputationType.RESIDUAL_MEALTICKETS),
       Office.class),
-  
+
   //#######################################
   // FLOWS PARAMS
 
@@ -353,12 +399,28 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   SEND_FLOWS_NOTIFICATION("send_flows_notification",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  SEND_MANAGER_NOTIFICATION_FOR_661("send_manager_notification_for_661",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  ENABLE_37_FLOW("enable_37_flow",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
@@ -412,7 +474,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
    * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.
    */
@@ -425,7 +487,7 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
- 
+
   /**
    * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
    * responsabile di sede.
@@ -451,7 +513,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
    * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte 
    * dell'eventuale responsabile di gruppo.
@@ -477,9 +539,9 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-  
+
   /**
-   * Per i livelli I-III è necessaria l'approvazione dei riposi compensativi da parte del 
+   * Per i responsabili di gruppo è necessaria l'approvazione dei riposi compensativi da parte del 
    * responsabile di sede.
    */
   COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
@@ -489,10 +551,115 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
-      Office.class)
+      Office.class),
 
-  ;
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_manager_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  //#####################################################################
+  //FLOWS PARAMS COMPETENCES
   
+  /**
+   * Attivazione o meno delle richieste di straordinario.
+   */
+  ENABLE_COMPETENCE_FLOWS(
+      "enable_competence_flows",
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte 
+   * dell'eventuale responsabile del servizio di reperibilità.
+   */
+  CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED(
+      "change_reperibility_request_reperibility_manager_approval_required",
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità 
+   * da parte di un reperibile.
+   */
+  CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED(
+      "change_reperibility_request_employee_approval_required",
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class);
+
   public final String name;
   public final EpasParamCategory category;
   public final EpasParamTimeType epasParamTimeType;
@@ -501,6 +668,9 @@ public enum EpasParam {
   public final Object defaultValue;
   public final Class<?> target;
 
+  /**
+   * Costruttore per inizializzazione configurazione parametri.
+   */
   EpasParam(String name, EpasParamCategory category, EpasParamTimeType epasParamTimeType,
       EpasParamValueType epasParamValueType, Object defaultValue,
       List<RecomputationType> recomputationTypes, Class<?> target) {
@@ -513,31 +683,49 @@ public enum EpasParam {
     this.target = target;
   }
 
+  /**
+   * Verifica se il parametro è annuale.
+   */
   public boolean isYearly() {
     return this.epasParamTimeType.equals(EpasParamTimeType.YEARLY);
   }
 
+  /**
+   * Verifica se il parametro è generale.
+   */
   public boolean isGeneral() {
     return this.epasParamTimeType.equals(EpasParamTimeType.GENERAL);
   }
 
 
+  /**
+   * Verifica se il parametro è periodico.
+   */
   public boolean isPeriodic() {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
   }
 
   public enum EpasParamCategory {
-    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS
+    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
   }
 
+  /**
+   * Tipologie di periodicità temporale del parametro.
+   */
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;
-    
+
+    /**
+     * Verifica se la periodicità è GENERAL.
+     */
     public boolean isGeneral() {
       return this == GENERAL;
     }
   }
 
+  /**
+   * Tipologie di ricalcolo.
+   */
   public enum RecomputationType {
     DAYS, RESIDUAL_HOURS, RESIDUAL_MEALTICKETS
   }
@@ -545,18 +733,23 @@ public enum EpasParam {
   /**
    * Enumerato con i tipi di valori che può assumere un parametro di configurazione.
    *
-   * @author alessandro
+   * @author Alessandro Martelli
    */
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
     EMAIL, IP_LIST, INTEGER, BOOLEAN;
 
+    /**
+     * Rappresenta un intervallo di LocalTime.
+     */
     public static class LocalTimeInterval {
       public LocalTime from;
       public LocalTime to;
 
-      // TODO: validation
+      /**
+       * Costruttore.
+       */
       public LocalTimeInterval(LocalTime from, LocalTime to) {
         this.from = from;
         this.to = to;
@@ -568,11 +761,17 @@ public enum EpasParam {
       }
     }
 
+    /**
+     * Rappresenta una lista di IP.
+     */
     public static class IpList {
       public List<String> ipList;
 
       // TODO: validation
 
+      /**
+       * Costruttore.
+       */
       public IpList(List<String> ipList) {
         this.ipList = ipList;
       }
@@ -656,10 +855,10 @@ public enum EpasParam {
             }
           case DAY_MONTH:
             return new MonthDay(
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[1]),
-                new Integer(value.split(DAY_MONTH_SEPARATOR)[0]));
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[1]),
+                Integer.parseInt(value.split(DAY_MONTH_SEPARATOR)[0]));
           case MONTH:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case EMAIL:
             return value;
           case IP_LIST:
@@ -667,9 +866,9 @@ public enum EpasParam {
                 Splitter.on(IP_LIST_SEPARATOR)
                 .trimResults().omitEmptyStrings().splitToList(value.trim()));
           case INTEGER:
-            return new Integer(value);
+            return Integer.parseInt(value);
           case BOOLEAN:
-            return new Boolean(value);
+            return Boolean.parseBoolean(value);
           default:
             log.warn("Tipo non riconosciuto: {}", type);
         }
@@ -683,14 +882,14 @@ public enum EpasParam {
   /**
    * Verifica la lista dei cds non abilitati a visualizzare la 
    * "Presenze automatica".
-   * 
+   *
    * @return la lista dei cds che non sono abilitati a visualizzare la 
    *     "Presenza automatica" sui contratti dei dipendenti.
    */
   public static Set<String> revokedCdsStampProfilePermission() {
     val cds = ImmutableSet.copyOf(
         Play.configuration.getProperty("permission.revoke.contract.stamp_profile.cds", "000")
-          .split(","));
+        .split(","));
     log.trace("revokedCds4StampProfilePermission = {}", cds);    
     return cds;
   }

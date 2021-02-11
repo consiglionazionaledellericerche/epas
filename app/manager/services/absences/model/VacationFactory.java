@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
@@ -9,6 +26,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -28,6 +46,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
 
+/**
+ * Factory per le ferie.
+ */
 @Slf4j
 public class VacationFactory {
   
@@ -46,6 +67,7 @@ public class VacationFactory {
   
   /**
    * La periodChain che riduce il problema delle ferie e permessi alla prendibilità di assenze.
+   *
    * @param person persona 
    * @param group gruppo
    * @param fetchedContract i contratti
@@ -145,7 +167,7 @@ public class VacationFactory {
     //Ferie maturate nell'anno
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -212,7 +234,7 @@ public class VacationFactory {
     //Collapse initialization days
     handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> permissionPeriodPerYear(Person person, GroupAbsenceType group, 
@@ -226,7 +248,7 @@ public class VacationFactory {
     DateInterval yearInterval = DateUtility.getYearInterval(year);
     List<Integer> limits = Lists.newArrayList();
     //Permessi nell'anno
-    for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
+    for (VacationPeriod vacationPeriod : contract.getExtendedVacationPeriods()) {
       if (DateUtility
           .intervalIntersection(vacationPeriod.periodInterval(), yearInterval) == null) {
         continue;
@@ -268,10 +290,10 @@ public class VacationFactory {
     LocalDate endYear = new LocalDate(year, 12, 31);
     
     if (!beginYear.isEqual(periods.get(0).from)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     if (!endYear.isEqual(periods.get(periods.size() - 1).to)) {
-      return periods;
+      return periods.stream().distinct().collect(Collectors.toList());
     }
     
     int lowerLimitSelected = lowerLimits.get(0);
@@ -298,7 +320,7 @@ public class VacationFactory {
       periods.get(0).vacationAmountBeforeInitializationPatch = newAmount;
     }
     
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   private List<AbsencePeriod> fixTooLucky(List<AbsencePeriod> periods, List<Integer> upperLimits, 
@@ -388,7 +410,9 @@ public class VacationFactory {
   private List<AbsencePeriod> handleAccruedFirstYear(Person person, GroupAbsenceType group, 
       Contract contract, List<AbsencePeriod> periods) {
     List<AbsencePeriod> fixed = Lists.newArrayList();
-    LocalDate secondYearStart = contract.beginDate.plusYears(1);
+    
+    LocalDate secondYearStart = contract.getPreviousContract() != null
+        ? contract.getPreviousContract().beginDate : contract.beginDate.plusYears(1);
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {
@@ -515,11 +539,12 @@ public class VacationFactory {
         break;
       }
     }
-    return periods;
+    return periods.stream().distinct().collect(Collectors.toList());
   }
   
   /**
    * Gestore dell'inizializzazione.
+   *
    * @return l'ammontare da attribuire ai periodi successivi perchè precedente l'inizializzazione.
    */
   private List<AbsencePeriod> handleInitialization(List<AbsencePeriod> periods, 
@@ -588,7 +613,7 @@ public class VacationFactory {
   
   private LocalDate vacationsExpireDate(int year, Office office) {
 
-    MonthDay monthDay = (MonthDay)configurationManager
+    MonthDay monthDay = (MonthDay) configurationManager
         .configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, year); 
 
     LocalDate expireDate = LocalDate.now()

@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
@@ -13,29 +31,22 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
-
 import helpers.rest.ApiRequestException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-
 import synch.perseoconsumers.AnagraficaApis;
 
 @Slf4j
@@ -65,7 +76,7 @@ public class RolePerseoConsumer {
 
 
   /**
-   * @return La lista dei ruoli assegnati su perseo alle sedi.
+   * a lista dei ruoli assegnati su perseo alle sedi.
    */
   private ListenableFuture<List<PerseoRole>> perseoRoles() {
 

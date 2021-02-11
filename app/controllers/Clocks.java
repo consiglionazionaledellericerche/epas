@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -10,9 +27,12 @@ import it.cnr.iit.epas.NullStringBinder;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
+import manager.ldap.LdapService;
+import manager.ldap.LdapUser;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -31,8 +51,17 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Util;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione delle timbrature via WEB.
+ *
+ * @author Cristian Lucchesi
+ * @author Dario Tagliaferri
+ *
+ */
+@Slf4j
 @With(Resecure.class)
 public class Clocks extends Controller {
 
@@ -48,6 +77,8 @@ public class Clocks extends Controller {
   static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
   static ConsistencyManager consistencyManager;
+  @Inject
+  static LdapService ldapService;
 
   /**
    * Mostra la pagina di inizio della timbratura web.
@@ -67,8 +98,7 @@ public class Clocks extends Controller {
       try {
         Secure.login();
       } catch (Throwable ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
+        log.warn("Eccezione per la login durante la @Clocks.show", ex);
       }
     }
 
@@ -80,6 +110,7 @@ public class Clocks extends Controller {
 
   /**
    * Mostra la pagina di login per la timbratura web.
+   *
    * @param person la persona che intende loggarsi
    * @param password la password con cui intende loggarsi
    */
@@ -99,6 +130,45 @@ public class Clocks extends Controller {
       show();
     }
 
+    checkIpEnabled(person);
+
+    if (Security.authenticate(user.username, password)) {
+      // Mark user as connected
+      session.put("username", user.username);
+      daySituation();
+    } else {
+      flash.error("Autenticazione fallita!");
+      show();
+    }
+  }
+
+  /**
+   * Effettua il login tramite ldap.
+   */
+  @NoCheck
+  public static void ldapLogin(String username, String password) {
+    log.debug("Richiesta autenticazione su Timbrature via WEB con credenziali "
+        + "LDAP username={}", username);
+
+    Optional<LdapUser> ldapUser = ldapService.authenticate(username, password);
+
+    if (!ldapUser.isPresent()) {
+      log.info("Failed clock login using LDAP for {}", username);
+      flash.error("Oops! Username o password sconosciuti");
+      show();
+    }
+
+    log.debug("clockLdapLogin -> LDAP user = {}", ldapUser.get());
+
+    Person person = Ldap.getPersonByLdapUser(ldapUser.get(), Optional.of("/clocks/show"));
+    if (person != null) {
+      checkIpEnabled(person);
+      daySituation();
+    }
+  }
+  
+  @Util
+  private static void checkIpEnabled(Person person) {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
@@ -107,16 +177,6 @@ public class Clocks extends Controller {
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
           + " abilitarlo");
-      show();
-
-    }
-
-    if (Security.authenticate(user.username, password)) {
-      // Mark user as connected
-      session.put("username", user.username);
-      daySituation();
-    } else {
-      flash.error("Autenticazione fallita!");
       show();
     }
   }
@@ -156,6 +216,7 @@ public class Clocks extends Controller {
 
   /**
    * Ritorna la form di inserimento della timbratura.
+   *
    * @param wayType verso timbratura.
    */
   public static void webStamping(@Required WayType wayType) {
@@ -172,6 +233,7 @@ public class Clocks extends Controller {
 
   /**
    * Inserisce la timbratura.
+   *
    * @param way       verso timbratura
    * @param stampType Causale timbratura
    * @param note      eventuali note.

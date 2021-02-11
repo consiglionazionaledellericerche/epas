@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -11,6 +28,7 @@ import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.validators.LocalDateIsNotFuture;
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +46,7 @@ import models.Person;
 import models.User;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -38,6 +57,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione dei buoni pasto.
+ */
 @With({Resecure.class})
 public class MealTickets extends Controller {
 
@@ -123,14 +145,15 @@ public class MealTickets extends Controller {
 
   /**
    * Form di inserimento buoni pasto e riepilogo degli ultimi blocchi inseriti.
+   *
    * @param contractId l'id del contratto di cui vedere i buoni inseriti
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
   public static void personMealTickets(Long contractId, Integer year, Integer month) {
-    
+
     Contract contract = contractDao.getContractById(contractId);
-    
+
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
     rules.checkIfPermitted(contract.person.office);
@@ -247,19 +270,20 @@ public class MealTickets extends Controller {
   public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
-      @Valid @Required LocalDate deliveryDate, @Valid @Required LocalDate expireDate) {
+      @Valid @Required @CheckWith(LocalDateIsNotFuture.class) LocalDate deliveryDate, 
+      @Valid @Required LocalDate expireDate) {
 
     Contract contract = contractDao.getContractById(contractId);
     Person person = contract.person;
     notFoundIfNull(contract.person);
-    
+
     rules.checkIfPermitted(contract.person.office);
     Preconditions.checkState(contract.isPersistent());
     User admin = Security.getUser().get();
 
     MealTicketRecap recap;
     //Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-    
+
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
@@ -270,7 +294,7 @@ public class MealTickets extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      
+
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
@@ -282,17 +306,17 @@ public class MealTickets extends Controller {
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
           deliveryDate, expireDate, admin);
     }
-    
+
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
     ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
         ticketNumberFrom, ticketNumberTo, expireDate, office));
-    
+
     ticketToAddOrdered.forEach(ticket -> {
       validation.valid(ticket);          
-      
+
     });
     if (Validation.hasErrors()) {
-      
+
       Validation.errors().forEach(error -> {
         if (error.getKey().equals(".code")) {
           flash.error(Messages.get("mealTicket.error"));
@@ -300,7 +324,7 @@ public class MealTickets extends Controller {
               deliveryDate, expireDate, admin);
         }
       });
-      
+
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
@@ -504,9 +528,17 @@ public class MealTickets extends Controller {
   public static void findCodeBlock(String code) {
 
     List<BlockMealTicket> blocks = Lists.newArrayList();
+    List<MealTicket> mealTicket = Lists.newArrayList();
     if (code != null && !code.isEmpty()) {
-      List<MealTicket> mealTicket = mealTicketDao.getMealTicketsMatchCodeBlock(code,
-          Optional.<Office>absent());
+      if (Security.getUser().get().isSystemUser()) {
+        mealTicket = mealTicketDao.getMealTicketsMatchCodeBlock(code,
+            Optional.<Office>absent());
+
+      } else {
+        mealTicket = mealTicketDao
+            .getMealTicketsMatchCodeBlock(code, 
+                Optional.of(Security.getUser().get().person.office));
+      }
       blocks = MealTicketStaticUtility
           .getBlockMealTicketFromOrderedList(mealTicket, Optional.<DateInterval>absent());
     }

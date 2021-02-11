@@ -1,0 +1,22 @@
+#{modalAsync id:'modalDeleteStamping', button:'Salva', 
+title:('Cancella orario ' + stamping.stampType.description)}
+<div id="absenceCodeData">
+#{form action:@TeleworkStampings.deleteTeleworkStamping(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  	#{f.hidden 'teleworkStampingId', value:stamping.id /}
+  	#{f.hidden 'confirmed', value:confirmed /}
+	
+  		#{alert color:'danger'}
+  			<p>Conferma cancellazione dell'orario <strong>${stamping.date.format()}</strong>.</p>
+  			<p>Se intendi veramente rimuovere la timbratura premi sul bottone sottostante.</p><br>
+  		#{/alert}
+  	
+  
+	#{b.buttons center:true}
+		#{b.submit 'Cancella', color:'danger' /}		
+	#{/b.buttons}
+   
+  #{/form}
+</div>
+#{/modalAsync}

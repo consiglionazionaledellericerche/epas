@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package persondays;
 
 import com.google.common.base.Optional;
@@ -24,11 +41,11 @@ import play.test.UnitTest;
 @StaticInject
 public class PersonDaysTest extends UnitTest {
 
-  public static LocalTime startLunch = new LocalTime(1,0,0);
-  public static LocalTime endLunch = new LocalTime(23,0,0);
+  public static LocalTime startLunch = new LocalTime(1, 0, 0);
+  public static LocalTime endLunch = new LocalTime(23, 0, 0);
   
-  public static LocalTime startWork = new LocalTime(0,0,0);
-  public static LocalTime endWork = new LocalTime(23,59,0);
+  public static LocalTime startWork = new LocalTime(0, 0, 0);
+  public static LocalTime endWork = new LocalTime(23, 59, 0);
  
   public static LocalDate first = new LocalDate(2016, 1, 2);
   public static LocalDate second = new LocalDate(2016, 1, 3);
@@ -65,7 +82,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+        personDay.getStampingsTime()).isEqualTo(420); //7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(30);      //30 minuti
     org.assertj.core.api.Assertions.assertThat(personDay.getDifference()).isEqualTo(-42);
@@ -96,7 +113,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(420);   //7:00 ore
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+        personDay.getStampingsTime()).isEqualTo(420); //7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
@@ -333,8 +350,8 @@ public class PersonDaysTest extends UnitTest {
     personDay.setStampings(stampings);
     
     // # Il test che secondo Daniele fallisce
-    LocalTime startLunch = new LocalTime(12,0,0);
-    LocalTime endLunch = new LocalTime(15,0,0);
+    LocalTime startLunch = new LocalTime(12, 0, 0);
+    LocalTime endLunch = new LocalTime(15, 0, 0);
 
     validPairs = personDayManager.getValidPairStampings(personDay.stampings);
     gapLunchPair = personDayManager
@@ -373,7 +390,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getTimeAtWork()).isEqualTo(390);   //6:30 ore
     org.assertj.core.api.Assertions.assertThat(
-        personDay.getStampingsTime()).isEqualTo(420);//7:00 ore     
+        personDay.getStampingsTime()).isEqualTo(420); //7:00 ore     
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(30);      //30 minuti
     org.assertj.core.api.Assertions.assertThat(
@@ -393,8 +410,8 @@ public class PersonDaysTest extends UnitTest {
     exitingTime = new LocalDateTime(second.getYear(), second.getMonthOfYear(),  //4 ore pom. 
         second.getDayOfMonth(), 18, 00);
     
-    LocalTime startLunch12 = new LocalTime(12,0,0);
-    LocalTime endLunch15 = new LocalTime(15,0,0);
+    LocalTime startLunch12 = new LocalTime(12, 0, 0);
+    LocalTime endLunch15 = new LocalTime(15, 0, 0);
     personDayManager.queSeraSera(personDay, exitingTime, 
         Optional.fromNullable(previousForProgressive), normalDay(), false,
         new LocalTimeInterval(startLunch12, endLunch15), new LocalTimeInterval(startWork, endWork));

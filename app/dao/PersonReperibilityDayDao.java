@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -20,7 +37,7 @@ import org.joda.time.LocalDate;
 /**
  * Dao per i PersonReperibilityDay.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 public class PersonReperibilityDayDao extends DaoBase {
 
@@ -70,6 +87,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * La lista di giorni di reperibilità per la persona nell'intervallo begin-to.
+   *
    * @param begin la data di inizio
    * @param to la data di fine
    * @param type il tipo di reperibilità
@@ -91,6 +109,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * Cancella i giorni di reperibilità sulla reperibilità nel giorno.
+   *
    * @param type tipo di reperibilità
    * @param day il giorno da considerare
    * @return il numero di personReperibilityDay cancellati che hanno come parametri il tipo type e
@@ -105,6 +124,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * La lista dei giorni di reperibilità della persona nell'attività type tra begin e to.
+   *
    * @param begin la data di inizio
    * @param to la data di fine
    * @param type il tipo di reperibilità
@@ -125,6 +145,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * Il giorno di reperibilità, se esiste, con id passato come parametro.
+   *
    * @param personReperibilityDayId l'id del giorno di reperibilità
    * @return il personReperibilityDay, se esiste, associato all'id passato come parametro.
    */
@@ -142,6 +163,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * Il tipo di reperibilità con id passato come parametro.
+   *
    * @param id l'id del tipo di reperibilità
    * @return il personReperibilityType relativo all'id passato come parametro.
    */
@@ -152,6 +174,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * La lista di tutti i tipi di reperibilità.
+   *
    * @return la lista di tutti i PersonReperibilityType presenti sul db.
    */
   public List<PersonReperibilityType> getAllReperibilityType() {
@@ -162,6 +185,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * La lista dei servizi di reperibilità della sede.
+   *
    * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la
    *     reperibilità.
    * @param isActive se è attiva
@@ -179,6 +203,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * Il tipo di reperibilità, se esiste, appartenente alla sede con la descrizione passata.
+   *
    * @param description il nome del servizio
    * @param office la sede su cui cercare
    * @return il tipo di reperibilità, se esiste, con descrizione uguale a quella passata come
@@ -198,6 +223,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * L'associazione persona/reperibilità relativa ai parametri passati.
+   *
    * @param person la persona da cercare
    * @param type il tipo di reperibilità
    * @return il PersonReperibility relativo alla persona person e al tipo type passati come
@@ -213,6 +239,7 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   /**
    * La lista dei personReperibility che hanno il tipo passato come parametro.
+   *
    * @param type il tipo di reperibilità
    * @return la lista dei personReperibility che hanno come personReperibilityType il tipo passato
    *     come parametro.
@@ -285,4 +312,21 @@ public class PersonReperibilityDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+
+  /**
+   * Ricerca, se esiste, l'attività di reperibilità che praticano la lista di persone 
+   * passata come parametro.
+   *
+   * @param list la lista di persone di cui cercare l'attività di reperibilità
+   * @return l'attività, se esiste, di cui fanno parte le persone della lista passata.
+   */
+  public Optional<PersonReperibilityType> byListOfPerson(List<Person> list) {
+    final QPersonReperibilityType type = QPersonReperibilityType.personReperibilityType;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
+    final PersonReperibilityType result = getQueryFactory()
+        .selectFrom(type).leftJoin(type.personReperibilities, pr)
+        .where(pr.person.in(list)).fetchOne();
+    return Optional.fromNullable(result);
+  }
 }
+

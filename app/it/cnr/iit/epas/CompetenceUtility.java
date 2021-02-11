@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
@@ -70,9 +87,9 @@ public class CompetenceUtility {
 
   /**
    * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
-   * (int)(days/2) + resto;
+   * (int)(days/2) + resto; TODO: parametrico rispetto ale pre del DB (ampo ore retribuite).
    *
-   * @author arianna TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
+   * @author Arianna Del Soldato 
    */
   public BigDecimal calcShiftHoursFromDays(int days) {
     BigDecimal decDays = new BigDecimal(days);
@@ -90,9 +107,9 @@ public class CompetenceUtility {
 
   /**
    * Calcola le ore di turno dai giorni (days) resto = (days%2 == 0) ? 0 : 0.5 ore = days*6 +
-   * (int)(days/2) + resto;
+   * (int)(days/2) + resto. TODO: parametrico rispetto ale pre del DB (ampo ore retribuite).
    *
-   * @author arianna TODO: parametrico rispetto ale pre del DB (ampo ore retribuite)
+   * @author Arianna Del Soldato
    */
   public BigDecimal calcShiftHoursFromDays2(int days) {
     BigDecimal decDays = new BigDecimal(days);
@@ -115,7 +132,7 @@ public class CompetenceUtility {
   /**
    * Calcola le oer e i minuti dal numero totale dei minuti lavorati.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public BigDecimal calcDecimalShiftHoursFromMinutes(int minutes) {
     int hours;
@@ -139,7 +156,7 @@ public class CompetenceUtility {
   /**
    * Calcola il LocalTime dal numero dei minuti che compongono l'orario.
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public String calcStringShiftHoursFromMinutes(int minutes) {
     int hours;
@@ -153,8 +170,6 @@ public class CompetenceUtility {
       mins = minutes % 60;
     }
 
-    //log.debug("hours = {} mins = {}", hours, mins);
-
     return Integer.toString(hours).concat(".").concat(Integer.toString(mins));
   }
 
@@ -167,7 +182,7 @@ public class CompetenceUtility {
    * @param personShiftSumDaysForTypes tabella contenente il numero di giorni di turno effettuati
    *     per ogni persona e tipologia di turno. Questa tabella viene aggiornata contando i giorni di
    *     turno contenuti nella lista personShiftDays passata come parametro
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public void countPersonsShiftsDays(
       List<PersonShiftDay> personShiftDays,
@@ -221,7 +236,7 @@ public class CompetenceUtility {
    * tipo e i turni di reperibilit√† svolti in un determinato periodo di tempo ritorna una tabella
    * del tipo (Person, [thNoStamping, thAbsence], List<'gg/MMM '>).
    *
-   * @author arianna
+   * @author Arianna Del Soldato
    */
   public Table<Person, String, List<String>> getReperibilityInconsistenceAbsenceTable(
       List<PersonReperibilityDay> personReperibilityDays,
@@ -389,8 +404,6 @@ public class CompetenceUtility {
             List<PairStamping> pairStampings =
                 personDayManager.getValidPairStampings(personDay.get().stampings);
 
-            //Logger.debug("Dimensione di pairStampings =%s", pairStampings.size());
-
             // se c'e' una timbratura guardo se e' entro il turno
             if ((personDay.get().stampings.size() == 1)
                 && ((personDay.get().stampings.get(0).isIn()
@@ -439,7 +452,6 @@ public class CompetenceUtility {
               // gli intervalli di prima e dopo pranzo
             } else {
 
-              //Logger.debug("Controlla le timbrature");
               boolean okBeforeLunch = false;    // intervallo prima di pranzo coperto
               boolean okAfterLunch = false;        // intervallo dopo pranzo coperto
 

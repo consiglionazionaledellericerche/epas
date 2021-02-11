@@ -28,11 +28,12 @@
   	#{f.date 'endDate' /}
   	#{f.booleanRadio 'onlyMission', label:'Missioni con tempo a lavoro', popover:'true' /}
 	#{f.booleanRadio 'forAll', label:'Per tutti' /}
-    
+        
     <div id="single-person" #{if forAll} style="display: none" #{/if}>	
     #{f.selectModels 'peopleIds',
   		items:personList, placeholder:'Il personale' /}  	
   	</div>
+  	
   	#{b.buttons center:'true'}
   		#{b.back /}
   		#{b.ok /}

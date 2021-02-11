@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -21,7 +38,7 @@ import org.joda.time.LocalDate;
 /**
  * Dao per i PersonShift.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 public class PersonShiftDayDao extends DaoBase {
 
@@ -34,6 +51,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * Il giorno di turno della persona person nella data date se esiste.
+   *
    * @param person la persona per cui cercare il turno
    * @param date la data in cui cercare il turno
    * @return il personShiftDay relativo alla persona person nel caso in cui in data date fosse in
@@ -54,6 +72,7 @@ public class PersonShiftDayDao extends DaoBase {
   /**
    * La lista dei giorni di turno nel periodo compreso tra from e to per l'attività type per la 
    * persona person (opzionale).
+   *
    * @param from la data da cui cercare i giorni di turno
    * @param to la data fino a cui cercare i giorni di tunro
    * @param type l'attività su cui cercare i turni
@@ -80,7 +99,8 @@ public class PersonShiftDayDao extends DaoBase {
 
 
   /**
-   *  Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
+   * Cerca il PersonShiftDay per ShiftType, data, ShiftSlot.
+   *
    * @param shiftType l'attività su cui cercare il giorno di turno
    * @param date la data su cui cercare il giorno di turno
    * @param shiftSlot lo slot di turno
@@ -113,11 +133,26 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * Metodo che ritorna la lista dei personShift disabilitati.
+   *
    * @return la lista dei personShift disabilitati.
    */
   public List<PersonShift> getDisabled() {
     final QPersonShift personShift = QPersonShift.personShift;
     return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)).fetch();
+  }
+  
+  /**
+   * Metodo di utilità che ritorna i casi di turnisti erroneamente disabilitati nonostante le date
+   * di inizio e fine attività di turnista contengano la data odierna.
+   *
+   * @return la lista delle persone erroneamente disabilitate.
+   */
+  public List<PersonShift> getWrongDisabled() {
+    final QPersonShift personShift = QPersonShift.personShift;
+    return getQueryFactory().selectFrom(personShift).where(personShift.disabled.eq(true)
+        .and(personShift.beginDate.loe(LocalDate.now())
+            .andAnyOf(personShift.endDate.isNull(), 
+                personShift.endDate.goe(LocalDate.now())))).fetch();
   }
 
   /**
@@ -160,6 +195,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * Il conteggio dei personShiftDay nel giorno date per la persona person.
+   *
    * @param person la persona per cui cercare i turni
    * @param date la data in cui cercare i turni
    * @return il numero di personShiftDay.
@@ -173,6 +209,7 @@ public class PersonShiftDayDao extends DaoBase {
 
   /**
    * La lista dei personShiftDay nel giorno date per l'attività activity.
+   *
    * @param date il giorno in cui cercare
    * @param activity l'attività di turno su cui cercare
    * @return la lista dei personShiftDay.
@@ -185,6 +222,7 @@ public class PersonShiftDayDao extends DaoBase {
   
   /**
    * La lista dei giorni di turno per una persona in un periodo.
+   *
    * @param from la data da cui cercare i giorni di turno
    * @param to la data fino a cui cercare i giorni di turno
    * @return La lista dei giorni di turno per una persona in un periodo.

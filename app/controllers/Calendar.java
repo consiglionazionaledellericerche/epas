@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
-import com.beust.jcommander.internal.Lists;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.GeneralSettingDao;
@@ -22,7 +40,6 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ShiftManager2;
 import models.CompetenceCode;
-import models.GeneralSetting;
 import models.OrganizationShiftSlot;
 import models.Person;
 import models.PersonCompetenceCodes;
@@ -50,6 +67,9 @@ import play.mvc.With;
 import security.SecurityRules;
 
 
+/**
+ * Controller per la gestione dei calendari di reperibilità.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Calendar extends Controller {
@@ -74,6 +94,9 @@ public class Calendar extends Controller {
   private static String holidayCode = "T3";
   private static String nightCode = "T2";
   
+  /**
+   * Tipologie di periodo di turno.
+   */
   public enum ShiftPeriod {
     daily,
     nightly,
@@ -225,10 +248,12 @@ public class Calendar extends Controller {
       int index = 0;
       // prende i turni associati alle persone attive in quel turno
       for (PersonShiftShiftType personShift : people) {
+        log.debug("Turnista: {}", personShift.personShift.person);
         final Person person = personShift.personShift.person;
-        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
+        final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 2)];
         events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
         events.addAll(absenceEvents(person, start, end));
+        events.addAll(notAbsenceEvents(person, start, end));
         index++;
       }
     }
@@ -296,6 +321,7 @@ public class Calendar extends Controller {
 
   /**
    * Ritorna lista di DTO contenenti le assenze di una persona nell'intervallo specificato.
+   *
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -309,7 +335,7 @@ public class Calendar extends Controller {
             JustifiedTypeName.complete_day_and_add_overtime);
 
     List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
-        Optional.<Boolean>absent());
+        Optional.<Boolean>absent(), Optional.of(true));
     List<ShiftEvent> events = new ArrayList<>();
     ShiftEvent event = null;
 
@@ -336,6 +362,52 @@ public class Calendar extends Controller {
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
             .borderColor(EventColor.RED.borderColor)
+            .build();
+
+        events.add(event);
+      } else {
+        event.setEnd(abs.personDay.date.plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
+      }
+
+    }
+    return events;
+  }
+  
+  /**
+   * Ritorna lista di DTO contenente le assenze per telelavoro e smart working.
+   *
+   * @param person la persona di cui si cercano le assenze
+   * @param start la data di inizio
+   * @param end la data di fine
+   * @return la lista di eventi di assenza "non assenza" come i casi di telelavoro o smart working.
+   */
+  private static List<ShiftEvent> notAbsenceEvents(Person person, LocalDate start, LocalDate end) {
+    final List<JustifiedTypeName> types = ImmutableList
+        .of(JustifiedTypeName.assign_all_day, 
+            JustifiedTypeName.complete_day_and_add_overtime);
+
+    List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
+        Optional.<Boolean>absent(), Optional.of(Boolean.FALSE));
+    List<ShiftEvent> events = new ArrayList<>();
+    ShiftEvent event = null;
+    for (Absence abs : absences) {
+      if (event == null
+          || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
+          .equals(abs.personDay.date)
+          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.personDay.date)) {
+
+        event = ShiftEvent.builder()
+            .allDay(true)
+            .title(abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day) 
+                ? "Attività lavorativa di " + abs.absenceType.code + " di "
+                + abs.personDay.person.fullName() : 
+                  "Attività lavorativa di " + abs.absenceType.description + " di "
+                + abs.personDay.person.fullName())
+            .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
+            .editable(false)
+            .color(EventColor.YELLOW.backgroundColor)
+            .textColor(EventColor.YELLOW.textColor)
+            .borderColor(EventColor.YELLOW.borderColor)
             .build();
 
         events.add(event);
@@ -442,18 +514,15 @@ public class Calendar extends Controller {
  
         personShiftDay.personShift = shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
-        Optional<String> error;
+        Optional<String> error = Optional.of("");
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
-        } else {
-          if (!organizationShiftslot.isPersistent() && shiftSlot == null) {
-            error = Optional.of(Messages.get("shift.notSlotSpecified"));
-          } else {
-            error = Optional.of(Messages.get("validation.invalid"));
-          }
-          
-        }
+        } 
 
+        if (!organizationShiftslot.isPersistent() && shiftSlot == null) {
+          error = Optional.of(Messages.get("shift.notSlotSpecified"));
+        } 
+        
         if (error.isPresent()) {
           response.status = 409;
 
@@ -552,6 +621,7 @@ public class Calendar extends Controller {
 
   /**
    * True se l'attività è modificabile, false altrimenti.
+   *
    * @param activityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
@@ -660,7 +730,7 @@ public class Calendar extends Controller {
 
     Map<String, Object> args = new HashMap<>();
     // Check tra la richiesta del riepilogo e l'approvazione definitiva dei turni: non ci devono
-    // essere state modifiche in modo da evitare che il supervisore validi una situazione diversa 
+    // essere state modifiche in modo da evitare che il responsabile validi una situazione diversa 
     // da quella che si aspetta
     if (shiftTypeMonth.version != version) {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "

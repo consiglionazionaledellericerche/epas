@@ -1,24 +1,44 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import models.CompetenceCode;
 import models.Office;
 import models.OrganizationShiftSlot;
 import models.OrganizationShiftTimeTable;
 import models.Person;
-import models.PersonShiftDay;
 import models.ShiftTimeTable;
 import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.dto.OrganizationTimeTable;
 import models.enumerate.CalculationType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
-
+/**
+ * Manager per la gestione degli ShiftOrganization.
+ *
+ * @author Dario Tagliaferri
+ */
 public class ShiftOrganizationManager {
   
+  /**
+   * Totale competenze in un periodo temporale per una persona ed un tipo di turno.
+   */
   public int calculatePersonShiftCompetencesInPeriod(ShiftType activity, Person person,
       LocalDate from, LocalDate to, boolean holiday) {
     return 0;
@@ -26,6 +46,7 @@ public class ShiftOrganizationManager {
   
   /**
    * Ritorna una stringa contenente un eventuale errore in creazione di time table e slot.
+   *
    * @param list la lista di oggetti che compongono l'organizationTimeTable
    * @param office la sede
    * @param calculationType il tipo di calcolo della timetable
@@ -79,6 +100,7 @@ public class ShiftOrganizationManager {
 
   /**
    * Ritorna il nome della timetable trasformata secondo la nuova modellazione.
+   *
    * @param shiftTimeTable la timetable da trasformare
    * @return il nome della timetable trasformata secondo la nuova modellazione.
    */
@@ -92,5 +114,5 @@ public class ShiftOrganizationManager {
     return String.format("%s - %s / %s - %s", shiftTimeTable.startMorning, 
         shiftTimeTable.endMorning, shiftTimeTable.startAfternoon, shiftTimeTable.endAfternoon);
   }
-  
+
 }

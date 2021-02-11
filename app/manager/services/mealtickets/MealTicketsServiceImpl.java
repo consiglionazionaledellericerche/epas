@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.mealtickets;
 
 import com.google.common.base.Optional;
@@ -25,7 +42,7 @@ import org.joda.time.YearMonth;
 /**
  * Implementazione di produzione del servizio meal tickets.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class MealTicketsServiceImpl implements IMealTicketsService {
 
@@ -62,6 +79,9 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     this.wrapperFactory = wrapperFactory;
   }
 
+  /**
+   * Creat un'istanza di MealTicketRecap a partire da un Contract.
+   */
   @Override
   public Optional<MealTicketRecap> create(Contract contract) {
 
@@ -214,12 +234,11 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   /**
    * I tipi di ordinamento per la selezione della lista dei buoni pasto.
    *
-   * @author alessandro
+   * @author Alessandro Martelli
    */
   public static enum MealTicketOrder {
     ORDER_BY_EXPIRE_DATE_ASC,
     ORDER_BY_DELIVERY_DATE_DESC
   }
-
 
 }
