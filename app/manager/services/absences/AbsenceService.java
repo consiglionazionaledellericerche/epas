@@ -558,6 +558,11 @@ public class AbsenceService {
       log.debug("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       // vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
+      
+      if ((Boolean) confManager.configValue(person.office, 
+          EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)) {
+        //TODO: aggiungere il gruppo per inserimento codici di visita medica
+      }
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
           && (Boolean) confManager.configValue(person,
