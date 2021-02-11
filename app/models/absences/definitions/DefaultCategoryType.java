@@ -45,7 +45,8 @@ public enum DefaultCategoryType {
   ALTRI_104("Altri congedi legge 104/92", 8, DefaultTab.LEGGE_104),
 
   MALATTIA_DIPENDENTE("Malattia dipendente", 8, DefaultTab.MALATTIA), 
-  VISITA_MEDICA("Visita medica", 9, DefaultTab.MALATTIA), 
+  VISITA_MEDICA("Visita medica", 9, DefaultTab.MALATTIA),
+  VISITA_MEDICA_DIPENDENTE("Visita medica dipendente", 9, DefaultTab.MALATTIA),
   VISITA_MEDICA_TERAPIE("Visita medica per terapie", 9, DefaultTab.MALATTIA),
 
   MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.CONGEDI_PARENTALI), 

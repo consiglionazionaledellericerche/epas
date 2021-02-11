@@ -176,7 +176,13 @@ public enum EpasParam {
       Person.class),
   
 
-
+  PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM("people_allowed_insert_medical_exam",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
