@@ -22,44 +22,46 @@ import injection.StaticInject;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
-import lombok.ToString;
+import lombok.EqualsAndHashCode;
+import lombok.val;
 import models.Stamping;
-import models.Stamping.WayType;
 import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
+import play.data.validation.Required;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * principali di una timbratura.
+ * Dati per la creazione via REST di una timbratura di una persona.
  *
  * @author Cristian Lucchesi
- * @version 3
  *
  */
 @StaticInject
-@ToString
 @Data
-public class StampingShowTerseDto {
+@EqualsAndHashCode(callSuper = true)
+public class StampingCreateDto extends StampingUpdateDto {
 
-  private Long id;
-  private LocalDateTime date;
-  private WayType way;
-  private StampTypes stampType;
-  private String place;
-  private String reason;
-  private boolean markedByAdmin;
-  private boolean markedByEmployee;
-  private String note;
-
-  @JsonIgnore
-  @Inject
-  static ModelMapper modelMapper;
+  @Required
+  private String badgeNumber;
   
+  @Required
+  private LocalDateTime dateTime;
+
+  @Inject
+  @JsonIgnore
+  static ModelMapper modelMapper;
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova istanza di un oggetto Stamping a partire dai 
+   * valori presenti nel rispettivo DTO.
    */
-  public static StampingShowTerseDto build(Stamping stamping) {
-    return modelMapper.map(stamping, StampingShowTerseDto.class);    
+  public static Stamping build(StampingCreateDto stampingDto) {
+    val stamping = modelMapper.map(stampingDto, Stamping.class);
+
+    if (stampingDto.getReasonType() != null) {
+      stamping.stampType = StampTypes.byIdentifier(stampingDto.getReasonType().name());
+    }
+
+    return stamping;
   }
+
 }

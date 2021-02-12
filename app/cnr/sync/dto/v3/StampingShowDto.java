@@ -17,39 +17,40 @@
 
 package cnr.sync.dto.v3;
 
+import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
+import lombok.val;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * principali di una timbratura.
+ * DTO per l'esportazione via REST delle informazioni di una timbratura.
  *
  * @author Cristian Lucchesi
  * @version 3
- *
  */
 @StaticInject
 @ToString
 @Data
-public class StampingShowTerseDto {
+public class StampingShowDto {
 
   private Long id;
   private LocalDateTime date;
   private WayType way;
-  private StampTypes stampType;
+  private StampTypeDto stampType;
   private String place;
   private String reason;
   private boolean markedByAdmin;
   private boolean markedByEmployee;
   private String note;
+  private String stampingZone;
+  private PersonShowTerseDto person;
 
   @JsonIgnore
   @Inject
@@ -59,7 +60,9 @@ public class StampingShowTerseDto {
    * Nuova instanza di un StampingShowTerseDto contenente i valori 
    * dell'oggetto stamping passato.
    */
-  public static StampingShowTerseDto build(Stamping stamping) {
-    return modelMapper.map(stamping, StampingShowTerseDto.class);    
+  public static StampingShowDto build(Stamping stamping) {
+    val dto = modelMapper.map(stamping, StampingShowDto.class);
+    dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
+    return dto;
   }
 }
