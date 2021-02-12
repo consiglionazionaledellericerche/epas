@@ -57,7 +57,7 @@ import security.SecurityRules;
 @Slf4j
 @With(Resecure.class)
 public class Contracts extends Controller {
- 
+
   @Inject
   static ContractDao contractDao;
   @Inject
@@ -72,7 +72,7 @@ public class Contracts extends Controller {
   static PeriodManager periodManager;
   @Inject
   static PersonDao personDao;
-  
+
   /**
    * Contratti di una persona.
    * La persona è individuata tramite una delle chiavi della persona passate come
@@ -88,7 +88,7 @@ public class Contracts extends Controller {
         .collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(contracts));
   }
-  
+
   /**
    * Restituisce il JSON con il contratto cercato per id. 
    */
@@ -97,7 +97,7 @@ public class Contracts extends Controller {
     val contract = getContractFromRequest(id);
     renderJSON(gsonBuilder.create().toJson(ContractShowDto.build(contract)));
   }
-  
+
   /**
    * Crea un contratto con i valori passati via JSON.
    * Questo metodo può essere chiamato solo in HTTP POST.
@@ -243,7 +243,6 @@ public class Contracts extends Controller {
    *
    * @return il contratto se trovato, altrimenti torna direttamente 
    *     una risposta HTTP 404.
-   * 
    */
   @Util
   private static Contract getContractFromRequest(Long id) {

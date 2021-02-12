@@ -17,6 +17,9 @@
 
 package cnr.sync.dto;
 
+/**
+ * DTO per rappresentare il risultato di un'inserimento di un'assenza via REST.
+ */
 public class AbsenceAddedRest {
 
   public String absenceCode;

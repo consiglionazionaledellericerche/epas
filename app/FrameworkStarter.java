@@ -21,14 +21,14 @@ import play.Play;
 
 /**
  * Classe wrapper utilizzare per avviare il server del play.
- * @author marco
+ *
+ * @author Marco Andreini
  *
  */
 public class FrameworkStarter {
 
   /**
    * Avvia il play in modalità server.
-   * 
    */
   public static void main(String[] args) throws Exception {
 

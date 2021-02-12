@@ -20,6 +20,10 @@ package cnr.sync.dto;
 import com.google.common.collect.Lists;
 import java.util.List;
 
+/**
+ * DTO per rappresentare via REST i dati riepilogativi del tempo lavorato 
+ * comprensivi delle timbrature e dei codici di assenza.
+ */
 public class PersonDayDto {
 
   public int tempolavoro;

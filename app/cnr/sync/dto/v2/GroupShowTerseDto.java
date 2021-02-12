@@ -28,10 +28,10 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in forma ridotta ed in Json per un gruppo di persone.
- * 
+ *
  * @author Cristian Lucchesi
  *
- */ 
+ */
 @Data
 public class GroupShowTerseDto {
   

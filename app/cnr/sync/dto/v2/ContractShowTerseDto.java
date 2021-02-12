@@ -27,10 +27,16 @@ import lombok.val;
 import models.Contract;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Dati esportati in forma ridotta ed in Json per un contratto.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 @Data
 public class ContractShowTerseDto {
- 
+
   private Long id;
   private PersonShowTerseDto person;
   private LocalDate beginDate;
