@@ -18,6 +18,7 @@
 package cnr.sync.dto.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import injection.StaticInject;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
@@ -28,10 +29,11 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in forma ridotta ed in Json per un gruppo di persone.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */ 
+@StaticInject
 @Data
 public class GroupShowTerseDto {
   
