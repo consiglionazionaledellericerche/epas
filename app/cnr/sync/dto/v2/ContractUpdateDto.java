@@ -26,7 +26,7 @@ import models.Person;
 /**
  * Dati per l'aggiornamento vai REST di un contratto di 
  * una persona.
- *  
+ *
  * @author Cristian Lucchesi
  *
  */
@@ -40,7 +40,7 @@ public class ContractUpdateDto extends ContractCreateDto {
   public void update(Contract contract) {
     Verify.verifyNotNull(contract);
     Verify.verifyNotNull(contract.person);
-    
+
     contract.person = Person.findById(getPersonId());
     contract.beginDate = JodaConverters.javaToJodaLocalDate(getBeginDate());
     contract.endDate = JodaConverters.javaToJodaLocalDate(getEndDate());

@@ -26,6 +26,12 @@ import lombok.Data;
 import models.ContractWorkingTimeType;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Dati esportati in forma ridotta ed in Json per un ContractWorkingTimeType.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 @Data
 public class ContractWorkingTimeTypeShowTerseDto {
@@ -38,7 +44,11 @@ public class ContractWorkingTimeTypeShowTerseDto {
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
+  /**
+   * Nuova instanza di un ContractWorkingTimeTypeShowTerseDto contenente i valori 
+   * dell'oggetto ContractWorkingTimeType passato.
+   */
   public static ContractWorkingTimeTypeShowTerseDto build(ContractWorkingTimeType cwtt) {
     return modelMapper.map(cwtt, ContractWorkingTimeTypeShowTerseDto.class);
   }

@@ -29,6 +29,12 @@ import lombok.val;
 import models.Contract;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Dati esportati in Json per un contratto.
+ *
+ * @author Cristian Lucchesi
+ *
+ */ 
 @StaticInject
 @Data
 @EqualsAndHashCode(callSuper = true)
