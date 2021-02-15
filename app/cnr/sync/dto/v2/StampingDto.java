@@ -27,7 +27,7 @@ import models.enumerate.StampTypes;
 /**
  * DTO per l'esportazione via REST delle informazioni 
  * principali di una timbratura.
- * 
+ *
  * @version 2
  * @author Cristian Lucchesi
  *

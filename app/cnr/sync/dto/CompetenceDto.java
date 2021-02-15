@@ -20,6 +20,9 @@ package cnr.sync.dto;
 import com.google.common.base.Function;
 import models.Competence;
 
+/**
+ * DTO per rappresentare i dati una competenza (straordinari, turni, etc) via REST.
+ */
 public class CompetenceDto {
   public int year;
   public int month;

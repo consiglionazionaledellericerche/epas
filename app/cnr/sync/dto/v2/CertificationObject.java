@@ -22,6 +22,13 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Dati esportati in Json per le informazioni mensili per la generazione
+ * della busta paga.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Builder
 @Data
 public class CertificationObject {

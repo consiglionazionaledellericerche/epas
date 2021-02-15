@@ -43,6 +43,12 @@ import play.mvc.Util;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * API Rest per la gestione delle persone.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @With(Resecure.class)
 @Slf4j
 public class Persons extends Controller {

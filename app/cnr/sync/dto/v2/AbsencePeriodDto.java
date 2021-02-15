@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Dati esportati in Json per i periodi di assenza di una persona in un periodo.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

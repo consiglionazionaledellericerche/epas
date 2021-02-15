@@ -27,8 +27,8 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per l'affiliazione di una persona ad un gruppo.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */ 
 @Data

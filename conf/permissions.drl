@@ -2822,13 +2822,17 @@ when
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
 
- 		/* duplicate */
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
+    /* duplicate */
+    "StampingsFromClient.create",
+    "StampingsFromClient.createNotRecompute",
+    "StampingsFromClient.absence",
+    "StampingsFromClient.absenceNotRecompute",
+    "rest.v3.Stampings.show",
+    "rest.v3.Stampings.create",
+    "rest.v3.Stampings.update",
+    "rest.v3.Stampings.delete"
 
- 		), target == null, granted == false)
+   ), target == null, granted == false)
  then
  $c.grant();
 end
@@ -2840,12 +2844,15 @@ when
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
 
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
-
- 		), target == $o, granted == false)
+    "StampingsFromClient.create",
+    "StampingsFromClient.createNotRecompute",
+    "StampingsFromClient.absence",
+    "StampingsFromClient.absenceNotRecompute",
+    "rest.v3.Stampings.show",
+    "rest.v3.Stampings.create",
+    "rest.v3.Stampings.update",
+    "rest.v3.Stampings.delete"
+  ), target == $o, granted == false)
 then
  $c.grant();
 end
@@ -2865,8 +2872,8 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-		"manager.AbsenceManager.saveAbsences",
-		
+        "manager.AbsenceManager.saveAbsences",
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"
 
@@ -2885,7 +2892,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-		"manager.AbsenceManager.saveAbsences",
+        "manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"

@@ -29,7 +29,7 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per la Persona.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
