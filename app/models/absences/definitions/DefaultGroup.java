@@ -452,6 +452,10 @@ public enum DefaultGroup {
     return Stream.of(g19, g26).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
   
+  public static List<String> medicalExamsCodes() {       
+    return getCodes(DefaultGroup.G_631_DIPENDENTI);    
+  }
+  
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con congedo parentale
    * e malattia figlio abilitato.
