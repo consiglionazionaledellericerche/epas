@@ -20,6 +20,10 @@ package cnr.sync.dto.v2;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Dati esportati in Json per la quantità mensile di buoni pasto
+ * assegnati ad un dipendente.
+ */ 
 @Data
 @Builder
 public class CertificationMealTicketDto {

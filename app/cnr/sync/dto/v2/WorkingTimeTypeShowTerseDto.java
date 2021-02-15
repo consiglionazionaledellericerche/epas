@@ -28,7 +28,7 @@ import org.modelmapper.ModelMapper;
 /**
  * Dati esportati in Json per le impostazioni di un 
  * orario di lavoro.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
@@ -48,6 +48,9 @@ public class WorkingTimeTypeShowTerseDto {
   @Inject
   static ModelMapper modelMapper;
 
+  /**
+   * Nuova istanza del DTO a partire dal'entity.
+   */
   public static WorkingTimeTypeShowTerseDto build(WorkingTimeType wtt) {
     return modelMapper.map(wtt, WorkingTimeTypeShowTerseDto.class);
   }

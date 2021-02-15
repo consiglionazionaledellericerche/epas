@@ -21,6 +21,10 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Dati esportati in Json per le informazioni mensili per la generazione
+ * della busta paga di uno specifico dipendente in un determinato mese.
+ */
 @Builder
 @Data
 public class CertificationDto {

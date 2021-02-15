@@ -17,8 +17,14 @@
 
 package models.exports;
 
+import cnr.sync.dto.v3.StampingCreateDto;
+import helpers.JodaConverters;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import models.Person;
+import models.Stamping.WayType;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDateTime;
 
@@ -27,6 +33,9 @@ import org.joda.time.LocalDateTime;
  *
  * @author Cristian Lucchesi
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class StampingFromClient {
 
@@ -35,7 +44,30 @@ public class StampingFromClient {
   public StampTypes stampType;
   public Person person;
   public boolean markedByAdmin;
+  public boolean markedByEmployee;
   public LocalDateTime dateTime;
   public String zona;
   public String note;
+  public String reason;
+  public String place;
+  
+  /**
+   * Costruisce uno StampingFromClient a partire da
+   * un StampingCreateDto.
+   */
+  public static StampingFromClient build(StampingCreateDto dto) {
+    return StampingFromClient.builder()
+      .numeroBadge(dto.getBadgeNumber())
+      .inOut(dto.getWayType().equals(WayType.in) ? 0 : 1)
+      .stampType(
+          dto.getReasonType() != null ? StampTypes.valueOf(dto.getReasonType().name()) : null)
+      .markedByAdmin(dto.isMarkedByAdmin())
+      .markedByEmployee(dto.isMarkedByEmployee())
+      .dateTime(JodaConverters.javaToJodaLocalDateTime(dto.getDateTime()))
+      .zona(dto.getStampingZone())
+      .note(dto.getNote())
+      .reason(dto.getReason())
+      .place(dto.getPlace())
+      .build();
+  }
 }

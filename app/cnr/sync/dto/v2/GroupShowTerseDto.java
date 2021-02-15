@@ -32,7 +32,7 @@ import org.modelmapper.ModelMapper;
  *
  * @author Cristian Lucchesi
  *
- */ 
+ */
 @StaticInject
 @Data
 public class GroupShowTerseDto {

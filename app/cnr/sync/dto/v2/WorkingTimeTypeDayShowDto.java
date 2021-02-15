@@ -27,7 +27,7 @@ import org.modelmapper.ModelMapper;
 /**
  * Dati esportati in Json per le impostazioni giornaliere di un 
  * orario di lavoro.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
@@ -48,7 +48,10 @@ public class WorkingTimeTypeDayShowDto {
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
+  /**
+   * Nuova istanza del DTO a partire dal'entity.
+   */
   public WorkingTimeTypeDayShowDto build(WorkingTimeTypeDay wttd) {
     return modelMapper.map(wttd, WorkingTimeTypeDayShowDto.class);
   }

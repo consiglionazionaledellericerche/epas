@@ -21,6 +21,9 @@ import lombok.Builder;
 import lombok.Data;
 import org.joda.time.LocalDate;
 
+/**
+ * Dati esportati in Json per le ore di formazione.
+ */
 @Data
 @Builder
 public class CertificationTrainingHoursDto {

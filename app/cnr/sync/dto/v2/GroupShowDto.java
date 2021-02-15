@@ -28,7 +28,7 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Dati esportati in Json per un gruppo di persone.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */ 
