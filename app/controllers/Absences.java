@@ -52,6 +52,7 @@ import manager.recaps.YearlyAbsencesRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -146,8 +147,13 @@ public class Absences extends Controller {
   public static void addAttach(@Required Absence absence, Blob absenceFile) {
 
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
-
-    rules.checkIfPermitted(absence.personDay.person.office);
+    
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      rules.checkIfPermitted(absence.personDay.person.office);
+    } else {
+      rules.checkIfPermitted(absence);
+    }    
 
     if (absenceFile != null) {
       absence.absenceFile = absenceFile;
@@ -155,9 +161,14 @@ public class Absences extends Controller {
 
       flash.success("File allegato con successo.");
     }
-
-    Stampings.personStamping(absence.personDay.person.id,
-        absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
+    
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      Stampings.personStamping(absence.personDay.person.id,
+          absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
+    } else {
+      Stampings.stampings(absence.personDay.date.getYear(), 
+          absence.personDay.date.getMonthOfYear());
+    }    
 
   }
   
@@ -206,8 +217,15 @@ public class Absences extends Controller {
 
     flash.success("File allegato rimosso con successo.");
 
-    Stampings.personStamping(absence.personDay.person.id,
-        absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      Stampings.personStamping(absence.personDay.person.id,
+          absence.personDay.date.getYear(), absence.personDay.date.getMonthOfYear());
+    } else {
+      Stampings.stampings(absence.personDay.date.getYear(), 
+          absence.personDay.date.getMonthOfYear());
+    }
+    
 
   }
 
@@ -284,7 +302,12 @@ public class Absences extends Controller {
     Absence absence = absenceDao.getAbsenceById(id);
     notFoundIfNull(absence);
 
-    rules.checkIfPermitted(absence.personDay.person.office);
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      rules.checkIfPermitted(absence.personDay.person.office);
+    } else {
+      rules.checkIfPermitted(absence);
+    }    
 
     response.setContentTypeIfNotSet(absence.absenceFile.type());
     Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
