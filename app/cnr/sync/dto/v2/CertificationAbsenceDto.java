@@ -22,6 +22,9 @@ import lombok.Data;
 import org.joda.time.LocalDate;
 
 
+/**
+ * Dati esportati in Json per assenze.
+ */
 @Data
 @Builder
 public class CertificationAbsenceDto {

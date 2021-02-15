@@ -17,7 +17,9 @@
 
 package cnr.sync.dto;
 
-
+/**
+ * DTO per rappresentare i dati un'assenza via REST.
+ */
 public class AbsenceRest {
 
   public String date;

@@ -33,6 +33,12 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * API Rest per la gestione delle tipologie di orario di lavoro.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 @With(Resecure.class)
 public class WorkingTimeTypes extends Controller {

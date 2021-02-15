@@ -350,7 +350,7 @@ public class NotificationManager {
       boolean update, boolean delete) {
 
     // Se l'user che ha fatto l'inserimento è utente di sistema esco
-    if (currentUser.isSystemUser()) {
+    if (currentUser.isSystemUser() || currentUser.person == null) {
       return;
     }
 

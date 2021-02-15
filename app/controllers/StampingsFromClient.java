@@ -70,7 +70,7 @@ public class StampingsFromClient extends Controller {
     }
 
     // Stamping already present (409)
-    if (!stampingManager.createStampingFromClient(body, true)) {
+    if (!stampingManager.createStampingFromClient(body, true).isPresent()) {
       JsonResponse.conflict();
     }
 
@@ -96,7 +96,7 @@ public class StampingsFromClient extends Controller {
     }
 
     // Stamping already present (409)
-    if (!stampingManager.createStampingFromClient(body, false)) {
+    if (!stampingManager.createStampingFromClient(body, false).isPresent()) {
       JsonResponse.conflict();
     }
 

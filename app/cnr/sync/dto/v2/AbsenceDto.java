@@ -25,9 +25,9 @@ import org.joda.time.LocalDate;
 /**
  * DTO per l'esportazione via REST delle informazioni 
  * principali di un'assenza.
+ *
  * @since versione 2 dell'API REST
- * 
- * @author cristian
+ * @author Cristian Lucchesi
  *
  */
 @Builder
@@ -42,6 +42,7 @@ public class AbsenceDto {
   
   /**
    * Builder del dto.
+   *
    * @param absence l'assenza da trasformare in dto
    * @return il dto costruito.
    */

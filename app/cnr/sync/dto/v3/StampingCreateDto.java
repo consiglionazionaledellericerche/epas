@@ -15,51 +15,53 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cnr.sync.dto.v2;
+package cnr.sync.dto.v3;
 
-import com.beust.jcommander.internal.Sets;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.val;
-import models.Contract;
+import models.Stamping;
+import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
+import play.data.validation.Required;
 
 /**
- * Dati esportati in Json per un contratto.
+ * Dati per la creazione via REST di una timbratura di una persona.
  *
  * @author Cristian Lucchesi
  *
- */ 
+ */
 @StaticInject
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ContractShowDto extends ContractShowTerseDto {
+public class StampingCreateDto extends StampingUpdateDto {
 
-  private Set<ContractWorkingTimeTypeShowTerseDto> workingTimeTypes = Sets.newHashSet();
-
-  @JsonIgnore
-  @Inject
-  static ModelMapper modelMapper;
+  @Required
+  private String badgeNumber;
   
+  @Required
+  private LocalDateTime dateTime;
+
+  @Inject
+  @JsonIgnore
+  static ModelMapper modelMapper;
+
   /**
-   * Nuova instanza di un ContractShowDto contenente i valori 
-   * dell'oggetto contract passato.
+   * Nuova istanza di un oggetto Stamping a partire dai 
+   * valori presenti nel rispettivo DTO.
    */
-  public static ContractShowDto build(Contract contract) {
-    val contractDto = modelMapper.map(contract, ContractShowDto.class);
-    contractDto.setPerson(PersonShowTerseDto.build(contract.person));
-    if (contract.getPreviousContract() != null) {
-      contractDto.setPreviousContract(ContractShowTerseDto.build(contract.getPreviousContract()));
+  public static Stamping build(StampingCreateDto stampingDto) {
+    val stamping = modelMapper.map(stampingDto, Stamping.class);
+
+    if (stampingDto.getReasonType() != null) {
+      stamping.stampType = StampTypes.byIdentifier(stampingDto.getReasonType().name());
     }
-    contractDto.setWorkingTimeTypes(
-        contract.contractWorkingTimeType.stream()
-          .map(ContractWorkingTimeTypeShowTerseDto::build)
-          .collect(Collectors.toSet()));
-    return contractDto;
+
+    return stamping;
   }
+
 }
