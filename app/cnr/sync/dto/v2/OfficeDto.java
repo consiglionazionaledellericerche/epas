@@ -22,7 +22,7 @@ import lombok.Data;
 
 /**
  * Informazioni esportate in Json per l'ufficio.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

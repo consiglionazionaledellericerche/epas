@@ -34,6 +34,12 @@ import models.Person;
 import play.Play;
 import play.libs.WS;
 
+/**
+ * Metodi per prelevare le informazioni sulle persone da Perseo.
+ *
+ * @author Marco Andreini
+ *
+ */
 public class PeopleConsumer {
 
   private static final String URL_BASE = Play.configuration.getProperty("perseo.base");
@@ -42,7 +48,7 @@ public class PeopleConsumer {
 
   /**
    * Preleva la persona da un endpoint REST presente in configurazione.
-   * 
+   *
    * @param id l'id della persona da cercare.
    * @return il ListenableFuture contenete la persona prelevata via REST da perseo.
    * @throws IllegalStateException nel caso la persona non si trovata.

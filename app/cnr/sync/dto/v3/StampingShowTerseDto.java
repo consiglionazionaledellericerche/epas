@@ -31,9 +31,9 @@ import org.modelmapper.ModelMapper;
 /**
  * DTO per l'esportazione via REST delle informazioni 
  * principali di una timbratura.
- * 
- * @version 3
+ *
  * @author Cristian Lucchesi
+ * @version 3
  *
  */
 @StaticInject

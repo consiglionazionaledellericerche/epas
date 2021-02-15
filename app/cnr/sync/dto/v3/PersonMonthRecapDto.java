@@ -25,6 +25,14 @@ import lombok.Data;
 import lombok.val;
 import org.testng.collections.Lists;
 
+/**
+ * DTO per l'esportazione via REST delle informazioni del riepilogo mensile
+ * assenze/presenze in un determinato mese.
+ *
+ * @version 3
+ * @author Cristian Lucchesi
+ *
+ */
 @AllArgsConstructor
 @Builder
 @Data

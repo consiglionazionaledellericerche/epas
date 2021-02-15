@@ -20,6 +20,9 @@ package cnr.sync.dto.v2;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Dati esportati in Json per le competenze (straordinari, turni, etc).
+ */
 @Data
 @Builder
 public class CertificationCompetencesDto {

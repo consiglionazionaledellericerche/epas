@@ -24,7 +24,7 @@ import models.flows.Group;
 
 /**
  * Dati per l'aggiornamento di un gruppo via REST.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

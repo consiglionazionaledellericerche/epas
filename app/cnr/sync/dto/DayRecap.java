@@ -17,7 +17,9 @@
 
 package cnr.sync.dto;
 
-
+/**
+ * DTO per rappresentare via REST i dati riepilogativi delle ore lavorate in un giorno.
+ */
 public class DayRecap {
   public int workingMinutes;
   //      Da trasformare in un localdate

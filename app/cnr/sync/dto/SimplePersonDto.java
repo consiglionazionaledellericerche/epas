@@ -20,6 +20,9 @@ package cnr.sync.dto;
 import com.google.common.base.Function;
 import models.Person;
 
+/**
+ * DTO per rappresentare via REST un estratto dei dati principali di una persona.
+ */
 public class SimplePersonDto {
   
   public long id;
@@ -28,7 +31,7 @@ public class SimplePersonDto {
   public String updatedAt;
   public String email;
   public String uidCnr;
-  
+
   public enum FromPerson implements Function<Person, SimplePersonDto> {
     ISTANCE;
     

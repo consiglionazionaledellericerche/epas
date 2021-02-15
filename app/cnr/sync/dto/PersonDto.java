@@ -17,6 +17,9 @@
 
 package cnr.sync.dto;
 
+/**
+ * DTO per rappresentare i dati una persona via REST.
+ */
 public class PersonDto {
 
   public int id;

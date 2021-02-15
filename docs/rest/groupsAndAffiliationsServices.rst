@@ -159,7 +159,7 @@ Group Delete
 
 La cancellazione di un gruppo è possibile tramite una HTTP DELETE all'indirizzo **/rest/v2/groups/delete**
 
-Per individuare il gruppo da eliminare si utilizzano lo stesso parametri previsti per la show: **id**.
+Per individuare il gruppo da eliminare si utilizza lo stesso parametro previsti per la show: **id**.
 
 ::
   $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/gropus/delete?id=4

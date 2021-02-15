@@ -17,6 +17,9 @@
 
 package cnr.sync.dto;
 
+/**
+ * DTO per rappresentare via REST i dati riepilogativi delle presenze di un dipendente.
+ */
 public class PersonMonthDto {
 
   public int progressivoFinaleMese;

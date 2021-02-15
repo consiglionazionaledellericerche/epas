@@ -41,7 +41,7 @@ import security.SecurityRules;
 /**
  * API Rest per la gestione dei gruppi di persone.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  *
  */
 @Slf4j
@@ -56,7 +56,7 @@ public class Groups extends Controller {
   static GsonBuilder gsonBuilder;
 
   /**
-   * Elendo dei gruppi di una sede in formato JSON. 
+   * Elenco dei gruppi di una sede in formato JSON. 
    *
    * @param id id in ePAS dell'Ufficio.
    * @param code codice cds dell'ufficio
@@ -124,7 +124,7 @@ public class Groups extends Controller {
   }
 
   /**
-   * Aggiorna i dati di un gruppo individuata con i parametri HTTP
+   * Aggiorna i dati di un gruppo individuato con i parametri HTTP
    * passati ed i valori passati nel body HTTP come JSON.
    * Questo metodo può essere chiamato solo via HTTP PUT.
    */
@@ -166,7 +166,7 @@ public class Groups extends Controller {
   }
 
   /**
-   * Effettua la cancellazione di una persona individuata con i 
+   * Effettua la cancellazione di un gruppo individuato con i 
    * parametri HTTP passati.
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */

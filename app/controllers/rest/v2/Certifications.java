@@ -17,7 +17,6 @@
 
 package controllers.rest.v2;
 
-
 import cnr.sync.dto.v2.CertificationAbsenceDto;
 import cnr.sync.dto.v2.CertificationCompetencesDto;
 import cnr.sync.dto.v2.CertificationDto;
@@ -263,7 +262,7 @@ public class Certifications extends Controller {
         .build();
     return obj;
   }
-  
+
   /**
    * Metodo privato per la ricerca delle assenze.
    *
@@ -287,7 +286,7 @@ public class Certifications extends Controller {
     Integer timeToJustify = null;
     String justifiedType = "";
     for (Absence abs : absencesPlus) {
-      
+
       String absenceCodeToSend = abs.absenceType.code.toUpperCase();      
       if (previousDate != null && previousDate.plusDays(1).equals(abs.personDay.date)
           && previousAbsenceCode.equals(absenceCodeToSend)) {
@@ -330,7 +329,7 @@ public class Certifications extends Controller {
         timeToJustify = abs.absenceType.justifiedTime;
       }
       justifiedType = abs.getJustifiedType().getLabel();
-      
+
     }
     if (!absencesPlus.isEmpty()) {
       CertificationAbsenceDto absence = CertificationAbsenceDto.builder()
@@ -342,8 +341,7 @@ public class Certifications extends Controller {
           .build();
       absences.add(absence);   
     }
-      
-    
+
     return absences;
   }
 }

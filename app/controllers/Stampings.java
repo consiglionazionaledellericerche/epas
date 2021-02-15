@@ -348,7 +348,7 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(stamping);
     final User currentUser = Security.getUser().get();
     String result = stampingManager
-        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+        .persistStamping(stamping, person, currentUser, newInsert);
     if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
@@ -423,7 +423,7 @@ public class Stampings extends Controller {
     final User currentUser = Security.getUser().get();
     
     String result = stampingManager
-        .persistStamping(stamping, date, time, person, currentUser, newInsert);
+        .persistStamping(stamping, person, currentUser, newInsert);
     if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {

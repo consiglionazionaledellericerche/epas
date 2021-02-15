@@ -29,7 +29,7 @@ import play.data.validation.Required;
 
 /**
  * Dati per la creazione via REST di un nuovo contratto di una persona.
- * 
+ *
  * @author cristian
  *
  */

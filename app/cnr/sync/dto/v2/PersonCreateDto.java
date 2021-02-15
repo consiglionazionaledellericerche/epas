@@ -28,7 +28,7 @@ import play.data.validation.Required;
 
 /**
  * Dati per la creazione di una persona via REST.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -46,6 +46,7 @@ import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.testng.util.Strings;
 import play.i18n.Messages;
 
 /**
@@ -118,6 +119,7 @@ public class StampingManager {
     return false;
   }
 
+
   /**
    * Crea il tempo. Il campo time è già stato validato HH:MM o HHMM
    */
@@ -176,13 +178,11 @@ public class StampingManager {
    * Metodo che salva la timbratura.
    *
    * @param stamping la timbratura da persistere
-   * @param date la data della timbratura
-   * @param time l'orario della timbratura
    * @param person la persona a cui associare la timbratura
    * @return la stringa contenente un messaggio di errore se il salvataggio non è andato a
    *     buon fine, stringa vuota altrimenti.
    */
-  public String persistStamping(Stamping stamping, LocalDate date, String time, 
+  public String persistStamping(Stamping stamping, 
       Person person, User currentUser, boolean newInsert) {
     String result = "";
 
@@ -226,7 +226,7 @@ public class StampingManager {
   /**
    * Stamping dal formato del client al formato ePAS.
    */
-  public boolean createStampingFromClient(StampingFromClient stampingFromClient,
+  public Optional<Stamping> createStampingFromClient(StampingFromClient stampingFromClient,
       boolean recompute) {
 
     // Check della richiesta
@@ -242,7 +242,7 @@ public class StampingManager {
     if (stampingDao.getStamping(stampingFromClient.dateTime, person, way).isPresent()) {
       log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
           stampingFromClient.dateTime, person, person.number);
-      return false;
+      return Optional.absent();
     }
 
     //controllo se la precedente timbratura è per lavoro fuori sede e di ingresso
@@ -280,7 +280,7 @@ public class StampingManager {
       consistencyManager.updatePersonSituation(person.id, personDay.date);
     }
 
-    return true;
+    return Optional.of(stamping);
   }
 
   /**
@@ -383,10 +383,45 @@ public class StampingManager {
         .getPersonByBadgeNumber(stamping.numeroBadge, user.get().getBadgeReader()));
 
     if (person.isPresent()) {
-      stamping.person = person.get();      
+      stamping.person = person.get();
     } else {
       log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
           + " matricolaFirma={}. Controllare il database.", stamping.numeroBadge);
+    }
+
+    return person;
+
+  }
+
+  /**
+   * Preleva l'utente associato al numero di badge passato ed al bagdeReader
+   * individuato tramite l'autenticazione corrente. 
+   *
+   * @param badgeNumber numero di badge
+   * @return un Optional contenente la Person se presente, altrimenti absent
+   */
+  public Optional<Person> getPersonFromBadgeAndCurrentBadgeReader(String badgeNumber) {
+
+    Optional<User> user = Security.getUser();
+    if (!user.isPresent()) {
+      log.warn("Impossibile recuperare l'utente che ha inviato la timbratura con badgeNumber: {}", 
+          badgeNumber);
+      return Optional.absent();
+    }
+    if (user.get().getBadgeReader() == null) {
+      log.warn("L'utente {} utilizzato per l'invio della timbratura"
+          + " non ha una istanza badgeReader valida associata.", user.get().username);
+      return Optional.absent();
+    }
+    if (Strings.isNullOrEmpty(badgeNumber)) {
+      return Optional.absent();
+    }
+    final Optional<Person> person = Optional.fromNullable(personDao
+        .getPersonByBadgeNumber(badgeNumber, user.get().getBadgeReader()));
+
+    if (!person.isPresent()) {
+      log.warn("Non e' stato possibile recuperare la persona a cui si riferisce la timbratura,"
+          + " badgeNumber={}. Controllare il database.", badgeNumber);
     }
 
     return person;
