@@ -49,6 +49,7 @@ public enum DefaultTab {
   COVID19("Emergenza covid-19", 16), 
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
   CONGEDI_PARENTALI_DIPENDENTI("Congedi Parentali dipendenti", 24),
+  VISITA_MEDICA_DIPENDENTI("Visita medica dipendenti", 24),
   AUTOMATICI("Codici Automatici", 11);
 
   public String description;
