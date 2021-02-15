@@ -46,7 +46,7 @@ public enum DefaultCategoryType {
 
   MALATTIA_DIPENDENTE("Malattia dipendente", 8, DefaultTab.MALATTIA), 
   VISITA_MEDICA("Visita medica", 9, DefaultTab.MALATTIA),
-  VISITA_MEDICA_DIPENDENTE("Visita medica dipendente", 9, DefaultTab.MALATTIA),
+  
   VISITA_MEDICA_TERAPIE("Visita medica per terapie", 9, DefaultTab.MALATTIA),
 
   MALATTIA_FIGLIO_1("Malattia primo figlio", 9, DefaultTab.CONGEDI_PARENTALI), 
@@ -86,6 +86,7 @@ public enum DefaultCategoryType {
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 23, DefaultTab.ORE_AGGIUNTIVE_DIPENDENTI), 
   ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
       24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
+  VISITA_MEDICA_DIPENDENTE("Visita medica dipendente", 24, DefaultTab.VISITA_MEDICA_DIPENDENTI),
   CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;
