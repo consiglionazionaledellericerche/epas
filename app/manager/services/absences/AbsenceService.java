@@ -527,6 +527,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
     final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType medicalExams = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -561,7 +563,7 @@ public class AbsenceService {
       
       if ((Boolean) confManager.configValue(person.office, 
           EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)) {
-        //TODO: aggiungere il gruppo per inserimento codici di visita medica
+        groupsPermitted.add(medicalExams);
       }
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
