@@ -438,6 +438,7 @@ public class Synchronizations extends Controller {
   /**
    * Permette la join tra la persona presente su ePAS e quella presente su Perseo 
    * (anagrafica).
+   *
    * @param epasPerson Person presente su ePas
    * @param perseoPerson Person prelevata da Perseo.
    */
@@ -617,6 +618,7 @@ public class Synchronizations extends Controller {
 
   /**
    * Importa tutte le persone presenti nell'ufficio con id epasOfficeId.
+   *
    * @param epasOfficeId id dell'ufficio.
    */
   public static void importAllPersonInOffice(Long epasOfficeId) {
@@ -744,6 +746,7 @@ public class Synchronizations extends Controller {
   /**
    * Permette l'aggiornamento del contratto tra la persona presente su ePAS e quella 
    * presente su Perseo (anagrafica).
+   *
    * @param epasContract contratto presente su ePas
    * @param perseoContract contratto Prelevato da Perseo.
    */
@@ -936,6 +939,7 @@ public class Synchronizations extends Controller {
 
   /**
    * Sincronizza il parametro eppn delle persone della sede con id officeId.
+   *
    * @param officeId l'identificativo della sede
    */
   public static void syncEppn(Long officeId) {
@@ -975,7 +979,7 @@ public class Synchronizations extends Controller {
   /**
    * Sincronizza le persone presenti in un ufficio, prelevando le persone
    * assegnate all'ufficio dall'anagrafica esterna.
-   * 
+   *
    * @param id l'id dell'ufficio da sincronizzare.
    */
   public void syncPeopleInOffice(Long id) {
@@ -987,7 +991,7 @@ public class Synchronizations extends Controller {
   /**
    * Sincronizza i dati di una persona presente in ePAS con quelli 
    * dell'anagrafica.
-   * 
+   *
    * @param id id in ePAS della persona da sincronizzare.
    */
   public static void syncPerson(Long id) {

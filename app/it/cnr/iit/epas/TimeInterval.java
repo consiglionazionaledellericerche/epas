@@ -36,7 +36,6 @@ public class TimeInterval {
    *
    * @param begin ora inizio intervallo.
    * @param end da fine intervallo.
-   * @return
    */
   public static TimeInterval withBegin(LocalTime begin, Optional<LocalTime> end) {
     TimeInterval timeInterval = new TimeInterval();
@@ -59,7 +58,6 @@ public class TimeInterval {
    *
    * @param begin data inizio intervallo, se null impostata a MIN_DATE
    * @param end data fine intervallo, se null impostata a MAX_DATE
-   * @return
    */
   public static TimeInterval build(LocalTime begin, LocalTime end) {
 
