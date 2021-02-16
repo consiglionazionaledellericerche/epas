@@ -17,6 +17,11 @@
 
 package cnr.sync.dto;
 
+import com.google.common.base.Joiner;
+import java.util.stream.Collectors;
+import manager.services.absences.model.DayInPeriod.TemplateRow;
+import play.i18n.Messages;
+
 /**
  * DTO per rappresentare il risultato di un'inserimento di un'assenza via REST.
  */
@@ -26,4 +31,18 @@ public class AbsenceAddedRest {
   public String date;
   public boolean isOk;
   public String reason;
+  
+  /**
+   * Costruisce un'instanza del DTO AbsenceAddedRest a partire dal DTO templateRow.
+   */
+  public static AbsenceAddedRest build(TemplateRow templateRow) {
+    AbsenceAddedRest aar = new AbsenceAddedRest();
+    aar.date = templateRow.absence.getDate().toString();
+    aar.absenceCode = templateRow.absence.absenceType.code;
+    aar.isOk = templateRow.absenceErrors.isEmpty();
+    aar.reason = Joiner.on(", ").join(
+        templateRow.absenceErrors.stream()
+        .map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
+    return aar;
+  }
 }

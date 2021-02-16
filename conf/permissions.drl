@@ -2938,6 +2938,57 @@ then
 end
 
 /*******************************************************************************
+ * Azioni utente con ruolo ABSENCE_MANAGER
+ ******************************************************************************/
+rule AbsenceManager
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "absenceManager") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence",
+        "manager.AbsenceManager.saveAbsences",
+
+        "rest.Absences.checkAbsenceByPerseoId",
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.Absences.delete",
+        "rest.Absences.deleteAbsencesInPeriod"
+
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule AbsenceManager_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "absenceManager") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.insertAbsence",
+        "rest.Absences.checkAbsence",
+        "manager.AbsenceManager.saveAbsences",
+		
+        "rest.Absences.checkAbsenceByPerseoId",
+        "rest.Absences.insertAbsenceByPerseoId",
+        
+        "rest.Absences.delete",
+        "rest.Absences.deleteAbsencesInPeriod"
+
+		
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+
+/*******************************************************************************
  * Azioni via REST per Skynet
  ******************************************************************************/
 
@@ -2951,7 +3002,9 @@ when
         "rest.Absences.checkAbsence",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+        "rest.Absences.delete",
+        "rest.Absences.deleteAbsencesInPeriod"
 
        ), granted == false)
 then
