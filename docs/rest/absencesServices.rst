@@ -16,13 +16,13 @@ Permessi
 ========
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
-di *Rest Client*, oppure di *Lettore Informazioni* per le operazioni di sola lettura.
+di *Gestore Assenze* o *Rest Client*, oppure di *Lettore Informazioni* per le operazioni di sola lettura.
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di *amministratore tecnico*.
 
 Su https://epas-demo.devel.iit.cnr.it potete per esempio creare un nuovo utente associato alla
-vostra sede tipo *istituto_xxx_rest_client* oppure *istituto_xxx_personday_reader*
+vostra sede tipo *istituto_xxx_absence_manager* oppure *istituto_xxx_personday_reader*
 (cambiate il nome o in futuro andrà in conflitto con quello di altri istituti) ed una volta creato
-l'utente assegnateli il ruolo *Rest Client*.
+l'utente assegnateli il ruolo *Gestore Assenze*.
 
 Inoltre è possibile utilizzare un utente di sistema con ruolo di *Gestore Assenze* per accedere 
 alle informazioni sulle assenze di tutte le sedi. Questo utente è utiizzato per l'eventuale 
@@ -48,7 +48,7 @@ Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.
 cambiatelo con un utente appropriato per la vostra sede.
 
 ::
-  $ http -a istituto_xxx_rest_client GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod email==galileo.galilei@cnr.it begin==2020-12-01 end==2021-12-31
+  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod email==galileo.galilei@cnr.it begin==2020-12-01 end==2021-12-31
 
 La risposta sarà del tipo:
 
@@ -57,6 +57,7 @@ La risposta sarà del tipo:
         "absenceCode": "37",
         "date": "2020-12-21",
         "description": "ferie anno precedente (dopo il 31/8)",
+        "id": 107109,
         "name": "Galileo",
         "surname": "Galilei"
     },
@@ -64,6 +65,7 @@ La risposta sarà del tipo:
         "absenceCode": "94",
         "date": "2020-12-28",
         "description": "festività soppresse (ex legge 937/77)",
+        "id": 107110,
         "name": "Galileo",
         "surname": "Galilei"
     },
@@ -82,7 +84,7 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
 
 ::
-  $ http -a istituto_xxx_rest_client GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato conterrà i giorni in cui sarebbe possibile inserire l'assenza, con un formato
 tipo il seguente.
@@ -118,7 +120,7 @@ Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
 Nel caso di tratti di un'assenza oraria è possibile indicare i campi *hours* and *minutes*.
 
 ::
-    $ http -a istituto_xxx_rest_client GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente.
@@ -141,3 +143,32 @@ Con un risultato tipo il seguente.
 
 Per esempio nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
+
+
+Cancellazione di un'assenza
+===========================
+
+La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizzo
+**/rest/v2/absences/delete**.
+
+Per individuare l'assenza da eliminare si utilizza il parametro *id* dell'assenza.
+
+::
+  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/delete id==107109
+
+
+Cancellazione delle assenza di uno stesso tipo in un periodo
+============================================================
+
+È possibile cancellare più assenze di una persona che siano dello stesso tipo specificando
+i limiti temporali di inizio e fine delle assenze da cancellare.
+Questa operazione può essere seguita con una *HTTP DELETE* all'endpoint **/rest/absences/deleteAbsencesInPeriod**.
+
+La persona può essere individuata passando i parametri identificativi delle persone:
+*id, email, eppn, perseoPersonId, fiscalCode*. 
+Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
+*YYYY-MM-dd*.
+Il codice dell'assenze da cancellare deve essere indicato con il parametro *absenceCode*.
+
+::
+  $ http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/deleteAbsencesInPeriod email==galileo.galilei@cnr.it begin==2021-02-15 end==2021-02-16 absenceCode==31

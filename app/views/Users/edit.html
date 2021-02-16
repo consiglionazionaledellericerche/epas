@@ -44,9 +44,9 @@
 				<strong>Nessun ruolo di sistema.</strong>
 			</div>
 			#{/if}
-			#{list user.roles}
+			#{list items:user.roles, as:'role'}
 			<li class="list-group-item clearfix">
-				<strong><em>${_}</em></strong>
+				<strong><em>${messages.get('AccountRole.' + role)}</em></strong>
 			</li>
 			#{/list}
 		</ul>
