@@ -993,7 +993,7 @@ TimeSlots.manageTimeSlots= Fasce orarie di lavoro
 # Enumerati
 ########################
 
-AccountRole.DEVELOPER= developer
+AccountRole.DEVELOPER= Developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
 AccountRole.ABSENCES_MANAGER= Gestore assenze

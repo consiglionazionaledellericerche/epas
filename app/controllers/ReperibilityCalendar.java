@@ -379,7 +379,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Verifica se il calendario è modificabile o meno nella data richiesta.
-   * 
+   *
    * @param reperibilityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
@@ -428,7 +428,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * DTO che modellano le assenze della persona nel periodo.
-   * 
+   *
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
