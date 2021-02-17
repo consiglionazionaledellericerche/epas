@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Tipi assenza di default.
- * 
+ *
  * @author Alessandro Martelli
  *
  */
@@ -1683,6 +1683,9 @@ public enum DefaultAbsenceType {
   public Boolean reperibilityCompatible;
   public Boolean isRealAbsenceType;
 
+  /**
+   * DTO con i parametri predefiniti dei tipi di assenza.
+   */
   private DefaultAbsenceType(String certificationCode, String description, boolean internalUse,
       Set<JustifiedTypeName> justifiedTypeNamesPermitted, Integer justifiedTime,
       boolean consideredWeekEnd, boolean timeForMealTicket, Integer replacingTime,

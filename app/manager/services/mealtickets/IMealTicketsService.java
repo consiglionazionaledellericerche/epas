@@ -27,7 +27,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Servizio meal tickets.
- * 
+ *
  * @author Alessandro Martelli
  *
  */

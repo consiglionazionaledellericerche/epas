@@ -25,7 +25,7 @@ import org.joda.time.YearMonth;
 
 /**
  * Implementazione contractMonthRecap.
- * 
+ *
  * @author Alessandro Martelli
  */
 public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
