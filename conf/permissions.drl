@@ -1996,22 +1996,23 @@ then
  $c.grant();
 end
 
-/*******************************************************************
- * Azioni per ruolo di gestore dell'anagrafica (registry_manager)
- ******************************************************************/
-rule OnlyForRegistryManager_Generic
+
+/******************************************************************************
+ * Azioni per account di sistema di gestore dell'anagrafica (REGISTRY_MANAGER)
+ *****************************************************************************/
+rule RegistryManager_AllOffices
 when
- $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ AccountRole(this in (AccountRole.REGISTRY_MANAGER))
  $c: PermissionCheck(action in (
- 		"Persons.list",
-    	"Persons.edit",
-    	"Persons.insertPerson",
-		"Persons.update",
+        "Persons.list",
+        "Persons.edit",
+        "Persons.insertPerson",
+        "Persons.update",
         "Persons.save",
-     	"Persons.insertUsername",
-     	"Persons.updateUsername",
-     	"Persons.showCurrentContractWorkingTimeType",
-    	"Persons.showCurrentVacation",
+        "Persons.insertUsername",
+        "Persons.updateUsername",
+        "Persons.showCurrentContractWorkingTimeType",
+        "Persons.showCurrentVacation",
 
         "AbsenceGroups.absenceInitializations",
         "AbsenceGroups.initialization",
@@ -2040,10 +2041,10 @@ when
         "Contracts.updateSourceContract",
         "Contracts.updateSourceContractVacation",
         "Contracts.updateSourceContractMeal",
-     	"Contracts.saveResidualSourceContract",
-     	"Contracts.saveVacationSourceContract",
-     	"Contracts.saveMealTicketSourceContract",
-		"Contracts.updateContractStampProfile",
+        "Contracts.saveResidualSourceContract",
+        "Contracts.saveVacationSourceContract",
+        "Contracts.saveMealTicketSourceContract",
+        "Contracts.updateContractStampProfile",
         "Contracts.saveContractStampProfile",
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
@@ -2051,49 +2052,152 @@ when
         "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
-		"Persons.children",
-     	"Persons.editChild",
-     	"Persons.saveChild",
-     	"Persons.insertChild",
-     	"Persons.deleteChild",
+        "Persons.children",
+        "Persons.editChild",
+        "Persons.saveChild",
+        "Persons.insertChild",
+        "Persons.deleteChild",
 
-     	"Persons.confirmGroup",
-     	"Persons.removePersonFromGroup",
+        "Persons.confirmGroup",
+        "Persons.removePersonFromGroup",
 
-     	"Persons.modifySendEmail",
-     	"Persons.updateSendEmail",
-     	
-     	"rest.v2.Persons.show",
-     	"rest.v2.Persons.create",
-     	"rest.v2.Persons.update",
-     	"rest.v2.Persons.delete",
-     	"rest.v2.Persons.list",
+        "Persons.modifySendEmail",
+        "Persons.updateSendEmail",
 
-     	"rest.v2.Groups.show",
-     	"rest.v2.Groups.create",
-     	"rest.v2.Groups.update",
-     	"rest.v2.Groups.delete",
-     	"rest.v2.Groups.list",
-     	
-     	"rest.v2.Affiliations.show",
-     	"rest.v2.Affiliations.create",
-     	"rest.v2.Affiliations.update",
-     	"rest.v2.Affiliations.delete",
-     	"rest.v2.Affiliations.byGroup",
-     	"rest.v2.Affiliations.byPerson",
-     	
-     	"rest.v2.Contracts.byPerson",
-     	"rest.v2.Contracts.show",
-     	"rest.v2.Contracts.create",
-     	"rest.v2.Contracts.update",
-     	"rest.v2.Contracts.setPreviousContract",
-     	"rest.v2.Contracts.unsetPreviousContract",
-     	"rest.v2.Contracts.delete",
-     	
-     	"rest.v2.WorkingTimeTypes.show",
+        "rest.v2.Persons.show",
+        "rest.v2.Persons.create",
+        "rest.v2.Persons.update",
+        "rest.v2.Persons.delete",
+        "rest.v2.Persons.list",
+
+        "rest.v2.Groups.show",
+        "rest.v2.Groups.create",
+        "rest.v2.Groups.update",
+        "rest.v2.Groups.delete",
+        "rest.v2.Groups.list",
+
+        "rest.v2.Affiliations.show",
+        "rest.v2.Affiliations.create",
+        "rest.v2.Affiliations.update",
+        "rest.v2.Affiliations.delete",
+        "rest.v2.Affiliations.byGroup",
+        "rest.v2.Affiliations.byPerson",
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+        "rest.v2.Contracts.create",
+        "rest.v2.Contracts.update",
+        "rest.v2.Contracts.setPreviousContract",
+        "rest.v2.Contracts.unsetPreviousContract",
+        "rest.v2.Contracts.delete",
+
+        "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list"
 
-     	), target == null, granted == false)
+        ), granted == false)
+then
+ $c.grant();
+end
+
+
+/*******************************************************************
+ * Azioni per ruolo di gestore dell'anagrafica (registry_manager)
+ ******************************************************************/
+rule OnlyForRegistryManager_Generic
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $c: PermissionCheck(action in (
+        "Persons.list",
+        "Persons.edit",
+        "Persons.insertPerson",
+        "Persons.update",
+        "Persons.save",
+        "Persons.insertUsername",
+        "Persons.updateUsername",
+        "Persons.showCurrentContractWorkingTimeType",
+        "Persons.showCurrentVacation",
+
+        "AbsenceGroups.absenceInitializations",
+        "AbsenceGroups.initialization",
+        "AbsenceGroups.saveInitialization",
+        "AbsenceGroups.deleteInitialization",
+        "AbsenceGroups.importCertificationsAbsences",
+        "AbsenceGroups.certificationsAbsences",
+        "AbsenceGroups.reloadCertificationAbsences",
+        "AbsenceGroups.syncCertificationsAbsences",
+
+        "Configurations.personShow",
+        "Configurations.personEdit",
+        "Configurations.personUpdate",
+        "Configurations.getAttachment",
+
+        "Contracts.personContracts",
+        "Contracts.insert",
+        "Contracts.save",
+        "Contracts.edit",
+        "Contracts.update",
+        "Contracts.delete",
+
+        "Contracts.initializationsStatus",
+        "Contracts.initializationsVacation",
+        "Contracts.initializationsMeal",
+        "Contracts.updateSourceContract",
+        "Contracts.updateSourceContractVacation",
+        "Contracts.updateSourceContractMeal",
+        "Contracts.saveResidualSourceContract",
+        "Contracts.saveVacationSourceContract",
+        "Contracts.saveMealTicketSourceContract",
+        "Contracts.updateContractStampProfile",
+        "Contracts.saveContractStampProfile",
+        "Contracts.updateContractWorkingTimeType",
+        "Contracts.saveContractWorkingTimeType",
+        "Contracts.updateContractMandatoryTimeSlot",
+        "Contracts.saveContractMandatoryTimeSlot",        
+        "Contracts.updateContractVacationPeriod",
+        "Contracts.saveContractVacationPeriod",
+        "Persons.children",
+        "Persons.editChild",
+        "Persons.saveChild",
+        "Persons.insertChild",
+        "Persons.deleteChild",
+
+        "Persons.confirmGroup",
+        "Persons.removePersonFromGroup",
+
+        "Persons.modifySendEmail",
+        "Persons.updateSendEmail",
+
+        "rest.v2.Persons.show",
+        "rest.v2.Persons.create",
+        "rest.v2.Persons.update",
+        "rest.v2.Persons.delete",
+        "rest.v2.Persons.list",
+
+        "rest.v2.Groups.show",
+        "rest.v2.Groups.create",
+        "rest.v2.Groups.update",
+        "rest.v2.Groups.delete",
+        "rest.v2.Groups.list",
+
+        "rest.v2.Affiliations.show",
+        "rest.v2.Affiliations.create",
+        "rest.v2.Affiliations.update",
+        "rest.v2.Affiliations.delete",
+        "rest.v2.Affiliations.byGroup",
+        "rest.v2.Affiliations.byPerson",
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+        "rest.v2.Contracts.create",
+        "rest.v2.Contracts.update",
+        "rest.v2.Contracts.setPreviousContract",
+        "rest.v2.Contracts.unsetPreviousContract",
+        "rest.v2.Contracts.delete",
+
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"
+
+        ), target == null, granted == false)
 then
  $c.grant();
 end

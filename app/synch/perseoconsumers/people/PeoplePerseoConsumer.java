@@ -39,6 +39,10 @@ import models.Qualification;
 import play.libs.WS;
 import synch.perseoconsumers.AnagraficaApis;
 
+/**
+ * Classe di supporto per prelevare via REST le informazioni da Perseo.
+ *
+ */
 @Slf4j
 public class PeoplePerseoConsumer {
 
@@ -259,6 +263,9 @@ public class PeoplePerseoConsumer {
     return Optional.fromNullable(epasConverter(perseoPerson, qualificationsMap));
   }
 
+  /**
+   * Preleva le informazioni sui badge di una persona.
+   */
   public ListenableFuture<PersonBadge> getPersonBadge(Long personId) {
 
     final String url;
@@ -302,6 +309,9 @@ public class PeoplePerseoConsumer {
   }
 
 
+  /**
+   * Preleva le informazioni su tutti i badge associati ad un ufficio.
+   */
   public ListenableFuture<List<PersonBadge>> getOfficeBadges(Long departmentPerseoId) {
 
     final String url;
