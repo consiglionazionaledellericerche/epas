@@ -24,12 +24,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.rest.v2.Persons;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
@@ -41,12 +43,18 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -70,9 +78,13 @@ public class Absences extends Controller {
   @Inject
   static AbsenceTypeDao absenceTypeDao;
   @Inject
+  static AbsenceComponentDao absenceComponentDao;
+  @Inject
   static ObjectMapper mapper;
   @Inject
   private static IWrapperFactory wrapperFactory;
+  @Inject
+  static GsonBuilder gsonBuilder;
   @Inject
   private static SecurityRules rules;
 
@@ -261,9 +273,15 @@ public class Absences extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void deleteAbsencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, String absenceCode, LocalDate begin, LocalDate end) {
+      String fiscalCode, @Required String absenceCode,
+      @Required LocalDate begin, @Required LocalDate end) {
+
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
+    }
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
@@ -283,6 +301,52 @@ public class Absences extends Controller {
         deletedAbsences, person.getFullname(), absenceCode, begin, end);
     JsonResponse.ok(String.format("Deleted %s absences", deletedAbsences));
   }
+
+  /**
+   * Inserimento di giorni di ferie con seleziona automatica dei codici da parte di ePAS.
+   */
+  public static void insertVacation(Long id, String eppn, String email, Long personPerseoId,
+      String fiscalCode, @Required LocalDate begin, @Required LocalDate end) {
+
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest("Mandatory parameters missing (begin, end)");
+    }
+
+    rules.checkIfPermitted(person.office);
+
+    val groupAbsenceType = 
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    AbsenceType absenceType = null;
+    LocalDate recoveryDate = null;
+    boolean forceInsert = false;
+
+    val justifiedType = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+
+    InsertReport insertReport = absenceService.insert(person, groupAbsenceType, begin, end,
+        absenceType, justifiedType, null, null, forceInsert, absenceManager);
+
+    log.debug("Richiesto inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {}", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType,
+            begin, end);
+
+    val absences = 
+        absenceManager.saveAbsences(insertReport, person, begin, recoveryDate, 
+            justifiedType, groupAbsenceType);
+
+    log.info("Effettuato inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {}", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType, 
+        begin, end);
+
+    renderJSON(
+        gsonBuilder.create().toJson(
+            absences.stream().map(AbsenceRest::build).collect(Collectors.toList())));
+  }
+
 
   /**
    * Cerca il contratto in funzione del id passato.
@@ -308,5 +372,5 @@ public class Absences extends Controller {
     rules.checkIfPermitted(absence.personDay.person.office);
     return absence;
   }
-  
+
 }

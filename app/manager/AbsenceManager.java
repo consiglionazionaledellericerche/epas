@@ -151,9 +151,10 @@ public class AbsenceManager {
    * @param justifiedType il tipo di giustificazione
    * @param groupAbsenceType il gruppo di appartenenza dell'assenza
    */
-  public void saveAbsences(InsertReport insertReport, Person person, LocalDate from, 
+  public List<Absence> saveAbsences(InsertReport insertReport, Person person, LocalDate from, 
       LocalDate recoveryDate, JustifiedType justifiedType, GroupAbsenceType groupAbsenceType) {
-    
+
+    List<Absence> newAbsences = Lists.newArrayList();
     //Persistenza
     if (!insertReport.absencesToPersist.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
@@ -167,6 +168,7 @@ public class AbsenceManager {
         personDay.absences.add(absence);
         rules.check("AbsenceGroups.save", absence);
         absence.save();
+        newAbsences.add(absence);
         personDay.save();
 
         notificationManager.notificationAbsencePolicy(Security.getUser().get(),
@@ -178,12 +180,13 @@ public class AbsenceManager {
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
-      log.info("Prima del lancio dei ricalcoli");      
+      log.trace("Prima del lancio dei ricalcoli");      
       JPA.em().flush();
-      log.info("Flush dell'entity manager effettuata");
+      log.trace("Flush dell'entity manager effettuata");
       
       consistencyManager.updatePersonSituation(person.id, from);
     }
+    return newAbsences;
   }
   
   /**

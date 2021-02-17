@@ -19,10 +19,16 @@ Per poter accedere a queste interfaccie REST è necessario utilizzare un utente 
 di *Gestore anagrafica* per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
 utilizzato per la gestione delle persone e dei gruppi).
 
-u https://epas-demo.devel.iit.cnr.it potete per esempio creare un nuovo utente associato alla
+Su https://epas-demo.devel.iit.cnr.it potete per esempio creare un nuovo utente associato alla
 vostra sede tipo *istituto_xxx_registry_manager* (cambiate il nome o in futuro andrà in
 conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli il
 ruolo *Gestore Anagrafica*.
+
+Inoltre è possibile utilizzare un utente di sistema con ruolo di *Gestore anagrafica* per accedere 
+alle informazioni sulle persone di tutte le sedi. Questo utente è utiizzato per l'eventuale 
+integrazione con sistemi esterni (per esempio di rendicontazione) a livello di tutte le sedi. 
+L'utente di sistema con ruolo di *Gestore anagrafica* non può essere creato dalle singole sedi ma
+può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
 
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
@@ -189,6 +195,7 @@ Affiliation Create
   {
     "beginDate": "2020-10-12",
     "endDate": null,
+    "externalId": null,
     "group": {
         "description": "Gruppo ISTI di test",
         "endDate": null,
@@ -230,6 +237,7 @@ Affiliation byGroup
     {
         "beginDate": "2020-10-12",
         "endDate": null,
+        "externalId": null,
         "group": {
             "description": "Gruppo di test",
             "endDate": null,

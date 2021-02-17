@@ -26,7 +26,14 @@ vostra sede tipo *istituto_xxx_registry_manager* (cambiate il nome o in futuro a
 conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli il
 ruolo *Gestore Anagrafica*.
 
+Inoltre è possibile utilizzare un utente di sistema con ruolo di *Gestore anagrafica* per accedere 
+alle informazioni sulle persone di tutte le sedi. Questo utente è utiizzato per l'eventuale 
+integrazione con sistemi esterni (per esempio di rendicontazione) a livello di tutte le sedi. 
+L'utente di sistema con ruolo di *Gestore anagrafica* non può essere creato dalle singole sedi ma
+può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
+
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
+
 
 Contract byPerson
 =================
@@ -70,7 +77,8 @@ La persona può essere individuata passando i soliti parametri identificativi de
                  "office": null
               }
            }
-        ]
+        ],
+        "updatedAt": "2021-01-15T17:55:05.966788"
      }
   ]
 
@@ -103,20 +111,7 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
          "number": "9802"
      },
      "previousContract": null,
-     "workingTimeTypes": [
-        {
-            "beginDate": "2018-12-27",
-            "endDate": null,
-            "workingTimeType": {
-                "description": "Normale",
-                "disabled": false,
-                "externalId": null,
-                "horizontal": true,
-                "id": 1,
-                "office": null
-            }
-        }
-     ]
+     "updatedAt": "2021-01-15T17:55:05.966788"
   }
 
 
@@ -172,7 +167,8 @@ La risposta sarà del tipo:
             }
         }
      ]
-     "previousContract": null
+     "previousContract": null,
+     "updatedAt": "2021-01-15T17:55:05.966788"
   }
 
 
