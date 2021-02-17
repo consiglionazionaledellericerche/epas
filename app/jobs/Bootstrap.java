@@ -74,15 +74,15 @@ public class Bootstrap extends Job<Void> {
       return;
     }
 
-    Session session = (Session) JPA.em().getDelegate();
+    try (Session session = (Session) JPA.em().getDelegate()) {
+      if (Qualification.count() == 0) {
 
-    if (Qualification.count() == 0) {
+        session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+            .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
 
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
-
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
+        session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+            .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
+      }
     }
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
