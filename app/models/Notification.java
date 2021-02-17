@@ -82,15 +82,26 @@ public class Notification extends MutableModel {
 
   }
 
+  /**
+   * Interfaccia del builder dei messaggi all'interno delle notifice. 
+   */
   public interface NotificationBuilderMessage {
     NotificationBuilderType message(String text);
   }
 
+  /**
+   * Interfaccia del builder del destinatario nei messaggi di notifica. 
+   */
   public interface NotificationBuilderOperator {
     NotificationBuilderMessage destination(User operator);
   }
 
-  public static class NotificationBuilder implements
+  /**
+   * Builder per costruire i messaggi di Notifica.
+   *
+   * @author Marco Andreini
+   */
+  static class NotificationBuilder implements
       NotificationBuilderTypeCreate, NotificationBuilderType,
       NotificationBuilderMessage, NotificationBuilderOperator {
 
@@ -139,6 +150,7 @@ public class Notification extends MutableModel {
 
   /**
    * Crea un builder per costruire le notifiche.
+   *
    * @return a new notification, saved.
    */
   public static NotificationBuilderOperator builder() {
