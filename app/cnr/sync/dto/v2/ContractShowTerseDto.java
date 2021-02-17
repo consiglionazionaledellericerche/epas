@@ -43,11 +43,11 @@ public class ContractShowTerseDto {
   private LocalDate endDate;
   private LocalDate endContract;
   private String externalId;
-  
+
   private Boolean onCertificate;
   private ContractShowTerseDto previousContract;
   private LocalDateTime updatedAt;
-  
+
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
