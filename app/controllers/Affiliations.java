@@ -35,7 +35,7 @@ import security.SecurityRules;
 
 /**
  * Controller per la gestione delle affiliazione delle persone ai gruppi.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

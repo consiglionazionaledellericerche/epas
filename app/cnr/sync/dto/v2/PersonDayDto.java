@@ -24,6 +24,10 @@ import lombok.Data;
 import org.joda.time.LocalDate;
 
 
+/**
+ * DTO che rappresenta le informazioni sommario di timbrature/assenze e
+ * tempo a lavoro in un giorno di una specifica persona.
+ */
 @Builder
 @Data
 public class PersonDayDto {

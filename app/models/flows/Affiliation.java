@@ -37,6 +37,12 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+/**
+ * Rappresenta l'affiliazione di una persona ad un gruppo.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Audited
@@ -89,7 +95,7 @@ public class Affiliation extends BaseModel {
   
   /**
    * Verifica di appartenenza a questa affiliazione.
-   * 
+   *
    * @return true se la data passata è compresa nelle data di validità 
    *     di questa affiliazione, false altrimenti.
    */

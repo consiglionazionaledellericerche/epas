@@ -27,7 +27,7 @@ import models.PersonDay;
 
 /**
  * Costruisce il recap dei buoni pasto.
- * 
+ *
  * @author Alessandro Martelli
  */
 public class MealTicketRecapBuilder {
@@ -40,6 +40,7 @@ public class MealTicketRecapBuilder {
    * 2) MEAL_TICKET_EXPIRED: in error finisce la data in cui si inizia a consumare buoni pasto 
    * scaduti.<br>
    * Se non ci sono errori viene salvato il numero di buoni pasto rimanenti.
+   *
    * @param contract contract
    * @param mealTicketInterval intervallo buoni pasto da considerare
    * @param personDays giorni da considerare

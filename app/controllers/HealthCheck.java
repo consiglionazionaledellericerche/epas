@@ -26,6 +26,13 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
 
+/**
+ * Contiene metodi con informazioni sullo stato del sistema operativo
+ * che ospita l'applicazione.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class HealthCheck extends Controller {

@@ -20,6 +20,12 @@ package helpers.rest;
 import helpers.JsonResponse;
 import play.mvc.Http.Request;
 
+/**
+ * Contiene metodi di utilità per la parte REST.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 public class RestUtils {
 
   /**

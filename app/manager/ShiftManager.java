@@ -997,7 +997,7 @@ public class ShiftManager {
       // compute the worked time in minutes of the present month
       int workedMins = (personsShiftHours.contains(person, thLackTime))
           ? numOfHours.multiply(sessanta).subtract(
-          new BigDecimal(personsShiftHours.get(person, thLackTime))).intValue()
+              new BigDecimal(personsShiftHours.get(person, thLackTime))).intValue()
           : numOfHours.multiply(sessanta).intValue();
 
       log.debug("Minuti lavorati = thReqHour * 60 - thLackTime = {} * 60 - {}",
@@ -1447,7 +1447,7 @@ public class ShiftManager {
 
       String label = eventLabel.concat(psd.personShift.person.surname);
 
-      icsCalendar.getComponents().add(createDurationICalEvent(
+      icsCalendar.getComponents().add(createDurationIcalEvent(
           new DateTime(start.getTime()), new DateTime(end.getTime()), label));
       continue;
     }
@@ -1472,7 +1472,7 @@ public class ShiftManager {
           shiftCancelled.date.getDayOfMonth());
       String label = eventLabel.concat("Annullato");
 
-      icsCalendar.getComponents().add(createAllDayICalEvent(new Date(shift.getTime()), label));
+      icsCalendar.getComponents().add(createAllDayIcalEvent(new Date(shift.getTime()), label));
       continue;
     }
 
@@ -1482,7 +1482,7 @@ public class ShiftManager {
   /*
    * Create a VEvent width label 'label' that start at 'startDate' end end at 'endDate'
    */
-  private VEvent createDurationICalEvent(DateTime startDate, DateTime endDate, String eventLabel) {
+  private VEvent createDurationIcalEvent(DateTime startDate, DateTime endDate, String eventLabel) {
     VEvent shiftDay = new VEvent(startDate, endDate, eventLabel);
     shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));
 
@@ -1492,7 +1492,7 @@ public class ShiftManager {
   /*
    * Creat an all day VEvent whith label 'label' for the day 'date'
    */
-  private VEvent createAllDayICalEvent(Date date, String eventLabel) {
+  private VEvent createAllDayIcalEvent(Date date, String eventLabel) {
     VEvent shiftDay = new VEvent(date, eventLabel);
 
     shiftDay.getProperties().add(new Uid(UUID.randomUUID().toString()));

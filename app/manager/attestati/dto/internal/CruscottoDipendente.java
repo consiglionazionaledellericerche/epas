@@ -50,12 +50,6 @@ public class CruscottoDipendente implements Serializable {
   public SituazioneDipendenteAssenze[] situazioneDipendenteAssenze;
   public SituazioneParametriControllo[] situazioneParametriControllo;
 
-  public static class SituazioneDipendenteCompetenze implements Serializable {
-
-    private static final long serialVersionUID = 6065731174487090789L;
-  
-  }
-
   /**
    * Rappresentazione la situazione delle assenze di un dipendente.
    */
@@ -116,7 +110,7 @@ public class CruscottoDipendente implements Serializable {
      * Estrae le date della situazione dipendente per quel codice di assenza.
      * Preleva le date dalle chiavi delle due mappe giorniConsolidatiMap e giorniNoConsolidatiMap.
      * Il campo value della mappa è un dato che modella le quantità e non ci interessa. 
-     * 
+     *
      * @return le date utilizzate.
      */
     public Set<LocalDate> codeDates() {
