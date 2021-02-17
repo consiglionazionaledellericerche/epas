@@ -14,6 +14,7 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-2 success">${psDto.basedWorkingDays}</td>
   </tr>
   <tr>
+  	#{if !person.isTopQualification()}
     <td class="col-xs-10">Tempo disponibile per straordinari: </td>
     #{if mese.value.progressivoFinalePositivoMese > 0}
     	<td class="col-xs-2 success">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
@@ -24,6 +25,7 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     #{else}
     	<td class="col-xs-2 danger">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
     #{/else}
+    #{/if}
   </tr>
   <tr>
     <td class="col-xs-10">Il numero di riposi compensativi usati nell'anno è </td>

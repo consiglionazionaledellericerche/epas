@@ -116,6 +116,11 @@ public enum DefaultGroup {
   G_631("631 - Permesso per visita medica", "", DefaultCategoryType.VISITA_MEDICA, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
       DefaultComplation.C_631, null, false, true), 
+  
+  G_631_DIPENDENTI("631 - Permesso per visita medica dipendenti", "", 
+      DefaultCategoryType.VISITA_MEDICA_DIPENDENTE, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
+      DefaultComplation.C_631, null, false, true), 
 
   MISSIONE_GIORNALIERA("Missione giornaliera", "",
       DefaultCategoryType.MISSIONE_CNR, 0, GroupAbsenceTypePattern.programmed, PeriodType.year,
@@ -445,6 +450,10 @@ public enum DefaultGroup {
     List<String> g26 = getCodes(DefaultGroup.G_26_DIPENDENTI);
 
     return Stream.of(g19, g26).flatMap(x -> x.stream()).collect(Collectors.toList());
+  }
+  
+  public static List<String> medicalExamsCodes() {       
+    return getCodes(DefaultGroup.G_631_DIPENDENTI);    
   }
   
   /**

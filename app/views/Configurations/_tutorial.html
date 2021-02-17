@@ -39,6 +39,13 @@
       via web dei dipendenti.</p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM) }
+      <p>Abilitando questa funzionalità si permette ai dipendenti della sede di procedere all'auto inserimento dei codici
+      per permesso visita medica (631 orario e giornaliero). 
+      Una volta inserito il codice, sarà possibile per il dipendente anche allegare il certificato rilasciato in sede 
+      di visita medica.</p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.NUMBER_OF_VIEWING_COUPLE) }
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
     #{/if}

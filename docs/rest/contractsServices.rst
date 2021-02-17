@@ -239,16 +239,16 @@ le ferie non godute precedenti.
 Questa funzionalità è da utilizzare per esempio per alcune stabilizzazioni dove il dipendente
 mantiene dal precedente contratto la situazione delle ferie non godute.
 Per impostare e rimuovere che un contratto è continuativo rispetto al precedente è possibile
-utilizzare i metodi:
+utilizzare con un HTTP PUT i metodi:
 
   - **/rest/v2/contract/setPreviousContract**
   - **/rest/v2/contract/unsetPreviousContract**
 
 ::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/contract/setPreviousContract?id=4678
+  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/setPreviousContract?id=4678
 
 ::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/contract/unsetPreviousContract?id=4678
+  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/unsetPreviousContract?id=4678
 
 
 Contract Delete

@@ -30,7 +30,7 @@ import play.jobs.OnApplicationStart;
 /**
  * Avvia il calcolo delle metriche registrando tutte quelle configurate.
  *
- * @author marco
+ * @author Marco Andreini
  * @see Progetto github https://github.com/besmartbeopen/play1-base
  */
 @OnApplicationStart

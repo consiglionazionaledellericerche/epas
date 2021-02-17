@@ -25,8 +25,8 @@ import models.flows.Group;
 /**
  * Dati per l'aggiornamento vai REST di una affiliazione di 
  * una persona ad un gruppo.
- *  
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @Builder

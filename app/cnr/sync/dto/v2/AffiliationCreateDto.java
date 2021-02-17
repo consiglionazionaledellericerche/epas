@@ -30,17 +30,17 @@ import play.data.validation.Required;
 /**
  * Dati per la creazione via REST di una affiliazione di una persona ad
  * un gruppo.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @Data
 public class AffiliationCreateDto {
-  
+
   @Required
   private Long groupId;
   @Required
-  private Long personId;  
+  private Long personId;
   private BigDecimal percentage;
   @Required
   private LocalDate beginDate;

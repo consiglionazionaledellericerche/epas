@@ -2353,6 +2353,27 @@ then
  $c.grant();
 end
 
+/********************************************************
+ * Azioni per utente employee abilitato per visita medica
+ ********************************************************/
+rule Absences_person_medical_exam
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM && fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in (
+    "AbsenceGroups.insert",
+    "AbsenceGroups.edit",
+    "AbsenceGroups.delete",
+    "AbsenceGroups.save"
+    ), granted == false, target == null)
+then
+ $c.grant();
+end
+
+
+
 /************************************************************************************
  * Un dipendente può autocertificare le proprie timbrature per il lavoro fuori Sede se...
  ***********************************************************************************/
@@ -2422,6 +2443,21 @@ when
  				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)
  				|| (epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS && fieldValue == true)
  				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)) from $p.personConfigurations
+ $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
+then
+ $c.grant();
+end
+
+/******************************************************************************
+ * Un dipendente può autocertificare le proprie assenze per visita medica se...
+ *****************************************************************************/
+ 
+rule employeeCanInsertMedicalExam
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM && fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
@@ -2574,6 +2610,41 @@ when
 then
  $c.grant();
 end
+
+/**********************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per visita medica se:
+ **********************************************************************************/
+rule EmployeeCanEditMedicalExamAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM, fieldValue == true) from $o.configurations
+ $target: Absence(DefaultGroup.medicalExamsCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete",
+ 		"Absences.addAttach", "Absences.removeAttach", "Absences.downloadAttachment"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*****************************************************************************************
+ * L'impiegato può aggiungere un allegato ad una determinata assenza per visita medica se:
+ ****************************************************************************************/
+ 
+rule EmployeeCanAddAttachment
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM, fieldValue == true) from $o.configurations
+  //$target: Absence(DefaultGroup.medicalExamsCodes().contains(this.getCode()), this.getOwner() == $p)
+  $c: PermissionCheck(action in ("Absences.addAttach", "Absences.removeAttach", "Absences.downloadAttachment"), target == null, granted == false)
+then
+  $c.grant();
+end
+
 
 /*******************************************************************************
  * Un dipendente può autocertificare le proprie timbrature se...
@@ -2792,13 +2863,17 @@ when
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
 
- 		/* duplicate */
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
+    /* duplicate */
+    "StampingsFromClient.create",
+    "StampingsFromClient.createNotRecompute",
+    "StampingsFromClient.absence",
+    "StampingsFromClient.absenceNotRecompute",
+    "rest.v3.Stampings.show",
+    "rest.v3.Stampings.create",
+    "rest.v3.Stampings.update",
+    "rest.v3.Stampings.delete"
 
- 		), target == null, granted == false)
+   ), target == null, granted == false)
  then
  $c.grant();
 end
@@ -2810,12 +2885,15 @@ when
  Role(name == Role.BADGE_READER) from $uro.role
  $c: PermissionCheck(action in (
 
- 		"StampingsFromClient.create",
- 		"StampingsFromClient.createNotRecompute",
- 		"StampingsFromClient.absence",
- 		"StampingsFromClient.absenceNotRecompute"
-
- 		), target == $o, granted == false)
+    "StampingsFromClient.create",
+    "StampingsFromClient.createNotRecompute",
+    "StampingsFromClient.absence",
+    "StampingsFromClient.absenceNotRecompute",
+    "rest.v3.Stampings.show",
+    "rest.v3.Stampings.create",
+    "rest.v3.Stampings.update",
+    "rest.v3.Stampings.delete"
+  ), target == $o, granted == false)
 then
  $c.grant();
 end
@@ -2835,8 +2913,8 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-		"manager.AbsenceManager.saveAbsences",
-		
+        "manager.AbsenceManager.saveAbsences",
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"
 
@@ -2855,7 +2933,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
-		"manager.AbsenceManager.saveAbsences",
+        "manager.AbsenceManager.saveAbsences",
 		
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"

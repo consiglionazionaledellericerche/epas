@@ -30,6 +30,10 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+/**
+ * Costruisce un oggetto Person a partire dai dati presenti nel JSON
+ * restituito da Perseo.
+ */
 public class PersonDeserializer implements JsonDeserializer<Person> {
 
   // Pattern per il parsing delle date
@@ -84,7 +88,6 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
       person.fax = contact.get("fax").getAsString();
       person.mobile = contact.get("mobile").getAsString();
     }
-
 
     return person;
   }

@@ -527,6 +527,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
     final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType medicalExams = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -558,6 +560,11 @@ public class AbsenceService {
       log.debug("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       // vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
+      
+      if ((Boolean) confManager.configValue(person.office, 
+          EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)) {
+        groupsPermitted.add(medicalExams);
+      }
 
       if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
           && (Boolean) confManager.configValue(person,
