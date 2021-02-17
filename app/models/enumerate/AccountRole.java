@@ -33,5 +33,7 @@ public enum AccountRole {
   ABSENCES_MANAGER,
   //Può leggere i dati di tutto il personale relativi
   //a presenze e assenze del personale
-  PERSON_DAYS_READER
+  PERSON_DAYS_READER,
+  //Gestore dell'anagrafica del personale
+  REGISTRY_MANAGER
 }

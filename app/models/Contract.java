@@ -179,6 +179,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   *
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
    * 
    */
@@ -260,6 +261,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Ritorna la data di fine contratto.
+   *
    * @param endDate la data di terminazione contratto (per T.D.)
    * @param endContract la data di fine esperienza (per T.I. -> pensione)
    * @return la data di fine contratto.
@@ -273,6 +275,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * true se il contratto è correttamente sincronizzato, false altrimenti.
+   *
    * @return true se il contratto è correttamente sincronizzato, false altrimenti.
    */
   @Transient
@@ -295,6 +298,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Verifica di sovrapposizione con il range di questo contratto.
+   *
    * @return true se il range passato si sovrappone a quello definito
    *     in questo contratto.
    */
