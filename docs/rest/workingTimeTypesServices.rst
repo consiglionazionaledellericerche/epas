@@ -25,6 +25,12 @@ vostra sede tipo *istituto_xxx_registry_manager* (cambiate il nome o in futuro a
 conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli il
 ruolo *Gestore Anagrafica*.
 
+Inoltre è possibile utilizzare un utente di sistema con ruolo di *Gestore anagrafica* per accedere 
+alle informazioni sulle persone di tutte le sedi. Questo utente è utiizzato per l'eventuale 
+integrazione con sistemi esterni (per esempio di rendicontazione) a livello di tutte le sedi. 
+L'utente di sistema con ruolo di *Gestore anagrafica* non può essere creato dalle singole sedi ma
+può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
+
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 Elenco delle tipologie di orario di lavoro disponibili
