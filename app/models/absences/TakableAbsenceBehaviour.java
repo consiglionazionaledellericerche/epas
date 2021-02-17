@@ -36,6 +36,11 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.testng.collections.Sets;
 
+/**
+ * Rappresenta il comportamento (codici presi, codici prendibili, etc) delle assenze prendibili.
+ *
+ * @author Alessandro Martelli
+ */
 @Audited
 @Entity
 @Table(name = "takable_absence_behaviours")
@@ -84,10 +89,17 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @Enumerated(EnumType.STRING)
   public TakeAmountAdjustment takableAmountAdjustment;
  
+  /**
+   * Tipologia di comportamento per i codici di assenza presi. 
+   *
+   */
   public enum TakeCountBehaviour {
     period, sumAllPeriod, sumUntilPeriod; 
   }
   
+  /**
+   * Tipologie di aggiustamenti per il tempo totale dei codici di assenza.
+   */
   public enum TakeAmountAdjustment {
     workingTimePercent(true, false),
     workingPeriodPercent(false, true),
@@ -104,6 +116,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se il completamento non è presente in enum
    */
   public Optional<Boolean> matchEnum() {

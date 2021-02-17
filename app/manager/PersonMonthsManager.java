@@ -162,12 +162,17 @@ public class PersonMonthsManager {
     return rr;
   }
 
+  /**
+   * DTO per rappresenta se un periodo di formazione è inseribile o meno e l'eventualmente 
+   * motivazione.
+   */
   public static final class Insertable {
     private boolean result;
     private String message;
 
     /**
      * Costruttore.
+     *
      * @param result il risultato dell'inserimento
      * @param message il messaggio
      */

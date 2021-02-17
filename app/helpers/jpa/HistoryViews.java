@@ -48,6 +48,12 @@ import org.slf4j.LoggerFactory;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Classe di supporto per la visualizzazione delle storico delle Entity.
+ *
+ * @author Marco Andreini
+ *
+ */
 public class HistoryViews {
 
   private static final Logger log = LoggerFactory.getLogger(HistoryViews.class);
@@ -152,6 +158,9 @@ public class HistoryViews {
   }
 
 
+  /**
+   * Construisce un'istanza con la visualizzazione dello storico di un'entity.
+   */
   public static <T> T historicalViewOf(Class<T> cls, T current, T history,
       LocalDateTime revisionDateTime) {
     final Class<? extends T> model = historicalModel(cls);
@@ -169,6 +178,9 @@ public class HistoryViews {
     }
   }
 
+  /**
+   * Classe di utilità per rappresentare il classpath del play.
+   */
   public static class ApplicationClassesClasspath implements ClassPath {
 
     @Override

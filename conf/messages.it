@@ -993,6 +993,7 @@ TimeSlots.manageTimeSlots= Fasce orarie di lavoro
 # Enumerati
 ########################
 
+accountRole= Ruolo di sistema
 AccountRole.DEVELOPER= Developer
 AccountRole.ADMIN= Admin
 AccountRole.RO_ADMIN= Admin in sola lettura
@@ -1000,6 +1001,7 @@ AccountRole.ABSENCES_MANAGER= Gestore assenze
 AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
+AccountRole.REGISTRY_MANAGER= Gestore anagrafica
 
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)

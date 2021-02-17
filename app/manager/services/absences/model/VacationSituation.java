@@ -69,6 +69,9 @@ public class VacationSituation {
   }
   
   
+  /**
+   * DTO contenente il resoconto della situazione delle ferie.
+   */
   public static class VacationSummary {
     
     public TypeSummary type;
@@ -88,17 +91,22 @@ public class VacationSituation {
       this.contract = contract;
       this.absencePeriod = absencePeriod;
     }
-    
+
+    /**
+     * Tipologia di resconto: ferie o permessi.
+     */
     public static enum TypeSummary {
       VACATION, PERMISSION;
     }
     
+    /**
+     * Numero di giorni totali di ferie/permessi.
+     */
     public int total() {
       return computeTotal(absencePeriod);
     }
     
 
-    
     /**
      * Nuova implementazione: posPartum anno passato.
      */
@@ -302,6 +310,7 @@ public class VacationSituation {
     
     /**
      * Verifica se dopo un anno di contratto la data ricade nel periodo.
+     *
      * @param period il periodo da considerare per l'assenza
      * @return la data in cui termina il primo anno di contratto se ricade nel periodo.
      */
@@ -456,7 +465,7 @@ public class VacationSituation {
   
   /**
    * Versione cachata del riepilogo.
-   * 
+   *
    * @author Alessandro Martelli
    */
   public static class VacationSummaryCached implements Serializable {
