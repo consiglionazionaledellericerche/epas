@@ -109,7 +109,7 @@ tipo il seguente.
 Inserimento nuova assenza
 =========================
 
-Analagamente al metodo precedente per controllare un'assenza è possibile effettuare l'operazione di 
+Analogamente al metodo precedente per controllare un'assenza è possibile effettuare l'operazione di 
 inserimento di una assenza tramite una *HTTP PUT* all'endpoint **/rest/absences/insertAbsence**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
@@ -142,6 +142,50 @@ Con un risultato tipo il seguente.
   ]
 
 Per esempio nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi
+il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
+
+
+Inserimento di un giorno di ferie/permesso con codice assenza calcolato da ePAS
+===============================================================================
+
+Al fine di utilizzare la funzionalità già presente nell'interfacccia WEB di ePAS che calcola in 
+autonomia il codice di ferie più vantaggioso da inserire per il cliente (tra i 31, 32 e 94), è disponibile
+un metodo REST per l'inserimento delle assenze di tipo ferie in cui non viene passato il codice da utilizzare.
+L'inserimento di una assenza di tipo ferie è possibile tramite una *HTTP PUT* all'endpoint 
+**/rest/absences/insertVacation**.
+
+La persona può essere individuata passando i parametri identificativi delle persone:
+*id, email, eppn, perseoPersonId, fiscalCode*. 
+Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
+*YYYY-MM-dd*.
+
+::
+  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertVacation email==galileo.galilei@cnr.it begin==2021-03-05 end==2021-03-08
+
+Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
+Con un risultato tipo il seguente.
+
+::
+  [
+      {
+        "absenceCode": "31",
+        "date": "2021-03-05",
+        "description": "Ferie anno precedente",
+        "id": 107159,
+        "name": "Galileo",
+        "surname": "Galilei"
+    },
+    {
+        "absenceCode": "31",
+        "date": "2021-03-08",
+        "description": "Ferie anno precedente",
+        "id": 107160,
+        "name": "Galileo",
+        "surname": "Galilei"
+    }
+  ]
+
+Anche con questo metodo, nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi,
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
 
