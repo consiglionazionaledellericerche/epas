@@ -85,7 +85,7 @@ public class ContractMonthRecapManager {
    * mese<br> - riposi compensativi effettuati in numero e minuti totali<br> - buoni pasto
    * consegnati ed consumati nel mese <br>
    * </p>
-   * 
+   *
    * @param recapPreviousMonth    se presente è il riepilogo precedente.
    * @param otherCompensatoryRest altri riposi compensativi non persistiti nel db.
    * @param compensatoryRestClosureSeatRecovering variazioni orarie per recuperare i riposi 

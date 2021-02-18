@@ -35,7 +35,7 @@ import play.db.jpa.Blob;
 
 /**
  * Oggetto che modella gli allegati.
- * 
+ *
  * @author Daniele Murgia
  * @since 06/10/16
  */

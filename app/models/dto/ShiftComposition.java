@@ -20,6 +20,9 @@ package models.dto;
 import lombok.Data;
 import manager.services.shift.configuration.OrganizationShiftConfiguration;
 
+/**
+ * Configurazione e quantità di un turno.
+ */
 @Data
 public class ShiftComposition {
 

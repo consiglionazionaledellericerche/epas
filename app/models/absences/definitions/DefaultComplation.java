@@ -27,7 +27,7 @@ import org.assertj.core.util.Lists;
 
 /**
  * Comportamenti di completamento di default.
- * 
+ *
  * @author Alessandro Martelli
  *
  */

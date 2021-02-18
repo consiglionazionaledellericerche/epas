@@ -30,6 +30,10 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
+/**
+ * Associazione tra tipo di assenza e comportamento nella giustificazione
+ * dell'orario giornaliero.
+ */
 @Audited
 @Entity
 @Table(name = "absence_types_justified_behaviours")

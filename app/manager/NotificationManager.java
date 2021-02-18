@@ -62,7 +62,7 @@ import play.libs.Mail;
 
 /**
  * Genera le notifiche da inviare agl utenti.
- * 
+ *
  * @author Daniele Murgia
  * @since 23/06/16
  */

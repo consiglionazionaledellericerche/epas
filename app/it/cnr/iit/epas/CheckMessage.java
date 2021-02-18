@@ -19,7 +19,7 @@ package it.cnr.iit.epas;
 
 import models.absences.AbsenceType;
 
-/*
+/**
  * Questa classe mi occorre per ritornare un oggetto nel quale sintetizzare il
  * risultato della chiamata della funzione di assegnamento di un codice di assenza oraria
  * con gruppo di riferimento. In modo da stabilire se un certo codice possa essere preso o

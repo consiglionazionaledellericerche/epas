@@ -45,7 +45,9 @@ public class AbsenceTrouble extends BaseModel {
   @JoinColumn(name = "absence_id", nullable = false, updatable = false)
   public Absence absence;
 
- 
+  /**
+   * Tipo di problemi sulle assenze che si possono verificare.
+   */
   public enum AbsenceProblem {
     
     //Ignorata dal controllo

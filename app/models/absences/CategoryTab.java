@@ -29,6 +29,9 @@ import models.absences.definitions.DefaultTab;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
+/**
+ * Categorie di tab da mostrare nel menu per la gestione delle assenze.
+ */
 @Audited
 @Entity
 @Table(name = "category_tabs")

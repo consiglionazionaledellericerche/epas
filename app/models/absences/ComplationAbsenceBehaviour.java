@@ -37,6 +37,9 @@ import models.absences.definitions.DefaultComplation;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
+/**
+ * Modella il comportamente delle assenze con completamento dell'orario di lavoro.
+ */
 @Audited
 @Entity
 @Table(name = "complation_absence_behaviours")
@@ -72,7 +75,6 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @OrderBy("code")
   public Set<AbsenceType> replacingCodes = Sets.newHashSet();
 
-  
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
    *
@@ -96,7 +98,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Confronta le due liste.
    *
