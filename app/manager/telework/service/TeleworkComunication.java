@@ -33,6 +33,10 @@ import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
 import play.mvc.Http;
 
+/**
+ * Classe che si occupa di gestire le comunicazioni Rest con il
+ * servizio di gestione delle timbrature in telelavoro.
+ */
 @Slf4j
 public class TeleworkComunication {
 

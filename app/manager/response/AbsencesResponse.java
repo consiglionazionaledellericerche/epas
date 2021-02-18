@@ -25,6 +25,9 @@ import lombok.Setter;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
 
+/**
+ * DTO per contenere le informazioni relative all'esito di un inserimento di assenza. 
+ */
 @JsonFilter(JacksonModule.FILTER)
 public class AbsencesResponse {
 
@@ -90,6 +93,7 @@ public class AbsencesResponse {
 
   /**
    * Costruttore.
+   *
    * @param date la data
    * @param absenceCode il codice di assenza
    * @param warning il warning 

@@ -20,6 +20,10 @@ package models.enumerate;
 import com.google.common.collect.Range;
 import models.Qualification;
 
+/**
+ * Differenziazione tra livelli 1-3 e 4-10.
+ *
+ */
 public enum QualificationMapping {
 
   TECNOLOGI(Range.closed(1, 3)),

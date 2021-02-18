@@ -29,6 +29,10 @@ import lombok.Data;
 @Data
 public class ReportData {
 
+  /**
+   * DTO che contiene i dati relativi al browser con cui viene
+   * effettuata la segnalazione.
+   */
   @Data
   public static class BrowserData {
     private String appCodeName;

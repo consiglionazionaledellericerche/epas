@@ -7,14 +7,15 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 
+/**
+ * Rappresenta le possibili tipologie di competenze mensili.
+ */
 @Audited
 @Table(name = "monthly_competence_type")
 @Entity
@@ -39,6 +40,7 @@ public class MonthlyCompetenceType extends BaseModel {
   
   /**
    * Transiente che ritorna i codici associati all'attività.
+   *
    * @return la lista di codici di competenza feriale e festivo per l'attività.
    */
   @Transient

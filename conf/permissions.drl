@@ -3032,10 +3032,10 @@ when
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
         "manager.AbsenceManager.saveAbsences",
-		
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId"
-		
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -3058,8 +3058,9 @@ when
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
-        "rest.Absences.deleteAbsencesInPeriod"
+        "rest.Absences.deleteAbsencesInPeriod",
 
+        "rest.v3.Vacations.byPersonAndYear"
 
        ), target == null, granted == false)
 then
@@ -3077,14 +3078,15 @@ when
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
         "manager.AbsenceManager.saveAbsences",
-		
+
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         
         "rest.Absences.delete",
-        "rest.Absences.deleteAbsencesInPeriod"
+        "rest.Absences.deleteAbsencesInPeriod",
 
-		
+        "rest.v3.Vacations.byPersonAndYear"
+
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -3108,7 +3110,9 @@ when
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
-        "rest.Absences.deleteAbsencesInPeriod"
+        "rest.Absences.deleteAbsencesInPeriod",
+
+        "rest.v3.Vacations.byPersonAndYear"
 
        ), granted == false)
 then
@@ -3210,13 +3214,13 @@ when
 
         "ContractualReferences.list", "ContractualReferences.blank",
         "ContractualReferences.edit", "ContractualReferences.save",
-		"ContractualReferences.delete", "ContractualReferences.manage",
-		
+        "ContractualReferences.delete", "ContractualReferences.manage",
+
         "ContractualClauses.list", "ContractualClauses.blank",
         "ContractualClauses.edit", "ContractualClauses.save",
         "ContractualClauses.show",
-		"ContractualClauses.delete", "ContractualClauses.manage")
-		, granted == false)
+        "ContractualClauses.delete", "ContractualClauses.manage")
+        , granted == false)
 then
  $c.grant();
 end
@@ -3284,7 +3288,9 @@ when
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
-        "rest.v2.Leaves.byOfficeAndYear.show"
+        "rest.v2.Leaves.byOfficeAndYear.show",
+
+        "rest.v3.Vacations.byPersonAndYear"
 
        ), target == null, granted == false)
 then
@@ -3324,7 +3330,9 @@ when
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
-        "rest.v2.Leaves.byOfficeAndYear.show"
+        "rest.v2.Leaves.byOfficeAndYear.show",
+
+        "rest.v3.Vacations.byPersonAndYear"
 
        ), target == $o, granted == false)
 then
@@ -3367,7 +3375,9 @@ when
         "rest.Absences.checkAbsenceByPerseoId",
 
         "rest.v2.Leaves.byPersonAndYear",
-        "rest.v2.Leaves.byOfficeAndYear.show"
+        "rest.v2.Leaves.byOfficeAndYear.show",
+
+        "rest.v3.Vacations.byPersonAndYear"
 
        ), granted == false)
 then

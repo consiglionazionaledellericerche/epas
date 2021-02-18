@@ -25,6 +25,9 @@ import lombok.Data;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.YearMonth;
 
+/**
+ * Informazioni sulla timbratura per lavoro fuori sede.
+ */
 @Data
 @Builder()
 public class TeleworkDto {

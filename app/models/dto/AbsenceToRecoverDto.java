@@ -20,6 +20,9 @@ package models.dto;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
 
+/**
+ * DTO per le assenza da recuperare (ex. 91CE).
+ */
 public class AbsenceToRecoverDto {
 
   public Absence absence;

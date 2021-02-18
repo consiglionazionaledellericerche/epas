@@ -21,6 +21,9 @@ import com.google.common.base.Optional;
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.UploadSituationManager;
@@ -83,10 +86,10 @@ public class UploadSituation extends Controller {
    * @param office sede
    * @param year   anno
    * @param month  mese
+   * @throws IOException sollevata in caso non sia possibile chiudere il file.
    */
-  @SuppressWarnings("deprecation")
   public static void computeCreateFile(@Valid Office office,
-      @Required Integer year, @Required Integer month) {
+      @Required Integer year, @Required Integer month) throws IOException {
 
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -110,7 +113,9 @@ public class UploadSituation extends Controller {
 
     String body = updloadSituationManager.createFile(office, year, month);
     String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
-    renderBinary(IOUtils.toInputStream(body), fileName);
+    try (InputStream inputStream = IOUtils.toInputStream(body, Charset.defaultCharset())) {
+      renderBinary(inputStream, fileName);
+    }
   }
 
 }

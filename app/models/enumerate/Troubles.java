@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Rappresenta le tipologie di problemi sulle timbrature.
+ */
 public enum Troubles {
 
   UNCOUPLED_FIXED("timbratura disaccoppiata persona fixed"),

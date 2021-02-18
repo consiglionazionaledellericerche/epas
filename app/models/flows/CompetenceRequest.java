@@ -38,6 +38,12 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
+/**
+ * Richiesta di attribuzione di una competenza mensile.
+ *
+ * @author Dario Tagliaferri
+ *
+ */
 @Entity
 @Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {

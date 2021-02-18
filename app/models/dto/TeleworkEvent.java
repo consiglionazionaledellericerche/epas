@@ -25,6 +25,9 @@ import models.enumerate.EventColor;
 import org.joda.time.LocalDate;
 
 
+/**
+ * Evento di giornata in telelavoro da mostrare su un calendario.
+ */
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)

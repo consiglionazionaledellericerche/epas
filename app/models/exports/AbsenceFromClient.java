@@ -20,6 +20,9 @@ package models.exports;
 import models.Person;
 import org.joda.time.LocalDate;
 
+/**
+ * Utilizzato per importare via REST le assenze.
+ */
 public class AbsenceFromClient {
 
   public Person person;

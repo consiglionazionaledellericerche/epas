@@ -24,6 +24,9 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 
 
+/**
+ * Tipologia di servizio di turno.
+ */
 public class ShiftTypeService {
 
   @Required

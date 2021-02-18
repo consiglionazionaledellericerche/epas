@@ -17,6 +17,10 @@
 
 package models.enumerate;
 
+/**
+ * Tipologie di possibili informazioni da inviare nell'attestato mensile di
+ * un dipendente.
+ */
 public enum CertificationType {
   
   ABSENCE, COMPETENCE, FORMATION, MEAL;
