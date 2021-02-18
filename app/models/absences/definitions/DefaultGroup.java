@@ -140,9 +140,9 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
   
-  FERIE_CNR_PROROGA_2019("31 - Proroga 2019", "", DefaultCategoryType.FERIE_CNR, 0,
-      GroupAbsenceTypePattern.programmed, PeriodType.always, 
-      DefaultTakable.T_FERIE_CNR_PROROGA_2019, null, null, false, false), 
+//  FERIE_CNR_PROROGA_2019("31 - Proroga 2019", "", DefaultCategoryType.FERIE_CNR, 0,
+//      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+//      DefaultTakable.T_FERIE_CNR_PROROGA_2019, null, null, false, false), 
   
   //  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
