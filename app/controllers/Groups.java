@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import lombok.val;
 import manager.GroupManager;
 import models.GeneralSetting;
@@ -205,6 +205,9 @@ public class Groups extends Controller {
     render("@edit", office, peopleForGroups);
   }
   
+  /**
+   * Ritorna le informazioni sui ruoli presenti nella sede di appartenenza del dipendente.
+   */
   public static void seatOrganizationChart() {
     
     val currentPerson = Security.getUser().get().person;

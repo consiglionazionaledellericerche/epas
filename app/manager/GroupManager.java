@@ -199,9 +199,7 @@ public class GroupManager {
         if (!person.reperibility.isEmpty()) {
           map.put(role, person.reperibility.stream()
               .map(pr -> pr.personReperibilityType.supervisor.user).collect(Collectors.toList()));
-        } else {
-          map.put(role, Lists.emptyList());
-        }
+        } 
       }
       if (role.name.equals(Role.REST_CLIENT)) {
         continue;
@@ -214,11 +212,8 @@ public class GroupManager {
           map.put(role, person.personShifts.stream()
               .flatMap(ps -> ps.personShiftShiftTypes.stream()
                   .map(psst -> psst.shiftType.shiftCategories.supervisor.user))
-              .collect(Collectors.toList()));
-              
-        } else {
-          map.put(role, Lists.emptyList());
-        }
+              .collect(Collectors.toList()));              
+        } 
       }
       if (role.name.equals(Role.TECHNICAL_ADMIN)) {
         map.put(role, getTechnicalAdminInSeat(person.office));
