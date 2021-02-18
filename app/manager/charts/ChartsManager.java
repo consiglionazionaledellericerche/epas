@@ -894,6 +894,7 @@ public class ChartsManager {
 
   /**
    * Genera lo stile per una cella di un giorno lavorativo.
+   *
    * @param wb il workbook su cui applicare lo stile
    * @return lo stile per una cella che identifica un giorno lavorativo.
    */

@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Tipologia di limitazione su un periodo temporale.
+ */
 public enum LimitType {
 
   monthly,

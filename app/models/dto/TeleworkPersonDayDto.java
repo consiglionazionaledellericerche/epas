@@ -25,7 +25,9 @@ import models.PersonDay;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.TeleworkStampTypes;
 
-
+/**
+ * Informazioni giornaliere sulle timbrature per lavoro fuori sede.
+ */
 @Builder
 @Data
 public class TeleworkPersonDayDto {
@@ -42,6 +44,9 @@ public class TeleworkPersonDayDto {
     return beginEnd.isEmpty() && meal.isEmpty() && interruptions.isEmpty();
   }
   
+  /**
+   * Lista di tutte le timbrature per telelavoro di questo giorno.
+   */
   public List<TeleworkDto> getTeleworkStampings() {
     List<TeleworkDto> list = Lists.newArrayList(beginEnd);
     list.addAll(meal);

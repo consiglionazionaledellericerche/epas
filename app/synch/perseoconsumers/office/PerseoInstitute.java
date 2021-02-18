@@ -20,6 +20,9 @@ package synch.perseoconsumers.office;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * DTO che rappresenta i dati degli istituti presenti su Perseo.
+ */
 public class PerseoInstitute {
   public int id; //perseoId
   public String name;

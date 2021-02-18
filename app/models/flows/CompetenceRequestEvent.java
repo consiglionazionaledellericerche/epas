@@ -34,6 +34,11 @@ import models.flows.enumerate.CompetenceRequestEventType;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
+/**
+ * Eventi relativi al flusso di approvazione delle competenze mensili.
+ *
+ * @author Dario Tagliaferri
+ */
 @Builder
 @ToString
 @Entity

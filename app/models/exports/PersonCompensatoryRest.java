@@ -17,6 +17,9 @@
 
 package models.exports;
 
+/**
+ * Rappresenta i dati relativi al tempo per riposo compensativo.
+ */
 public class PersonCompensatoryRest {
 
   public String name;

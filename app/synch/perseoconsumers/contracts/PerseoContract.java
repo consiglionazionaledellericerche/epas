@@ -17,6 +17,9 @@
 
 package synch.perseoconsumers.contracts;
 
+/**
+ * DTO che rappresenta i dati dei contratti presenti su Perseo.
+ */
 public class PerseoContract {
 
   public String id;

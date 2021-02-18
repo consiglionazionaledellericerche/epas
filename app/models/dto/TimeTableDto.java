@@ -19,6 +19,9 @@ package models.dto;
 
 import play.data.validation.Required;
 
+/**
+ * Rappresentazione di una time table per i turni.
+ */
 public class TimeTableDto {
 
   @Required

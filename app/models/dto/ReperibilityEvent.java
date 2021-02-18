@@ -24,6 +24,9 @@ import lombok.Data;
 import models.enumerate.EventColor;
 import org.joda.time.LocalDate;
 
+/**
+ * Rappresentazione di un evento nel calendario delle reperibilità.
+ */
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)

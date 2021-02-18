@@ -17,6 +17,9 @@
 
 package models.exports;
 
+/**
+ * Rappresenta un periodo temporale: from -> to.
+ */
 public class PeriodAbsenceCode {
 
   public String dateFrom;
