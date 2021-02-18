@@ -18,12 +18,14 @@
 package models.dto;
 
 
+/**
+ * Competente associate ad una persona.
+ */
 public class PersonCompetenceCodeDto {
 
   public Long personId;
   public Long competenceCodeId;
-  
-  
+
   public PersonCompetenceCodeDto(Long id, Long id2) {
     this.personId = id;
     this.competenceCodeId = id2;

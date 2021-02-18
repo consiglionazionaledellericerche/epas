@@ -48,6 +48,9 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import synch.perseoconsumers.AnagraficaApis;
 
+/**
+ * Preleva da Perseo le informazioni relative ai contratti dei dipendenti.
+ */
 @Slf4j
 public class ContractPerseoConsumer {
 

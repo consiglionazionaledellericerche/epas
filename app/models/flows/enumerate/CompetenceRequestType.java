@@ -22,6 +22,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import manager.configurations.EpasParam;
 
+/**
+ * Attributi relative ad una tipologia di richiesta di mensile di competenze
+ * da attribuire ad un dipendente.
+ *
+ * @author Dario Tagliaferri
+ */
 @Getter
 @RequiredArgsConstructor
 public enum CompetenceRequestType {

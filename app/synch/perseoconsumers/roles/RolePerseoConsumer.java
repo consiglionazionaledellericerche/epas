@@ -49,6 +49,9 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import synch.perseoconsumers.AnagraficaApis;
 
+/**
+ * Preleva da Perseo le informazioni relative ai ruoli dei dipendenti.
+ */
 @Slf4j
 public class RolePerseoConsumer {
 

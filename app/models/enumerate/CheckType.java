@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Tipologia di risultato di un controllo (danger, warning, success).
+ */
 public enum CheckType {
 
   DANGER("danger"),

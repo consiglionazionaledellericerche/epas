@@ -19,6 +19,9 @@ package synch.perseoconsumers.office;
 
 import com.google.common.base.MoreObjects;
 
+/**
+ * DTO che rappresenta i dati degli uffici presenti su Perseo.
+ */
 public class PerseoOffice {
   
   public int id; //perseoId

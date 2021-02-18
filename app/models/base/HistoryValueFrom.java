@@ -22,12 +22,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotazione per dirimere se si tratta dell'ultima revisione di 
+ * un'entity (current) o di una specifica revisione nel passato (revision).
+ */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HistoryValueFrom {
 
+  /**
+   * Tipologia di valore (current o revision) da associare all'entity
+   * dove è usata questa annotazione.
+   */
   HistoryFrom value();
 
+  /**
+   * Ultima versione (current) o versione ad una revisione specifica (revision).
+   */
   public enum HistoryFrom {
     REVISION, CURRENT;
   }

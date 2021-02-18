@@ -17,6 +17,9 @@
 
 package models.exports;
 
+/**
+ * Rappresenta i dati relativi al tempo disponibile come straordinario.
+ */
 public class PersonOvertime {
 
   public String name;

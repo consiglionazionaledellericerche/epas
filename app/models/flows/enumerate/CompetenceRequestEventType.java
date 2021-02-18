@@ -17,6 +17,13 @@
 
 package models.flows.enumerate;
 
+/**
+ * Tipologie di eventi che possono verificarsi nelle fasi
+ * di richiesta di una competenza mensile.
+ *
+ * @author Dario Tagliaferri
+ *
+ */
 public enum CompetenceRequestEventType {
 
   STARTING_APPROVAL_FLOW,

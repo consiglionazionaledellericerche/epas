@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
+/**
+ * Tipologie di timbrature relative al telelavoro.
+ */
 @Getter
 public enum TeleworkStampTypes {
 

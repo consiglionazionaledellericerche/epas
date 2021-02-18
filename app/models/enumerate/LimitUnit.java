@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Tipologia di limitazione sull'orario.
+ */
 public enum LimitUnit {
 
   minutes("minuti"),

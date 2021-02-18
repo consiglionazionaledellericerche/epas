@@ -38,7 +38,7 @@ import org.joda.time.YearMonth;
 
 /**
  * Wrapper personDay.
- * 
+ *
  * @author Alessandro Martelli
  */
 public class WrapperPersonDay implements IWrapperPersonDay {

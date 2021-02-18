@@ -50,7 +50,7 @@ import org.joda.time.YearMonth;
 
 /**
  * Wrapper per la person.
- * 
+ *
  * @author Marco Andreini
  */
 public class WrapperPerson implements IWrapperPerson {
