@@ -17,13 +17,11 @@
 
 package synch.diagnostic;
 
-import com.google.common.collect.Maps;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import models.Contract;
-import models.Institute;
 import models.Office;
 import models.Person;
 import org.joda.time.LocalDate;
@@ -52,64 +50,6 @@ import org.joda.time.LocalDate;
  */
 public class SynchDiagnostic {
 
-
-  /**
-   * Comparazione Institute epas <-> perseo.
-   */
-  private boolean instituteEquals(Institute epasInstitute, Institute perseoInstitute) {
-
-    return epasInstitute.cds.equals(perseoInstitute.cds)
-        && epasInstitute.name.equals(perseoInstitute.name)
-        && epasInstitute.code.equals(perseoInstitute.code);
-  }
-
-
-  private boolean isInstituteSynchronized(Institute epasInstitute, Institute perseoInstitute,
-      Map<String, Person> perseoPeople) {
-
-    if (epasInstitute.perseoId == null) {
-      return false;
-    }
-    if (!instituteEquals(epasInstitute, perseoInstitute)) {
-      return false;
-    }
-
-    for (Office epasOffice : epasInstitute.seats) {
-
-      //il perseoOffice
-      Office perseoOffice = null;
-      for (Office office : perseoInstitute.seats) {
-        if (Objects.equals(office.perseoId, epasOffice.perseoId)) {
-          perseoOffice = office;
-        }
-      }
-      if (perseoOffice == null) {
-        return false;
-      }
-
-      //le persone epas con matricola nel epasOffice Map(number -> Person)
-      Map<String, Person> epasPeople = Maps.newHashMap();
-      for (Person person : epasOffice.persons) {
-        if (person.number != null) {
-          epasPeople.put(person.number, person);
-        }
-      }
-
-      //le persone perseo nel perseoOffice Map(number -> Person)
-      //Map<Integer, Person> perseoPeople = null;
-
-      //i contratti perseo delle persone Map(number -> List(contract)) //può essere unica...
-      Map<String, List<Contract>> perseoContracts = null;
-
-      if (!isSeatSynchronized(epasOffice, perseoOffice,
-          epasPeople, perseoPeople, perseoContracts)) {
-
-      }
-    }
-
-    return false;
-  }
-
   /**
    * Comparazione seat epas <-> perseo.
    *
@@ -131,6 +71,9 @@ public class SynchDiagnostic {
         && Objects.equals(epasOffice.institute.perseoId, perseoOffice.institute.perseoId);
   }
 
+  /**
+   * Verifica se l'ufficio su ePAS e su Perseo contengono gli stessi dati.
+   */
   public boolean isSeatSynchronized(Office epasOffice, Office perseoOffice,
       Map<String, Person> epasPeople, Map<String, Person> perseoPeople,
       Map<String, List<Contract>> perseoContracts) {

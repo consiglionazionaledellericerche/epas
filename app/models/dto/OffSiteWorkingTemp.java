@@ -20,6 +20,9 @@ package models.dto;
 import models.Stamping;
 import org.joda.time.LocalDate;
 
+/**
+ * Informazioni relative al lavoro fuori sede.
+ */
 public class OffSiteWorkingTemp {
   
   public LocalDate date;

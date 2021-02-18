@@ -45,6 +45,7 @@ import play.mvc.results.Forbidden;
 public class SecurityRules {
 
   private static final String CURRENT_OPERATOR_IDENTIFIER = "currentOperator";
+
   /**
    * Contiene in cache i risultati dei controlli sui permessi sulla richiesta corrente. <b>Nota:</b>
    * i controlli sono considerati per l'utente corrente.
@@ -89,7 +90,7 @@ public class SecurityRules {
 
   /**
    * Controlla che l'azione corrente sia ammessa sull'instanza indicata.
-   * 
+   *
    * @return true se l'azione corrente è permessa sull'istanza fornita, false altrimenti.
    */
   public boolean check(Object instance) {

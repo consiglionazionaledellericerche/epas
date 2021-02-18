@@ -22,6 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Tipologie di possibili problemi nei controlli effettuati sui turni.
+ */
 public enum ShiftTroubles {
 
   //persona non assegnata all'attività

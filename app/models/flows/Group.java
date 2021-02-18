@@ -36,6 +36,9 @@ import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
+/**
+ * Rappresenta un gruppo di Persone.
+ */
 @Getter
 @Audited
 @Entity

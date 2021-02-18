@@ -17,6 +17,9 @@
 
 package models.exports;
 
+/**
+ * Codice di assenza con la sua descrizione.
+ */
 public class FrequentAbsenceCode {
 
   public String code;

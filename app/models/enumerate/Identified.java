@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Interfaccia per le classi con id.
+ */
 public interface Identified {
   long getId();
 }

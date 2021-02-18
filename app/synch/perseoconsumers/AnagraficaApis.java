@@ -20,6 +20,9 @@ package synch.perseoconsumers;
 import com.google.common.base.Strings;
 import play.Play;
 
+/**
+ * Endpoint per l'API dell'Anagrafica.
+ */
 public class AnagraficaApis {
 
   private static final String PERSEO_BASE_URL = "anagrafica.base";

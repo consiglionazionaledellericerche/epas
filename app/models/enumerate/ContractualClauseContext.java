@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Contesto a cui si applicano le clausole contrattuali.
+ */
 public enum ContractualClauseContext {
   ABSENCE,
   ABSENCE_AND_PRESENCE,

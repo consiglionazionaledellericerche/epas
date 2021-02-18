@@ -88,6 +88,7 @@ public enum NotificationSubject {
 
   /**
    * Url della show dell'oggetto riferito nella notifica.
+   *
    * @param referenceId id dell'oggetto
    * @return url con la show dell'oggetto
    */

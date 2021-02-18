@@ -30,6 +30,9 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 
 
+/**
+ * Rappresenta le informazioni di un'orario di lavoro di tipo orizzontale.
+ */
 public class HorizontalWorkingTime {
 
   /**
