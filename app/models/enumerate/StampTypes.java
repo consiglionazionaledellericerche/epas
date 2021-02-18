@@ -135,8 +135,6 @@ public enum StampTypes {
   
   /**
    * Controlla se questa causale non è lavoro fuori sede.
-   *
-   * @return
    */
   public boolean isNotOffSiteWork() {
     return this != LAVORO_FUORI_SEDE;

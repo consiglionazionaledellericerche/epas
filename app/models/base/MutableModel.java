@@ -23,6 +23,9 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.joda.time.LocalDateTime;
 
+/**
+ * Una entity con data di creazione e di ultima modifica.
+ */
 @MappedSuperclass
 public abstract class MutableModel extends BaseModel {
 

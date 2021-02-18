@@ -38,6 +38,10 @@ import models.contractual.ContractualClause;
 import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
+/**
+ * Associazione tra tipologie di gruppi di assenze e le tab in cui mostrarle
+ * nell'interfaccia di gestione delle assenze.
+ */
 @Audited
 @Entity
 @Table(name = "category_group_absence_types")

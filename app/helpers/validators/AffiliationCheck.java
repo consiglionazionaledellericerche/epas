@@ -20,6 +20,12 @@ package helpers.validators;
 import models.flows.Affiliation;
 import play.data.validation.Check;
 
+/**
+ * Controlla che l'affiliazione di una persona sia corretta, 
+ * cioè non si sovrapponga con una già presente per lo stesso
+ * gruppo.
+ * @author Cristian Lucchesi
+ */
 public class AffiliationCheck extends Check {
 
   @Override

@@ -31,7 +31,7 @@ import play.data.validation.Unique;
 
 /**
  * Classe che modella un istituto.
- * 
+ *
  * @author Alessandro Martelli
  */
 @Audited

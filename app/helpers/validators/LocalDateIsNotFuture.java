@@ -20,6 +20,12 @@ package helpers.validators;
 import org.joda.time.LocalDate;
 import play.data.validation.Check;
 
+/**
+ * Controlla che una data non sia futura.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 public class LocalDateIsNotFuture extends Check {
 
   @Override

@@ -30,11 +30,14 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+/**
+ * Dati per l'inizializzazione di un gruppo di assenza di un dipendente.
+ */
 @Audited
 @Entity
 @Table(name = "initialization_groups")
 public class InitializationGroup extends BaseModel {
-  
+
   private static final long serialVersionUID = -1963061850354314327L;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -44,49 +47,46 @@ public class InitializationGroup extends BaseModel {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "group_absence_type_id", nullable = false)
   public GroupAbsenceType groupAbsenceType;
-  
+
   @Column(name = "date")
   public LocalDate date;
 
   @Column(name = "forced_begin")
   public LocalDate forcedBegin;
-  
+
   @Column(name = "forced_end")
   public LocalDate forcedEnd;
-  
+
   // if (groupAbsenceType.pattern == programmed)
-  
+
   @Column(name = "units_input")
   public Integer unitsInput = 0;
-  
+
   @Column(name = "hours_input")
   public Integer hoursInput = 0;
-  
+
   @Column(name = "minutes_input")
   public Integer minutesInput = 0;
-  
+
   @Column(name = "average_week_time")
   public Integer averageWeekTime;
-  
-  
+
   @Column(name = "takable_total")
   public Integer takableTotal;
-  
+
   // if (groupAbsenceType.pattern == vacationsCnr)
-  
+
   @Column(name = "vacation_year")
   public Integer vacationYear;
-  
-  //TODO: enum ferie o permessi
-  
+
   //if (groupAbsenceType.pattern == compensatoryRestCnr)
-  
+
   @Column(name = "residual_minutes_last_year")
   public Integer residualMinutesLastYear;
-  
+
   @Column(name = "residual_minutes_current_year")
   public Integer residualMinutesCurrentYear;
-  
+
   /**
    * Constructor.
    *
