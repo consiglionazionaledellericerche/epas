@@ -62,28 +62,28 @@ public class Bootstrap extends Job<Void> {
   @Override
   public void doJob() throws IOException {
 
-    
+
     if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
-    
+
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 
-    try (Session session = (Session) JPA.em().getDelegate()) {
-      if (Qualification.count() == 0) {
+    Session session = (Session) JPA.em().getDelegate();
+    if (Qualification.count() == 0) {
 
-        session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-            .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
+      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+          .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
 
-        session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-            .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
-      }
+      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
+          .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
     }
+
 
     if (User.find("byUsername", "developer").fetch().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
