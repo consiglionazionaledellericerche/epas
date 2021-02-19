@@ -3060,6 +3060,9 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.attachment",
+        "rest.Absences.addAttachment",
+        "rest.Absences.deleteAttachment",
 
         "rest.v3.Vacations.byPersonAndYear"
 
@@ -3085,6 +3088,10 @@ when
         
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.attachment",
+        "rest.Absences.addAttachment",
+        "rest.Absences.deleteAttachment",
+
 
         "rest.v3.Vacations.byPersonAndYear"
 
@@ -3112,6 +3119,9 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.attachment",
+        "rest.Absences.addAttachment",
+        "rest.Absences.deleteAttachment",
 
         "rest.v3.Vacations.byPersonAndYear"
 
@@ -3291,7 +3301,10 @@ when
         "rest.v2.Leaves.byPersonAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.attachment"
 
        ), target == null, granted == false)
 then
@@ -3333,7 +3346,11 @@ when
         "rest.v2.Leaves.byPersonAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.attachment"
+
 
        ), target == $o, granted == false)
 then
@@ -3378,7 +3395,11 @@ when
         "rest.v2.Leaves.byPersonAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.Absences.absencesInPeriod",
+        "rest.Absences.attachment"
+
 
        ), granted == false)
 then

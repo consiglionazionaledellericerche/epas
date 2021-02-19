@@ -30,6 +30,7 @@ public class AbsenceRest {
   public String description;
   public String name;
   public String surname;
+  public Boolean hasAttachment;
   
   /**
    * Costruisce una nuova istanza del DTO a partire dall'assenza.
@@ -42,6 +43,7 @@ public class AbsenceRest {
     ar.date = absence.personDay.date.toString();
     ar.name = absence.personDay.person.name;
     ar.surname = absence.personDay.person.surname;
+    ar.hasAttachment = absence.absenceFile != null && absence.absenceFile.get() != null;
     return ar;
   }
 }

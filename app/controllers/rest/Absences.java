@@ -33,14 +33,17 @@ import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.ImageUtils;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -51,10 +54,14 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -349,6 +356,88 @@ public class Absences extends Controller {
 
 
   /**
+   * Fornisce l'eventuale attachment collegato ad una assenza individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP GET.
+   */
+  @SuppressWarnings("resource")
+  public static void attachment(Long id) throws IOException {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (absence.absenceFile == null) {
+      JsonResponse.notFound();
+    }
+
+    response.setContentTypeIfNotSet(absence.absenceFile.type());
+
+    log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
+        absence.absenceFile.type(), absence.id, absence.absenceFile.getFile());
+
+    var filename = String.format("assenza-%s-%s",
+        absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
+    if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
+      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+    }
+
+    renderBinary(absence.absenceFile.get(), filename, absence.absenceFile.length());
+  }
+
+
+  /**
+   * Effettua l'inserimento di un attachment ad una assenza individuata con i 
+   * parametri HTTP passati. Se è già presente un attachment viene sovrascritto.
+   * Questo metodo può essere chiamato solo via HTTP POST.
+   */
+  public static void addAttachment(Long id, Blob file) throws IOException {
+    RestUtils.checkMethod(request, HttpMethod.POST);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (file == null) {
+      JsonResponse.badRequest("Null or empty file");
+    } else {
+      absence.absenceFile = file;
+      absence.save();
+      log.info("Added attachment to absence {} via REST", absence);
+      JsonResponse.ok();
+    }
+  }
+
+
+  /**
+   * Effettua la cancellazione dell'attachment collegato ad assenza individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
+  public static void deleteAttachment(Long id) {
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (absence.absenceFile == null) {
+      JsonResponse.notFound();
+    }
+
+    absence.absenceFile.getFile().delete();
+    absence.save();
+
+    log.info("Deleted attachment for absence {} via REST", absence);
+    JsonResponse.ok();
+  }
+
+
+  /**
    * Cerca il contratto in funzione del id passato.
    *
    * @return il contratto se trovato, altrimenti torna direttamente 
@@ -372,5 +461,6 @@ public class Absences extends Controller {
     rules.checkIfPermitted(absence.personDay.person.office);
     return absence;
   }
+
 
 }
