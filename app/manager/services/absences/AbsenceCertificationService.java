@@ -657,7 +657,7 @@ public class AbsenceCertificationService {
    *  - tolgo il 23H7 da inserire automaticamente
    *  - tolgo il 23 da codici da rimuovere
    *  - inserisco il 23H7 ok
-   * 
+   *
    * @param situation absenceSituation
    */
   private void patchPostPartumH7(Person person, CertificationYearSituation situation) {

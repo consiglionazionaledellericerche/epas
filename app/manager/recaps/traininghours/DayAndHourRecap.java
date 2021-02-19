@@ -21,7 +21,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Recap giorno e ora.
- * 
+ *
  * @author Dario Tagliaferri
  *
  */

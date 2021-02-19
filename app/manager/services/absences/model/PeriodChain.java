@@ -32,6 +32,12 @@ import models.absences.GroupAbsenceType;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
+/**
+ * Rappresenta una catena di assenze.
+ *
+ * @author Alessandro Martelli
+ *
+ */
 @ToString
 public class PeriodChain {
   

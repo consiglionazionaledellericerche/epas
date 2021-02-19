@@ -149,6 +149,9 @@ public class Contracts extends Controller {
       throws JsonParseException, JsonMappingException, IOException {
     RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = getContractFromRequest(id);
+    if (body == null) {
+      JsonResponse.badRequest();
+    }
 
     val gson = gsonBuilder.create();
     val contractDto = gson.fromJson(body, ContractUpdateDto.class); 
@@ -160,7 +163,7 @@ public class Contracts extends Controller {
     // Salvo la situazione precedente per capire da dove riaggiornare i riepiloghi
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
-    
+
     contractDto.update(contract);
 
     //Controlla anche che l'utente corrente abbia

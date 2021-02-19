@@ -711,6 +711,9 @@ public enum EpasParam {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
   }
 
+  /**
+   * Categorizzazione dei parametri di ePAS.
+   */
   public enum EpasParamCategory {
     GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
   }

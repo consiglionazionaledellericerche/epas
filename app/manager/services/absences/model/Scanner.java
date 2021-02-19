@@ -44,6 +44,11 @@ import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
+/**
+ * Scan delle assenze per applicare i vari controlli e fix.
+ *
+ * @author Alessandro Martelli
+ */
 @Slf4j
 public class Scanner {
   

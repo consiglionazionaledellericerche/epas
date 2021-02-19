@@ -56,6 +56,9 @@ import org.joda.time.LocalDateTime;
 import org.testng.collections.Lists;
 import play.db.jpa.JPA;
 
+/**
+ * Manager per la gestione delle missioni.
+ */
 @Slf4j
 public class MissionManager {
 

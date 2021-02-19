@@ -50,6 +50,11 @@ import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import org.joda.time.LocalDate;
 
+/**
+ * Contiene factory di utilità per la gestione delle assenze.
+ *
+ * @author Alessandro Martelli
+ */
 @Slf4j
 public class ServiceFactories {
 
