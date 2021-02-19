@@ -24,6 +24,9 @@ import lombok.Setter;
 import models.absences.Absence;
 import models.absences.AmountType;
 
+/**
+ * Assenza già inserite con le relative informazioni.
+ */
 @Builder 
 @Getter 
 @Setter(AccessLevel.PACKAGE)
@@ -33,7 +36,7 @@ public class TakenAbsence {
   
   
   public int periodTakableTotal;   //situazione prima della assenza
-  public int periodTakenBefore;     
+  public int periodTakenBefore;
 
   public int takenAmount;
   

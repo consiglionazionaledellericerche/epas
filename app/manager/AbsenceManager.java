@@ -786,6 +786,9 @@ public class AbsenceManager {
     return startAbsence;
   }
 
+  /**
+   * Function per la trasformazione da Absence a LocalDate.
+   */
   public enum AbsenceToDate implements Function<Absence, LocalDate> {
     INSTANCE;
 

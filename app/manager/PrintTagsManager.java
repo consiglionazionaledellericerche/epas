@@ -44,6 +44,11 @@ import models.dto.OffSiteWorkingTemp;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
+/**
+ * Contiene metodi di utilità per la generazione del PDF
+ * con il resoconto mensile delle presenze/assenze di un 
+ * dipendente.
+ */
 public class PrintTagsManager {
 
   private final StampingHistoryDao stampingHistoryDao;

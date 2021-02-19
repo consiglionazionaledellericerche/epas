@@ -29,6 +29,11 @@ import play.jobs.Job;
 import play.jobs.On;
 
 
+/**
+ * Invia degli alert ai tecnologi e ricercatori che hanno
+ * l'autocertificazione delle presenze/assenze attiva ma
+ * hanno dei giorni non giustificati nel mese precedente.
+ */
 @Slf4j
 // Ogni giorno alle 15 dal lunedì al venerdì
 @On("0 0 15 ? * MON-FRI")

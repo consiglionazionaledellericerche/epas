@@ -23,6 +23,10 @@ import models.WorkingTimeType;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
+/**
+ * Correzioni sulle tipologie di orario di lavoro legate
+ * alla maternità / allattamento.
+ */
 @OnApplicationStart(async = true)
 @Slf4j
 public class WorkingTimeTypeAdjust extends Job<Void> {
