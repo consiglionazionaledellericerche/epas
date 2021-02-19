@@ -927,7 +927,7 @@ public class ReperibilityManager {
 
         if (date.getTime() - endDate.getTime() > 86400 * 1000) {
           log.debug("Memorizza periodo: startDate={}, sequence={}", startDate, sequence);
-          icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
+          icsCalendar.getComponents().add(createIcalEvent(startDate, sequence, eventLabel));
           startDate = endDate = date;
           sequence = 1;
           log.trace("Nuovo periodo: startDate={}", date);
@@ -941,14 +941,14 @@ public class ReperibilityManager {
       }
 
       log.debug("Memorizzo l'ultimo periodo: startDate={}, sequence={}", startDate, sequence);
-      icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
+      icsCalendar.getComponents().add(createIcalEvent(startDate, sequence, eventLabel));
     }
 
     return icsCalendar;
   }
 
 
-  private VEvent createICalEvent(Date startDate, int sequence, String eventLabel) {
+  private VEvent createIcalEvent(Date startDate, int sequence, String eventLabel) {
     VEvent reperibilityPeriod = new VEvent(startDate, new Dur(sequence, 0, 0, 0), eventLabel);
     reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
 

@@ -40,12 +40,14 @@ public class ContractUpdateDto extends ContractCreateDto {
   public void update(Contract contract) {
     Verify.verifyNotNull(contract);
     Verify.verifyNotNull(contract.person);
-
+    Verify.verifyNotNull(getPersonId());
+    
     contract.person = Person.findById(getPersonId());
     contract.beginDate = JodaConverters.javaToJodaLocalDate(getBeginDate());
     contract.endDate = JodaConverters.javaToJodaLocalDate(getEndDate());
     contract.endContract = JodaConverters.javaToJodaLocalDate(getEndContract());
     contract.perseoId = getPerseoId();
     contract.onCertificate = getOnCertificate();
+    contract.externalId = getExternalId();
   }
 }

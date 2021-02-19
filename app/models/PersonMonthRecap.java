@@ -30,7 +30,7 @@ import play.data.validation.Required;
 
 /**
  * Entità ore di formazione.
- * 
+ *
  * @author Cristian Lucchesi
  */
 @Table(name = "person_month_recap")

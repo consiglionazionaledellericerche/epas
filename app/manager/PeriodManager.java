@@ -322,7 +322,7 @@ public class PeriodManager {
     for (Object type : owner.types()) {
       boolean toRefresh = false;
       // 1) Cancello quelli che non appartengono più a contract
-      for (IPropertyInPeriod propertyInPeriod: owner.periods(type)) {
+      for (IPropertyInPeriod propertyInPeriod : owner.periods(type)) {
         if (DateUtility.intervalIntersection(ownerInterval, 
             new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate())) 
             == null) {

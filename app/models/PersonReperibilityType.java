@@ -41,7 +41,7 @@ import play.data.validation.Unique;
 
 /**
  * Tipo di reperibilità.
-  
+ *
  * @author Cristian Lucchesi
  */
 @Audited

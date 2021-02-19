@@ -28,6 +28,10 @@ import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
 
+/**
+ * Mantiene l'informazione sull'approvazione delle reperibilità
+ * di una persona in un determinato mese.
+ */
 @Entity
 @Audited
 @Table(name = "reperibility_type_month", uniqueConstraints = @UniqueConstraint(columnNames = {
