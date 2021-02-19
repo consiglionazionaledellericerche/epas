@@ -42,6 +42,7 @@ public class GroupShowTerseDto {
   private String description;
   private LocalDate endDate;
   private PersonShowTerseDto manager;
+  private String externalId;
   private LocalDateTime updatedAt;
 
   @JsonIgnore
