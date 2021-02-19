@@ -20,7 +20,9 @@ package manager;
 import models.Contract;
 import org.joda.time.LocalDate;
 
-
+/**
+ * Manager per la gestione dello storico delle entity.
+ */
 public class HistoricalManager {
   
   /**

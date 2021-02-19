@@ -67,6 +67,7 @@ public class OrganizationShiftTimeTable extends BaseModel {
   
   /**
    * Il numero degli slot.
+   *
    * @return quanti slot ci sono.
    */
   @Transient

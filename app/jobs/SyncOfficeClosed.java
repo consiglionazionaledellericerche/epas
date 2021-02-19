@@ -31,6 +31,9 @@ import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
+/**
+ * Chiusura degli uffici senza persone con contratto attivo.
+ */
 @Slf4j
 @OnApplicationStart(async = true)
 public class SyncOfficeClosed extends Job<Void> {

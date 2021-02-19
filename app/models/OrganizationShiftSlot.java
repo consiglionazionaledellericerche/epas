@@ -42,12 +42,12 @@ import org.joda.time.LocalTime;
 public class OrganizationShiftSlot extends BaseModel {
 
   private static final long serialVersionUID = 2019_10_28_1039L;
-  
-  
+
   public String name;
-  
+
   /**
    * Ritorna il nome dello slot formato attraverso inizio e fine dell'orario.
+   *
    * @return il nome dello slot.
    */
   @Transient
@@ -58,29 +58,29 @@ public class OrganizationShiftSlot extends BaseModel {
       return name;
     }
   }
-  
+
   @NotNull
   @Column(columnDefinition = "VARCHAR")
   public LocalTime beginSlot;
-  
+
   @NotNull
   @Column(columnDefinition = "VARCHAR")
   public LocalTime endSlot;
-  
+
   @Column(columnDefinition = "VARCHAR")
   @Nullable
   public LocalTime beginMealSlot;
-  
+
   @Column(columnDefinition = "VARCHAR")
   @Nullable
   public LocalTime endMealSlot;
-  
+
   @Enumerated(EnumType.STRING)
   @Column(name = "payment_type")
   public PaymentType paymentType;
  
   public Integer minutesPaid;
-  
+
   @ManyToOne
   @JoinColumn(name = "shift_time_table_id")
   public OrganizationShiftTimeTable shiftTimeTable;
