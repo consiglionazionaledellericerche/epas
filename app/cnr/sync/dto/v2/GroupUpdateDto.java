@@ -47,5 +47,7 @@ public class GroupUpdateDto extends GroupCreateDto {
     if (getManagerId() != null) {
       group.manager = Person.findById(getManagerId());  
     }
+    group.externalId = getExternalId();
+    group.endDate = getEndDate();
   }
 }
