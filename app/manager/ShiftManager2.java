@@ -133,7 +133,7 @@ public class ShiftManager2 {
 
   /**
    * Metodo che ritorna la lista delle attività associate all'utente che ne fa richiesta.
-   * 
+   *
    * @return la lista delle attività associate all'utente che ne fa richiesta.
    */
   public List<ShiftType> getUserActivities() {

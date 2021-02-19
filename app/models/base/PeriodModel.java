@@ -30,6 +30,9 @@ import org.joda.time.LocalDate;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
+/**
+ * Una entity con data di inizio e fine.
+ */
 @Audited
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel 
@@ -55,7 +58,7 @@ public abstract class PeriodModel extends BaseModel
         PeriodModel::getBeginDate, Comparator.nullsFirst(LocalDate::compareTo))
         .thenComparing(PeriodModel::getId, Comparator.nullsFirst(Long::compareTo));
   }
-  
+
   @Override
   public int compareTo(PeriodModel other) {
     return comparator().compare(this, other);
@@ -65,7 +68,7 @@ public abstract class PeriodModel extends BaseModel
   public LocalDate calculatedEnd() {
     return endDate;
   }
-  
+
   @Override
   public DateInterval periodInterval() {
     return new DateInterval(this.getBeginDate(), this.calculatedEnd()); 

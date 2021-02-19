@@ -17,6 +17,11 @@
 
 package models.absences;
 
+/**
+ * Tipologia di quantità di tempo da utilizzare per completare l'orario
+ * relativo ad un'assenza.
+ *
+ */
 public enum AmountType {
   minutes, units;
 }

@@ -25,6 +25,11 @@ import manager.services.PairStamping;
 import models.dto.ShiftComposition;
 import org.joda.time.LocalTime;
 
+/**
+ * Possibili configurazioni particolari di turno.
+ *
+ * @author Dario Tagliaferri
+ */
 public enum OrganizationShiftConfiguration {
 
   INAF_MORNING(new LocalTime(6, 0), new LocalTime(14, 0),

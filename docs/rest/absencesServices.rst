@@ -57,6 +57,7 @@ La risposta sarà del tipo:
         "absenceCode": "37",
         "date": "2020-12-21",
         "description": "ferie anno precedente (dopo il 31/8)",
+        "hasAttachment": false,
         "id": 107109,
         "name": "Galileo",
         "surname": "Galilei"
@@ -65,6 +66,7 @@ La risposta sarà del tipo:
         "absenceCode": "94",
         "date": "2020-12-28",
         "description": "festività soppresse (ex legge 937/77)",
+        "hasAttachment": false,
         "id": 107110,
         "name": "Galileo",
         "surname": "Galilei"
@@ -171,6 +173,7 @@ Con un risultato tipo il seguente.
         "absenceCode": "31",
         "date": "2021-03-05",
         "description": "Ferie anno precedente",
+        "hasAttachment": false,
         "id": 107159,
         "name": "Galileo",
         "surname": "Galilei"
@@ -179,6 +182,7 @@ Con un risultato tipo il seguente.
         "absenceCode": "31",
         "date": "2021-03-08",
         "description": "Ferie anno precedente",
+        "hasAttachment": false,
         "id": 107160,
         "name": "Galileo",
         "surname": "Galilei"
@@ -216,3 +220,68 @@ Il codice dell'assenze da cancellare deve essere indicato con il parametro *abse
 
 ::
   $ http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/deleteAbsencesInPeriod email==galileo.galilei@cnr.it begin==2021-02-15 end==2021-02-16 absenceCode==31
+
+
+Scaricamento allegato di un'assenza
+===================================
+
+Le assenze possono avere un allegato (per esempio un file PDF con dichiarazioni del dipendente o un file con
+la certificazione di una visita medifica).
+L'allegato può essere scaricato con una *HTTP GET* all'indirizzo **/rest/absences/attachment**.
+
+Per individuare l'assenza di cui prelevare l'allegato si utilizza il parametro *id* dell'assenza.
+
+::
+  http -a istituto_iit_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/attachment id==107122
+
+La risposta sarà del tipo:
+
+::
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment; filename="assenza-Galilei-Galileo-2021-02-12.pdf"
+  Content-Length: 410830
+  Content-Type: application/pdf
+  Date: Fri, 19 Feb 2021 10:28:47 GMT
+
+  +-----------------------------------------+
+  | NOTE: binary data not shown in terminal |
+  +-----------------------------------------+
+
+Nel caso l'allegato non sia presente verrà restituito un codice *HTTP 404*.
+
+
+Inserimento di un allegato ad un'assenza
+========================================
+
+Per inserire l'allegato è possibile utilizzare una *HTTP POST* all'indirizzo **/rest/absences/addAttachment**.
+
+Per individuare l'assenza a cui associare l'allegato si utilizza il parametro *id* dell'assenza.
+La *HTTP POST* deve essere di tipo *Multipart/form-data* e l'allegato deve essere passato con il nome *file*.
+
+Esempio:
+
+::
+  http -a istituto_iit_absence_manager --form POST https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment id==107122 file@assenza-Galilei-Galileo-2021-02-15.pdf
+
+Nel caso sia già presente un allegato quello precedente viene sovrascritto.
+
+Da notare che nell'esempio sopra si è utilizzata l'opzione **--form** ed il parametro 
+**file@assenza-Galilei-Galileo-2021-02-15.pdf**, dove *file* indica il nome utilizzato nella POST
+per passare allegato e *@assenza-Galilei-Galileo-2021-02-15.pdf* il riferimento al file locale da
+caricare sul server tramite queste API.
+
+
+Cancellazione di un allegato di un'assenza
+==========================================
+
+Per eliminare l'allegato è possibile utilizzare una *HTTP DELETE* all'indirizzo **/rest/absences/addAttachment**.
+
+Per individuare l'assenza di cui rimuovere l'allegato si utilizza il parametro *id* dell'assenza.
+
+Esempio:
+
+::
+  http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment id==107122
+
+Nel caso non fosse presente un'allegato viene restituito con codice *HTTP 404*, altrimenti un codice *HTTP 200* se
+la cancellazione va a buon fine.

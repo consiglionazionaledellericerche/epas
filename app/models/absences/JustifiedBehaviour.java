@@ -29,6 +29,11 @@ import lombok.Getter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
+/**
+ * Modellazione delle tipologie di giustificazione dell'orario dell'orario
+ * di lavoro da parte delle varie tipologie di assenza.
+ *
+ */
 @Audited
 @Entity
 @Table(name = "justified_behaviours")

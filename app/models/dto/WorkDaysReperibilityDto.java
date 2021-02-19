@@ -22,6 +22,9 @@ import java.util.List;
 import models.Person;
 import org.joda.time.LocalDate;
 
+/**
+ * Giorni di reperibilità in giornate lavorative.
+ */
 public class WorkDaysReperibilityDto {
 
   public Person person;

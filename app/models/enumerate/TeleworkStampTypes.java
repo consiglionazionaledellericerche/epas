@@ -50,7 +50,7 @@ public enum TeleworkStampTypes {
   
   /**
    * La lista delle causali attive.
-   * 
+   *
    * @return la lista degli stamptypes attivi.
    */
   public static List<TeleworkStampTypes> onlyActive() {

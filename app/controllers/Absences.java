@@ -29,6 +29,7 @@ import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import helpers.ImageUtils;
 import it.cnr.iit.epas.DateUtility;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +43,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
+import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.SecureManager;
@@ -60,7 +63,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -70,6 +72,7 @@ import security.SecurityRules;
 /**
  * Controller per la gestione delle assenze.
  */
+@Slf4j
 @With({Resecure.class})
 public class Absences extends Controller {
 
@@ -236,6 +239,7 @@ public class Absences extends Controller {
    * @param month    mese
    * @param officeId id office
    */
+  @SuppressWarnings("resource")
   public static void manageAttachmentsPerCode(Integer year, Integer month, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -277,8 +281,7 @@ public class Absences extends Controller {
         //nuovo tipo
         currentAbt = abs.absenceType;
       }
-      if (abs.absenceFile.get() != null) {
-
+      if (abs.absenceFile != null && abs.absenceFile.get() != null) {
         currentRecap.absenceSameType.add(abs);
       }
     }
@@ -296,9 +299,10 @@ public class Absences extends Controller {
    *
    * @param id l'id dell'allegato da scaricare
    */
+  @SuppressWarnings("resource")
   public static void downloadAttachment(long id) {
 
-    Logger.debug("Assenza con id: %d", id);
+    log.debug("Assenza con id: {}", id);
     Absence absence = absenceDao.getAbsenceById(id);
     notFoundIfNull(absence);
 
@@ -307,11 +311,17 @@ public class Absences extends Controller {
       rules.checkIfPermitted(absence.personDay.person.office);
     } else {
       rules.checkIfPermitted(absence);
-    }    
+    }
 
     response.setContentTypeIfNotSet(absence.absenceFile.type());
-    Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
-    renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
+    var filename = String.format("assenza-%s-%s",
+        absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
+    if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
+      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+    }
+
+    log.debug("Allegato relativo all'assenza: {}", absence.absenceFile.getFile());
+    renderBinary(absence.absenceFile.get(), filename, absence.absenceFile.length());
   }
 
   /**
@@ -367,6 +377,7 @@ public class Absences extends Controller {
    * @param year     anno
    * @param month    mese
    */
+  @SuppressWarnings("resource")
   public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month) {
 
     Person person = personDao.getPersonById(personId);
@@ -381,7 +392,7 @@ public class Absences extends Controller {
             false);
 
     for (Absence abs : personAbsenceList) {
-      if (abs.absenceFile.get() != null) {
+      if (abs.absenceFile != null && abs.absenceFile.get() != null) {
         personAbsenceListWithFile.add(abs);
       }
     }
