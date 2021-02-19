@@ -135,6 +135,7 @@ Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate
         "description": "Gruppo di test",
         "endDate": null,
         "id": 4,
+        "externalId": "gruppoTestExId",
         "manager": {
            "email": "galileo.galilei@cnr.it",
            "eppn": "galileo.galilei@cnr.it",
@@ -200,6 +201,7 @@ Affiliation Create
         "description": "Gruppo ISTI di test",
         "endDate": null,
         "id": 4,
+        "externalId": "gruppoTestExId",
         "manager": {
            "email": "galileo.galilei@cnr.it",
            "eppn": "galileo.galilei@cnr.it",
@@ -242,6 +244,7 @@ Affiliation byGroup
             "description": "Gruppo di test",
             "endDate": null,
             "id": 4,
+            "externalId": "gruppoTestExId",
             "manager": {
               "email": "galileo.galilei@cnr.it",
               "eppn": "galileo.galilei@cnr.it",
