@@ -7,7 +7,7 @@ name: epas
 releaseDate: '2021-02-08'
 url: 'https://github.com/consiglionazionaledellericerche/epas'
 applicationSuite: epas
-softwareVersion: 3.0.0
+softwareVersion: 2.0.0
 developmentStatus: stable
 softwareType: standalone/web
 platforms:
@@ -44,7 +44,6 @@ dependsOn:
       versionMin: "10.0"
       optional: no
 it:
-  countryExtensionVersion: 0.2
   riuso:
     codiceIPA: cnr
 description:
@@ -72,7 +71,7 @@ description:
         - disporre, in generale, della completa amministrazione e gestione delle informazioni;
         - pianificare, gestire e validare i calendari di servizi di turno e reperibilità.
     localisedName: ePAS
-    genericName: ePAS - Electronic Personnel Attendance System
+    genericName: ePAS
     shortDescription: >-
       ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale pensato
       per le specifiche esigenze degli Enti Pubblic di Ricerca.
@@ -107,8 +106,7 @@ description:
     features:
       - inserire, modificare e cancellare il personale afferente all’istituto/Unità Operativa;
       - gestire le varie tipologie di orario consentite dal Regolamento degli EPR;
-      - inviare, a fine mese, gli attestati di presenza del personale (se si utilizza
-        l'integrazione la procedura “Attestati” del CNR);
+      - inviare gli attestati di presenza del personale (tramite la procedura 'Attestati' del CNR);
       - disporre, in generale, della completa amministrazione e gestione delle informazioni;
       - pianificare, gestire e validare i calendari di servizi di turno e reperibilità.
       - ricevere le timbrature del personale interfacciandosi con varie tipologie di lettori badge;
