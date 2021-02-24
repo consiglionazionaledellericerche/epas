@@ -545,6 +545,7 @@ officeFilter= Filtra per Sede
 office.headQuarter=Sede principale
 office.joiningDate= Data di affiliazione
 office.name=Nome
+office.perseoId =Id Anagrafica esterna
 Offices.blank=Nuova sede
 office=Sede
 
