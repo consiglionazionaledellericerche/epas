@@ -62,7 +62,9 @@ public class SyncOfficeClosed extends Job<Void> {
       offices.add(office);
       List<Person> people = personDao.listFetched(Optional.<String>absent(),
           new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
-      if (people.isEmpty()) {
+      if (people.isEmpty()
+          //"Ufficio da cambiare" è l'ufficio predefinito creato al primo setup dell'applicazione
+          && !office.name.equalsIgnoreCase("Ufficio da cambiare")) {
         log.info("Non ci sono persone con contratto attivo sulla sede {}. "
             + "Inserisco la data di chiusura sede.", office.name);
         office.endDate = LocalDate.now();
