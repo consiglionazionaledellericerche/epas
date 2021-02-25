@@ -215,11 +215,28 @@ public class Groups extends Controller {
     if (currentPerson == null) {
       Application.index();
     }
-    Map<Role, List<User>> map = groupManager.createOrganizationChart(currentPerson);
+    Map<Role, List<User>> seatSupervisors = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.SEAT_SUPERVISOR));
+    Map<Role, List<User>> personnelAdmins = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+    Map<Role, List<User>> technicalAdmins = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
+    Map<Role, List<User>> registryManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.REGISTRY_MANAGER));
+    Map<Role, List<User>> mealTicketsManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER));
+    Map<Role, List<User>> personnelAdminsMini = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
+    Map<Role, List<User>> shiftManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.SHIFT_MANAGER));
+    Map<Role, List<User>> reperibilityManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.REPERIBILITY_MANAGER));
+    
     
     List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.user)
         .stream().map(uro -> uro.role).collect(Collectors.toList());
-    render(map, currentPerson, roles);
+    render(seatSupervisors, personnelAdmins, technicalAdmins, registryManagers, mealTicketsManagers, 
+        personnelAdminsMini, shiftManagers, reperibilityManagers, currentPerson, roles);
   }
   
   public static void viewInfoRole(Long id) {
