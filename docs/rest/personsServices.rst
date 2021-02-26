@@ -5,17 +5,8 @@ Di seguito una breve spiegazione dell'API REST relativa alla gestione dei dati a
 dipendenti che comprende i metodi per la visualizzazione, la creazione, la modifica e la
 cancellazione delle persone.
 
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai
-soli dati della propria sede. 
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in
-produzione del vostro ente.
-
 Permessi
-========
+--------
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di *Gestore anagrafica* per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
@@ -34,8 +25,8 @@ può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
 
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
-Show
-====
+Person Show
+-----------
 
 La visualizzazione dei dati di una persona è tramite una *HTTP GET* all'indirizzo
 **/rest/v2/persons/show**.
@@ -48,7 +39,8 @@ persone:
 ::
   $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?email=galileo.galilei@cnr.it
 
-::
+.. code-block:: json
+
   {
      "badges": [
          "15409"
@@ -90,8 +82,8 @@ Oppure per esempio per codice fiscale con questa chiamata:
 Nel caso vengano passati più parametri nella ricerca della persona l'ordine con cui viene cercata
 la persona è **id, email, eppn, perseoPersonId, fiscalCode**.
 
-Create
-======
+Person Create
+-------------
 
 La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo
 **/rest/v2/persons/create**.
@@ -101,8 +93,8 @@ La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo
 
 L'unica cosa da notare è che per associare la persona è necessario indicare il campo officeId (201 nel caso di epas-demo.devel.iit.cnr.it per ISTI - Pisa).
 
-Update
-======
+Person Update
+-------------
 
 La creazione di una persona è possibile tramite una *HTTP PUT* all'indirizzo
 **/rest/v2/persons/update**.
@@ -115,8 +107,8 @@ Per individuare la persona da aggiornare si utilizzano gli stessi parametri prev
   $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@isti.cnr.it number=99991 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
 
-Delete
-======
+Person Delete
+-------------
 
 La cancellazione di una persona è possibile tramite una *HTTP DELETE* all'indirizzo
 **/rest/v2/persons/delete**.
@@ -129,8 +121,8 @@ Per individuare la persona da eliminare si utilizzano gli stessi parametri previ
   $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/persons/delete?email=john.doe@cnr.it
 
 
-List
-====
+Person List
+-----------
 
 E' possibile avere la lista delle persone presenti nella sede tramite un *HTTP GET* all'indirizzo
 **/rest/v2/persons/list**.

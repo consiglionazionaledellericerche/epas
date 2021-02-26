@@ -5,17 +5,8 @@ Di seguito una breve spiegazione dell'API REST relativa alla consultazione e ges
 che comprende i metodi per la visualizzazione, la creazione, la modifica, la cancellazione e
 l'impostazione della continuità dei contratti.
 
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai
-soli dati della propria sede. 
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in
-produzione del vostro ente.
-
 Permessi
-========
+--------
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di *Gestore anagrafica* per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
@@ -36,7 +27,8 @@ L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic 
 
 
 Contract byPerson
-=================
+-----------------
+
 La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indirizzo
 **/rest/v2/contracts/byPerson**.
 
@@ -46,7 +38,8 @@ La persona può essere individuata passando i soliti parametri identificativi de
 ::
   $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/byPerson?email=galileo.galilei@cnr.it
 
-::
+.. code-block:: json
+
   [
      {
         "beginDate": "2018-12-27",
@@ -84,7 +77,7 @@ La persona può essere individuata passando i soliti parametri identificativi de
 
 
 Contract Show
-=============
+-------------
 
 La visualizzazione dei dati di un contratto è possibile tramite una HTTP GET all'indirizzo
 **/rest/v2/contracts/show**.
@@ -94,7 +87,8 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
 ::
   $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show?id=4284
 
-::
+.. code-block:: json
+
   {
      "beginDate": "2018-12-27",
      "endContract": null,
@@ -125,7 +119,7 @@ La stessa GET può essere effettuata passando l'id del gruppo nei due modi segue
 
 
 Contract Update
-===============
+---------------
 
 La modifica di un contratto è possibile tramite una HTTP PUT all'indirizzo
 **/rest/v2/contracts/update**.
@@ -137,7 +131,8 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
 
 La risposta sarà del tipo:
 
-::
+.. code-block:: json
+
   {
      "beginDate": "2018-12-27",
      "endContract": null,
@@ -173,7 +168,7 @@ La risposta sarà del tipo:
 
 
 Contract Create
-===============
+---------------
 
 La creazione di una persona è possibile tramite una HTTP POST all'indirizzo
 **/rest/v2/contracts/create**.
@@ -183,7 +178,8 @@ La creazione di una persona è possibile tramite una HTTP POST all'indirizzo
 
 La risposta sarà del tipo:
 
-::
+.. code-block:: json
+
   {
      "beginDate": "2020-10-21",
      "endContract": null,
@@ -214,7 +210,7 @@ La risposta sarà del tipo:
         }
      ]
     "previousContract": null
-}
+  }
 
 Le uniche cosa da notare sono la necessità di indicare obbligatoriamente il campo *personId*
 (1234 nell'esempio) ed il campo *beginDate*.
@@ -228,7 +224,7 @@ Sia nella creazione che nell'aggiornamento sono presenti i controlli che le date
 si intersechino con quelle di altri contratti già esistenti.
 
 Continuazione di due contratti consecutivi
-==========================================
+------------------------------------------
 
 È possibile impostare che un contratto è continuativo rispetto al precedente e che qundi ne erediti
 le ferie non godute precedenti. 
@@ -248,7 +244,7 @@ utilizzare con un HTTP PUT i metodi:
 
 
 Contract Delete
-===============
+---------------
 
 La cancellazione di un contratto è possibile tramite una HTTP DELETE all'indirizzo
 **/rest/v2/contract/delete**.

@@ -1,0 +1,32 @@
+ePAS - Electronic Personnel Attendance System
+===============================================
+
+ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale 
+`CNR <https://www.cnr.it>`_ sviluppato dall'Istituto `IIT <https://www.iit.cnr.it>`_ in
+collaborazione con l'Ufficio ICT; nasce nel 2012 come re-ingegnerizzazione di un sistema di
+rilevazione delle presenze già sviluppato anni prima.
+ePAS consente l’integrazione con vari modelli di lettore badge per l'acquisizione delle timbrature
+del personale ed è integrabile con varie componenti del sistema informativo di un Ente di Ricerca e
+con sistemi di workflow paperless.
+È stato realizzato come applicazione web, al fine di una sua immediata fruibilità da qualsiasi tipo
+di sistema (PC, Tablet, Smartphone). ePAS è attualmente utilizzato da più Enti di Ricerca.
+
+Sono parte integrante di questa soluzione anche i client per l'acquisizione delle timbrature
+rilasciati anche questi come opensource:
+
+  * https://github.com/consiglionazionaledellericerche/epas-client
+  * https://github.com/consiglionazionaledellericerche/epas-client-sql
+
+Indice dei contenuti
+
+.. toctree::
+   :maxdepth: 2
+ 
+   architecture
+   mainComponents
+   mainFeatures
+   admin/index
+   user/index
+   missions/index
+   rest/index
+   sysadmin/index

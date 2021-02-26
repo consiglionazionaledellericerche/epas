@@ -1,22 +1,13 @@
-.. ePAS documentation master file, created by
-   sphinx-quickstart on Mon Oct 13 15:08:03 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Benvenuto nella documentazione di ePAS!
-=======================================
+Documentazione per gli amministratori del personale
+===================================================
 
 Contenuti:
 
 .. toctree::
    :maxdepth: 2
 
-   architecture
-   mainComponents
-   mainFeatures
    managePerson
    workingTimeType
-   holidayPresence
    stampings
    seat
    parameters
@@ -26,13 +17,12 @@ Contenuti:
    tickets
    sendStampings
    variousRecap
-   utility
-   externalService
-   
+   utility   
 
    
 Introduzione
-============
+------------
+
 ePAS (Electronic Personnel Attendance System) è un software per la rilevazione e
 gestione delle presenze del personale sviluppato dall'Istituto di Informatica e 
 Telematica (IIT-CNR) per essere utilizzato dagli istituti del Consiglio 

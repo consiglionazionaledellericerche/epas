@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Benvenuti nella documentazione Integrazione ePAS-Missioni!
+Integrazione ePAS <-> Missioni
 ==========================================================
 
 .. toctree::
@@ -16,7 +16,7 @@ Benvenuti nella documentazione Integrazione ePAS-Missioni!
 
 
 Introduzione
-============
+------------
 
 Al fine di permettere una più efficace cooperazione tra i sistemi informatizzati del CNR, è’ stata terminata l’integrazione 
 del sistema ePAS con il sistema Missioni: sarà quindi possibile ricevere automaticamente sulla piattaforma ePAS tutte le informazioni 

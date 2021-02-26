@@ -3,17 +3,9 @@ Consultazione situazione riepilogi/attestati mensili via REST
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione della rendicontazione 
 mensile delle *assenze / competenze / buoni pasto / ore di formazione* dei dipendenti di una sede. 
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai 
-soli dati della propria sede. 
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo 
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in 
-produzione del vostro ente.
 
 Permessi
-========
+--------
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo 
 di *Lettore Informazioni* per la sede su cui si vuole effettuare le operazioni. 
@@ -27,7 +19,7 @@ ruolo *Lettore informazioni*.
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 Riepilogo situazione mensile assenze/competenze/buoni pasto/ore formazione
-==========================================================================
+--------------------------------------------------------------------------
 
 Le informazioni relative alle situazione mensile assenze/competenze/buoni pasto/ore formazione
 di un singolo dipendente in uno spefico anno sono disponibili tramite una HTTP GET all'indirizzo
@@ -44,7 +36,7 @@ cambiatelo con un utente appropriato per la vostra sede.
 
 La risposta sarà del tipo:
 
-::
+.. code-block:: json
 
   {
      "absences": [
@@ -61,7 +53,8 @@ La risposta sarà del tipo:
             "justifiedTime": 432,
             "justifiedType": "all_day",
             "to": "2020-12-03"
-        },
+        }
+     ]
      "competences": [
         {
             "code": "207",
@@ -94,7 +87,7 @@ singolo dipendente.
 
 
 Verifica validazione attestati
-==============================
+------------------------------
 
 Sono disponibili due metodi relativi ai servizi REST della parte *certifications*, 
 questi metodi sono solamente un _proxy_ rispetto ad *Attestati* nel senso che ePAS effettua 
@@ -114,7 +107,8 @@ Questo metodo ritorna il valore **true** se l'attestato è stato validato, **fal
 
 Il risultato è del tipo:
 
-::
+.. code-block:: json
+
   {
      "allCertificationsValidated": false,
      "notValidatedPersons": [
@@ -134,7 +128,8 @@ Il risultato è del tipo:
            "fullname": "Fibonacci Leonardo",
            "id": 1235,
            "number": "9801"
-       },
+       }
+    ]
   }
 
 **ATTENZIONE QUESTO METODO PUO' ESSERE MOLTO LENTO, perché effettua una chiamata ad Attestati per ogni dipendente**
