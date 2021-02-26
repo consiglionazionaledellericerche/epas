@@ -44,8 +44,11 @@ timbratura che sono:
 
 Un esempio è il seguente:
 
-:: 
- http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create matricolaFirma=9802 operazione=0 anno=2021 mese=02 giorno=08 ora=08 minuti=10 causale=lavoroFuoriSede luogo=Pisa motivazione='ero sotto la torre'
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create
+      matricolaFirma=9802 operazione=0 anno=2021 mese=02 giorno=08 ora=08 minuti=10 causale=lavoroFuoriSede luogo=Pisa motivazione='ero sotto la torre'
 
 Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
 
@@ -77,8 +80,11 @@ La *POST* deve contenere nel body un json con i campi della timbratura che sono:
 
 Per esempio:
 
-::
-  http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create badgeNumber=9802 dateTime='2021-02-12T08:20' wayType=in note='Note eccezionali veramente'
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create
+      badgeNumber=9802 dateTime='2021-02-12T08:20' wayType=in note='Note eccezionali veramente'
 
 Il metodo restituisce uno dei seguenti codici HTTP di risposta:
 
@@ -122,8 +128,10 @@ La visualizzazione dei dati di una timbratura è tramite una *HTTP* GET all'indi
 
 Per individuare la timbratura è possibile utilizzare solo il campo **id**. 
 
-::
-  http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show id==398946
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show id==398946
 
 Il risultato sarà uguale a quello dell'esempio riportato sopra come risposta all'inserimento
 di una timbratura
@@ -150,8 +158,11 @@ I campi che è possibile modificare sono i seguenti:
 la data e ora della timbratura, se è necessario modificare uno di questi campi allora
 è opportuno cancellare la vecchia timbratura ed inserirne una nuova.
 
-::
-    http -a client_timbrature_sede_xxx PUT https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946 wayType=in place=='Torre di Pisa' reason=='Esperimento caduta gravi' reasonType=lavoroFuoriSede
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946
+      wayType=in place=='Torre di Pisa' reason=='Esperimento caduta gravi' reasonType=lavoroFuoriSede
 
 
 Stamping Delete
@@ -161,5 +172,7 @@ La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indi
 
 Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: **id**.
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id=398946
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id=398946

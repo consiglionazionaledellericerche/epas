@@ -35,8 +35,11 @@ definite per la propria sede tramite una *HTTP GET* all'endopoint
 Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate presenti sugli uffici:
  - id, codeId (corrisponde al *sede id* di Attestati).
 
-::
-    $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it//rest/v2/workingtimetypes/list codeId==223400
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it//rest/v2/workingtimetypes/list
+      codeId==223400
 
 La risposta sarà del tipo:
 
@@ -72,8 +75,11 @@ una *HTTP GET* all'endopoint **/rest/v2/workingtimetypes/show**.
 
 Per individuare la tipologia di orario di lavoro è necessario passare il campo **id**.
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it//rest/v2/workingtimetypes/show id==1
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it//rest/v2/workingtimetypes/show
+      id==1
 
 Il risultato sarà del tipo:
 

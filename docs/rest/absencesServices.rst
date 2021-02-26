@@ -39,8 +39,11 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.
 
-::
-  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod email==galileo.galilei@cnr.it begin==2020-12-01 end==2021-12-31
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod 
+      email==galileo.galilei@cnr.it begin==2020-12-01 end==2021-12-31
 
 La risposta sarà del tipo
 
@@ -67,7 +70,6 @@ La risposta sarà del tipo
     }
   ]
 
-
 Verifica della possibilità di inserire un'assenza
 -------------------------------------------------
 
@@ -81,8 +83,11 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 *YYYY-MM-dd*.
 Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
 
-::
-  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence 
+      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato conterrà i giorni in cui sarebbe possibile inserire l'assenza, con un formato
 tipo il seguente:
@@ -104,7 +109,6 @@ tipo il seguente:
      }
   ]
 
-
 Inserimento nuova assenza
 -------------------------
 
@@ -118,8 +122,11 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
 Nel caso di tratti di un'assenza oraria è possibile indicare i campi *hours* and *minutes*.
 
-::
-  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence 
+      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente:
@@ -144,7 +151,6 @@ Con un risultato tipo il seguente:
 Per esempio nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
-
 Inserimento di un giorno di ferie/permesso con codice assenza calcolato da ePAS
 -------------------------------------------------------------------------------
 
@@ -159,8 +165,11 @@ La persona può essere individuata passando i parametri identificativi delle per
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 
-::
-  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertVacation email==galileo.galilei@cnr.it begin==2021-03-05 end==2021-03-08
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertVacation
+      email==galileo.galilei@cnr.it begin==2021-03-05 end==2021-03-08
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente.
@@ -191,7 +200,6 @@ Con un risultato tipo il seguente.
 Anche con questo metodo, nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi,
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
-
 Cancellazione di un'assenza
 ---------------------------
 
@@ -200,9 +208,11 @@ La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizz
 
 Per individuare l'assenza da eliminare si utilizza il parametro *id* dell'assenza.
 
-::
-  $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/delete id==107109
+.. code-block:: bash
 
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/delete 
+      id==107109
 
 Cancellazione delle assenze di uno stesso tipo in un periodo
 ------------------------------------------------------------
@@ -230,8 +240,11 @@ L'allegato può essere scaricato con una *HTTP GET* all'indirizzo **/rest/absenc
 
 Per individuare l'assenza di cui prelevare l'allegato si utilizza il parametro *id* dell'assenza.
 
-::
-  http -a istituto_iit_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/attachment id==107122
+.. code-block:: bash
+
+  $ http -a istituto_iit_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/absences/attachment
+      id==107122
 
 La risposta sarà del tipo:
 
@@ -260,8 +273,11 @@ La *HTTP POST* deve essere di tipo *Multipart/form-data* e l'allegato deve esser
 
 Esempio:
 
-::
-  http -a istituto_iit_absence_manager --form POST https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment id==107122 file@assenza-Galilei-Galileo-2021-02-15.pdf
+.. code-block:: bash
+
+  $ http -a istituto_iit_absence_manager --form 
+      POST https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
+      id==107122 file@assenza-Galilei-Galileo-2021-02-15.pdf
 
 Nel caso sia già presente un allegato quello precedente viene sovrascritto.
 
@@ -280,8 +296,11 @@ Per individuare l'assenza di cui rimuovere l'allegato si utilizza il parametro *
 
 Esempio:
 
-::
-  http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment id==107122
+.. code-block:: bash
+
+  $ http -a istituto_iit_absence_manager 
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
+      id==107122
 
 Nel caso non fosse presente un'allegato viene restituito con codice *HTTP 404*, altrimenti un codice *HTTP 200* se
 la cancellazione va a buon fine.

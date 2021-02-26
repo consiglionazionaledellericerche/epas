@@ -38,8 +38,12 @@ Group Create
 La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo 
 **/rest/v2/persons/create**.
 
-::
-  $ http -a istituto_xxx_registry_manager POST https://epas-demo.devel.iit.cnr.it/rest/v2/groups/create name="Gruppo Test" description="Gruppo di test" officeId=101 managerId=1234 externalId="gruppoTestExId"
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      POST https://epas-demo.devel.iit.cnr.it/rest/v2/groups/create
+      name="Gruppo Test" description="Gruppo di test" officeId=101 
+      managerId=1234 externalId="gruppoTestExId"
 
 La risposta alla creazione del gruppo sarà del tipo:
 
@@ -80,8 +84,10 @@ La visualizzazione dei dati di un gruppo è tramite una *HTTP* GET all'indirizzo
 
 Per individuare il gruppo è possibile utilizzare solo il campo **id**. 
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show?id=101`
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show?id=101
 
 .. code-block:: json
 
@@ -111,11 +117,15 @@ Per individuare il gruppo è possibile utilizzare solo il campo **id**.
 
 La stessa GET può essere effettuata passando l'id del gruppo nei due modi seguenti:
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/101
-  
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/id=101
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+     GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/101
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/id=101
 
 
 Group List
@@ -128,8 +138,10 @@ Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate
 
   - id, codeId (corrisponde al *sede id* di Attestati).
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/list?id=101
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/list?id=101
 
 .. code-block:: json
 
@@ -160,8 +172,11 @@ La modifica di un gruppo è possibile tramite una *HTTP PUT* all'indirizzo
 
 Per individuare il gruppo è possibile utilizzare solo il campo **id**. 
 
-::
-  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/groups/update?id=4 name="Gruppo Test" description="Gruppo di test" officeId=101 managerId=1235 externalId="gruppoTestExId
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/groups/update?id=4
+      name="Gruppo Test" description="Gruppo di test" officeId=101 managerId=1235 externalId="gruppoTestExId
 
 
 Group Delete
@@ -171,8 +186,10 @@ La cancellazione di un gruppo è possibile tramite una HTTP DELETE all'indirizzo
 
 Per individuare il gruppo da eliminare si utilizza lo stesso parametro previsti per la show: **id**.
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/gropus/delete?id=4
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/gropus/delete?id=4
 
 
 Gestione delle Associazioni ai gruppi
@@ -193,8 +210,11 @@ I metodi sono:
 Affiliation Create
 ------------------
 
-::
-  $ http -a istituto_xxx_registry_manager POST https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/create groupId=4 personId=1235 percentage=80.0 beginDate=2020-10-12
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      POST https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/create
+      groupId=4 personId=1235 percentage=80.0 beginDate=2020-10-12
 
 .. code-block:: json
 
@@ -234,10 +254,11 @@ Affiliation byGroup or byPerson
 
 **Affiliation byGroup**
 
+.. code-block:: bash
 
-::
-  http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/byGroup id==4 includeInactive==true
-
+  http -a istituto_xxx_registry_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/byGroup
+    id==4 includeInactive==true
 
 .. code-block:: json
 
@@ -281,8 +302,11 @@ affiliazioni che non sono più attive alla data corrente.
 
 **Affiliation byPerson**
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/byPerson id==4298
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/byPerson
+      id==4298
 
 
 La persona può essere individuata passando i soliti parametri identificativi delle persone: 
@@ -293,20 +317,28 @@ La persona può essere individuata passando i soliti parametri identificativi de
 Affiliation Show
 ----------------
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/show id==4
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/show
+      id==4
 
 
 Affiliation Update
 ------------------
 
-::
-  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/update id==4 groupId=4 personId=1235 percentage=80.0 beginDate=2020-10-12 endDate=2021-01-31
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/update
+      id==4 groupId=4 personId=1235 percentage=80.0 beginDate=2020-10-12 endDate=2021-01-31
 
 
 Affiliation Delete
 ------------------
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/delete id==4
+.. code-block:: bash
 
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/affiliations/delete
+      id==4
