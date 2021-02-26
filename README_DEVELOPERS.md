@@ -34,6 +34,7 @@ visto che non più compatibile con Java 11.
 La configurazione per l'accesso al db e per sovrascriscrivere i paremetri tipici
 dello sviluppo è nel file _conf/dev.conf_.
 
+
 Inizializzazione ed aggiornamento database
 ------------------------------------------
 
@@ -54,6 +55,26 @@ il database vuoto con alcuni da utili per il setup e la configurazione di ePAS a
 
 Il camando ```play evolutions:apply``` dovrà essere lanciato ogni qual volta ci sono
 delle nuove evoluzioni del db.
+
+
+Generazione della documentazione
+--------------------------------
+
+Tutta la documentazione è presente nella cartella docs ed è scritta in formato restructuredText.
+Per poter generare la documentazione è necessario installare le dipendente python tramite il comando
+
+```
+pip install -r requirements.txt
+``` 
+
+La generazione della documentazione è possibile tramite il comando 
+
+```
+make html
+```
+
+La documentazione in formato html sarà generata nella cartella *_build*.
+
 
 Test
 ----
