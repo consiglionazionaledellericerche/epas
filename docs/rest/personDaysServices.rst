@@ -30,15 +30,21 @@ La persona può essere individuata passando i parametri identificativi delle per
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it, 
 cambiatelo con un utente appropriato per la vostra sede.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituation email==galileo.galilei@cnr.it date==2020-10-28
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituation
+      email==galileo.galilei@cnr.it date==2020-10-28
 
 Le informazioni mensili di una persona si ottengono in modo simile al precedente passando al posto 
 del parametro *date* i parametri *year* e *month* con un GET all'indirizzo 
 **/rest/v3/personDays/getMonthSituationByPerson**.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getMonthSituationByPerson email==galileo.galilei@cnr.it year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getMonthSituationByPerson
+      email==galileo.galilei@cnr.it year==2020 month==10
 
 Cartellino byOffice (giornaliero e/o mensile)
 ---------------------------------------------
@@ -48,12 +54,17 @@ i dipendenti di una sede.
 La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *223400*.
 Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituationbyoffice sedeId==223400 date==2020-10-28
+.. code-block:: bash
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice sedeId==223400 year==2020 month==10
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getdaysituationbyoffice
+      sedeId==223400 date==2020-10-28
 
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice
+      sedeId==223400 year==2020 month==10
 
 Timbrature per lavoro fuori sede o per motivi di servizio con luogo e/o motivazione
 -----------------------------------------------------------------------------------
@@ -71,8 +82,11 @@ La persona può essere individuata passando i parametri identificativi delle per
 *id, email, eppn, perseoPersonId, fiscalCode*, i parametri *year* e *month* sono utilizzati per
 individuare l'anno ed il mese.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByPersonAndMonth email==galileo.galilei@cnr.it year==2021 month==02
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByPersonAndMonth
+      email==galileo.galilei@cnr.it year==2021 month==02
   
 Il risultato sarà del tipo:
 
@@ -120,8 +134,11 @@ di una sede utilizzando una GET all'indirizzo **/rest/v3/personDays/offSiteWorkB
 
 La sede è individuata tramite il parametro *sedeId*.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByOfficeAndMonth sedeId==223400 year==2021 month==02
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByOfficeAndMonth
+      sedeId==223400 year==2021 month==02
 
 Un esempio di risultato è il seguente:
 

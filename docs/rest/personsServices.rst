@@ -36,8 +36,10 @@ persone:
 
  - *id*, *email*, *eppn*, *perseoPersonId*, *fiscalCode*. 
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?email=galileo.galilei@cnr.it
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?email=galileo.galilei@cnr.it
 
 .. code-block:: json
 
@@ -68,16 +70,22 @@ persone:
 
 La stessa GET può essere effettuata passando l'id della persona nei due modi seguenti:
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show/1234
+.. code-block:: bash
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show/id=1234
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show/1234
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show/id=1234
 
 Oppure per esempio per codice fiscale con questa chiamata:
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?fiscalCode=GLLGLL74P10G702B
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?fiscalCode=GLLGLL74P10G702B
 
 Nel caso vengano passati più parametri nella ricerca della persona l'ordine con cui viene cercata
 la persona è **id, email, eppn, perseoPersonId, fiscalCode**.
@@ -88,8 +96,11 @@ Person Create
 La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo
 **/rest/v2/persons/create**.
 
-::
-  $ http -a istituto_xxx_registry_manager POST https://epas-demo.devel.iit.cnr.it/rest/v2/persons/create number=99999 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      POST https://epas-demo.devel.iit.cnr.it/rest/v2/persons/create
+      number=99999 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
 L'unica cosa da notare è che per associare la persona è necessario indicare il campo officeId (201 nel caso di epas-demo.devel.iit.cnr.it per ISTI - Pisa).
 
@@ -103,8 +114,11 @@ Per individuare la persona da aggiornare si utilizzano gli stessi parametri prev
 
   - **id, email, eppn, perseoPersonId, fiscalCode**.
 
-::
-  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@isti.cnr.it number=99991 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@isti.cnr.it
+      number=99991 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
 
 Person Delete
@@ -117,8 +131,10 @@ Per individuare la persona da eliminare si utilizzano gli stessi parametri previ
 
   - **id, email, eppn, perseoPersonId, fiscalCode**.
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/persons/delete?email=john.doe@cnr.it
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/persons/delete?email=john.doe@cnr.it
 
 
 Person List
@@ -130,5 +146,7 @@ E' possibile avere la lista delle persone presenti nella sede tramite un *HTTP G
 Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate presenti sugli uffici:
  - id, codeId (corrisponde al *sede id* di Attestati).
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/list?id=101
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/list?id=101

@@ -40,8 +40,11 @@ nel caso non venga specificato viene mostrata la situazione dell'anno corrente.
 Nell'esempio successivo viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v3/vacations/byPersonAndYear email==galileo.galilei@cnr.it year==2021
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/vacations/byPersonAndYear
+      email==galileo.galilei@cnr.it year==2021
 
 La risposta sarà del tipo:
 

@@ -31,8 +31,11 @@ campo *month*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation email==galileo.galilei@cnr.it year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation 
+      email==galileo.galilei@cnr.it year==2020 month==10
 
 La risposta sarà del tipo:
 
@@ -79,8 +82,11 @@ La risposta sarà del tipo:
 
 Per ottenere lo stesso riepilogo ma per tutti i dipendenti di una sede è possibile utilizzare il metodo:
 
-::
-    $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice sedeId==223400 year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice
+      sedeId==223400 year==2020 month==10
 
 Il risultato sarà una lista dei riepilogi strutturati come quello dell'esempio precedente per il
 singolo dipendente.
@@ -97,13 +103,19 @@ le chiamate REST ad attestati per sapere se i cartellini sono stati validati o m
 
 I due metodi sono:
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson email==galileo.galilei@cnr.it year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson
+      email==galileo.galilei@cnr.it year==2020 month==10
 
 Questo metodo ritorna il valore **true** se l'attestato è stato validato, **false** altrimenti.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice sedeId==223400 year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice
+      sedeId==223400 year==2020 month==10
 
 Il risultato è del tipo:
 

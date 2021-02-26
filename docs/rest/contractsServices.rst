@@ -35,8 +35,11 @@ La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indir
 La persona può essere individuata passando i soliti parametri identificativi delle persone:
 *id, email, eppn, perseoPersonId, fiscalCode*.
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/byPerson?email=galileo.galilei@cnr.it
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/byPerson
+      email==galileo.galilei@cnr.it
 
 .. code-block:: json
 
@@ -84,8 +87,11 @@ La visualizzazione dei dati di un contratto è possibile tramite una HTTP GET al
 
 Per individuare il contratto è possibile utilizzare solo il campo *id*.
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show?id=4284
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show 
+      id==4284
 
 .. code-block:: json
 
@@ -111,8 +117,10 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
 
 La stessa GET può essere effettuata passando l'id del gruppo nei due modi seguenti:
 
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show/4284
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show/4284
 
 ::
   $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show/id=4284
@@ -126,8 +134,11 @@ La modifica di un contratto è possibile tramite una HTTP PUT all'indirizzo
 
 Per individuare il contratto è possibile utilizzare solo il campo *id*.
 
-::
-  $ http -a istituto_xxx_registry_manager https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/update?id=4284 beginDate=2018-12-27 endDate=2020-10-20 personId=1234
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/updateid=4284 
+      beginDate=2018-12-27 endDate=2020-10-20 personId=1234
 
 La risposta sarà del tipo:
 
@@ -173,8 +184,11 @@ Contract Create
 La creazione di una persona è possibile tramite una HTTP POST all'indirizzo
 **/rest/v2/contracts/create**.
 
-::
-  $ http -a istituto_xxx_registry_manager POST https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/create beginDate=2020-10-21 personId=1234
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager 
+      POST https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/create
+      beginDate=2020-10-21 personId=1234
 
 La risposta sarà del tipo:
 
@@ -236,12 +250,15 @@ utilizzare con un HTTP PUT i metodi:
   - **/rest/v2/contract/setPreviousContract**
   - **/rest/v2/contract/unsetPreviousContract**
 
-::
-  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/setPreviousContract?id=4678
+.. code-block:: bash
 
-::
-  $ http -a istituto_xxx_registry_manager PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/unsetPreviousContract?id=4678
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/setPreviousContract?id=4678
 
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/unsetPreviousContract?id=4678
 
 Contract Delete
 ---------------
@@ -251,5 +268,7 @@ La cancellazione di un contratto è possibile tramite una HTTP DELETE all'indiri
 
 Per individuare il gruppo da eliminare si utilizza il parametro *id* del contratto.
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/contract/delete?id=4678
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/contract/delete?id=4678
