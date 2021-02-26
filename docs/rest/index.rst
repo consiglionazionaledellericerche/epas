@@ -24,10 +24,9 @@ disponibile all'indirizzo `https://epas-demo.devel.iit.cnr.it <https://epas-demo
 Naturalmente gli stessi comandi che trovate di seguito possono essere eseguiti anche nella istanza
 di ePAS in produzione del vostro ente.
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
+   :caption: Indice dei contenuti
 
    absencesServices
    certificationsServices

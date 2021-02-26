@@ -1,10 +1,9 @@
 Documentazione per i dipendenti
 ===============================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
+   :caption: Indice dei contenuti
 
    stampings
    monthlyAbsences
