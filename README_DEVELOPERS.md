@@ -6,6 +6,11 @@ database postgresql.
 Per il setup dell'ambiente di sviluppo è necessario aver installato sul 
 proprio PC java 11, il [play framework 1.5.x](https://www.playframework.com/documentation/1.5.x/install)
 ed avere accesso ad un dabatase postgresql.
+Di seguito alcune istruzioni per poter eseguire il debug o aggiungere nuove
+funzionalità avviando un'istanza di ePAS in locale sulla proprio workstation.
+
+Le configurazioni successive non sono necessarie se si sta semplicemente
+utilizzando ePAS con l'immagine docker pubblica.
 
 Avvio da Eclipse
 ----------------
@@ -28,6 +33,27 @@ visto che non più compatibile con Java 11.
 
 La configurazione per l'accesso al db e per sovrascriscrivere i paremetri tipici
 dello sviluppo è nel file _conf/dev.conf_.
+
+Inizializzazione ed aggiornamento database
+------------------------------------------
+
+L'applicazione utilizza un sistema di versione del database.
+Al primo avvio (a database vuoto) è necessario lanciare il comando 
+
+```
+play evolutions:apply
+```
+
+Questo comando si occupa di applicare tutte le evoluzioni del database contenute 
+nella directory db/evolutions le quali si occupano di creare tutte le tabelle 
+necessarie.
+
+Al primo avvio a db vuoto di ePAS, è necessario nel file *dev.conf* impostare il 
+paramentro *jobs.active* a *true*, questo per attivare i job che si occupano di popolare
+il database vuoto con alcuni da utili per il setup e la configurazione di ePAS a db vuoto.
+
+Il camando ```play evolutions:apply``` dovrà essere lanciato ogni qual volta ci sono
+delle nuove evoluzioni del db.
 
 Test
 ----
