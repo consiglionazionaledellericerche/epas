@@ -1,9 +1,8 @@
 Configurazioni per l'amministratore di sistema
 ==============================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
+   :caption: Indice dei contenuti
 
    configurazioneLog
