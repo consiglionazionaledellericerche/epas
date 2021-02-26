@@ -43,11 +43,11 @@ html_theme_path = [docs_cnr_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
 copyright = "2021 Consiglio Nazionale delle Ricerche"
-html_title = "ePAS - Electronic Personnel Attendance System"
+html_title = "Electronic Personnel Attendance System"
 html_show_sourcelink = False
 #html_favicon = "favicon.ico"
-#html_logo = "logo.png"
-#latex_logo = 'logo.png'
+html_logo = 'logo.png'
+latex_logo = 'logo.png'
 html_baseurl = 'docs'
 smartquotes = False
 language = "it"
