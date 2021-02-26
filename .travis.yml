@@ -1,0 +1,41 @@
+sudo: false
+language: python
+addons:
+  apt:
+    packages:
+    - latex-xcolor
+    - texlive-base
+    - texlive-latex-base
+    - texlive-latex-recommended
+    - texlive-fonts-recommended
+    - texlive-fonts-extra
+    - texlive-latex-extra
+    - texlive-formats-extra
+    - texlive-bibtex-extra
+    - texlive-humanities
+    - texlive-lang-italian
+    - texinfo
+    - texlive-science
+    - latexmk
+
+script:
+  - pip install -r requirements.txt
+  # Use Sphinx to make the html docs
+  - make html
+  - make latexpdf
+  - cp _build/latex/*.pdf _build/html/
+  - make epub
+  - cp _build/epub/*.epub _build/html/
+  # Tell GitHub not to use jekyll to compile the docs
+  - touch _build/html/.nojekyll
+
+# Tell Travis CI to copy the documentation to the gh-pages branch of
+# your GitHub repository.
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  keep-history: true
+  on:
+    branch: master
+  local_dir: _build/html/

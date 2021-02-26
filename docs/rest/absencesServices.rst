@@ -3,17 +3,9 @@ Consultazione ed inserimento assenze via REST
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione ed inserimento 
 delle assenze dei dipendenti di una sede. 
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai 
-soli dati della propria sede. 
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo 
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in 
-produzione del vostro ente.
 
 Permessi
-========
+--------
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di *Gestore Assenze* o *Rest Client*, oppure di *Lettore Informazioni* per le operazioni di sola lettura.
@@ -33,7 +25,7 @@ può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 Assenze di un dipendente in un periodo
-======================================
+--------------------------------------
 
 Le informazioni relative al assenze di un singolo dipendente in uno spefico intervallo temporatale
 anno sono disponibili tramite una HTTP GET all'indirizzo
@@ -50,30 +42,34 @@ cambiatelo con un utente appropriato per la vostra sede.
 ::
   $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod email==galileo.galilei@cnr.it begin==2020-12-01 end==2021-12-31
 
-La risposta sarà del tipo:
+La risposta sarà del tipo
 
-::
-      {
-        "absenceCode": "37",
-        "date": "2020-12-21",
-        "description": "ferie anno precedente (dopo il 31/8)",
-        "hasAttachment": false,
-        "id": 107109,
-        "name": "Galileo",
-        "surname": "Galilei"
+.. code-block:: json
+
+  [
+    {
+      "absenceCode": "37",
+      "date": "2020-12-21",
+      "description": "ferie anno precedente (dopo il 31/8)",
+      "hasAttachment": false,
+      "id": 107109,
+      "name": "Galileo",
+      "surname": "Galilei"
     },
     {
-        "absenceCode": "94",
-        "date": "2020-12-28",
-        "description": "festività soppresse (ex legge 937/77)",
-        "hasAttachment": false,
-        "id": 107110,
-        "name": "Galileo",
-        "surname": "Galilei"
-    },
+      "absenceCode": "94",
+      "date": "2020-12-28",
+      "description": "festività soppresse (ex legge 937/77)",
+      "hasAttachment": false,
+      "id": 107110,
+      "name": "Galileo",
+      "surname": "Galilei"
+    }
+  ]
+
 
 Verifica della possibilità di inserire un'assenza
-=================================================
+-------------------------------------------------
 
 È possibile verificare se è possibile inserire un'assenza per un dipendente senza effettuare
 l'effettivo inserimento. Questa operazione è fruibile utilizzando l'endpoint
@@ -89,9 +85,10 @@ Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
   $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato conterrà i giorni in cui sarebbe possibile inserire l'assenza, con un formato
-tipo il seguente.
+tipo il seguente:
 
-::
+.. code-block:: json
+
   [
      {
         "absenceCode": "31",
@@ -109,7 +106,7 @@ tipo il seguente.
 
 
 Inserimento nuova assenza
-=========================
+-------------------------
 
 Analogamente al metodo precedente per controllare un'assenza è possibile effettuare l'operazione di 
 inserimento di una assenza tramite una *HTTP PUT* all'endpoint **/rest/absences/insertAbsence**.
@@ -125,9 +122,10 @@ Nel caso di tratti di un'assenza oraria è possibile indicare i campi *hours* an
   $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
-Con un risultato tipo il seguente.
+Con un risultato tipo il seguente:
 
-::
+.. code-block:: json
+
   [
      {
         "absenceCode": "31",
@@ -148,7 +146,7 @@ il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
 
 Inserimento di un giorno di ferie/permesso con codice assenza calcolato da ePAS
-===============================================================================
+-------------------------------------------------------------------------------
 
 Al fine di utilizzare la funzionalità già presente nell'interfacccia WEB di ePAS che calcola in 
 autonomia il codice di ferie più vantaggioso da inserire per il cliente (tra i 31, 32 e 94), è disponibile
@@ -167,7 +165,8 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente.
 
-::
+.. code-block:: json
+
   [
       {
         "absenceCode": "31",
@@ -194,7 +193,7 @@ il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
 
 Cancellazione di un'assenza
-===========================
+---------------------------
 
 La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizzo
 **/rest/v2/absences/delete**.
@@ -205,8 +204,8 @@ Per individuare l'assenza da eliminare si utilizza il parametro *id* dell'assenz
   $ http -a istituto_xxx_absence_manager GET https://epas-demo.devel.iit.cnr.it/rest/absences/delete id==107109
 
 
-Cancellazione delle assenza di uno stesso tipo in un periodo
-============================================================
+Cancellazione delle assenze di uno stesso tipo in un periodo
+------------------------------------------------------------
 
 È possibile cancellare più assenze di una persona che siano dello stesso tipo specificando
 i limiti temporali di inizio e fine delle assenze da cancellare.
@@ -223,7 +222,7 @@ Il codice dell'assenze da cancellare deve essere indicato con il parametro *abse
 
 
 Scaricamento allegato di un'assenza
-===================================
+-----------------------------------
 
 Le assenze possono avere un allegato (per esempio un file PDF con dichiarazioni del dipendente o un file con
 la certificazione di una visita medifica).
@@ -236,7 +235,8 @@ Per individuare l'assenza di cui prelevare l'allegato si utilizza il parametro *
 
 La risposta sarà del tipo:
 
-::
+.. code-block::
+
   HTTP/1.1 200 OK
   Content-Disposition: attachment; filename="assenza-Galilei-Galileo-2021-02-12.pdf"
   Content-Length: 410830
@@ -251,7 +251,7 @@ Nel caso l'allegato non sia presente verrà restituito un codice *HTTP 404*.
 
 
 Inserimento di un allegato ad un'assenza
-========================================
+----------------------------------------
 
 Per inserire l'allegato è possibile utilizzare una *HTTP POST* all'indirizzo **/rest/absences/addAttachment**.
 
@@ -272,7 +272,7 @@ caricare sul server tramite queste API.
 
 
 Cancellazione di un allegato di un'assenza
-==========================================
+------------------------------------------
 
 Per eliminare l'allegato è possibile utilizzare una *HTTP DELETE* all'indirizzo **/rest/absences/addAttachment**.
 

@@ -4,9 +4,13 @@
 [![Supported JVM Versions](https://img.shields.io/badge/JVM-11-brightgreen.svg?style=for-the-badge&logo=Java)](https://openjdk.java.net/install/)
 
 ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale 
-[https://www.cnr.it](CNR) sviluppato dall'Istituto [IIT](https://www.iit.cnr.it) in collaborazione
+[CNR](https://www.cnr.it) sviluppato dall'Istituto [IIT](https://www.iit.cnr.it) in collaborazione
 con l'Ufficio ICT; nasce nel 2012 come re-ingegnerizzazione di un sistema di rilevazione delle
 presenze già sviluppato anni prima.
+
+La documentazione completa del progetto è disponibile all'indirizzo
+
+- [https://consiglionazionaledellericerche.github.io/epas/](https://consiglionazionaledellericerche.github.io/epas/)
 
 ePAS consente l’integrazione con vari modelli di lettore badge per l'acquisizione delle timbrature
 del personale ed è integrabile con varie componenti del sistema informativo di un Ente di Ricerca e
@@ -16,6 +20,7 @@ con sistemi di workflow paperless.
 di sistema (PC, Tablet, Smartphone).
 
 ePAS è attualmente utilizzato da più Enti di Ricerca.
+
 
 ## Funzionalità per il dipendente
 
@@ -87,7 +92,7 @@ ePAS è concesso in licenza GNU AFFERO GENERAL PUBLIC LICENSE, come si trova nel
 
 # <img src="https://www.docker.com/sites/default/files/d8/2019-07/Moby-logo.png" width=80> Startup
 
-#### _Per avviare una istanza di SIGLA con postgres locale_
+#### _Per avviare una istanza di ePAS con postgres locale_
 
 ePAS può essere facilmente installato via docker-compose su server Linux utilizzando il file 
 docker-compose.yml presente in questo repository.
@@ -101,7 +106,8 @@ curl -fsSL https://raw.githubusercontent.com/consiglionazionaledellericerche/epa
 
 Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosarailicenziato_ (da cambiare il prima possibile). 
 
-.. seealso::
+## Vedi anche
 
-   - `Vai alla documentazione utente <https://epas.projects.iit.cnr.it/content/utente-finale>`_
-   - `Vai alla documentazione tecnica dei servizi REST <https://epas.projects.iit.cnr.it/content/epas-v104-documentazione-servizi-rest>`_
+  - [Documentazione completa di ePAS ](https://consiglionazionaledellericerche.github.io/epas/)
+  - [ePAS client - file locali / ftp /sftp e lettori smartclock](https://github.com/consiglionazionaledellericerche/epas-client)
+  - [ePAS client - timbratura da database SQL](https://github.com/consiglionazionaledellericerche/epas-client-sql)

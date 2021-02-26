@@ -3,17 +3,10 @@ Consultazione situazione ferie e permessi dei dipendenti via REST
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione della situazione 
 delle ferie residue e maturate dei dipendenti di una sede.
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai 
-soli dati della propria sede.
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo 
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in 
-produzione del vostro ente.
 
 Permessi
-========
+--------
+
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo 
 di *Lettore Informazioni* oppure di *Gestore Assenze* per la sede su cui si vuole effettuare le operazioni. 
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di *amministratore tecnico*. 
@@ -31,8 +24,9 @@ può essere creato tra un utente con ruolo di *Amministratore* di ePAS.
 
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
+
 Situazione ferie e permessi, residui e maturati di un dipendente in un anno
-===========================================================================
+---------------------------------------------------------------------------
 
 Le informazioni relative al assenze di un singolo dipendente in uno spefico intervallo temporatale
 anno sono disponibili tramite una HTTP GET all'indirizzo
@@ -51,7 +45,8 @@ cambiatelo con un utente appropriato per la vostra sede.
 
 La risposta sarà del tipo:
 
-::
+.. code-block:: json
+
   [
     {
        "contract": {
