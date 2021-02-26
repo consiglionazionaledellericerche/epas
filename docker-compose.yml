@@ -12,7 +12,7 @@ services:
    ### inalterati i path sui container docker
 
   epas:
-    image: docker-registry.services.iit.cnr.it/epas/epas:stable
+    image: consiglionazionalericerche/epas
     container_name: epas
     volumes:
       - ./epas/logs:/home/epas/epas/logs
