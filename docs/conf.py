@@ -26,6 +26,9 @@ project = 'ePAS - Electronic Personnel Attendance System'
 release = '2.0.0'
 author = u'IIT - Consiglio Nazionale delle Ricerche'
 
+# Version è utilizzato per la produzione dell'ePUB
+version = release
+
 show_authors = True
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
@@ -45,7 +48,7 @@ html_static_path = ['_static']
 copyright = "2021 Consiglio Nazionale delle Ricerche"
 html_title = "Electronic Personnel Attendance System"
 html_show_sourcelink = False
-#html_favicon = "favicon.ico"
+html_favicon = "_static/images/favicon.ico"
 html_logo = 'logo.png'
 latex_logo = 'logo.png'
 html_baseurl = 'docs'
