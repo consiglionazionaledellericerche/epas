@@ -115,17 +115,12 @@ Per individuare il gruppo è possibile utilizzare solo il campo **id**.
   }
 
 
-La stessa GET può essere effettuata passando l'id del gruppo nei due modi seguenti:
+La stessa GET può essere effettuata passando l'id del gruppo nel modo seguente:
 
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager 
      GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/101
-
-.. code-block:: bash
-
-  $ http -a istituto_xxx_registry_manager 
-      GET https://epas-demo.devel.iit.cnr.it/rest/v2/groups/show/id=101
 
 
 Group List
