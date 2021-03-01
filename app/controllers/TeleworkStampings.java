@@ -288,5 +288,23 @@ public class TeleworkStampings extends Controller {
     
     render(stamping);
   }
+  
+  /**
+   * Metodo che ritorna la schermata riepilogativa da mandare all'approvazione del responsabile
+   * della sede di lavoro.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void report(final Integer year, final Integer month) {
+    if (year == null || month == null) {
+      Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+    }
+    val currentPerson = Security.getUser().get().person;
+  //Accesso da utente di sistema senza persona associata
+    if (currentPerson == null) {
+      Application.index();
+    }
+    render();
+  }
 
 }

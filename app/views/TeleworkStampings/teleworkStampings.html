@@ -6,6 +6,12 @@
 
 #{title title:('Orario in telelavoro ' + templateUtility.monthName(month) + ' ' + year) /}
 
+<div class="row">
+<div class="text-center">
+    <a class="btn btn-success" href="@{TeleworkStampings.report}"><i class="fa fa-flag"></i>
+      Genera report mensile </a>
+</div>
+</div>
 #{list items:list, as:'day'}
       <ul class="list-group">
      	 <li class="list-group-item  list-group-item-grey">
