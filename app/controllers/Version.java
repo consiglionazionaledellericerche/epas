@@ -21,22 +21,23 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
-import play.Logger;
+import lombok.extern.slf4j.Slf4j;
 import play.mvc.Controller;
 import play.mvc.With;
 
+@Slf4j
 @With({Resecure.class})
 public class Version extends Controller {
 
   /**
-   * Mostra la versione prelevata dal file version.conf.
+   * Mostra la versione prelevata dal file VERSION.
    */
   public static void showVersion() {
     String version = null;
     try {
-      version = Files.asCharSource(new File("conf/version.conf"), Charsets.UTF_8).read();
+      version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
     } catch (IOException ex) {
-      Logger.error("File di versione 'version.conf' non trovato");
+      log.error("File di versione 'VERSION' non trovato");
     }
     render(version);
   }

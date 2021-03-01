@@ -17,11 +17,13 @@
 
 package helpers;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import controllers.Security;
 import dao.AbsenceRequestDao;
 import dao.AbsenceTypeDao;
@@ -49,6 +51,8 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -812,6 +816,16 @@ public class TemplateUtility {
    */
   public String getCompanyUrl() {
     return CompanyConfig.url();
+  }
+
+  public String getVersion() {
+    String version = null;
+    try {
+      version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
+    } catch (IOException e) {
+      version = "unknown";
+    }
+    return version;
   }
 
 }
