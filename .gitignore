@@ -25,3 +25,4 @@ lib/
 /fabfile.pyc
 /bin/
 /.gradle/
+/_build
