@@ -131,7 +131,8 @@ public class CertificationYearSituation implements Serializable {
   
   /**
    * La situazione circa un singolo codice o gruppo.
-   * @author alessandro
+   *
+   * @author Alessandro Martelli
    *
    */
   public static class AbsenceSituation implements Serializable {
@@ -177,6 +178,9 @@ public class CertificationYearSituation implements Serializable {
     
   }
   
+  /**
+   * Tipologia di possibili situazioni circa un singolo codice o gruppo.
+   */
   public static enum AbsenceSituationType {
     FERIE_ANNO_CORRENTE("Ferie anno corrente", null),
     FERIE_ANNO_PRECEDENTE("Ferie anno precedente", null),

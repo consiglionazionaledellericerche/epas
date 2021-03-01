@@ -44,7 +44,8 @@ public class LocalDateBinder implements TypeBinder<LocalDate> {
     try {
       return LocalDate.parse(value, dtf);
     } catch (Exception ignored) {
-      log.debug("Exception during binding LocalDate {} format dd/MM/YYYY", value, ignored);
+      log.debug("Exception during binding LocalDate {} format dd/MM/YYYY", value);
+      log.trace("Exception: ", ignored);
     }
     try {
       return LocalDate.parse(value, DateTimeFormat.forPattern("YYYY-MM-dd"));

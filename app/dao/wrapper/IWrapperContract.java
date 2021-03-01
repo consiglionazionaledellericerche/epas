@@ -145,7 +145,7 @@ public interface IWrapperContract extends IWrapperModel<Contract> {
 
   /**
    * Se il contratto necessita di inizializzazione.
-   * 
+   *
    * @return esito
    */
   public boolean initializationMissing();

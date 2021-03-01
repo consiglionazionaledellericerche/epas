@@ -25,7 +25,7 @@ import org.assertj.core.util.Lists;
 
 /**
  * Le categorie di default.
- * 
+ *
  * @author Alessandro Martelli
  *
  */

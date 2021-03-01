@@ -22,32 +22,48 @@ import cnr.sync.dto.AbsenceRest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import controllers.rest.v2.Persons;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.PersonDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
+import helpers.ImageUtils;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Person;
 import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import play.i18n.Messages;
+import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.db.jpa.Blob;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 import security.SecurityRules;
 
@@ -69,9 +85,13 @@ public class Absences extends Controller {
   @Inject
   static AbsenceTypeDao absenceTypeDao;
   @Inject
+  static AbsenceComponentDao absenceComponentDao;
+  @Inject
   static ObjectMapper mapper;
   @Inject
   private static IWrapperFactory wrapperFactory;
+  @Inject
+  static GsonBuilder gsonBuilder;
   @Inject
   private static SecurityRules rules;
 
@@ -103,13 +123,7 @@ public class Absences extends Controller {
         .transform(new Function<Absence, AbsenceRest>() {
           @Override
           public AbsenceRest apply(Absence absence) {
-            AbsenceRest ar = new AbsenceRest();
-            ar.absenceCode = absence.absenceType.code;
-            ar.description = absence.absenceType.description;
-            ar.date = absence.personDay.date.toString();
-            ar.name = absence.personDay.person.name;
-            ar.surname = absence.personDay.person.surname;
-            return ar;
+            return AbsenceRest.build(absence);
           }
         }).toList();
     renderJSON(absences);
@@ -152,7 +166,6 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
-    List<AbsenceAddedRest> list = Lists.newArrayList();
     try {
       val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
       if (!absenceType.isPresent()) {
@@ -164,16 +177,9 @@ public class Absences extends Controller {
       val report = absenceService.insert(person, groupAbsenceType, begin, end, absenceType.get(),
           justifiedType, hours, minutes, false, absenceManager);
 
-      report.insertTemplateRows.stream().forEach(templateRow -> {
-        AbsenceAddedRest aar = new AbsenceAddedRest();
-        aar.date = templateRow.absence.getDate().toString();
-        aar.absenceCode = templateRow.absence.absenceType.code;
-        aar.isOk = templateRow.absenceErrors.isEmpty();
-        aar.reason = Joiner.on(", ").join(
-            templateRow.absenceErrors.stream()
-            .map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
-        list.add(aar);
-      });
+      val list = report.insertTemplateRows.stream()
+          .map(AbsenceAddedRest::build)
+          .collect(Collectors.toList());
 
       absenceManager.saveAbsences(report, person, begin, null, justifiedType, groupAbsenceType);
 
@@ -239,21 +245,222 @@ public class Absences extends Controller {
       val report = absenceService.insert(person.get(), groupAbsenceType, begin, end, 
           absenceType.get(), justifiedType, hours, minutes, false, absenceManager);
 
-      List<AbsenceAddedRest> list = Lists.newArrayList();
-
-      report.insertTemplateRows.stream().forEach(templateRow -> {
-        AbsenceAddedRest aar = new AbsenceAddedRest();
-        aar.date = templateRow.absence.getDate().toString();
-        aar.absenceCode = templateRow.absence.absenceType.code;
-        aar.isOk = templateRow.absenceErrors.isEmpty();
-        aar.reason = Joiner.on(", ").join(
-            templateRow.absenceErrors.stream()
-            .map(ae -> Messages.get(ae.absenceProblem)).collect(Collectors.toList()));
-        list.add(aar);
-      });
+      val list = report.insertTemplateRows.stream()
+                    .map(AbsenceAddedRest::build)
+                    .collect(Collectors.toList());
 
       renderJSON(list);
     }
   }
+
+  /**
+   * Effettua la cancellazione di una assenza individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
+  public static void delete(Long id) {
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    absenceManager.removeAbsencesInPeriod(
+        absence.personDay.person, absence.personDay.date, 
+        absence.personDay.date, absence.absenceType);
+
+    log.info("Deleted absence {} via REST", absence);
+    JsonResponse.ok();
+  }
+
+  /**
+   * Effettua la cancellazione di tutte le assenze di una persona con tipo dell'assenza
+   * corrispondente all'absenceCode passato e nel periodo indicato.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
+  public static void deleteAbsencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
+      String fiscalCode, @Required String absenceCode,
+      @Required LocalDate begin, @Required LocalDate end) {
+
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
+    }
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(person.office);
+
+    val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
+    
+    if (!absenceType.isPresent()) {
+      JsonResponse.notFound(String.format("AbsenceType code %s not found", absenceType));
+      return;
+    }
+
+    val deletedAbsences = absenceManager.removeAbsencesInPeriod(
+        person, begin, end, absenceType.get());
+
+    log.info("Deleted %s absences via REST for {}, code = {}, from {} to {}", 
+        deletedAbsences, person.getFullname(), absenceCode, begin, end);
+    JsonResponse.ok(String.format("Deleted %s absences", deletedAbsences));
+  }
+
+  /**
+   * Inserimento di giorni di ferie con seleziona automatica dei codici da parte di ePAS.
+   */
+  public static void insertVacation(Long id, String eppn, String email, Long personPerseoId,
+      String fiscalCode, @Required LocalDate begin, @Required LocalDate end) {
+
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest("Mandatory parameters missing (begin, end)");
+    }
+
+    rules.checkIfPermitted(person.office);
+
+    val groupAbsenceType = 
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+
+    AbsenceType absenceType = null;
+    LocalDate recoveryDate = null;
+    boolean forceInsert = false;
+
+    val justifiedType = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+
+    InsertReport insertReport = absenceService.insert(person, groupAbsenceType, begin, end,
+        absenceType, justifiedType, null, null, forceInsert, absenceManager);
+
+    log.debug("Richiesto inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {}", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType,
+            begin, end);
+
+    val absences = 
+        absenceManager.saveAbsences(insertReport, person, begin, recoveryDate, 
+            justifiedType, groupAbsenceType);
+
+    log.info("Effettuato inserimento assenze per {}. "
+        + "Codice/Tipo {}, dal {} al {}", 
+        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType, 
+        begin, end);
+
+    renderJSON(
+        gsonBuilder.create().toJson(
+            absences.stream().map(AbsenceRest::build).collect(Collectors.toList())));
+  }
+
+
+  /**
+   * Fornisce l'eventuale attachment collegato ad una assenza individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP GET.
+   */
+  @SuppressWarnings("resource")
+  public static void attachment(Long id) throws IOException {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (absence.absenceFile == null) {
+      JsonResponse.notFound();
+    }
+
+    response.setContentTypeIfNotSet(absence.absenceFile.type());
+
+    log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
+        absence.absenceFile.type(), absence.id, absence.absenceFile.getFile());
+
+    var filename = String.format("assenza-%s-%s",
+        absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
+    if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
+      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+    }
+
+    renderBinary(absence.absenceFile.get(), filename, absence.absenceFile.length());
+  }
+
+
+  /**
+   * Effettua l'inserimento di un attachment ad una assenza individuata con i 
+   * parametri HTTP passati. Se è già presente un attachment viene sovrascritto.
+   * Questo metodo può essere chiamato solo via HTTP POST.
+   */
+  public static void addAttachment(Long id, Blob file) throws IOException {
+    RestUtils.checkMethod(request, HttpMethod.POST);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (file == null) {
+      JsonResponse.badRequest("Null or empty file");
+    } else {
+      absence.absenceFile = file;
+      absence.save();
+      log.info("Added attachment to absence {} via REST", absence);
+      JsonResponse.ok();
+    }
+  }
+
+
+  /**
+   * Effettua la cancellazione dell'attachment collegato ad assenza individuata con i 
+   * parametri HTTP passati.
+   * Questo metodo può essere chiamato solo via HTTP DELETE.
+   */
+  public static void deleteAttachment(Long id) {
+    RestUtils.checkMethod(request, HttpMethod.DELETE);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della persona passata.
+    rules.checkIfPermitted(absence.personDay.person.office);
+
+    if (absence.absenceFile == null) {
+      JsonResponse.notFound();
+    }
+
+    absence.absenceFile.getFile().delete();
+    absence.save();
+
+    log.info("Deleted attachment for absence {} via REST", absence);
+    JsonResponse.ok();
+  }
+
+
+  /**
+   * Cerca il contratto in funzione del id passato.
+   *
+   * @return il contratto se trovato, altrimenti torna direttamente 
+   *     una risposta HTTP 404.
+   */
+  @Util
+  private static Absence getAbsenceFromRequest(Long id) {
+    if (id == null) {
+      JsonResponse.notFound();
+    }
+    
+    val absence = absenceDao.getAbsenceById(id);
+    
+    if (absence == null) {
+      JsonResponse.notFound();
+    }
+    
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione anagrafica sull'office attuale 
+    //della persona associata all'assenza
+    rules.checkIfPermitted(absence.personDay.person.office);
+    return absence;
+  }
+
 
 }

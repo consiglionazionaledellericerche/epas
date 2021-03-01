@@ -30,7 +30,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Blocco di buoni pasto.
- * 
+ *
  * @author Alessandro Martelli
  * 
  */

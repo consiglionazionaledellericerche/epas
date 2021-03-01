@@ -19,6 +19,9 @@ package models.dto;
 
 import models.enumerate.PaymentType;
 
+/**
+ * Time table per i turni di una specifica organizzazione/ente.
+ */
 public class OrganizationTimeTable {
 
   public int numberSlot;

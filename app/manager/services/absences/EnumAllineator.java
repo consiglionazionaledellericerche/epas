@@ -384,7 +384,8 @@ public class EnumAllineator {
   }
   
   /**
-   * Allinea le liste di codici. 
+   * Allinea le liste di codici.
+   *
    * @param oldEntitySet entity set da aggiornare
    * @param newEnumSet set di enumerati
    * @return se l'entity set è stato modificato
@@ -423,7 +424,8 @@ public class EnumAllineator {
   }
   
   /**
-   * Allinea le liste di tipi justificazione. 
+   * Allinea le liste di tipi justificazione.
+   *
    * @param oldEntitySet entity set da aggiornare
    * @param newEnumSet set di enumerati
    * @return se l'entity set è stato modificato
@@ -458,7 +460,8 @@ public class EnumAllineator {
   }
   
   /**
-   * Allinea le liste di behaviour. 
+   * Allinea le liste di behaviour.
+   *
    * @param oldEntitySet entity set da aggiornare
    * @param newEnumSet set di enumerati
    * @return se l'entity set è stato modificato
@@ -516,6 +519,7 @@ public class EnumAllineator {
  
   /**
    * Costruisce un'absenceType a partire dall'enumerato.
+   *
    * @return entity costruita
    */
   public AbsenceType buildAbsenceType(DefaultAbsenceType defaultAbsenceType) {
@@ -548,5 +552,4 @@ public class EnumAllineator {
     return absenceType;
   }
 
-      
 }

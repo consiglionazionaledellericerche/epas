@@ -33,12 +33,12 @@ import java.net.URLStreamHandler;
  */
 public class InlineStreamHandler extends URLStreamHandler {
 
-  public static class InlineURLConnection extends URLConnection {
+  public static class InlineUrlConnection extends URLConnection {
 
     private final byte[] data;
     private final String contentType;
 
-    protected InlineURLConnection(URL url, byte[] data, String contentType) {
+    protected InlineUrlConnection(URL url, byte[] data, String contentType) {
       super(url);
       this.data = data;
       this.contentType = contentType;
@@ -77,6 +77,6 @@ public class InlineStreamHandler extends URLStreamHandler {
 
   @Override
   protected URLConnection openConnection(URL url) throws IOException {
-    return new InlineURLConnection(url, data, type);
+    return new InlineUrlConnection(url, data, type);
   }
 }

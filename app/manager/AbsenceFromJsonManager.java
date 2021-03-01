@@ -30,6 +30,10 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Manager per contenere metodi di utilità per prelevare ed importare
+ * le informazioni sulle assenze da JSON.
+ */
 public class AbsenceFromJsonManager {
 
   private static final Logger log = LoggerFactory.getLogger(AbsenceFromJsonManager.class);

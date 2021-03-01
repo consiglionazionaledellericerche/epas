@@ -39,7 +39,7 @@ import play.data.validation.Unique;
 
 /**
  * Oggetto che modella i lettori badge.
- * 
+ *
  * @author Cristian Lucchesi
  */
 @Entity
@@ -62,7 +62,6 @@ public class BadgeReader extends BaseModel {
   @JoinColumn(name = "user_id")
   public User user;
 
-
   @OrderBy("code ASC")
   @OneToMany(mappedBy = "badgeReader")
   public Set<Badge> badges = Sets.newHashSet();
@@ -73,7 +72,6 @@ public class BadgeReader extends BaseModel {
   @OneToMany(mappedBy = "badgeReader")
   @NotAudited
   public List<Zone> zones = Lists.newArrayList();
-
 
   public boolean enabled = true;
 

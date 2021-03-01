@@ -47,11 +47,14 @@ public class ValidationHelper {
       public boolean apply(Error input) {
         return !input.message().equals("Validation failed");
       }
-    }).transform(errorToString.ISTANCE).join(Joiner.on(";  "));
+    }).transform(ErrorToString.ISTANCE).join(Joiner.on(";  "));
   }
 
 
-  public enum errorToString implements Function<Error, String> {
+  /**
+   * Trasforma un Error (play) in una stringa visualizzabile all'utente.
+   */
+  public enum ErrorToString implements Function<Error, String> {
     ISTANCE;
 
     @Override

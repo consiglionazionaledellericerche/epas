@@ -3,17 +3,9 @@ Consultazione situazione riepilogi/attestati mensili via REST
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione della rendicontazione 
 mensile delle *assenze / competenze / buoni pasto / ore di formazione* dei dipendenti di una sede. 
-Ogni sede potrà utilizzare l'API accedendo con un utente apposito opportunamente configurato ai 
-soli dati della propria sede. 
-
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo 
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in 
-produzione del vostro ente.
 
 Permessi
-========
+--------
 
 Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo 
 di *Lettore Informazioni* per la sede su cui si vuole effettuare le operazioni. 
@@ -27,7 +19,7 @@ ruolo *Lettore informazioni*.
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 Riepilogo situazione mensile assenze/competenze/buoni pasto/ore formazione
-==========================================================================
+--------------------------------------------------------------------------
 
 Le informazioni relative alle situazione mensile assenze/competenze/buoni pasto/ore formazione
 di un singolo dipendente in uno spefico anno sono disponibili tramite una HTTP GET all'indirizzo
@@ -39,12 +31,15 @@ campo *month*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation email==galileo.galilei@cnr.it year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation 
+      email==galileo.galilei@cnr.it year==2020 month==10
 
 La risposta sarà del tipo:
 
-::
+.. code-block:: json
 
   {
      "absences": [
@@ -61,7 +56,8 @@ La risposta sarà del tipo:
             "justifiedTime": 432,
             "justifiedType": "all_day",
             "to": "2020-12-03"
-        },
+        }
+     ]
      "competences": [
         {
             "code": "207",
@@ -86,15 +82,18 @@ La risposta sarà del tipo:
 
 Per ottenere lo stesso riepilogo ma per tutti i dipendenti di una sede è possibile utilizzare il metodo:
 
-::
-    $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice sedeId==223400 year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice
+      sedeId==223400 year==2020 month==10
 
 Il risultato sarà una lista dei riepilogi strutturati come quello dell'esempio precedente per il
 singolo dipendente.
 
 
 Verifica validazione attestati
-==============================
+------------------------------
 
 Sono disponibili due metodi relativi ai servizi REST della parte *certifications*, 
 questi metodi sono solamente un _proxy_ rispetto ad *Attestati* nel senso che ePAS effettua 
@@ -104,17 +103,24 @@ le chiamate REST ad attestati per sapere se i cartellini sono stati validati o m
 
 I due metodi sono:
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson email==galileo.galilei@cnr.it year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson
+      email==galileo.galilei@cnr.it year==2020 month==10
 
 Questo metodo ritorna il valore **true** se l'attestato è stato validato, **false** altrimenti.
 
-::
-  $ http -a istituto_xxx_person_day_reader GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice sedeId==223400 year==2020 month==10
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice
+      sedeId==223400 year==2020 month==10
 
 Il risultato è del tipo:
 
-::
+.. code-block:: json
+
   {
      "allCertificationsValidated": false,
      "notValidatedPersons": [
@@ -134,7 +140,8 @@ Il risultato è del tipo:
            "fullname": "Fibonacci Leonardo",
            "id": 1235,
            "number": "9801"
-       },
+       }
+    ]
   }
 
 **ATTENZIONE QUESTO METODO PUO' ESSERE MOLTO LENTO, perché effettua una chiamata ad Attestati per ogni dipendente**

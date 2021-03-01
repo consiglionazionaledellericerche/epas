@@ -21,7 +21,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.gson.Gson;
@@ -130,6 +129,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Metodo statico per la formattazione dell'oggetto passato.
+   *
    * @param obj l'oggetto da formattare
    * @return la formattazione dell'oggetto passato.
    */
@@ -151,6 +151,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Ritorna l'applicazione del metodo getField sul campo del modello.
+   *
    * @param <T> generico oggetto
    * @param models generico
    * @param fieldName il nome del campo
@@ -170,6 +171,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Trasforma i campi con i message.
+   *
    * @param fields la lista di campi
    * @return l'applicazione del message sull'oggetto.
    */
@@ -185,6 +187,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Traduce l'enumerato.
+   *
    * @param item l'enumerato da tradurre
    * @return la traduzione dei valori di un enum è composta da NomeSempliceEnum.valore.
    */
@@ -194,6 +197,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Formatta l'oggetto in formato stringa.
+   *
    * @param obj l'oggetto da considerare
    * @return la formattazione in stringa dell'oggetto passato.
    */
@@ -225,6 +229,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Traduce il range passato come parametro.
+   *
    * @param obj il range da tradurre
    * @return la traduzione in stringa del range passato come parametro.
    */
@@ -251,6 +256,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Traduce un oggetto.
+   *
    * @param label la label da tradurre
    * @param args la lista di argomenti
    * @return l'oggetto tradotto
@@ -268,6 +274,7 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Ritorna la stringa cryptata con aes e chiave play predefinita.
+   *
    * @param value la stringa da criptare
    * @return la stringa cryptata con aes e chiave play predefinita.
    */
@@ -307,7 +314,7 @@ public class TemplateExtensions extends JavaExtensions {
       return obj != null ? obj.toString() : null;
     } catch (Throwable throwable) {
       // TODO logging
-      throw Throwables.propagate(throwable);
+      throw new RuntimeException(throwable);
     }
   }
 
@@ -327,15 +334,12 @@ public class TemplateExtensions extends JavaExtensions {
 
   /**
    * Ritorna la stringa dell'anno mese passato come parametro.
+   *
    * @param month Yearmoth da formattare
    * @return La Stringa in formato Mese(nome) Anno
    */
   public static String asText(YearMonth month) {
     return WordUtils.capitalize(month.monthOfYear().getAsText()) + " " + month.getYear();
-  }
-  
-  public static void main(String[] args) {
-    System.out.println(java.time.LocalDate.now().format(LOCALDATE_JAVA_FORMATTER));
   }
 
 }

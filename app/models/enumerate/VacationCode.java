@@ -17,6 +17,10 @@
 
 package models.enumerate;
 
+/**
+ * Tutte le possibili tipologie ferie e permessi legge, compreso
+ * il piano di maturazione.
+ */
 public enum VacationCode {
 
   CODE_28_4("28+4", 28, 4),

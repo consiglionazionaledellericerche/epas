@@ -1,0 +1,10 @@
+Institute(istituto):
+  name: Istituto da cambiare
+  cds: 000001
+  code: IDC
+
+Office(ufficio):
+  name: Ufficio da cambiare
+  codeId: 223400
+  institute: istituto
+  beginDate: 2021-01-01

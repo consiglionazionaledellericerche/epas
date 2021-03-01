@@ -9,9 +9,9 @@ I log in ePAS sono gestiti tramite la Log4J e la loro configurazione può essere
 
 Tramite il docker compose è possibile configurare il livello dei log, gli
 appender da utilizzare e gli eventuali parametri per l'invio dei log ad un
-`graylog https://www.graylog.org/`_ server esterno.
+`graylog <https://www.graylog.org/>`_ server esterno.
 
-.. docker-compose.yml:: yml
+.. code-block:: yaml
 
   #  [...]
    - environment:
@@ -21,7 +21,6 @@ appender da utilizzare e gli eventuali parametri per l'invio dei log ad un
   #      - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull'appender graylog2. default: null
   #      - GRAYLOG_PORT=                         # Opzionale. default: 3514
   #      - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST
-
 
 Se non specificato tramite la variabile APPENDERS gli appender abilitati 
 di default sono *stdout* e *stderr* che inviano i log sullo standard output e
@@ -38,9 +37,10 @@ Appender di tipo stdout e stderr
 Gli appender di tipo *stdout* e *stderr* inviano i log sullo standard output e
 standard error a seconda del livello di log (ERROR e FATAL vanno su *stderr*).
 
-La configurazione specifica per questi appender è la seguente:
+La configurazione specifica per questi appender da impostare nel file
+**log4j.prod.properties** è la seguente:
 
-.. log4j.prod.properties::
+.. code-block::
 
   # Standard output appender
   log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -65,10 +65,11 @@ Appender di tipo file
 ----------------------
  
 Nel caso si utilizzi l'appender di tipo file i log vengono salvati all'interno
-del container nel file log/epas.log, si consiglia quindi di effettuare un 
-mapping del volume tipo:
- 
- .. docker-compose.yml:: yml
+del container nel file log/epas.log, si consiglia quindi di effettuare all'interno
+del **docker-compose.yml** un mapping del volume tipo:
+
+.. code-block:: yaml
+
   # [...]
   volumes:
     - ${PWD}/logs:/home/epas/epas/logs
@@ -76,9 +77,10 @@ mapping del volume tipo:
 I log sono di tipo DailyRollingFileAppender, quindi vengono ruotati automaticamente
 ogni giorno.
 
-La configurazione specifica per questo appender è la seguente:
+La configurazione specifica per questo appender da impostare nel file 
+**log4j.prod.properties** è la seguente:
 
-.. log4j.prod.properties::
+.. code-block::
 
   log4j.appender.file.Threshold=DEBUG
   log4j.appender.file=org.apache.log4j.DailyRollingFileAppender
@@ -95,9 +97,10 @@ Le informazioni sull'host graylog a cui inviare i log sono configurabili tramite
 i parametri: *GRAYLOG_HOST*, *GRAYLOG_PORT* e *GRAYLOG_ORIGIN_HOST*, vedere i 
 commenti nel *docker-compose.yml* per maggiori informazioni.
 
-La configurazione specifica per questo appender è la seguente:
+La configurazione specifica per questo appender da impostare nel file
+**log4j.prod.properties** è la seguente:
 
-.. log4j.prod.properties::
+.. code-block::
 
   # Define the graylog2 destination
   log4j.appender.graylog2=org.graylog2.log.GelfAppender

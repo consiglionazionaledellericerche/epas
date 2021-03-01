@@ -21,6 +21,9 @@ import org.joda.time.DateTimeConstants;
 import play.data.validation.Max;
 import play.data.validation.Min;
 
+/**
+ * Rappresentazione di un orario di lavoro di tipo verticale.
+ */
 public class VerticalWorkingTime {
   
   @Min(1)
@@ -34,8 +37,7 @@ public class VerticalWorkingTime {
   public boolean holiday = false;
 
   public boolean mealTicketEnabled = true;
-  
- 
+
   @Max(7)
   public int dayOfWeek;
 
@@ -60,7 +62,5 @@ public class VerticalWorkingTime {
   public int ticketAfternoonWorkingTime = 1;
   
   public String name;
-  
-  
 
 }

@@ -32,6 +32,10 @@ import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
+/**
+ * DTO oer le informazioni necessarie alla generazione del PDF 
+ * con la situazione mensile di un dipendente.
+ */
 @Data
 @Builder
 public class PrintTagsInfo {

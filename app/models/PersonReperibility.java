@@ -94,14 +94,15 @@ public class PersonReperibility extends BaseModel {
   public static Comparator<PersonReperibility> PersonReperibilityComparator = 
       new Comparator<PersonReperibility>() {
 
-    public int compare(PersonReperibility pr1, PersonReperibility pr2) {
+        public int compare(PersonReperibility pr1, PersonReperibility pr2) {
 
-      String prName1 = pr1.personReperibilityType.description.toUpperCase();
-      String prName2 = pr2.personReperibilityType.description.toUpperCase();
+          String prName1 = pr1.personReperibilityType.description.toUpperCase();
+          String prName2 = pr2.personReperibilityType.description.toUpperCase();
 
 
-      return prName1.compareTo(prName2);
-    }
+          return prName1.compareTo(prName2);
+        }
 
-  };
+      };
+
 }

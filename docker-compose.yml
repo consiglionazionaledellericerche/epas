@@ -1,29 +1,34 @@
 version: '3.1'
 
-networks:
-  epas:
-    external: true
+   ############################################################################
+   #                             ePAS Server                                  #
+   # Configurazione per l'avvio di ePAS e di un'eventuale postgres locale     #
+   ############################################################################
 
 services:
 
-###    Le variabili volumes sono mappate come - host_folder:container_folder
-###    Correggere all'occorrenza i path per le cartelle sull'host ma lasciare inalterati i path sui container docker  
+   ### Le variabili volumes sono mappate come - host_folder:container_folder
+   ### Correggere all'occorrenza i path per le cartelle sull'host ma lasciare 
+   ### inalterati i path sui container docker
 
   epas:
-    image: docker-registry.services.iit.cnr.it/epas/epas:stable
+    image: consiglionazionalericerche/epas
     container_name: epas
-    networks:
-      - epas
     volumes:
-      #- ./epas/logs:/home/epas/epas/logs
-      #- ./epas/attachments:/home/epas/epas/data/attachments
+      - ./epas/logs:/home/epas/epas/logs
+      - ./epas/attachments:/home/epas/epas/data/attachments
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    labels:
-      - traefik.enable=true
-      - traefik.backend=epas
-      - traefik.frontend.rule=Host:${HOST_NAME}
-      - traefik.port=9000
+    #Non è necessario esporre la porta 9000 se si utilizza un proxy per
+    #servire le richieste http/https. L'utilizzo del proxy https è fortemente
+    #consigliato in produzione, utilizzare per esempio traefik.
+    ports:
+      - 9000:9000
+    #labels:
+    #  - traefik.enable=true
+    #  - traefik.backend=epas
+    #  - traefik.frontend.rule=Host:${HOST_NAME}
+    #  - traefik.port=9000
     environment:
       - VIRTUAL_HOST=${HOST_NAME}
       #- PROTOCOL=https                         # default: http  -- (http,https)
@@ -47,9 +52,9 @@ services:
       #### Connessione DB ####
       - DB_HOST=${DB_HOST}                     # default: indirizzo assegnato al container postgres linkato
       - DB_NAME=${DB_NAME}                     # default: epas
-      - DB_PASS=${DB_PASS}                     # default: "non necessaria"
-      - DB_PORT=5432                           # default: 5432
-      - DB_USER=${DB_USER}                     # default: postgres
+      - DB_PASS=${DB_PASS}                     # Obbligatoria. Password per accedere al database server
+      #- DB_PORT=5432                          # default: 5432
+      #- DB_USER=${DB_USER}                    # default: postgres
       #### server SMTP ####
       - SMTP_HOST=${SMTP_HOST}                # default: smtp.cnr.it
       #- SMTP_PORT=${SMTP_PORT}                # default: 25 se SMTP_CHANNEL è impostato clear o starttls; 465 se impostato su ssl
@@ -84,3 +89,13 @@ services:
       
     restart: unless-stopped
 
+  postgres:
+    image: postgres:12
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+    restart: unless-stopped

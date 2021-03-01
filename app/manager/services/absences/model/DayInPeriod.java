@@ -31,6 +31,13 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 
+/**
+ * Rappresenta una specifica giornata all'interno di un periodo di assenze,
+ * giornata con le specifiche informazioni utili per i controlli sulle assenze.
+ *
+ * @author Alessandro Martelli
+ *
+ */
 @Getter
 @Setter
 public class DayInPeriod {

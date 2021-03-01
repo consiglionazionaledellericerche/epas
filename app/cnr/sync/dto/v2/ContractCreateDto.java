@@ -36,9 +36,9 @@ import play.data.validation.Required;
 @StaticInject
 @Data
 public class ContractCreateDto {
-  
+
   @Required
-  private Long personId;  
+  private Long personId;
   @Required
   private LocalDate beginDate;
   private LocalDate endDate;
@@ -52,11 +52,11 @@ public class ContractCreateDto {
   //Se il campo non è passato il contractManager associarà
   //il tipo di orario predefinito "Normale"
   private Long workingTimeTypeId;
-  
+
   @JsonIgnore
   @Inject
   private static ModelMapper modelMapper;
-  
+
   /**
    * Nuova istanza di un oggetto contract a partire dai 
    * valori presenti nel rispettivo DTO.

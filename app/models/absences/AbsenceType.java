@@ -200,7 +200,7 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public boolean isAllDayPermitted() {
-    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+    for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
       if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.all_day)) {
         return true;
       }
@@ -215,7 +215,7 @@ public class AbsenceType extends BaseModel {
    */  
   @Transient
   public boolean isAbsenceTypeMinutesPermitted() {
-    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+    for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
       if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.absence_type_minutes)) {
         return true;
       }
@@ -230,7 +230,7 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public boolean isSpecifiedMinutesPermitted() {
-    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+    for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
       if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.specified_minutes)) {
         return true;
       }
@@ -245,7 +245,7 @@ public class AbsenceType extends BaseModel {
    */
   @Transient
   public boolean isNothingPermitted() {
-    for (JustifiedType justifiedType: this.justifiedTypesPermitted) {
+    for (JustifiedType justifiedType : this.justifiedTypesPermitted) {
       if (justifiedType.name.equals(JustifiedType.JustifiedTypeName.nothing)) {
         return true;
       }

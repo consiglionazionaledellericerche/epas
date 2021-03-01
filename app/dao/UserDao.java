@@ -38,6 +38,7 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.Role;
 import models.User;
+import models.enumerate.AccountRole;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
@@ -275,4 +276,12 @@ public class UserDao extends DaoBase {
         .map(uro -> uro.user).distinct().collect(Collectors.toList());
   }
 
+  /**
+   * Gli utenti che hanno il ruolo Developer.
+   */
+  public List<User> getUsersWithRoleDeveloper() {
+    QUser user = QUser.user;
+    return getQueryFactory().selectFrom(user)
+        .where(user.roles.contains(AccountRole.DEVELOPER)).fetch();
+  }
 }

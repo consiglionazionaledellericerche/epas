@@ -6,16 +6,13 @@ dipendenti di una sede.
 Ogni sede potrà utilizzare l'API, accedendo con un utente apposito opportunamente configurato, ai 
 soli dati della propria sede. 
 **Questa è l'interfaccia WEB utilizzata dagli epas-client**, per l'inserimento delle timbrature, 
-se possibile, è consigliato utilizzare uno degli ePAS client opensource disponibili.
+se possibile, è consigliato utilizzare uno degli ePAS client opensource disponibili:
 
-Gli esempi sono per semplicità basati sulla `httpie https://httpie.org/`_ ed utilizzano la demo 
-disponibile all'indirizzo *https://epas-demo.devel.iit.cnr.it*.
-
-Naturalmente gli stessi comandi che trovate di seguito potete farli anche nella istanza in 
-produzione del vostro ente.
+  * https://github.com/consiglionazionaledellericerche/epas-client
+  * https://github.com/consiglionazionaledellericerche/epas-client-sql
 
 Permessi
-========
+--------
 
 Per poter accedere a questa interfaccia REST è necessario utilizzare le credenziali associate
 ad una **Sorgente Timbratura** della propria sede. Eventualmente verificare nella documentazione
@@ -26,8 +23,9 @@ utente associato alla vostra sede, con uno username tipo *client_timbrature_sede
 
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
+
 Inserimento di una timbratura (versione utilizzata dagli epas-client)
-=====================================================================
+---------------------------------------------------------------------
 
 Per effettuare l'inserimento di una timbratura è necessario effettuare una *HTTP POST* all'endpoint
 **/stampingsfromclient/create**. La *POST* deve contenere nel body un json con i campi della
@@ -46,8 +44,11 @@ timbratura che sono:
 
 Un esempio è il seguente:
 
-:: 
- http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create matricolaFirma=9802 operazione=0 anno=2021 mese=02 giorno=08 ora=08 minuti=10 causale=lavoroFuoriSede luogo=Pisa motivazione='ero sotto la torre'
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create
+      matricolaFirma=9802 operazione=0 anno=2021 mese=02 giorno=08 ora=08 minuti=10 causale=lavoroFuoriSede luogo=Pisa motivazione='ero sotto la torre'
 
 Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
 
@@ -58,7 +59,7 @@ Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di ris
 
 
 Stamping Create
-===============
+---------------
 
 Dalla versione 3 dell'API è presente un nuovo metodo per l'inserimento di una timbratura.
 La nuova versione è utilizzabile con una *HTTP POST* all'endpoint
@@ -79,8 +80,11 @@ La *POST* deve contenere nel body un json con i campi della timbratura che sono:
 
 Per esempio:
 
-::
-  http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create badgeNumber=9802 dateTime='2021-02-12T08:20' wayType=in note='Note eccezionali veramente'
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create
+      badgeNumber=9802 dateTime='2021-02-12T08:20' wayType=in note='Note eccezionali veramente'
 
 Il metodo restituisce uno dei seguenti codici HTTP di risposta:
 
@@ -92,7 +96,9 @@ Il metodo restituisce uno dei seguenti codici HTTP di risposta:
 Se l'inserimento va a buon fine (con codice HTTP *200*) il metodo restituisce anche le informazioni
 della timbratura inserita.
 
-::
+.. code-block:: json
+
+
   {
     "date": "2021-02-12T08:20:00",
     "id": 398946,
@@ -115,21 +121,23 @@ della timbratura inserita.
   }
 
 Stamping Show
-=============
+-------------
 
 La visualizzazione dei dati di una timbratura è tramite una *HTTP* GET all'indirizzo 
 **/rest/v3/stampings/show**.
 
 Per individuare la timbratura è possibile utilizzare solo il campo **id**. 
 
-::
-  http -a client_timbrature_sede_xxx POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show id==398946
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show id==398946
 
 Il risultato sarà uguale a quello dell'esempio riportato sopra come risposta all'inserimento
 di una timbratura
 
 Stamping Update
-==========================
+---------------
 
 La modifica di la timbratura è possibile tramite una *HTTP PUT* all'indirizzo 
 **/rest/v2/stampings/update**.
@@ -150,16 +158,21 @@ I campi che è possibile modificare sono i seguenti:
 la data e ora della timbratura, se è necessario modificare uno di questi campi allora
 è opportuno cancellare la vecchia timbratura ed inserirne una nuova.
 
-::
-    http -a client_timbrature_sede_xxx PUT https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946 wayType=in place=='Torre di Pisa' reason=='Esperimento caduta gravi' reasonType=lavoroFuoriSede
+.. code-block:: bash
+
+  $ http -a client_timbrature_sede_xxx
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946
+      wayType=in place=='Torre di Pisa' reason=='Esperimento caduta gravi' reasonType=lavoroFuoriSede
 
 
 Stamping Delete
-===============
+---------------
 
 La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo **/rest/v2/stampings/delete**
 
 Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: **id**.
 
-::
-  $ http -a istituto_xxx_registry_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id=398946
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id=398946

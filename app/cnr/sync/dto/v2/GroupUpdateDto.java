@@ -38,13 +38,16 @@ public class GroupUpdateDto extends GroupCreateDto {
   public void update(Group group) {
     group.name = getName();
     group.description = getDescription();
-    group.sendFlowsEmail = getSendFlowsEmail();
+    if (getSendFlowsEmail() != null) {
+      group.sendFlowsEmail = getSendFlowsEmail();
+    }
     if (getOfficeId() != null) {
       group.office = Office.findById(getOfficeId());
     }
     if (getManagerId() != null) {
       group.manager = Person.findById(getManagerId());  
     }
-
+    group.externalId = getExternalId();
+    group.endDate = getEndDate();
   }
 }

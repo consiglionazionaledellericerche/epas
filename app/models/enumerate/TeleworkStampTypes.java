@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 
+/**
+ * Tipologie di timbrature relative al telelavoro.
+ */
 @Getter
 public enum TeleworkStampTypes {
 
@@ -47,7 +50,7 @@ public enum TeleworkStampTypes {
   
   /**
    * La lista delle causali attive.
-   * 
+   *
    * @return la lista degli stamptypes attivi.
    */
   public static List<TeleworkStampTypes> onlyActive() {

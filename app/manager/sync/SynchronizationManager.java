@@ -403,7 +403,7 @@ public class SynchronizationManager {
 
   /**
    * Sincronizza i contratti presenti in ePAS con quelli presenti in anagrafica.
-   * 
+   *
    * @param person la persona di cui sincronizzare i contratti.
    * @return il risultato della sincronizzazione.
    */
@@ -492,6 +492,9 @@ public class SynchronizationManager {
     return Optional.of(matchingContracts);
   }
 
+  /**
+   * DTO per contenere due contratti consistenti tra ePAS e Perseo.
+   */
   @Data
   public class MatchingContracts {
     private Contract registryContract = null;

@@ -12,8 +12,9 @@
       <label class="col-sm-3 control-label">&{'user.roles'}</label>
       <div class="col-sm-6">
         <p class="form-control-static">
-          #{list user.roles}
-            <span class="text-primary">${_}</span>#{ifnot _isLast}, #{/ifnot}
+          #{list items:user.roles, as:'role'}
+            <span class="text-primary">
+              <strong>${messages.get('AccountRole.' + role)}</span></strong>#{ifnot role_isLast}, #{/ifnot}
           #{/list}
         </p>
       </div>

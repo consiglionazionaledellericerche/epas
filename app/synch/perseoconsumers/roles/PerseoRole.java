@@ -17,6 +17,9 @@
 
 package synch.perseoconsumers.roles;
 
+/**
+ * DTO che rappresenta i dati dei ruoli presenti su Perseo.
+ */
 public class PerseoRole {
 
   public Long personPerseoId; 

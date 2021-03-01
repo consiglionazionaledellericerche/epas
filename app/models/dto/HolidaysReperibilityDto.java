@@ -23,6 +23,10 @@ import models.Person;
 import org.joda.time.LocalDate;
 
 
+/**
+ * Reperibilità nei festivi.
+ *
+ */
 public class HolidaysReperibilityDto {
 
   public Person person;

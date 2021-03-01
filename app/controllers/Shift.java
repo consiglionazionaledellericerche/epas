@@ -67,6 +67,7 @@ import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import play.data.binding.As;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
@@ -267,7 +268,7 @@ public class Shift extends Controller {
    * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthAsPdf(int year, int month, Long shiftCategoryId) {
+  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
     //    int year = params.get("year", Integer.class);
     //    int month = params.get("month", Integer.class);
     if (shiftCategoryId == null) {
@@ -405,7 +406,7 @@ public class Shift extends Controller {
    * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthCalAsPdf(int year, int month, Long type) {
+  public static void exportMonthCalAsPDF(int year, int month, Long type) {
 
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
         type, year, month);
@@ -506,10 +507,14 @@ public class Shift extends Controller {
   }
 
 
+  /**
+   * Restituisce la informazioni sul turno in formato iCal.
+   */
   @BasicAuth
-  public static void iCal(@Required String type, @Required int year, Long personId) {
-    if (validation.hasErrors()) {
-      badRequest("Parametri mancanti. " + validation.errors());
+  public static void ical(@Required String type, @Required int year, Long personId) {
+
+    if (Validation.hasErrors()) {
+      badRequest("Parametri mancanti. " + Validation.errors());
     }
     Optional<User> currentUser = Security.getUser();
 

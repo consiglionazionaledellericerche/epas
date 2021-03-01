@@ -39,6 +39,9 @@ import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import synch.perseoconsumers.AnagraficaApis;
 
+/**
+ * Preleva da Perseo le informazioni relative agli uffici.
+ */
 @Slf4j
 public class OfficePerseoConsumer {
 

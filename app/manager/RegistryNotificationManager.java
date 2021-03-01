@@ -26,7 +26,7 @@ import models.enumerate.NotificationSubject;
 
 /**
  * Contiene le notifiche relative all'anagrafica del personale e delle sedi.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

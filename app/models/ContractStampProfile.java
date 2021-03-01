@@ -48,6 +48,7 @@ public class ContractStampProfile extends PropertyInPeriod {
   /**
    * TODO: questa implementazione andrebbe spostata nel PeriodModel
    * Se la data è contenuta nel periodo.
+   *
    * @param date data da verificare
    * @return esito
    */
@@ -68,6 +69,7 @@ public class ContractStampProfile extends PropertyInPeriod {
   /**
    * TODO: questa implementazione andrebbe spostata nel PeriodModel.
    * Il range del periodo.
+   *
    * @return range
    */
   public Range<LocalDate> dateRange() {

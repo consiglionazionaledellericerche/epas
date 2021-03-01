@@ -27,6 +27,9 @@ import models.WorkingTimeTypeDay;
 import models.dto.VerticalWorkingTime;
 import org.joda.time.DateTimeConstants;
 
+/**
+ * Manager per la gestione dei tipi di orario di lavoro.
+ */
 public class WorkingTimeTypeManager {
   
   /**

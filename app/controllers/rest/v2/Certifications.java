@@ -206,7 +206,7 @@ public class Certifications extends Controller {
    * @return il dto contenente le informazioni da inviare al chiamante del servizio rest.
    */   
   private static CertificationDto generateCertDto(Map<String, Certification> map, 
-      int year, int month, Person person) {        
+      int year, int month, Person person) {
     
     List<CertificationCompetencesDto> competences = Lists.newArrayList();
     List<CertificationMealTicketDto> mealTickets = Lists.newArrayList();

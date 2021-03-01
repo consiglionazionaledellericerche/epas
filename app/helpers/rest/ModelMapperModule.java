@@ -29,6 +29,10 @@ import org.modelmapper.AbstractConverter;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 
+/**
+ * Modulo guice per fornire un ModelMapper configurato per
+ * convertire le date in formato joda in quelle java.time.
+ */
 @AutoRegister
 public class ModelMapperModule extends AbstractModule {
 

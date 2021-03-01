@@ -34,6 +34,9 @@ import models.flows.enumerate.AbsenceRequestEventType;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
+/**
+ * Eventi relativi al flusso di approvazione di un'assenza.
+ */
 @Builder
 @ToString
 @Entity

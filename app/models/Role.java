@@ -34,6 +34,8 @@ import org.hibernate.envers.Audited;
 @Table(name = "roles")
 public class Role extends BaseModel {
 
+  private static final long serialVersionUID = 6717202212924325368L;
+
   public static final String SEAT_SUPERVISOR = "seatSupervisor";
   public static final String PERSONNEL_ADMIN = "personnelAdmin";
   public static final String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
@@ -47,7 +49,8 @@ public class Role extends BaseModel {
   public static final String MEAL_TICKET_MANAGER = "mealTicketManager";
   public static final String REGISTRY_MANAGER = "registryManager";
   public static final String PERSON_DAY_READER = "personDayReader";
-  private static final long serialVersionUID = 6717202212924325368L;
+  public static final String ABSENCE_MANAGER = "absenceManager";
+
   public String name;
 
   
@@ -94,6 +97,9 @@ public class Role extends BaseModel {
     }
     if (name.equals(PERSON_DAY_READER)) {
       return "Lettore informazioni";
+    }
+    if (name.equals(ABSENCE_MANAGER)) {
+      return "Gestore assenze";
     }
     return name;
   }

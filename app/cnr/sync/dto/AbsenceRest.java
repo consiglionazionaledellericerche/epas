@@ -17,14 +17,33 @@
 
 package cnr.sync.dto;
 
+import models.absences.Absence;
+
 /**
  * DTO per rappresentare i dati un'assenza via REST.
  */
 public class AbsenceRest {
 
+  public Long id;
   public String date;
   public String absenceCode;
   public String description;
   public String name;
   public String surname;
+  public Boolean hasAttachment;
+  
+  /**
+   * Costruisce una nuova istanza del DTO a partire dall'assenza.
+   */
+  public static AbsenceRest build(Absence absence) {
+    AbsenceRest ar = new AbsenceRest();
+    ar.id = absence.id;
+    ar.absenceCode = absence.absenceType.code;
+    ar.description = absence.absenceType.description;
+    ar.date = absence.personDay.date.toString();
+    ar.name = absence.personDay.person.name;
+    ar.surname = absence.personDay.person.surname;
+    ar.hasAttachment = absence.absenceFile != null && absence.absenceFile.get() != null;
+    return ar;
+  }
 }

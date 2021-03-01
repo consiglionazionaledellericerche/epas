@@ -686,7 +686,7 @@ public class ConfigurationManager {
    */
   public void updatePeopleConfigurations() {
     List<Person> people = Person.findAll();
-    for (Person person: people) {
+    for (Person person : people) {
       log.debug("Fix parametri di configurazione della persona {}", person.fullName());
       updateConfigurations(person);
     }

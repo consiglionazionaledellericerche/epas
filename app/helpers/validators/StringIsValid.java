@@ -19,6 +19,13 @@ package helpers.validators;
 
 import play.data.validation.Check;
 
+/**
+ * Controlla che una stringa non sia composta solo da caratteri
+ * che non formano una parola o fraase di senso compiuto.
+ *
+ * @author Dario Tagliaferri
+ *
+ */
 public class StringIsValid extends Check {
 
   @Override

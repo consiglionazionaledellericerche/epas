@@ -27,7 +27,12 @@ import models.absences.GroupAbsenceType.PeriodType;
 import org.assertj.core.util.Lists;
 
 
-
+/**
+ * Gruppi di assenze di default.
+ *
+ * @author Alessandro Martelli
+ * @author Dario Tagliaferri
+ */
 public enum DefaultGroup {
 
   // Dai codici in attestati si evince che il permesso provvisorio si prende solo a giornate
@@ -139,11 +144,7 @@ public enum DefaultGroup {
   FERIE_CNR("31/94/32 - Ferie e permessi legge", "", DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
-  
-  FERIE_CNR_PROROGA_2019("31 - Proroga 2019", "", DefaultCategoryType.FERIE_CNR, 0,
-      GroupAbsenceTypePattern.programmed, PeriodType.always, 
-      DefaultTakable.T_FERIE_CNR_PROROGA_2019, null, null, false, false), 
-  
+
   //  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
@@ -209,14 +210,12 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_COVID50, null, null,
       false, true),   
-  
+
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
       "23/25/24 - Astensione facoltativa post partum primo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_23, DefaultComplation.C_23,
       DefaultGroup.G_25, false, true),
-  
-
 
   G_242("242 - Astensione facoltativa post partum non retrib. "
       + "secondo figlio 0-12 anni 600 giorni",

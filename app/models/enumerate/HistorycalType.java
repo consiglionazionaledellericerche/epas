@@ -17,6 +17,9 @@
 
 package models.enumerate;
 
+/**
+ * Tipologie di storico per i contratti.
+ */
 public enum HistorycalType {
   CONTRACT,
   INITIALIZATION;

@@ -1,55 +1,113 @@
-ePAS - Electronic Personnel Attendance System
-==============================================
+# ePAS - Electronic Personnel Attendance System
 
-Avvio da Eclipse
-----------------
+[![license](https://img.shields.io/badge/License-AGPL%20v3-blue.svg?logo=gnu&style=for-the-badge)](https://github.com/consiglionazionaledellericerche/epas/blob/master/LICENSE)
+[![Supported JVM Versions](https://img.shields.io/badge/JVM-11-brightgreen.svg?style=for-the-badge&logo=Java)](https://openjdk.java.net/install/)
 
-Per il run su eclipse utilizzare questo parametro vmargs:
+ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale 
+[CNR](https://www.cnr.it) sviluppato dall'Istituto [IIT](https://www.iit.cnr.it) in collaborazione
+con l'Ufficio ICT; nasce nel 2012 come re-ingegnerizzazione di un sistema di rilevazione delle
+presenze già sviluppato anni prima.
 
- -javaagent:"${project_loc:Personnel Attendance System}/lib/lombok-1.18.4.jar"
+La documentazione completa del progetto è disponibile all'indirizzo
 
-Per java>=8 aggiungere -noverify per java<8 aggiungere -XX:-UseSplitVerifier
+- [https://consiglionazionaledellericerche.github.io/epas/](https://consiglionazionaledellericerche.github.io/epas/)
 
-Test
-----
+ePAS consente l’integrazione con vari modelli di lettore badge per l'acquisizione delle timbrature
+del personale ed è integrabile con varie componenti del sistema informativo di un Ente di Ricerca e
+con sistemi di workflow paperless.
 
-Strumenti utilizzati:
- - jailer- http://jailer.sourceforge.net/ per l'estrazione dei dati dalla base di dati di produzione
-   - la base di dati per i test è stata creata a partire dai dati delle "Person" admin e Cristian Lucchesi al 28 febbraio 2014
+È stato realizzato come applicazione web, al fine di una sua immediata fruibilità da qualsiasi tipo
+di sistema (PC, Tablet, Smartphone).
 
- - dbUnit - http://dbunit.sourceforge.net/
-  - i dati sono importati e disponibili per i test tramite l'importazione del dataset db unit fatto dalla procedura Startup dentro il
-    package dei test
-
- - junit
-   - alcuni test di base sono fatti tramite l'integrazione in play della junit
-
-QueryDSL:
-Per ricompilare i Q<model>:
-
-$ ant build -Dplay.path=<il-path-del-play>
-
-Esempio di query sulle person:
-
-        SearchResults<?> results = PersonDao.list(Optional.of(""),
-                ImmutableSet.of(Office.<Office>findById(1L)), true)
-                .paginated(page);
-        ...
+ePAS è attualmente utilizzato da più Enti di Ricerca.
 
 
-Restore del db con fabric
-------------------------
+## Funzionalità per il dipendente
 
-Il fabric si può installare in una virtualenv apposita (vedere virtualenvwrapper). 
-Il comando tipico è:
+ePAS offre al dipendente le seguenti principali funzionalità:
 
-	pip install fabric
+-  consultazione della propria situazione presenze giornaliera/mensile/annuale;
 
-Volendo, a prescindere dalla virtualenv corrente, è possibile inserire nel path
-un link al comando fab, che comunque riporta il python path corretto.
+-  timbrature, assenze, missioni, riepilogo orari di lavoro;
 
-Inoltre c'è un comando per recuperare l'ultimo backup del database di
-produzione di Pisa, eliminare la copia locale e sostituirla con quella prelevata.
-Ad esempio:
+-  riepilogo ferie/riposi compensativi utilizzate e residue;
 
- $ fab -H epas.tools.iit.cnr.it copybackup epas-devel
+-  competenze mensili e annuali.
+
+## Funzionalità per gli amministatori del personale
+
+Dispone, inoltre, di un sistema di gestione che consente, agli uffici
+del personale di:
+
+-  inserire, modificare e cancellare il personale afferente
+   all’istituto/UO;
+
+-  gestire le varie tipologie di orario consentite dal Regolamento CNR;
+
+-  inviare, a fine mese, gli attestati di presenza del personale
+   (sistema integrato con la procedura “Attestati” del CNR);
+
+-  disporre, in generale, della completa amministrazione e gestione
+   delle informazioni;
+
+-  pianificare, gestire e validare i calendari di servizi di turno e
+   reperibilità.
+
+## ePAS per il CNR
+
+Per il CNR il servizio è installato presso la sede centrale del CNR ed è attualmente integrato con:
+
+  - [Siper](https://consiglionazionaledellericerche.github.io/docs/siper) 
+    (per poter ricavare i dati del personale);
+
+  - il nuovo sistema 
+    [Attestati](https://consiglionazionaledellericerche.github.io/docs/attestati.html)
+    (per l'invio mensile degli attestati di  presenza);
+
+  - [OIL](https://consiglionazionaledellericerche.github.io/docs/attestati.html) 
+    (per la gestione delle segnalazioni e delle richieste di assistenza);
+
+  - Identity Provider del CNR (per l'autenticazione tramite le credenziali Siper);
+
+  - [Missioni](https://consiglionazionaledellericerche.github.io/docs/missioni.html) 
+    (per l'inserimento automatizzato dei codici di missione).
+
+## Applicazioni on line
+
+* [ePAS - CNR](https://epas.amministrazione.cnr.it)
+* [ePAS - INAF](https://epas.inaf.it)
+* [ePAS - Consorzio Lamma](https://epas.lamma.toscana.it)
+
+## 👏 Come Contribuire 
+
+Lo scopo principale di questo repository è continuare ad evolvere ePAS. 
+Vogliamo contribuire a questo progetto nel modo più semplice e trasparente possibile e siamo grati
+alla comunità per ogni contribuito a correggere bug e miglioramenti.
+
+## 📄 Licenza
+
+ePAS è concesso in licenza GNU AFFERO GENERAL PUBLIC LICENSE, come si trova nel file [LICENSE][l].
+
+[l]: https://github.com/consiglionazionaledellericerche/epas/blob/master/LICENSE
+
+# <img src="https://www.docker.com/sites/default/files/d8/2019-07/Moby-logo.png" width=80> Startup
+
+#### _Per avviare una istanza di ePAS con postgres locale_
+
+ePAS può essere facilmente installato via docker-compose su server Linux utilizzando il file 
+docker-compose.yml presente in questo repository.
+
+Accertati di aver installato docker e docker-compose dove vuoi installare ePAS ed in seguito
+esegui il comando successivo per un setup di esempio.
+
+```
+curl -fsSL https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/master/epas-first-setup.sh -o epas-first-setup.sh && sh epas-first-setup.sh
+```
+
+Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosarailicenziato_ (da cambiare il prima possibile). 
+
+## Vedi anche
+
+  - [Documentazione completa di ePAS ](https://consiglionazionaledellericerche.github.io/epas/)
+  - [ePAS client - file locali / ftp /sftp e lettori smartclock](https://github.com/consiglionazionaledellericerche/epas-client)
+  - [ePAS client - timbratura da database SQL](https://github.com/consiglionazionaledellericerche/epas-client-sql)
