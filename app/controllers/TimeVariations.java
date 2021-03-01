@@ -44,6 +44,13 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Variazione di tempo applicate in funzione di specifiche
+ * assenze (per esempio per recupero 91CE).
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @With({Resecure.class})
 public class TimeVariations extends Controller {
 

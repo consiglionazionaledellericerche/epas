@@ -35,7 +35,7 @@ import org.joda.time.YearMonth;
 
 /**
  * Il dao sui riepiloghi di turno mensili.
- * 
+ *
  * @author Daniele Murgia
  * @since 10/06/17
  */
