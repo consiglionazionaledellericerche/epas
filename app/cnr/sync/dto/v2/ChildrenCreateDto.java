@@ -18,6 +18,7 @@
 package cnr.sync.dto.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import injection.StaticInject;
 import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
@@ -35,6 +36,7 @@ import play.data.validation.Required;
  * @author Cristian Lucchesi
  *
  */
+@StaticInject
 @Data
 public class ChildrenCreateDto {
   

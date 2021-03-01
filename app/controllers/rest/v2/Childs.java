@@ -156,8 +156,9 @@ public class Childs extends Controller {
     if (!validation.valid(children).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
-
+    childrenDto.update(children);
     children.save();
+
     log.info("Updated children {} via REST", children);
     renderJSON(gson.toJson(ChildrenShowDto.build(children)));
   }

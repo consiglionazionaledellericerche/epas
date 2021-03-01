@@ -25,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+/**
+ * Binder per le LocalDate java.util.
+ */
 @Slf4j
 @Global
 public class LocalDateJavaBinder implements TypeBinder<LocalDate> {

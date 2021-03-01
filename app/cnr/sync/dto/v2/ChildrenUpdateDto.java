@@ -17,6 +17,7 @@
 
 package cnr.sync.dto.v2;
 
+import helpers.JodaConverters;
 import lombok.Builder;
 import models.Office;
 import models.Person;
@@ -39,6 +40,8 @@ public class ChildrenUpdateDto extends ChildrenCreateDto {
   public void update(PersonChildren children) {
     children.name = getName();
     children.surname = getSurname();
+    children.bornDate = JodaConverters.javaToJodaLocalDate(getBornDate());
     children.taxCode = getFiscalCode();
+    children.externalId = getExternalId();
   }
 }

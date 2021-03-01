@@ -39,6 +39,7 @@ public class MonthlyCompetenceTypeDao extends DaoBase {
   
   /**
    * Metodo che ritorna la lista di tutti i tipi di competenza mensile.
+   *
    * @return la lista di tutti i tipi di competenza mensile.
    */
   public List<MonthlyCompetenceType> listTypes() {

@@ -27,7 +27,7 @@ import models.query.QGeneralSetting;
 
 /**
  * DAO per le impostazioni generali di ePAS.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
