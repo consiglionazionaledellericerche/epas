@@ -268,7 +268,7 @@ public class Shift extends Controller {
    * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthAsPdf(int year, int month, Long shiftCategoryId) {
+  public static void exportMonthAsPDF(int year, int month, Long shiftCategoryId) {
     //    int year = params.get("year", Integer.class);
     //    int month = params.get("month", Integer.class);
     if (shiftCategoryId == null) {
@@ -406,7 +406,7 @@ public class Shift extends Controller {
    * @author Arianna Del Soldato
    */
   //@BasicAuth
-  public static void exportMonthCalAsPdf(int year, int month, Long type) {
+  public static void exportMonthCalAsPDF(int year, int month, Long type) {
 
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
         type, year, month);
