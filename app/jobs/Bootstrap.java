@@ -18,15 +18,19 @@
 package jobs;
 
 import com.google.common.io.Resources;
+import dao.UserDao;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import models.Institute;
 import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
+import models.absences.AbsenceType;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
@@ -53,6 +57,9 @@ import play.test.Fixtures;
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
+
+  @Inject
+  static UserDao userDao;
   
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
@@ -61,7 +68,6 @@ public class Bootstrap extends Job<Void> {
 
   @Override
   public void doJob() throws IOException {
-
 
     if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
@@ -74,22 +80,21 @@ public class Bootstrap extends Job<Void> {
       return;
     }
 
-    Session session = (Session) JPA.em().getDelegate();
-    if (Qualification.count() == 0) {
-
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
-
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
-    }
-
-
-    if (User.find("byUsername", "developer").fetch().isEmpty()) {
+    //Crea un utente admin con il ruolo di developer se non presente.
+    //Utile per il primo setup dell'applicazione.
+    if (userDao.getUsersWithRoleDeveloper().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
     }
 
-    //impostare il campo tipo orario orizzondale si/no effettuando una euristica
+    if (Institute.count() == 0) {
+      Fixtures.loadModels("../db/import/fakeInstituteAndOffice.yml");
+    }
+
+    if (Qualification.count() == 0) {
+      Fixtures.loadModels("../db/import/qualifications.yml");
+    }
+
+    //impostare il campo tipo orario orizzontale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
 
