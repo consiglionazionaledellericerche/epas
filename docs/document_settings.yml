@@ -8,5 +8,5 @@ document:
   downloads:
     - type: epub
       url: Manuale-SIGLA.epub
-#    - type: pdf
-#      url: Manuale-SIGLA.pdf
+    - type: pdf
+      url: Manuale-SIGLA.pdf
