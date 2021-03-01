@@ -57,7 +57,7 @@ import security.SecurityRules;
  */
 @Slf4j
 @With(Resecure.class)
-public class Childs extends Controller {
+public class Child extends Controller {
 
   @Inject 
   static SecurityRules rules;
