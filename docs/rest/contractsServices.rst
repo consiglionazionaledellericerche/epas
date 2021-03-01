@@ -12,7 +12,7 @@ Per poter accedere a queste interfaccie REST è necessario utilizzare un utente 
 di *Gestore anagrafica* per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
 utilizzato per la gestione delle persone e dei gruppi).
 
-u https://epas-demo.devel.iit.cnr.it potete per esempio creare un nuovo utente associato alla
+Su https://epas-demo.devel.iit.cnr.it potete per esempio creare un nuovo utente associato alla
 vostra sede tipo *istituto_xxx_registry_manager* (cambiate il nome o in futuro andrà in
 conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli il
 ruolo *Gestore Anagrafica*.
@@ -115,15 +115,12 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
   }
 
 
-La stessa GET può essere effettuata passando l'id del gruppo nei due modi seguenti:
+La stessa GET può essere effettuata passando l'id del contratto nel modo seguente:
 
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager 
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show/4284
-
-::
-  $ http -a istituto_xxx_registry_manager GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/show/id=4284
 
 
 Contract Update
@@ -137,7 +134,7 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager
-      https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/updateid=4284 
+      https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/update id=4284 
       beginDate=2018-12-27 endDate=2020-10-20 personId=1234
 
 La risposta sarà del tipo:
@@ -181,7 +178,7 @@ La risposta sarà del tipo:
 Contract Create
 ---------------
 
-La creazione di una persona è possibile tramite una HTTP POST all'indirizzo
+La creazione di un contratto è possibile tramite una HTTP POST all'indirizzo
 **/rest/v2/contracts/create**.
 
 .. code-block:: bash
@@ -266,7 +263,7 @@ Contract Delete
 La cancellazione di un contratto è possibile tramite una HTTP DELETE all'indirizzo
 **/rest/v2/contract/delete**.
 
-Per individuare il gruppo da eliminare si utilizza il parametro *id* del contratto.
+Per individuare il contratto da eliminare si utilizza il parametro *id* del contratto.
 
 .. code-block:: bash
 

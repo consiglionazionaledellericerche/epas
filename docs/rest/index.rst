@@ -35,6 +35,7 @@ di ePAS in produzione del vostro ente.
    leavesServices
    personDaysServices
    personsServices
+   childServices
    stampingsServices
    vacationServices
    workingTimeTypesServices
