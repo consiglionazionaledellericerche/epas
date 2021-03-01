@@ -397,7 +397,7 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportYearAsPdf(int year, Long type) {
+  public static void exportYearAsPDF(int year, Long type) {
 
     log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
@@ -480,7 +480,7 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportMonthAsPdf(
+  public static void exportMonthAsPDF(
       @Required int year, @Required int month, @Required Long type) {
 
     if (Validation.hasErrors()) {
