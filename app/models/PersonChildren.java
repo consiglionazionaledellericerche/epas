@@ -18,9 +18,11 @@
 package models;
 
 import helpers.validators.LocalDatePast;
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.PreUpdate;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -55,4 +57,13 @@ public class PersonChildren extends BaseModel {
 
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;
+  
+  public String externalId;
+
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 }

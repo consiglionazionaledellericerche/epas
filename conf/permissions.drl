@@ -2083,6 +2083,12 @@ when
         "rest.v2.Affiliations.byGroup",
         "rest.v2.Affiliations.byPerson",
 
+        "rest.v2.Childs.byPerson",
+        "rest.v2.Childs.show",
+        "rest.v2.Childs.create",
+        "rest.v2.Childs.update",
+        "rest.v2.Childs.delete",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
         "rest.v2.Contracts.create",
@@ -2186,6 +2192,12 @@ when
         "rest.v2.Affiliations.byGroup",
         "rest.v2.Affiliations.byPerson",
 
+        "rest.v2.Childs.byPerson",
+        "rest.v2.Childs.show",
+        "rest.v2.Childs.create",
+        "rest.v2.Childs.update",
+        "rest.v2.Childs.delete",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
         "rest.v2.Contracts.create",
@@ -2282,6 +2294,12 @@ when
      	"rest.v2.Affiliations.delete",
      	"rest.v2.Affiliations.byGroup",
      	"rest.v2.Affiliations.byPerson",
+
+        "rest.v2.Childs.byPerson",
+        "rest.v2.Childs.show",
+        "rest.v2.Childs.create",
+        "rest.v2.Childs.update",
+        "rest.v2.Childs.delete",
 
      	"rest.v2.Contracts.byPerson",
      	"rest.v2.Contracts.show",
