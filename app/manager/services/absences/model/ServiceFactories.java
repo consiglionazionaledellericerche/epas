@@ -632,19 +632,20 @@ public class ServiceFactories {
     if (!absence.getAbsenceType().isConsideredWeekEnd() && isHoliday) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.NotOnHoliday);
     } else {
-      log.info("Controllo la reperibilità per {} nel giorno {}", person, absence.getAbsenceDate());
+      log.info("Controllo la reperibilità per {} nel giorno {}", 
+          person, absence.getAbsenceDate());
       //check sulla reperibilità
       if (!absence.absenceType.reperibilityCompatible && personReperibilityDayDao
           .getPersonReperibilityDay(person, absence.getAbsenceDate()).isPresent() 
           && !absence.getAbsenceType().reperibilityCompatible) {
-        log.info("Aggiungere warning di reperibilità per {} in data {}", person, 
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility);
+        log.info("Aggiunto warning di reperibilità per {} in data {}", person, 
             absence.getAbsenceDate());
-        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility); 
       }
       log.info("Controllo i turni per {} nel giorno {}", person, absence.getAbsenceDate());
       if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
-        log.info("Aggiungere warning di turno per {} in data {}", person, absence.getAbsenceDate());
-        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift); 
+        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift);
+        log.info("Aggiunto warning di turno per {} in data {}", person, absence.getAbsenceDate());
       }
     }
 
