@@ -190,7 +190,7 @@ public class Overtimes extends Controller {
    * @author Arianna Del Soldato
    *
    */
-  public static void exportMonthAsPdf(Integer year, Integer month,
+  public static void exportMonthAsPDF(Integer year, Integer month,
       @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
     response.accessControl("*");
 
