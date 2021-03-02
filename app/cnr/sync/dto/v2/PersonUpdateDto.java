@@ -23,7 +23,7 @@ import models.Person;
 import models.Qualification;
 
 /**
- * Dati per la creazione di una persona via REST.
+ * Dati per l'aggiornamento di una persona via REST.
  *
  * @author Cristian Lucchesi
  *

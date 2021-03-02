@@ -28,6 +28,9 @@ import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 import play.data.binding.types.DateBinder;
 
+/**
+ * Binder per le LocalDateTime joda.
+ */
 @Slf4j
 @Global
 public class LocalDateTimeBinder implements TypeBinder<LocalDateTime> {

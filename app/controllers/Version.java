@@ -25,6 +25,13 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Mostra la versione dell'applicazione in funzione del file
+ * conf/version.conf.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @With({Resecure.class})
 public class Version extends Controller {
 

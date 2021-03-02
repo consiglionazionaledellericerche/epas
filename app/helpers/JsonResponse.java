@@ -20,6 +20,10 @@ package helpers;
 import play.mvc.Http;
 import play.mvc.results.RenderJson;
 
+/**
+ * Una risposta Json con i suoi possibili codici
+ * http di risposta.
+ */
 public final class JsonResponse {
 
   private static final String SIMPLE = "HTTP %s";

@@ -15,37 +15,33 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dao;
+package cnr.sync.dto.v2;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.querydsl.jpa.JPQLQueryFactory;
-import java.util.Optional;
-import javax.persistence.EntityManager;
-import models.GeneralSetting;
-import models.query.QGeneralSetting;
+import helpers.JodaConverters;
+import lombok.Builder;
+import models.Office;
+import models.Person;
+import models.PersonChildren;
+import models.Qualification;
 
 /**
- * DAO per le impostazioni generali di ePAS.
+ * Dati per l'aggiornamento di un figlio/figlia via REST.
  *
  * @author Cristian Lucchesi
  *
  */
-public class GeneralSettingDao extends DaoBase {
-
-  @Inject
-  GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-    super(queryFactory, emp);
-  }
+@Builder
+public class ChildrenUpdateDto extends ChildrenCreateDto {
 
   /**
-   * In caso non siano ancora mai state salvate, le restituisce nuove.
-   *
-   * @return le impostazioni generali.
+   * Aggiorna i dati dell'oggetto Person passato con quelli
+   * presenti nell'instanza di questo DTO.
    */
-  public GeneralSetting generalSetting() {
-    return Optional.ofNullable(queryFactory
-        .selectFrom(QGeneralSetting.generalSetting).fetchOne())
-        .orElseGet(GeneralSetting::new);
+  public void update(PersonChildren children) {
+    children.name = getName();
+    children.surname = getSurname();
+    children.bornDate = JodaConverters.javaToJodaLocalDate(getBornDate());
+    children.taxCode = getFiscalCode();
+    children.externalId = getExternalId();
   }
 }
