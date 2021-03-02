@@ -372,6 +372,11 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.startAt",
           "La data di inizio non può essere successiva alla data di fine");
     }
+    if (absenceRequest.endTo.compareTo(absenceRequest.startAt.plusMonths(6)) > 0) {
+      Validation.addError("absenceRequest.endTo",
+          "Le richieste di assenza non possono essere per periodi maggiori di sei mesi. "
+          + "Eventualmente effettuare più richieste di assenza.");
+    }
 
     // verifico che non esista già una richiesta (non rifiutata)
     // di assenza che interessa i giorni richiesti
