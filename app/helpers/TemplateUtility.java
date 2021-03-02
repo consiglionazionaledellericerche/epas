@@ -91,6 +91,7 @@ import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
+import play.cache.Cache;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -818,12 +819,19 @@ public class TemplateUtility {
     return CompanyConfig.url();
   }
 
+  /**
+   * Preleva l'informazione della versione corrente dal file VERSION utilizzando
+   * la cache se il dato è presente.
+   */
   public String getVersion() {
-    String version = null;
-    try {
-      version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
-    } catch (IOException e) {
-      version = "unknown";
+    String version = Cache.get("VERSION", String.class);
+    if (version == null) {
+      try {
+        version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
+      } catch (IOException e) {
+        version = "unknown";
+      }
+      Cache.add("VERSION", version);
     }
     return version;
   }
