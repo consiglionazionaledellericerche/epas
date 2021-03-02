@@ -53,7 +53,7 @@ public class WorkingTimeTypes extends Controller {
   /**
    * Metodo REST che mostra il WorkingTimeType in funzione del id passato,
    * se non trovata ritorna una risposta HTTP 404.
-   * 
+   *
    * @param id identificativo in ePAS della tipologia di orario di lavoro 
    */
   public static void show(Long id) {
