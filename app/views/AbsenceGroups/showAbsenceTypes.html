@@ -1,0 +1,70 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Codici di assenza' /}
+
+#{set breadcrumbs:['AbsenceGroups.showAbsenceTypes':@AbsenceGroups.showAbsenceTypes()] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container-fluid">
+#{secure.check 'Absences.insertAbsenceType' }
+<div class="row text-center">
+	#{secure.link @AbsenceGroups.insertAbsenceType(), class:'btn btn-primary',fa:'plus' }
+		Definisci nuovo codice di assenza
+	#{/secure.link}
+</div>
+#{/secure.check}
+
+
+	<table class="table table-bordered table-striped table-hover" width="100%" datatable>
+	 <thead>
+	  <tr>
+	  	<th>&{'absenceType.code'}</th>
+	  	<th>&{'absenceType.certificateCode'}</th>
+	  	<th>&{'absenceType.description'}</th>
+	  	<th>&{'absenceType.internalUse'}</th>
+	  	<th>&{'absenceType.consideredWeekEnd'}</th>
+	  	<th>&{'absenceType.active'}</th>
+	  	<th>&{'absenceType.justifiedTypesPermitted'}</th>
+	  	<th>&{'absenceType.tecnici'}</th>
+	  	<th>&{'absenceType.tecnologi'}</th>
+	  	<th>&{'absenceType.used'}</th>
+	  </tr>
+	</thead>
+	<tbody>
+		#{list absenceTypes}
+		<tr>
+			<td>#{secure.link @AbsenceGroups.editAbsenceType(_.id)}${_.code}#{/secure.link}</td>
+			<td>${_.certificateCode}</td>
+			<td>${_.description}</td>
+			
+			<td>#{if _.internalUse}<i class="fa fa-check" aria-hidden="true"></i>#{/if}</td>
+	
+			<td>#{if _.consideredWeekEnd}<i class="fa fa-check" aria-hidden="true"></i>#{/if}</td>
+			
+			<td>#{if !_.isExpired()}<i class="fa fa-check" aria-hidden="true"></i>#{/if}</td>
+			
+			<td>
+			  #{list items:_.justifiedTypesPermitted, as:'justifiedType'}
+			    <span class="label label-default">${justifiedType.label()}</span><br>
+			  #{/list}
+			</td>
+			<td>
+			  #{if _.isQualificationMapping(models.enumerate.QualificationMapping.TECNICI)} 
+			    <i class="fa fa-check" aria-hidden="true"></i>
+		      #{/if}
+			  #{else}
+			  #{/else}
+			</td>
+			<td>
+			  #{if _.isQualificationMapping(models.enumerate.QualificationMapping.TECNOLOGI)}
+			    <i class="fa fa-check" aria-hidden="true"></i>
+			  #{/if}
+			  #{else}
+			  #{/else}
+			</td>
+			<td>${_.absences.size()}</td> 
+		</tr>
+		#{/list}
+		</tbody>
+	</table>
+</div>

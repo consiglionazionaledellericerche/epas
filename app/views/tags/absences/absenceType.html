@@ -1,0 +1,52 @@
+  <span class="label
+  
+  #{if _absenceType.expired }
+    label-default
+  #{/if}
+  #{else}
+    #{if _absenceType.replacingType}
+      label-info 
+    #{/if}
+    #{elseif _absenceType.isAllDayPermitted() || _absenceType.isAbsenceTypeMinutesPermitted() 
+      || _absenceType.isSpecifiedMinutesPermitted() }
+    label-primary
+    #{/elseif}
+    #{else}
+      label-primary
+    #{/else}
+  #{/else}
+ 
+  
+  " webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</span>
+  
+  *{ <strong webui-popover-hover data-url="#${_absenceType.id}">${_absenceType.code}</strong> }*
+
+  <div class="webui-popover-content" id="${_absenceType.id}">
+    <strong>Tipo Assenza ${_absenceType.code}</strong><br><br>
+    <strong>Descrizione:</strong> ${_absenceType.description.label()}<br>  
+     
+    
+    *{ tempo giustificato }*
+    <strong>Come giustifica:</strong>
+    #{list items:_absenceType.justifiedTypesPermitted, as:'justifiedType'}
+      &{justifiedType.name}
+    #{/list}<br> 
+    #{if _absenceType.justifiedTime > 0}
+      <strong>Tempo Giustificato:</strong> ${_absenceType.justifiedTime.printHourMinute()} 
+    #{/if}
+    
+    
+    *{ tempo completamento }*
+    #{if _absenceType.replacingType}
+      <strong>Come completa:</strong> &{_absenceType.replacingType} <br>
+      #{if _absenceType.replacingTime > 0}
+      <strong>Tempo Completamento:</strong> ${_absenceType.replacingTime.printHourMinute()}
+      #{/if}
+    #{/if}
+    
+    #{if _absenceType.expired}
+    Il codice è scaduto il ${_absenceType.validTo.format()}
+    #{/if}
+
+  </div>
+   

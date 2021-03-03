@@ -1,0 +1,39 @@
+%{
+  if(child.persistent) 
+    modaltitle = 'Modifica figlio per ' + child.person.fullname;
+  else
+    modaltitle = 'Inserisci figlio per ' + child.person.fullname;
+}%
+  
+#{modalAsync id:'defaultModal', title:modaltitle }
+
+  <div id="insertChild">
+    #{alert color:'info'}
+	  Inserire i dati del figlio. 
+	#{/alert}
+	
+	#{form @Persons.saveChild(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#insertChild'}
+	
+	  #{if child.persistent }
+	    <input type="hidden" name="child.id" value="${child.id}"/>
+	  #{/if}
+	  #{else}
+	  	<input type="hidden" name="child.person.id" value="${child.person.id}"/>
+	  #{/else}
+	  
+	  #{f.input 'child.name'/}
+	  #{f.input 'child.surname'/}
+	  #{f.input 'child.taxCode' /}
+	  #{f.date 'child.bornDate',view:'year'/}
+	  
+	  #{b.buttons center:true}
+	   #{if child.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
+	   #{else}<input class="text-center btn btn-primary" type="submit" value="Inserisci" />#{/else}
+	  #{/b.buttons}  
+	
+	#{/form}
+  </div>
+  
+#{/modalAsync}	
+

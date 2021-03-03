@@ -1,0 +1,11 @@
+ {
+ "activePersons" : [
+ 	#{list activePersons,as:'person'}
+	{
+	  	"surnarname" : "${person.surname}",
+	  	"name" : "${person.name}",
+	  	"password" : "${person.password}"
+	}#{if !person_isLast},#{/if}	
+	 #{/list} 
+	]
+}

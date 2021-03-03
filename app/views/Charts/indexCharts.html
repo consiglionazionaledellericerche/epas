@@ -1,0 +1,35 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Grafici' /}
+
+#{switcher year:true/}
+
+#{charts.chartsTabs activeAction:'indexCharts' /}
+
+<div class="container">
+#{title title:('Indice grafici e controlli ') /}
+<div class="panel panel-primary">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Seleziona il grafico che ti interessa visualizzare</h4>
+		  </div>
+		<div class="panel-body">
+
+
+<ul>
+	<!-- <li><a href="@{Charts.overtimeOnPositiveResidual()}">Straordinari su residuo positivo MENSILE</a></li> -->
+	<li><a href="@{Charts.overtimeOnPositiveResidualInYear(null)}">Straordinari su residuo positivo ANNUALE</a></li>
+	<li><a href="@{Charts.whichAbsenceInYear(null)}">Suddivisione ANNUALE delle assenze</a></li>
+	
+</ul>
+
+
+	</div>
+</div>
+
+
+<ul class="pager">
+  <li><a href="/application/indexAdmin">Home</a></li>
+  <li><a href="/stampings/personStamping">Timbrature</a></li>
+</ul>
+
+</div>

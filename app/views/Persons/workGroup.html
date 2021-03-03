@@ -1,0 +1,55 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assegnazione a gruppo di lavoro di ' + person.getFullname() /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(),
+(person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include './_tabs.html' /}
+<div class="container">
+  #{panel title:'Gruppo di lavoro di ' + person.getFullname(), color:'primary'}
+
+  #{if (person.people.isEmpty())}
+  <h4 class="center">Nessuna persona presente nel Gruppo di Lavoro</h4>
+  <br>
+  #{/if}
+
+  #{else}
+  <ul class="list-group">
+    #{list items:person.people, as:'p'}
+    <li class="list-group-item">
+      #{form @Persons.removePersonFromGroup() }
+      <div class="pull-right btn-group">
+        <input type="hidden" name="pId" value="${p.id}"/>
+        <a href="@{Persons.removePersonFromGroup(p.id)}" style="color:red;"><i style="color:red;"
+                                                                               class="fa fa-trash-o"></i>Rimuovi</a>
+      </div>
+      <h4 class="list-group-item-heading">${p.fullname}</h4>
+
+      <div class="list-group-item-text">
+        <i class="fa fa-user"></i> ${p.email}
+      </div>
+      #{/form}
+    </li>
+    #{/list}
+  </ul>
+  #{/else}
+
+  #{form @Persons.confirmGroup(), class:'form-horizontal' }
+  <input type="hidden" name="personId" value="${person.id}"/>
+
+  #{f.selectModels 'peopleGroupId',items:people /}
+  <br>
+
+  <div class="container-fluid center">
+    <input class="btn btn-primary col-xs-offset-5 col-xs-2" type="submit" value="Salva"/>
+  </div>
+
+  #{/form}
+  #{/panel}
+</div>
+
+
+
+

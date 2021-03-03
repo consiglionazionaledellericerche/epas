@@ -1,0 +1,62 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Abilita competenze'  /}
+
+<div class="container">
+
+  #{title title:'Competenze abilitate nel mese di ' + templateUtility.monthName(month) + ' ' + year + ' ' + ' per ' + office.name, color:'primary' /}
+
+  #{include './_tabs.html' /}
+
+  #{alert color:'info'}
+  <p>Elenco di tutte le competenze abilitate ai dipendenti di <strong>${office.name}</strong></p>
+  <p>Per modificare la configurazione dei dipentendi cliccare sul loro nome.</p>
+  #{/alert}
+
+  <table class="table table-condensed table-hover table-bordered center" datatable-nopaging >
+	<thead>
+	  <tr>
+		<th>Nome</th>
+		<th>Competenza</th>
+		<th>Descrizione</th>
+		<th>Abilitata Dal</th>
+		<th>Al</th>
+   	  </tr>
+	</thead>
+	<tbody>
+
+    #{list items:mapEnabledCompetences.values(), as:'personCompetenceCodes'}
+      #{list items:personCompetenceCodes, as:'personCompetenceCode'}
+      
+       <tr>
+         <td>
+			#{secure.link @Competences.updatePersonCompetence(personCompetenceCode.person.id, year, month), 'data-async-modal':'#defaultModal' }
+               ${personCompetenceCode.person.fullName()}
+			#{/secure.link}
+ 	     </td>
+ 	     <td>${personCompetenceCode.competenceCode.code}</td>
+ 	     <td>${personCompetenceCode.competenceCode.description}</td>
+ 	     <td>${personCompetenceCode.beginDate.format()}</td>
+ 	     <td>${personCompetenceCode.endDate?.format()}</td>
+        </tr>
+      #{/list}
+    #{/list}
+    #{list items:withoutCompetences, as:'person'}
+      <tr>
+         <td>
+			#{secure.link @Competences.updatePersonCompetence(person.id, year, month), 'data-async-modal':'#defaultModal' }
+               ${person.fullName()}
+			#{/secure.link}
+ 	     </td>
+ 	     <td></td>
+ 	     <td><em>Nessuna competenza abilitata nel mese</em></td>
+ 	     <td></td>
+ 	     <td></td>
+      </tr>
+    #{/list}
+    
+    </tbody>
+  </table>
+
+</div>
+

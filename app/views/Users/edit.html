@@ -1,0 +1,82 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{if user}
+	#{set title: 'Modifica utente ' + user.username /}
+#{/if}
+#{else}
+	#{set title: 'Nuovo utente' /}
+#{/else}
+
+<div class="container">
+	#{title title: title /}
+
+	#{breadcrumbs ['manageUsers':@Users.list(), (title):null ], noHome:'true' /}
+
+	#{form @Users.save(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+
+		#{if user}
+			#{f.hidden 'user.id', value: user.id /}
+		#{/if}
+		#{f.input 'user.username', value:username?:user?.username /}
+	  #{f.input 'password' , type:'password', value: password?:'' /}
+	  #{f.input 'confirmPassword' , type:'password', value: confirmPassword?:'' /}
+
+		#{f.selectModel 'user.owner' , items: templateUtility.technicalAdminOffices /}
+
+		#{f.checkbox 'user.disabled' /}
+
+		#{b.buttons center:true}
+			#{b.submit 'Salva'/}
+		#{/b.buttons}
+
+	#{/form}
+
+	#{if user?.persistent}
+	#{secure.check 'Users.editAccountRoles'}
+	<div id="accountRolesList">
+		<ul class="list-group col-sm-6 col-sm-offset-3">
+			<a href="@{editAccountRoles(user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-cogs" aria-hidden="true"></i>
+				<strong>Gestisci ruoli di Sistema</strong>
+			</a>
+			#{if user.roles.empty}
+			<div class="alert alert-warning">
+				<strong>Nessun ruolo di sistema.</strong>
+			</div>
+			#{/if}
+			#{list items:user.roles, as:'role'}
+			<li class="list-group-item clearfix">
+				<strong><em>${messages.get('AccountRole.' + role)}</em></strong>
+			</li>
+			#{/list}
+		</ul>
+	</div>
+	#{/secure.check}
+
+	<div id="rolesList">
+		<ul class="list-group col-sm-6 col-sm-offset-3">
+			<a href="@{addRole(user.id)}" class="list-group-item active" data-async-modal="#defaultModal">
+				<i class="fa fa-plus-circle" aria-hidden="true"></i>
+				<strong>Nuovo ruolo</strong>
+			</a>
+			#{if user.usersRolesOffices.empty}
+				<div class="alert alert-warning">
+					<strong>Nessun ruolo assegnato.</strong>
+				</div>
+			#{/if}
+			#{list user.usersRolesOffices, as: 'uro'}
+			<li class="list-group-item clearfix">
+				<strong><em>${uro.role}</em></strong> della sede di <strong><em>${uro.office}</em></strong>
+				#{secure.check 'Users.removeRole', target: uro }
+        <a href="@{removeRole(uro.id)}" class="badge" style="color:white;">
+          &{'crud.delete'} <i class="fa fa-trash" aria-hidden="true"></i>
+        </a>
+				#{/secure.check}
+			</li>
+			#{/list}
+		</ul>
+	</div>
+	#{/if}
+</div>
+
+

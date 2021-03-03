@@ -1,0 +1,15 @@
+[
+  		{
+  			"startMorning" : "${shiftTimeTable.startMorning.toString("HH:mm")}",
+  			"endMorning" : "${shiftTimeTable.endMorning.toString("HH:mm")}",
+  			"startAfternoon" : "${shiftTimeTable.startAfternoon.toString("HH:mm")}",
+  			"endAfternoon" : "${shiftTimeTable.endAfternoon.toString("HH:mm")}",
+  			"startMorningLunchTime" : "${shiftTimeTable.startMorningLunchTime.toString("HH:mm")}",
+  			"endMorningLunchTime" : "${shiftTimeTable.endMorningLunchTime.toString("HH:mm")}",
+  			"startAfternoonLunchTime" : "${shiftTimeTable.startAfternoonLunchTime.toString("HH:mm")}",
+  			"endAfternoonLunchTime" : "${shiftTimeTable.endAfternoonLunchTime.toString("HH:mm")}",
+  			"totalWorkMinutes" : "${shiftTimeTable.totalWorkMinutes}",
+  			"paidMinutes" : "${shiftTimeTable.paidMinutes}"
+  		}
+
+]

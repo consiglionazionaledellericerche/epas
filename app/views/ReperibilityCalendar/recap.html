@@ -1,0 +1,79 @@
+
+#{secure.check 'Reperibility.exportMonthAsPDF'}
+<!-- Stampa dei calendari mensile e annuale -->
+
+#{form @Reperibility.exportMonthAsPDF(), class:'form-horizontal'}
+
+#{f.hidden 'type', value:reperibility.id /}
+#{f.hidden 'start', value:start /}   
+#{f.hidden 'month', value:start.getMonthOfYear() /} 
+#{f.hidden 'year', value:start.getYear() /}    	
+	#{b.buttons}
+            
+            #{b.submit 'Calendario mensile', fa:'calendar'/}
+    #{/b.buttons}		
+
+#{/form}
+
+#{form @Reperibility.exportYearAsPDF(), class:'form-horizontal'}
+
+#{f.hidden 'type', value:reperibility.id /}
+#{f.hidden 'start', value:start /}   
+#{f.hidden 'year', value:start.getYear() /}    	
+	#{b.buttons}
+            
+            #{b.submit 'Calendario annuale', class:'btn btn-info', fa:'calendar' /}
+    #{/b.buttons}		
+
+#{/form}
+#{/secure.check}
+
+<h3>Giorni di ${reperibility.monthlyCompetenceType.name} feriale validi</h3>
+<br>
+<ul class="list-group">
+  #{list workDaysReperibilityCalculatedCompetences.entrySet()}
+  <li class="list-group-item clearfix
+    #{if reperibilityTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-info#{/else}">
+    ${_.getKey().fullname} <span class="label label-info pull-right">${_.getValue()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+<h3>Giorni di ${reperibility.monthlyCompetenceType.name} festiva validi</h3>
+<br>
+<ul class="list-group">
+  #{list holidaysReperibilityCalculatedCompetences.entrySet()}
+  <li class="list-group-item clearfix
+    #{if reperibilityTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-danger#{/else}">
+    ${_.getKey().fullname} <span class="label label-danger pull-right">${_.getValue()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{if reperibilityTypeMonth?.approved}
+<div>
+  <em class="text-muted">&{'calendar.competencesApproved'}</em>
+</div>
+<br>
+#{secure.check 'ReperibilityCalendar.monthReperibilityApprovement', target: reperibility }
+#{b.link @monthReperibilityApprovement(reperibility.id, start.format()),class: 'btn-sm', color:'warning',
+fa:
+'thumbs-o-down' }
+  &{'calendar.removeApprovation'}
+#{/b.link}
+#{/secure.check}
+#{/if}
+#{else}
+<div>
+  <em class="text-muted">&{'calendar.competencesToBeApproved'}</em>
+</div>
+<br>
+#{secure.check 'ReperibilityCalendar.monthReperibilityApprovement', target: reperibility  }
+#{b.link @monthReperibilityApprovement(reperibility.id, start.format()),class: 'btn-sm', color:'info', fa:
+'thumbs-o-up' }
+&{'calendar.approve'}
+#{/b.link}
+#{/secure.check}
+#{/else}

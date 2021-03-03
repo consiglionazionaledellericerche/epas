@@ -1,0 +1,76 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include './_tabs.html' /}
+
+<div class="container">
+
+	#{form @Persons.update(),class:'form-horizontal' }
+		<input type="hidden" name="person.id" value="${person.id}"/>
+		
+		#{panel title:'Dati personali', color:'primary'}
+
+				#{f.input 'person.surname'/}
+				#{f.input 'person.name'/}
+				#{f.input 'person.number',type:'number'/}
+				#{f.input 'person.email'/}
+				#{f.input 'person.fiscalCode'/}
+				
+				#{f.input 'person.user.username', disabled:true /}
+
+				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
+				#{f.selectModel 'person.office',items:templateUtility.officesAllowed() /}
+			#{secure.check 'Persons.updateBeginDate'}
+				#{f.date 'person.beginDate' /}
+			#{/secure.check}
+			#{secure.check 'Persons.updatedAt'}
+				#{f.simpleView 'person.updatedAt', value:person.updatedAt?.format() /}
+			#{/secure.check}
+
+	      #{f.booleanRadio 'person.wantEmail' /}
+	<div class="col-sm-6 col-sm-offset-3">
+		#{alert color:'info'}
+					Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+					<strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+					<strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+					al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+		#{/alert}
+	</div>
+
+
+	#{/panel}
+
+	#{panel title:'Altre informazioni', color:'primary'}
+		#{f.input 'person.telephone'/}
+		#{f.date 'person.birthday',view:'year'/}
+		#{secure.check 'Persons.updatePerseoId'}
+       		#{f.input 'person.perseoId', popover: true/}
+       	#{/secure.check}
+
+   		#{f.input 'person.eppn', popover: true, disabled:!controllers.Resecure.check('Persons.updateEppn', person) /} 
+		        
+		<div class="col-sm-6 col-sm-offset-3">
+			#{alert color:'info'}
+			<p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando
+				attivo.</p>
+			#{/alert}
+		</div>
+
+	#{/panel}
+
+		#{secure.check 'Persons.update'}
+		<div class="container-fluid center">
+		   <input class="btn btn-primary" type="submit" value="Salva" />
+		</div>
+		#{/secure.check}
+	#{/form}
+		
+</div>
+		
+
+

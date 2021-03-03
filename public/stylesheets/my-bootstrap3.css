@@ -1,0 +1,540 @@
+/* Browser reset
+/* Browser reset
+------------------------------------------------------------------------- */
+
+h1,h2,h3,h4,h5 {
+	padding: 2px;
+	margin: 2px;
+	margin-bottom:4px;
+}
+
+/* Sticky footer styles
+------------------------------------------------------------------------- */
+
+html,
+body {
+  background-color: white;
+  height: 100%;
+}
+
+#wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin-bottom:  -70px;
+    background: white;
+}
+
+#page_content{
+	padding-top:70px;
+	padding-bottom: 90px;
+}
+
+footer {
+  height: 70px;				
+  background-color: black;
+  text-align: center;
+}
+
+footer p {
+  padding-top: 5px;
+  color: grey;
+  font-size: .9em;
+}
+
+
+/* Helper Classes
+------------------------------------------------------------------------- */
+.margin-top{
+	margin-top: 1em;
+}
+
+.margin-bottom{
+	margin-bottom: 1em;
+}
+
+.margin-top-2{
+	margin-top: 2em;
+}
+
+.margin-bottom-2{
+	margin-bottom: 2em;
+}
+
+.margin-top-3{
+	margin-top: 3em;
+}
+
+.margin-bottom-3{
+	margin-bottom: 3em;
+}
+
+.margin-top-4{
+	margin-top: 4em;
+}
+
+.margin-bottom-4{
+	margin-bottom: 4em;
+}
+
+.margin-top-5{
+	margin-top: 5em;
+}
+
+.margin-bottom-5{
+	margin-bottom: 5em;
+}
+
+
+/* Regole per smartphone s2
+------------------------------------------------------------------------- */
+@media (max-width: 400px) {
+
+	html, body {
+		font-size: 10px;
+	}	
+	
+	.container {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+}
+
+/* Custom page CSS
+------------------------------------------------------------------------ */
+/* Not required for template or sticky footer method. */
+
+#google-font {
+	font-family: 'Shadows Into Light', cursive;
+	font-size: 200%;
+}
+
+#defaultSpinner {
+	position: fixed;
+  	top: 60px;
+	display: block;
+}
+
+#banner {
+	position: absolute;
+	width: 100%;
+	height: 80px;
+	background-color: white;
+	top: 0;
+	left: 0;
+	border-bottom: 1px solid black;
+	box-shadow: 0px 0px 5px black;
+}
+
+#banner img {
+	height: 79px;
+	width: auto;
+	display: inline-block;
+}
+
+#nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
+	padding-right: 2px;
+	padding-left: 2px;
+}
+
+#nav-year .badge, #nav-month .badge {
+	background-color: #FFFFFF; /* bianco */
+	font-size: 1.1em;
+	display: inline;
+    color: #033C73; /* blu scuro */
+}
+
+.my-navbar-form {
+	padding-left: 4px;
+	padding-right: 2px;
+}
+
+.my-navbar-form select{
+	border-radius: 20px;
+	padding: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin-top: 9px;
+}
+
+.panel {
+	padding-left: 0px;
+	padding-right: 0px;
+	border-color: darkgrey;
+}
+
+#container-fluid-nav-tabs {
+    padding-bottom: 20px;
+}
+    
+ul.pagination {
+    margin-top: 0px;
+}
+
+/* CSS utilità */
+
+.center {
+	text-align: center;
+}
+
+.center th, .center td {
+	text-align: center;
+}
+
+.table-xeditable, .table-xeditable td {
+	border: none !important;
+}
+
+/* CSS template */
+
+.reloading, .reloading * {
+	background-color: lightgrey !important;
+	cursor: wait;	
+}
+
+div.datepicker {
+    z-index: 9999 !important;
+}
+
+#clockBase{
+	text-align: center;
+	font-size:180px;
+	font-weight:bold;
+	text-shadow: 5px 5px 5px black;
+}
+
+/*username*/
+
+.table-form td.username {
+	text-align: center;
+	padding-right: 0px;
+	font-family: cursive;
+	font-size:large;
+}
+
+/* Data tables */
+tfoot input {
+   width: 100%;
+   padding: 3px;
+   box-sizing: border-box;
+}
+
+/* -----------------------------------------------------*/
+/* VOGLIO UNA VITA COLORATA BELLA, FANCULO QUESTA CELLA *//*      <<======  AHAHAHAHAH.......STANZINO.... */
+/* -----------------------------------------------------*/
+
+.list-group-item-grey{ background-color: #EAEAEA; }
+.bg-grey{ background-color: #EAEAEA; }
+
+.data-select-bar{
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+/* classe che riprende la nomenlclatura bootstrap per il colore del testo */
+.text-dark { 
+  color: #292525;
+}
+
+/* CREA LO SFONDO PER I VALORI NEI TAG view
+div.form-group .form-control-static {
+    background: rgb(245,245,245);
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+    text-align: center;
+}
+*/
+table[datatable] {
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+}
+
+table[datatable] > thead > tr > th:hover{
+  background: #F9F9F9;
+}
+
+span[notAllowed] {
+  color:#808080;
+  cursor: not-allowed;
+}
+
+/* COLORI PER LE OPERAZIONE NELLA VISTA DELLO STORICO */
+td.ADD{
+  color: #04AD04; /* VERDE */
+}
+td.MOD{
+  color:  blue;
+}
+td.DEL{
+  color: red;
+}
+
+td.default-single > i.fa-cutlery{
+  color: #669EC1;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-cutlery.forced{
+  color: #00395D;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-cutlery.exitingnow{
+  color: #ACC1CE;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-cutlery.notyet{
+  color: #008076;
+  text-shadow: 1px 1px 1px #ccc;
+  -webkit-animation: blinker 3s linear infinite;
+  -moz-animation: blinker 3s linear infinite;
+  -o-animation: blinker 3s linear infinite;
+  animation: blinker 3s linear infinite;
+
+}
+
+td.default-single > i.fa-ban{
+  color: #B54F4F;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-ban.forced{
+  color: #670000;
+  text-shadow: 1px 1px 1px #ccc;
+}
+
+td.default-single > i.fa-spinner{
+  color: #3A79A0;
+}
+
+
+*[popover-hover]:hover  {
+	cursor: help;
+}
+
+
+td[popover-hover]:hover {
+	background: #F1F1F1;
+}
+
+/*
+*[webui-popover-hover]:hover  {
+	cursor: help;
+}
+*/
+
+td[webui-popover-hover]:hover {
+	background: #F1F1F1;
+}
+
+.webui-popover-title {
+  background: #F1F1F1;
+}
+
+@keyframes blinker {
+ 50% { opacity: 0.0; }
+}
+
+i[green] {
+	color: green;
+}
+
+i[red] {
+	color: red;
+}
+
+.label-badge {
+    padding: 0.5em;
+    border-radius: 1em;
+}
+
+/* Add blur effect to background when modal is opened*/
+body.modal-open #wrapper{
+    -webkit-filter: blur(1px);
+    -moz-filter: blur(1px);
+    -o-filter: blur(1px);
+    -ms-filter: blur(1px);
+    filter: blur(1px);
+}
+
+.modal-backdrop,
+.modal-backdrop.fade.in{
+	opacity: 0.3;
+	filter: alpha(opacity=70);
+	background: black;
+	/*background: rgba(0, 51, 128, 0.57);*/
+}
+
+/* REGOLE PER LE SELECT 2 UTILIZZARE PER GLI SWITCHER NEL MENU */
+
+.select2-container.switcher {
+  height: 1em;
+}
+
+.select2-container.switcher .select2-choice {
+  height: 25px;
+  line-height: 1;
+    border-radius: 8px;
+}
+
+.select2-container.switcher .select2-arrow b {
+  background-position: inherit;
+}
+
+
+.select2-drop.switcher {
+   margin-top: -7px;
+   border-top: none;
+}
+
+.select2-drop.switcher input {
+   padding: 0;
+}
+
+.switcher .select2-results {
+  max-height: 600px;
+}
+
+.select2-results {
+  max-height: 350px;
+}
+
+button.button-as-link {
+  background:none!important;
+  border:none; 
+  padding:0!important;
+  color:#069;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
+/* Serve per gli elementi fullcalendar: titolo su più linee */
+.fc-month-view span.fc-title {
+	white-space: normal;
+}
+/* Colore di rendering delle festività sul calendario */
+.fc-bgevent.holiday {
+    background-color: #fff7e0;
+    color: #353535;
+    opacity: .7;
+    text-align: center;
+    padding-top: .6em;
+}
+
+/* Tema Alert per il webui-popover*/
+
+.webui-popover-alert {
+  border-color: #ebccd1;
+  background-color: #f2dede;
+  color: #a94442;
+}
+.webui-popover-alert .webui-popover-title {
+  background: #e2abab;
+  border-bottom: 1px solid #ebccd1;
+  color: #8c2624;
+  text-shadow: 0 0 3px #f2dede;
+}
+
+.webui-popover-alert.top > .webui-arrow,
+.webui-popover-alert.top-left > .webui-arrow,
+.webui-popover-alert.top-right > .webui-arrow,
+.webui-popover-alert.top > .webui-arrow:after,
+.webui-popover-alert.top-left > .webui-arrow:after,
+.webui-popover-alert.top-right > .webui-arrow:after {
+  border-top-color: #f2dede;
+}
+.webui-popover-alert.right > .webui-arrow,
+.webui-popover-alert.right-top > .webui-arrow,
+.webui-popover-alert.right-bottom > .webui-arrow,
+.webui-popover-alert.right > .webui-arrow:after,
+.webui-popover-alert.right-top > .webui-arrow:after,
+.webui-popover-alert.right-bottom > .webui-arrow:after {
+  border-right-color: #f2dede;
+}
+.webui-popover-alert.bottom > .webui-arrow,
+.webui-popover-alert.bottom-left > .webui-arrow,
+.webui-popover-alert.bottom-right > .webui-arrow,
+.webui-popover-alert.bottom > .webui-arrow:after,
+.webui-popover-alert.bottom-left > .webui-arrow:after,
+.webui-popover-alert.bottom-right > .webui-arrow:after {
+  border-bottom-color: #f2dede;
+}
+.webui-popover-alert.left > .webui-arrow,
+.webui-popover-alert.left-top > .webui-arrow,
+.webui-popover-alert.left-bottom > .webui-arrow,
+.webui-popover-alert.left > .webui-arrow:after,
+.webui-popover-alert.left-top > .webui-arrow:after,
+.webui-popover-alert.left-bottom > .webui-arrow:after {
+  border-left-color: #f2dede;
+}
+
+.fc-month-view .fc-time{
+   display : none;
+}
+
+/* Login form*/
+.panel-login {
+	border-color: #ccc;
+	box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+}
+
+.panel-login>.panel-heading {
+	color: #00415d;
+	background-color: #fff;
+	border-color: #fff;
+	text-align: center;
+}
+
+.panel-login>.panel-heading a {
+	text-decoration: none;
+	color: #666;
+	font-weight: bold;
+	font-size: 15px;
+	-webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	transition: all 0.1s linear;
+}
+
+.panel-login>.panel-heading a:hover {
+	text-decoration: underline;
+}
+
+.panel-login>.panel-heading a.active {
+	color: #029f5b;
+	font-size: 18px;
+}
+
+.panel-login>.panel-heading>div.row>div:first-child {
+	border-right: 1pt solid black;
+}
+
+.panel-login>.panel-heading hr {
+	margin-top: 10px;
+	margin-bottom: 0px;
+	clear: both;
+	border: 0;
+	height: 1px;
+	background-image: -webkit-linear-gradient(left,rgba(0, 0, 0, 0),rgba(0, 0, 0, 0.15),rgba(0, 0, 0, 0));
+	background-image: -moz-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+	background-image: -ms-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+	background-image: -o-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+}
+
+.panel-login div.submit-btn {
+  margin: 1em 0;	
+}
+
+a#web-stamping-btn {
+	font-size: 200%; 
+	box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+}
+
+#login-idp-btn {
+	margin: 0.5em 0 2em;
+}
+
+#login-idp-btn a {
+	box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+}

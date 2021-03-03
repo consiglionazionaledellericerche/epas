@@ -1,0 +1,94 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div class="container">
+
+*{
+#{title title:'Gruppi di Assenze' /}
+}*
+
+#{set breadcrumbs:['Gruppi Assenze':@AbsenceGroups.showGroups(null), (selected):@AbsenceGroups.showGroups(selected)] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+  
+ #{form action:@AbsenceGroups.showGroups(), method:'GET', autocomplete:false,
+		    class:'form form-horizontal auto-submit'}
+    
+    #{f.selectModel 'category', inputName:'categoryId', personalizeItems:true}
+        <option></option>      
+       
+       #{list items:categoryTabs, as:'categoryTab'}
+           <optgroup label="${categoryTab.label}">
+           #{list categoryTab.categoryGroupAbsenceTypes, as:'category'}
+	         <option value="${category.id}"
+	          #{if category.equals(selected)} selected #{/if}> 
+	          ${category.label}
+	         </option>
+  	       #{/list}
+  	       </optgroup>
+  	    #{/list}
+     #{/f.selectModel}
+
+ #{/form}
+ 
+ #{alert color:'info'}
+    <p>Elenco dei gruppi definiti per la categoria <strong>${selected.name}</strong></p>
+ #{/alert}
+
+ 
+ <table class="table table-bordered"> 
+   <thead>
+ 	<tr>
+ 	  <th class="col-md-3">Gruppo</th>
+ 	  *{
+ 	  <th>Categoria</th>
+ 	  <th>Tipologia</th>
+ 	  }*
+ 	  <th>Periodo</th>
+ 	  <th>Limiti e codici</th>
+ 	  <th>Completamenti e codici</th>
+ 	</tr>
+   </thead>
+   <tbody>
+ #{list items:selected.groupAbsenceTypes, as:'group'}
+  <tr>
+    #{include './_showGroup.html' /}
+  </tr>
+ #{/list}
+ </tbody>
+
+ </table>
+ 
+<div class="panel panel-default">
+  <div class="panel-body"> 
+  <p>Tramite questa vista è possibile comprendere il comportamento dei gruppi di codici assenza.</p>
+  
+  <br>
+  <span class="label label-danger">Numero Minuti</span> Limite per il gruppo definito conteggiato in minuti <br>
+  <span class="label label-danger">Numero Giorni</span> Limite per il gruppo definito conteggiato in giorni <br>
+  
+  <br>
+  <span class="label label-warning">Completamento in Minuti</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti sulla base dei minuti effettivi giustificati. <br> 
+  <span class="label label-warning">Completamento in Giorni</span> I codici di <span class="label label-info">completamento</span> da inviare alla Sede Centrale vengono inseriti al consumo di una intera giornata lavorativa, rapportata al tipo orario del dipendente. <br> 
+  
+  <br>
+  <i class="fa fa-link" aria-hidden="true"></i> Il gruppo è prendibile dopo l'esaurimento di un gruppo con una priorità maggiore. <br>
+  <i class="fa fa-star" aria-hidden="true"></i> Il gruppo è di tipo speciale, limiti e completamenti sono gestiti con algoritmi specifici. <br>
+  <i class="fa fa-asterisk" aria-hidden="true"></i> Il gruppo è di tipo semplice, nessun limite e completamento definito. <br>
+  <i class="fa fa-magic" aria-hidden="true"></i> Il gruppo è di tipo automatico, i codici vengono inseriti dal sistema sulla base di determinati eventi o configurazioni.<br>
+  
+ </div>
+</div>
+
+  <div class="row text-center">
+	#{secure.link @AbsenceGroups.insertGroup(selected.id), class:'btn btn-primary',fa:'plus' }
+		Nuovo gruppo
+	#{/secure.link}
+  </div>
+
+
+  
+</div>
+
+
+ 

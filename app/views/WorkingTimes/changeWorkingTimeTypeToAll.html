@@ -1,0 +1,38 @@
+#{modalAsync title: 'Cambia orario a tutti' }
+
+
+<div class="container" id="changeAll">
+  #{alert color:'info'}
+    <p>
+      Seleziona il <strong><em>Nuovo tipo orario</em></strong>.
+    </p>
+    <p>  
+      Per ogni dipendente di <strong>${office.name}</strong> e per ogni giorno in cui è presente l'orario <strong>${wtt.description}</strong>,
+      verrà applicato il <strong><em>Nuovo tipo orario</em></strong> selezionato.
+    </p>
+    <p>
+      Non è possibile specificare una data inizio oltre il mese precedente quello attuale.
+      </p>
+    <p>
+      Se si desidera cambiare l'orario definitivamente lasciare vuoto il campo <strong>&{'dateTo'}</strong>
+    </p>
+  #{/alert}
+	
+
+	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll(), class:'form-horizontal',
+	'data-async':'#page_content', 'data-async-error':'#changeAll', 'data-spinner':'#defaultSpinner'}
+	<input type="hidden" name="officeId" value="${office.id}"/>
+	<input type="hidden" name="wtt.id" value="${wtt.id}" />
+
+    #{f.selectModel 'wttNew',label:'Nuovo tipo orario',items:wttList /}
+	#{f.date 'dateFrom' /}
+	#{f.date 'dateTo' /}
+	
+    #{b.buttons center:true}
+      #{b.submit 'Cambia a tutti'/}
+    #{/b.buttons}
+
+	#{/form}
+</div>
+
+#{/modalAsync}

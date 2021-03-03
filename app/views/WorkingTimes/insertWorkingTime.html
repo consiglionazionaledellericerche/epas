@@ -1,0 +1,150 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Creazione nuovo Tipo Orario per ' + office.name  /}
+
+#{set breadcrumbs:['Tipi Orario':@WorkingTimes.manageWorkingTime(office.id), ('Nuovo tipo orario ' + office.name):null]/}
+ 
+<div class="container">
+
+#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+#{title title:'Creazione Nuovo Tipo Orario ' + office.name /}
+
+  <div class="col-md-10 col-md-offset-1">
+     
+      #{form @WorkingTimes.saveHorizontal(), class:'form-horizontal'}
+	  
+      <input type="hidden" name="office.id" value="${office.id}"/>
+      <input type="hidden" name="horizontalPattern.externalId" value="${externalId}"/>
+
+	  #{f.simpleView 'horizontalPattern.name', label:'Nome Orario', hidden:true /}  
+
+	  <div class="alert alert-success">
+	   Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
+	   della settimana ad eccezione dei giorni festivi.
+      </div>	 
+
+	  <!-- Tempo a lavoro -->	 
+
+	  #{workingTime.legend tempoALavoro:'true', wttTips:'true' /}			  
+	  
+	  #{workingTime.input 
+	    type:'hoursAndMinutes',
+	    title:'Tempo lavoro giornaliero', 
+	  	color:'info', 
+	  	field:'horizontalPattern.workingTime',
+	  	hourValue:horizontalPattern.workingTimeHour,
+	  	minuteValue:horizontalPattern.workingTimeMinute  /}
+	  	
+	  #{workingTime.input 
+	    type:'multipleSelect',
+	    selectHolidays:'true', 
+	    title:'Giorni festivi', 
+	  	color:'info', 
+	  	field:'horizontalPattern.holidays',
+	  	value:horizontalPattern.holidays /}
+	  
+	  <!-- Buono pasto -->
+	  
+	  #{workingTime.legend buonoPastoAbilitato:'true', wttTips:'true' /}
+	  
+	  #{workingTime.input
+	   type:'radio', 
+	   title:'Calcolo Buono Pasto abilitato',
+	   color:'danger',
+	   field:'horizontalPattern.mealTicketEnabled',
+	   value:horizontalPattern.mealTicketEnabled /}  
+  
+	  <div id="horizontal-mealticket" #{if !horizontalPattern.mealTicketEnabled} style="display: none" #{/if}>
+	  #{workingTime.legend buonoPasto:'true', wttTips:'true' /}
+	  
+      #{workingTime.input 
+	    type:'hoursAndMinutes', 
+	    title:'Tempo di lavoro minimo per diritto a usufruire del buono pasto', 
+	  	color:'danger', 
+	  	field:'horizontalPattern.mealTicketTime',
+	  	hourValue:horizontalPattern.mealTicketTimeHour,
+	  	minuteValue:horizontalPattern.mealTicketTimeMinute /}
+	  	
+	  #{workingTime.input 
+	   type:'minutes', 
+	   title:'Durata minima intervallo pranzo', 
+	   color:'danger',
+	   field:'horizontalPattern.breakTicketTime',
+	   value:horizontalPattern.breakTicketTime /}
+	  
+	  <!-- Soglia buono pasto -->
+	  
+	  
+	  
+	  #{workingTime.input
+	   type:'radio', 
+	   title:'Condizione soglia pomeridiana attiva',
+	   color:'danger',
+	   field:'horizontalPattern.afternoonThresholdEnabled',
+	   value:horizontalPattern.afternoonThresholdEnabled /}  
+	  
+	   <div id="horizontal-afternoon" #{if !horizontalPattern.afternoonThresholdEnabled} style="display: none" #{/if}>
+	   
+	      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+	      	
+		  #{workingTime.input 
+		   type:'hoursAndMinutes',
+		   title:'Soglia pomeridiana per buono pasto',
+		   color:'danger',
+		   field:'horizontalPattern.ticketAfternoonThreshold',
+		   hourValue:horizontalPattern.ticketAfternoonThresholdHour,
+		   minuteValue:horizontalPattern.ticketAfternoonThresholdMinute  /}
+		
+		  #{workingTime.input
+		   type:'minutes', 
+		   title:'Lavoro minimo per buono pasto dopo soglia pomeridiana',
+		   color:'danger',
+		   field:'horizontalPattern.ticketAfternoonWorkingTime',
+		   value:horizontalPattern.ticketAfternoonWorkingTime /}  
+		</div>	
+		
+	   </div> 	
+	  *{		
+	  <div class="col-sm-12">
+	    #{include './_wttRecap.html' /}
+	  </div>
+	  }*	
+ 
+	  <div class="center">
+	    <input class="btn btn-primary" type="submit" value="Crea"/>
+	  </div>
+      #{/form}
+   
+ </div> 
+</div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+		
+		$("input[name='Orario Orizzontale']").change(function(){
+			
+			jQuery( "#form-horizontal" ).toggle(200);
+			jQuery( "#form-vertical" ).toggle(200);
+			
+		});
+		
+		$("input[name='horizontalPattern.mealTicketEnabled']").change(function(){
+			
+			jQuery( "#horizontal-mealticket" ).toggle(0);
+		
+		});
+		
+
+		$("input[name='horizontalPattern.afternoonThresholdEnabled']").change(function(){
+			
+			jQuery( "#horizontal-afternoon" ).toggle(0);
+		
+		});
+       
+	 });
+	</script>
+#{/set}
+
+

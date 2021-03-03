@@ -1,0 +1,14 @@
+[
+	#{list personsToRender, as:'person'}
+			{
+			"personId": "${person.personId}",
+			"name" : "${person.name}",
+  			"surname" : "${person.surname}",
+  			"code" : "${person.code}",
+  			"start" : "${person.dateFrom}",
+  			"end" : "${person.dateTo}"
+  			}${person.isLast ? '' : ','}
+  	#{/list}
+]
+
+

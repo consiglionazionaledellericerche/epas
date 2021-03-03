@@ -1,0 +1,90 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+*		/										module:secure
+
+#Import Shibboleth routes
+GET		/shibboleth/login                  shib.Shibboleth.login
+GET		/shibboleth/authenticate           shib.Shibboleth.authenticate
+GET		/shibboleth/logout                 shib.Shibboleth.logout
+
+# Home page
+GET     /                                       Application.index
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+
+# Import Secure routes
+#*       /                						module:secure
+
+
+#Gestione reperibilità (sist-org)
+GET 	/reperibility/{type}/personList															Reperibility.personList
+
+GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
+
+PUT		/reperibility/{type}/update/{year}/{month}												Reperibility.update
+PUT		/reperibility/{type}/changePeriods														Reperibility.changePeriods	
+
+GET 	/reperibility/{type}/exportYearAsPDF/{<(19|20)\d\d>year}								Reperibility.exportYearAsPDF
+GET 	/reperibility/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}		Reperibility.exportMonthAsPDF
+GET		/reperibility/{type}/iCal/?{personId}?/{<(19|20)\d\d>year}								Reperibility.iCal
+GET 	/reperibility/{type}/who/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.who
+
+GET 	/reperibility/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.absence
+GET		/reperibility/{type}/whoIsAbsent/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.whoIsAbsent
+
+#Gestione turni (sist-org)
+GET		/shift/{type}/personList																		Shift.personList
+GET		/shift/{type}/timeTable																			Shift.timeTable
+GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.find
+GET 	/shift/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}						Shift.exportMonthAsPDF
+GET 	/shift/{type}/exportMonthCalAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}					Shift.exportMonthCalAsPDF
+PUT		/shift/{type}/update/{year}/{month}																Shift.update
+GET		/shift/{type}/iCal/?{personId}?/{<(19|20)\d\d>year}												Shift.iCal
+
+GET		/shift/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.absence
+GET		/shift/renderServices/{shiftType}																Shift.renderServices
+GET		/shift/renderPersonShiftServices/{shiftType}													Shift.renderPersonShiftServices
+GET		/shift/renderShiftname/{shiftType}																Shift.renderShiftname
+GET		/shift/renderActivityname/{shiftType}															Shift.renderActivityname
+
+#Gestione straordinari (sist-org)
+GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}						Overtimes.getPersonOvertimes
+PUT		/overtimes/setRequestedOvertime/{year}/{month}								Overtimes.setRequestOvertime
+POST 	/overtimes/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}	Overtimes.exportMonthAsPDF
+
+GET 	/overtimes/getSupervisorTotalOvertimes/{email}								Overtimes.getSupervisorTotalOvertimes
+PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSupervisorTotalOvertimes
+
+#Gestione timbrature via json
+PUT		/stampings/create						StampingsFromClient.create
+
+#Invio periodi di assenza 
+POST	/absenceFromJson/absenceInPeriod/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}				AbsenceFromJson.absenceInPeriod
+
+#Ricezione richiesta codici frequenti di assenza
+GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}		AbsenceFromJson.frequentAbsence
+
+# EndPoints Rest
+
+GET     /rest/persons/{email}/{action}          rest.Persons.{action}
+
+*       /rest/v{<[0-9]+>version}/{controller}/{action}/{<[a-z0-9]+>id} rest.v{version}.{controller}.{action}
+*       /rest/v{<[0-9]+>version}/{controller}/{action}             rest.v{version}.{controller}.{action}
+
+#Questi due endpoint potrebbero essere rimossi e utilizzare le rotte corrispondenti
+*       /rest/absences/checkAbsenceByPerseoId             rest.Absences.checkAbsence
+*       /rest/absences/insertAbsenceByPerseoId             rest.Absences.insertAbsence
+
+*       /rest/{controller}/{action}/{<[a-z0-9]+>id} rest.{controller}.{action}
+*       /rest/{controller}/{action}             rest.{controller}.{action}
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}
+
+
+

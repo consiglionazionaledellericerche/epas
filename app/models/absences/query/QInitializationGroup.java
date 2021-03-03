@@ -1,0 +1,90 @@
+package models.absences.query;
+
+import static com.querydsl.core.types.PathMetadataFactory.*;
+import models.absences.InitializationGroup;
+
+
+import com.querydsl.core.types.dsl.*;
+
+import com.querydsl.core.types.PathMetadata;
+import javax.annotation.Generated;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
+
+
+/**
+ * QInitializationGroup is a Querydsl query type for InitializationGroup
+ */
+@Generated("com.querydsl.codegen.EntitySerializer")
+public class QInitializationGroup extends EntityPathBase<InitializationGroup> {
+
+    private static final long serialVersionUID = -656690549L;
+
+    private static final PathInits INITS = PathInits.DIRECT2;
+
+    public static final QInitializationGroup initializationGroup = new QInitializationGroup("initializationGroup");
+
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
+
+    public final NumberPath<Integer> averageWeekTime = createNumber("averageWeekTime", Integer.class);
+
+    public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
+
+    //inherited
+    public final SimplePath<Object> entityId = _super.entityId;
+
+    public final DatePath<org.joda.time.LocalDate> forcedBegin = createDate("forcedBegin", org.joda.time.LocalDate.class);
+
+    public final DatePath<org.joda.time.LocalDate> forcedEnd = createDate("forcedEnd", org.joda.time.LocalDate.class);
+
+    public final QGroupAbsenceType groupAbsenceType;
+
+    public final NumberPath<Integer> hoursInput = createNumber("hoursInput", Integer.class);
+
+    //inherited
+    public final NumberPath<Long> id = _super.id;
+
+    public final NumberPath<Integer> minutesInput = createNumber("minutesInput", Integer.class);
+
+    //inherited
+    public final BooleanPath persistent = _super.persistent;
+
+    public final models.query.QPerson person;
+
+    public final NumberPath<Integer> residualMinutesCurrentYear = createNumber("residualMinutesCurrentYear", Integer.class);
+
+    public final NumberPath<Integer> residualMinutesLastYear = createNumber("residualMinutesLastYear", Integer.class);
+
+    public final NumberPath<Integer> takableTotal = createNumber("takableTotal", Integer.class);
+
+    public final NumberPath<Integer> unitsInput = createNumber("unitsInput", Integer.class);
+
+    public final NumberPath<Integer> vacationYear = createNumber("vacationYear", Integer.class);
+
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
+
+    public QInitializationGroup(String variable) {
+        this(InitializationGroup.class, forVariable(variable), INITS);
+    }
+
+    public QInitializationGroup(Path<? extends InitializationGroup> path) {
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
+    }
+
+    public QInitializationGroup(PathMetadata metadata) {
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QInitializationGroup(PathMetadata metadata, PathInits inits) {
+        this(InitializationGroup.class, metadata, inits);
+    }
+
+    public QInitializationGroup(Class<? extends InitializationGroup> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.groupAbsenceType = inits.isInitialized("groupAbsenceType") ? new QGroupAbsenceType(forProperty("groupAbsenceType"), inits.get("groupAbsenceType")) : null;
+        this.person = inits.isInitialized("person") ? new models.query.QPerson(forProperty("person"), inits.get("person")) : null;
+    }
+
+}
+

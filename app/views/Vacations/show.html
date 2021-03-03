@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Ferie e permessi' /}
+
+
+<div class="container">
+
+#{title title:('Ferie e Permessi ' + year) /}
+   
+   #{if vacationSituations.empty}
+     #{alert color:'warning'}
+       <p>Nessun contratto attivo per l'anno richiesto.</p>
+     #{/alert}
+   #{/if}
+   
+   #{include './vacationsElements/info.html' /}   
+   
+</div>
+
+
+

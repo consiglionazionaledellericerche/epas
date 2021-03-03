@@ -1,0 +1,103 @@
+#{f.hidden 'shiftCategoryId', value:cat.id /}
+		#{title title:'Organizzazione del lavoro in turni - Associazione timetable' /}
+		#{alert color:'info'}
+			E' necessario associare all'attività una timetable tra quelle proposte.
+			Le timetable con sfondo <strong>verde</strong>, sono quelle definite esclusivamente 
+			per la propria sede <strong>${cat.office.name}</strong> 
+			
+		#{/alert}	
+		
+		#{tabList}
+  			#{tabItem id:'standard', title:'Timetable standard', active:true /}
+  			#{tabItem id:'organization', title:'Timetable esterne' /}
+  		#{/tabList}
+		
+		#{tabContent}
+		#{tabContentItem id:'standard', active:true}
+		<table class="table table-hover table-striped table-bordered">
+		<tr>
+			<th>Seleziona</th>
+			<th>Metodologia di calcolo</th>
+			<th>Inizio turno mattina</th>
+			<th>Fine turno mattina</th>
+			<th>Inizio turno pomeriggio</th>
+			<th>Fine turno pomeriggio</th>
+			<th>Inizio turno notturno</th>
+			<th>Fine turno notturno</th>
+			<th>Info aggiuntive</th>			
+		</tr>
+		#{list items:dtoList, as:'key'}
+		#{if key.isOfficeTimeTable}
+		<tr class="success">
+		#{/if}
+		#{else}
+		<tr>
+		#{/else}
+			<td><input type="radio" name="shift" value="${key.id}"> </td>
+			<td>${key.calculationType}</td>
+			<td>${key.startMorning}</td>
+			<td>${key.endMorning}</td>
+			<td>${key.startAfternoon}</td>
+			<td>${key.endAfternoon}</td>
+			<td>${key.startEvening}</td>
+			<td>${key.endEvening}</td>
+			<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
+		 	  	</i>
+		 	</td>
+				<div class="webui-popover-content" id="shift-${key.id}">  			
+		  			Inizio pausa pranzo turno mattina: <strong>${key.startMorningLunchTime}</strong><br>
+		  			Fine pausa pranzo turno mattina: <strong>${key.endMorningLunchTime}</strong><br>
+					Inizio pausa pranzo turno pomeriggio: <strong>${key.startAfternoonLunchTime}</strong><br>
+					Fine pausa pranzo turno pomeriggio: <strong>${key.endAfternoonLunchTime}</strong><br>
+					#{if !key.startEveningLunchTime.equals('')}
+						Inizio pausa pranzo turno notturno: <strong>${key.startEveningLunchTime}</strong><br>
+					#{/if}
+					#{if !key.endEveningLunchTime.equals('')}
+						Fine pausa pranzo turno notturno: <strong>${key.endEveningLunchTime}</strong><br>
+					#{/if}			  
+				</div> 	  
+			
+		</tr>
+		#{/list}
+		</table>
+		
+		#{/tabContentItem}
+		#{tabContentItem id:'organization'}
+			<table class="table table-hover table-striped table-bordered">
+			<tr>
+				<th>Seleziona</th>
+				<th>Nome</th>
+				<th>Metodologia di calcolo</th>
+				<th>Considera tutti gli slot completi <br> 
+				per pagamento</th>
+				<th>Info aggiuntive</th>	
+			</tr>
+			#{list items:timeTableList, as:'key'}
+				<tr>
+					<td><input type="radio" name="organizationShift" value="${key.id}"></td>
+					<td>${key.name}</td>
+					<td>${key.calculationType}</td>
+					<td>${key.considerEverySlot}</td>
+					<td><i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-url="#shift-${key.id}" data-placement="right"  data-title="Info turno">
+		 	  			</i> 
+		 	  		</td>
+		 	  		<div class="webui-popover-content" id="shift-${key.id}">  		
+		 	  		#{list items:key.organizationShiftSlot, as:'slot'}
+			  			Inizio slot: <strong>${slot.beginSlot}</strong><br>
+			  			Fine slot: <strong>${slot.endSlot}</strong><br>
+			  			#{if slot.beginMealSlot != null}
+						Inizio pausa pranzo slot: <strong>${slot.beginMealSlot}</strong><br>
+						#{/if}
+						#{if slot.endMealSlot != null}
+						Fine pausa pranzo slot: <strong>${slot.endMealSlot}</strong><br>
+						#{/if}
+					#{/list}		  
+					</div> 	  
+					
+				</tr>	
+				
+			#{/list}
+			
+			</table>
+		#{/tabContentItem}
+		#{/tabContent}

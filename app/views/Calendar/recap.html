@@ -1,0 +1,67 @@
+<h3>Ore di turno feriale valide</h3>
+<br>
+<ul class="list-group">
+  #{list shiftsCalculatedCompetences.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-info#{/else}">
+    ${_.getKey().fullname} <span class="label label-info pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{if nightShifts != null }
+<h3>Ore di turno notturno valide</h3>
+<ul class="list-group">
+  #{list nightShifts.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-primary#{/else}">
+    ${_.getKey().fullname} <span class="label label-primary pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+
+#{/if}
+<br>
+#{if holidayShifts != null }
+<h3>Ore di turno festivo valide</h3>
+<ul class="list-group">
+  #{list holidayShifts.entrySet()}
+  <li class="list-group-item clearfix
+    #{if shiftTypeMonth?.approved}list-group-item-warning#{/if}
+    #{else}list-group-item-danger#{/else}">
+    ${_.getKey().fullname} <span class="label label-danger pull-right">${_.getValue().printHourMinute()}</span>
+  </li>
+  #{/list}
+</ul>
+<br>
+#{/if}
+
+
+
+#{if shiftTypeMonth?.approved}
+<div>
+  <em class="text-muted">&{'calendar.competencesApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType }
+#{b.link @monthShiftsApprovement(shiftType.id, start.format()),class: 'btn-sm', color:'warning',
+fa:
+'thumbs-o-down' }
+  &{'calendar.removeApprovation'}
+#{/b.link}
+#{/secure.check}
+#{/if}
+#{else}
+<div>
+  <em class="text-muted">&{'calendar.competencesToBeApproved'}</em>
+</div>
+<br>
+#{secure.check 'Calendar.monthShiftsApprovement', target: shiftType  }
+#{b.link @monthShiftsApprovement(shiftType.id, start.format()),class: 'btn-sm', color:'info', fa:
+'thumbs-o-up' }
+&{'calendar.approve'}
+#{/b.link}
+#{/secure.check}
+#{/else}

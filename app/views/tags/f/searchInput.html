@@ -1,0 +1,11 @@
+#{field _arg}
+<div class="col-sm-4">
+  <label for="${field.id}" class="control-label">#{if _label}&{_label}#{/if} #{else}&{field.name}#{/else}</label>
+  <div class="input-group">
+    <input type="text" id="${field.id}" name="${field.name}" class="form-control" placeholder="&{'search'}">
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+    </span>
+  </div>
+</div>
+#{/field}

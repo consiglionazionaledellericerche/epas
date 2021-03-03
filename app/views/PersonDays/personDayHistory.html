@@ -1,0 +1,108 @@
+%{
+  title = 'Gestione Del Giorno ';
+  if (personDay) {
+    title = title + personDay?.date.format();
+  }
+}%
+
+#{modalAsync id:'modalStamping',  title:title }
+
+<div class="container-fluid" id="showDay">
+  #{include './_showDayTabs.html' /}
+  
+  #{if found}	  
+    #{accordionGroup 'info'}
+	  #{accordionItem 'stampings', parent:'info', title:'Storico Timbrature', open:true}
+	    #{if historyStampingsList.empty } Non ci sono timbrature. #{/if}
+	    #{else}
+	    #{list items:historyStampingsList, as:'historyStamping'}
+	    <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()}
+	    (id=${historyStamping.get(0).value.id})</h5>
+	
+		    <table class="table table-condensed table-bordered">
+		
+		    <tr class="success">
+		      <th>&{'stamping'}</th>
+		      <th>&{'modification.date'}</th>
+		      <th>&{'done.by'}</th>
+		      <th>&{'modification.type'}</th>
+		      #{if zoneDefined}
+		      	<th>&{'zone'}</th>
+		      #{/if}
+		    </tr>
+		
+		    #{list items:historyStamping, as:'stamping'}
+		    <tr class="warning">
+		      <td>#{ifnot stamping.typeIsDel()}${stamping.value.label}#{/ifnot}</td>
+		      <td>${stamping.formattedRevisionDate()}</td>
+		      <td>
+					<span
+					#{if stamping.revision?.owner?.badgeReader}
+						class="badge" webui-popover-hover data-url="#${stamping.revision.id}">${stamping.formattedOwner()} <i class="fa fa-info-circle" aria-hidden="true"></i>
+					#{/if}
+					#{else}
+						> ${stamping.formattedOwner()}
+					#{/else}
+					</span>
+					</td>
+		      <td class="${stamping.type}">&{stamping.type}</td>
+		      #{if zoneDefined}
+		      <td>#{if stamping.value.stampingZone != null}${stamping.value.stampingZone}#{/if}
+		      		#{else}<i>Non definito</i>#{/else}
+		      </td>
+		      #{/if}
+		      
+		    </tr>
+					#{if stamping.revision?.owner?.badgeReader}
+					<div class="webui-popover-content" id="${stamping.revision.id}">
+						<strong>${stamping.revision.owner?.badgeReader?.code}</strong><br>
+						<em>${stamping.revision.owner?.badgeReader?.description}</em><br>
+						<strong>Posizione:</strong><em> ${stamping.revision.owner?.badgeReader?.location}</em><br>
+						<strong>IP:</strong><span class="text-info"> ${stamping.revision?.ipaddress}</span>
+					</div>
+					#{/if}
+		    #{/list}
+		    </table>
+	    #{/list}
+	    #{/else}
+	  #{/accordionItem}
+	#{/accordionGroup}
+	
+	#{accordionGroup 'info'}
+	  #{accordionItem 'absences', parent:'info', title:'Storico Assenze', open:true}
+	  #{if historyAbsencesList.empty } Non ci sono assenze. #{/if}
+	  #{else}
+	  <!-- Per ogni assenza una tabella -->
+	  #{list items:historyAbsencesList, as:'historyAbsence'}
+	  <h5>Storico assenza codice ${historyAbsence.get(0).value?.absenceType.code}
+	    (id=${historyAbsence.get(0).value?.id})</h5>
+	
+	  <table class="table table-condensed table-bordered">
+	
+	    <tr class="success">
+	      <th>&{'absenceType.code'}</th>
+	      <th>&{'modification.date'}</th>
+	      <th>&{'done.by'}</th>
+	      <th>&{'modification.type'}</th>
+	    </tr>
+	
+	    #{list items:historyAbsence, as:'absence'}
+	    <tr class="warning">
+	      <td>${absence.value.absenceType?.code}</td>
+	      <td>${absence.formattedRevisionDate()}</td>
+	      <td>${absence.formattedOwner()}</td>
+	      <td class="${absence.type}">&{absence.type}</td>
+	    </tr>
+	    #{/list}
+	  </table>
+	  #{/list}
+	  #{/else}
+	  #{/accordionItem}
+	#{/accordionGroup}
+  #{/if}
+  #{else}
+    <p>Nessuna assenza o timbratura nella storia del giorno.</p>
+  #{/else}
+</div>
+
+#{/modalAsync}

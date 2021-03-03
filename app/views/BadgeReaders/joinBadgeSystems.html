@@ -1,0 +1,103 @@
+#{modalAsync title:'BadgeReaders.joinBadgeSystems' }
+
+<div id="joinBadgeSystems">
+
+  #{alert color:'info'}
+  <p>
+    Imposta i <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong>
+    di <strong>${badgeReader.code}</strong>.
+  </p>
+
+  <p>Tutti i badge associati ai &{'badgeSystem'} selezionati saranno abilitati a timbrare alla
+    &{'badgeReader'} ${badgeReader.code}.
+  </p>
+  #{/alert}
+
+  #{form action:@saveBadgeSystems(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#joinBadgeSystems' }
+
+  #{f.hidden 'badgeReader.id' /}
+  #{f.view 'badgeReader' /}
+
+  #{f.selectMultipleModel 'badgeReader.badgeSystems',
+  values:templateUtility.allBadgeSystem(), placeholder:'Tutti i badge system' /}
+
+  <!-- CASO ERRORE -->
+  #{if violatedBadges}
+  #{alert color:'danger'}
+  <p>Operazione annullata a causa dei seguenti conflitti:</p>
+
+  <table class="table table-condended table-bordered"
+  ">
+  <tr>
+    <th>Persona</th>
+    <th>Codice</th>
+    <th>&{'badgeReader'}</th>
+    <th>&{'badgeSystem'}</th>
+  </tr>
+  #{list items:violatedBadges, as:'badge'}
+  <tr>
+    <td>${badge.person.fullname}</td>
+    <td>${badge.code}</td>
+    <td>${badge.badgeReader.code}</td>
+    <td>${badge.badgeSystem.name}</td>
+  </tr>
+  #{/list}
+  </table>
+  #{/alert}
+
+  #{b.buttons center:true}
+  #{b.link @edit(badgeReader.id), title:'Annulla' /}
+  #{/b.buttons}
+
+  #{/if}
+  #{else}
+
+  #{if badgesDefinitelyToRemove}
+
+  <!-- CASO RICHIESTA CONFERMA -->
+  #{f.hidden 'confirmed', value:'true' /}
+
+  #{alert color:'danger'}
+  <p><strong>Attenzione !!!</strong></p>
+
+  <p>Questa operazione eliminerà in modo permanente i seguenti badge associati ai dipendenti</p>
+
+  <table class="table table-condended table-bordered">
+    <tr>
+      <th>Persona</th>
+      <th>Codice</th>
+      <th>&{'badgeSystem'}</th>
+    </tr>
+    #{list items:badgesDefinitelyToRemove, as:'badge'}
+    <tr>
+      <td>${badge.person.fullname}</td>
+      <td>${badge.code}</td>
+      <td>${badge.badgeSystem.name}</td>
+    </tr>
+    #{/list}
+  </table>
+  <p>in quando nei &{'badgeSystems'} elencati in tabella non risulterà più associata alcuna
+    &{'badgeReader'}.</p>
+
+  <p>Confermare o annullare l'operazione.</p>
+  #{/alert}
+  #{b.buttons center:true}
+  #{b.cancel @edit(badgeReader.id) /}
+  #{b.submit 'Conferma'/}
+  #{/b.buttons}
+  #{/if}
+  #{else}
+
+  <!-- CASO INIZIALE -->
+  #{b.buttons}
+  #{b.save /}
+  #{/b.buttons}
+  #{/else}
+  #{/else}
+
+  #{/form}
+</div>
+
+#{/modalAsync}

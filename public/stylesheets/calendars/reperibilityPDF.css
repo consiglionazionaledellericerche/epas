@@ -1,0 +1,66 @@
+
+/* Tabella riassuntiva nel PDF annuale*/
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+caption {
+	width: 80%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+	color: #284A7E;
+	background-color: white;
+	padding: 0 0 0.5em 0;
+}
+
+tr th {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	color: white;
+	background-color: #284A7E;
+	text-align: center;
+}
+
+tr td {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	border: 0.2px solid silver;
+	text-align: center;
+	padding : 0.2em;
+}
+
+tr td.nome-dipendente {
+	font-weight: bold;
+	text-align: left;
+}
+
+
+
+/*Colori delle Label dei reperibili*/
+
+tr td#Rossi {
+	color: green;	
+}
+
+tr td#Lucchesi {
+	color: #200772;	
+}
+
+tr td#Vivaldi {
+	color: #E339A4;	
+}
+
+tr td#Ruberti {
+	color: #64026E;	
+}
+
+tr td#LuconiTrombacchi {
+	color: #33CCCC;	
+}
+
+tr td.fs {
+	background-color: #FF8D40;
+}
+

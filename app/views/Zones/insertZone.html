@@ -1,0 +1,16 @@
+#{modalAsync title:'Inserisci nuova zona' }
+
+<div id="zonedata">
+#{form action:@save(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#zonedata'}
+  	#{f.hidden 'readerId', value:reader.id /}
+	#{f.input 'zone.name', required:'true' /}
+	#{f.input 'zone.description' /}
+  	#{b.buttons center:true}
+    
+    	#{b.save /}
+  	#{/b.buttons}
+#{/form}
+</div>
+#{/modalAsync}

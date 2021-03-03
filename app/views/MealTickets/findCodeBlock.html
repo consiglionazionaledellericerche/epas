@@ -1,0 +1,68 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+<div class="container">
+
+  #{title title:'Ricerca Buoni Pasto', administration:true /}
+
+	#{include './_tabs.html' /}
+
+  #{alert color:'warning'}
+    <p><strong>Ricerca nell'elenco dei blocchi inseriti.</strong></p>
+  #{/alert}
+  
+  <!-- form paginata --> 
+  #{form action:@findCodeBlock(), class:'form-horizontal', method:'GET',
+          'data-reload':'#results', autocomplete:'off'}
+   
+    #{f.input 'code', 'data-autochange':true, value:code, autofocus:true,
+            placeholder:'search'.label() /}
+  #{/form}
+  
+  <section id="results">
+  #{if code != null && blocks.empty}
+    <p>Nessuna occorrenza trovata.</p>
+  #{/if}
+  #{else}
+    #{if !blocks.empty } 
+	  <table class="table table-hover table-bordered">
+	  <tr>
+		<th>Blocco</th>
+		<th>Posizione</th>
+		<th>Dipendente</th>
+		<th>Sede</th>
+		<th>Amministratore</th>
+	  </tr>
+	    #{list items:blocks, as:'block'}
+		    <tr>
+		       <td>${block.codeBlock}</td>
+		       <td>(${block.first}-${block.last})</td>
+	           <td>
+		         #{secure.link @personMealTickets(block.contract.id), 
+		            target:block.contract.person.office}
+	               ${block.contract.person.fullname}
+	             #{/secure.link}
+		       </td>
+		       <td>${block.contract.person.office.name}</td>
+		       <td>
+		         ${block.admin.fullname}
+		         #{if block.admin.telephone}
+		           <a href="#" popover-hover
+	                  data-content="${block.admin.telephone}"><i class="fa fa-phone"></i>
+	               </a>
+	             #{/if}
+	             #{if block.admin.email}
+		           <a href="#" popover-hover
+	                  data-content="${block.admin.email}"><i class="fa fa-envelope"></i>
+	               </a>
+	             #{/if}  
+		       </td>
+	        </tr>
+	    #{/list}
+	  </table>     
+	#{/if}   
+  #{/else}
+  </section>
+</div>
+

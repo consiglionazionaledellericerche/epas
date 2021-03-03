@@ -1,0 +1,6 @@
+${data.note}
+
+URL: ${data.url}
+Sede: ${user.person.office}
+
+Utente: ${user.person.name} ${user.person.surname}  Email: ${user.person.email}  Data: ${new Date().format('dd.MM.yyyy (hh:mm:ss)')}

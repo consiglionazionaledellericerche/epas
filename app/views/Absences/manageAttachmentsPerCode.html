@@ -1,0 +1,50 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+#{absences.absencesTabs activeAction:'manageAttachmentsPerCode' /}
+ 
+<div class="container">
+
+  #{title title:'Allegati per codici di assenza ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+
+  #{if attachmentRecapList.empty}
+    Nessun allegato presente per questo mese.
+  #{/if}
+  #{else}
+  <table class="table table-hover">   
+		  <tr>
+		  	<th>Codice</th>
+		  	<th>Allegati</th>
+		  	#{if attachmentRecapList.size() > 0}
+		  		<th>Comprimi</th>
+		  	#{/if}
+		  </tr>
+		  #{list items:attachmentRecapList, as:'recap'}
+		  <tr>
+		    <td>${recap.getCode()}</td>
+		    <td>
+		      #{list items:recap.absenceSameType, as:'absence'}
+		        <a href="@{Absences.downloadAttachment(absence.id)}" 
+					   data-toggle="tooltip" 
+					   title="${absence.personDay.date} di ${absence.personDay.person.name} ${absence.personDay.person.surname}">
+					<span class="glyphicon glyphicon-envelope"></span>
+				</a>
+		      #{/list}
+		    
+		    
+		    </td>
+		    #{if recap != null}
+		    	<td><a href="@{Absences.zipAttachment(recap.getCode(),year, month)}" 
+					   data-toggle="tooltip" 
+					   title="comprimi file">
+					<span class="glyphicon glyphicon-compressed"></span>
+				</a></td>
+		    #{/if}
+		  </tr>
+		  #{/list}
+		
+  </table>
+  #{/else}
+
+</div>

@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+
+<div id="logout">
+#{form @Application.logout()}	
+    <input type="submit" value="Account logout" />   
+#{/form}
+</div>
+
+<div id="chooseView">
+#{form @SwitchTemplate.dispatch()}
+#{select 'menuItem', value:menuItem, id:'view'}
+	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
+	#{option 'absences'}Assenze Mensili#{/option}
+	#{option 'stampings'}Timbrature#{/option}
+	#{option 'vacations'}Ferie#{/option}
+	#{option 'competences'}Competenze e Straordinari#{/option}	
+#{/select}
+
+<input type="submit" value="go!" />
+     
+#{/form}
+</div>
+
+<h3>Personale reperibile (${personList.size()})</h3>
+
+<table id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+	<tr>
+		<th>Cognome</th>
+		<th>Nome</th>
+		<th>Matricola</th>
+
+		<th>Telefono</th>
+		<th>Stanza</th>
+		<th>Email</th>
+		<th>Note</th>
+	</tr>
+	#{list personList}
+	<tr>
+		<td>${_.surname}</td>
+		<td>${_.name}</td>
+		<td>${_.number}</td>
+	</tr>
+	#{/list}
+</table>

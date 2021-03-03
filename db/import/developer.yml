@@ -1,0 +1,5 @@
+User(developer):
+  username: admin
+  password: 095c5ffb185c32aefd76bf12180675ff #cambialaosarailicenziato 
+  roles:
+    - DEVELOPER

@@ -1,0 +1,73 @@
+#{extends 'main.html' /}
+#{set header: 'navbar' /}
+#{set title: 'ePAS - Riepilogo Mensile'  /}
+
+
+<div class="container">
+	#{title title:'Riepilogo del mese di ' + templateUtility.monthName(month) + ' ' + year +  ' - ' + office?.name /}
+</div>
+
+#{stampings.presenceDashboardTabs activeAction:'showRecaps' /}
+
+<div class="container">
+	
+	<blockquote>
+		#{alert color:'warning'}
+		Per estrarre il riepilogo mensile relativo a presenza a lavoro e in smart working clicca qui
+  		    <div class="pull-right btn-group">            
+      		
+            <a class="btn btn-sm btn-default" href="@{MonthRecaps.generateSmartWorkingMonthlyRecap(month, year, office.id)}">
+            <i class="fa fa-calendar"></i> Scarica</a>            
+    		
+          </div>
+  		
+  		#{/alert}
+</blockquote>
+
+	<table class="table table-striped table-hover" width="100%" datatable>
+   <thead>
+      <tr>
+          <th>Nome</th>
+		  <th>Monte ore <br>anno passato</th>
+		  <th>Monte ore <br>anno corrente</th>
+		  <th>Buoni residui</th>
+		  <th>Progressivo</th>
+		  <th>Ore Lavorate</th>
+		  <th>Riposi</th>
+		  <th>Straordinari</th>
+      </tr>
+   </thead>
+ 
+   <tbody>
+   		
+   		#{list items:recaps, as:'recap'}
+		
+		   <tr>
+		     <td>${recap.contract.person.fullname}</td>
+		     
+		     <td data-order="${recap.remainingMinutesLastYear}" #{if recap.remainingMinutesLastYear < 0} class="danger"#{/if}>${recap.remainingMinutesLastYear.toHourTime()}</td>
+		     
+		     <td data-order="${recap.remainingMinutesCurrentYear}" #{if recap.remainingMinutesCurrentYear < 0} class="danger"#{/if}>${recap.remainingMinutesCurrentYear.toHourTime()}</td>
+		     <td #{if recap.remainingMealTickets < 0} class="danger"#{/if}>${recap.remainingMealTickets}</td>
+		     
+		     <td data-order="${recap.progressivoFinaleMese}" #{if recap.progressivoFinaleMese < 0} class="danger"#{/if}>${recap.progressivoFinaleMese.toHourTime()}</td>
+		     <td data-order="${recap.oreLavorate}">${recap.oreLavorate.toHourTime()}</td>
+		     <td>${recap.recoveryDayUsed}</td>
+		     <td #{if recap.straordinarioMinuti > 0} class="warning"#{/if}>${recap.straordinarioMinuti.toHourTime()}</td>
+		   </tr>
+		
+		#{/list}
+   
+   </tbody>
+ </table>
+
+<div class="alert alert-success">
+	Riepilogo mensile <a href="@{MonthRecaps.customRecap(year, month, session.get("officeSelected"))}">versione 2</a> (link provvisorio).
+</div>
+
+</div>
+
+
+
+
+

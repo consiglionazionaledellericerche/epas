@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package models;
+
+import javax.persistence.Entity;
+import lombok.ToString;
+import models.base.BaseModel;
+import org.hibernate.envers.Audited;
+
+/**
+ * Configurazione generale di ePAS.
+ *
+ */
+@ToString
+@Entity
+@Audited
+public class GeneralSetting extends BaseModel {
+
+  private static final long serialVersionUID = 881278299637007974L;
+
+  // Parametri gestione anagrafica
+  
+  public boolean syncBadgesEnabled = false;
+  public boolean syncOfficesEnabled = false;
+  public boolean syncPersonsEnabled = false;
+  
+  // Fine parametri gestione anagrafica
+  
+  // Parametri gestione invio dati a fine mese
+  
+  public boolean onlyMealTicket = false;
+
+  // Fine parametri gestione invio dati a fine mese
+  
+  // Parametri gestione codici di competenza turno
+  
+  public String startDailyShift = "6:00";
+  
+  public String endDailyShift = "19:00";
+  
+  public String startNightlyShift = "19:00";
+  
+  public String endNightlyShift = "6:00";
+  // Fine parametri gestione codici di competenza turno
+  
+  // Parametri gestione gruppi
+  
+  public boolean handleGroupsByInstitute = true;
+  
+  // Fine parametri gestione gruppi
+  
+  // Parametri gestione giorni di turno
+  
+  public boolean saturdayHolidayShift = true;
+  
+  public boolean roundingShiftQuantity = false;
+  
+  // Fine parametri gestione giorni di turno
+}

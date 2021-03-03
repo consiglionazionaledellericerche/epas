@@ -1,0 +1,63 @@
+*{
+ type: ["hoursAndMinutes", "multipleSelect", "minutes"]
+ readonly: se true è in visualizzazione
+ title: etichetta della form
+ field: nome del campo http
+ value: valore di default del campo
+ color: colore del div
+
+ hoursAndMinutes:
+   field: il prefisso del nome del campo. 
+          Si assume che i campi siano field + "Hour" e field + "Minute"
+   hourValue: default per l'ora
+   minuteValue: default per i minuti
+ 
+ minutes: stilizzare un campo soli minuti in colonna con hoursAndMinutes
+   
+ multipleSelect:
+   items: gli oggetti su cui scegliere
+ 
+
+}*
+
+<div style="padding-bottom: 50px;" class="alert alert-${_color}"> 
+    
+    <div class="col-xs-4">${_title}</div>
+    
+    <div class="col-xs-8">
+    
+    #{if _type.equals("hoursAndMinutes")}
+      <div class="col-xs-2">Ore</div>
+      <div class="col-xs-3">${_hourValue}</div>
+    
+      <div class="col-xs-2">Minuti</div>
+      <div class="col-xs-3">${_minuteValue}</div>
+    #{/if}
+
+   #{if _type.equals("multipleSelect")}
+    <div class="col-xs-8">
+      #{list items:_value, as:'item'}
+        ${item}
+      #{/list}   
+	</div>  
+    #{/if}
+    
+    #{if _type.equals("minutes")}
+      <div class="col-xs-2">Minuti</div>
+      <div class="col-xs-3">${_value}</div>
+    #{/if}
+    
+    #{if _type.equals("radio")}
+      <div class="col-xs-2"></div>
+      <div class="radio-inline">
+	    <input type="radio" name="${_field}" value="true"#{if _value == true} checked#{/if}>Si
+	  </div>
+	
+	  <div class="radio-inline">
+	    <input type="radio" name="${_field}" value="false"#{if _value == false} checked#{/if}>No
+	  </div>
+       
+    #{/if}
+    </div>
+</div>
+

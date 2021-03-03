@@ -1,0 +1,90 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Ore Formazione'  /}
+
+<div class="container">
+
+#{title title:('Ore di formazione ' + year + ' ' + person.fullname ) /}
+
+    #{alert color:'info'}
+     <p>E' possibile aggiungere o modificare le ore di formazione del mese attuale o dei primi giorni del mese
+	    precedente (fino all'invio degli attestati).
+	 </p> 
+  	 <p>Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
+  	
+    #{/alert}
+  	
+    <table class="table table-condensed table-bordered center">
+	  <tr class="warning">
+		<th>Mese</th>
+		<th>Ore di formazione</th>
+		<th>Aggiungi</th>
+		<th>Inviate ad Attestati</th>
+		
+	  </tr>
+	
+	
+	  #{list items:1..12, as: 'mese'}
+	  <tr>
+		<td class="warning">&{'views.tags.display.date.month.' +mese}</td>
+		
+		
+		<!-- Modifica -->
+		<td>
+			#{list items:personMonthRecapList, as: 'pm'}
+				#{if pm != null && pm.month == mese}
+				    <!-- mese attuale o precedente-->	
+				    
+				    <p>
+					      <span class="label label-success">${pm.trainingHours} ore</span>
+					      <span>${pm.fromDate?.format()}</span>
+					      #{if !pm.fromDate?.isEqual(pm.toDate)}
+					      - <span>${pm.toDate?.format()}</span>
+					      #{/if}
+				    
+				      #{if pm.editable }
+						<a href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-async-modal="#defaultModal">
+						<i class="fa fa-pencil"></i></a>						
+						<a href="@{PersonMonths.deleteTrainingHours(pm.id)}" 
+						   data-async-modal="#defaultModal"><span class="glyphicon glyphicon-trash"></span></a>
+					  #{/if}
+					</p>   
+				  #{/if}
+			#{/list}
+		</td>
+		
+		
+		<!-- Inserimento -->
+		<td>
+			#{if (mese == today.getMonthOfYear() && year == today.getYear()) 
+			     || (mese == today.minusMonths(1).getMonthOfYear() && year == today.minusMonths(1).getYear())}
+			     
+				<a href="@{PersonMonths.insertTrainingHours(mese, year)}" data-async-modal="#defaultModal">Inserisci ore di formazione</a>
+			#{/if}
+			
+		</td>
+		
+		
+		<!-- Approvazione -->
+		<td>
+			#{if pm != null && pm.month == mese }
+				#{if mese == today.getMonthOfYear() || mese == today.minusMonths(1).getMonthOfYear()}
+					#{if pm.hoursApproved == true}
+						SI<br>
+					#{/if}
+					#{else}
+						NO<br>
+					#{/else}			
+				#{/if}
+			#{/if}
+			
+		</td>
+	  </tr>
+	  #{/list}
+    </table>
+
+</div>
+
+
+
+

@@ -1,0 +1,20 @@
+#{f.edit _arg, label:_label}
+  %{
+    value = _attrs.containsKey('value') ? _value : field.value
+  }%
+  
+  <select class="form-control ${_class}" multiple select2 name="${field.name}" id="${field.id}"#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+  <option></option>
+    #{list _items}
+       
+      <option value="${_.id}"#{if value.contains(_)} selected#{/if}>
+        #{if _getLabel}
+          ${_.getLabel()}
+        #{/if}
+        #{else}
+          ${_.label()}
+        #{/else}  
+      </option>
+    #{/list}
+  </select>
+#{/f.edit}

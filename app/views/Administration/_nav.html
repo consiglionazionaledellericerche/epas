@@ -1,0 +1,22 @@
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+	<li#{if actionSelected.equals("Administration.generalSetting")} class="active"#{set editable:true /}#{/if}>
+      <a href="@{Administration.generalSetting()}">Impostazioni generali</a>
+    </li>  
+    <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{set editable:true /}#{/if}>
+      <a href="@{Administration.playConfiguration()}">Play!</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.jvmConfiguration")} class="active"#{/if}>
+      <a href="@{Administration.jvmConfiguration()}">Jvm</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.runtimeData")} class="active"#{/if}>
+      <a href="@{Administration.runtimeData()}">Runtime</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.threadsData")} class="active"#{/if}>
+      <a href="@{Administration.threadsData()}">Thread</a>
+    </li>
+    <li#{if actionSelected.equals("Administration.emergency") || actionSelected.equals("Administration.shutdown")} class="active"#{/if}>
+      #{secure.link @Administration.emergency(), fa:'ambulance'}Emergency#{/secure.link}
+    </li>    
+  </ul>
+</div>

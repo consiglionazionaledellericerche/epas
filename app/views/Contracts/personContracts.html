@@ -1,0 +1,134 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + person.fullname /}
+
+ 
+
+  #{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include 'Persons/_tabs.html' /}
+<div class="container">  
+ 	
+  #{panel title:'Configurazione ePAS Contratto Attuale', color:'primary'}
+	
+    #{if wrCurrentContract == null }
+      Il dipendente attualmente non ha un contratto attivo.
+    #{/if}
+    #{else}  
+      #{if wrCurrentContract.initializationMissing() || wrCurrentContract.mealTicketInitBeforeGeneralInit() }
+        #{alert color:'danger', center:true}
+	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale non è correttamente inizializzato.
+	      </p>
+	      #{b.buttons center:true}
+	        #{if wrCurrentContract.initializationMissing()}
+	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	        #{/if}
+	        #{else}
+	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	        #{/else}
+	      #{/b.buttons}
+        #{/alert}
+      #{/if}
+      
+      <form class='form-horizontal'>
+      <!-- Inizio contratto (beginDate) -->
+      #{f.view 'Inizio Contratto', label:'Inizio Contratto', value:wrCurrentContract.value.beginDate.format() /}
+
+      <!-- Scadenza contratto (endDate) -->
+      #{if wrCurrentContract.value.endDate == null && !wrCurrentContract.value.isTemporaryMissing}
+        <!-- tempo indeterminato -->
+        #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Indeterminato' /}
+      #{/if} 
+      #{else}
+        <!-- contratto determinato -->
+        #{if wrCurrentContract.value.isTemporaryMissing}
+          #{f.view 'Fine Contratto', label:'Fine Contratto', value:'Tempo determinato da definire' /}
+        #{/if}
+        #{else}
+          #{f.view 'Fine Contratto', label:'Fine Contratto', value:wrCurrentContract.value.endDate.format() /}            
+        #{/else}
+      #{/else}
+      
+      <!-- Terminazione contratto (endContract) -->
+      #{if wrCurrentContract.value.endContract}
+        #{f.view 'Terminazione Contratto', label:'Terminazione Contratto', value:wrCurrentContract.value.endContract.format() /}
+      #{/if}
+      
+      #{f.view 'In Attestati', value:wrCurrentContract.value.onCertificate /}
+   
+      <!-- Tipo Orario -->
+      #{f.view 'Tipo Orario', value:wrPerson.currentWorkingTimeType.get() /}
+      
+      <!-- Piano Ferie -->
+      #{f.view 'Piano Ferie', value:wrPerson.currentVacationPeriod.get().vacationCode.label() /}
+      
+      *{
+      #{f.view 'Presenza Automatica', value:wrPerson.currentContractStampProfile.get().fixedworkingtime /}
+      }*
+      </form>
+      #{alert color:'info'}
+        E' possibile modificare la configurazione attuale del dipendente attraverso le funzionalità
+  raggiungibili dal pannello sottostante <strong>Gestisci Contratti</strong>.
+      #{/alert}
+    #{/else}
+        
+	#{/panel} 
+
+	#{panel title:'Gestisci Contratti', color:'primary'}
+     #{secure.check 'Contracts.insert'}
+	   <div class="text-center">
+        <p>
+          <a class="btn btn-success" href="@{Contracts.insert('person.id':person.id)}" data-async-modal="#defaultModal">
+            <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto
+          </a>
+        </p>
+      </div>
+      #{/secure.check}
+  	  <table class="table table-hover">
+		<tr class="warning">
+			<th>Inizio contratto</th>
+			<th>Fine contratto</th>
+			<th>Terminazione<br>esperienza</th>
+			<th>Continuativo del<br> precedente</th>
+			<th>Gestisci</th>
+			<th>Storico</th>
+		</tr>
+    #{list items:contractList, as:'contract'}
+ 		<tr>
+		<td>${contract.value.beginDate?.format()}</td>
+		
+		<td>
+        #{if contract.value.endDate}
+          ${contract.value.endDate.format()}
+        #{/if}
+		#{elseif contract.value.isTemporaryMissing}
+          <em class="text-danger">Tempo determinato da definire !!!</em>
+        #{/elseif}
+        #{else}
+          <em>Indeterminato</em>
+        #{/else}
+		</td>
+		
+		<td>${contract.value.endContract?.format()}</td>
+		<td align="center">#{if contract.value.previousContract != null} SI #{/if}</td>
+		<td align="center">
+				#{b.buttons center:true}
+					#{secure.check 'Contracts.merge'}
+					#{b.link @Contracts.merge(contract.value.id), color:'warning', title:'Merge'/}
+					#{/secure.check}
+					#{secure.check 'Contracts.split'}
+					#{b.link @Contracts.split(contract.value.id), color:'danger', title:'Split'/}
+        			#{/secure.check}
+        			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+      			#{/b.buttons}
+		</td>
+		<td>#{secure.link @Historicals.contractHistory(contract.value.id, 'CONTRACT'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
+		</tr>
+	  #{/list}
+	  </table>
+	#{/panel}
+</div>

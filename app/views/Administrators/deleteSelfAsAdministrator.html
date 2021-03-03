@@ -1,0 +1,22 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Rimozione amministratore ' + office.name /}
+
+<div class="container-fluid center">
+  <div class="well">
+    <p class="lead">ATTENZIONE!!!</p>
+    <p> 
+    Una volta rimossi i diritti di amministrazione per ${person.name} ${person.surname}
+     non sarà più possibile  visualizzare le informazioni su ${office.name}.
+    </p>
+  </div>  
+    
+  <p>
+    Confermare la rimozione dell'utente <strong>${person.user.username}</strong>
+    <br>da amministratore di <strong>${office.name}</strong>
+  </p>
+     
+    
+    <a class="btn btn-danger" 
+    href="@{Administrators.deleteAdministrator(office.id, person.id)}">Conferma elimina</a>
+  
+</div>

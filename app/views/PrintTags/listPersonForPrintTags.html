@@ -1,0 +1,56 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stampa cartellino' /}
+
+#{set 'moreStyles'}
+<style type="text/css">
+  .panel{
+  margin-top: 5%;
+  }
+</style>
+#{get 'moreStyles' /}
+#{/set}
+<div class="container">
+  #{title title:'Stampa cartellino', administration:true /}
+</div>
+<div class="container">
+
+  #{panel title:'Creazione cartellino mensile del Personale', color:'primary'}
+
+  #{alert color:'info'}
+  <p>Sarà generato un file PDF contenenti le informazioni della persona selezionata.</p>
+  <p>Selezionare uno dei nomi presenti nella lista e premere ok</p>
+  #{/alert}
+
+  #{form @PrintTags.showTag(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  	<input type="hidden" name="year" value="${date.getYear()}"/>
+  	<input type="hidden" name="officeId" value="${office.id}"/>
+  #{f.booleanRadio 'forAll', label:'Per tutti' /}
+  <div id="single-person" #{if forAll} style="display: none" #{/if}>	
+  #{f.selectModel 'person', items:personList /}
+  </div>
+  #{f.checkbox 'includeStampingDetails' /}
+  
+  #{b.buttons center:'true'}
+  #{b.back /}
+  #{b.ok /}
+  #{/b.buttons}
+  #{/form}
+  #{/panel}
+
+</div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+					
+		$("input[name='forAll']").change(function(){
+			
+			jQuery( "#single-person" ).toggle(0);
+		
+		});
+		       
+	 });
+	</script>
+#{/set}

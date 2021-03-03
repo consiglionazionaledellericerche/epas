@@ -1,0 +1,8 @@
+[
+	#{list frequentAbsenceCodeList, as:'frequentAbsence'}
+			{
+			"codice" : "${frequentAbsence.code}",
+  			"descrizione" : "${frequentAbsence.description}"  
+  			}${frequentAbsence.isLast ? '' : ','}
+  	#{/list}
+]

@@ -1,0 +1,24 @@
+[
+  	#{list shiftPeriods, as:'shiftPeriod'}
+  		#{if shiftPeriod.cancelled == false}
+  			{
+  			"id" : ${shiftPeriod.person.id},
+  			"start" : "${shiftPeriod.start}",
+  			"end" : "${shiftPeriod.end}",
+  			"cancelled": "${shiftPeriod.cancelled}",
+  			"shiftSlot": "${shiftPeriod.shiftSlot.getName()}",
+  			"ttStart": "${shiftPeriod.startSlot}",
+  			"ttEnd": "${shiftPeriod.endSlot}"
+  			}${shiftPeriod_isLast ? '' : ','}
+  		#{/if}
+  		#{else}
+  			{
+  			"start" : "${shiftPeriod.start}",
+  			"end" : "${shiftPeriod.end}",
+  			"ttStart": "${shiftPeriod.startSlot}",
+  			"ttEnd": "${shiftPeriod.endSlot}",
+  			"cancelled": "${shiftPeriod.cancelled}"
+  			}${shiftPeriod_isLast ? '' : ','}  	
+	 	#{/else}
+  	#{/list}
+]

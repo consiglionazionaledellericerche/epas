@@ -1,0 +1,101 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Timbrature'  /}
+
+#{set 'moreStyles'}
+  #{stylesheet 'stampingsTable.css'/}
+#{/set}
+
+
+
+<div class="col-xs-12 col-lg-8">
+
+  <table id="tabellonetimbrature" class="table table-bordered table-condensed">
+
+    <tr>
+      <th class="group-single">Giorno</th>
+      <th class="group-single">Buono<br>pasto</th>
+      <th class="invisible"></th>
+
+      <th class="group-single">Codice <br>assenza</th>
+
+      #{list items:1..psDto.numberOfInOut, as:'i'}
+      <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
+      <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
+      #{/list}
+
+      #{secure.check 'Stampings.insert', target: person}
+        #{secure.check 'Stampings.insert', target: yearMonth }
+        <th class="group-single">Inserisci<br>timbratura</th>
+        #{/secure.check}
+      #{/secure.check}
+
+      <th class="invisible"></th>
+
+      <th class="group-single">Tempo<br>lavoro</th>
+      <th class="group-single">Diffe-<br/>renza</th>
+      <th class="group-single">Progres-<br/>sivo</th>
+      <th class="group-single">Tipo<br>Orario</th>
+    </tr>
+
+    #{list items:psDto.daysRecap, as:'dayRecap'}
+
+    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
+
+    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+      #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" webui-popover-hover data-content="&{'firstDay'}"></i>#{/if}
+      #{secure.link @PersonDays.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+      ${dayRecap.personDay.date.shortDayName()}
+      #{/secure.link}
+    </td>
+
+    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
+
+    <td class="invisible"></td>
+
+    #{include './personStampingComponents/_absencesTemplate.html' /}
+
+    #{include './personStampingComponents/_stampingsTemplate.html' /}
+    <td class="invisible"></td>
+    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
+    #{include './personStampingComponents/_workingTimeTypePopover.html' /}
+    </tr>
+    #{/list}
+  </table>
+</div>
+
+<div id="riepiloghi">
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+    *{
+    #{secure.link @Persons.edit(person.id), target:person}
+      ${person.fullname}
+	#{/secure.link}
+	}*
+    #{include './personStampingComponents/_alerts.html' /}
+    #{if psDto.absenceToRecoverYet}
+    	#{include './personStampingComponents/_absencesRecap.html' /}
+    #{/if}
+    #{include './personStampingComponents/_contractsRecap.html' /}
+  </div>
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
+    #{include './personStampingComponents/_notes.html' /}
+  </div>
+  
+  #{secure.check 'Administration.switchUserTo'}
+    <a class="btn btn-warning btn-xs" href="@{Administration.switchUserToPersonUser(person.id)}">Assumi identità</a>
+  #{/secure.check}
+  
+</div>
+
+<div id="modalStamping" class="modal fade container" tabindex="-1"></div>
+
+<div id="modalAbsence" class="modal fade container" tabindex="-1"></div>
+
+<div id="modalGroupAbsence" class="modal fade container" tabindex="-1"></div>
+
+<div id="modalVariation" class="modal fade container" tabindex="-1"></div>
+
+
+

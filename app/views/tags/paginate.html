@@ -1,0 +1,66 @@
+%{
+  results = _arg
+  if (_attrs) {
+  	attributes = ' ' + helpers.Web.serialize(_attrs, "arg")
+  } else {
+    attributes = ''
+  }
+}%
+
+#{if results != null}
+
+#{if results.total == 0}
+    <div class="alert alert-warning">${'noResultFound'.label()}</div>
+#{/if}
+
+#{else}
+
+#{doBody /}
+
+<div class="pull-right">
+${'pagedResults'.label(results.total, results.offset + 1, Math.min(results.offset + results.limit, results.total))}
+</div>
+<div class="">
+%{
+  paginator = helpers.Paginator.instanceFor(results);
+}%
+#{if paginator.hasPrevious || paginator.hasNext}
+<ul class="pagination">
+#{if paginator.hasPrevious}
+ #{if paginator.tooLong}
+<li><a href="${paginator.simpleUrl}" data-post="${paginator.previousData.toJson()}"${attributes.raw()}>&larr;</a>
+ #{/if}#{else}
+<li><a href="${paginator.previous}"${attributes.raw()}>&larr;</a></li>
+ #{/else}
+#{/if}
+#{else}
+<li class="disabled"><span>&larr;</span></li>
+#{/else}
+#{list items:paginator.pages, as:'page'}
+#{if page == paginator.current}
+<li class="active"><span>${page}</span></li>
+#{/if}
+#{else}
+ #{if paginator.tooLong}
+<li><a href="${paginator.simpleUrl}" data-post="${paginator.dataFor(page).toJson()}"${attributes.raw()}>${page}</a>
+ #{/if}#{else}
+<li><a href="${paginator.urlFor(page)}"${attributes.raw()}>${page}</a></li>
+ #{/else}
+#{/else}
+#{/list}
+#{if paginator.hasNext}
+ #{if paginator.tooLong}
+<li><a href="${paginator.simpleUrl}" data-post="${paginator.nextData.toJson()}"${attributes.raw()}>&rarr;</a>
+ #{/if}#{else}
+<li><a href="${paginator.next}"${attributes.raw()}>&rarr;</a></li>
+ #{/else}
+#{/if}
+#{else}
+<li class="disabled"><span>&rarr;</span></li>
+#{/else}
+</ul>
+#{/if}
+</div>
+
+#{/else}
+#{/if}

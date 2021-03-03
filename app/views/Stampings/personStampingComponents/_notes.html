@@ -1,0 +1,63 @@
+#{list items:psDto.contractMonths, as:'mese'} 
+ #{accordionGroup 'tickets'}
+ 
+  #{accordionItem ('accordion_contract_meal'+mese.contract.value.id), parent:'tickets', 
+                  title:('Situazione buoni pasto '+mese.value.contractDescription), open:true, color:'primary'} 
+       #{if psDto.currentMonth}
+	   	   <p><em>Il giorno attuale non è considerato nel conteggio dei buoni pasto utilizzati.</em></p>
+   	   #{/if}
+   	   <table class="table table-bordered table-condensed">
+   	      #{if mese.value.buoniPastoDaInizializzazione > 0 || mese.value.buoniPastoDaInizializzazione < 0}
+   	       <tr>
+		    <td class="col-xs-10">Buoni pasto da inizializzazione <em>(al ${mese.value.contract.sourceDateMealTicket.format()})</em></td>
+		    <td class="col-xs-2 success">${mese.value.buoniPastoDaInizializzazione}</td>
+		   </tr>
+   	      #{/if}
+   	      #{else}
+   	       <tr>
+		    <td class="col-xs-10">Buoni pasto rimanenti dai mesi precedenti</td>
+		    <td class="col-xs-2 success">${mese.value.buoniPastoDalMesePrecedente}</td>
+		   </tr>
+   	      #{/else}
+   	     
+		  <tr>
+		    <td class="col-xs-10">Buoni pasto consegnati nel mese</td>
+		    <td class="col-xs-2 success">${mese.value.buoniPastoConsegnatiNelMese}</td>
+		  </tr>
+		  <tr>
+				<td class="col-xs-10"> Buoni pasto maturati nel mese</td>
+				<td class="col-xs-2 danger">${mese.value.buoniPastoUsatiNelMese}</td>
+		  </tr>
+		  <tr class="warning">
+				<td class="col-xs-10">Buoni pasto rimanenti alla data di oggi</td>
+				<td  class="col-xs-2"><strong>${mese.value.remainingMealTickets}</strong></td>
+		  </tr>	
+	    </table>
+	  
+  #{/accordionItem}
+  #{/accordionGroup}
+#{/list}
+
+  *{
+  #{accordionGroup 'absenceRecap'}
+  #{accordionItem 'accordion_absence', parent:'absenceRecap', 
+                  title:'Riepilogo Assenze', open:false, color:'primary'} 
+        <table class="table table-condensed table-bordered">
+	      <tr>
+		    <th width="80">Codice assenza</th>
+		    <th width="200">Descrizione</th>
+		    <th width="80">Numero giorni</th>
+		  </tr>
+		  #{list items:psDto.absenceCodeMap.entrySet(), as:'entry'}
+		  <tr>
+		    <td>${entry.getKey().code}</td>     
+		    <td>${entry.getKey().description}</td>	
+		    <td>${entry.getValue()}</td>	
+	      </tr>
+		  #{/list}
+        </table>
+  #{/accordionItem}
+  
+  #{/accordionGroup}
+  }*
+  

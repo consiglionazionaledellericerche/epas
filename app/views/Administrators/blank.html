@@ -1,0 +1,25 @@
+#{modalAsync id:'modalInsertUro', button:'Salva', title:'Nuovo amministratore'}
+
+  <div class="alert alert-success" role="alert">
+  Nuovo amministratore per <strong>${uro.office.name}</strong> 
+  </div>
+
+
+  <div id="uroData">
+
+    #{form action:@Administrators.save(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#uroList',
+	    'data-async-error':'#uroData' }
+	
+	#{f.hidden 'uro.office.id' /}
+
+	#{f.selectModel 'uro.user',items:templateUtility.usersInInstitute(uro.office.institute), getLabel:true /}
+	#{f.selectModel 'uro.role',items:templateUtility.rolesAssignable(uro.office) /} 
+
+	<p class="center">
+	  <input class="btn btn-primary" type="submit" value="Inserisci" />
+	</p>
+  #{/form}
+ </div>
+
+#{/modalAsync}

@@ -1,0 +1,37 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Nuova timetable' /}
+
+<div class="container">
+#{title title:('Definisci una nuova time table per i turni ') /}
+#{form @Competences.configureShiftTimeTable(), class:'form-horizontal'}
+  #{f.hidden 'step', value:step /}
+    
+  	#{if step == 1}  
+  	
+		#{include './configurationShiftTimeTable/_step1.html' /}		
+		
+	#{/if}
+	
+	#{if step == 2}
+		#{include './configurationShiftTimeTable/_step2.html' /}
+
+	#{/if}
+	
+	#{if step == 3}
+		#{include './configurationShiftTimeTable/_step3.html' /}
+		
+	#{/if}
+
+    #{b.buttons center:true}
+        #{if step != 3 }
+			#{b.submit 'Avanti' /}
+		#{/if}
+		#{else}
+			#{b.submit 'Crea' /}
+		#{/else} 
+    #{/b.buttons}
+
+#{/form}
+</div>
+

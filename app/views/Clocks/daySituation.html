@@ -1,0 +1,183 @@
+#{extends 'main.html' /}
+#{set header:'clock' /}
+#{set title: 'ePAS - Timbratura web'  /}
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+function preventBack() {
+  window.history.forward();
+}
+setTimeout("preventBack()", 0);
+window.onunload = function() {
+  null
+};
+
+function startTime() {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  // add a zero in front of numbers<10
+  m = checkTime(m);
+  s = checkTime(s);
+  document.getElementById('clockBase').innerHTML = h + ":" + m + ":" + s;
+  t = setTimeout(function() {
+    startTime()
+  }, 500);
+}
+
+function checkTime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+</script>
+#{/set}
+
+#{set 'moreStyles'}
+#{stylesheet 'stampingsTable.css'/}
+#{/set}
+
+<div class="container">
+
+  <a href="@{secure.logout()}" class="btn btn-default col-xs-2 pull-right"><i class="fa fa-share text-danger"> Logout</i></a>
+
+  <div class="row">
+    <div class="col-xs-12" id="clockBase"></div>
+  </div>
+
+  <div class="center">
+    <h2>Situazione ${user.person.fullname} ${dayRecap.personDay.date.format()}</h2>
+    <table id="tabellonetimbrature" class="table table-bordered table-condensed">
+
+      <tr>
+        <th class="group-single">Giorno</th>
+        <th class="group-single">Buono<br>pasto</th>
+        <th class="invisible"></th>
+
+        <th class="group-single">Codice <br>assenza</th>
+
+        #{list items:1..numberOfInOut, as:'i'}
+        <th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
+        <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
+        #{/list}
+
+        <th class="invisible"></th>
+
+        <th class="group-single">Tempo<br>lavoro</th>
+        <th class="group-single">Diffe-<br/>renza</th>
+        <th class="group-single">Progres-<br/>sivo</th>
+        <th class="group-single">Tipo<br>Orario</th>
+      </tr>
+
+      <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
+
+      <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+        ${dayRecap.personDay.date.shortDayName()}
+      </td>
+
+      #{include 'Stampings/personStampingComponents/_mealTicketsTemplate.html' /}
+      <td class="invisible"></td>
+
+      <!-- ASSENZE -->
+      <td class="assenza default-single">
+      #{list items:dayRecap.personDay.absences, as:'absence'}
+      
+       <!-- Calcolo dei gruppi coinvolti -->
+       %{ 
+         involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
+       }%
+    
+       <!-- Assenza da non visualizzare perchè è un rimpiazzamento corretto -->
+       #{if absence.isReplacing(involvedGroups) && !absence.isOrphanReplacing(involvedGroups) }#{/if}
+       #{else}
+
+          <!-- Costruzione contenuto popover -->
+	      #{absences.absence-popover absence:absence, person:person, noLabel:true /}
+	      
+	      <!-- Link popover (nome del codice) -->
+	      <span webui-popover-hover data-url="#${absence.id}"
+	
+	      *{ colore codice assenza }*
+	      #{if !absence.troubles.empty} class="text-danger" #{/if}
+	      #{elseif absence.absenceType.internalUse} class="text-muted" #{/elseif}
+	      #{else} class="text-primary" #{/else}>
+	
+	      #{if !absence.troubles.empty}
+	      <strong>${absence.absenceType.code}</strong>
+	      #{/if}
+	      #{else}
+	        ${absence.absenceType.code}
+	      #{/else}
+	      </span>
+
+       #{/else}
+       
+      #{/list}
+      </td>
+
+      <!-- TIMBRATURE -->
+      #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+
+      *{ posizione timbratura }*
+      <td class="position${stampingTemplate.pairPosition} stamping
+
+        *{ colore timbratura }*
+        #{if stampingTemplate.colour.equals("in")} default-left" #{/if}
+      #{elseif stampingTemplate.colour.equals("out")} default-right" #{/elseif}
+      #{elseif stampingTemplate.colour.equals("warn")} warn" #{/elseif}
+
+      *{ popover }*
+      #{if stampingTemplate.showPopover()} webui-popover-hover
+      data-url="#${stampingTemplate.stamping.id}" #{/if}
+      >
+      #{if stampingTemplate.date}
+      ${stampingTemplate.hour}
+      #{/if}
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <a title="Timbratura di servizio mancante" class="initialism">
+        <i class="icon-warning-sign"></i>
+        </a>
+      #{/elseif}
+
+      #{if stampingTemplate.stamping.stampType}
+      <strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+        #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+      <strong>${smt.code}</strong>
+      #{/list}
+      </td>
+
+      #{if stampingTemplate.showPopover()}
+      <div class="webui-popover-content" id="${stampingTemplate.stamping.id}">
+        #{if stampingTemplate.stamping.stampType}
+        <p><strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+          ${stampingTemplate.stamping.stampType.description}</p>
+        #{/if}
+        #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <p><strong>${smt.code}</strong> ${smt.description}</p>
+        #{/list}
+        #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>
+        #{/if}
+      </div>
+      #{/if}
+      #{/list}
+
+      <td class="invisible"></td>
+      #{include 'Stampings/personStampingComponents/_workTimeDifferenceProgressive.html' /}
+      #{include 'Stampings/personStampingComponents/_workingTimeTypePopover.html' /}
+
+      </tr>
+    </table>
+  </div>
+
+  <a href="@{Clocks.webStamping("in")}" class="btn btn-lg btn-default col-xs-offset-3" data-async-modal="#defaultModal">
+  <i class="fa fa-sign-in text-success"> &{'stamping.in'}</i>
+  </a>
+
+  <a href="@{Clocks.webStamping("out")}" class="btn btn-lg btn-default col-xs-offset-1" data-async-modal="#defaultModal">
+  <i class="fa fa-sign-out text-primary"> &{'stamping.out'}</i>
+  </a>
+
+</div>

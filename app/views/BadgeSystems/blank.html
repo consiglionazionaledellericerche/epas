@@ -1,0 +1,28 @@
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'BadgeSystems.blank' }
+
+<div class="alert alert-info" role="alert">
+  Inserisci i dati del nuovo <strong><i class="fa fa-credit-card"></i> &{'badgeSystem'}</strong>.
+</div>
+
+<div id="badgeSystemData">
+
+  #{form action:@save(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#badgeSystemList',
+  'data-async-error':'#badgeSystemData'}
+
+  #{f.input 'badgeSystem.name', required:true /}
+  #{f.input 'badgeSystem.description' /}
+
+  #{f.selectModel 'badgeSystem.office', items:templateUtility.officeForBadgeReaders(), required:true
+  /}
+
+  #{b.buttons center:true}
+  #{b.cancel @index() /}
+  #{b.save /}
+  #{/b.buttons}
+
+  #{/form}
+
+</div>
+
+#{/modalAsync}

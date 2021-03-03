@@ -1,0 +1,50 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Export situazione mensile' /}
+
+<div class="container">
+#{title title:('Export periodico per rendicontazione ') /}
+
+	#{alert color:'info'}
+		<i class="fa fa-info-circle fa-2x" aria-hidden="true"> Info:</i><br><br>
+  		<p>Una volta scelti i parametri per cui ottenere l'eportazione, verrà generato un file <strong>.zip</strong>
+  		che conterrà o la lista di file <strong>.csv</strong> per il periodo selezionato,
+  		oppure un file <strong>.xls</strong> contenente un foglio per ogni mese appartenente all'intervallo specificato. </p>
+  		
+  	#{/alert}
+
+
+#{form @Charts.exportPersonalTimesheetSituation(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+  	<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+  	<input type="hidden" name="year" value="${date.getYear()}"/>
+  	<input type="hidden" name="personId" value="${person.id}"/>
+	
+  	#{f.selectEnum 'exportFile', items:controllers.Charts.ExportFile, 
+		value:exportFile, byEquals:true /}
+	#{f.date 'beginDate'/}
+  	#{f.date 'endDate' /}
+  	#{f.booleanRadio 'onlyMission', label:'Missioni con tempo a lavoro', popover:'true' /}
+    
+    
+  	#{b.buttons center:'true'}
+  		#{b.back /}
+  		#{b.ok /}
+  	#{/b.buttons}
+  	
+  	#{/form}
+
+</div>
+
+#{set 'moreScripts'}
+  <script type="text/javascript">
+	$(document).ready(function() {
+					
+		$("input[name='forAll']").change(function(){
+			
+			jQuery( "#single-person" ).toggle(0);
+		
+		});
+		       
+	 });
+	</script>
+#{/set}

@@ -1,0 +1,32 @@
+#{modalAsync id:'modalActivateService', button:'Salva', 
+title:(comp.disabled ? 'Abilita codice competenza' : 'Disabilita codice competenza')}
+<div id="absenceCodeData">
+  #{form action:@Competences.evaluateCompetenceCode(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  	#{f.hidden 'competenceCodeId', value:comp.id /}
+  	#{f.hidden 'confirmed', value:confirmed /}
+  	#{if !comp.disabled}
+  		#{alert color:'danger'}
+  			<p>Disabilitando questo codice di competenza, esso rimarrà comunque visibile nella lista dei codici senza gruppo, opportunamente evidenziato,
+  				ma non risulterà più associabile ad alcuna persona presente in anagrafica nella pagina di abilitazione delle competenze.</p>
+  		#{/alert}
+  	#{/if}
+  	#{else}
+  		#{alert color:'success'}
+  			<p>Abilitando questo codice di competenza, esso tornerà ad avere una normale visualizzazione nella lista dei codici senza gruppo, 
+  				e tornerà ad essere associabile nella pagina di abilitazione delle competenze.</p>
+  		#{/alert}
+  	#{/else}
+  
+	#{b.buttons center:true}
+		#{if comp.disabled}
+			#{b.submit 'Abilita', color:'success' /}
+		#{/if}
+		#{else}
+			#{b.submit 'Disabilita', color:'danger' /}
+		#{/else}
+	#{/b.buttons}
+  #{/form}
+</div>
+#{/modalAsync}

@@ -1,0 +1,89 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
+
+<div class="container">
+
+  #{title title:'Gestione Istituti e Sedi' /}
+  
+  <div class="row">
+	  <div class="col-md-9">
+	  #{form action:@Institutes.list(), class:'form-inline', method:'GET',
+	  'data-reload':'#results', autocomplete:'off'}
+	  
+	    #{ff.finput 'instituteName', sronly:true, placeholder:'Filtra nome istituto', faicon:'university' /}
+	    #{ff.finput 'officeName', sronly:true, placeholder:'Filtra nome sede', faicon:'cogs' /}
+	    #{ff.finput 'codes', sronly:true, placeholder:'Filtra codici', faicon:'barcode' /}
+	    
+	  #{/form}
+	  </div>
+	  <div class="col-md-3">
+	        #{secure.check 'Institutes.blank'}
+	        #{b.actions}
+	          <a class="btn btn-success" href="@{blank()}" data-async-modal="#modalEditInstitute">
+	          <i class="fa fa-plus"></i> &{'Institutes.blank'}
+	          </a>
+	        #{/b.actions}
+	     #{/secure.check}
+	  </div>
+  </div>
+  
+
+  <div id="instituteList"> <!-- per il risultato della modale asincrona -->
+
+    <section id="results">
+      #{paginate results}
+
+      #{list results.results, as:'institute'}
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-grey">
+          <div class="pull-right btn-group">
+            #{secure.check 'Offices.blank'}
+            <a class="btn btn-sm btn-default" href="@{Offices.blank(institute.id)}" data-async-modal="#modalInsertOffice">
+              <i class="fa fa-plus"></i> Aggiungi sede</a>
+            #{/secure.check}
+          </div>
+          <h4>
+            #{secure.link @edit(institute.id), 'data-async-modal':'#modalEditInstitute',fa:'university'}
+              <span webui-popover-hover data-placement="vertical">${institute.name}</span>
+              <div class="webui-popover-content">
+                #{if institute.cds}<em>cds: ${institute.cds}</em>#{/if}
+                #{else}<small><em>cds non impostato</em></small>#{/else}
+              </div>
+            #{/secure.link}
+          </h4>
+
+        </li>
+        #{list institute.seats, as:'seat'}
+        #{if seat.endDate != null}
+        <li class="list-group-item  list-group-item-danger">
+          #{include './_office.html' /}
+        </li>
+        #{/if}
+        #{else} 
+        <li class="list-group-item  list-group-item-bianco">
+          #{include './_office.html' /}
+        </li>
+        #{/else}
+        #{/list}
+      </ul>
+
+      #{/list}
+      #{/paginate}
+    </section>
+  </div>
+
+  <!--Link per la vista di import degli uffici da Perseo -->
+  *{
+  <a href="@{Import.officeList()}" class="btn btn-default">
+    <i class="fa fa-cloud-download text-primary"> Importa Sedi</i>
+  </a>
+  }*
+</div>
+
+
+<div id="modalEditInstitute" class="modal fade container" tabindex="-1"></div>
+
+<div id="modalInsertOffice" class="modal fade container" tabindex="-1"></div>
+
+<!-- <a class="btn btn-primary pull-right" href="@\{Import.officeList()}">Importa da Perseo</a>	 -->

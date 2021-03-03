@@ -1,0 +1,80 @@
+#{ if switchYear && switchMonth}
+<ul class="hidden-xs nav navbar-nav">
+  <li>
+    <a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}"><i
+            class="fa fa-arrow-left"></i></a></li>
+</ul>
+#{/if}
+#{if switchYear }
+<ul id="nav-year" class="nav navbar-nav">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      #{list items:navYears, as:'year'}
+      <li><a href="?year=${year}&month=${currentData.month}&personId=${currentData.personId}&officeId=${currentData.officeId}">${year}</a></li>
+      #{/list}
+    </ul>
+  </li>
+</ul>
+#{/if}
+#{if switchMonth}
+<ul id="nav-month" class="nav navbar-nav">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      #{list items:1..12, as:'month'}
+      <li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.getDayOfMonth(month)}">&{'Month.'+month}</a></li>
+      #{/list}
+    </ul>
+  </li>
+</ul>
+#{/if}
+#{ if switchYear && switchMonth }
+<ul class="hidden-xs nav navbar-nav">
+  <li>
+    <a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.day}"><i
+            class="fa fa-arrow-right"></i></a></li>
+</ul>
+#{/if}
+#{if switchDay }
+#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
+#{f.hidden 'actionSelected' /}
+<div class="form-group">
+  <!-- Lista giorni -->
+  #{select 'day', value:session.get("daySelected"), class:'form-control', id:'day', onChange:'javascript:this.form.submit()'}
+  #{list items:1..currentData.daysInMonth(), as:'d'}
+  #{option d}${d}#{/option}
+  #{/list}
+  #{/select}
+</div>
+
+#{/form}
+#{/if}
+#{if switchPerson}
+#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form',
+onChange:'javascript:this.form.submit()' }
+#{f.hidden 'actionSelected' /}
+<div class="form-group">
+  <div class="form-group">
+    <select name="person.id" data-switcher onChange="javascript:this.form.submit()">
+      #{list items:navPersons, as:'person'}
+      <option value="${person.id}" #{if person?.id == currentData.personId} selected#{/if}>${person.surname + ' ' + person.name}</option>
+      #{/list}
+    </select>
+  </div>
+</div>
+#{/form}
+#{/if}
+#{if switchOffice}
+#{form @SwitchTemplate.updateOffice(), class: 'navbar-form navbar-left my-navbar-form',
+onChange:'javascript:this.form.submit()' }
+#{f.hidden 'actionSelected' /}
+<div class="form-group">
+  <select name="office.id" data-switcher onChange="javascript:this.form.submit()">
+    #{list items:navOffices, as:'office'}
+      <option value="${office.id}" #{if office?.id == currentData.officeId} selected#{/if}>${office.name}</option>
+    #{/list}
+  </select>
+</div>
+#{/form}
+#{/if}
