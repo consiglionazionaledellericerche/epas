@@ -27,11 +27,8 @@ ePAS è attualmente utilizzato da più Enti di Ricerca.
 ePAS offre al dipendente le seguenti principali funzionalità:
 
 -  consultazione della propria situazione presenze giornaliera/mensile/annuale;
-
 -  timbrature, assenze, missioni, riepilogo orari di lavoro;
-
 -  riepilogo ferie/riposi compensativi utilizzate e residue;
-
 -  competenze mensili e annuali.
 
 ## Funzionalità per gli amministatori del personale
@@ -41,15 +38,11 @@ del personale di:
 
 -  inserire, modificare e cancellare il personale afferente
    all’istituto/UO;
-
 -  gestire le varie tipologie di orario consentite dal Regolamento CNR;
-
 -  inviare, a fine mese, gli attestati di presenza del personale
    (sistema integrato con la procedura “Attestati” del CNR);
-
 -  disporre, in generale, della completa amministrazione e gestione
    delle informazioni;
-
 -  pianificare, gestire e validare i calendari di servizi di turno e
    reperibilità.
 
@@ -59,16 +52,12 @@ Per il CNR il servizio è installato presso la sede centrale del CNR ed è attua
 
   - [Siper](https://consiglionazionaledellericerche.github.io/docs/siper) 
     (per poter ricavare i dati del personale);
-
   - il nuovo sistema 
     [Attestati](https://consiglionazionaledellericerche.github.io/docs/attestati.html)
     (per l'invio mensile degli attestati di  presenza);
-
   - [OIL](https://consiglionazionaledellericerche.github.io/docs/attestati.html) 
     (per la gestione delle segnalazioni e delle richieste di assistenza);
-
   - Identity Provider del CNR (per l'autenticazione tramite le credenziali Siper);
-
   - [Missioni](https://consiglionazionaledellericerche.github.io/docs/missioni.html) 
     (per l'inserimento automatizzato dei codici di missione).
 
@@ -105,6 +94,14 @@ curl -fsSL https://raw.githubusercontent.com/consiglionazionaledellericerche/epa
 ```
 
 Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosarailicenziato_ (da cambiare il prima possibile). 
+
+## Credits
+
+[Istituto di Informatica e Telematica del CNR](https://www.iit.cnr.it)
+
+  - Cristian Lucchesi <cristian.lucchesi@iit.cnr.it>
+  - Maurizio Martinelli <maurizio.martinelli@iit.cnr.it>
+  - Dario Tagliaferri <dario.tagliaferri@iit.cnr.it>
 
 ## Vedi anche
 
