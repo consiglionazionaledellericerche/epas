@@ -27,7 +27,9 @@ Si entrerà a questo punto nell'area di login:
    Schermata di login attestati
    
 A questo livello viene posta all'attenzione dell'amministratore tutta la procedura da seguire per
-effettuare un corretto invio degli attestati di presenza, a partire dallo stralcio dei dati fino alla spiegazione punto per punto di quel che farà la procedura di ePAS una volta collegato al sistema centrale all'indirizzo *https://attestati.rm.cnr.it/attestati*
+effettuare un corretto invio degli attestati di presenza, a partire dallo stralcio dei dati fino
+alla spiegazione punto per punto di quel che farà la procedura di ePAS una volta collegato al
+sistema centrale all'indirizzo *https://attestati.rm.cnr.it/attestati*
 
 Le credenziali per l'accesso al sistema della sede centrale sono quelle relative agli account
 **SIPER** in dotazione a ciascun dipendente del personale amministrativo.
