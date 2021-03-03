@@ -320,8 +320,8 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per aggiornare il mese successivo.
-   * @param month mese di partenza.
    *
+   * @param month mese di partenza.
    * @return mese successivo a mese di partenza.
    */
   public final int computeNextMonth(final int month) {

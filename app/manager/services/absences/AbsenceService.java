@@ -1,5 +1,18 @@
-/**
- * I Parametri di ePAS.
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package manager.services.absences;
@@ -225,6 +238,14 @@ public class AbsenceService {
       LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
       Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
 
+    if ((from != null && from.isBefore(from.minusMonths(6)))
+        || (to != null && to.isAfter(from.plusMonths(6)))) {
+      log.warn("ATTENZIONE effettuo la simulazione di inserimento delle assenze di {} "
+          + "a partire da {} fino a {}. Il periodo è molto lungo, potrebbe compromettere "
+          + "le presentazioni del sistema.",
+          person.getFullname(), from, to);
+    }
+
     // Inserimento forzato (nessun controllo)
     if (forceInsert) {
       Preconditions.checkNotNull(absenceType);
@@ -432,9 +453,8 @@ public class AbsenceService {
 
     // scan dei gruppi
     log.info("Chiamata la scan delle assenze per {} a partire dalla data {}", person, from);
-    absenceScan.scan();
 
-    log.debug("");
+    absenceScan.scan();
 
     return absenceScan;
 

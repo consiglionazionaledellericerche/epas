@@ -25,6 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Mostra la versione dell'applicazione in funzione del file VERSION.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class Version extends Controller {
@@ -37,7 +43,7 @@ public class Version extends Controller {
     try {
       version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
     } catch (IOException ex) {
-      log.error("File di versione 'VERSION' non trovato");
+      log.warn("File di versione 'VERSION' non trovato");
     }
     render(version);
   }
