@@ -1,0 +1,22 @@
+	        <span webui-popover-hover data-url="#${absence.id}"
+		      
+		        *{ colore codice assenza }*
+		        #{if !absence.troubles.empty}              class="text-danger"   #{/if}
+		        #{elseif absence.absenceType.internalUse}  class="text-muted"    #{/elseif}
+		        #{else}                                    class="text-primary"  #{/else}>
+		        
+			    #{if !absence.troubles.empty} 
+			      <strong>${absence.absenceType.code}</strong>
+			    #{/if}
+			    #{else} 
+			      ${absence.absenceType.code} 
+			    #{/else}
+			    
+			    <!-- Asterisco presenza rimpiazzamento (solo per amministratore) -->
+			    #{secure.check 'AbsenceGroups.edit'}
+			      #{if absence.hasReplacing() }
+			        *
+			      #{/if}
+			    #{/secure.check}
+			    
+			</span>

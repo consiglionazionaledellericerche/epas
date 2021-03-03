@@ -1,0 +1,35 @@
+<section id="normalResults">
+  #{paginate results}
+  <ul class="list-group">
+    #{list items:results.results, as:'user'}
+    <li class="list-group-item">
+      <div class="pull-right btn-group">
+        #{b.show @show(user.id), 'data-async-modal': '#defaultModal' /}
+        #{secure.check 'Users.edit'}
+          #{b.edit @edit(user.id) /}
+        #{/secure.check}
+      </div>
+      #{if user.disabled}
+        <h4 class=" text-muted"><i class="fa fa-user"></i><em> ${user.username}</em></h4>
+        <span class="label label-default">&{'disabledUser'}</span>
+      #{/if}
+      #{else}
+        <h4><i class="fa fa-user text-primary"></i> ${user.username}</h4>
+      #{/else}
+      #{if user.person}
+        <span class="label label-info">&{'personUser'}</span>
+      #{/if}
+      #{if user.badgeReader}
+        <span class="label label-primary">&{'badgeReaderUser'}</span>
+      #{/if}
+      #{ifnot user.roles.empty}
+        <span class="label label-success">&{'systemUser'}</span>
+      #{/ifnot}
+      #{if !user.person && !user.badgeReader && user.roles.empty}
+        <span class="label label-warning">&{'orphanUser'}</span>
+      #{/if}
+    </li>
+    #{/list}
+  </ul>
+  #{/paginate}
+</section>

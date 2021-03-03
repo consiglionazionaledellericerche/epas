@@ -1,0 +1,25 @@
+#{modalAsync id:'modalMonthlyCompetenceType', button:'Salva', title:'Nuovo tipo di competenza mensile'}
+<div id="absenceCodeData">
+  	
+  #{form action:@MonthlyCompetenceTypes.saveType(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#absenceCodeData'}
+  
+	  #{f.hidden 'monthlyCompetencetype.id' /}
+	
+	  #{f.input 'monthlyCompetencetype.name'/}	  
+	  <div class="row">
+	  <div class="col-sm-2"></div>
+	  </div>
+	  	  
+	  #{f.selectModel 'monthlyCompetencetype.workdaysCode', items:competenceCodeList, required:true /}
+	  #{f.selectModel 'monthlyCompetencetype.holidaysCode', items:competenceCodeList, required:true /}
+	 	  	  
+	  
+	  #{b.buttons center:true}
+	      #{b.submit 'Inserisci'/}
+	  #{/b.buttons}
+	  	  
+  #{/form}
+</div>
+#{/modalAsync}

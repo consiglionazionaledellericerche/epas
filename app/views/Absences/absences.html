@@ -1,0 +1,38 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Assenze mensili' /}
+
+#{switcher year:true, month:true /}
+
+<div class="container">
+
+#{title title:('Assenze Mensili ' + templateUtility.monthName(month) + ' ' + year) /}
+
+  #{if absenceTypeInMonth.entrySet().empty}
+    #{alert color:'info'}
+    <p>Nessuna assenza da visualizzare per il mese selezionato.</p>
+    #{/alert}
+  #{/if}
+  #{else}
+        
+      <table class="table table-striped table-border table-condensed">
+	    <tr class="warning">
+		  <th>Descrizione</th>
+		  <th>Codice</th>
+		  <th>Numero giorni</th>
+	    <tr>
+	    
+	    #{list items:absenceTypeInMonth.entrySet(), as:'entry'}
+	    <tr>
+	        <td>${entry.getKey().description}</td>
+	        <td>${entry.getKey().code}</td>
+	        <td>
+	         <a href="@{Absences.absenceInMonth(entry.getKey().code, year, month)}" data-async-modal="#defaultModal">${entry.getValue()}</a>
+			</td>
+		</tr>
+		 #{/list}
+     </table>
+     
+   #{/else}  
+     
+</div>

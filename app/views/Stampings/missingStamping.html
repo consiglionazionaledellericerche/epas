@@ -1,0 +1,83 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Timbrature mancanti'  /}
+
+#{set 'moreStyles'}
+<style>
+  span.badge.badge-danger {
+    background-color: rgb(192, 66, 66); /* rosso scuro */
+  }
+  
+  span.badge.badge-warning {
+    background-color: #ec971f;
+    color: white;
+  }
+</style>
+#{/set}
+
+<div class="container">
+	#{title title:'Riepilogo problemi sui giorni del mese ' + month+'/'+year +  ' - ' + office?.name /}
+</div>
+
+#{stampings.presenceDashboardTabs activeAction:'missingStampings' /}
+
+<div class="container">
+
+      <table class="table table-hover table-striped table-bordered">
+	    <tr>
+		  <th style="min-width: 300px;">Nome</th>
+		  <th>No assenze e timbrature</th>
+		  <th>Timbrature disaccoppiate<br>giorno feriale</th>
+			<th>Orario di lavoro insufficiente</th>
+		  <th>Lavoro festivo</th>
+		</tr>
+	
+	   #{list items:missingStampings, as:'personMissingStampings'}
+	   
+	   #{if !personMissingStampings.troublesNoAbsenceNoStampingsL.empty 
+	       || !personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHolidayL.empty
+	       || personMissingStampings.holidayWorkingTimeNotAccepted > 0
+	       || personMissingStampings.holidayWorkingTimeAccepted > 0 }
+	       
+	   <tr>
+		 <td>
+		   <a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">
+		     ${personMissingStampings.person.surname} ${personMissingStampings.person.name}
+		   </a>
+		 </td>
+		 
+		 <td>
+		   #{list items:personMissingStampings.troublesNoAbsenceNoStampingsL, as:'day'}
+		     <span class="badge badge-danger">${day}</span>
+		   #{/list}
+	     </td>
+	     
+	     <td>
+	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHolidayL, as:'day'}
+			  <span class="badge badge-warning">${day}</span>
+			#{/list}
+	     </td>
+
+			 <td>
+				#{list personMissingStampings.troublesNotEnoughWorkTime, as:'day'}
+				 <span class="badge badge-default">${day}</span>
+				#{/list}
+			 </td>
+
+	     <td>
+	        #{if personMissingStampings.holidayWorkingTimeNotAccepted> 0 }
+	        <span class="badge badge-warning">Non Accettate: ${personMissingStampings.holidayWorkingTimeNotAccepted.toHourTime()}</span><br>
+	        #{/if}
+	        #{if personMissingStampings.holidayWorkingTimeAccepted > 0 }
+	        <span class="badge badge-inverse">Accettate: ${personMissingStampings.holidayWorkingTimeAccepted.toHourTime()}</span>
+	        #{/if}
+	     </td>
+	   </tr>   
+	   #{/if}  
+	   #{/list}
+	
+     </table>
+
+ 
+ 
+</div>

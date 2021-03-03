@@ -1,0 +1,24 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+#{absences.absencesTabs activeAction:'manageAttachmentsPerPerson' /}
+ 
+<div class="container">
+  
+  #{title title:'Allegati ' + person.fullname + ' ' + templateUtility.monthName(month) + ' ' + year, administration:true /}
+
+	#{if personAbsenceListWithFile.empty}
+	  Non ci sono allegati inseriti per questo mese.
+	#{/if}
+	#{else}
+		<ul class="icons-ul">
+			#{list items:personAbsenceListWithFile, as:'personAbsence'}
+				<li class="distanziato"> 
+				  <i class="icon-li icon-ok"></i>Allegato del ${personAbsence.personDay.date} 
+				  <a href="@{Absences.downloadAttachment(personAbsence.id)}"><span class="glyphicon glyphicon-paperclip"></span></a>
+				</li>
+			#{/list}
+		</ul>
+	#{/else}	
+</div>

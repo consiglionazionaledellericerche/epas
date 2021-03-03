@@ -1,0 +1,39 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Esporta competenze'  /}
+
+#{switcher year:true, month:true /}
+
+<div class="container">
+
+#{title title:'Esporta Competenze' /}
+
+#{include './_tabs.html' /}
+
+#{alert color:'info'}
+  <p>
+   Esporta in formato.csv la situazione mensile del gruppo di competenza selezionato per i dipendenti della sede ${office.name}.
+  </p>
+#{/alert}
+ 
+#{panel title:'Esporta gruppo di competenze', color:'primary'}
+
+<div class="col-sm-3"></div>
+<div class="col-sm-6">
+		#{form @Competences.getCompetenceGroupInYearMonth(), class:'form form-horizontal'}
+	  		#{f.hidden 'officeId', value:office.id /}
+			#{f.hidden 'year', value:year /}
+    		#{f.hidden 'month', value:month /}
+    		#{f.booleanRadio 'temporary', label:'Solo tempi determinati' /}
+	  		#{f.selectModel 'group', items:list, label:'Gruppo', required:true /}
+      		
+       		<input class="btn btn-primary" type="submit" value="Esporta"/>
+     	#{/form} 
+</div>
+<div class="col-sm-3"></div>
+
+
+
+#{/panel}
+ 	  	
+</div>

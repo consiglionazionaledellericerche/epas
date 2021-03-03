@@ -1,0 +1,114 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + wrappedContract.value.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (wrappedContract.value.person.fullname):@Contracts.personContracts(wrappedContract.value.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include './_tabs.html' /}
+
+<div class="container">
+
+   
+  #{alert color:'info'}
+  
+  	<p>Utilizzare questa form per modificare le date del contratto.</p>
+  	
+  	<p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     il tipo orario attribuito alla parte conclusiva del contratto.
+     </p>
+     
+     <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari 
+     verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+  #{/alert}
+  
+  #{if wrappedContract.value.isTemporaryMissing && wrappedContract.value.endDate == null}
+    #{alert color:'danger'}
+      <p>Il contratto selezionato è stato automaticamente importato dall'anagrafica dell'Ente e 
+      risulta essere della tipologia Tempo Determinato. Per completare la configurazione
+      occorre specificare opportunamente la data di fine rapporto specificando il campo <strong>Data Fine</strong></p> 
+    #{/alert}
+  #{/if}  
+
+  #{if wrappedContract.value.sourceDateResidual}  
+  #{alert color:'info'}
+       <p>Per questo contratto è stata definita la data di inizializzazione 
+       <strong>${wrappedContract.value.sourceDateResidual.format()}</strong>,
+       sarà pertanto impossibile spostare la data di inizio del contratto successivamente a quella data. <br>
+       In caso di necessità rimuovere o modificare tale inizializzazione. 
+       </p>
+  #{/alert}
+  #{/if}
+
+  <div id="modifyContract">
+	#{form @Contracts.update(), class:'form-horizontal', 
+	'data-async':'#page_content', 'data-async-error':'#modifyContract', 
+	'data-spinner':'#defaultSpinner' } 
+	  
+	    
+	  <input type="hidden" name="contract.id" value="${wrappedContract.value.id}" />
+		<!-- Form input -->
+		#{if !confirmed }
+			#{f.date 'contract.beginDate', value:contract.beginDate?.format() /}
+	    	#{f.date 'contract.endDate', value:contract.endDate?.format() /}
+	    	#{f.date 'contract.endContract', value:contract.endContract?.format() /}
+	    	#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate /}
+    		#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract /}
+	    	
+	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
+	    		#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing /}
+	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updatePersonId'}
+	    		#{f.input 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId /}
+	    	#{/secure.check}
+	    	#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.date 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format() /}
+	    	#{/secure.check}
+	    	
+	    	#{ifError 'contract.crossValidationFailed'} 
+	    	<div class="alert alert-danger">
+	    	  #{error 'contract.crossValidationFailed' /}
+	    	</div>
+	    	#{/ifError}
+
+				#{secure.check 'Contracts.update'}
+	    		<div class="text-center">
+	  			<input class="btn btn-primary" type="submit" value="Modifica"/>
+				</div>
+				#{/secure.check}
+		#{/if}
+		<!-- Form di conferma -->
+		#{else}
+		
+			#{f.simpleView 'contract.beginDate', value:contract.beginDate?.format(), hidden:true /}
+			#{f.simpleView 'contract.endDate', value:contract.endDate?.format(), hidden:true /}
+			#{f.simpleView 'contract.endContract', value:contract.endContract?.format(), hidden:true /}
+			#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate, readOnly:true /}
+			#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract, readOnly:true /}
+			#{secure.check 'Contracts.updateIsTemporyMissing'}
+				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
+			#{/secure.check}
+			#{secure.check 'Contracts.updatePersonId'}
+				#{f.simpleView 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId, hidden:true /}
+			#{/secure.check}
+			#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    		#{f.simpleView 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format(), hidden:true /}
+	    	#{/secure.check}
+			<input type="hidden" name="confirmed" value="true" />
+			
+			#{recomputeRecap.show recomputeRecap:recomputeRecap /}
+			
+			#{b.buttons center:true}
+			   #{b.submit 'Conferma'/}
+			   #{b.cancel @edit(contract.id) /}
+			#{/b.buttons}
+		#{/else}
+		
+
+	#{/form}
+
+  </div>
+
+</div>

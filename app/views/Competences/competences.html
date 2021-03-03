@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Situazione Mensile'  /}
+
+<div class="container">
+  #{title title:('Riepilogo competenze ' + templateUtility.monthName(session.get("monthSelected")) + ' ' + year) /}
+
+  #{if !personMonthCompetenceRecap.present}
+    #{alert color:'danger'}
+       <p>Risultano non correttamente inizializzati i dati sulle competenze effettuate nell'anno selezionato.</p>
+       <p>Impossibile costruire la situazione richiesta.</p>
+     #{/alert}
+  #{/if}
+  #{else}
+  
+  	#{if map.isEmpty()}
+      #{alert color:'info'}
+      <p>
+      Per questo mese non sono state assegnate competenze o non sono state abilitate.</p>
+      #{/alert}
+  	#{/if}
+  	#{else}
+  		<table class="table table-bordered table-hover">
+        
+        <tr class="warning">
+          <th>Competenza</th>
+          <th>Quantità</th>
+        </tr>
+        #{list items:map.entrySet(), as:'entry'}
+        <tr>
+          <td>${entry.getKey().description} (${entry.getKey().code})</td>
+          <td>${entry.getValue()}</td>
+        </tr>       
+		#{/list}
+      	</table>
+  	#{/else}      
+  #{/else}
+    
+</div> 
+

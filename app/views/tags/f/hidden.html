@@ -1,0 +1,13 @@
+#{field _arg}%{
+ if (_value) {
+   value = _value
+ } else {
+   value = field.value
+ }
+ if (value instanceof Enum) {
+   value = value.name()
+ } else if (value instanceof Date) {
+   value = value.format()
+ }
+}%<input type="hidden" value="${value}" name="${field.name}" id="${field.id}"/>
+#{/field}

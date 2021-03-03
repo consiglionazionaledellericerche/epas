@@ -1,0 +1,29 @@
+*{ 
+  arg: (href) required
+  color: default
+  fa: optional fontawesome code
+  popover: testo del popover opzionale
+  disabled: nel caso di disabled il popover non funziona
+}*
+<a href="${_arg}" 
+   class="btn 
+          btn-#{if _color}${_color}#{/if}#{else}default#{/else}
+          #{if _disabled} disabled #{/if} 
+          ${_class != null ? (' '+_class) : ''}">
+   
+   <!-- popover che si attiva sia sull'icona che 
+        sul testo grazie a questo div che li contiene entrambi -->
+   #{if _popover} <div webui-popover-hover data-content="&{_popover}"> #{/if}
+
+     <!-- icona -->   
+	 #{if _fa}<i class="fa fa-${_fa}"></i> #{/if}
+	 
+	 <!-- label hidden xs se è presente l'icona -->
+	 <span #{if _fa}class="hidden-xs" #{/if}> 
+	   #{doBody/}
+	 </span>
+	 
+   #{if _popover} </div>#{/if}	 
+   
+   
+</a>

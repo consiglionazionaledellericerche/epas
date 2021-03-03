@@ -1,0 +1,23 @@
+<ul class="nav navbar-nav">
+
+  #{set actions:[
+  'Groups.showGroups', 'Stampings.dailyPresenceForPersonInCharge', 'Competences.monthlyOvertime'] /}
+  
+	<li class="dropdown #{if request.action in actions}active#{/if}">
+		    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-users"></i>
+      			<div class="visible-xs-inline visible-md-inline visible-lg-inline">&{'groups'}<span class="caret"></span></div>
+    		</a>
+    	<ul class="dropdown-menu">
+ 	  #{secure.li @Groups.showGroups(session.get("officeSelected")) }
+        <i class="fa fa-home" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @Stampings.dailyPresenceForPersonInCharge(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Competences.monthlyOvertime(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-user-plus" aria-hidden="true"></i>
+      #{/secure.li}
+      </ul>
+     </li>
+</ul>

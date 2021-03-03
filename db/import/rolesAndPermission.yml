@@ -1,0 +1,43 @@
+# Ruoli predefiniti
+Role(personnelAdmin):
+  name: personnelAdmin
+
+Role(personnelAdminMini):
+  name: personnelAdminMini
+
+Role(employee_role):
+  name: employee
+
+Role(badgeReader):
+  name: badgeReader
+
+Role(restClient):
+  name: restClient
+
+# Ruolo per la gestione dei turni
+Role(shiftManager):
+  name: shiftManager
+
+# Ruolo per la gestione delle reperibilità
+Role(reperibilityManager):
+  name: reperibilityManager
+
+
+###############################################################
+                JustifiedType Predefiniti
+###############################################################
+
+JustifiedType(absence_type):
+  name: absence_type
+
+JustifiedType(specified_minutes):
+  name: specified_minutes
+
+JustifiedType(half_day):
+  name: half_day
+
+JustifiedType(missing_time):
+  name: missing_time
+
+
+

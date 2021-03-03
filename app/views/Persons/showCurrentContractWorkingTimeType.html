@@ -1,0 +1,56 @@
+#{modalAsync id:'defaultModal', title:('Tipo Orario Attuale di ' + person.fullname) }
+
+#{if cwtt}
+
+<div class="alert alert-success">Validità orario attuale: 
+
+	<strong>Dal </strong>${cwtt.beginDate.format()}
+	#{if cwtt.endDate}
+		<strong>Al </strong>${cwtt.endDate.format()}
+	#{/if}	 
+</div>
+
+<table class="table table-condensed table-bordered center">
+  <tr>
+    <th><h4><span class="label label-primary">${wtt.description}</span></h4></th>
+		<th>Lun</th>
+		<th>Mar</th>
+		<th>Mer</th>
+		<th>Gio</th>
+		<th>Ven</th>
+		<th>Sab</th>
+		<th>Dom</th>
+	</tr>
+
+	<tr>
+		<td class="center">Tempo lavoro</td>
+		#{list wtt.workingTimeTypeDays}
+		<td class="first-line">${_.workingTime.toHourTime()}</td>
+		#{/list}	
+	</tr>
+
+	<tr>
+		<td class="center">Tempo minimo per intervallo pranzo</td>
+		#{list wtt.workingTimeTypeDays}
+		<td>${_.mealTicketTime.toHourTime()}</td>
+		#{/list}			
+	</tr>
+		
+	<tr>
+		<td class="center">Intervallo pranzo</td>
+		#{list wtt.workingTimeTypeDays}
+		<td>${_.breakTicketTime.toHourTime()}</td>
+		#{/list}	
+	</tr>
+
+	<tr>
+		<td class="center">Giorno festivo</td>
+		#{list wtt.workingTimeTypeDays}
+			<td>#{if _.holiday}<span class="glyphicon glyphicon-ok"></span>#{/if}</td>
+		#{/list}	
+	</tr>
+</table>
+
+#{/if}
+
+#{/modalAsync}

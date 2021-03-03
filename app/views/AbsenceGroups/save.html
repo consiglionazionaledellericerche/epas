@@ -1,0 +1,54 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div class="container">
+
+#{title title:'Esito Inserimento Assenza' /}
+
+  ${engineInstance.person.fullname}<br>
+  ${engineInstance.date}<br>
+  ${engineInstance.groupAbsenceType.name}<br>
+  
+  
+  #{if engineInstance.absenceEngineProblem.present}
+    Problema riscontrato: engineInstance.absenceEngineProblem.get()}
+  #{/if}
+  #{else}
+    <table class="table">
+      <tr>
+        <th>Data</th>
+        <th>Codice</th>
+        <th>Operazione</th>
+        <th>Consumo</th>
+        <th>Residuo</th>
+        <th>Problemi</th>
+      </tr>
+      #{list items:engineInstance.responseItems, as:'responseItem'}
+      <tr>
+        <td>${responseItem.date}</td>
+        <td>${responseItem.absence.absenceType.code}</td>
+        <td>${responseItem.operation}</td>
+        <td>
+          #{list items:responseItem.consumedResidualAmount, as:'cra'}
+            ${cra.amount}<br>
+          #{/list}
+        </td>
+        <td>
+          #{list items:responseItem.consumedResidualAmount, as:'cra'}
+            ${cra.residualAfter()}<br>
+          #{/list}
+        </td>
+        <td>
+        #{if responseItem.absenceProblem}
+          ${responseItem.absenceProblem}
+        #{/if}
+        </td>
+        
+      </tr>
+      #{/list}
+    </table>
+  #{/else}
+
+  
+</div>

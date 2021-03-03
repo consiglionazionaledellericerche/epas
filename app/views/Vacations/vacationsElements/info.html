@@ -1,0 +1,210 @@
+#{list items:vacationSituations, as:'vacationSituation'}
+	
+	#{panel title:'Ferie', dim:6, color:'primary' }
+	     
+      <table class="table table-bordered table-hover">
+      
+      <tr class="warning">
+        <th>Anno</th>
+        <th>Totali (maturate)</th>
+        <th>Utilizzate</th>
+        <th>Residue (maturate)</th>
+      </tr>
+
+      <!-- Ferie Past year -->  
+      #{if vacationSituation.lastYear != null}	
+      <tr>
+        <td>${vacationSituation.lastYear.year}</td>
+        <td>${vacationSituation.lastYear.total()} (${vacationSituation.lastYear.accrued()})</td>
+        <td>
+           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.lastYear.year, 'VACATION')}" 
+              data-async-modal="#defaultModal">
+			${vacationSituation.lastYear.used()}
+		  </a>
+	    </td>
+        <td>${vacationSituation.lastYear.usableTotal()} 
+           (${vacationSituation.lastYear.usable()}) 
+        </td>
+      </tr>
+      #{/if}
+      
+      <!-- Ferie Current year -->
+      #{if vacationSituation.currentYear != null}
+      <tr>
+        <td>${vacationSituation.currentYear.year}</td>
+        <td>${vacationSituation.currentYear.total()} (${vacationSituation.currentYear.accrued()})</td>
+        <td>
+           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.currentYear.year, 'VACATION')}" 
+              data-async-modal="#defaultModal">
+			${vacationSituation.currentYear.used()}
+		  </a>
+	    </td>
+        <td>${vacationSituation.currentYear.usableTotal()} 
+           (${vacationSituation.currentYear.usable()}) 
+        </td>
+      </tr>
+      #{/if}
+  	</table>
+  	
+	#{/panel}
+	
+	#{panel title:'Permessi legge 937/77', dim:6, color:'primary' }
+	  
+	  #{if vacationSituation.permissions != null}    
+        <table class="table table-bordered table-hover">
+	      <tr class="warning">
+	        <th>Anno</th>
+	        <th>Totali (maturati)</th>
+	        <th>Utilizzati</th>
+	        <th>Residui (maturati)</th>
+	      </tr>  	
+	      <tr>
+	        <!-- year -->
+	        <td>${vacationSituation.permissions.year}</td>
+	        <!-- totali (maturate) -->
+	        <td>${vacationSituation.permissions.total()} (${vacationSituation.permissions.accrued()})</td>
+	        <!-- utilizzate -->
+	        <td>
+	           <a href="@{Vacations.personVacationSummary(vacationSituation.contract.id, vacationSituation.permissions.year, 'PERMISSION')}" 
+	              data-async-modal="#defaultModal">
+				${vacationSituation.permissions.used()}
+			  </a>
+		    </td>
+		    <!-- residue (maturate) -->
+	        <td>${vacationSituation.permissions.usableTotal()} 
+	           (${vacationSituation.permissions.usable()}) </td>
+	      </tr>
+  	    </table>
+      #{/if}#{else}
+      <p>Nessun dato da visualizzare.</p>
+      #{/else}  
+	#{/panel}
+	
+	#{panel title:'Permessi personali (661)', dim:12, color:'primary' }
+		<ul class="list-group">
+		#{list items:periodChain.periods, as:'absencePeriod' }
+		<li class="list-group-item list-group-item-info">
+	      <p>
+	        <strong>${absencePeriod.groupAbsenceType.description}</strong>
+	      </p>
+	    
+	    #{if absencePeriod.errorsBox.containsCriticalErrors() }
+	      <p>ci sono errori critici. TODO: elencarli</p>
+	    #{/if}
+	    #{if absencePeriod.errorsBox.containsAbsencesErrors() }
+	      <p>ci sono errori legati alle assenze. TODO: elencarli</p>
+	    #{/if}
+    
+    	</li>
+    	    <li class="list-group-item">
+     <p>
+        #{if absencePeriod.isTakableWithLimit() }
+           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+       
+           <br><strong>Totale utilizzabile</strong> 
+           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+       #{/if}
+     </p>
+     
+     <p>
+     #{secure.check 'AbsenceGroups.initialization'}
+     #{if absencePeriod.groupAbsenceType.initializable }
+     #{if absencePeriod.initialization}
+       %{ initializationGroup = absencePeriod.initialization; }%
+       #{include './_initializationStatus.html' /}       
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, initializationGroup.date.format(), true)}" data-async-modal="#defaultModal">Modifica Inizializzazione</a>       
+     #{/if}
+     #{else}
+       Per questo periodo non è stata definita alcuna inizializzazione. 
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date, true)}" data-async-modal="#defaultModal">Inizializzazione</a>      
+     #{/else}
+     #{/if}
+     #{/secure.check}
+     </p>
+     
+     <p>  
+       #{if absencePeriod.isTakableWithLimit() }
+           <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
+           <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
+           da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
+       #{/if}
+     </p> 
+     
+    
+    #{if absencePeriod.daysInPeriod.values().empty }
+        <p><em>Non ci sono assenze utilizzate per questo gruppo nel periodo selezionato.</em></p>
+    #{/if}
+    #{else}
+
+     <table class="table table-condensed table-bordered">
+      <tr class="bg-warning">
+        <th>Data</th>
+        <th>Assenza</th>
+        #{if absencePeriod.isTakableWithLimit() }
+          <th>Limite<br>Utilizzabile</th>
+          <th>Limite<br>Consumato</th>
+        #{/if}
+        <th>Completamento<br>Precedente<br></th>
+        <th>Completamento<br>Assenza</th>
+        <th>Completamento<br>Residuo<br></th>
+      </tr>
+      
+      #{list items:absencePeriod.daysInPeriod.values(), as:'dayInPeriod'}
+      #{list items:dayInPeriod.allTemplateRows(), as:'rowRecap' }
+        <tr #{if rowRecap.beforeInitialization} class="bg-grey" #{/if}>
+          <td>
+            #{if rowRecap.date}
+              ${rowRecap.date.format()}
+            #{/if}  
+          </td>
+          <td>
+	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
+          </td>
+          #{if absencePeriod.isTakableWithLimit() }
+            <td>${rowRecap.usableLimit}</td>
+            <td>${rowRecap.usableTaken}</td>
+          #{/if}
+          <td>${rowRecap.consumedComplationBefore}</td>
+          <td>${rowRecap.consumedComplationAbsence}</td>
+          <td>${rowRecap.consumedComplationNext}</td>
+        </tr>
+      #{/list}
+      #{/list}
+
+      </table>
+      
+     #{/else}
+     
+     #{if absencePeriod.groupAbsenceType.nextGroupToCheck}
+     <i class="fa fa-2x fa-arrow-down" aria-hidden="true"></i>
+     #{/if}
+		#{/list}
+		</ul>
+	#{/panel}      
+    #{if showVacationPeriods}
+    <div class="col-md-12">
+	
+	  <p>I <strong>Piani Ferie</strong> attualmente associati sono i seguenti:<br></p>
+	     <table class="table center">
+	    <tr class="info">
+	      <th>Dal</th>
+	      <th>Al</th>
+	      <th>Valore</th>
+	    </tr>
+	    
+	    #{list items: vacationSituation.contract.vacationPeriods, as: 'vp'}
+	    <tr>
+	      <td>${vp.beginDate.format()}</td>
+	      <td>
+	        #{if vp.endDate}${vp.endDate.format()}#{/if}#{else}<em>Indeterminato</em>#{/else}
+	      </td>
+	      <td>${vp.vacationCode.label()}</td>
+	    </tr>
+	    #{/list}
+	    
+	    </table>	  
+		
+    </div>
+    #{/if}
+#{/list}

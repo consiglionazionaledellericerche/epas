@@ -1,0 +1,61 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Competenze pagate'  /}
+
+
+
+<div class="container">
+
+  #{title title:'Competenze assegnate ' + year + ' per ' + office.name, color:'primary' /}
+
+  #{include './_tabs.html' /}
+  
+ #{alert color:'info'}
+ <p> Visualizza le competenze assegnate nell'anno da tutti i dipendenti. E' possibile filtrare
+ il risultato per i soli contratti a tempo determinato.
+ </p>
+ #{/alert}  
+ 
+ <a class="btn btn-primary" #{if !onlyDefined} disabled="disabled"#{/if} href="@{Competences.approvedCompetenceInYear(year, false, office.id)}">Tutti</a> 
+ <a class="btn btn-primary" #{if onlyDefined} disabled="disabled"#{/if} href="@{Competences.approvedCompetenceInYear(year, true, office.id)}">Solo Determinati</a>
+ 
+
+  <table class="table table-bordered table-hover table-condensed">
+    <tr>
+      <th></th>
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      <th>${code.code}</th>
+      #{/list}
+    </tr>
+    
+    <tr class="info">
+      <td><strong>Totale</strong></td>
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      <td><strong>${totalValueAssigned.get(code)}</strong></td>
+      #{/list}  
+    </tr>
+    
+    #{list personList, as:'person'}
+    <tr>
+      <td>${person.value.fullname}
+          #{if person.hasPassToIndefiniteInYear(year)} (*)#{/if}
+      </td>
+      
+      #{list items:totalValueAssigned.keySet(), as:'code'}
+      
+      #{if mapPersonCompetenceRecap.get(person.value) != null && mapPersonCompetenceRecap.get(person.value).get(code) != null}
+        <td>${mapPersonCompetenceRecap.get(person.value).get(code)}</td>
+	  #{/if}
+	  #{else}
+	    <td>0</td>
+	  #{/else}
+      
+      #{/list}
+    </tr>
+    #{/list}
+    
+  </table>
+  
+  <p>(*) La persona è passata a tempo indeterminato durante l'anno selezionato.</p>
+
+</div>

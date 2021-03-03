@@ -1,0 +1,18 @@
+<td class="assenza default-single">
+  #{secure.check 'AbsenceGroups.insert', target: yearMonth }
+    #{secure.check 'AbsenceGroups.insert',  target:person}
+    <a href="@{AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format())}" data-async-modal="#modalGroupAbsence">
+      __
+    </a>
+    #{/secure.check}
+  #{/secure.check}
+
+  #{list items:dayRecap.personDay.absences, as:'absence'}
+    
+    #{include './_absenceRendering.html' /}
+    
+    #{if absence.absenceFile.exists()}
+      #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
+    #{/if}
+  #{/list}
+</td>

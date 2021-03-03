@@ -1,0 +1,127 @@
+<div class="container-fluid">
+#{if vacationSituations != null && !vacationSituations.isEmpty()}
+ 	#{accordionItem 'infoFerie', parent:'info', title:'Info situazione ferie', open:false, color:'info' }
+ 	#{include './../Vacations/vacationsElements/info.html' /}
+ 	#{/accordionItem}
+ #{/if}
+</div>
+<br>
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>Compila il form sottostante per inviare una richiesta di assenza.
+Specifica la <strong>data di inizio</strong> e la <strong>data di fine</strong>.<br>  
+Ogni volta che cambierai il campo relativo alle date, il sistema <strong>automaticamente</strong> calcolerà l'esito della richiesta,
+riportando il/i codice/i inserito/i al completamento del flusso.  </p>
+#{/alert}
+</div>
+#{form action:@edit(), method:'POST', autocomplete:false,
+	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
+                        
+	#{f.hidden 'absenceRequest.id' /}
+	#{f.hidden 'absenceRequest.person.id' /}
+	#{f.hidden 'absenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+
+	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	
+
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+	
+		#{if absenceForm != null}
+		#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+     
+	    #{if absenceForm.hasAbsenceTypeChoice()} 
+			 #{f.selectModel 'absenceType', personalizeItems:true}
+			   #{if absenceForm.automaticChoiceExists}
+			      <optgroup label="Inserimento Automatico">
+			        <option value=""
+			          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
+				  <optgroup/>
+			   #{/if}   
+			   <optgroup label="Codice Specifico">
+			    #{list absenceForm.absenceTypes, as:'absenceType'}
+			    <option value="${absenceType?.id}"
+			      #{if absenceForm.absenceTypeSelected != null && absenceForm.absenceTypeSelected.equals(absenceType) } selected #{/if}>
+			      ${absenceType.getLabel()}
+			    </option>
+			    #{/list}   
+			   <optgroup/>
+			 #{/f.selectModel}
+		 #{/if}
+		 #{else}
+		   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
+		   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
+		 #{/else}
+	   
+	     #{if absenceForm.hasJustifiedTypeChoice() }
+	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+	     #{/if}
+	     
+	     *{ seleziona minuti }*    
+	     #{if absenceForm.hasHourMinutesChoice() }
+	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
+	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
+	     #{/if}
+	     #{/if}
+	
+	#{/if}
+
+	
+      
+	#{if retroactiveAbsence}
+		#{f.input 'absenceRequest.note', required:true, value:absenceRequest.note /}
+	#{/if}
+	#{if handleCompensatoryRestSituation}
+	<div class="container-fluid">
+	<h3>Riposi compensativi rimasti: 
+	<span #{if compensatoryRestAvailable > 10 } class="label label-info"#{/if} 
+		  #{if compensatoryRestAvailable > 5  && compensatoryRestAvailable < 10} class="label label-warning"#{/if}
+		  #{if compensatoryRestAvailable > 0  && compensatoryRestAvailable < 5} class="label label-danger"#{/if}>
+		  ${compensatoryRestAvailable}</span></h3>
+	</div>
+	#{/if}
+	#{if existing != null}
+	<div class="container-fluid"> 
+	#{include './existing.html' /}
+	</div>
+	#{/if}
+	<div class="container-fluid"> 
+   	#{include './_report.html' /}
+	</div>
+	
+#{/form}
+
+#{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'absenceRequest.id' /}
+	#{f.hidden 'absenceRequest.person.id' /}
+	#{f.hidden 'absenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}
+	#{f.hidden 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
+	#{f.hidden 'absenceRequest.note' /}
+
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+		#{if absenceForm != null} 
+      	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
+      	#{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
+      	#{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
+      
+      	#{f.hidden 'hours', value:absenceForm.hours /}
+      	#{f.hidden 'minutes', value:absenceForm.minutes /}
+    	#{/if}
+    #{/if}
+
+            
+	#{b.buttons center:true}
+		 #{b.link @list(absenceRequest.type), color:'default', title:'Indietro' /}
+		 #{if insertable && insertReport.howManySuccess() > 0}
+         #{b.submit 'Inserisci'/}
+         #{/if}
+         #{else}
+         #{b.submit 'Inserisci', disabled:true /}
+         #{/else}
+    #{/b.buttons}
+#{/form}	  

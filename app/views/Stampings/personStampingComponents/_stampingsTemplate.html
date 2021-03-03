@@ -1,0 +1,60 @@
+
+ #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+
+    *{ posizione timbratura }*
+    <td class="position${stampingTemplate.pairPosition} stamping
+       
+    *{ colore timbratura }*
+    #{if stampingTemplate.colour.equals("in")}       default-left"  #{/if}
+    #{elseif stampingTemplate.colour.equals("out")}  default-right" #{/elseif}
+    #{elseif stampingTemplate.colour.equals("warn")} warn"          #{/elseif}
+
+    *{ popover }*
+    #{if stampingTemplate.showPopover()} webui-popover-hover data-url="#${stampingTemplate.stamping.id}" #{/if}
+    >
+
+      #{if stampingTemplate.date}
+		    #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+          ${stampingTemplate.hour}
+		    #{/secure.link}
+      #{/if}
+      #{elseif stampingTemplate.pairPosition.equals("center")}
+      <a title="Timbratura di servizio mancante" class="initialism">
+        <i class="icon-warning-sign"></i>
+      </a>
+      #{/elseif}
+
+      #{if stampingTemplate.stamping.stampType}
+        <strong>${stampingTemplate.stamping.stampType.identifier}</strong>
+      #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <strong>${smt.code}</strong>
+      #{/list}
+    </td>
+    #{if stampingTemplate.showPopover()}
+      <div class="webui-popover-content" id="${stampingTemplate.stamping.id}">
+      #{if stampingTemplate.stamping.stampType}
+      <p><strong>${stampingTemplate.stamping.stampType.identifier}</strong> ${stampingTemplate.stamping.stampType.description}</p>
+      #{/if}
+      #{list items:stampingTemplate.stampModificationTypes, as:'smt'}
+        <p><strong>${smt.code}</strong> ${smt.description}</p>
+      #{/list}      
+      #{if stampingTemplate.stamping.place}<strong>Luogo: </strong><em>${stampingTemplate.stamping.place}</em></p>#{/if}
+      #{if stampingTemplate.stamping.reason}<strong>Motivazione: </strong><em>${stampingTemplate.stamping.reason}</em></p>#{/if}
+      #{if stampingTemplate.stamping.note}<strong>note: </strong><em>${stampingTemplate.stamping.note}</em></p>#{/if}
+      </div>
+    #{/if}
+    #{/list}
+
+    #{secure.check 'Stampings.insert', target: person}
+      #{secure.check 'Stampings.insert', target: yearMonth }
+      <td class="inserisciTimbratura default-single">
+        #{if !dayRecap.personDay.future}
+          <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+        		+++
+      		</a>
+      	#{/if}
+      </td>
+      #{/secure.check}
+    #{/secure.check}
+    

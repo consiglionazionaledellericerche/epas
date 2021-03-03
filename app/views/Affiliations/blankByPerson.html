@@ -1,0 +1,41 @@
+%{
+  if(affiliation.persistent) 
+    modaltitle = 'Modifica associazione per ' + affiliation.person.fullname;
+  else
+    modaltitle = 'Inserimento associazione per ' + affiliation.person.fullname;
+}%
+  
+#{modalAsync id:'defaultModal', title:modaltitle }
+
+  <div id="blankByPerson">
+    #{alert color:'info'}
+	  Inserire i dati dell'appartenenza al gruppo. 
+	#{/alert}
+
+	#{form @save(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#blankByPerson'}
+
+	  #{if affiliation.persistent }
+	    <input type="hidden" name="affiliation.id" value="${affiliation.id}"/>
+	  #{/if}
+	  <input type="hidden" name="affiliation.person.id" value="${affiliation.person.id}"/>
+
+	  #{f.selectModel 'affiliation.group', items:activeGroups, required:true, getLabel:true /}
+	  #{f.input 'affiliation.percentage' /}
+
+	  #{f.date 'affiliation.beginDate' /}
+	  #{f.date 'affiliation.endDate' /}
+
+	  #{secure.check 'Affiliation.externalId'}
+	  	#{f.input 'affiliation.externalId' /}
+	  #{/secure.check}
+
+	  #{b.buttons center:true}
+	   #{if affiliation.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
+	   #{else}<input class="text-center btn btn-primary" type="submit" value="Inserisci" />#{/else}
+	  #{/b.buttons}  
+	
+	#{/form}
+  </div>
+  
+#{/modalAsync}

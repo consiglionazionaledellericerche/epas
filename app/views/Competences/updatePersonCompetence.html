@@ -1,0 +1,40 @@
+#{modalAsync id:'modalCompetenceCode', title: 'Abilita competenze per ' + person.fullname + ' nel mese di ' + templateUtility.monthName(month) + ' ' + year}
+<div id="updateCompetenceModal">
+	#{alert color:'info'}
+	 <p>
+	   <strong>Aggiunta</strong>
+	   <br>
+	   Le nuove competenze selezionate saranno utilizzabili dal dipendente a partire da <em>${templateUtility.monthName(month)} ${year}</em>.
+	 </p>
+	 
+	 <p>
+	   <strong>Rimozione</strong><br>
+	   Le competenze presenti deselezionate non saranno più utilizzabili a partire dal mese successivo a <em>${templateUtility.monthName(month)} ${year}</em>.
+	 </p>
+		
+	#{/alert}
+	#{if certificationsSent}
+	#{alert color: 'warning'}
+		<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
+		<strong>Attenzione:</strong> Per questo mese i dati sono già stati caricati su Attestati.<br>
+		Modificando la mappa delle competenze abilitate, potrebbero riscontrarsi differenze tra i dati presenti su ePAS <br>
+		e i dati presenti su Attestati.		
+	#{/alert}
+	#{/if}
+  #{form action:@Competences.saveNewCompetenceConfiguration(), method:'POST', autocomplete:false,
+    class:'form form-horizontal', 'data-async':'#page_content',
+    'data-async-error':'#updateCompetenceModal'}
+
+    #{f.selectModels 'codeListIds', items:templateUtility.allCodeList(), placeholder:'I codici di competenza' /}
+    
+    #{f.hidden 'personId', value:person.id /}
+    #{f.hidden 'year', value:year /}
+    #{f.hidden 'month', value:month /}
+    
+    #{b.buttons center:true}
+  	  #{b.submit 'Ok'/}
+    #{/b.buttons}
+  #{/form}
+</div>
+
+#{/modalAsync}

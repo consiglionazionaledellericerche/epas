@@ -1,0 +1,100 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Approvazione Turni' /}
+
+
+<div class="container">
+  #{if shiftTypeMonth?.approved}
+  #{title title: 'Revoca competenze' /}
+  <h2>${shiftTypeMonth.yearMonth.asText()} - ${shiftTypeMonth.shiftType}</h2>
+  #{alert color:'warning', dismissible: true}
+  <p>
+    Le competenze per il mese ${shiftTypeMonth.yearMonth.asText()} risultano già approvate.
+    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate ai turnisti
+    di questa attività.
+    Inoltre una volta rimossa l'approvazione sarà nuovamente possibile effettuare le modifiche
+    sui turni del calendario.
+  </p>
+  #{/alert}
+  #{/if}
+  #{else}
+  #{title title: 'Approvazione competenze' /}
+  <h2>${shiftTypeMonth.yearMonth.asText()} - ${shiftTypeMonth.shiftType}</h2>
+  #{alert color:'info', dismissible: true}
+  <p>
+    Le competenze per il mese ${shiftTypeMonth.yearMonth.asText()} risultano da approvare.
+    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto ai turnisti di
+    questa attività.<br>
+    Una volta approvate, non sarà possibile apportare ulteriori modifiche ai turni dal calendario
+    salvo annullamento dell'approvazione.
+  </p>
+  #{/alert}
+  #{/else}
+  
+    <!-- Stampa calendario di turno -->
+<div class="row"></div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+          <a href="@{Shift.exportMonthAsPDF(shiftTypeMonth.yearMonth.getYear(), 
+          			shiftTypeMonth.yearMonth.getMonthOfYear(), shiftTypeMonth.shiftType.shiftCategories.id)}" >
+           <i class="fa fa-calendar fa-2x" aria-hidden="true">  Stampa calendario</i> 
+          </a>
+    </div>
+</div>
+<div class="row"><br></div>
+
+  <ul class="list-group">
+    #{list shiftsCalculatedCompetences.entrySet()}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+        ${_.getKey().fullname}
+        #{if peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.invalidatingTroubles())}
+        <span class="text-danger pull-right">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+          &{'calendar.notAllValidShifts'}
+        </span>
+        #{/if}
+        #{elseif peopleTrouble.get(_.getKey()).removeAll(models.enumerate.ShiftTroubles.warningTroubles())}
+        <span class="text-warning pull-right">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> &{'calendar.warningShifts'}
+        </span>
+        #{/elseif}
+        #{else}
+        <span class="text-success pull-right">
+          <i class="fa fa-check" aria-hidden="true"></i> &{'calendar.allValidShifts'}
+        </span>
+        #{/else}
+      </h4>
+      <p class="list-group-item-text">Competenze maturate in questo mese <span
+          class="label label-info">${_.getValue().printHourMinute()}</span></p>
+    </li>
+    #{/list}
+  </ul>
+
+  #{if shiftTypeMonth?.approved}
+    #{form action:@removeApprovation(), method:'POST', class:'form form-horizontal' }
+    #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
+    #{f.hidden 'version', value: shiftTypeMonth.version /}
+
+    #{b.buttons center:true}
+      #{b.submit 'Rimuovi approvazione' /}
+      #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+    #{/b.buttons}
+
+    #{/form}
+  #{/if}
+  #{else}
+    #{form action:@approveShiftsInMonth(), method:'POST', class:'form form-horizontal' }
+      #{f.hidden 'shiftTypeMonthId', value: shiftTypeMonth.id /}
+      #{f.hidden 'version', value: shiftTypeMonth.version /}
+
+      #{b.buttons center:true}
+        #{b.submit 'Approva competenze' /}
+        #{b.cancel @show('id':shiftTypeMonth.shiftType.id, shiftTypeMonth.yearMonth.toLocalDate(1).toString()) /}
+      #{/b.buttons}
+
+    #{/form}
+  #{/else}
+</div>
+
+

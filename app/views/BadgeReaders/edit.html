@@ -1,0 +1,167 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sede'  /}
+
+#{set breadcrumbs:['badgeReaders':@BadgeReaders.list(), ('Configura '+ badgeReader.code):null] /}
+ 
+<div class="container">
+	#{breadcrumbs breadcrumbs, noHome:'true' /}
+
+	#{title title:'Configurazione ' + badgeReader.code /}
+  
+#{tabList}
+  #{tabItem id:'info', title:'Riepilogo', active:true /}
+	#{tabItem id:'badgeSystems', title:'badgeSystems' /}
+	#{tabItem id:'zones', title:'Gestisci zone' /}
+	#{tabItem id:'delete', title:'Elimina'/}
+#{/tabList}
+	<br>
+#{tabContent}
+
+  #{tabContentItem id:'info', active:true}
+	#{panel title:'Informazioni', color:'primary'}
+  	  <div class="alert alert-info" role="alert">
+				Modifica i dati della &{'badgeReader'} <strong>${badgeReader.code}</strong>
+      </div>
+		#{form action:@updateInfo(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }			
+
+		  #{f.hidden 'badgeReader.id' /}				
+		  #{f.input 'badgeReader.code', required:true /}
+	      #{f.input 'badgeReader.description' /}
+	      #{f.input 'badgeReader.location' /}
+	    
+	      #{f.selectModel 'owner', value:badgeReader.user.owner, 
+	        items:templateUtility.officeForBadgeReaders(), required:true /}
+ 	  	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+		#{/form}
+	#{/panel}
+
+	#{panel title:'Nuova Password', color:'primary'}
+  	  <div class="alert alert-danger" role="alert">
+				Modifica la password di accesso della &{'badgeReader'} <strong>${badgeReader.code}</strong>
+      </div>
+		#{form action:@changePassword(badgeReader.id), method:'POST', autocomplete:false,
+		    class:'form form-horizontal' }
+
+
+	#{f.hidden 'user.id', value:badgeReader.user.id /}
+	#{f.view 'badgeReader.user.username' /}
+	  	  #{f.input 'newPass', type:'password', label:'Nuova password' /} 
+	
+	      #{b.buttons}
+	        #{b.save /}
+	      #{/b.buttons}
+		#{/form}
+	#{/panel}
+  
+  #{/tabContentItem}
+
+	#{tabContentItem id:'badgeSystems'}
+
+
+	*{ TODO il target }*
+	#{secure.check 'BadgeReaders.joinBadgeSystems'}
+	<div class="text-center">
+		<a class="btn btn-success" href="@{joinBadgeSystems(badgeReader.id)}"
+			 data-async-modal="#defaultModal">
+			&{'BadgeReaders.joinBadgeSystems'} ${badgeReader.code}
+		</a>
+	</div>
+	<br>
+	#{/secure.check}
+
+	#{alert color:'info'}
+	<p>La lista dei <strong><i class="fa fa-credit-card"></i> &{'badgeSystems'}</strong> attualmente
+		associati a <strong>${badgeReader.code}</strong>.</p>
+	#{/alert}
+
+	<section id="results">
+		#{paginate results}
+		<ul class="list-group">
+			#{list items:results.results, as:'item'}
+
+			<li class="list-group-item list-group-item-grey">
+				#{badgeSystem.item item:item /}
+			</li>
+
+			#{/list}
+		</ul>
+		#{/paginate}
+	</section>
+
+
+	#{/tabContentItem}
+	
+	#{tabContentItem id:'zones'}
+		<br>
+		
+			#{alert color:'warning'}
+				In questa sezione è possibile specificare varie zone di timbratura affinchè si permetta 
+				che una timbratura di uscita da una zona e una successiva
+				timbratura di ingresso presso un'altra zona, se effettuate entro un tempo definito, consentano al
+				sistema di non conteggiare il tempo intercorso tra le due timbrature.
+			#{/alert}
+				
+				<div class="text-center">
+				<a class="btn btn-success" href="@{Zones.insertZone(badgeReader.id)}"
+			 		data-async-modal="#defaultModal">
+					Inserisci zona per ${badgeReader.code}
+				</a>
+				</div>
+				<br>
+		#{if !zoneList.isEmpty()}
+		<table class="table table-striped table-hover table-condensed center" datatable>
+		<thead>
+	    <tr>
+	      <th>Zona</th>
+	      <th>Descrizione</th>	            
+	    </tr>
+	    </thead>
+	    <tbody>
+		#{list items:zoneList, as:'zone'}
+		<tr>
+			<td>${zone.name}</td>
+			<td>${zone.description}</td>
+		</tr>
+		#{/list}
+		</tbody>
+		</table>
+		#{/if}
+		
+				<div class="text-center">
+				<a class="btn btn-info" href="@{Zones.linkZones(badgeReader.id)}">
+					Associa zone 
+				</a>
+				</div>
+	#{/tabContentItem}
+
+	#{tabContentItem id:'delete'}
+
+	#{if badgeReader.badgeSystems.empty }
+	<div class="text-danger center">
+		#{alert color:'danger'}
+		<p>E' possibile eliminare la &{'badgeReader'} <strong>${badgeReader.code}</strong> poichè non è
+			associata ad
+			alcun &{'badgeSystem'}.</p>
+		<a class="btn btn-danger" href=@{BadgeReaders.delete(badgeReader.id)}>Elimina</a>
+		#{/alert}
+	</div>
+	#{/if}
+	#{else}
+	#{alert color:'info'}
+	<p>E' possibile eliminare una &{'badgeReader'} solo nel caso in cui non sia associato ad alcun
+		&{'badgeSystem'}</p>
+	#{/alert}
+	#{/else}
+
+	#{/tabContentItem}
+#{/tabContent}
+
+
+</div>
+
+<div id="modalInsertBadgeReader" class="modal fade container" tabindex="-1"></div>

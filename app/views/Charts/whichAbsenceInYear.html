@@ -1,0 +1,49 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+<div class="container">
+
+	<div class="panel panel-primary">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Seleziona l'anno</h4>
+		  </div>
+		<div class="panel-body">
+#{form @Charts.whichAbsenceInYear()}
+
+#{select 'yearChart', value:annoList.get(0), id:'yearChart'}
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}					
+#{/select}
+<input class="btn btn-primary span1" type="submit" value="Ok"/>
+#{/form}
+		</div>
+	</div>
+</div>
+#{if yearChart != 0}
+
+<div id="mythirdchart" style="height: 550px;">
+
+</div>
+
+	#{set 'moreScripts'}
+	<script type="text/javascript">
+	new Morris.Donut({
+	  element: 'mythirdchart',
+	  data: [
+		{label: "Assenze per missione", value: '${missioniSize}'},
+    	{label: "Assenze per riposo compensativo", value: '${riposiCompensativiSize}'},
+		{label: "Assenze per malattia", value: '${malattiaSize}'},
+		{label: "Altre assenze", value: '${altreSize}'}
+		
+	  ]	  
+	});
+
+</script>
+	
+	#{/set}
+#{/if}
+
+<ul class="pager">
+  <li><a href="/charts/indexCharts">Indietro</a></li>
+  
+</ul>

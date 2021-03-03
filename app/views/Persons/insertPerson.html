@@ -1,0 +1,78 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Inserimento nuova persona' /}
+
+<div class="container">
+
+  #{set breadcrumbs:['Lista Persone':@Persons.list(),
+  ('Inserimento Dipendente'):null] /}
+  #{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+  #{title title:'Inserimento Dipendente' /} 
+
+  #{form @Persons.save(),class:'form-horizontal'}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
+    </div>
+    <div class="panel-body">
+	  #{f.hidden 'person.beginDate', value:org.joda.time.LocalDate.now().format() /}
+      #{f.input 'person.surname',required:'true'/}
+      #{f.input 'person.name',required:'true'/}
+      #{f.input 'person.number',type:'number'/}
+      #{f.input 'person.email',required:'true'/}
+
+      #{f.selectModel 'person.qualification', items:templateUtility.allQualifications, required:'true'/}
+      #{f.selectModel 'person.office', items:templateUtility.officesAllowed(), required:'true'/}
+
+      #{f.checkbox 'person.wantEmail'/}
+
+      <p>
+        Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+        <strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+        <strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+        al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
+    </div>
+    <div class="panel-body">
+      #{f.date 'contract.beginDate',view:'year',required:'true'/} 
+      #{f.date 'contract.endDate',view:'year'/} 
+      #{f.checkbox 'contract.onCertificate', title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
+
+      <p>
+        Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
+        Sarà possibile modificarlo in un secondo momento scegliendo fra i tipi orario definiti per la sede selezionata.<br>
+        <strong>Importante:</strong> Per motivi di sicurezza al personale non in Attestati non può essere attribuito 
+        alcun ruolo amministrativo ePAS.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">3</span> Altre informazioni (opzionali)</h3>
+    </div>
+    <div class="panel-body">
+
+      #{f.input 'person.telephone'/}
+      #{f.date 'person.birthday'/}
+      #{f.input 'person.eppn'/}
+
+      <p>Il campo opzionale <strong>Eppn</strong> viene utilizzato per il login shibboleth quando attivo.</p>
+    </div>
+  </div>
+
+  <div class="container-fluid center">
+    <input class="btn btn-primary" type="submit" value="Salva" />
+    <a href="@{Persons.list()}" class="btn btn-default" role="button">Annulla</a>
+  </div>
+  #{/form}
+</div>    
+
+

@@ -1,0 +1,28 @@
+<li class="list-group-item" id="notification_${notification.id}">
+  <em class="text-primary">
+    <time datetime="${notification.createdAt}" title="${notification.createdAt.format()}">
+      <strong>${notification.createdAt.toDate().since()}</strong> 
+    </time>
+  </em>
+  <span style="padding-left: 4px">
+    ${notification.message}
+    #{if notification.redirect}
+      #{bb.b_link notification.url, fa:'external-link', color:'default', popover:'notification.show'}
+      #{/bb.b_link}
+    #{/if}
+    #{else}
+      <i class="btn fa fa-chain-broken" webui-popover-hover data-content="Nessun riferimento esistente per questa notifica" aria-hidden="true"></i>
+
+    #{/else}
+  </span>
+  <div class="pull-right">
+    <div class="btn-group">
+      #{if !notification.read}
+        #{bb.b_link @Notifications.read(notification.id, message, filter), color:'primary', fa:'check-circle', popover:'Segna come letta'}
+          &{'notification.archive'}
+        #{/bb.b_link}
+      #{/if}
+    </div>
+  </div>
+  <span class="clearfix"></span>
+</li>

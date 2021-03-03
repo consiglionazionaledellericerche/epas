@@ -1,0 +1,44 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+
+ <div class="container">
+    
+    #{if absence}
+        #{alert color:'danger'}
+	      <p>Modifica i valori critici per l'assenza selezionata.</p>
+	    #{/alert}	    
+    #{/if}#{else}
+        #{alert color:'danger'}
+	      <p>Inserire un id assenza valido.</p>
+	    #{/alert}
+    #{/else}
+    
+ 
+    #{form @AbsenceGroups.editAbsenceCriticalValue(), method:'POST', autocomplete:false, class:'form form-horizontal auto-submit'}
+      #{f.input 'absenceId', value:absence?.id /}
+    #{/form}
+    
+    #{if absence}
+    #{form @AbsenceGroups.saveAbsenceCriticalValue(),class:'form-horizontal'}
+      
+      #{f.hidden 'absenceId', value:absence.id /}
+      #{f.view 'person', value:absence.personDay.person.fullname /}
+      #{f.view 'absenceType', value:absence.absenceType.code /}
+      #{f.view 'absenceType.description', value:absence.absenceType.description /}
+      #{f.selectModel 'justifiedType', 
+ 		  value:absence.justifiedType, items:absence.absenceType.justifiedTypesPermitted, placeholder:'Come giustifica' /}
+      #{f.input 'justifiedMinutes', value:absence.justifiedMinutes, type:'number' /}
+      
+      #{b.buttons center:true}
+	   #{b.submit 'Salva'/}
+	  #{/b.buttons}
+    
+    #{/form}
+    #{/if}
+
+
+</div>
+
+
+

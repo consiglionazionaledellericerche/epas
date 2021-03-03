@@ -1,0 +1,63 @@
+<div class="container-fluid"> 
+#{alert color: 'info' }
+<p>
+Nel menu in alto seleziona <strong>l'anno e il mese</strong> per cui vuoi richiedere il cambio.
+Qui sotto compila il form per inviare una richiesta di ${competenceRequest.type.label()}
+Specificando la <strong>data</strong> che intendi richiedere come cambio e la <strong>persona</strong> cui intendi richiederlo.<br>  
+</p>
+#{/alert}
+</div>
+
+#{form action:@edit(), method:'POST', autocomplete:false,
+	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
+
+	#{f.hidden 'competenceRequest.id' /}
+	#{f.hidden 'competenceRequest.type' /}
+	#{f.hidden 'year', value: currentData.year /}
+	#{f.hidden 'month', value: currentData.month /}
+	#{f.hidden 'persist', value:persist /}
+
+	<div class="container-fluid">
+	<h3>Servizi di reperibilità e persone affiliate per ${templateUtility.monthName(month)} ${year}: </h3><br>
+		#{f.selectModel 'type', value:type, 
+	        items:types, required:true /}
+	    #{f.selectModel 'teamMate', items:teamMates, required:true /}
+	    #{if insertable}
+	    	#{f.selectModel 'beginDayToGive', items:myReperibilityDates /}
+	    	#{f.selectModel 'endDayToGive', items:myReperibilityDates /}
+	    	#{f.selectModel 'beginDayToAsk', items:reperibilityDates /}
+	    	#{f.selectModel 'endDayToAsk', items:reperibilityDates /}
+	    #{/if}
+	</div>
+#{/form}
+
+
+#{form action:@save(), method:'POST', autocomplete:false,
+	class:'form form-horizontal', 'data-spinner':'#modalSpinner' }
+                       
+	#{f.hidden 'competenceRequest.id' /}
+	#{f.hidden 'competenceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'year', value: currentData.year /}
+	#{f.hidden 'month', value: currentData.month /}
+
+	#{f.hidden 'competenceRequest.startAt', value:competenceRequest.startAt?.format() /}
+	#{f.hidden 'competenceRequest.endTo', value:competenceRequest.endTo?.format() /}
+	#{f.hidden 'competenceRequest.note' /}
+	#{f.hidden 'type.id', value:type?.id /}
+	#{f.hidden 'teamMate.id', value:teamMate?.id /}
+	#{f.hidden 'beginDayToGive.id', value:beginDayToGive?.id /}
+	#{f.hidden 'endDayToGive.id', value:endDayToGive?.id /}
+    #{f.hidden 'beginDayToAsk.id', value:beginDayToAsk?.id /}
+    #{f.hidden 'endDayToAsk.id', value:endDayToAsk?.id /}
+               
+    #{b.buttons center:true}
+		 #{b.link @list(competenceRequest.type), color:'default', title:'Indietro' /}
+		 #{if insertable}
+         #{b.submit 'Inserisci'/}
+         #{/if}
+         #{else}
+         #{b.submit 'Inserisci', disabled:true /}
+         #{/else}
+    #{/b.buttons}
+#{/form}	  

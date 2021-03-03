@@ -1,0 +1,74 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione fasce orarie di lavoro'  /}
+
+<div class="container">
+  #{title title:'Gestione delle fasce orarie di lavoro' /}
+</div>
+
+#{set _activeAction:'manageTimeSlots' /}
+#{include './timeSlotTabs.html' /}
+
+<div class="container">
+
+  #{panel title:'Fasce orarie predefinite', color:'primary'}
+
+  <div class="alert alert-info" role="alert">
+    Le <strong>fasce orarie predefinite</strong> possono essere assegnate ad ogni dipendente di ogni sede.<br>
+    Non possono essere modificate o aggiunte ma possono essere presi ad esempio da parte degli amministratori
+    del personale per creare nuove fasce di orario particolari per le sedi amministrate.
+  </div>
+
+  <!-- Nuovo -->
+  #{secure.check 'TimeSlots.blankPredefined'}
+  	#{b.buttons}
+  	<div class="text-center">
+    	<a class="btn btn-success" href="@{TimeSlots.blank}">
+     		<span class="glyphicon glyphicon-plus"></span> Crea nuova fascia oraria
+		</a>
+	</div>
+	#{/b.buttons}
+   #{/secure.check}
+
+  <table class="table table-hover">
+    <tr>
+      <th>Descrizione</th>
+      <th>Contratti attivi<br>attualmente associati<br>(alla data di oggi)</th>
+      <th>Periodi associati<br>a contratti attivi</th>
+      #{secure.check ''}
+      	<th>Contratti <br>associati<br>(storico)</th>
+      #{/secure.check}
+    </tr>
+    #{list items:timeSlots, as:'item'}
+    <tr>
+      <td>
+        ${item.value.label}
+      </td>      
+      <td>
+        <a href="@{TimeSlots.showContracts(item.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${item.getAssociatedActiveContract(office).size()}          
+        </a>
+      </td>
+      <td>
+        <a href="@{TimeSlots.showContractMandatoryTimeSlot(item.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${item.getAssociatedPeriodInActiveContract(office).size()}
+        </a>
+      </td>
+      #{secure.check ''}
+      	<td>
+      	  ${item.value.contractMandatoryTimeSlots.size()}
+          #{if item.value.contractMandatoryTimeSlots.size() == 0 }
+	   	    <a href="@{Timeslots.delete(item.value.id)}">
+	 	    	<i data-toggle="tooltip" data-placement="bottom" title="Elimina fascia oraria non associata ad alcun contratto" 
+	 	    		class="fa fa-trash-o"></i>
+			</a>
+		  #{/if}
+      	
+      	</td>
+      #{/secure.check}
+      
+    </tr>
+    #{/list}
+  </table>
+  #{/panel}
+</div>

@@ -1,0 +1,18 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   personId = session.get("personSelected");
+   officeId = session.get("officeSelected");
+ }%
+
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("certifications")} class="active" #{/if}>
+      <a href="@{Certifications.certifications(officeId)}">Invio Attestati</a>
+    </li>
+  </ul>
+</div>
+<br>

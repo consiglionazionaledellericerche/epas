@@ -1,0 +1,20 @@
+#{if !_periods.empty }
+	    <p>Nuova configurazione</p>
+	    <table class="table table-bordered table-condensed center">
+		  <tr>
+		    <th>Dal</th>
+		    <th>Al</th>
+			<th>Valore</th>
+		  </tr>
+		  #{list items:_periods, as:'periodRecap'}
+		  <tr>
+		    <td>${periodRecap.beginDate.format()}</td>
+			<td>#{if periodRecap.endDate != null} ${periodRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+			<td>
+			    ${periodRecap.value.label()}
+			</td>
+		  </tr>
+		  #{/list}
+	  	</table>
+#{/if}
+

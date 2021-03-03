@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+	<style type="text/css">
+		table.cartellino {
+			border: 1px solid #000;
+			background-color: #ccc;
+		}
+
+		table.cartellino tr {
+			background-color: #ccc;
+		}
+
+		table.cartellino td {
+			background-color: #ddd;
+			border: 1px solid #fff;
+		}
+
+		table.cartellino th {
+			background-color: #ddd;
+			border: 1px solid #fff;
+			color: black;
+		}
+
+		table {
+			border: 1px solid #000;
+			background-color: #ccc;
+		}
+
+		tr {
+			background-color: #ddd;
+		}
+
+		tr:nth-child(even) {
+			background-color: #eee;
+		}
+	</style>
+	
+</head>
+<body>
+	<h3>${titolo}</h3>
+
+	<table class="cartellino">
+		<tr>
+			<th><font size="0.5">Buono mensa</font></th>
+			<th><font size="0.5">Giorno</font></th>
+			<th><font size="0.5">Codice di assenza</font></th>
+			#{list items:1..psDto.numberOfInOut}
+			<th><font size="0.5">${_}° entrata</font></th>
+			<th><font size="0.5">${_}° uscita</font></th>
+			#{/list}
+			<th><font size="0.5">Tempo lavoro</font></th>
+			<th><font size="0.5">Differenza</font></th>
+			<th><font size="0.5">Progressivo</font></th>
+			<th><font size="0.5">Tipo Orario</font></th>
+			<th><font size="0.5">Note</font></th>
+		</tr>
+		#{list psDto.daysRecap}
+		<tr>
+			<td>
+				#{if _.mealTicket.equals('NO')}<font size="0.5">${_.mealTicket}</font>#{/if}
+			</td>
+			<td>
+				<font size="0.5">${_.date.shortDayName()}</font>
+			</td>
+			<td>
+				<font size="0.5">
+					#{list _.absences ,as:'absence'}
+					${absence.absenceType?.code}
+					#{/list}
+				</font>
+			</td>
+			#{list _.stampingsTemplate,as: 'st'}
+			<td>
+				<font size="0.5">#{if st.date}${st.hour}#{/if}
+					<strong>${st.identifier}</strong>
+					<strong>${st.markedByAdminCode}</strong>
+					<strong>${st.missingExitStampBeforeMidnightCode}</strong>
+				</font>
+			</td>
+			#{/list}
+			<td>
+				<font size="0.5">
+					${_.workTime}
+					<strong>${_.todayLunchTimeCode}</strong>
+					<strong>${_.fixedWorkingTimeCode}</strong>
+					<strong>${_.exitingNowCode}</strong>
+				</font>
+			</td>							
+			<td>
+				<font size="0.5">
+					${_.difference}
+				</font>
+			</td>	
+			<td>
+				<font size="0.5">
+					${_.progressive}
+				</font>
+			</td>
+			<td><font size="0.5">${_.workingTimeTypeDescription}</font></td>
+			<td></td>
+		</tr>
+		#{/list}
+	</table>
+
+	<p id="spiegazioneTabellaTimbrature">
+		<font size="2">
+			Il numero di buoni mensa usabili per questo mese e': <strong>${psDto.numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${psDto.numberOfMealTicketToRender}</strong>. 
+			<br>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong>
+			<br>Il numero di ore di lavoro effettuate nel mese è di: <strong>${psDto.totalWorkingTime.toHourTime()}</strong> 
+		</font>
+	</p>
+
+	<p id="spiegazioneTabellaTimbrature"/>
+
+	<div id="tabelleRiassuntive">
+		#{if !psDto.stampModificationTypeSet.isEmpty()}
+		<strong style="margin-top: 2em">Note:</strong>
+		<br>
+		<table id="Note timbrature">
+			<tr>
+				<th width="80"><font size="2">Codice timbratura</font></th>
+				<th width="400"><font size="2">Descrizione</font></th>
+			</tr>
+			#{list psDto.stampModificationTypeSet}
+			<tr>
+				<td><font size="2">${_.code}</font></td>     
+				<td><font size="2">${_.description}</font></td>		
+			</tr>
+			#{/list}
+			#{list psDto.stampTypeSet}
+			<tr>
+				<td><font size="2">${_.identifier}</font></td>
+				<td><font size="2">${_.description}</font></td>
+			</tr>
+			#{/list}
+		</table>
+		#{/if}
+
+		*{Significato codici assenza}*
+		<br>
+		<strong style="margin-top: 2em">Tabella codici di assenza:</strong>
+		<br>
+		<table id="Codici di assenza">
+			<tr>
+				<th width="80"><font size="2">Codice assenza</font></th>
+				<th width="200"><font size="2">Descrizione</font></th>
+				<th width="80"><font size="2">Numero giorni</font></th>
+
+			</tr>
+			#{list psDto.absenceCodeMap.entrySet()}
+			<tr>
+				<td><font size="2">${_.getKey().code}</font></td>     
+				<td><font size="2">${_.getKey().description}</font></td>	
+				<td><font size="2">${_.getValue()}</font></td>	
+			</tr>
+			#{/list}
+		</table>
+	</div>
+
+	<p>
+		SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
+		<br>
+		Firma
+	</p>
+
+</body>
+</html>

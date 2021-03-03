@@ -1,0 +1,58 @@
+# you describe your data using the YAML notation here
+# and then load them using Fixtures.load("data.yml")
+
+WorkingTimeType(normal):
+    description: normal
+
+WorkingTimeTypeDay(normalMonday):
+    workingTimeType: normal
+    dayOfWeek: 1
+    holiday: false
+    
+WorkingTimeTypeDay(normalTuesday):
+    workingTimeType: normal
+    dayOfWeek: 2
+    holiday: false
+        
+WorkingTimeTypeDay(normalWednesday):
+    workingTimeType: normal
+    dayOfWeek: 3
+    holiday: false
+    
+WorkingTimeTypeDay(normalThursday):
+    workingTimeType: normal
+    dayOfWeek: 4
+    holiday: false
+
+WorkingTimeTypeDay(normalFriday):
+    workingTimeType: normal
+    dayOfWeek: 5
+    holiday: false
+    
+WorkingTimeTypeDay(normalSaturday):
+    workingTimeType: normal
+    dayOfWeek: 6
+    holiday: true
+
+WorkingTimeTypeDay(normalSunday):
+    workingTimeType: normal
+    dayOfWeek: 7
+    holiday: true
+ 
+StampType(timbratureIngresso):
+    description: Timbratura di ingresso
+
+StampType(timbraturaUscitaPerPranzo):
+    description: Timbratura d'uscita per pranzo
+
+StampType(timbraturaIngressoDopoPausaPranzo):
+    description: Timbratura di ingresso dopo pausa pranzo
+
+StampType(timbratureUscita):
+    description: Timbratura di uscita
+
+Person(cristian):
+    name: Cristian
+    surname: Lucchesi
+    workingTimeType: normal
+    

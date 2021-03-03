@@ -1,0 +1,103 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+
+
+<div class="container">
+
+  #{title title:'Riepilogo Buoni Pasto ' + templateUtility.monthName(month) + ' ' + year + ' ' + office.name, administration:true /}
+
+	#{include './_tabs.html' /}
+  
+    *{
+    // TODO ripristinare se serve il pannello di riepilgo dei buoni inseriti nell'ultima action.
+    }*   
+    <!-- Ultimi inseriti -->
+    #{if blockAdded != null }
+    <div class="col-md-12 center">
+  	
+  	  <div class="alert alert-success alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+        <strong>Buoni Pasto correttamente inseriti per la persona 
+          <a href="@{MealTickets.quickBlocksInsert(personAdded.id)}" data-async-modal="#defaultModal">	  	      
+	  	     ${personAdded.surname} ${personAdded.name}</a>
+	  	  </a>
+	  	</strong>
+        <br><br>
+         <table class="table center">
+		    <tr>
+		      <th>Codice Blocco</th>
+		      <th>Dimensione</th>
+			  <th>Data Scadenza</th>
+		      <th>Data Attribuzione</th>
+		      <th>Amministratore Assegnatario</th>
+		    </tr>
+		    #{list items:blockAdded, as:'block'}
+		      <tr style="background-color: white;">
+		        <td>
+		          <strong>${block.codeBlock}</strong>
+		        </td>
+		        <td>${block.getDimBlock()}</td>
+		        <td>${block.getExpireDate()}</td>
+		        <td>${block.getReceivedDate()}</td>
+		        <td>${block.getAdmin().name} ${block.getAdmin().surname}</td>	        
+		      </tr>
+		    #{/list}
+		  </table>
+      </div>
+      
+    </div>    
+    #{/if}
+
+  
+      <table class="table table-bordered center" datatable>
+        <thead>
+        <tr>
+	      <th>Nome</th>
+	      <th>Mese Precedente <br>(o da inizializzazione)</th>
+	      <th>Consegnati mese</th>
+	      <th>Utilizzati mese</th>
+	      <th>Rimanenti</th>
+	  	</tr>
+	  	</thead>
+	  	<tbody>
+	  	  #{list items:monthRecapList, as:'recap'}
+	  	  <tr>
+	  	    <td #{if recap.expireInMonth()} webui-popover-hover data-content="Il contratto scade nel mese" #{/if}>
+	  	    
+	  	       <a href="@{MealTickets.personMealTickets(recap.contract.id, year, month)}">
+		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>  	  
+		  	      #{if recap.expireInMonth()} * #{/if}
+	  	    </td> 
+	  	    
+	  	    #{if recap.buoniPastoDaInizializzazione > 0}
+	  	      <td>${recap.buoniPastoDaInizializzazione}</td>
+	  	    #{/if}#{else}
+	  	      <td>${recap.buoniPastoDalMesePrecedente}</td>
+	  	    #{/else}
+	  	    
+	  	    <td>${recap.buoniPastoConsegnatiNelMese}</td>
+	  	    <td>${recap.buoniPastoUsatiNelMese}</td>
+	  	    <!-- remaining cell -->
+	  	    #{if recap.remainingMealTickets >= 5}
+	  	      <td class="success">
+	  	    #{/if}
+	  	    #{if recap.remainingMealTickets > 0 && recap.remainingMealTickets < 5}
+	  	       <td class="warning">
+	  	    #{/if}   
+	  	    #{if recap.remainingMealTickets <= 0}
+	  	      <td class="danger">
+	  	    #{/if}
+	  	      <strong>
+	  	      ${recap.remainingMealTickets}
+	  	      </strong>
+	  	    </td>
+	  	  </tr>
+
+	  	  #{/list}
+	  	</tbody>	
+	  </table>
+  
+</div>
+

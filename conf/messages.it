@@ -1,0 +1,1411 @@
+absenceRequest =richiesta di assenza
+
+absenceRequest.endTo =Fine
+absenceRequest.note =Note
+absenceRequest.person =Dipendente
+absenceRequest.startAt =Inizio
+absenceRequest.type =Tipologia
+absenceRequest.officeHeadApproved =Approvazione responsabile di sede
+absenceRequest.managerApproved =Approvazione responsabile di gruppo
+absenceRequest.administrativeApproved =Approvazione del amministrativo
+absenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+absenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+AbsenceRequests.approval=Approva
+AbsenceRequests.disapproval=Disapprova
+
+AbsenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+AbsenceRequestEventType.MANAGER_APPROVAL=Richiesta approvata dal responsabile del gruppo di lavoro
+AbsenceRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile del gruppo di lavoro
+AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL=Richiesta approvata dall'amministratore del personale
+AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+AbsenceRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede
+AbsenceRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+AbsenceRequestEventType.COMPLETE=Richiesta completata
+AbsenceRequestEventType.DELETE=Richiesta cancellata
+AbsenceRequestEventType.EXPIRING=Richiesta scaduta
+
+STARTING_APPROVAL_FLOW =Inizio approvazione
+MANAGER_APPROVAL =Approvata dal responsabile del gruppo di lavoro
+MANAGER_REFUSAL =Respinta dal responsabile del gruppo di lavoro
+ADMINISTRATIVE_APPROVAL =Approvata dall'amministratore del personale
+ADMINISTRATIVE_REFUSAL =Respinta dall'amministratore del personale
+OFFICE_HEAD_APPROVAL =Approvata dal responsabile di sede
+OFFICE_HEAD_REFUSAL =Respinta dal responsabile di sede
+COMPLETE =Richiesta completata
+DELETE =Richiesta cancellata
+EXPIRING =Richiesta scaduta
+AbsenceRequestType.VACATION_REQUEST_TO_APPROVE=Ferie da approvare
+AbsenceRequestType.COMPENSATORY_REST_TO_APPROVE=Riposi compensativi da approvare
+AbsenceRequestType.PERSONAL_PERMISSION_TO_APPROVE=Permessi personali da approvare
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TO_APPROVE=Ferie anno passato dopo deadline da approvare
+AbsenceRequestType.VACATION_REQUEST=Ferie
+AbsenceRequestType.COMPENSATORY_REST=Riposo compensativo
+AbsenceRequestType.PERSONAL_PERMISSIONS=Permesso personale
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS=Ferie anno passato dopo deadline
+
+competenceRequest =richiesta di competenza
+
+competenceRequest.endTo =Fine
+competenceRequest.note =Testo della richiesta
+competenceRequest.person =Dipendente
+competenceRequest.startAt =Inizio
+competenceRequest.type =Tipologia
+competenceRequest.value =Ore di straordinario da richiedere
+competenceRequest.dateToChange =Giorno in cui effettuare il cambio
+competenceRequest.beginDateToAsk =Giorno inziale chiesto
+competenceRequest.endDateToAsk =Giorno finale chiesto
+competenceRequest.beginDateToGive =Giorno iniziale offerto
+competenceRequest.endDateToGive =Giorno finale offerto
+competenceRequest.shiftSlot =Slot di turno da cambiare
+competenceRequest.employeeApproved =Approvazione dipendente
+competenceRequest.officeHeadApproved =Approvazione responsabile di sede
+competenceRequest.managerApproved =Approvazione responsabile di gruppo
+competenceRequest.administrativeApproved =Approvazione del amministrativo
+competenceRequest.employeeApprovalRequired =Richiesta approvazione del dipendente
+competenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+competenceRequest.approval=Approva
+competenceRequest.disapproval=Disapprova
+
+CompetenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+CompetenceRequestEventType.EMPLOYEE_APPROVAL=Richiesta approvata dal dipendente
+CompetenceRequestEventType.EMPLOYEE_REFUSAL=Richiesta respinta dal dipendente
+CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL=Richiesta approvata dal supervisore del servizio
+CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL=Richiesta respinta dal supervisore del servizio
+CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL=Richiesta approvata dall'amministratore del personale
+CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+CompetenceRequestEventType.COMPLETE=Richiesta completata
+CompetenceRequestEventType.DELETE=Richiesta cancellata
+CompetenceRequestEventType.EXPIRING=Richiesta scaduta
+
+CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST =Cambio di reperibilità
+CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST_TO_APPROVE =Richieste di cambio di reperibilità
+CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST.blank =nuova richiesta cambio reperibilità
+
+CompetenceRequests.changeReperibility =Mie richieste di cambio di reperibilità
+CompetenceRequests.changeReperibilityToApprove = Richieste di cambio reperibilità
+
+CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibilita'
+
+
+type =Servizio di reperibilità
+teamMate =Reperibile da contattare
+activityType =Servizio di reperibilità
+beginDayToGive = Giorno iniziale da dare
+beginDayToAsk = Giorno iniziale da chiedere
+endDayToGive = Giorno finale da dare
+endDayToAsk = Giorno finale da chiedere
+
+activity =Attività di turno
+ADD= Inserimento
+
+administrations= Amministrazione
+administrator= Amministratore
+adminPassword= Password Amministratore
+adminPasswordRetype= Reinserire Password
+
+Administration.generalSetting.table= Impostazioni generali di sistema
+Administration.playConfiguration.table= Parametri di Configurazione Play! framework
+Administration.jvmConfiguration.table= Parametri Jvm
+Administration.runtimeData.table= Valori di Runtime
+Administration.threadsData.table= Informazioni sui thread attivi
+
+Affiliations.personAffiliations=Gruppi
+Affiliation =Appartenenza al gruppo
+affiliation =Appartenenza al gruppo
+affiliation.group =Gruppo
+affiliation.person =Persona
+affiliation.percentage =Percentuale
+affiliation.beginDate =Data inizio
+affiliation.endDate =Data fine
+affiliation.externalId =External id
+affiliationPeople= Afferenti al gruppo
+
+application.data= Informazioni applicazione
+
+badge.badgeReader= Lettore badge associato
+badge.begin= Inzio
+badge.code= Numero badge
+badge.delete= Elimina Badge
+badge.edit= Modifica
+badge.end= Fine
+
+badgeReaderUser= Utente associato a un Client Timbrature
+badgeReader.badgeSystems=Gruppi Badge
+BadgeReader.blank= Nuova Sorgente Timbrature
+badgeReader.code=Nome
+badgeReader.description=Descrizione
+badgeReader.id=id
+badgeReader.location=Location
+badgeReader.user.owner=Sede Responsabile
+BadgeReaders.joinBadgeSystems= Gestisci Associazioni
+badgeReader=Sorgente Timbrature
+badgeReaders= Sorgenti Timbrature
+badgeReader.user.username=Username
+badgeReader.user.password=Password
+badgeReader.owner= Sede proprietaria
+
+badgeSystem.description=Descrizione
+badgeSystem = Gruppo Badge
+badgeSystem.name=Nome
+badgeSystem.office=Sede
+BadgeSystems.blank= Nuovo Gruppo Badge
+badgeSystems= Gruppi Badge
+BadgeSystems.joinBadges= Associa Badge
+
+beginDate=Data Inizio
+endDate=Data Fine
+from=Da
+to=A
+recoveryDate=Da recuperare entro
+
+calculationType=Tipo di conteggio dei turni
+paymentType=Tipo di pagamento
+
+calendar.competencesApproved = Le competenze per questo mese sono state approvate
+calendar.competencesToBeApproved = Le competenze per questo mese sono da approvare
+calendar.removeApprovation= Rimuovi approvazione
+calendar.approve= Approva competenze
+calendar.allValidShifts= Tutti i turni risultano validi
+calendar.notAllValidShifts= Uno o più turni risultano non validi
+calendar.warningShifts= Alcuni turni hanno riduzioni d'orario
+
+category=Categoria
+
+categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+
+categoryTab.name =nome
+categoryTab.description =descrizione
+categoryTab.priority =priorità
+
+child.bornDate= Data entrata in famiglia
+child.name= Nome
+child.surname= Cognome
+child.taxCode= Codice fiscale
+personChildren=Figlio Dipendente
+
+codeBlock=Codice Blocco
+
+code=Codice
+competence.reason =Motivazione
+valueApproved= Valore per competenza
+codeListIds =Codici di competenza abilitati
+competenceCode.code= Codice Competenza
+competenceCode.codeToPresence= Codice per attestato di presenza
+competenceCode.description= Descrizione
+competenceCode.new= Nuovo codice di competenza
+competenceCode.limitType=Limite di utilizzo
+competenceCode.limitValue= Quantità massima
+competenceCode.limitUnit =Unità di misura
+competenceCode.limitDescription =Descrizione limite
+
+CompManager.overGroupLimit= Superato il quantitativo massimo usabile per l'intero gruppo
+CompManager.overYearLimit= Superato il quantitativo annuale usabile
+CompManager.overMonthLimit= Superato il quantitativo mensile usabile
+CompManager.diffBasedWorkingDay= Differenza con i giorni di lavoro effettuati nel mese
+CompManager.overServiceLimit= Superato il limite per i servizi reper.tà disponibili
+CompManager.notEnabled= Competenza non abilitata nell'anno e mese selezionati
+CompManager.overEntireMonth= Non si può assegnare un valore superiore a 1 per questa competenza
+CompManager.notConfigured= Aggiungere prima il servizio per cui si richiede la reperibilità
+
+configuration.entry= Parametro
+configuration.entry.value= Valore parametro
+configurations= Configurazione
+configurations.entries= Parametri di Configurazione Play
+
+confirmPassword= Conferma Password
+
+contract.beginDate= Inizio Contratto
+contract= Contratto
+Contract= Contratto
+contract.endContract= Terminato Il
+contract.endDate= Fine Contratto
+contract.onCertificate= In attestati
+contract.onCertificate.true= Si
+contract.onCertificate.false= No
+contract.perseoId =Identificato contratto in Anagrafica
+contract.externalId =External id
+sourceDateRecoveryDay = Data inizializzazione riposi compensativi
+linkedToPreviousContract = Continuazione del precedente contratto
+
+previousContract.beginDate= Inizio precedente contratto
+previousContract.endContract= Terminato Il
+previousContract.endDate= Fine precedente Contratto
+
+dateToSplit =Data in cui dividere il contratto
+
+attestatiSync = Importa assenze da Attestati
+
+contractualClause =Istituto contrattuale
+contractualClause.name =nome
+contractualClause.context =contesto
+contractualClause.beginDate =data di inizio
+contractualClause.endDate =data di fine
+contractualClause.categoryGroupAbsenceTypes =Categorie di gruppi di assenza
+contractualClause.contractualReferences =Riferimenti contrattuali
+contractualClause.fruitionTime =Tempi di fruizione
+contractualClause.howToRequest =Modalità di richiesta
+contractualClause.supportingDocumentation =Documentazione giustificativa
+contractualClause.legalAndEconomic =Caratteristiche giuridico economiche
+contractualClause.otherInfos =Altre informazioni
+contractualClause.validity =validità temporale
+
+ContractualClauses.list =Istituti contrattuali
+
+ContractualClauseContext.ABSENCE =assenze
+ContractualClauseContext.ABSENCE_AND_PRESENCE =assenze e presenze
+ContractualClauseContext.PRESENCE =presenze
+
+contractualReference.name =nome
+contractualReference.url =indirizzo web
+contractualReference.beginDate =data di inizio
+contractualReference.endDate =data di fine
+contractualReference.file =Allegato
+
+ContractualReferences.list =Riferimenti normativi
+
+sourceDateMealTicket= Data inizializzazione
+sourceDateResidual= Data inizializzazione
+sourceDateVacation= Data inizializzazione
+sourcePermissionUsed= Giorni di permesso utilizzati anno corrente
+sourceRecoveryDayUsed= Giorni di riposo compensativo effettuati nell'anno corrente
+
+hoursCurrentYear= Ore residue anno corrente
+minutesCurrentYear= Minuti residui anno corrente
+hoursLastYear= Ore residue anno passato
+minutesLastYear= Minuti residui anno passato
+
+sourceVacationCurrentYearUsed= Giorni di ferie utilizzati dell'anno corrente
+sourceVacationLastYearUsed= Giorni di ferie utilizzati dell'anno passato
+contract.sourceRemainingMealTicket= Buoni pasto residui
+
+contractStampProfile.fixedworkingtime=Presenza Automatica
+ContractStampProfile= Periodo Presenza Automatica
+ContractWorkingTimeType=Periodo Tipo Orario
+contractWorkingTimeType=Periodo Tipo Orario
+
+ContractMandatoryTimeSlot=Fascia oraria obbligatoria
+contractMandatoryTimeSlot=Fascia oraria obbligatoria
+
+crud.cancel=Indietro
+crud.cancelled=Operazione annullata.
+crud.created=&{%s} creato con successo
+crud.deleted=&{%s} cancellato con successo
+crud.delete=Elimina
+crud.hasErrors =Occorre correggere gli errori riportati.
+crud.modified=&{%s} modificato con successo
+crud.saved=&{%s} salvato con successo
+crud.save=Salva
+crud.disable=Disabilita
+crud.enable=Riabilita
+crud.ok= Ok
+crud.userDeleteError= Errore nella disabilitazione. Non si può disabilitare un utente fisico con la persona ancora ad esso associata.
+crud.disabled=&{%s} disabilitato con successo
+
+crud.systemDeleteError= Errore nella cancellazione. Non è possibile cancellare un utente di sistema che abbia informazioni storicizzate ancora associate. 
+
+csp.beginDate= Data Inizio
+csp.endDate= Data Fine
+csp.fixedworkingtime=Presenza Automatica
+
+cwtt.beginDate= Data Inizio
+cwtt.endDate= Data Fine
+cwtt.workingTimeType= Tipo Orario
+cwtt.externalId =External id
+
+cmts.beginDate= Data Inizio
+cmts.endDate= Data Fine
+cmts.timeSlot= Fascia oraria
+
+vp.beginDate= Data Inizio
+vp.endDate= Data Fine
+vp.vacationCode=Piano Ferie
+
+timeSlot=Fascia oraria
+timeSlot.beginSlot=orario di inizio
+timeSlot.endSlot=orario di fine
+timeSlot.office=Ufficio
+timeSlot.description=descrizione
+timeSlot.disable=Disabilitato
+
+VacationCode.CODE_28_4= 28+4
+VacationCode.CODE_26_4= 26+4
+VacationCode.CODE_25_4= 25+4
+VacationCode.CODE_21_4= 21+4
+VacationCode.CODE_16_2= 16+2
+VacationCode.CODE_17_2= 17+2
+VacationCode.CODE_11_2= 11+2
+VacationCode.CODE_10_2= 10+2
+VacationCode.CODE_22_3= 22+3
+VacationCode.CODE_21_3= 21+3
+VacationCode.CODE_30_4= 30+4
+VacationCode.CODE_32_4= 32+4
+VacationCode.CODE_9_1= 9+1
+VacationCode.CODE_13_2= 13+2
+VacationCode.CODE_14_2= 14+2
+
+date= Data
+
+date.modified= Data della Modifica
+dateFrom=Dal
+dateOfPatron= Data del Patrono
+dateTo=Fino Al
+day= Giorno (se presente)
+deliveryDate=Consegnato il
+
+dateVariation= Data Variazione
+
+DEL= Eliminazione
+
+domain= Dominio
+done.by= Effettuata da
+
+emailToContact= Indirizzo email dell&#39;amministrazione
+endContract=Data Risoluzione
+expireDate=Data Scadenza
+
+externalId =External id
+
+feedback.subject =EPAS - Segnalazione utente
+feedback.staff =Lo staff di EPAS
+
+file= File
+
+disabled= Codice di competenza disabilitato
+enabled= Abilita Codice di competenza
+beginEndCompetenceCode= In questo mese inizia e termina la validità di utilizzo del codice di competenza.
+beginCompetenceCode= In questo mese inizia l'utilizzo del codice di competenza.
+endCompetenceCode= In questo mese termina l'utilizzo del codice di competenza. Dal prossimo mese non sarà più usabile e visibile in questa lista.
+firstDay= Giorno inizio contratto
+
+forceInsert= Forza Inserimento
+
+generalSetting =Impostazioni generali di sistema
+generalSetting.syncBadgesEnabled =Sincronizzazione badge
+generalSetting.syncOfficesEnabled =Sincronizzazione uffici
+generalSetting.syncPersonsEnabled =Sincronizzazione persone
+generalSetting.onlyMealTicket =Invio solo dei buoni pasto
+generalSetting.startDailyShift =Inizio fascia per turno diurno
+generalSetting.endDailyShift =Fine fascia per turno diurno
+generalSetting.startNightlyShift =Inizio fascia per turno notturno
+generalSetting.endNightlyShift =Fine fascia per turno notturno
+generalSetting.handleGroupsByInstitute =Gestisci i gruppi per istituto
+generalSetting.saturdayHolidayShift =Sabato da considerare festivo
+generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
+
+group.label =Nome gruppo
+group.limitType =Periodo di utililzzo limite
+group.limitValue =Quantità massima
+group.competenceCodes =Codici competenza da associare
+group.limitUnit =Unità di misura
+group.limitDescription =Descrizione limite
+group.name =Nome gruppo
+group.description =Descrizione
+group.manager =Responsabile
+group.people =Afferenti al gruppo
+group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
+groups =Gruppi di lavoro
+
+history.back= Indietro
+history.type= Operazione
+
+institute.cds= Centro di spesa
+institute.code=Sigla
+institute.name=Nome
+Institutes.blank=Nuovo istituto
+Institutes.delete=Elimina istituto
+invalid.time=Formato del tempo errato.
+
+includeStampingDetails= Includi dettagli timbrature
+link.denied= Permessi insufficenti
+link.zoneBase =Zona di partenza
+link.delay =Tolleranza
+link.zoneLinked =Zona di arrivo
+logout= Esci
+lunchPauseEnd= Fine pausa pranzo
+lunchPauseStart= Inizio pausa pranzo
+
+list[1].beginSlot=Inizio turno
+list[1].endSlot=Fine turno
+list[1].isMealActive=Pausa pranzo attiva
+list[1].beginMealSlot=Inizio pausa pranzo
+list[1].endMealSlot=Fine pausa pranzo
+list[1].paymentType=Modalità di pagamento
+list[1].minutesPaid=Minuti pagati
+
+list[2].beginSlot=Inizio turno
+list[2].endSlot=Fine turno
+list[2].isMealActive=Pausa pranzo attiva
+list[2].beginMealSlot=Inizio pausa pranzo
+list[2].endMealSlot=Fine pausa pranzo
+list[2].paymentType=Modalità di pagamento
+list[2].minutesPaid=Minuti pagati
+
+list[3].beginSlot=Inizio turno
+list[3].endSlot=Fine turno
+list[3].isMealActive=Pausa pranzo attiva
+list[3].beginMealSlot=Inizio pausa pranzo
+list[3].endMealSlot=Fine pausa pranzo
+list[3].paymentType=Modalità di pagamento
+list[3].minutesPaid=Minuti pagati
+
+list[4].beginSlot=Inizio turno
+list[4].endSlot=Fine turno
+list[4].isMealActive=Pausa pranzo attiva
+list[4].beginMealSlot=Inizio pausa pranzo
+list[4].endMealSlot=Fine pausa pranzo
+list[4].paymentType=Modalità di pagamento
+list[4].minutesPaid=Minuti pagati
+
+manageNoOwnerUsers= Gestione Utenti di Sistema/Orfani
+manageUsers= Gestione Utenti
+
+mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
+mealTicket.aquired= Buono Pasto maturato
+mealTicket.notAquired= Buono Pasto non maturato
+mealTicket.forcedAquired= Buono Pasto maturato (forzato dall'amministratore)
+mealTicket.forcedNotAquired= Buono Pasto non maturato (forzato dall'amministratore)
+mealTicket.notYetAquired= Buono Pasto non ancora maturato
+mealTicket=Buono Pasto
+mealTicket.error= Il blocco è già stato assegnato a un dipendente della propria sede
+modifierType= Calcolo Orario
+
+MealTicketDecision.COMPUTED=Calcolato
+MealTicketDecision.FORCED_TRUE=Forzato Si
+MealTicketDecision.FORCED_FALSE=Forzato No
+mealTicketDecision=Valore Buono Pasto
+
+ExportFile.CSV=CSV
+ExportFile.XLS=XLS
+exportFile=Formato per esportazione
+
+forbidden= Operazione non permessa
+
+block.first=Dal
+block.last=Al
+
+MOD= Modifica
+
+modification.date= Data Modifica
+modification.type= Tipo Operazione
+
+Month.10=Ottobre
+Month.11=Novembre
+Month.12=Dicembre
+Month.1=Gennaio
+Month.2=Febbraio
+Month.3=Marzo
+Month.4=Aprile
+Month.5=Maggio
+Month.6=Giugno
+Month.7=Luglio
+Month.8=Agosto
+Month.9=Settembre
+
+name=Nome
+noResultFound=Nessuna corrispondenza trovata.
+note= Note
+
+monthlyCompetenceType =Tipo servizio giornaliero
+monthlyCompetencetype.name =Nome
+monthlyCompetencetype.workdaysCode =Codice feriale
+monthlyCompetencetype.holidaysCode =Codice festivo
+
+newUser= Nuovo Utente
+
+notify.error =Attenzione
+notify.success =Ok
+
+notification.all= Tutte le notifiche
+notification.toRead= Notifiche da leggere
+notification.archived= Notifiche lette
+notification.archive= Archivia
+notification.archiveAll= Archivia Tutte
+notification.show= Visualizza Dettaglio
+NotificationFilter.ALL= Tutte le notifiche
+NotificationFilter.ARCHIVED= Notifiche lette
+NotificationFilter.TO_READ= Notifiche da leggere
+
+nuovaPassword= Nuova Password
+confermaPassword= Ripeti Password
+
+notSentToAttestati= le ore di formazione sono state inserite dopo l'ultima validazione degli attestati o non sono ancora state inviate ad attestati. 
+sentToAttestati= le ore di formazione sono state inviate correttamente ad attestati.
+errorsInSendingToOldAttestati= Ci sono stati errori nell'invio dei dati al vecchio attestati. Controllare tra i certificated_data.
+errorsInSendingToNewAttestati= Ci sono stati dei problemi nell'invio delle informazioni al nuovo attestati. Controllare tra i certifications.
+
+office.address=Indirizzo
+office.code= Codice
+office.beginDate =Data inizio utilizzo 
+office.endDate =Data chiusura sede
+office.codeId= Sede Id
+officeFilter= Filtra per Sede
+office.headQuarter=Sede principale
+office.joiningDate= Data di affiliazione
+office.name=Nome
+office.perseoId =Id Anagrafica esterna
+Offices.blank=Nuova sede
+office=Sede
+
+officeIds= Sedi su cui associare l'utente
+
+onCertificate=In attestati
+isTemporaryMissing =Informazioni tempo determinato mancanti
+
+disabledUser= Utente disabilitato
+orphanUser= Utente Orfano
+
+pagedResults =Sono state trovate <strong>%d</strong> corrispondenze, mostrate dalla %d alla %d.
+passwordSuccessfullyChanged = Password modificata con successo
+password= Password
+
+PDFReport.thBadStampings=Timbrature errate
+PDFReport.thAbsences=Assenza
+PDFReport.thBadWorkindDay=Giorno lavorativo non valido
+PDFReport.thNoStampings=Mancata timbratura
+PDFReport.thMissions=Missione
+PDFReport.thIncompleteTime=Orario incompleto
+PDFReport.thMissingTime=Orario insufficiente
+PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
+
+################### CALENDARIO SHIFT #################################################
+
+shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
+calendar.ShiftToubles.PERSON_IS_ABSENT=Il turnista è assente nel giorno %d
+calendar.ShiftToubles.NOT_ENOUGH_WORKING_TIME=Orario incompleto nel giorno %d
+
+calendar.Troubles.NO_ABS_NO_STAMP=Timbrature assenti nel giorno %d
+calendar.Troubles.UNCOUPLED_WORKING=Timbrature disaccoppiate nel giorno %d
+calendar.Troubles.NOT_ENOUGH_WORKTIME=Tempo di lavoro insufficiente il %d
+
+calendar.CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED=Slot del turno già assegnato il %d
+calendar.CalendarShiftTroubles.PERSON_SHIFT_ASSIGNED.La persona è già in turno il %d
+
+PDFReport.thDays=Num. di giorni
+PDFReport.thReqHour=Num. di ore spettanti
+PDFReport.thLackTime=Ore mancanti
+PDFReport.thAppHour =Num. di ore approvate
+PDFReport.thExceededMin=Minuti accumulati
+
+PDFReport.ShiftToubles.PERSON_IS_ABSENT=Assenza
+PDFReport.Troubles.NOT_ENOUGH_WORKTIME=Giorno lavorativo non valido
+PDFReport.Troubles.NO_ABS_NO_STAMP=Mancata timbratura
+PDFReport.UNCOUPLED_WORKING=Timbrature errate
+PDFReport.NOT_ENOUGH_WORKTIME==Orario incompleto
+
+#######################################################################################
+
+peopleIds=Persone associabili all'attività
+
+person.badgeNumber=Numero Badge
+person.badge= Numero badge
+person.birthday=Data di nascita
+person.currentVacationPeriod= Ferie
+person.currentWorkingTimeType= Tipo Orario
+person.email=Email
+person.fiscalCode=Codice Fiscale
+person.perseoId=Id Anagrafica esterna
+person.eppn=Eppn (Per login Shibboleth)
+person.isPersonInCharge= Responsabile gruppo di lavoro
+person.name=Nome
+person.number=Matricola
+person.office= Sede
+person=Persona
+person.qualification= Livello
+personQualification= Livello
+person.surname=Cognome
+person.telephone=Telefono
+person.user.username= Username in ePAS
+person.wantEmail=Invio Email
+person.beginDate=Data attivazione in ePAS
+person.updatedAt=Ultimo aggiornamento
+
+personUser= Utente associato ad una persona
+
+PersonMonths.insertPeopleTrainingHours= Inserisci ore di formazione
+
+personShiftDay= Turno
+
+peopleGroupId= Persone del gruppo di Lavoro
+
+psst.beginDate =Data inizio
+psst.endDate =Data fine
+psst.jolly =Jolly
+
+qualification=Livello
+
+reason=Motivazione
+
+regulations =Normativa
+
+recapMealTickets=Riepilogo Buoni Pasto
+report=Descrizione problema
+restoreUser= Torna chi eri
+reperibility =Servizio di reperibilità
+reperibility.noReperibilityWorkers =Nessun Reperibile assegnabile per questa attività nel periodo selezionato
+reperibilityCalendar.allValidReperibility= Tutti le reperibilità risultano valide
+
+roleIds= Ruoli attribuibili
+
+secure.error=Oops! Username o password sconosciuti.
+secure.logout=Utente correttamente disconnesso.
+secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
+
+serviceDisabled =Servizio disabilitato
+
+calendars =Calendari
+shifts =Gestione turni
+shiftSlot= Fascia Turno
+
+show= Visualizza
+edit= Modifica
+
+sourceDateMealTicket=Data Inizializzazione
+sourceDateResidual=Data inizializzazione
+sourceDateVacation=Data inizializzazione
+
+stamping= Timbratura
+stamping.in= Timbratura di ingresso
+stamping.note= Note
+stamping.place= Luogo
+stamping.reason= Motivo
+stamping.out= Timbratura di uscita
+stamping.stampType= Causale Timbratura
+stamping.stampModificationType= Modifiche Timbratura
+stamping.way= Verso Timbratura
+
+stampingNote= Timbratura inserita automaticamente dal sistema per chiudere l'attività di lavoro fuori sede.
+
+stampings= Timbratura
+stampType= Causale
+
+synch.offices=Sincronizza sedi
+synch.people=Sincronizza persone
+synch.contracts=Sincronizza contratti
+synch.badges= Sincronizza Badges
+synch.eppn= Sincronizza campo Eppn
+
+systemUser= Utente con ruoli di Sistema
+ticketNumberFrom=Dal Numero
+ticketNumberTo=Al Numero
+time= Orario
+
+type.type =Nome attività
+type.description =Descrizione
+type.allowUnpairSlots =Permetti disparità tra gli slot di turno 
+considerEverySlot =Permetti assegnamento turno con tutti slot popolati
+type.office =Sede
+type.supervisor =Responsabile servizio
+type.managers =Gestori servizio mensile
+type.monthlyCompetenceType =Tipologia competenza mensile
+
+timeTable.startMorning =inizio turno
+timeTable.endMorning =fine turno
+timeTable.startAfternoon =inizio turno
+timeTable.endAfternoon =fine turno
+timeTable.startEvening =inizio turno
+timeTable.endEvening =fine turno
+timeTable.paidMinutes =Quantità retribuita (in minuti)
+timeTable.totalWorkMinutes =Tempo di turno (in minuti)
+
+type.type =Nome
+type.description =Descrizione
+type.entranceTolerance =Tolleranza minima in ingresso (minuti)
+type.entranceMaxTolerance =Tolleranza massima in ingresso (minuti)
+type.exitTolerance =Tolleranza minima in uscita (minuti)
+type.exitMaxTolerance =Tolleranza massima in uscita (minuti)
+type.hourTolerance =Tolleranza per turno (minuti)
+type.breakInShift = Tolleranza minima per pausa pranzo
+type.breakMaxInShift =Tolleranza massima per pausa pranzo
+type.maxToleranceAllowed =Numero massimo di tolleranze sforabili
+
+timeTable.startMorningLunchTime =inizio pranzo
+timeTable.endMorningLunchTime =fine pranzo
+timeTable.startAfternoonLunchTime =inizio pranzo
+timeTable.endAfternoonLunchTime =fine pranzo
+timeTable.startEveningLunchTime =inizio pranzo
+timeTable.endEveningLunchTime =fine pranzo
+
+cat.description =Descrizione
+cat.office =Sede
+cat.supervisor =Responsabile servizio
+cat.managers =Gestori dei turni
+
+uro.office=Sede
+uro.role= Ruolo
+uro.user= Utente
+user= Utente
+user.password= Password
+user.username= Username
+user.owner= Sede proprietaria
+user.usersRolesOffices= Ruoli abilitati
+user.disabled= Utente disabilitato
+user.roles= Ruoli di sistema
+
+Users.blank= Inserisci utente
+User.blank= Nuovo utente
+User.systemBlank= Nuovo utente di sistema
+user.person= Persona associata
+users= Utenti
+
+Users.editAccountRoles= Gestione Ruoli di sistema
+Users.addRole= Nuovo Ruolo
+
+usersRolesOffices= Ruolo
+userRoleOffice.role= Ruolo
+userRoleOffice.office= Sede
+
+personUsers=Utenti Persone
+systemUsers=Utenti Di Sistema
+disabledUsers=Utenti Disabilitati
+
+yearAtt=Anno Attestato
+monthAtt=Mese Attestato
+attestatiLogin=Username Attestati
+attestatiPassword=Password Attestati
+
+views.common.false=falso
+views.common.true=vero
+views.common.yes_or_no.false=No
+views.common.yes_or_no.true=Si
+
+views.tags.display.date.format.allTime=%%hh:%%mm
+views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
+views.tags.display.date.format=dd/MM/yyyy
+views.tags.display.date.format.noDay=MM yyyy
+views.tags.display.date.format.onlyTime=%%mm:%%ss
+views.tags.display.date.month.10=Ottobre
+views.tags.display.date.month.11=Novembre
+views.tags.display.date.month.12=Dicembre
+views.tags.display.date.month.1=Gennaio
+views.tags.display.date.month.2=Febbraio
+views.tags.display.date.month.3=Marzo
+views.tags.display.date.month.4=Aprile
+views.tags.display.date.month.5=Maggio
+views.tags.display.date.month.6=Giugno
+views.tags.display.date.month.7=Luglio
+views.tags.display.date.month.8=Agosto
+views.tags.display.date.month.9=Settembre
+
+vacations.takable=Usufruibili
+
+takableTotal=Limite Totale
+takableUsed=Limite Consumato
+complationUsed=Completato
+
+
+
+
+wtt.description= Nome Tipo Orario
+wtt.office=Sede
+wtt= Tipo Orario
+
+WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
+WorkingTimeTypePattern.VERTICAL = Orario Verticale
+workingTimeTypePattern=Tipo Orario
+
+vwt.name= Nome orario
+
+zone =Zona di timbratura
+zone.name =Nome della zona di timbratura
+zone.description =Descrizione
+
+#######################################################
+# Traduzioni per form di stabilizzazione (provvisoria)#
+#######################################################
+residuoOrario=Residuo orario (ore:minuti)
+buoniPasto= Buoni pasto rimanenti
+ferieAnnoPassato= Ferie anno passato (da fare)
+ferieAnnoPresente= Ferie anno corrente (da fare)
+permessi= Permessi legge (da fare)
+
+###########################
+# Messaggi di validazione
+###########################
+
+validation.affiliation.membershipAlreadyPresent =Associazione a questo gruppo già presente nelle date specificate
+
+validation.contract.contractOverlaping =Il contratto non può intersecarsi con altri contratti del dipendente
+validation.contract.sourceDateResidualBeforeBeginDate =La data di inizio non può essere successiva alla data di inizializzazione
+validation.contract.endContractBeforeBeginContract =La data di terminazione del contratto non può precedere l'inizio del contratto.
+validation.contract.endContractBeforeEndDate =La data di terminazione del contratto non può essere successiva alla data di scadenza del contratto.
+
+validation.period.endDateBeforeBeginDate =La data di fine non può precedere quella di inizio.
+
+validation.after=Deve essere successiva a %2$s
+validation.before=Deve essere precedente a %2$s
+validation.email=Indirizzo email non valido
+validation.equals=Deve essere uguale &{%2$s}
+validation.future=Deve essere futura
+validation.invalid=Valore non valido
+validation.isTrue=Deve essere impostato
+validation.match=Deve corrispondere a %2$s
+validation.max=Non può essere maggiore di %2$d
+validation.maxSize=Lunghezza massima %2$d
+validation.min=Non può essere minore di %2$d
+validation.minSize=Lunghezza minima %2$d
+validation.notFound=Oggetto non trovato per l'id %2$s
+validation.past=Deve essere passata
+validation.phone=Non è un numero di telefono valido
+validation.range=Non può essere minore di %2$d o maggiore di %3$d
+validation.required=Obbligatorio
+validation.unique =Deve essere unico
+validation.url=Non è un URL valido
+
+
+##########################
+# Messaggi di eccezioni
+##########################
+
+errorCompetenceCodeException= Codice di competenza non presente tra quelli abilitati per la persona
+
+
+########################
+# Actions
+########################
+
+Absences.absences= Assenze Mensili
+Absences.absencesPerPerson= Assenze Annuali
+Absences.absencesVisibleForEmployee= Presenze Giornaliere
+Absences.showGeneralMonthlyAbsences= Assenze
+AbsenceGroups.showGroups=Gruppi Assenze
+AbsenceGroups.initialization=Assenze Iniziali
+AbsenceGroups.showAbsenceTypes=Codici Assenza
+AbsenceGroups.showCategories=Categorie Assenze
+AbsenceGroups.certificationsAbsenceCodes=Codici Assenza Attestati
+AbsenceGroups.certificationsAbsences=Cruscotto Dipendente Attestati
+Administration.internalSearch=Ricerca
+Administration.adjustSeats=Rimodula sedi
+Administration.generalSetting= Informazioni Applicazione
+Administration.playConfiguration= Informazioni Applicazione
+Administration.utilities= Utilities
+BadgeReaders.list= Sorgenti Timbrature
+BadgeSystems.list= Gruppi Badge
+BadgeSystems.personBadges= Badge
+Certifications.certifications= Invio Attestati
+Charts.checkLastYearAbsences= Controlli ed Esportazioni
+Charts.excelFile=Esportazione periodica in excel
+Competences.approvedCompetenceInYear= Competenza Assegnate nell'anno
+Competences.competences= Competenze
+Competences.enabledCompetences= Abilita Competenze
+Competences.exportCompetences= Esporta competenze
+Competences.manageCompetenceCode= Codici Competenze
+Competences.monthlyOvertime= Straordinari mensili gruppo
+Competences.showCompetences= Assegna Competenze
+Competences.showCompetences= Competenze
+Competences.totalOvertimeHours= Monte ore
+Configurations.personShow= Configurazione personale
+Configurations.show= Configurazione Sedi
+Contracts.delete= Elimina Contratto
+Contracts.edit= Dati Contrattuali
+Contracts.personContracts= Dati Contrattuali
+Contracts.updateContractStampProfile= Presenza Automatica
+Contracts.updateContractVacationPeriod= Piani Ferie
+Contracts.updateContractWorkingTimeType= Tipo Orario
+Contracts.updateContractMandatoryTimeSlot= Fascia oraria obbligatoria
+Contracts.updateSourceContract= Inizializzazione
+Contracts.initializationsStatus=Dati Iniziali
+
+AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.compensatoryRests =Miei riposi compensativi
+AbsenceRequests.shortTermPermit =Miei permessi brevi
+AbsenceRequests.personalPermissions =Miei permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadline =Mie richieste ferie anno passato dopo deadline
+AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
+AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
+AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
+AbsenceRequests.permissionsToApprove =Flussi di permessi personali
+AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno passato dopo deadline
+
+
+AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
+AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
+AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
+
+
+AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
+
+AbsenceRequestType.PERSONAL_PERMISSION =permesso personale
+AbsenceRequestType.PERSONAL_PERMISSIONS =Miei permessi personali
+AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
+
+AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
+
+Institutes.list= Sedi e Amministratori
+MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
+MealTickets.findCodeBlock= Ricerca Buoni Pasto
+MealTickets.mealTickets= Riepilogo Buoni Pasto
+MealTickets.personMealTickets= Nuovo Inserimento
+MealTickets.recapMealTickets= Buoni Pasto
+MealTickets.recapMealTickets= Riepilogo Buoni Pasto
+MealTickets.recapPersonMealTickets= Riepilogo Buoni Pasto Consegnati
+MealTickets.returnedMealTickets= Buoni Pasto Riconsegnati
+MonthRecaps.showRecaps= Riepilogo Mensile
+PersonMonths.hourRecap= Riepilogo Orario
+PersonMonths.trainingHours= Ore di Formazione
+PersonMonths.visualizePeopleTrainingHours= Ore di Formazione
+Persons.changePassword= Cambio Password
+Persons.children= Figli
+Persons.deletePerson= Elimina
+Persons.edit= Dati Anagrafici
+Persons.list= Lista Persone
+Persons.workGroup= Gruppo Di Lavoro
+PrintTags.listPersonForPrintTags= Stampa Cartellino
+PrintTags.showTag= Stampa Cartellino Presenze
+Stampings.dailyPresence= Presenza Giornaliera
+Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
+Stampings.missingStamping= Riepilogo problemi sui giorni
+Stampings.stampingsByAdmin= Timbrature da amministratore
+Stampings.personStamping= Timbrature
+Stampings.stampings= Situazione Mensile
+TeleworkStampings.teleworkStampings= Inserimento orario in telelavoro
+TeleworkStampings.personTeleworkStampings= Orari dipendenti in telelavoro
+
+Stats.general =Statistiche utilizzatori
+
+Synchronizations.institutes= Sincronizza Sedi
+Synchronizations.people= Sincronizza Personale
+Synchronizations.badges= Sincronizza Badges
+TimeVariations.show= Riposi compensativi chiusura ente
+TimeVariations.personShow= Riposi compensativi chiusura ente
+Users.list= Gestione Utenti
+Vacations.show= Ferie
+Vacations.list= Ferie e Permessi
+WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
+Competences.activateServices= Gestione Servizi
+Groups.showGroups= Gestione gruppi
+Shift.handleShifts =Gestisci turni
+Calendar.show =Gestisci turni
+ReperibilityCalendar.show =Gestisci reperibilità
+Shift.personalShift =Visualizza turno
+TimeSlots.manageTimeSlots= Fasce orarie di lavoro
+
+########################
+# Enumerati
+########################
+
+accountRole= Ruolo di sistema
+AccountRole.DEVELOPER= Developer
+AccountRole.ADMIN= Admin
+AccountRole.RO_ADMIN= Admin in sola lettura
+AccountRole.ABSENCES_MANAGER= Gestore assenze
+AccountRole.MISSIONS_MANAGER= Gestore missioni
+AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
+AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
+AccountRole.REGISTRY_MANAGER= Gestore anagrafica
+
+CalculationType.standard_CNR=Calcolo standard CNR
+CalculationType.percentage=Calcolo percentuale (es.:INAF)
+
+
+chartType= Tipo di grafico
+ChartTypes.BARS= Grafico a barre
+ChartTypes.COLUMNS= Grafico a colonne
+
+LimitType.monthly= Mensile
+LimitType.yearly= Annuale
+LimitType.noLimit= Senza limite
+LimitType.onMonthlyPresence= In base a presenza mensile
+LimitType.entireMonth= Intero mese
+
+LimitUnit.minutes =Minuti
+LimitUnit.hours =Ore
+LimitUnit.days =Giorni
+LimitUnit.month =Mese
+
+LimitDescription.daysOfMonth =Giorni del mese
+LimitDescription.daysOfYear =Giorni dell'anno
+
+PaymentType.T1 = Pagamento tutto imputato su competenza turno diurno
+PaymentType.SPLIT_CALCULATION = Pagamento splittato in base alla fascia
+
+reperibility.personInactive = Persona non attiva sulla reperibilità
+reperibility.alreadyInReperibility = Già in reperibilità per l'attività %s
+reperibility.absenceInDay = La persona nel giorno selezionato è assente
+reperibility.dayAlreadyAssigned = Giorno già assegnato a %s
+
+StampTypes.MOTIVI_DI_SERVIZIO= Motivi di Servizio
+StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE= Motivi di Servizio Fuori Sede
+StampTypes.VISITA_MEDICA= Visita Medica
+StampTypes.PERMESSO_SINDACALE= Permesso Sindacale
+StampTypes.INCARICO_DI_INSEGNAMENTO= Incarico di Insegnamento
+StampTypes.DIRITTO_ALLO_STUDIO= Diritto allo Studio
+StampTypes.MOTIVI_PERSONALI= Motivi Personali
+StampTypes.REPERIBILITA= Reperibilità
+StampTypes.INTRAMOENIA= Intramoenia
+StampTypes.GUARDIA_MEDICA= Guardia Medica
+StampTypes.PAUSA_PRANZO= Pausa Pranzo
+StampTypes.LAVORO_FUORI_SEDE= Lavoro fuori sede
+StampTypes.PERMESSO_BREVE= Permesso breve (36 ore anno)
+TeleworkStampTypes.INIZIO_TELELAVORO =Inizio telelavoro
+TeleworkStampTypes.FINE_TELELAVORO =Fine telelavoro
+TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO =Inizio pranzo in telelavoro
+TeleworkStampTypes.FINE_PRANZO_TELELAVORO =Fine pranzo in telelavoro
+TeleworkStampTypes.INIZIO_INTERRUZIONE =Inizio interruzione in telelavoro
+TeleworkStampTypes.FINE_INTERRUZIONE =Fine interruzione in telelavoro
+
+ShiftSlot.MORNING = Mattina
+ShiftSlot.AFTERNOON = Pomeriggio
+ShiftSlot.EVENING = Sera
+
+
+shift.absenceInDay = La persona nel giorno selezionato è assente
+shift.alreadyInShift = Già in turno per l'attività %s
+shift.maxQuantityInSlot = Non si può eccedere la differenza di 1 persona tra slot per l'attività %s
+shift.maxQuantity = Al massimo 3 persone al giorno sull'attività %s
+shift.slotAlreadyAssigned = Slot già assegnato a %s
+shift.personInactive = Persona non attiva sul turno
+shift.holidayShiftNotEnabled = La persona non ha abilitato il turno festivo
+shift.notSlotSpecified = Specificare uno slot da assegnare
+ShiftTroubles.PERSON_NOT_ASSIGNED = Persona non assegnata al turno
+ShiftTroubles.NOT_COMPLETED_SHIFT = Turno valido ma non completo (un\'ora in meno)
+ShiftTroubles.OUT_OF_STAMPING_TOLERANCE = Fuori dalla tolleranza per le timbrature
+ShiftTroubles.NOT_ENOUGH_WORKING_TIME = Tempo a lavoro insufficiente
+ShiftTroubles.PROBLEMS_ON_OTHER_SLOT = Problemi sull'altro slot
+ShiftTroubles.PERSON_IS_ABSENT = Dipendente assente nella data
+ShiftTroubles.EXCEEDED_BREAKTIME = Eccesso di pausa
+ShiftTroubles.SHIFT_INCOMPLETED = Turno incompleto, manca almeno uno slot
+ShiftTroubles.MIN_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in ingresso
+ShiftTroubles.MAX_ENTRANCE_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in ingresso
+ShiftTroubles.MIN_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima in uscita
+ShiftTroubles.MAX_EXIT_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima in uscita
+ShiftTroubles.MIN_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima per pausa pranzo
+ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima per pausa pranzo
+ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS = Ecceduto il numero massimo di tolleranze violabili
+ShiftTroubles.FUTURE_DAY = Giorno futuro, calcoli non effettuabili
+
+
+
+shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
+shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
+
+# Parametri di configurazione
+
+WEB_STAMPING_ALLOWED=Autorizzazione timbratura via web
+ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
+NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
+DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
+SEND_EMAIL=Invio email di avviso ai dipendenti
+SEND_ADMIN_NOTIFICATION=Invio di notifiche agli amministratori del personale  
+EMAIL_TO_CONTACT=Indirizzo email segreteria
+WORKING_OFF_SITE=Lavoro fuori sede
+ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
+RECOMPUTATION_LIMIT=Limite temporale dei ricalcoli (in mesi)
+TR_AUTOCERTIFICATION= Autocertificazione presenze per Tecnologi e Ricercatori
+TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
+TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
+ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni
+ENABLE_CALENDAR_REPERIBILITY= Abilitazione gestione calendario reperibilità
+ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
+SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
+SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo
+
+EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
+MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da I a III
+MONTH_EXPIRY_RECOVERY_DAYS_49=Mese massimo per utilizzo residui dell'anno precedente per i livelli da IV a VIII
+MAX_RECOVERY_DAYS_13=Numero massimo di giorni di recupero in un anno per i livelli da I a III
+MAX_RECOVERY_DAYS_49=Numero massimo di giorni di recupero in un anno per i livelli da IV a VIII
+
+DAY_OF_PATRON=Festa del Patrono
+HOUR_MAX_TO_CALCULATE_WORKTIME=Limite orario massimo per timbratura notturna 	
+WORK_INTERVAL_MISSION_DAY=Intervallo di attività lavorativa in sede per giorni missione
+LUNCH_INTERVAL=Intervallo in cui ricercare le pause per pranzo
+WORK_INTERVAL=Intervallo apertura / chiusura struttura
+
+OFF_SITE_STAMPING=Inserimento timbratura lavoro fuori sede
+OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con convenzione
+MATERNITY_PERIOD=Periodo Maternità
+TELEWORK=Auto inserimento codice di assenza per Telelavoro
+TELEWORK_STAMPINGS=Orario in telelavoro
+DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
+DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 parente disabile
+RIGHT_TO_STUDY=Permessi per diritto allo studio
+COVID_19=Auto inserimento codice per emergenza COVID-19
+ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
+PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
+SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
+PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
+
+
+DAYS=Ricalcoli giornalieri.
+RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
+RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
+
+ENABLE_FLOWS =Flusso di richiesta assenza attivato
+ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
+
+VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
+VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 
+VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile gruppo di lavoro 
+VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione ferie per i Responsabili di gruppo da parte del Responsabile di Sede
+
+COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile Sede
+COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli I-III da parte del Responsabile gruppo di lavoro
+COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
+
+PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
+PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile Sede	
+PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile gruppo di lavoro		
+PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
+PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
+
+ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
+CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
+CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
+
+CHANGE_REPERIBILITY_REQUEST =Richiesta cambio reperibilità
+configurationDto.validityYear=Anno
+configurationDto.toTheEnd=Anche Per gli anni successivi
+configurationDto.validityBegin=Validità Inizio
+configurationDto.validityEnd=Validità Fine
+
+configurationDto.booleanNewValue=Nuovo Valore
+configurationDto.stringNewValue=Nuovo Valore
+configurationDto.integerNewValue=Nuovo Valore
+configurationDto.localdateNewValue=Nuovo Valore
+
+whichTolerance =Quando applicare la tolleranza
+
+ToleranceType.entrance= Solo Ingresso
+ToleranceType.exit= Solo Uscita
+ToleranceType.both= Entrambe
+
+WayType.in= Ingresso
+WayType.out= Uscita
+
+###########################################################################
+#	Descrizioni campi (usati nei popovers e nelle descrizioni dei campi)
+###########################################################################
+
+emailToContact.popover= L&#39;indirizzo email qui specificato sarà utilizzato come campo per i reply alle mail inviate dal sistema
+
+institute.cds.popover= Codice univoco del centro di spesa (per l&#39;IIT è 044)
+institute.code.popover= Sigla Istituto - Es. IIT,IBBR,ISAFOM etc.
+
+lunchPauseStart.popover= Inserire l&#39;orario nel formato hh:mm
+lunchPauseEnd.popover= Inserire l&#39;orario nel formato hh:mm
+
+office.code.popover= Codice univoco della sede (per l&#39;IIT di Pisa è 044000)
+office.codeId.popover= Id univoco della Sede. Serve per l&#39;invio degli attestati a Roma (per l&#39;IIT di Pisa è &quot;223400&quot;)
+office.joiningDate.popover= Data di affiliazione della sede
+
+onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a lavoro = tempo di lavoro assegnato al dipendente. Se no, con tempo a lavoro = 0
+
+time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
+person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200
+
+domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
+
+type.tolerance.popover= Specificare l&apos;eventuale tolleranza in minuti da applicare alle timbrature per inserirle o meno nel turno. Inserire 0 se non si vuole tolleranza.
+type.maxToleranceAllowed.popover= Quante tolleranze è possibile sforare per vedere comunque riconosciuto il turno (seppure in orario ridotto)
+type.type.popover = Il nome da attribuire all&apos;attività sul turno
+type.description.popover= Una descrizione dell&apos;attività
+type.breakInShiftEnabled.popover =Se da regolamento dei turni è prevista una pausa all&#39;interno del turno diversa dalla pausa pranzo cliccare sì, no altrimenti.
+type.entranceTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio intero del tempo in turno 
+type.entranceMaxTolerance.popover = Tolleranza entro la quale la timbratura di ingresso concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.exitTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio intero del tempo in turno 
+type.exitMaxTolerance.popover = Tolleranza entro la quale la timbratura di uscita concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.breakInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio intero del tempo in turno 
+type.breakMaxInShift.popover = Tolleranza entro la quale la timbratura di pausa pranzo concorre comunque al conteggio del tempo in turno, ma in quantità ridotta
+type.enableHolidays.popover = Abilita l&#39;inserimento (e il conteggio) di turni anche nei giorni festivi
+type.allowUnpairSlots.popover = Permette di avere differenza di persone in numero tra i vari slot di turno (es.: 2 la mattina e 1 il pomeriggio o viceversa)
+considerEverySlot.popover = Considera tutti gli slot di turno completi per assegnare il turno
+
+###########################################################################
+#	Messaggi utilizzati nelle viste
+###########################################################################
+
+tr_autocertification.alert= Per poter abilitare la funzione <strong>&{TR_AUTOCERTIFICATION}</strong> &egrave; necessario caricare un documento con l&apos;autorizzazione del proprio direttore.
+tr_autocertification.file= File di Autorizzazione
+
+description.WORKING_OFF_SITE= L&apos;abilitazione del parametro <strong>&{WORKING_OFF_SITE}</strong> permette, se abilitato anche nella configurazione del dipendente, l&apos;inserimento autonomo delle informazioni relative al <strong>Lavoro Fuori Sede</strong>.<br> L&apos;inserimento/modifica/eliminazione di una timbratura, comporta l'invio di una notifica ai propri amministratori del personale.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_AUTOCERTIFICATION= L&apos;abilitazione del parametro <strong>&{TR_AUTOCERTIFICATION}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autocertificare la propria presenza a lavoro, e dunque di inserire in autonomia le proprie timbrature.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_VACATIONS= L&apos;abilitazione del parametro <strong>&{TR_VACATIONS}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autoinserire i propri giorni di ferie e permessi legge.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+description.TR_COMPENSATORY= L&apos;abilitazione del parametro <strong>&{TR_COMPENSATORY}</strong> attiver&agrave; la possibilit&agrave; per i Tecnologi e i Ricercatori di questa sede di autoinserire i propri giorni di riposo compensativo.<br> L&apos;inserimento di queste informazioni &egrave; limitato solamente agli ultimi 2 mesi e non &egrave permesso nei mesi per i quali sono gi&agrave; stati inviati gli attestati di presenza.
+
+###########################################################################
+#	COMPONENTE ASSENZE
+###########################################################################
+
+absenceFile=Allegato
+absenceType= Codice assenza
+absenceType.certificateCode= Attestati
+absenceType.code= Codice
+absenceType.consideredWeekEnd= Festivi
+absenceType.description= Descrizione
+absenceType.internalUse= Interno
+absenceType.qualifications= Livelli
+absenceType.reperibilityCompatible=Compatibile con reperibilità
+absenceType.tecnici= Tecnici
+absenceType.tecnologi= Tecnologi
+absenceType.validFrom= Inizio validita'
+absenceType.validTo= Fine validita'
+absenceType.active= Attivo
+absenceType.justifiedTypesPermitted=Tempo giustificato  
+absenceType.timeForMealTicket=Considerato per buono pasto
+absenceType.justifiedTime=Minuti specificati nel tipo assenza
+
+absenceType.replacingTime=Minuti per completamento
+absenceType.used=Usato
+
+groupAbsenceType=Gruppo di Codici
+groupAbsenceType.description=Descrizione
+groupAbsenceType.chainDescription=Descrizione Catena
+groupAbsenceType.automatic=Inserimento Automatico
+groupAbsenceType.initializable=Inizializzabile
+groupAbsenceType.category= Categoria
+groupAbsenceType.name=Nome
+groupAbsenceType.pattern= Pattern
+groupAbsenceType.periodType=Periodo
+groupAbsenceType.nextGroupToCheck=Gruppo successivo 
+PeriodType.always=Sempre
+PeriodType.year=Annuale
+PeriodType.month=Mensile
+PeriodType.child1_0_3=Primo figlio 0-3 anni
+PeriodType.child1_0_6=Primo figlio 0-6 anni
+PeriodType.child1_0_12=Primo figlio 0-12 anni
+PeriodType.child1_3_12=Primo figlio 3-12 anni
+PeriodType.child1_6_12=Primo figlio 6-12 anni
+PeriodType.child2_0_3=Secondo figlio 0-3 anni
+PeriodType.child2_0_6=Secondo figlio 0-6 anni
+PeriodType.child2_0_12=Secondo figlio 0-12 anni
+PeriodType.child2_3_12=Secondo figlio 3-12 anni
+PeriodType.child2_6_12=Secondo figlio 6-12 anni
+PeriodType.child3_0_3=Terzo figlio 0-3 anni
+PeriodType.child3_0_6=Terzo figlio 0-6 anni
+PeriodType.child3_0_12=Terzo figlio 0-12 anni
+PeriodType.child3_3_12=Terzo figlio 3-12 anni
+PeriodType.child3_6_12=Terzo figlio 6-12 anni
+
+always(0, null, null), year(0, null, null), month(0, null, null),
+    child1_0_3(1, 0, 3), child1_0_6(1, 0, 6), child1_0_12(1, 0, 12), 
+    child1_6_12(1, 6, 12), child1_3_12(1, 3, 12),
+    
+    child2_0_3(2, 0, 3), child2_0_6(2, 0, 6), child2_0_12(2, 0, 12), child2_6_12(2, 6, 12), 
+    child2_3_12(2, 3, 12),
+    
+    child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), 
+    child3_3_12(3, 3, 12);
+
+
+categoryGroupAbsenceType.name=Nome
+categoryGroupAbsenceType.description=Descrizione
+categoryGroupAbsenceType.priority=Priorità
+categoryGroupAbsenceType.tab=Tab
+categoryGroupAbsenceType.groupAbsenceTypes =Gruppi di assenze
+categoryGroupAbsenceType.absenceTypes =Tipi di assenza
+
+justifiedType=Tempo giustificato
+
+insert=Inserimento
+insertReplacing = Inserimento Rimpiazzamento
+
+absence_type_minutes=Tempo specificato nel tipo assenza
+all_day=Tutto il giorno
+half_day=Mezza giornata
+assign_all_day=Assegna l'intera giornata lavorativa
+specified_minutes=Specificare ore e minuti
+all_day_limit=Niente ma scala una giornata dal limite
+specified_minutes_limit=Niente ma scala i minuti dal limite
+complete_day_and_add_overtime=Completa il giorno e permette ore in più
+
+nothing=Niente
+minutes=Minuti
+hours=Ore
+units=Giorni
+month=Mese
+year=Anno
+programmed=Programmato
+child0_12=Figlio 0-12 anni
+child0_6=Figlio 0-6 anni
+workingTimeAndWorkingPeriodPercent=Percentuale Tempo Lavoro e Orario Lavoro
+takeAmountType=Tipo Limite
+fixedLimit=Limite fissato
+takableAmountAdjustment=Aggiustamento limite fissato
+takableCodesIds=Codici Prendibili
+complationAmountType=Tipo Completamento
+complationCodesIds=Codici Completamento
+replacingCodesIds=Codici Rimpiazzamento
+TakeAmountAdjustment.workingTimePercent=Percentuale tipo orario
+TakeAmountAdjustment.workingPeriodPercent=Percentuale periodo lavorato
+TakeAmountAdjustment.workingTimeAndWorkingPeriodPercent=Percentuale tipo orario e periodo lavorato
+AmountType.minutes=Minuti
+AmountType.units=Giorni
+no_overtime=No straordinari assegnabili 
+minimumTime=Quantità minima 
+maximumTime=Quantità massima
+takenPercentageTime=Consumo dal monte disponibile (in caso di orario normale)
+
+initializationGroup.hoursInput =Ore Utilizzate
+initializationGroup.minutesInput =Minuti Utilizzati
+initializationGroup.unitsInput=Giorni Completi Utilizzati
+
+TooEarlyReplacing=Codice di completamento anticipato
+MissingReplacing=Manca il codice di rimpiazzamento.
+WrongReplacing=Il codice di rimpiazzamento presente non è quello corretto.
+CompromisedReplacing=La sequenza dei rimpiazzamenti è compromessa.
+CompromisedTwoComplation=Due assenze a completamento nello stesso giorno.
+LimitExceeded=Il tetto massimo utilizzabile per il periodo è stato superato.
+AllDayAlreadyExists=Codice che giustifica l'intera giornata già presente.
+NoChildExist=Figlio non presente in anagrafica o fuori età.
+NotOnHoliday=Non di festa
+InReperibility=In Reperibilità
+InReperibilityOrShift=In Turno o Reperibilità
+InShift=In Turno
+ForceInsert=Inserimento forzato
+IgnoredBeforeInitialization=Precedente l'inizializzazione
+Migration661=In questa data il codice non dovrebbe essere uguale o superiore alle 6 ore
+MinimumTimeViolated=Quantità minima richiesta non soddisfatta
+MaximumTimeExceed=Quantità massima giornaliera superata
+
+child1_0_3=Primo figlio 0-3 anni
+child1_0_6=Primo figlio 0-6 anni
+child1_0_12=Primo figlio 0-12 anni
+child1_3_12=Primo figlio 3-12 anni
+child2_0_3=Secondo figlio 0-3 anni
+child2_0_6=Secondo figlio 0-6 anni
+child2_0_12=Secondo figlio 0-12 anni
+child2_3_12=Secondo figlio 3-12 anni
+child3_0_3=Terzo figlio 0-3 anni
+child3_0_6=Terzo figlio 0-6 anni
+child3_0_12=Terzo figlio 0-12 anni
+child3_3_12=Terzo figlio 3-12 anni
+
+always=Sempre
+compensatoryRestCnr=Riposo Compensativo CNR
+vacationsCnr=Ferie CNR
+simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.compensatoryRestCnr=Riposo Compensativo CNR
+GroupAbsenceTypePattern.vacationsCnr=Ferie CNR
+GroupAbsenceTypePattern.simpleGrouping=Gruppo Semplice
+GroupAbsenceTypePattern.programmed=Programmato
+
+#DA VERIFICARE
+absenceType.code.popover= Codice di assenza
+absenceType.certificateCode.popover= Usare solo se il codice che deve andare negli attestati di presenza è diverso da quello definito nella riga precedente (questo diventa il codice ufficiale e il precedente un alias per uso interno)
+absenceType.description.popover= Descrizione codice di assenza
+absenceType.internalUse.popover= Seleziona "Si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza
+absenceType.validFrom.popover= Data inizio validità di questo codice (se vuoto valido da sempre)
+absenceType.validTo.popover= Data fine validità di questo codice (se vuoto valido per sempre)
+modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
+absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
+absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
+
+###########################################################################
+#	FINE COMPONENTE ASSENZE
+###########################################################################

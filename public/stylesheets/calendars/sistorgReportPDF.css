@@ -1,0 +1,188 @@
+body {
+	color: black;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+h1 {
+	color: #284A7E;
+	font-size: 12pt;
+	text-align: center;
+	margin: 0;
+}
+
+h2 {
+	color: #284A7E;
+	font-size: 11pt;
+	text-align: center;
+}
+
+h3 {
+	color: #284A7E;
+	font-size: 10pt;
+	text-align: center;
+}
+
+div.table {
+	margin: 2em, 1em;
+}
+
+
+
+/* Tabella riassuntiva nel PDF annuale*/
+table.no-border {
+	border: none;
+	width: 80%;
+	margin: 2em 1em;
+}
+
+table.no-border tr th {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	border: none;
+	padding: 0.5em;
+	text-align: center;
+	background-color: white;
+	color: #284A7E;
+	font-weight: bold;
+}
+
+table.no-border tr td {
+	border: none;
+}
+
+
+
+
+/* tabella dei report PDF mensili */
+table.mensile {
+	border-collapse: collapse;
+	width: 80%;
+	margin-left: 10%;
+}
+
+div.note_presenze table.mensile {
+	border-collapse: collapse;
+	width: 90%;
+	margin-left: 5%
+}
+
+table.mensile tr th {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	border: 0.2px solid black;
+	padding: 0.5em;
+	text-align: left;
+	background-color: white;
+	color: #284A7E;
+	font-weight: bold;
+	vertical-align: top;
+}
+
+table.mensile tr td {
+	vertical-align: top;
+	text-align: left;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	border: 0.2px solid black;
+	padding: 0.5em;
+	text-align: left;
+	background-color: white;
+}
+
+table.mensile caption {
+	width: 80%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+	color: #284A7E;
+	padding: 0 0 0.9em 0;
+	background-color: white;
+	margin-left: 10%;
+}
+
+
+/* celle particolari */
+tr td.no-border {
+	border: none;
+}
+
+tr td.label {
+	padding-left: 1.5em;
+	font-weight: bold;
+}
+
+table.mensile th.red {
+	color: red;
+}
+
+.red {
+	color: red;
+}
+
+.sab {
+	color: red;
+}
+
+.dom {
+	color: red;
+}
+
+
+
+/* Firme in calce ai file PDF*/
+div.firma {
+	width: 30%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	text-align: center;
+	margin-top: 3em;
+}
+
+div.date {
+	width: 20%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	text-align: left;
+	margin: 3em, 0, 4em, 7em;
+}
+
+div.dir {
+	float: left;
+	margin-left: 7em;
+}
+
+div.resp {
+	float: right;
+	margin-right: 7em;
+}
+
+/* Note nei report*/
+div.note_presenze {
+	width: 90%;
+	border: 0.2px solid black;
+	background-color: #FAFAFA;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	text-align: left;
+	padding: 1em 1em;
+	margin-left: 5%;
+	/*margin: 3em, 0, 4em, 7em;*/
+	clear: left;	
+	page-break-before:always;
+}
+
+div.note_presenze  h2, h3 {
+	text-align: left;
+	padding-left: 1em;
+	color: red;
+}
+
+div.page {
+	page-break-after:always;
+}
+
+div.note {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	text-align: left;
+}

@@ -1,0 +1,45 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestisci ' + cat.description /}
+
+#{set breadcrumbs:['Gestisci servizi':@Competences.activateServices(cat.office.id), 
+  (cat.description):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+#{form @Competences.configureShift(), class:'form-horizontal', method: 'POST'}
+	#{f.hidden 'step', value:step /}
+	
+	
+	#{if step == 1}  
+		#{include './configuration/_step1.html' /}		
+		
+	#{/if}
+	
+	#{if step == 2}
+		#{include './configuration/_step2.html' /}
+
+	#{/if}
+	
+	#{if step == 3}
+		#{include './configuration/_step3.html' /}
+		
+	#{/if}
+	
+	#{b.buttons center:true}
+			#{b.link @Competences.activateServices(cat.office.id)}
+	   			Indietro
+	   		#{/b.link}
+			#{if step != 3 }
+				#{b.submit 'Avanti' /}
+			#{/if}
+			#{else}
+				#{b.submit 'Crea' /}
+			#{/else}   
+		#{/b.buttons}
+#{/form}
+</div>
+
+<div id="modalActivateService" class="modal fade container" tabindex="-1"></div>
+
+

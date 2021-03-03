@@ -1,0 +1,91 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+
+#{absences.absencesTabs activeAction:'absenceInPeriod' /}
+<div class="container">
+
+  
+  #{title title:'Assenze nel periodo', administration:true /}
+  <div class="text-center">
+  #{form @Absences.absenceInPeriod(), class:'form-inline', role:'form'}
+
+		<input type="hidden" name="personId" value="${person.id}"/>
+           
+       <div class="form-group">
+         <label for="da">Da: </label>
+         <input value="${from?.format()}" class="form-control" type="text" name="from" 
+           datepicker id="da"/>
+       </div>
+       
+       <div class="form-group">
+         <label for="a">A: </label>
+         <input value="${to?.format()}" class="form-control" type="text" name="to" 
+           datepicker id="a" />
+       </div>
+       
+       <button type="submit" class="btn btn-default">Invio</button>
+  #{/form}
+  </div>
+  <br>
+
+  
+  <div class="col-xs-12 col-sm-12 col-md-6">
+		<div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Assenze di ${person.name} ${person.surname} nel periodo ${from?.format()} - ${to?.format()}</h3>
+      </div>
+      <div class="panel-body">
+		<table class="table">
+			<tr>
+				<th>Giorno</th>
+				<th>Assenza</th>
+				<th>Descrizione</th>
+			</tr>
+			#{list items:absenceList, as:'absence'}
+			<tr>
+		      <td>${absence.personDay.date.format()}</td>
+			  <td>${absence.absenceType.code}</td>
+			  <td>${absence.absenceType.description}</td>
+		 	</tr>				
+			#{/list}
+		</table>
+	  </div>
+	</div>
+  </div>
+  
+  <div class="col-xs-12 col-sm-12 col-md-6">
+		<div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Totali giorni d'assenza</h3>
+      </div>
+      <div class="panel-body">
+		<table class="table">
+			<tr>
+				<th>Codice</th>
+				<th>Numero giorni</th>
+				
+			</tr>
+			<tr>
+				<td>Ferie</td>
+				<td>${ferie.size()}</td>
+			</tr>
+			<tr>
+				<td>Missioni</td>
+				<td>${missioni.size()}</td>
+			</tr>
+			<tr>
+				<td>Riposi Compensativi</td>
+				<td>${riposiCompensativi.size()}</td>
+			</tr>
+			<tr>
+				<td>Altre assenze</td>
+				<td>${altreAssenze.size()}</td>
+			</tr>
+		</table>
+	  </div>
+	</div>
+  </div>
+
+</div>

@@ -1,0 +1,30 @@
+<table>
+	<tr>
+	  <th>Mese old</th>
+	  <th>Passato old</th>
+	  <th>Corrente old</th>
+	  <th>Buoni old</th>
+	  <th>Mese new</th>
+	  <th>Passato new</th>
+	  <th>Corrente new</th>
+	  <th>Buoni new</th>
+	</tr>
+	
+	#{list items:0..maxArrayIndex, as:'i'}
+	
+	  <tr>
+	  	<td>${personResidualMonthRecaps.get(i).anno} ${personResidualMonthRecaps.get(i).mese} </td>
+	    <td>${personResidualMonthRecaps.get(i).monteOreAnnoPassato}</td>
+	    <td>${personResidualMonthRecaps.get(i).monteOreAnnoCorrente}</td>
+	    <td>${personResidualMonthRecaps.get(i).buoniPastoResidui}</td>
+	  
+	    <td>${contractMonthRecaps.get(i).year} ${contractMonthRecaps.get(i).month} </td>
+	    <td>${contractMonthRecaps.get(i).remainingMinutesLastYear}</td>
+	    <td>${contractMonthRecaps.get(i).remainingMinutesCurrentYear}</td>
+	    <td>${contractMonthRecaps.get(i).remainingMealTickets}</td>
+	  
+	  </tr>
+	
+	#{/list}
+	
+</table>

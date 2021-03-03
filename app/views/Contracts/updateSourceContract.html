@@ -1,0 +1,129 @@
+#{modalAsync title: 'Inizializza ore contratto ' + contract.person.fullname }
+
+<div id="updateSource">
+
+#{if wrContract.initializationMissing()}
+  #{alert color:'danger'}
+    <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto necessita di inizializzazione poichè ePAS 
+    potrebbe non disporre di tutta l'informazione necessaria.</p>
+    <p>Affinchè la situazione sia configurata correttamente occorre specificare una data uguale o successiva al <strong>${wrContract.dateForInitialization().format()}</strong>.</p>
+  #{/alert}
+#{/if}
+#{else}
+  #{alert color:'success'}
+   <i class="fa fa-2x fa-check bg-success"></i> Il contratto non necessita di inizializzazione.
+   #{if wrContract.value.sourceDateResidual}
+     <p>
+       Esiste già una inizializzazione definita alla data <strong>${wrContract.value.sourceDateResidual.format()}</strong>
+     </p>
+     <p>  
+       Se si desidera modificare la data e l'inizializzazione esistente scegliere una data uguale o successiva al 
+       <strong>${wrContract.dateForInitialization().format()}</strong> e impostare nuovamente i valori iniziali.
+     </p>
+   #{/if}#{else}
+     <p>
+       Se si desidera definire l'inizializzazione scegliere una data uguale o successiva al 
+       <strong>${wrContract.dateForInitialization().format()}</strong>.
+     </p>
+   
+   #{/else} 
+  #{/alert}
+#{/else}
+     
+
+     #{alert color:'info'}
+	  <p>
+  		  Inserire la situazione della persona alla fine della giornata specificata nel campo <strong>Data Inizializzazione</strong>.<br>
+  	 	  Una volta definiti i dati il software provvederà a ricalcolare i ripiloghi annuali della persona utilizzando i dati di inizializzazione e i dati presenti nel database 
+  		  a partire dal giorno successivo a <strong>Data Inizializzazione</strong>. 
+  	  </p>
+  	  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+	 #{/alert}
+
+	 #{if contract.sourceDateResidual != null}
+	 #{alert color:'info'}
+	  <p>Per rimuovere l'inizializzazione esistente svuotare il campo <strong>&{'sourceDateResidual'}</strong>.</p>
+	 #{/alert}
+	 #{/if}
+	 
+     <!-- Form di input -->		
+	 #{if !confirmedResidual}
+	   #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#updateSource', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+
+        <input type="hidden" name="contractId" value="${contract.id}" />
+	
+	    #{f.date 'sourceDateResidual', value:contract.sourceDateResidual?.format(), biglabel:true  /}
+	    #{f.input 'hoursLastYear', biglabel:true, type:number /}
+	    #{f.input 'minutesLastYear', biglabel:true, type:number /}
+	    #{f.input 'hoursCurrentYear', biglabel:true, type:number  /}
+	    #{f.input 'minutesCurrentYear', biglabel:true, type:number  /}
+	    
+
+		#{secure.check 'Contracts.saveResidualSourceContract'}
+	      #{b.buttons center:true}
+               #{b.submit 'Salva'/}
+             #{/b.buttons}
+		#{/secure.check}
+	  #{/form}	
+	#{/if}
+	<!-- Form di conferma -->
+	#{else}
+
+	  #{form @Contracts.saveResidualSourceContract(), 'method':'POST', class:'form-horizontal', 
+         'data-async':'#page_content', 'data-async-error':'#updateSource', 'data-spinner':'#defaultSpinner'}
+			
+		<input type="hidden" name="contractId" value="${contract.id}" />
+		#{f.hidden 'confirmedResidual', value:true /}
+		#{f.simpleView 'sourceDateResidual', value:sourceDateResidual.format(), biglabel:true, hidden:true /}
+		
+		#{f.simpleView 'hoursLastYear', biglabel:true, hidden:true /}
+		#{f.simpleView 'minutesLastYear', biglabel:true, hidden:true /}
+		
+		#{f.simpleView 'hoursCurrentYear', biglabel:true, hidden:true /}
+		#{f.simpleView 'minutesCurrentYear', biglabel:true, hidden:true /}
+
+		#{if removeMandatory}
+		  #{alert color:'danger'}
+		    L'inizializzazione attuale alla data <strong>${wrContract.value.sourceDateResidual.format()}</strong> è obbligatoria. 
+		    Procedere con la rimozione solo se si intende spostare la data di inizio del contratto dopo tale data.
+		  #{/alert}
+		#{/if}
+		#{if removeUnnecessary}
+		  #{alert color:'warning'}
+		    La rimozione di questa inizializzazione definita alla data <strong>${wrContract.value.sourceDateResidual.format()}</strong> comporterà il ricalcolo della situazione della
+		    persona dall'inizio del contratto <strong>${recomputeFrom.format()}</strong> 
+		    al <strong>${recomputeTo.format()}</strong> 
+		    per un totale di <strong>${days}</strong> giorni. 
+		  #{/alert}			  
+		#{/if}  
+		  
+		#{if sourceNew}
+		    #{alert color:'warning'}
+				La definizione di questa inizializzazione comporterà il ricalcolo della situazione
+				della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong> 
+				per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert}
+		#{/if}
+		#{if sourceUpdate}
+		    #{alert color:'warning'}
+				La definizione di questa inizializzazione sovrascriverà quella esistente 
+				impostata alla data <strong>${contract.sourceDateResidual.format()}</strong><br>
+				Comporterà il ricalcolo della situazione della persona dal 
+				<strong>${recomputeFrom.format()}</strong> al <strong>${recomputeTo.format()}</strong>
+				 per un totale di <strong>${days}</strong> giorni.		      
+		    #{/alert} 
+		#{/if}
+		
+		#{b.buttons center:true}
+            #{b.cancel @initializationsStatus(contract.person.office.id) /}
+            #{b.submit 'Conferma'/}
+        #{/b.buttons}
+      #{/form}	  
+	#{/else}
+   
+</div>
+
+#{/modalAsync}        
+

@@ -1,0 +1,124 @@
+<ul class="nav navbar-nav">
+
+  #{set actions:[
+  'Persons.list',
+  'Stampings.personStamping',
+  'Absences.showGeneralMonthlyAbsences',
+  'Vacations.list',
+  'Competences.showCompetences',
+  'MealTickets.recapMealTickets',
+  'PersonMonths.visualizePeopleTrainingHours',
+  'Stampings.missingStamping',
+  'Stampings.dailyPresence',
+  'MonthRecaps.showRecaps',
+  'Charts.checkLastYearAbsences',
+  'PrintTags.listPersonForPrintTags',
+  'Certifications.certifications',
+  'Contracts.initializationsStatus',
+  'Contracts.initializationsMeal',
+  'AbsenceGroups.absenceInitializations',
+  'AbsenceGroups.absenceTroubles'] /}
+
+  <li class="dropdown #{if request.action in actions}active#{/if}">
+
+    *{ responsività dropDown }*
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
+      <div class="visible-xs-inline visible-md-inline visible-lg-inline"> &{'administrations'}<span class="caret"></span></div>
+    </a>
+
+    *{ items }*
+    <ul class="dropdown-menu">
+
+      *{ Lista Persone }*
+
+      #{secure.li @Persons.list() }
+      <i class="fa fa-users" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @Contracts.initializationsStatus(currentData.officeId) }
+      <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.check 'Stampings.personStamping'}
+      <li role="separator" class="divider"></li>
+      #{/secure.check}
+
+      *{ Gestione Presenze Timbrature / Assenze / Competenze / Ferie e Permessi / Buoni Pasto / Ore di formazione }*
+
+      #{secure.li @Stampings.personStamping(currentData.personId, currentData.year, currentData.month) }
+      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{if teleworkStampingsActive}
+	      #{secure.li @TeleworkStampings.personTeleworkStampings(currentData.personId, currentData.year, currentData.month) }
+	      	<i class="fa fa-clock-o" aria-hidden="true"></i>
+	      #{/secure.li}
+      #{/if}
+
+      #{secure.li @Absences.showGeneralMonthlyAbsences(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-user-times" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @Vacations.list(currentData.year, currentData.officeId) }
+      <i class="fa fa-plane" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Competences.showCompetences(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-money" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-cutlery" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @PersonMonths.visualizePeopleTrainingHours(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.check 'Stampings.missingStamping'}
+      <li class="divider"></li>
+      #{/secure.check}
+
+      *{ Controllo Presenze Timbrature Mancanti / Presenza giornaliera / Riepilogo Mensile }*
+
+      #{secure.li @Stampings.missingStamping(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Stampings.stampingsByAdmin(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-legal" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Stampings.dailyPresence(currentData.year, currentData.month, currentData.day, currentData.officeId) }
+      <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @MonthRecaps.showRecaps(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-calendar" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.check 'Charts.checkLastYearAbsences'}
+      <li class="divider"></li>
+      #{/secure.check}
+
+      #{secure.li @Charts.checkLastYearAbsences(null,currentData.officeId) }
+      <i class="fa fa-pie-chart" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @PrintTags.listPersonForPrintTags(currentData.year, currentData.month, currentData.officeId) }
+      <i class="fa fa-print" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.check 'Certifications.certifications'}
+      <li class="divider"></li>
+      #{/secure.check}
+
+      *{ Invio Attestati }*
+
+      #{secure.li @Certifications.certifications(currentData.officeId) }
+        <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+      #{/secure.li}
+
+    </ul>
+    *{ end items }*
+  </li>
+</ul>

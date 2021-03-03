@@ -1,0 +1,33 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Esportazione ore e straodinari' /}
+
+
+#{charts.chartsTabs activeAction:'exportHourAndOvertime' /}
+
+<div class="container">
+#{title title:('Export straordinari e residui ') /}
+		
+	#{alert color:'info'}
+		Seleziona l'anno per il quale esportare ore in più e straordinari</h4>
+	#{/alert}
+<div class="col-sm-3"></div>
+<div class="container col-sm-6">
+#{form @Charts.export()}
+
+#{select 'year', value:year, class:'form-control', id:'year'}
+	#{list annoList}
+		#{option _.anno}${_.anno}#{/option}
+	#{/list}			
+#{/select}
+<br>
+#{b.buttons center:true}   
+      #{b.submit 'Avanti'/}
+#{/b.buttons}
+		
+#{/form}
+</div>
+</div>
+
+
+

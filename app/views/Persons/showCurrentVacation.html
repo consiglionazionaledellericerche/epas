@@ -1,0 +1,25 @@
+#{modalAsync id:'defaultModal', title:('Piano Ferie Attuale di ' + person.fullname) }
+
+<div class="alert alert-success">Validità piano ferie attuale: 
+
+	<strong>Dal </strong>${vp.beginDate.format()}
+	#{if vp.endDate}
+		<strong>Al </strong>${vp.endDate.format()}
+	#{/if}	 
+</div>
+
+<table class="table table-bordered table-hover table-condensed">
+	<tr>
+		<th>Nome</th>
+		<th>Giorni ferie</th>
+		<th>Giorni permesso</th>
+	</tr>
+	<tr>
+		<td>${vp.vacationCode.label()}</td>
+		<td>${vp.vacationCode.vacations}</td>
+		<td>${vp.vacationCode.permissions}</td>
+	</tr>
+</table>
+
+#{/modalAsync}
+

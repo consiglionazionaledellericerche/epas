@@ -1,0 +1,57 @@
+#{modalAsync title:'Ore formazione ' + templateUtility.monthName(month) + ' ' + year}
+
+	#{if personMonthSituationId != null}
+		#{alert color:'info'}
+		       	<p>Modifica le ore di formazione nel periodo selezionato.</p>
+		#{/alert}
+	#{/if}
+	#{else}
+		#{alert color:'info'}
+		<p>Tramite questa form è possibile specificare le ore di formazione effettuate nel corso del mese
+		selezionato.
+		</p>
+		<p>Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
+		e la quantità di ore effettuate.</p>      
+		
+		#{/alert}   
+	#{/else}	
+	
+	<div id="insertHour">
+	#{form @PersonMonths.saveTrainingHours(), class:'form-horizontal', 'data-async':'#page_content',
+			    'data-async-error':'#insertHour', 'data-spinner':'#defaultSpinner'}
+	  
+	  <input name="personId" type="hidden" value="${person.id}"/>
+	  #{f.hidden 'month', value:month /}
+  	  #{f.hidden 'year', value:year /}
+	  #{if personMonthSituationId != null}
+	  		<input name="personMonthSituationId" type="hidden" value="${personMonthSituationId}"/>
+	  		<input name="begin" type="hidden" value="${begin}"/>
+			<input name="end" type="hidden" value="${end}"/>		
+			#{f.simpleView 'Dal', value:dateFrom.format() /}
+			#{f.simpleView 'Al', value:dateTo.format() /}  
+	  #{/if}
+	  #{else}
+	     #{f.input 'begin', label:'Giorno Iniziale', type:'number', required:'true' /}
+	     #{f.input 'end', label:'Giorno Finale', type:'number', required:'true' /}
+	  #{/else}
+	
+	  #{f.input 'value', label:'Quantità', type:'number', required:'true' /}
+	  
+	  #{b.buttons center:'true'}
+	    <button type="submit" class="btn btn-primary" value="Ok">Invio</button>
+	  #{/b.buttons}
+	  
+	#{/form}
+	</div>
+	
+	#{if personMonthSituationId == null}
+		#{alert color:'warning'}
+		        <p>  	
+		  			<strong>Esempio: </strong><em>se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
+		  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.</em>
+		  		</p>	
+		#{/alert}
+	#{/if}
+
+
+#{/modalAsync}

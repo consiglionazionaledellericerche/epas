@@ -1,0 +1,101 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Riepilogo ore ' + year  /}
+
+#{set 'moreStyles'}
+
+<style>
+       
+@media (max-width: 991px) {
+
+	.container {
+	    font-size: 12px !important; 
+	}
+	
+}
+
+@media (max-width: 767px) {
+
+	footer {
+		display: none;
+	}
+	
+}
+
+</style>
+
+#{/set}
+
+<div class="container">
+  
+  #{title title:('Riepilogo Ore ' + year) /}
+  
+  #{if recaps.empty}
+    #{alert color:'info'}
+    <p>Nessun riepilogo da visualizzare per l'anno selezionato.</p>
+    #{/alert}
+   
+  #{/if}
+  #{else}
+  
+    <table class="table hour-recap table-condensed center">
+    <tr class="warning">
+	  <th rowspan=2>Mese</th>
+	  <th rowspan=2>Ore<br>Lavorate</th>
+	  <th colspan=3>Monte ore inizio mese</th>
+	  <th rowspan=2>Progressivo<br>a fine mese</th>
+	  <th rowspan=2>Ore<br>Straord.</th>
+	  <th rowspan=2>Riposi<br>Comp. </th>
+	  <th colspan=3>Monte ore fine mese</th>
+	</tr>
+	<tr>
+		<th class="warning">Anno<br>passato</th>
+		<th class="warning">Anno<br>corrente</th>
+		<th class="warning">Totale</th>
+		
+		
+		
+		<th class="warning">Anno<br>passato</th>
+		<th class="warning">Anno<br>corrente</th>
+		<th class="warning">Totale</th>
+	</tr>
+	
+	#{list items:recaps, as:'recap'}
+	  <tr>
+			<td><strong>&{'views.tags.display.date.month.' +recap.value.month}</strong></td>
+	    
+	    <td>${recap.value.oreLavorate.toHourTime()}</td>
+	    
+	    <td><em>${recap.getResidualLastYearInit().toHourTime()}</em></td>
+	    <td><em>${recap.value.initMonteOreAnnoCorrente.toHourTime()}</em></td>
+	    <td style="color: darkblue">${(recap.getResidualLastYearInit()
+	       + recap.value.initMonteOreAnnoCorrente).toHourTime()}</td>
+	    	   
+	    <!-- Progressivo -->
+	    #{if recap.value.progressivoFinaleMese > 0}
+	      <td style="color: darkblue">${recap.value.progressivoFinaleMese.toHourTime()}</td>
+	    #{/if}
+	    #{else}
+	      <td style="color: darkred">${recap.value.progressivoFinaleMese.toHourTime()}</td>
+	    #{/else}  
+	    
+	    <!-- Straordinario -->
+	    <td style="color: darkred">${recap.value.getStraordinarioMinuti().toHour()} </td>
+	    
+	    <!-- Riposo compensativo -->
+	    <td>(${recap.value.recoveryDayUsed}) <div style="color: darkred; display: inline;">
+	    ${recap.value.riposiCompensativiMinutiPrint.toHourTime()}</div></td>
+	    
+
+	    <td><em>${recap.value.remainingMinutesLastYear.toHourTime()}</em></td>
+	    <td><em>${recap.value.remainingMinutesCurrentYear.toHourTime()}</em></td>
+	    <td style="color: darkblue">${(recap.value.remainingMinutesLastYear 
+	    + recap.value.remainingMinutesCurrentYear).toHourTime()}</td>
+	  </tr>
+	#{/list}
+	
+    </table>
+    #{/else}
+
+</div>
+

@@ -1,0 +1,62 @@
+<ul class="nav navbar-nav">
+
+  #{set actions:[
+  'Administration.utilities',
+  'Administration.playConfiguration',
+  'Synchronizations.institutes',
+  'Synchronizations.people',
+  'Synchronizations.badges',
+  'AbsenceGroups.certificationsAbsenceCodes',
+  'AbsenceGroups.certificationsAbsences'] /}
+
+  <li class="dropdown #{if request.action in actions}active#{/if}">
+
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-medkit"></i>
+      <div class="visible-lg-inline visible-xs-inline"> Tools
+        <span class="caret"></span>
+      </div>
+    </a>
+
+    <ul class="dropdown-menu">
+
+      #{secure.li @Administration.utilities() }
+      <i class="fa fa-wrench" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @Administration.internalSearch() }
+      <i class="fa fa-search" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @Administration.adjustSeats() }
+      <i class="fa fa-adjust" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Administration.generalSetting() }
+      <i class="fa fa-info-circle" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Synchronizations.institutes() }
+      <i class="fa fa-refresh" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Synchronizations.people(session.get("officeSelected")) }
+      <i class="fa fa-refresh" aria-hidden="true"></i>
+      #{/secure.li}
+
+      #{secure.li @Synchronizations.badges(session.get("officeSelected")) }
+        <i class="fa fa-refresh" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }
+      <i class="fa fa-cloud" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @AbsenceGroups.certificationsAbsences(session.get("personSelected"), session.get("yearSelected")) }
+      <i class="fa fa-cloud" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @Stats.general() }
+      <i class="fa fa-bar-chart" aria-hidden="true"></i>
+      #{/secure.li}
+
+    </ul>
+  </li>
+</ul>

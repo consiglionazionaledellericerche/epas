@@ -1,0 +1,25 @@
+#{modalAsync id:'defaultModal', title:'Rimozione figlio' }
+
+#{alert color:'danger'}
+	<div class="text-center">
+	<p>Attenzione!!! <br>
+	 Stai per rimuovere da ePAS il figlio di <strong>${child.person.fullname}</strong><br>
+	 <strong>${child.name}</strong>
+	 <strong>${child.surname}</strong>
+	 nato il <strong>${child.bornDate.format()}</strong>.
+	</p>
+	<p>
+	 Questa operazione non potrà essere annullata.
+	</p>
+	#{form @Persons.deleteChild(), class:'form-horizontal' }
+		<input type="hidden" name="childId" value="${child.id}"/>
+		<input type="hidden" name="confirmed" value="true"/>
+		
+	    #{b.buttons center:true}
+		<input class="btn btn-danger" type="submit" value="Conferma Elimina" />
+		#{/b.buttons}
+	#{/form}
+	</div>
+#{/alert}
+
+#{/modalAsync}	

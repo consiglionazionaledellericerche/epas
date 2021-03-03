@@ -1,0 +1,63 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Import istituti da Anagrafica'  /}
+
+#{synch.synchTabs activeAction:'institutes' /}
+
+<div class="container">
+  *{ #{form @Import.importOffices(),class:'form-horizontal'} }*
+  
+  <table class="table table-bordered"  datatable>
+  <thead>
+	<tr>
+	  <th>Istituto</th>
+	  <th>Sedi</th>
+	</tr>
+  </thead>
+  <tbody>
+	#{list perseoInstitutes, as:'institute'}
+	<tr>
+	  <td>
+	    <span class="label label-success">${institute.perseoId}</span>
+	    <span class="label label-primary">${institute.cds}</span>
+	    <span class="label label-primary" popover-hover-2 data-content="${institute.name}">${institute.code}</span>
+	    
+	        %{ epasSeat = epasInstituteByPerseoId.get(institute.perseoId) }%
+            #{if epasSeat}
+              <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${institute.perseoId}"></i>
+	        #{/if}
+	  </td>
+	  <td>
+      #{list institute.seats, as:'seat'}
+        <p>
+          <span class="label label-primary">${seat.codeId}</span>
+          <span class="label label-primary" >${seat.code}</span>
+          <span class="label label-primary">${seat.name}</span>
+          <span class="label label-success">${seat.perseoId}</span>
+          %{ epasSeat = epasOfficesByPerseoId.get(seat.perseoId) }%
+          #{if epasSeat}
+             <i class="fa fa-check fa-2x text-success" aria-hidden="true"
+	         popover-hover-2 data-content="Sincronizzato con perseoId ${seat.perseoId}"></i>
+	         <a href="@{Synchronizations.people(epasSeat.id)}">
+             <i class="fa fa-users text-primary"
+	          popover-hover-2 data-content="Vai a Sincronizza Persone ${epasSeat.name}" 
+	          aria-hidden="true"></i>
+	         </a>
+	      #{/if}
+	      #{else}
+	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>
+	      #{/else}
+        </p>
+     #{/list}
+	  </td>
+    </tr>
+   #{/list}
+  </tbody>
+</table>
+  
+  
+  *{ #{/form} }*
+</div>
+
+
