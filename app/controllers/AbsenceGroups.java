@@ -38,6 +38,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.validators.LocalDateNotTooFar;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -84,6 +85,7 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -569,8 +571,8 @@ public class AbsenceGroups extends Controller {
    * @param minutes minuti
    */
   public static void insert(
-      Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
-      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      Long personId, @CheckWith(LocalDateNotTooFar.class) LocalDate from, CategoryTab categoryTab,                      //tab
+      @CheckWith(LocalDateNotTooFar.class) LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
       boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
@@ -584,6 +586,11 @@ public class AbsenceGroups extends Controller {
         absenceService.buildAbsenceForm(person, from, categoryTab,
             to, recoveryDate, groupAbsenceType, switchGroup, absenceType,
             justifiedType, hours, minutes, false, false);
+    
+    if (Validation.hasErrors()) {
+      render(absenceForm, personId, from, categoryTab, to, forceInsert, recoveryDate,
+          groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, forceInsert);
+    }
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,

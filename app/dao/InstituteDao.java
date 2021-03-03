@@ -27,7 +27,7 @@ import models.query.QInstitute;
 
 /**
  * Dao per gli istituti.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

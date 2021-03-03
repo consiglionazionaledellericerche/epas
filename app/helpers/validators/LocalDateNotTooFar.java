@@ -15,37 +15,26 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dao;
+package helpers.validators;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.querydsl.jpa.JPQLQueryFactory;
-import java.util.Optional;
-import javax.persistence.EntityManager;
-import models.GeneralSetting;
-import models.query.QGeneralSetting;
+import org.joda.time.LocalDate;
+import play.data.validation.Check;
 
 /**
- * DAO per le impostazioni generali di ePAS.
+ * Controlla che una data non sia troppo lontana (1 anno) da oggi.
  *
  * @author Cristian Lucchesi
  *
  */
-public class GeneralSettingDao extends DaoBase {
+public class LocalDateNotTooFar extends Check {
 
-  @Inject
-  GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-    super(queryFactory, emp);
-  }
-
-  /**
-   * In caso non siano ancora mai state salvate, le restituisce nuove.
-   *
-   * @return le impostazioni generali.
-   */
-  public GeneralSetting generalSetting() {
-    return Optional.ofNullable(queryFactory
-        .selectFrom(QGeneralSetting.generalSetting).fetchOne())
-        .orElseGet(GeneralSetting::new);
+  @Override
+  public boolean isSatisfied(Object validatedObject, Object date) {
+    if (date == null) {
+      return true;
+    }
+    setMessage("La data non deve essere distante più di un 1 anno da oggi");
+    return !((LocalDate) date).isAfter(LocalDate.now().plusYears(1))
+        && !((LocalDate) date).isBefore(LocalDate.now().minusYears(1));
   }
 }
