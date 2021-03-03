@@ -116,7 +116,7 @@ public class TeleworkStampings extends Controller {
           + "L'applicazione potrebbe essere spenta o non raggiungibile."
           + "Riprovare più tardi");
     }
-
+    
     render(list, year, month);
   }
 
@@ -294,8 +294,11 @@ public class TeleworkStampings extends Controller {
    * della sede di lavoro.
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public static void report(final Integer year, final Integer month) {
+  public static void report(final Integer year, final Integer month) 
+      throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
@@ -304,7 +307,25 @@ public class TeleworkStampings extends Controller {
     if (currentPerson == null) {
       Application.index();
     }
-    render();
+    LocalDate date = LocalDate.now();
+    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
+
+    if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
+      flash.error("Non esiste situazione mensile per il mese di %s %s",
+          DateUtility.fromIntToStringMonth(month), year);
+
+      YearMonth last = wrperson.getLastActiveMonth();
+      Stampings.stampings(last.getYear(), last.getMonthOfYear());
+    }
+    PersonStampingRecap psDto = stampingsRecapFactory
+        .create(wrperson.getValue(), year, month, true);
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    String[] info = wrperson.getValue().office.name.split("-");
+    String place = info[1];
+    render(list, wrperson, date, place);
   }
 
 }
