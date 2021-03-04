@@ -34,6 +34,7 @@ Sistemi Informativi del CNR.
    :maxdepth: 2
    :caption: Indice dei contenuti
 
+   inizialization
    managePerson
    workingTimeType
    stampings
