@@ -34,3 +34,8 @@ rilasciati anche questi come opensource:
    missions/index
    rest/index
    sysadmin/index
+
+.. toctree::
+   :hidden:
+
+   appendix
