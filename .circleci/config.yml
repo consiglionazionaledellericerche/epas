@@ -12,7 +12,9 @@ jobs:
             pip install -r requirements.txt
             make html
             make epub
+            make latexpdf
             cp _build/epub/*.epub _build/html/
+            cp _build/latex/*.pdf _build/html/
             touch _build/html/.nojekyll
       - persist_to_workspace:
           root: _build
