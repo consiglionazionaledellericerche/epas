@@ -5,7 +5,8 @@ ePAS è un'applicazione java basata su Play Framework versione 1.5.x e
 database postgresql.
 Per il setup dell'ambiente di sviluppo è necessario aver installato sul 
 proprio PC java 11, il [play framework 1.5.x](https://www.playframework.com/documentation/1.5.x/install)
-ed avere accesso ad un dabatase postgresql.
+ed avere accesso ad un dabatase postgresql (dalla versione 9.5 in poi).
+
 Di seguito alcune istruzioni per poter eseguire il debug o aggiungere nuove
 funzionalità avviando un'istanza di ePAS in locale sulla proprio workstation.
 
