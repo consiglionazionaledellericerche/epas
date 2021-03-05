@@ -18,11 +18,19 @@
 package models.informationrequests;
 
 import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
 
+@Audited
+@Entity
+@Table(name = "illness_requests")
 public class IllnessRequest extends InformationRequest {
 
-  public LocalDate from;
+  public LocalDate beginDate;
   
-  public LocalDate to;
+  public LocalDate endDate;
+  
+  public String name;
 }

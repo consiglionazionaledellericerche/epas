@@ -20,14 +20,20 @@ package models.base;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 import org.joda.time.LocalDateTime;
 import models.Person;
 import models.enumerate.InformationType;
+import play.data.validation.Required;
 
 @MappedSuperclass
 public class InformationRequest extends BaseModel{
   
+  @Required
+  @NotNull
+  @ManyToOne(optional = false)
   public Person person;
   
   @Enumerated(EnumType.STRING)

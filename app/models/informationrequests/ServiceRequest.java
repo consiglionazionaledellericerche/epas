@@ -19,15 +19,21 @@ package models.informationrequests;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
 
+@Audited
+@Entity
+@Table(name = "service_requests")
 public class ServiceRequest extends InformationRequest{
 
-  public LocalDate date;
+  public LocalDate day;
   
-  public LocalTime from;
+  public LocalTime startAt;
   
-  public LocalTime to;
+  public LocalTime endTo;
   
   public String reason;
 }
