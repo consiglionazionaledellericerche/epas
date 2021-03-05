@@ -3317,6 +3317,7 @@ when
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
@@ -3362,6 +3363,7 @@ when
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
@@ -3411,6 +3413,7 @@ when
         "rest.Absences.checkAbsenceByPerseoId",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
