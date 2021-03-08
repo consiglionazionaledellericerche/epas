@@ -2,7 +2,7 @@
 
 CREATE TABLE telework_request(
 	id BIGSERIAL PRIMARY KEY,
-	person_id BIGINT NOT NULL,
+	person_id BIGINT REFERENCES persons(id),
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
@@ -10,6 +10,7 @@ CREATE TABLE telework_request(
 	year INTEGER,
 	month INTEGER,
 	version INT DEFAULT 0);
+
 	
 
 CREATE TABLE telework_request_history(
@@ -28,7 +29,7 @@ CREATE TABLE telework_request_history(
 
 CREATE TABLE illness_request(
 	id BIGSERIAL PRIMARY KEY,
-	person_id BIGINT NOT NULL,
+	person_id BIGINT REFERENCES persons(id),
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
@@ -54,7 +55,7 @@ CREATE TABLE illness_request_history(
 
 CREATE TABLE service_request(
 	id BIGSERIAL PRIMARY KEY,
-	person_id BIGINT NOT NULL,
+	person_id BIGINT REFERENCES persons(id),
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
