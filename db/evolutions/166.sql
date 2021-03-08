@@ -1,5 +1,27 @@
 # --- !Ups
 
+CREATE TABLE information_request_event(
+	id BIGSERIAL PRIMARY KEY,
+	information_request_id BIGINT REFERENCES information_requests(id),
+	owner_id BIGINT REFERENCES users(id),
+	description TEXT,
+	event_type TEXT,
+	created_at TIMESTAMP WITHOUT TIME ZONE
+);
+
+CREATE TABLE information_request_event_history(
+	id BIGINT NOT NULL,
+	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
+    _revision_type SMALLINT NOT NULL,
+	information_request_id BIGINT,
+	owner_id BIGINT REFERENCES users(id),
+	description TEXT,
+	event_type TEXT,
+	created_at TIMESTAMP WITHOUT TIME ZONE,
+	PRIMARY KEY (id, _revision, _revision_type)
+);
+
+
 CREATE TABLE telework_request(
 	id BIGSERIAL PRIMARY KEY,
 	person_id BIGINT REFERENCES persons(id),
@@ -9,9 +31,7 @@ CREATE TABLE telework_request(
 	context TEXT,
 	year INTEGER,
 	month INTEGER,
-	version INT DEFAULT 0);
-
-	
+	version INT DEFAULT 0);	
 
 CREATE TABLE telework_request_history(
 	id BIGINT NOT NULL,
@@ -36,8 +56,7 @@ CREATE TABLE illness_request(
 	begin_date DATE,
 	end_date DATE,
 	name TEXT,
-	version INT DEFAULT 0);
-	
+	version INT DEFAULT 0);	
 
 CREATE TABLE illness_request_history(
 	id BIGINT NOT NULL,
@@ -80,4 +99,6 @@ CREATE TABLE service_request_history(
 	reason TEXT,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
+
+
 

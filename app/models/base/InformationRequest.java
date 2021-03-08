@@ -17,15 +17,22 @@
 
 package models.base;
 
+import com.beust.jcommander.internal.Lists;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.validation.constraints.NotNull;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDateTime;
 import models.Person;
 import models.enumerate.InformationType;
+import models.flows.AbsenceRequestEvent;
+import models.informationrequests.InformationRequestEvent;
 import play.data.validation.Required;
 
 @MappedSuperclass
@@ -50,5 +57,10 @@ public class InformationRequest extends BaseModel{
    */
   @Column(name = "office_head_approval_required")
   public boolean officeHeadApprovalRequired = true;
+  
+  @NotAudited
+  @OneToMany(mappedBy = "absenceRequest")
+  @OrderBy("createdAt DESC")
+  public List<InformationRequestEvent> events = Lists.newArrayList();
 
 }
