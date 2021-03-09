@@ -24,8 +24,8 @@ command -v docker-compose -v >/dev/null 2>&1 || { echo >&2 "Docker-compose not f
 mkdir -p $INSTALL_DIR/epas/attachments $INSTALL_DIR/epas/logs $INSTALL_DIR/postgres/data
 cd $INSTALL_DIR
 
-#curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/docker-compose.yml -o docker-compose.yml
-#curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/.env -o .env
+curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/docker-compose.yml -o docker-compose.yml
+curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/.env -o .env
 
 # Avvio del postgres e creazione del DB vuoto epas
 docker-compose up -d postgres

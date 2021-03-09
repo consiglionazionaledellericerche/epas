@@ -95,6 +95,18 @@ curl -fsSL https://raw.githubusercontent.com/consiglionazionaledellericerche/epa
 
 Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosarailicenziato_ (da cambiare il prima possibile). 
 
+#### _Avviare ePAS in alta affidabilità in un cluster docker swarm_
+
+Un esempio di installazione di ePAS tramite *Ansible* in un cluster *Docker Swarm*
+è disponibile, grazie ad Andrea Dell'Amico (ISTI - CNR), all'indirizzo:
+[https://epas.amministrazione.cnr.ithttps://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git](https://epas.amministrazione.cnr.ithttps://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git)
+
+Attenzione: per usare l'ultima versione opensource è necessario cambiare la variabile
+*epas_docker_server_image* in **consiglionazionalericerche/epas**.
+
+Il role *Ansible* configura anche un HAProxy, l'autenticazione tramite LDAP (che potrebbe essere
+opzionale ed è eventualmente da personalizzare) e l'SMTP (anche questo da personalizzare).
+
 ## Credits
 
 [Istituto di Informatica e Telematica del CNR](https://www.iit.cnr.it)
