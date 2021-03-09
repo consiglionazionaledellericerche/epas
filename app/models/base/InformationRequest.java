@@ -17,18 +17,21 @@
 
 package models.base;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.joda.time.LocalDateTime;
 import models.Person;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequestEvent;
@@ -36,6 +39,9 @@ import models.informationrequests.InformationRequestEvent;
 import play.data.validation.Required;
 
 @MappedSuperclass
+@Audited
+@Entity
+@Table(name = "information_requests")
 public class InformationRequest extends BaseModel{
   
   @Required
@@ -43,7 +49,10 @@ public class InformationRequest extends BaseModel{
   @ManyToOne(optional = false)
   public Person person;
   
+  @Required
+  @NotNull
   @Enumerated(EnumType.STRING)
+  @Column(name = "information_type")
   public InformationType informationType;
   
   /**
@@ -59,7 +68,7 @@ public class InformationRequest extends BaseModel{
   public boolean officeHeadApprovalRequired = true;
   
   @NotAudited
-  @OneToMany(mappedBy = "absenceRequest")
+  @OneToMany(mappedBy = "informationRequest")
   @OrderBy("createdAt DESC")
   public List<InformationRequestEvent> events = Lists.newArrayList();
 
