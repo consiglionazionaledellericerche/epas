@@ -18,7 +18,9 @@
 package models.informationrequests;
 
 import java.time.LocalDate;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
@@ -26,6 +28,8 @@ import models.base.InformationRequest;
 @Audited
 @Entity
 @Table(name = "illness_requests")
+//@DiscriminatorValue("illnessInformation")
+@PrimaryKeyJoinColumn(name = "informationRequestId")
 public class IllnessRequest extends InformationRequest {
 
   public LocalDate beginDate;

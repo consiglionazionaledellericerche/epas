@@ -17,7 +17,9 @@
 
 package models.informationrequests;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
@@ -25,6 +27,8 @@ import models.base.InformationRequest;
 @Audited
 @Entity
 @Table(name = "telework_requests")
+//@DiscriminatorValue("teleworkInformation")
+@PrimaryKeyJoinColumn(name = "informationRequestId")
 public class TeleworkRequest extends InformationRequest {
 
   public int month;

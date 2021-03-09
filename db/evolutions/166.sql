@@ -44,60 +44,54 @@ CREATE TABLE information_request_events_history(
 
 
 CREATE TABLE telework_requests(
-	id BIGSERIAL PRIMARY KEY,	
+	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),	
 	context TEXT,
 	year INTEGER,
-	month INTEGER,
-	version INT DEFAULT 0,
-	FOREIGN KEY (id) REFERENCES information_requests (id));	
+	month INTEGER);	
 
 CREATE TABLE telework_requests_history(
-	id BIGINT NOT NULL,
+	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
 	context TEXT,
   	year INTEGER,
 	month INTEGER,
-	PRIMARY KEY (id, _revision, _revision_type)
+	PRIMARY KEY (information_request_id, _revision, _revision_type)
 );
 
 CREATE TABLE illness_requests(
-	id BIGSERIAL PRIMARY KEY,
+	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),
 	begin_date DATE,
 	end_date DATE,
-	name TEXT,
-	version INT DEFAULT 0,
-	FOREIGN KEY (id) REFERENCES information_requests (id));	
+	name TEXT);	
 
 CREATE TABLE illness_requests_history(
-	id BIGINT NOT NULL,
+	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
 	begin_date DATE,
 	end_date DATE,
 	name TEXT,
-	PRIMARY KEY (id, _revision, _revision_type)
+	PRIMARY KEY (information_request_id, _revision, _revision_type)
 );
 
 CREATE TABLE service_requests(
-	id BIGSERIAL PRIMARY KEY,
+	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),
 	day DATE,
-	start_at TIMESTAMP WITHOUT TIME ZONE,
-	end_to TIMESTAMP WITHOUT TIME ZONE,
-	reason TEXT,
-	version INT DEFAULT 0,
-	FOREIGN KEY (id) REFERENCES information_requests (id));
+	start_at TIME WITHOUT TIME ZONE,
+	end_to TIME WITHOUT TIME ZONE,
+	reason TEXT);
 	
 
 CREATE TABLE service_requests_history(
-	id BIGINT NOT NULL,
+	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
 	day DATE,
-	start_at TIMESTAMP WITHOUT TIME ZONE,
-	end_to TIMESTAMP WITHOUT TIME ZONE,
+	start_at TIME WITHOUT TIME ZONE,
+	end_to TIME WITHOUT TIME ZONE,
 	reason TEXT,
-	PRIMARY KEY (id, _revision, _revision_type)
+	PRIMARY KEY (information_request_id, _revision, _revision_type)
 );
 
 

@@ -19,7 +19,9 @@ package models.informationrequests;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
@@ -27,6 +29,8 @@ import models.base.InformationRequest;
 @Audited
 @Entity
 @Table(name = "service_requests")
+//@DiscriminatorValue("serviceInformation")
+@PrimaryKeyJoinColumn(name = "informationRequestId")
 public class ServiceRequest extends InformationRequest{
 
   public LocalDate day;

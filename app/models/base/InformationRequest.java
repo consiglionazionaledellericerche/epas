@@ -21,9 +21,13 @@ import com.google.common.collect.Lists;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
@@ -38,11 +42,12 @@ import models.flows.AbsenceRequestEvent;
 import models.informationrequests.InformationRequestEvent;
 import play.data.validation.Required;
 
-@MappedSuperclass
 @Audited
+//@DiscriminatorColumn(name="information_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Entity
-@Table(name = "information_requests")
-public class InformationRequest extends BaseModel{
+@Table(name="information_requests")
+public abstract class InformationRequest extends BaseModel{
   
   @Required
   @NotNull
@@ -52,19 +57,16 @@ public class InformationRequest extends BaseModel{
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  @Column(name = "information_type")
   public InformationType informationType;
   
   /**
    * Data di approvazione del responsabili sede.
    */
-  @Column(name = "office_head_approved")
   public LocalDateTime officeHeadApproved;
   
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
-  @Column(name = "office_head_approval_required")
   public boolean officeHeadApprovalRequired = true;
   
   @NotAudited
