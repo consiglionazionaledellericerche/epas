@@ -33,6 +33,7 @@ import models.Office;
 import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.query.QContractWorkingTimeType;
 import models.query.QWorkingTimeType;
 import org.joda.time.LocalDate;
 
@@ -163,6 +164,18 @@ public class WorkingTimeTypeDao extends DaoBase {
     Verify.verify(wttd.get().dayOfWeek == date.getDayOfWeek());
 
     return wttd;
+  }
+
+  /**
+   * ContractWorkingTimeType by id.
+   *
+   * @param id identificativo dell'associazione tra contratto e tipologia di orario di lavoro
+   * @return associazione tra contratto e tipologia di orario di lavoro con l'id passato.
+   */
+  public ContractWorkingTimeType getContractWorkingTimeType(Long id) {
+    final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+    return getQueryFactory().selectFrom(cwtt)
+        .where(cwtt.id.eq(id)).fetchOne();
   }
 
 }
