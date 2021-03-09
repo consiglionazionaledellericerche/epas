@@ -2206,6 +2206,9 @@ when
         "rest.v2.Contracts.unsetPreviousContract",
         "rest.v2.Contracts.delete",
 
+        "rest.v2.ContractWorkingTimeTypes.show",
+        "rest.v2.ContractWorkingTimeTypes.updateExternalId",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list"
 
@@ -2287,13 +2290,13 @@ when
      	"rest.v2.Groups.update",
      	"rest.v2.Groups.delete",
      	"rest.v2.Groups.list",
-     	
-     	"rest.v2.Affiliations.show",
-     	"rest.v2.Affiliations.create",
-     	"rest.v2.Affiliations.update",
-     	"rest.v2.Affiliations.delete",
-     	"rest.v2.Affiliations.byGroup",
-     	"rest.v2.Affiliations.byPerson",
+
+        "rest.v2.Affiliations.show",
+        "rest.v2.Affiliations.create",
+        "rest.v2.Affiliations.update",
+        "rest.v2.Affiliations.delete",
+        "rest.v2.Affiliations.byGroup",
+        "rest.v2.Affiliations.byPerson",
 
         "rest.v2.Child.byPerson",
         "rest.v2.Child.show",
@@ -2301,16 +2304,19 @@ when
         "rest.v2.Child.update",
         "rest.v2.Child.delete",
 
-     	"rest.v2.Contracts.byPerson",
-     	"rest.v2.Contracts.show",
-     	"rest.v2.Contracts.create",
-     	"rest.v2.Contracts.update",
-     	"rest.v2.Contracts.setPreviousContract",
-     	"rest.v2.Contracts.unsetPreviousContract",
-     	"rest.v2.Contracts.delete",
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+        "rest.v2.Contracts.create",
+        "rest.v2.Contracts.update",
+        "rest.v2.Contracts.setPreviousContract",
+        "rest.v2.Contracts.unsetPreviousContract",
+        "rest.v2.Contracts.delete",
 
-     	"rest.v2.WorkingTimeTypes.show",
-        "rest.v2.WorkingTimeTypes.list"     	
+        "rest.v2.ContractWorkingTimeTypes.show",
+        "rest.v2.ContractWorkingTimeTypes.updateExternalId",
+
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"
 
      	), target == $o, granted == false)
 then
@@ -3302,7 +3308,9 @@ when
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
-        
+
+        "rest.v2.ContractWorkingTimeTypes.show",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
 
@@ -3349,6 +3357,8 @@ when
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
 
+        "rest.v2.ContractWorkingTimeTypes.show",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
 
@@ -3393,6 +3403,9 @@ when
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
+
+
+        "rest.v2.ContractWorkingTimeTypes.show",
 
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
