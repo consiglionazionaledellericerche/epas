@@ -18,9 +18,10 @@
 package controllers;
 
 import com.google.common.base.Verify;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.enumerate.InformationType;
+import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.InformationRequestEvent;
 import org.joda.time.LocalDateTime;
@@ -34,7 +35,7 @@ import play.mvc.With;
  */
 @Slf4j
 @With(Resecure.class)
-public class InformationRequests extends Controller{
+public class InformationRequests extends Controller {
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -46,6 +47,18 @@ public class InformationRequests extends Controller{
   
   public static void serviceExit() {
     list(InformationType.SERVICE_INFORMATION);
+  }
+  
+  public static void teleworksToApprove() {
+    listToApprove(InformationType.TELEWORK_INFORMATION);
+  }
+  
+  public static void illnessToApprove() {
+    listToApprove(InformationType.ILLNESS_INFORMATION);
+  }
+  
+  public static void serviceExitToApprove() {
+    listToApprove(InformationType.SERVICE_INFORMATION);
   }
   
   /**
@@ -66,5 +79,9 @@ public class InformationRequests extends Controller{
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}", type, person,
         fromDate);
+  }
+  
+  public static void listToApprove(InformationType type) {
+    
   }
 }
