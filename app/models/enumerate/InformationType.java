@@ -17,9 +17,26 @@
 
 package models.enumerate;
 
+import com.google.common.base.Optional;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import manager.configurations.EpasParam;
+
+@Getter
+@RequiredArgsConstructor
 public enum InformationType {
 
-  illnessInformation,
-  teleworkInformation,
-  serviceInformation;
+  ILLNESS_INFORMATION(false, 
+      Optional.of(EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED)),
+  TELEWORK_INFORMATION(false,
+      Optional.of(EpasParam.TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED)),
+  SERVICE_INFORMATION(false,
+      Optional.of(EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED));
+  
+  public final boolean alwaysSkipOfficeHeadApproval;
+  public final Optional<EpasParam> officeHeadApprovalRequiredTopLevel;
+  public final Optional<EpasParam> officeHeadApprovalRequiredTechnicianLevel;
 }

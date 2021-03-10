@@ -664,6 +664,87 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  //#####################################################################
+  //INFORMATION FLOWS PARAMS
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * del responsabile di sede.
+   */
+  ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "illness_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte del 
+   * responsabile di sede.
+   */
+  ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione del telelavoro da parte 
+   * del responsabile di sede.
+   */
+  TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "telework_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione del telelavoro da parte del 
+   * responsabile di sede.
+   */
+  TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "telework_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle uscite di servizio da parte 
+   * del responsabile di sede.
+   */
+  SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "service_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle uscite di servizio da parte del 
+   * responsabile di sede.
+   */
+  SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "service_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
       Office.class);
 
   public final String name;
@@ -715,7 +796,7 @@ public enum EpasParam {
    * Categorizzazione dei parametri di ePAS.
    */
   public enum EpasParamCategory {
-    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
+    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS, INFORMATION_FLOWS
   }
 
   /**
