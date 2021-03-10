@@ -34,6 +34,7 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
 import dao.GroupDao;
+import dao.InformationRequestDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -80,6 +81,7 @@ import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.contractual.ContractualReference;
+import models.enumerate.InformationType;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
@@ -88,6 +90,7 @@ import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
+import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
@@ -128,6 +131,7 @@ public class TemplateUtility {
   private final GroupDao groupDao;
   private final TimeSlotDao timeSlotDao;
   private final CompetenceRequestDao competenceRequestDao;
+  private final InformationRequestDao informationRequestDao;
    
   
   /**
@@ -146,7 +150,7 @@ public class TemplateUtility {
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
-      CompetenceRequestDao competenceRequestDao) {
+      CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -169,6 +173,7 @@ public class TemplateUtility {
     this.groupDao = groupDao;
     this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
+    this.informationRequestDao = informationRequestDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -293,6 +298,43 @@ public class TemplateUtility {
             Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
             user.person);
     return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro.
+   * @return la quantità di richieste di telelavoro pendenti.
+   */
+  public final int teleworkRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+    List<TeleworkRequest> results = informationRequestDao
+        .toApproveTeleworkResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.TELEWORK_INFORMATION, groups, user.person);
+
+    return results.size();
+  }
+  
+  public final int serviceRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    return 0;
+  }
+  
+  public final int illnessRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    return 0;
   }
 
 

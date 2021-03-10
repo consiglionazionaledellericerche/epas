@@ -18,12 +18,12 @@
 package controllers;
 
 import com.google.common.base.Verify;
-import org.joda.time.LocalDateTime;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import models.enumerate.InformationType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.InformationRequestEvent;
+import org.joda.time.LocalDateTime;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -40,6 +40,18 @@ public class InformationRequests extends Controller{
     list(InformationType.TELEWORK_INFORMATION);
   }
   
+  public static void illness() {
+    list(InformationType.ILLNESS_INFORMATION);
+  }
+  
+  public static void serviceExit() {
+    list(InformationType.SERVICE_INFORMATION);
+  }
+  
+  /**
+   * Ritorna la lista delle richieste del tipo passato come parametro.
+   * @param type il tipo di flusso informativo da richiedere
+   */
   public static void list(InformationType type) {
     Verify.verifyNotNull(type);
 

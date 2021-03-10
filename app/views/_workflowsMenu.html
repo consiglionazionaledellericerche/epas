@@ -61,6 +61,16 @@
       <li class="divider"></li>
       #{/secure.check}
       
+      #{secure.li @InformationRequests.teleworks()}
+        <i class="fa fa-laptop" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @InformationRequests.serviceExit()}
+        <i class="fa fa-sign-out" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @InformationRequests.illness()}
+        <i class="fa fa-h-square" aria-hidden="true"></i>
+      #{/secure.li}
+      <li class="divider"></li>
             
       #{secure.check 'CompetenceRequests.handleEnabled'}
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
@@ -105,6 +115,27 @@
     	#{/if}
       #{/secure.li}
       #{/secure.check}
+      
+      #{secure.li @InformationRequests.teleworksToApprove()}
+        <i class="fa fa-laptop" aria-hidden="true"></i>
+        #{if templateUtility.teleworkRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.teleworkRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+      
+      #{secure.li @InformationRequests.serviceExitToApprove()}
+        <i class="fa fa-sign-out" aria-hidden="true"></i>
+        #{if templateUtility.personalPermissionRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+    	#{/if}
+      #{/secure.li}
+      
+      #{secure.li @InformationRequests.illnessToApprove()}
+        <i class="fa fa-h-square" aria-hidden="true"></i>
+        #{if templateUtility.personalPermissionRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+    	#{/if}
+      #{/secure.li}
             
 
     </ul>

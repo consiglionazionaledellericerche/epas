@@ -21,8 +21,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
+import org.hibernate.envers.Audited;
+
 
 @Audited
 @Entity
