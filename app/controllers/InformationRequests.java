@@ -18,12 +18,19 @@
 package controllers;
 
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.flows.InformationRequestManager;
 import models.enumerate.InformationType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
+import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDateTime;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -36,6 +43,9 @@ import play.mvc.With;
 @Slf4j
 @With(Resecure.class)
 public class InformationRequests extends Controller {
+  
+  @Inject
+  static InformationRequestManager informationRequestManager;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -79,6 +89,21 @@ public class InformationRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}", type, person,
         fromDate);
+    val config = informationRequestManager.getConfiguration(type, person);
+    List<TeleworkRequest> teleworks = Lists.newArrayList();
+    List<ServiceRequest> services = Lists.newArrayList();
+    List<IllnessRequest> illness = Lists.newArrayList();
+    switch (type) {
+      case TELEWORK_INFORMATION:
+        break;
+      case ILLNESS_INFORMATION:
+        break;
+      case SERVICE_INFORMATION:
+        break;
+        default:
+          break;
+    }
+    render(teleworks, services, illness);
   }
   
   public static void listToApprove(InformationType type) {
