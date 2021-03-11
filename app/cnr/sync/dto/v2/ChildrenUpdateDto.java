@@ -19,10 +19,7 @@ package cnr.sync.dto.v2;
 
 import helpers.JodaConverters;
 import lombok.Builder;
-import models.Office;
-import models.Person;
 import models.PersonChildren;
-import models.Qualification;
 
 /**
  * Dati per l'aggiornamento di un figlio/figlia via REST.
