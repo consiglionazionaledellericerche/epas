@@ -36,6 +36,7 @@ import org.modelmapper.ModelMapper;
 @Data
 public class ContractWorkingTimeTypeShowTerseDto {
 
+  private Long id;
   private LocalDate beginDate;
   private LocalDate endDate;
   private WorkingTimeTypeShowTerseDto workingTimeType;
