@@ -3,9 +3,13 @@
 CREATE TABLE information_requests(
 	id BIGSERIAL PRIMARY KEY,
 	person_id BIGINT REFERENCES persons(id),
+	start_at TIMESTAMP WITHOUT TIME ZONE,
+	end_to TIMESTAMP WITHOUT TIME ZONE,
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
+	flow_started BOOLEAN,
+	flow_ended BOOLEAN,
 	version INT DEFAULT 0
 );
 
@@ -14,9 +18,13 @@ CREATE TABLE information_requests_history(
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
 	person_id BIGINT,
+	start_at TIMESTAMP WITHOUT TIME ZONE,
+	end_to TIMESTAMP WITHOUT TIME ZONE,
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
+	flow_started BOOLEAN,
+	flow_ended BOOLEAN,
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 

@@ -18,7 +18,9 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,11 +29,14 @@ import javax.persistence.EntityManager;
 import models.Person;
 import models.UsersRolesOffices;
 import models.enumerate.InformationType;
+import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.query.QAbsenceRequest;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import models.informationrequests.query.QTeleworkRequest;
 
 /**
  * Dao per i flussi informativi.
@@ -58,5 +63,38 @@ public class InformationRequestDao extends DaoBase {
   
   public List<ServiceRequest> toApproveServiceResults() {
     return null;
+  }
+  
+  /**
+   * Lista delle richiesta di assenza per persona e data.
+   *
+   * @param person La persona della quale recuperare le richieste di assenza
+   * @param fromDate La data iniziale dell'intervallo temporale da considerare
+   * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
+   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
+   */
+  public List<TeleworkRequest> findByPersonAndDate(Person person,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      InformationType informationType, boolean active) {
+
+    Preconditions.checkNotNull(person);
+    Preconditions.checkNotNull(fromDate);
+
+    final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder(teleworkRequest.person.eq(person)
+        .and(teleworkRequest.startAt.after(fromDate))
+        .and(teleworkRequest.informationType.eq(informationType)));
+    if (toDate.isPresent()) {
+      conditions.and(teleworkRequest.endTo.before(toDate.get()));
+    }
+    if (active) {
+      conditions.and(teleworkRequest.flowEnded.eq(false));
+    } else {
+      conditions.and(teleworkRequest.flowEnded.eq(true));
+    }
+    return getQueryFactory().selectFrom(teleworkRequest)
+        .where(conditions).orderBy(teleworkRequest.startAt.desc()).fetch();
   }
 }

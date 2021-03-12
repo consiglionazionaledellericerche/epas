@@ -54,6 +54,17 @@ public abstract class InformationRequest extends BaseModel{
   @ManyToOne(optional = false)
   public Person person;
   
+  /**
+   * Data e ora di inizio.
+   */
+  @Required
+  @NotNull
+  @Column(name = "start_at")
+  public LocalDateTime startAt;
+
+  @Column(name = "end_to")
+  public LocalDateTime endTo;
+  
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
@@ -68,6 +79,18 @@ public abstract class InformationRequest extends BaseModel{
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   public boolean officeHeadApprovalRequired = true;
+  
+  /**
+   * Se il flusso è avviato.
+   */
+  @Column(name = "flow_started")
+  public boolean flowStarted = false; 
+
+  /**
+   * Se il flusso è terminato.
+   */
+  @Column(name = "flow_ended")
+  public boolean flowEnded = false;
   
   @NotAudited
   @OneToMany(mappedBy = "informationRequest")

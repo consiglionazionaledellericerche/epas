@@ -32,6 +32,7 @@ import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDateTime;
+import dao.InformationRequestDao;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -46,6 +47,8 @@ public class InformationRequests extends Controller {
   
   @Inject
   static InformationRequestManager informationRequestManager;
+  @Inject
+  static InformationRequestDao informationRequestDao;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -95,6 +98,7 @@ public class InformationRequests extends Controller {
     List<IllnessRequest> illness = Lists.newArrayList();
     switch (type) {
       case TELEWORK_INFORMATION:
+        //teleworks = informationRequestDao
         break;
       case ILLNESS_INFORMATION:
         break;
