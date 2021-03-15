@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.1] - unreleased
+### Changed
+- Modificato comportamento form di richiesta ferie, adesso sposta la data finale impostandola
+uguale alla data iniziale se si mette una data iniziale successiva alla data finale.
 ### Added
 - Aggiunti metodi Rest per la visualizzazione dell'associazione tra contratto
 e tipologia di orario di lavoro e aggiornamento del corrispondente externalId
