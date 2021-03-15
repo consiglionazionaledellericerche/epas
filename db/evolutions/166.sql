@@ -86,8 +86,8 @@ CREATE TABLE illness_requests_history(
 CREATE TABLE service_requests(
 	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),
 	day DATE,
-	start_at TIME WITHOUT TIME ZONE,
-	end_to TIME WITHOUT TIME ZONE,
+	begin_at TIME WITHOUT TIME ZONE,
+	finish_to TIME WITHOUT TIME ZONE,
 	reason TEXT);
 	
 
@@ -96,8 +96,8 @@ CREATE TABLE service_requests_history(
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
     _revision_type SMALLINT NOT NULL,
 	day DATE,
-	start_at TIME WITHOUT TIME ZONE,
-	end_to TIME WITHOUT TIME ZONE,
+	begin_at TIME WITHOUT TIME ZONE,
+	finish_to TIME WITHOUT TIME ZONE,
 	reason TEXT,
 	PRIMARY KEY (information_request_id, _revision, _revision_type)
 );

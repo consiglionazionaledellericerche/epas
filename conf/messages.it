@@ -89,6 +89,12 @@ CompetenceRequests.changeReperibilityToApprove = Richieste di cambio reperibilit
 
 CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibilita'
 
+InformationType.TELEWORK_INFORMATIONS =Flussi per Telelavoro
+InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
+InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
+InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
+InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+
 
 type =Servizio di reperibilità
 teamMate =Reperibile da contattare

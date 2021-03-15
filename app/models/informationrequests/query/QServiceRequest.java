@@ -26,15 +26,20 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
 
     public final models.base.query.QInformationRequest _super;
 
+    public final TimePath<java.time.LocalTime> beginAt = createTime("beginAt", java.time.LocalTime.class);
+
     public final DatePath<java.time.LocalDate> day = createDate("day", java.time.LocalDate.class);
 
-    public final TimePath<java.time.LocalTime> endTo = createTime("endTo", java.time.LocalTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> endTo;
 
     //inherited
     public final SimplePath<Object> entityId;
 
     //inherited
     public final ListPath<models.informationrequests.InformationRequestEvent, QInformationRequestEvent> events;
+
+    public final TimePath<java.time.LocalTime> finishTo = createTime("finishTo", java.time.LocalTime.class);
 
     //inherited
     public final BooleanPath flowEnded;
@@ -62,7 +67,8 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
 
     public final StringPath reason = createString("reason");
 
-    public final TimePath<java.time.LocalTime> startAt = createTime("startAt", java.time.LocalTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> startAt;
 
     //inherited
     public final NumberPath<Integer> version;
@@ -86,6 +92,7 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
     public QServiceRequest(Class<? extends ServiceRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this._super = new models.base.query.QInformationRequest(type, metadata, inits);
+        this.endTo = _super.endTo;
         this.entityId = _super.entityId;
         this.events = _super.events;
         this.flowEnded = _super.flowEnded;
@@ -96,6 +103,7 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
         this.officeHeadApproved = _super.officeHeadApproved;
         this.persistent = _super.persistent;
         this.person = _super.person;
+        this.startAt = _super.startAt;
         this.version = _super.version;
     }
 

@@ -35,9 +35,9 @@ public class ServiceRequest extends InformationRequest{
 
   public LocalDate day;
   
-  public LocalTime startAt;
+  public LocalTime beginAt;
   
-  public LocalTime endTo;
+  public LocalTime finishTo;
   
   public String reason;
 }

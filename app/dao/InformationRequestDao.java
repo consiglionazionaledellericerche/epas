@@ -152,10 +152,10 @@ public class InformationRequestDao extends DaoBase {
     final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
 
     BooleanBuilder conditions = new BooleanBuilder(serviceRequest.person.eq(person)
-        .and(serviceRequest.startAt.after(fromDate.toLocalTime()))
+        .and(serviceRequest.startAt.after(fromDate))
         .and(serviceRequest.informationType.eq(informationType)));
     if (toDate.isPresent()) {
-      conditions.and(serviceRequest.endTo.before(toDate.get().toLocalTime()));
+      conditions.and(serviceRequest.endTo.before(toDate.get()));
     }
     if (active) {
       conditions.and(serviceRequest.flowEnded.eq(false));
