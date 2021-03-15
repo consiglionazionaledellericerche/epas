@@ -10,12 +10,6 @@
 	if (config.officeHeadApprovalRequired) {
 	 approvalsRequired++;
 	}
-	if (config.managerApprovalRequired) {
-	 approvalsRequired++;
-	}
-	if (config.administrativeApprovalRequired) {
-	  approvalsRequired++;
-	}
 	approvalRequired = approvalsRequired > 0
 }%
 
@@ -33,30 +27,46 @@
   
   	#{tabContentItem id:'attivo', active:true}
   	#{b.buttons center:true}
-  		<a class="btn btn-success" href="@{AbsenceRequests.blank('person':person, 'type':type)}">
-    		<i class="fa fa-plus"></i> &{'AbsenceRequestType.' + type + '.blank'}
+  	#{secure.check 'InformationRequests.blank', target:type}
+  		<a class="btn btn-success" href="@{InformationRequests.blank('person':person, 'type':type)}">
+    		<i class="fa fa-plus"></i> &{'InformationType.' + type + '.blank'}
   		</a>
+  	#{/secure.check}
   	#{/b.buttons}
- 	#{if myResults.isEmpty()}
+ 	#{if type.equals(models.enumerate.InformationType.TELEWORK_INFORMATION)}
  		#{alert color:'info'}
  		<p>Al momento non ci sono flussi di richiesta assenza in esecuzione.</p>
  		#{/alert}
  	#{/if}
- 	#{else}
- 		#{include './tableElements/_table.html' /}
- 	#{/else}
+ 	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
+ 		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza in esecuzione.</p>
+ 		#{/alert}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
+ 		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza in esecuzione.</p>
+ 		#{/alert}
+ 	#{/if}
   	
   #{/tabContentItem}
 
   #{tabContentItem id:'nonAttivo'}
-  	#{if closed.isEmpty()}
-  		#{alert color:'info'}
+    #{if type.equals(models.enumerate.InformationType.TELEWORK_INFORMATION)}
+ 		#{alert color:'info'}
  		<p>Al momento non ci sono flussi di richiesta assenza conclusi.</p>
  		#{/alert}
-  	#{/if}
-  	#{else}
-  		#{include './tableElements/_closedTable.html' /}
-  	#{/else}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
+ 		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza conclusi.</p>
+ 		#{/alert}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
+ 		#{alert color:'info'}
+ 		<p>Al momento non ci sono flussi di richiesta assenza conclusi.</p>
+ 		#{/alert}
+ 	#{/if}
   	
   #{/tabContentItem}
  

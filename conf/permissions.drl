@@ -54,6 +54,13 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.CompetenceRequest;
 
+import models.base.InformationRequest;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
+import models.enumerate.InformationType;
+
 import security.PermissionCheck;
 
 global models.User currentOperator;
@@ -694,6 +701,14 @@ when
 		"CompetenceRequests.delete",
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
+		
+		/*Richiesta flusso informativo*/
+		"InformationRequests.illness",
+		"InformationRequests.serviceExit",
+		"InformationRequests.list",
+		"InformationRequests.blank",
+		"InformationRequests.save",
+		"InformationRequests.edit",
 		
 		
      	/* Ferie */
@@ -2968,6 +2983,34 @@ when
 then
  $c.grant();
 end
+
+/************************************************************************************************
+ * Regola per permettere la fruizione del pulsante di inserimento di un nuovo flusso informativo
+ ************************************************************************************************/
+ 
+ rule blankInformationRequest
+ when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $it: InformationType(this in (InformationType.TELEWORK_INFORMATION))
+  $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
+ then
+  $c.revoke();
+ end
+ 
+/**********************************************************************************
+ * Regola per usufruire del flusso per le richieste di presa visione del telelavoro
+ **********************************************************************************/
+ 
+ rule canUseTeleworkFlow
+ when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "InformationRequests.teleworks", target == null, granted == false)
+ then
+  $c.grant();
+ end
 
 
 /*******************************************************************************

@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.flows.InformationRequestManager;
+import models.Person;
 import models.enumerate.InformationType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
@@ -114,10 +115,14 @@ public class InformationRequests extends Controller {
         log.info("Passato argomento non conosciuto");
         break;
     }
-    render(teleworks, services, illness, config);
+    render(teleworks, services, illness, config, type);
   }
   
   public static void listToApprove(InformationType type) {
+    
+  }
+  
+  public static void blank(Person person, InformationType type) {
     
   }
 }
