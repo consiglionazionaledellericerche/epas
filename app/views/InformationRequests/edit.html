@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set informationRequestTypeLabel: messages.get('InformationType.' + type.toString() + 'S') /}
+#{set informationRequest: serviceRequest != null ? serviceRequest : illnessRequest /}
+#{set title:('ePAS - ' + informationRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + type.label()) /}
+
+#{set breadcrumbs:[(informationRequestTypeLabel):@InformationRequests.list(type), ('Modifica'):null] /}
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+  #{title title:(informationRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + type.label()) /}
+</div>
+
+<div class="container">
+	#{include './_form.html' /}
+</div>

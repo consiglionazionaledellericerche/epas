@@ -17,8 +17,13 @@
 
 package manager.flows;
 
+import com.google.common.base.Verify;
+import java.util.List;
 import javax.inject.Inject;
+import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -27,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
 import models.Person;
+import models.Role;
 import models.enumerate.InformationType;
 import models.flows.enumerate.AbsenceRequestType;
 
@@ -34,6 +40,8 @@ import models.flows.enumerate.AbsenceRequestType;
 public class InformationRequestManager {
 
   private ConfigurationManager configurationManager;
+  private UsersRolesOfficesDao uroDao;
+  private RoleDao roleDao;
   /**
    * DTO per la configurazione delle InformationRequest.
    */
@@ -47,8 +55,11 @@ public class InformationRequestManager {
   }
   
   @Inject
-  public InformationRequestManager(ConfigurationManager configurationManager) {
+  public InformationRequestManager(ConfigurationManager configurationManager, 
+      UsersRolesOfficesDao uroDao, RoleDao roleDao) {
     this.configurationManager = configurationManager;
+    this.uroDao = uroDao;
+    this.roleDao = roleDao;
   }
   
   /**
@@ -83,5 +94,34 @@ public class InformationRequestManager {
     }
     
     return informationRequestConfiguration;
+  }
+  
+  /**
+   * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
+   * tipo di assenza.
+   *
+   * @param requestType il tipo di assenza da controllare
+   * @param person la persona per cui controllare il tipo di assenza
+   * @return la lista degli eventuali problemi riscontrati.
+   */
+  public List<String> checkconfiguration(InformationType requestType, Person person) {
+    Verify.verifyNotNull(requestType);
+    Verify.verifyNotNull(person);
+
+    val problems = Lists.<String>newArrayList();
+    val config = getConfiguration(requestType, person);
+
+    if (person.user.hasRoles(Role.GROUP_MANAGER, Role.SEAT_SUPERVISOR)) {
+      return Lists.newArrayList();
+    }
+    
+    if (config.isOfficeHeadApprovalRequired() && uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office)
+        .isEmpty()) {
+      problems.add(String.format("Approvazione del responsabile di sede richiesta. "
+          + "L'ufficio %s non ha impostato nessun responsabile di sede. "
+          + "Contattare l'ufficio del personale.", person.office.getName()));
+    }
+    return problems;
   }
 }

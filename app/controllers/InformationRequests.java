@@ -17,10 +17,12 @@
 
 package controllers;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
+import dao.PersonDao;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.inject.Inject;
@@ -37,6 +39,7 @@ import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di flusso informativo dei dipendenti.
@@ -51,6 +54,10 @@ public class InformationRequests extends Controller {
   static InformationRequestManager informationRequestManager;
   @Inject
   static InformationRequestDao informationRequestDao;
+  @Inject
+  static SecurityRules rules;
+  @Inject
+  static PersonDao personDao;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -122,7 +129,41 @@ public class InformationRequests extends Controller {
     
   }
   
-  public static void blank(Person person, InformationType type) {
+  public static void blank(Optional<Long> personId, InformationType type) {
+    Verify.verifyNotNull(type);
     
+    Person person;
+    if (personId.isPresent()) {
+      rules.check("AbsenceRequests.blank4OtherPerson");
+      person = personDao.getPersonById(personId.get());
+    } else {
+      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+        person = Security.getUser().get().person;
+      } else {
+        flash.error("L'utente corrente non ha associato una persona.");
+        list(type);
+        return;
+      }
+    }
+    notFoundIfNull(person);
+    
+    val configurationProblems = informationRequestManager.checkconfiguration(type, person);
+    if (!configurationProblems.isEmpty()) {
+      flash.error(Joiner.on(" ").join(configurationProblems));
+      list(type);
+      return;
+    }
+    ServiceRequest serviceRequest = new ServiceRequest();
+    IllnessRequest illnessRequest = new IllnessRequest();
+    switch(type) {
+      case SERVICE_INFORMATION:
+        render("@edit", serviceRequest, type);
+        break;
+      case ILLNESS_INFORMATION:
+        render("@edit", illnessRequest, type);
+        break;
+        default: 
+          break;
+    }
   }
 }
