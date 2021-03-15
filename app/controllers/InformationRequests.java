@@ -17,8 +17,11 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import dao.InformationRequestDao;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +34,6 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
-import org.joda.time.LocalDateTime;
-import dao.InformationRequestDao;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -89,7 +90,7 @@ public class InformationRequests extends Controller {
       return;
     }
     val person = currentUser.person;
-    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
+    val fromDate = LocalDateTime.now().withDayOfYear(1).withMonth(1).minusMonths(1);
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}", type, person,
         fromDate);
     val config = informationRequestManager.getConfiguration(type, person);
@@ -98,16 +99,22 @@ public class InformationRequests extends Controller {
     List<IllnessRequest> illness = Lists.newArrayList();
     switch (type) {
       case TELEWORK_INFORMATION:
-        //teleworks = informationRequestDao
+        teleworks = informationRequestDao.teleworksByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.TELEWORK_INFORMATION, true);
         break;
       case ILLNESS_INFORMATION:
+        illness = informationRequestDao.illnessByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.ILLNESS_INFORMATION, true);
         break;
       case SERVICE_INFORMATION:
+        services = informationRequestDao.servicesByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.SERVICE_INFORMATION, true);
         break;
-        default:
-          break;
+      default:
+        log.info("Passato argomento non conosciuto");
+        break;
     }
-    render(teleworks, services, illness);
+    render(teleworks, services, illness, config);
   }
   
   public static void listToApprove(InformationType type) {

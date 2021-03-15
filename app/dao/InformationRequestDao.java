@@ -36,6 +36,8 @@ import models.flows.query.QAbsenceRequest;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import models.informationrequests.query.QIllnessRequest;
+import models.informationrequests.query.QServiceRequest;
 import models.informationrequests.query.QTeleworkRequest;
 
 /**
@@ -74,7 +76,7 @@ public class InformationRequestDao extends DaoBase {
    * @param absenceRequestType Il tipo di richiesta di assenza specifico
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
-  public List<TeleworkRequest> findByPersonAndDate(Person person,
+  public List<TeleworkRequest> teleworksByPersonAndDate(Person person,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       InformationType informationType, boolean active) {
 
@@ -96,5 +98,71 @@ public class InformationRequestDao extends DaoBase {
     }
     return getQueryFactory().selectFrom(teleworkRequest)
         .where(conditions).orderBy(teleworkRequest.startAt.desc()).fetch();
+  }
+  
+  /**
+   * Lista delle richiesta di assenza per persona e data.
+   *
+   * @param person La persona della quale recuperare le richieste di assenza
+   * @param fromDate La data iniziale dell'intervallo temporale da considerare
+   * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
+   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
+   */
+  public List<IllnessRequest> illnessByPersonAndDate(Person person,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      InformationType informationType, boolean active) {
+
+    Preconditions.checkNotNull(person);
+    Preconditions.checkNotNull(fromDate);
+
+    final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder(illnessRequest.person.eq(person)
+        .and(illnessRequest.startAt.after(fromDate))
+        .and(illnessRequest.informationType.eq(informationType)));
+    if (toDate.isPresent()) {
+      conditions.and(illnessRequest.endTo.before(toDate.get()));
+    }
+    if (active) {
+      conditions.and(illnessRequest.flowEnded.eq(false));
+    } else {
+      conditions.and(illnessRequest.flowEnded.eq(true));
+    }
+    return getQueryFactory().selectFrom(illnessRequest)
+        .where(conditions).orderBy(illnessRequest.startAt.desc()).fetch();
+  }
+  
+  /**
+   * Lista delle richiesta di assenza per persona e data.
+   *
+   * @param person La persona della quale recuperare le richieste di assenza
+   * @param fromDate La data iniziale dell'intervallo temporale da considerare
+   * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
+   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
+   */
+  public List<ServiceRequest> servicesByPersonAndDate(Person person,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      InformationType informationType, boolean active) {
+
+    Preconditions.checkNotNull(person);
+    Preconditions.checkNotNull(fromDate);
+
+    final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder(serviceRequest.person.eq(person)
+        .and(serviceRequest.startAt.after(fromDate.toLocalTime()))
+        .and(serviceRequest.informationType.eq(informationType)));
+    if (toDate.isPresent()) {
+      conditions.and(serviceRequest.endTo.before(toDate.get().toLocalTime()));
+    }
+    if (active) {
+      conditions.and(serviceRequest.flowEnded.eq(false));
+    } else {
+      conditions.and(serviceRequest.flowEnded.eq(true));
+    }
+    return getQueryFactory().selectFrom(serviceRequest)
+        .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
   }
 }
