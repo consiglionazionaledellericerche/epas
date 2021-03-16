@@ -23,6 +23,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
+    public final StringPath cookiePolicyContent = createString("cookiePolicyContent");
+
+    public final BooleanPath cookiePolicyEnabled = createBoolean("cookiePolicyEnabled");
+
     public final StringPath endDailyShift = createString("endDailyShift");
 
     public final StringPath endNightlyShift = createString("endNightlyShift");
