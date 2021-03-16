@@ -986,7 +986,8 @@ when
  AccountRole(this == AccountRole.ADMIN)
  $c: PermissionCheck(
     action.startsWith("Absences.")
-    || action.startsWith("Administration.")
+    || (action.startsWith("Administration.") && 
+       action not in ("Administration.generalSetting", "Administration.saveGeneralSetting"))
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
     || action.startsWith("PrintTags.")

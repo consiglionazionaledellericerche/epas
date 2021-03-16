@@ -33,6 +33,8 @@ public class QAffiliation extends EntityPathBase<Affiliation> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     public final QGroup group;
 
     //inherited
@@ -44,6 +46,8 @@ public class QAffiliation extends EntityPathBase<Affiliation> {
     public final BooleanPath persistent = _super.persistent;
 
     public final models.query.QPerson person;
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     //inherited
     public final NumberPath<Integer> version = _super.version;
