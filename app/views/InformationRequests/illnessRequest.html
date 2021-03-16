@@ -1,0 +1,49 @@
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>Compila il form sottostante per avviare un flusso informativo per comunicazione malattia.
+Specifica la data di <strong>inizio</strong> e la data di <strong>fine</strong>.<br>  
+</p>
+#{/alert}
+</div>
+
+#{form action:@edit(), method:'POST', autocomplete:false,
+	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
+                        
+	#{f.hidden 'illnessRequest.id' /}
+	#{f.hidden 'illnessRequest.person.id' /}
+	#{f.hidden 'illnessRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+
+	#{f.date 'illnessRequest.startAt', required:true, value:illnessRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'illnessRequest.endTo', value:illnessRequest.endTo?.format("dd/MM/yyyy") /}
+      
+	#{if retroactiveAbsence}
+		#{f.input 'illnessRequest.note', required:true, value:illnessRequest.note /}
+	#{/if}
+	#{if existing != null}
+	<div class="container-fluid"> 
+	#{include './existing.html' /}
+	</div>
+	#{/if}
+	
+#{/form}
+
+
+#{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'illnessRequest.id' /}
+	#{f.hidden 'illnessRequest.person.id' /}
+	#{f.hidden 'illnessRequest.type' /}
+	#{f.hidden 'illnessRequest.startAt', value:illnessRequest.startAt?.format() /}
+	#{f.hidden 'illnessRequest.endTo', value:illnessRequest.endTo?.format() /}
+	#{f.date 'illnessRequest.startAt', required:true, value:illnessRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'illnessRequest.endTo', value:illnessRequest.endTo?.format("dd/MM/yyyy") /}
+            
+	#{b.buttons center:true}
+		 #{b.link @list(type), color:'default', title:'Indietro' /}
+		 
+         #{b.submit 'Inserisci'/}
+         
+    #{/b.buttons}
+#{/form}

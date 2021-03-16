@@ -1,0 +1,49 @@
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>Compila il form sottostante per avviare un flusso di richiesta uscita di servizio.
+Specifica la <strong>data</strong>, l'ora di <strong>inizio</strong>, l'ora di <strong>fine</strong> e la motivazione.<br>  
+</p>
+#{/alert}
+</div>
+
+#{form action:@edit(), method:'POST', autocomplete:false,
+	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
+                        
+	#{f.hidden 'serviceRequest.id' /}
+	#{f.hidden 'serviceRequest.person.id' /}
+	#{f.hidden 'serviceRequest.type' /}
+	#{f.hidden 'persist', value:persist /}
+
+	#{f.date 'serviceRequest.startAt', required:true, value:serviceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'serviceRequest.endTo', value:serviceRequest.endTo?.format("dd/MM/yyyy") /}
+      
+	#{if retroactiveAbsence}
+		#{f.input 'serviceRequest.note', required:true, value:serviceRequest.note /}
+	#{/if}
+	#{if existing != null}
+	<div class="container-fluid"> 
+	#{include './existing.html' /}
+	</div>
+	#{/if}
+	
+#{/form}
+
+
+#{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'serviceRequest.id' /}
+	#{f.hidden 'serviceRequest.person.id' /}
+	#{f.hidden 'serviceRequest.type' /}
+	#{f.hidden 'serviceRequest.startAt', value:serviceRequest.startAt?.format() /}
+	#{f.hidden 'serviceRequest.endTo', value:serviceRequest.endTo?.format() /}
+	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+            
+	#{b.buttons center:true}
+		 #{b.link @list(type), color:'default', title:'Indietro' /}
+		 
+         #{b.submit 'Inserisci'/}
+         
+    #{/b.buttons}
+#{/form}

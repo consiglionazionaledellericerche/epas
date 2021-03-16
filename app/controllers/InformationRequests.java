@@ -157,13 +157,29 @@ public class InformationRequests extends Controller {
     IllnessRequest illnessRequest = new IllnessRequest();
     switch(type) {
       case SERVICE_INFORMATION:
-        render("@edit", serviceRequest, type);
+        render("@editServiceRequest", serviceRequest, type);
         break;
       case ILLNESS_INFORMATION:
-        render("@edit", illnessRequest, type);
+        render("@editIllnessRequest", illnessRequest, type);
         break;
         default: 
           break;
     }
+  }
+  
+  public static void editServiceRequest() {
+    
+  }
+  
+  public static void editIllnessRequest() {
+    
+  }
+  
+  public static void saveServiceRequest() {
+    
+  }
+  
+  public static void saveIllnessRequest() {
+    
   }
 }
