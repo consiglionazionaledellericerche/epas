@@ -31,6 +31,7 @@ import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
@@ -369,8 +370,9 @@ public class AbsenceRequests extends Controller {
           groupAbsenceType, absenceType, justifiedType, hours, minutes, periodChain);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
-      Validation.addError("absenceRequest.startAt",
-          "La data di inizio non può essere successiva alla data di fine");
+      absenceRequest.endTo = absenceRequest.startAt;
+      flash.success("Aggiornata la data di fine della richiesta a %s", 
+          TemplateExtensions.format(absenceRequest.endTo.toDate()));
     }
     if (absenceRequest.endTo.compareTo(absenceRequest.startAt.plusMonths(6)) > 0) {
       Validation.addError("absenceRequest.endTo",

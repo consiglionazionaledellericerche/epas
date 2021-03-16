@@ -30,6 +30,7 @@ import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 
@@ -40,6 +41,7 @@ import play.data.validation.Required;
  * @author Alessandro Martelli
  */
 @ToString
+@Audited
 @Entity
 @Table(name = "contracts_working_time_types")
 public class ContractWorkingTimeType extends PropertyInPeriod implements IPropertyInPeriod {
@@ -60,6 +62,8 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
 
   @NotAudited
   public LocalDateTime updatedAt;
+
+  public String externalId;
 
   @PreUpdate
   @PrePersist
