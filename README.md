@@ -99,7 +99,7 @@ Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosaraili
 
 Un esempio di installazione di ePAS tramite *Ansible* in un cluster *Docker Swarm*
 è disponibile, grazie ad Andrea Dell'Amico (ISTI - CNR), all'indirizzo:
-[https://epas.amministrazione.cnr.ithttps://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git](https://epas.amministrazione.cnr.ithttps://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git)
+[https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git](https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git)
 
 Attenzione: per usare l'ultima versione opensource è necessario cambiare la variabile
 *epas_docker_server_image* in **consiglionazionalericerche/epas**.
