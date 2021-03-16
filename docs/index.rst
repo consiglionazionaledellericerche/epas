@@ -32,6 +32,7 @@ rilasciati anche questi come opensource:
    techAdmin/index
    user/index
    missions/index
+   applicationAdmin/index
    rest/index
    sysadmin/index
 

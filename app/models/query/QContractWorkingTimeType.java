@@ -37,11 +37,15 @@ public class QContractWorkingTimeType extends EntityPathBase<ContractWorkingTime
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     //inherited
     public final NumberPath<Integer> version = _super.version;

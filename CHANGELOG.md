@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - unreleased
 ### Added
+- Aggiunta gestione e visualizzazione delle privacy policy con possibilità di
+attivare/disattivare la sua visualizzazione.
 - Aggiunti metodi Rest per la visualizzazione dell'associazione tra contratto
 e tipologia di orario di lavoro e aggiornamento del corrispondente externalId
 

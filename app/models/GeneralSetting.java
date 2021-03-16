@@ -33,6 +33,10 @@ public class GeneralSetting extends BaseModel {
 
   private static final long serialVersionUID = 881278299637007974L;
 
+  //Cookie policy
+  public boolean cookiePolicyEnabled = false;
+  public String cookiePolicyContent;
+  
   // Parametri gestione anagrafica
   
   public boolean syncBadgesEnabled = false;
