@@ -11,6 +11,7 @@ uguale alla data iniziale se si mette una data iniziale successiva alla data fin
 ### Fixed
 - Corretta drools per l'accesso all'endpoint REST /rest/absences/insertVacation
 ### Added
+- Aggiunto link alla privacy policy (se abilitata) nel footer
 - Aggiunta gestione e visualizzazione delle privacy policy con possibilità di
 attivare/disattivare la sua visualizzazione
 - Aggiunti metodi Rest per la visualizzazione dell'associazione tra contratto
