@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Modificato comportamento form di richiesta ferie, adesso sposta la data finale impostandola
 uguale alla data iniziale se si mette una data iniziale successiva alla data finale.
+### Fixed
+- Corretta drools per l'accesso all'endpoint REST /rest/absences/insertVacation
 ### Added
 - Aggiunti metodi Rest per la visualizzazione dell'associazione tra contratto
 e tipologia di orario di lavoro e aggiornamento del corrispondente externalId
