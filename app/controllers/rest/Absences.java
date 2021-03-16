@@ -375,7 +375,6 @@ public class Absences extends Controller {
    * parametri HTTP passati.
    * Questo metodo può essere chiamato solo via HTTP GET.
    */
-  @SuppressWarnings("resource")
   public static void attachment(Long id) throws IOException {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val absence = getAbsenceFromRequest(id);
