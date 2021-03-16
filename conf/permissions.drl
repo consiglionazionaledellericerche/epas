@@ -3085,6 +3085,7 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
@@ -3107,16 +3108,14 @@ when
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
         "manager.AbsenceManager.saveAbsences",
-
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
-        
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
-
 
         "rest.v3.Vacations.byPersonAndYear"
 
@@ -3144,6 +3143,7 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
