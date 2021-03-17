@@ -183,8 +183,10 @@ public class InformationRequests extends Controller {
     render(serviceRequest, retroactiveAbsence);
   }
   
-  public static void editIllnessRequest() {
-    
+  public static void editIllnessRequest(IllnessRequest illnessRequest, boolean retroactiveAbsence) {
+    rules.checkIfPermitted(illnessRequest);
+    boolean insertable = true;
+    render(illnessRequest, retroactiveAbsence, insertable);
   }
   
   public static void saveServiceRequest() {

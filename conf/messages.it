@@ -94,6 +94,15 @@ InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
 InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
 InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
+InformationType.ILLNESS_INFORMATION =Informazione di malattia
+serviceRequest.day =Giorno
+serviceRequest.beginAt =Inizio
+serviceRequest.finishTo =Fine
+serviceRequest.reason =Motivazione
+illnessRequest.beginDate =Giorno iniziale
+illnessRequest.endDate =Giorno finale
+illnessRequest.name =Nome assenza
 
 
 type =Servizio di reperibilità

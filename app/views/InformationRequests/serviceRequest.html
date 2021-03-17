@@ -11,7 +11,7 @@ Specifica la <strong>data</strong>, l'ora di <strong>inizio</strong>, l'ora di <
                         
 	#{f.hidden 'serviceRequest.id' /}
 	#{f.hidden 'serviceRequest.person.id' /}
-	#{f.hidden 'serviceRequest.type' /}
+	#{f.hidden 'serviceRequest.informationType' /}
 	#{f.hidden 'persist', value:persist /}
 	
 	#{f.date 'serviceRequest.day', required:true, value:serviceRequest.day?.format("dd/MM/yyyy") /}
@@ -34,7 +34,7 @@ Specifica la <strong>data</strong>, l'ora di <strong>inizio</strong>, l'ora di <
 	  
 	#{f.hidden 'serviceRequest.id' /}
 	#{f.hidden 'serviceRequest.person.id' /}
-	#{f.hidden 'serviceRequest.type' /}
+	#{f.hidden 'serviceRequest.informationType' /}
 	#{f.hidden 'persist', value:persist /}
 	
 	#{f.hidden 'serviceRequest.day', required:true, value:serviceRequest.day?.format("dd/MM/yyyy") /}
