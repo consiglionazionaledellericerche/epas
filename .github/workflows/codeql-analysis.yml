@@ -23,8 +23,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    #runs-on: ubuntu-latest
-    runs-on: criluc/play1:1.5.3-openjdk-11-patched 
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -52,7 +51,15 @@ jobs:
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Autobuild
       #uses: github/codeql-action/autobuild@v1
-      run: ./gradlew --daemon playPrecompile
+      env:
+       - PLAY_VERSION: 1.5.3
+      run: |
+       - wget -q https://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
+       - unzip -q play-${PLAY_VERSION}.zip
+       - rm play-${PLAY_VERSION}.zip
+       - cd play-${PLAY_VERSION}
+       - ln -sf $HOME/play-${PLAY_VERSION}/play /usr/local/bin
+       - ./gradlew --daemon playPrecompile
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
 
