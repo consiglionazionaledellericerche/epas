@@ -54,11 +54,8 @@ jobs:
       run: |
        wget -q https://downloads.typesafe.com/play/1.5.3/play-1.5.3.zip
        unzip -q play-1.5.3.zip
-       rm play-1.5.3.zip
-       cd play-1.5.3
-       sudo ln -sf $HOME/play-1.5.3/play /usr/local/bin
-       cd -
-       /usr/local/bin/play precompile
+       ./play-1.5.3/play precompile
+
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
 
