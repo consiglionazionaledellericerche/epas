@@ -28,9 +28,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.RegistryNotificationManager;
@@ -142,7 +141,7 @@ public class SynchronizationManager {
 
     val syncResult = new SyncResult();
 
-    var epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    Person epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
     if (epasPerson == null) {
       epasPerson = personDao.getPersonByNumber(perseoPerson.number);
     }
