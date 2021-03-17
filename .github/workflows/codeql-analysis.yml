@@ -59,6 +59,7 @@ jobs:
        rm play-${PLAY_VERSION}.zip
        cd play-${PLAY_VERSION}
        sudo ln -sf $HOME/play-${PLAY_VERSION}/play /usr/local/bin
+       cd -
        ./gradlew --daemon playPrecompile
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
