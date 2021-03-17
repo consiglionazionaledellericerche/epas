@@ -54,13 +54,13 @@ jobs:
       env:
         PLAY_VERSION: 1.5.3
       run: |
-       - apt-get update && apt-get install -y wget
-       - wget -q https://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
-       - unzip -q play-${PLAY_VERSION}.zip
-       - rm play-${PLAY_VERSION}.zip
-       - cd play-${PLAY_VERSION}
-       - ln -sf $HOME/play-${PLAY_VERSION}/play /usr/local/bin
-       - ./gradlew --daemon playPrecompile
+       apt-get update && apt-get install -y wget
+       wget -q https://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
+       unzip -q play-${PLAY_VERSION}.zip
+       rm play-${PLAY_VERSION}.zip
+       cd play-${PLAY_VERSION}
+       ln -sf $HOME/play-${PLAY_VERSION}/play /usr/local/bin
+       ./gradlew --daemon playPrecompile
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
 
