@@ -37,6 +37,7 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -167,8 +168,19 @@ public class InformationRequests extends Controller {
     }
   }
   
-  public static void editServiceRequest() {
-    
+  public static void editServiceRequest(ServiceRequest serviceRequest, boolean retroactiveAbsence) {
+    rules.checkIfPermitted(serviceRequest);
+    boolean insertable = true;
+    if (serviceRequest.startAt == null || serviceRequest.endTo == null) {
+      Validation.addError("serviceRequest.startAt",
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("serviceRequest.endTo",
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+      insertable = false;
+      render("@edit", serviceRequest, retroactiveAbsence, insertable);
+    }
+    render(serviceRequest, retroactiveAbsence);
   }
   
   public static void editIllnessRequest() {
