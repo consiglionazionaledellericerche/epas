@@ -59,6 +59,7 @@ jobs:
       run: |
        wget -q https://downloads.typesafe.com/play/1.5.3/play-1.5.3.zip
        unzip -q play-1.5.3.zip
+       play-1.5.3/play deps
        play-1.5.3/play precompile
 
     # ℹ️ Command-line programs to run using the OS shell.
