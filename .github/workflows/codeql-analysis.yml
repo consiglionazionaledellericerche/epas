@@ -19,9 +19,7 @@ on:
     branches: [ main ]
   schedule:
     - cron: '21 0 * * 4'
-  paths: 
-    - app
-    - public
+
 jobs:
   analyze:
     name: Analyze
@@ -82,3 +80,6 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+      paths: 
+        - app
+        - public
