@@ -23,7 +23,8 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: criluc/play1:1.5.3-openjdk-11-patched 
 
     strategy:
       fail-fast: false
