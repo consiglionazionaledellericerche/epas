@@ -54,6 +54,7 @@ jobs:
       env:
         PLAY_VERSION: 1.5.3
       run: |
+       - apt-get update && apt-get install -y wget
        - wget -q https://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
        - unzip -q play-${PLAY_VERSION}.zip
        - rm play-${PLAY_VERSION}.zip
