@@ -19,7 +19,9 @@ on:
     branches: [ main ]
   schedule:
     - cron: '21 0 * * 4'
-
+  paths: 
+    - app
+    - public
 jobs:
   analyze:
     name: Analyze
@@ -33,14 +35,18 @@ jobs:
         # Learn more:
         # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
 
+    # Specify the container in which actions will run
+    container:
+      image: criluc/play1:1.5.3-openjdk-11-patched
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Setup python
-      uses: actions/setup-python@v2
-      with:
-        python-version: "2.x"
+    #- name: Setup python
+    #  uses: actions/setup-python@v2
+    #  with:
+    #    python-version: "2.x"
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -57,10 +63,11 @@ jobs:
     - name: Autobuild
       #uses: github/codeql-action/autobuild@v1
       run: |
-       wget -q https://downloads.typesafe.com/play/1.5.3/play-1.5.3.zip
-       unzip -q play-1.5.3.zip
-       play-1.5.3/play deps
-       play-1.5.3/play precompile
+       #wget -q https://downloads.typesafe.com/play/1.5.3/play-1.5.3.zip
+       #unzip -q play-1.5.3.zip
+       #play-1.5.3/play deps
+       #play-1.5.3/play precompile
+       play deps
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
