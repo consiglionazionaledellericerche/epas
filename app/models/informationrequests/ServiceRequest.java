@@ -19,10 +19,12 @@ package models.informationrequests;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
 
@@ -40,4 +42,18 @@ public class ServiceRequest extends InformationRequest{
   public LocalTime finishTo;
   
   public String reason;
+  
+  /**
+   * Orario formattato come HH:mm.
+   *
+   * @return orario della timbratura formattato come HH:mm.
+   */
+  @Transient
+  public String formattedHour(LocalTime time) {
+    if (time != null) {
+      return time.format(DateTimeFormatter.ISO_LOCAL_TIME);
+    } else {
+      return "";
+    }
+  }
 }

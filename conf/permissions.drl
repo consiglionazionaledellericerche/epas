@@ -708,7 +708,10 @@ when
 		"InformationRequests.list",
 		"InformationRequests.blank",
 		"InformationRequests.save",
-		"InformationRequests.edit",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveIllnessRequest",
 		
 		
      	/* Ferie */

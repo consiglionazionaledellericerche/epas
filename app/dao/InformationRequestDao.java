@@ -28,6 +28,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.UsersRolesOffices;
+import models.base.InformationRequest;
+import models.base.query.QInformationRequest;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -165,4 +167,38 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(serviceRequest)
         .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
   }
+  
+  public InformationRequest getById(Long id) {
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    
+    return getQueryFactory().selectFrom(informationRequest)
+        .where(informationRequest.id.eq(id)).fetchFirst();
+  }
+  
+  public Optional<ServiceRequest> getServiceById(Long id) {
+   final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+   
+   final ServiceRequest result = getQueryFactory()
+       .selectFrom(serviceRequest).where(serviceRequest.id.eq(id)).fetchFirst();
+   return Optional.fromNullable(result);
+       
+  }
+  
+  public Optional<IllnessRequest> getIllnessById(Long id) {
+    final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
+    
+    final IllnessRequest result = getQueryFactory()
+        .selectFrom(illnessRequest).where(illnessRequest.id.eq(id)).fetchFirst();
+    return Optional.fromNullable(result);
+        
+   }
+  
+  public Optional<TeleworkRequest> getTeleworkById(Long id) {
+    final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
+    
+    final TeleworkRequest result = getQueryFactory()
+        .selectFrom(teleworkRequest).where(teleworkRequest.id.eq(id)).fetchFirst();
+    return Optional.fromNullable(result);
+        
+   }
 }

@@ -33,15 +33,19 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import lombok.ToString;
 import models.Person;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequestEvent;
 import models.informationrequests.InformationRequestEvent;
 import play.data.validation.Required;
 
+@ToString(of = {"informationType", "person", "startAt", "endTo", 
+    "officeHeadApproved", "officeHeadApprovalRequired"})
 @Audited
 //@DiscriminatorColumn(name="information_type", discriminatorType = DiscriminatorType.STRING)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -96,5 +100,20 @@ public abstract class InformationRequest extends BaseModel{
   @OneToMany(mappedBy = "informationRequest")
   @OrderBy("createdAt DESC")
   public List<InformationRequestEvent> events = Lists.newArrayList();
+  
+  @Transient
+  public boolean isOfficeHeadApproved() {
+    return officeHeadApproved != null;
+  }
+  
+  /**
+   * Un flusso è completato se tutte le approvazioni richieste sono state
+   * impostate.
+   *
+   * @return true se è completato, false altrimenti.
+   */
+  public boolean isFullyApproved() {
+    return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
+  }
 
 }

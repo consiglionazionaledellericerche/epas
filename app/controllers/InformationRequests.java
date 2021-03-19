@@ -23,6 +23,8 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
 import dao.PersonDao;
+import helpers.validators.StringIsTime;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.inject.Inject;
@@ -30,13 +32,18 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.flows.InformationRequestManager;
 import models.Person;
+import models.Role;
+import models.User;
 import models.enumerate.InformationType;
+import models.flows.AbsenceRequest;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import play.data.validation.CheckWith;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -168,19 +175,10 @@ public class InformationRequests extends Controller {
     }
   }
   
-  public static void editServiceRequest(ServiceRequest serviceRequest, boolean retroactiveAbsence) {
-    rules.checkIfPermitted(serviceRequest);
-    boolean insertable = true;
-    if (serviceRequest.startAt == null || serviceRequest.endTo == null) {
-      Validation.addError("serviceRequest.startAt",
-          "Entrambi i campi data devono essere valorizzati");
-      Validation.addError("serviceRequest.endTo",
-          "Entrambi i campi data devono essere valorizzati");
-      response.status = 400;
-      insertable = false;
-      render("@edit", serviceRequest, retroactiveAbsence, insertable);
-    }
-    render(serviceRequest, retroactiveAbsence);
+  public static void editServiceRequest(ServiceRequest serviceRequest, InformationType type,
+      @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
+    
+    
   }
   
   public static void editIllnessRequest(IllnessRequest illnessRequest, boolean retroactiveAbsence) {
@@ -189,11 +187,97 @@ public class InformationRequests extends Controller {
     render(illnessRequest, retroactiveAbsence, insertable);
   }
   
-  public static void saveServiceRequest() {
+  public static void saveServiceRequest(ServiceRequest serviceRequest, InformationType type,
+      @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
+  //rules.checkIfPermitted(serviceRequest);
+    boolean insertable = true;
+    serviceRequest.beginAt = informationRequestManager.deparseTime(begin);
+    serviceRequest.finishTo = informationRequestManager.deparseTime(finish);
+    if (serviceRequest.beginAt == null || serviceRequest.finishTo == null) {
+      Validation.addError("serviceRequest.beginAt",
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("serviceRequest.finishTo",
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+      insertable = false;
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
+    }
+    //TODO: completare con la creazione di un evento di richiesta
+    serviceRequest.startAt = LocalDateTime.now();
+    serviceRequest.save();
+    
+    boolean isNewRequest = !serviceRequest.isPersistent();
+    if (isNewRequest || !serviceRequest.flowStarted) {
+      informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest), 
+          Optional.absent(), Optional.absent(),serviceRequest.person,
+          InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (serviceRequest.person.isSeatSupervisor()) {
+        approval(serviceRequest.id);
+      } else {
+        // invio la notifica al primo che deve validare la mia richiesta
+        notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
+            absenceRequest, true);
+        // invio anche la mail
+        notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
+            absenceRequest, true);
+      }
+
+    }
+    flash.success("Operazione effettuata correttamente");
+
+    InformationRequests.list(serviceRequest.informationType);
     
   }
   
   public static void saveIllnessRequest() {
     
+  }
+  
+  
+  /**
+   * Metodo dispatcher che chiama il corretto metodo per approvare la richiesta.
+   *
+   * @param id l'id della richiesta da approvare
+   */
+  public static void approval(long id) {
+
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    notFoundIfNull(absenceRequest);
+    User user = Security.getUser().get();
+
+    boolean approved = informationRequestManager.approval(absenceRequest, user);
+
+    if (approved) {
+      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
+
+      flash.success("Operazione conclusa correttamente");
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
+    }
+    InformationRequests.listToApprove(absenceRequest.type);
+
+  }
+  
+  /**
+   * Dispatcher che instrada al corretto metodo l'operazione da fare sulla richiesta a seconda dei
+   * parametri.
+   *
+   * @param id l'id della richiesta di assenza
+   */
+  public static void disapproval(long id, boolean disapproval, String reason) {
+    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    User user = Security.getUser().get();
+    if (!disapproval) {
+      disapproval = true;
+      render(absenceRequest, disapproval);
+    }
+    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      // caso di approvazione da parte del responsabile di sede
+      informationRequestManager.officeHeadDisapproval(id, reason);
+      flash.error("Richiesta respinta");
+      render("@show", absenceRequest, user);
+    }
+    render("@show", absenceRequest, user);
   }
 }

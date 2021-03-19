@@ -17,11 +17,16 @@
 
 package manager.flows;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import java.time.LocalTime;
 import java.util.List;
 import javax.inject.Inject;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import controllers.Security;
+import dao.InformationRequestDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import lombok.Data;
@@ -31,10 +36,30 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
+import models.PersonDay;
 import models.Role;
+import models.User;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.base.InformationRequest;
 import models.enumerate.InformationType;
+import models.flows.AbsenceRequest;
+import models.flows.AbsenceRequestEvent;
+import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.InformationRequestEventType;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
+import play.db.jpa.JPA;
 
 @Slf4j
 public class InformationRequestManager {
@@ -42,6 +67,7 @@ public class InformationRequestManager {
   private ConfigurationManager configurationManager;
   private UsersRolesOfficesDao uroDao;
   private RoleDao roleDao;
+  private InformationRequestDao dao;
   /**
    * DTO per la configurazione delle InformationRequest.
    */
@@ -56,10 +82,11 @@ public class InformationRequestManager {
   
   @Inject
   public InformationRequestManager(ConfigurationManager configurationManager, 
-      UsersRolesOfficesDao uroDao, RoleDao roleDao) {
+      UsersRolesOfficesDao uroDao, RoleDao roleDao, InformationRequestDao dao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
+    this.dao = dao;
   }
   
   /**
@@ -124,4 +151,299 @@ public class InformationRequestManager {
     }
     return problems;
   }
+  
+  /**
+   * Metodo di utilità per parsare una stringa e renderla un LocalTime.
+   * @param time la stringa contenente l'ora
+   * @return il LocalTime corrispondente alla stringa passata come parametro.
+   */
+  public LocalTime deparseTime(String time) {
+    if (time == null || time.isEmpty()) {
+      return null;
+    }
+    time = time.replaceAll(":", "");
+    Integer hour = Integer.parseInt(time.substring(0, 2));
+    Integer minute = Integer.parseInt(time.substring(2, 4));
+    return LocalTime.of(hour, minute);
+  }
+
+  /**
+   * 
+   * @param serviceRequest
+   * @param illnessRequest
+   * @param teleworkRequest
+   * @param person
+   * @param eventType
+   * @param absent
+   * @return
+   */
+  public Optional<String> executeEvent(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
+      Person person, InformationRequestEventType eventType, Optional<String> reason) {
+
+    val request = serviceRequest.isPresent() ? serviceRequest.get() : 
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+
+    val problem = checkAbsenceRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
+        person, eventType);
+    if (problem.isPresent()) {
+      log.warn("Impossibile inserire la richiesta di informazione {}. Problema: {}", request,
+          problem.get());
+      return problem;
+    }
+
+    switch (eventType) {
+      case STARTING_APPROVAL_FLOW:
+        request.flowStarted = true;
+        break;
+
+      case OFFICE_HEAD_ACKNOWLEDGMENT:
+        request.officeHeadApproved = java.time.LocalDateTime.now();
+        break;
+
+      case OFFICE_HEAD_REFUSAL:
+        // si riparte dall'inizio del flusso.
+        // resetFlow(absenceRequest);
+        // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
+        request.flowEnded = true;
+        notificationManager.notificationAbsenceRequestRefused(request, person);
+        break;
+        
+      case DELETE:
+        // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
+        request.flowEnded = true;
+        break;
+      case EPAS_REFUSAL:
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
+        notificationManager.notificationAbsenceRequestRefused(request, person);
+        break;
+
+      default:
+        throw new IllegalStateException(
+            String.format("Evento di richiesta assenza %s non previsto", eventType));
+    }
+
+    val event = InformationRequestEvent.builder().informationRequest(request).owner(person.user)
+        .eventType(eventType).build();
+    event.save();
+
+    log.info("Costruito evento per richiesta di assenza {}", event);
+    request.save();
+    checkAndCompleteFlow(serviceRequest, illnessRequest, teleworkRequest);
+    return Optional.absent();    
+  }
+  
+
+  /**
+   * Verifica se il tipo di evento è eseguibile dall'utente indicato.
+   * 
+   * @param serviceRequest l'eventuale richiesta di uscita di servizio
+   * @param illnessRequest l'eventuale richiesta di malattia
+   * @param teleworkRequest l'eventuale richiesta di telelavoro
+   * @param approver la persona che effettua l'approvazione.
+   * @param eventType il tipo di evento.
+   * @return l'eventuale problema riscontrati durante l'approvazione.
+   */
+  public Optional<String> checkAbsenceRequestEvent(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, Person approver,
+      InformationRequestEventType eventType) {
+    
+    val request = serviceRequest.isPresent() ? serviceRequest.get() : 
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+    
+    if (eventType == InformationRequestEventType.STARTING_APPROVAL_FLOW) {
+      if (!request.person.equals(approver)) {
+        return Optional.of("Il flusso può essere avviato solamente dal diretto interessato.");
+      }
+      if (request.flowStarted) {
+        return Optional.of("Flusso già avviato, impossibile avviarlo di nuovo.");
+      }
+    }
+
+    if (eventType == InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT
+        || eventType == InformationRequestEventType.OFFICE_HEAD_REFUSAL) {
+      if (request.isOfficeHeadApproved()) {
+        return Optional.of("Questa richiesta di assenza è già stata approvata "
+            + "da parte del responsabile di sede.");
+      }
+      if (!uroDao.getUsersRolesOffices(approver.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+          request.person.office).isPresent()) {
+        return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
+            + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
+      }
+
+    }
+
+    return Optional.absent();
+  }
+
+  /**
+   * Rimuove tutte le eventuali approvazioni ed impostata il flusso come da avviare.
+   * 
+   * @param serviceRequest l'eventuale richiesta di uscita di servizio
+   * @param illnessRequest l'eventuale richiesta di malattia
+   * @param teleworkRequest l'eventuale richiesta di telelavoro
+   */
+  public void resetFlow(Optional<ServiceRequest> serviceRequest, Optional<IllnessRequest> illnessRequest, 
+      Optional<TeleworkRequest> teleworkRequest) {
+    if (serviceRequest.isPresent()) {
+      serviceRequest.get().flowStarted = false;
+      serviceRequest.get().officeHeadApproved = null;
+    }
+    if (illnessRequest.isPresent()) {
+      illnessRequest.get().flowStarted = false;
+      illnessRequest.get().officeHeadApproved = null;
+    }
+    if (teleworkRequest.isPresent()) {
+      teleworkRequest.get().flowStarted = false;
+      teleworkRequest.get().officeHeadApproved = null;
+    }
+  }
+  
+  /**
+   * Controlla se una richiesta informativa può essere terminata con successo.
+   * @param serviceRequest l'eventuale richiesta di uscita di servizio
+   * @param illnessRequest l'eventuale richiesta di malattia
+   * @param teleworkRequest l'eventuale richiesta di telelavoro
+   */
+  public void checkAndCompleteFlow(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+    if (serviceRequest.isPresent()) {
+      if (serviceRequest.get().isFullyApproved() && !serviceRequest.get().flowEnded) {
+        completeFlow(serviceRequest, Optional.absent(), Optional.absent());      
+      } 
+    }
+    if (illnessRequest.isPresent()) {
+      if (illnessRequest.get().isFullyApproved() && !illnessRequest.get().flowEnded) {
+        completeFlow(Optional.absent(), illnessRequest, Optional.absent());      
+      } 
+    }
+    if (teleworkRequest.isPresent()) {
+      if (teleworkRequest.get().isFullyApproved() && !teleworkRequest.get().flowEnded) {
+        completeFlow(Optional.absent(), Optional.absent(), teleworkRequest);      
+      } 
+    }       
+  }
+ 
+  /**
+   * Certifica il completamento del flusso.
+   * @param serviceRequest l'eventuale richiesta di uscita di servizio
+   * @param illnessRequest l'eventuale richiesta di informazione malattia
+   * @param teleworkRequest l'eventuale richiesta di approvazione telelavoro
+   */
+  private void completeFlow(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+    if (serviceRequest.isPresent()) {
+      serviceRequest.get().flowEnded = true;
+      serviceRequest.get().save();    
+    }
+    if (illnessRequest.isPresent()) {
+      illnessRequest.get().flowEnded = true;
+      illnessRequest.get().save(); 
+    }
+    if (teleworkRequest.isPresent()) {
+      teleworkRequest.get().flowEnded = true;
+      teleworkRequest.get().save(); 
+    }  
+  }
+  
+  /**
+   * segue l'approvazione del flusso controllando i vari casi possibili.
+   * 
+   * @param serviceRequest l'eventuale richiesta di uscita di servizio
+   * @param illnessRequest l'eventuale richiesta di informazione malattia
+   * @param teleworkRequest l'eventuale richiesta di approvazione telelavoro
+   * @param user l'utente che sta approvando il flusso
+   * @return true se il flusso è stato approvato correttamente, false altrimenti.
+   */
+  public boolean approval(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
+      User user) {
+    if (serviceRequest.isPresent()) {
+      if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        // caso di approvazione da parte del responsabile di sede
+        officeHeadApproval(serviceRequest.get().id, user);
+        return true;
+      }
+    }
+    if (illnessRequest.isPresent()) {
+      if (!illnessRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        // caso di approvazione da parte del responsabile di sede
+        officeHeadApproval(illnessRequest.get().id, user);
+        return true;
+      }
+    }
+    if (teleworkRequest.isPresent()) {
+      if (!teleworkRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        // caso di approvazione da parte del responsabile di sede
+        officeHeadApproval(teleworkRequest.get().id, user);
+        return true;
+      }
+    }  
+    
+    return false;
+  }
+  
+
+  /**
+   * Approvazione richiesta informativa da parte del responsabile di sede. 
+   * @param id id della richiesta di assenza.
+   * @param user l'utente che deve approvare
+   */
+  public void officeHeadApproval(long id, User user) {
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id).get();
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), Optional.of(teleworkRequest),
+        currentPerson, InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT,
+        Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.", request,
+        currentPerson.getFullname());
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+
+  }
+  
+ 
+  /**
+   * Disapprovazione richiesta di flusso informativo da parte del responsabile di sede.
+   * 
+   * @param id id della richiesta di assenza.
+   * @param reason la motivazione del rifiuto
+   */
+  public void officeHeadDisapproval(long id, String reason) {
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id).get();
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
+        Optional.of(teleworkRequest), currentPerson, InformationRequestEventType.OFFICE_HEAD_REFUSAL,
+        Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di sede {}.", request,
+        currentPerson.getFullname());
+
+  }
+
 }
