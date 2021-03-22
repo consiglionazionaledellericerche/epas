@@ -56,9 +56,13 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       } else {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
-      mission.anno = jsonObject.get("anno").getAsInt();
-      mission.numero = jsonObject.get("numero").getAsLong();
-      
+      if (jsonObject.get("anno") != null) {
+        mission.anno = jsonObject.get("anno").getAsInt();        
+      }
+      if (jsonObject.get("numero") != null) {
+        mission.numero = jsonObject.get("numero").getAsLong();
+      }
+
       log.debug("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;
     } catch (Exception ex) {
