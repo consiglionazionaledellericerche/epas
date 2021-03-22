@@ -206,7 +206,8 @@ public class InformationRequestManager {
         // resetFlow(absenceRequest);
         // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
         request.flowEnded = true;
-        notificationManager.notificationAbsenceRequestRefused(request, person);
+        //TODO: aggiungere notifica
+        //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
         
       case DELETE:
@@ -215,7 +216,8 @@ public class InformationRequestManager {
         break;
       case EPAS_REFUSAL:
         resetFlow(serviceRequest, illnessRequest, teleworkRequest);
-        notificationManager.notificationAbsenceRequestRefused(request, person);
+      //TODO: aggiungere notifica
+        //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
 
       default:
@@ -411,7 +413,8 @@ public class InformationRequestManager {
         Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
-    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    //TODO: notifica di approvazione
+    //notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
 
   }
   

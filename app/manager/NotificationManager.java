@@ -45,6 +45,7 @@ import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.definitions.DefaultGroup;
+import models.base.InformationRequest;
 import models.enumerate.AccountRole;
 import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
@@ -1167,4 +1168,110 @@ public class NotificationManager {
     log.info("Inviata email al responsabile/gestore per informazione "
         + "chiusura flusso permesso personale");
   }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////
+  // Notifiche per information request
+  //////////////////////////////////////////////////////////////////////////////////////////
+  
+  /**
+   * Il metodo che fa partire la notifica al giusto livello della catena.
+   *
+   * @param currentUser l'utente che fa la richiesta
+   * @param informationRequest la richiesta informativa via flusso
+   * @param insert se si tratta di inserimento (per ora unico caso contemplato)
+   */
+  public void notificationInformationRequestPolicy(User currentUser, 
+      InformationRequest informationRequest, boolean insert) {
+    if (currentUser.isSystemUser()) {
+      return;
+    }
+    if (insert) {
+      notifyInformationRequest(informationRequest, Crud.CREATE);
+      return;
+    }
+  }
+  
+  
+  /**
+   * Il metodo che si occupa di generare la corretta notifica al giusto utente.
+   *
+   * @param absenceRequest la richiesta di assenza da notificare
+   * @param operation l'operazione da notificare
+   */
+  private void notifyInformationRequest(InformationRequest informationRequest, Crud operation) {
+    Verify.verifyNotNull(informationRequest);
+    final Person person = informationRequest.person;
+    final String template;
+    if (Crud.CREATE == operation) {
+      template = "%s ha inserito una nuova richiesta di assenza: %s";
+    } else if (Crud.UPDATE == operation) {
+      template = "%s ha modificato una richiesta di assenza: %s";
+    } else if (Crud.DELETE == operation) {
+      template = "%s ha eliminato una richiesta di assenza: %s";
+    } else {
+      template = null;
+    }
+    final String message =
+        String.format(template, person.fullName(), informationRequest.startAt.toString());
+
+    // se il flusso è terminato notifico a chi ha fatto la richiesta...
+    if (informationRequest.isFullyApproved()) {
+      Notification.builder().destination(person.user).message(message)
+      .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+      // ...e all'amministratore del personale
+
+
+    }
+    final Role roleDestination = getProperRole(informationRequest);
+    if (roleDestination == null) {
+      log.info(
+          "Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
+              + "{} di tipo {} con date {}, {}",
+              informationRequest.person, informationRequest.informationType, informationRequest.startAt, 
+              informationRequest.endTo);
+      return;
+    }
+    List<User> users =
+        person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+        .map(uro -> uro.user).collect(Collectors.toList());
+    if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+      log.info("Notifica al responsabile di gruppo per {}", informationRequest);
+      List<Group> groups = 
+          groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
+      log.debug("Gruppi da controllare {}", groups);
+      for (User user : users) {
+        for (Group group : groups) {
+          if (group.manager.equals(user.person) && group.getPeople().contains(person)) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+          }
+        }
+      }
+      return;
+    } else {
+      users.forEach(user -> {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+      });
+    }
+
+  }
+  
+  /**
+   * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta d'assenza.
+   *
+   * @param absenceRequest la richiesta d'assenza
+   * @return il ruolo a cui inviare la notifica della richiesta di assenza.
+   */
+  private Role getProperRole(InformationRequest informationRequest) {
+    Role role = null;
+
+    if (informationRequest.officeHeadApprovalRequired 
+        && informationRequest.officeHeadApproved == null) {
+      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    }
+    
+    return role;
+  }
+  
 }

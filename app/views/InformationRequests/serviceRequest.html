@@ -15,20 +15,18 @@ Specifica la <strong>data</strong>, l'ora di <strong>inizio</strong>, l'ora di <
 	#{f.hidden 'serviceRequest.informationType' /}
 	#{f.hidden 'persist', value:persist /}
 	
-	#{f.hidden 'serviceRequest.day', required:true, value:serviceRequest.day.format("dd/MM/yyyy") /}
+	#{f.date 'serviceRequest.day', required:true, value:serviceRequest.day.format("dd/MM/yyyy") /}
 
-	#{f.hidden 'begin', required:true /}
-	#{f.hidden 'finish', required:true /}
+	#{f.input 'begin', required:true /}
+	#{f.input 'finish', required:true /}
 	
-	#{f.hidden 'serviceRequest.reason', required:true /}
+	#{f.input 'serviceRequest.reason', required:true /}
             
 	#{b.buttons center:true}
 		 #{b.link @list(type), color:'default', title:'Indietro' /}
-		 #{if insertable}
+		 
          #{b.submit 'Inserisci'/}
-         #{/if}
-         #{else}
-         #{b.submit 'Inserisci', disabled:true /}
-         #{/else}
+         
+         
     #{/b.buttons}
 #{/form}

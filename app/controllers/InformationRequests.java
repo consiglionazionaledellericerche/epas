@@ -30,10 +30,12 @@ import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.NotificationManager;
 import manager.flows.InformationRequestManager;
 import models.Person;
 import models.Role;
 import models.User;
+import models.base.InformationRequest;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequest;
 import models.flows.enumerate.AbsenceRequestEventType;
@@ -66,6 +68,8 @@ public class InformationRequests extends Controller {
   static SecurityRules rules;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static NotificationManager notificationManager;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -165,10 +169,14 @@ public class InformationRequests extends Controller {
     IllnessRequest illnessRequest = new IllnessRequest();
     switch(type) {
       case SERVICE_INFORMATION:
-        render("@editServiceRequest", serviceRequest, type);
+        serviceRequest.person = person;
+        serviceRequest.informationType = type;
+        render("@editServiceRequest", serviceRequest, type, person);
         break;
       case ILLNESS_INFORMATION:
-        render("@editIllnessRequest", illnessRequest, type);
+        illnessRequest.person = person;
+        illnessRequest.informationType = type;
+        render("@editIllnessRequest", illnessRequest, type, person);
         break;
         default: 
           break;
@@ -187,7 +195,7 @@ public class InformationRequests extends Controller {
     render(illnessRequest, retroactiveAbsence, insertable);
   }
   
-  public static void saveServiceRequest(ServiceRequest serviceRequest, InformationType type,
+  public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
   //rules.checkIfPermitted(serviceRequest);
     boolean insertable = true;
@@ -200,9 +208,9 @@ public class InformationRequests extends Controller {
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       insertable = false;
-      render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish);
     }
-    //TODO: completare con la creazione di un evento di richiesta
+    
     serviceRequest.startAt = LocalDateTime.now();
     serviceRequest.save();
     
@@ -215,11 +223,12 @@ public class InformationRequests extends Controller {
         approval(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
-            absenceRequest, true);
+//        notificationManager.notificationInformationRequestPolicy(request.person.user,
+//            request, true);
         // invio anche la mail
-        notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
-            absenceRequest, true);
+//        notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
+//            absenceRequest, true);
+        log.debug("Inviata la richiesta di approvazione");
       }
 
     }
@@ -229,8 +238,39 @@ public class InformationRequests extends Controller {
     
   }
   
-  public static void saveIllnessRequest() {
-    
+  public static void saveIllnessRequest(IllnessRequest illnessRequest) {
+    if (illnessRequest.beginDate == null || illnessRequest.endDate == null) {
+      Validation.addError("serviceRequest.beginDate",
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("serviceRequest.endDate",
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+      
+      render("@editServiceRequest", illnessRequest);
+    }
+    illnessRequest.startAt = LocalDateTime.now();
+    illnessRequest.save();
+    boolean isNewRequest = !illnessRequest.isPersistent();
+    if (isNewRequest || !illnessRequest.flowStarted) {
+      informationRequestManager.executeEvent(Optional.absent(), 
+          Optional.fromNullable(illnessRequest), Optional.absent(),illnessRequest.person,
+          InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (illnessRequest.person.isSeatSupervisor()) {
+        approval(illnessRequest.id);
+      } else {
+        // invio la notifica al primo che deve validare la mia richiesta
+        //notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
+        //    absenceRequest, true);
+        // invio anche la mail
+        //notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
+        //    absenceRequest, true);
+        log.debug("Inviata la richiesta di approvazione");
+      }
+
+    }
+    flash.success("Operazione effettuata correttamente");
+
+    InformationRequests.list(illnessRequest.informationType);
   }
   
   
@@ -240,21 +280,35 @@ public class InformationRequests extends Controller {
    * @param id l'id della richiesta da approvare
    */
   public static void approval(long id) {
-
-    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
-    notFoundIfNull(absenceRequest);
+    InformationRequest request = informationRequestDao.getById(id);
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = informationRequestDao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = informationRequestDao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = informationRequestDao.getTeleworkById(id).get();
+    }
+    notFoundIfNull(request);
     User user = Security.getUser().get();
 
-    boolean approved = informationRequestManager.approval(absenceRequest, user);
+    boolean approved = informationRequestManager.approval(Optional.of(serviceRequest), 
+        Optional.of(illnessRequest), Optional.of(teleworkRequest), user);
 
     if (approved) {
-      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
-
+      //TODO: inviare segnalazione
+      //notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
+      log.debug("Inviata mail con approvazione");
       flash.success("Operazione conclusa correttamente");
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    InformationRequests.listToApprove(absenceRequest.type);
+    InformationRequests.listToApprove(request.informationType);
 
   }
   
@@ -265,19 +319,42 @@ public class InformationRequests extends Controller {
    * @param id l'id della richiesta di assenza
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
-    AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    InformationRequest request = informationRequestDao.getById(id);
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    notFoundIfNull(request);
     User user = Security.getUser().get();
-    if (!disapproval) {
-      disapproval = true;
-      render(absenceRequest, disapproval);
-    }
-    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = informationRequestDao.getServiceById(id).get();
+        if (!disapproval) {
+          disapproval = true;
+          render(serviceRequest, disapproval);
+        }
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = informationRequestDao.getIllnessById(id).get();
+        if (!disapproval) {
+          disapproval = true;
+          render(illnessRequest, disapproval);
+        }
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = informationRequestDao.getTeleworkById(id).get();
+        if (!disapproval) {
+          disapproval = true;
+          render(teleworkRequest, disapproval);
+        }
+    }      
+    
+    if (request.officeHeadApprovalRequired && request.officeHeadApproved == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       informationRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
+      render("@show", request, user);
     }
-    render("@show", absenceRequest, user);
+    render("@show", request, user);
   }
 }
