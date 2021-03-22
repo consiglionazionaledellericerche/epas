@@ -50,19 +50,24 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
       mission.dataFine = 
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_fine").getAsString()));
-      if (jsonObject.get("id_ordine").isJsonNull()) {
+      if (jsonObject.get("id_ordine") == null ||
+          jsonObject.get("id_ordine").isJsonNull()) {
         mission.idOrdine = null;
       } else {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
-      mission.anno = jsonObject.get("anno").getAsInt();
-      mission.numero = jsonObject.get("numero").getAsLong();
-      
+      if (jsonObject.get("anno") != null) {
+        mission.anno = jsonObject.get("anno").getAsInt();        
+      }
+      if (jsonObject.get("numero") != null) {
+        mission.numero = jsonObject.get("numero").getAsLong();
+      }
+
       log.debug("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;
     } catch (Exception ex) {
       log.error("Problem during binding MissionFromClient: {}, {}, {}, {}, {}",
-          name, annotations, value, actualClass, genericType);
+          name, annotations, value, actualClass, genericType, ex);
       return null;
     }
     
