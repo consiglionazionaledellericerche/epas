@@ -400,6 +400,8 @@ firstDay= Giorno inizio contratto
 forceInsert= Forza Inserimento
 
 generalSetting =Impostazioni generali di sistema
+generalSetting.cookiePolicyEnabled=Visualizzazione del banner per la cookie policy abilitato
+generalSetting.cookiePolicyContent=Pagina (HTML) con la cookie policy
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone

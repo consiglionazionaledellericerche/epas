@@ -17,13 +17,11 @@
 
 package helpers;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Files;
 import controllers.Security;
 import dao.AbsenceRequestDao;
 import dao.AbsenceTypeDao;
@@ -52,8 +50,6 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,7 +90,6 @@ import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
-import play.cache.Cache;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -839,43 +834,26 @@ public class TemplateUtility {
         LocalDate.now().dayOfMonth().withMaximumValue(), true).list();
     return people;
   }
-  
+
   /**
    * Sigla dell'ente/azienda che utilizza ePAS.
    */
   public String getCompanyCode() {
-    return CompanyConfig.code();    
+    return CompanyConfig.code();
   }
-  
+
   /**
    * Nome dell'ente/azienda che utilizza ePAS.
    */
   public String getCompanyName() {
     return CompanyConfig.name();
   }
-  
+
   /**
    * Indirizzo sito/web dell'ente/azienda che utilizza ePAS.
    */
   public String getCompanyUrl() {
     return CompanyConfig.url();
-  }
-
-  /**
-   * Preleva l'informazione della versione corrente dal file VERSION utilizzando
-   * la cache se il dato è presente.
-   */
-  public String getVersion() {
-    String version = Cache.get("VERSION", String.class);
-    if (version == null) {
-      try {
-        version = Files.asCharSource(new File("VERSION"), Charsets.UTF_8).read();
-      } catch (IOException e) {
-        version = "unknown";
-      }
-      Cache.add("VERSION", version);
-    }
-    return version;
   }
 
 }

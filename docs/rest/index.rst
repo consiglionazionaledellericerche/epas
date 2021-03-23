@@ -39,3 +39,5 @@ di ePAS in produzione del vostro ente.
    stampingsServices
    vacationServices
    workingTimeTypesServices
+   missionsServices
+

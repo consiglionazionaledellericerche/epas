@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -314,7 +313,7 @@ public class Absences extends Controller {
     }
 
     response.setContentTypeIfNotSet(absence.absenceFile.type());
-    var filename = String.format("assenza-%s-%s",
+    String filename = String.format("assenza-%s-%s",
         absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
       filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());

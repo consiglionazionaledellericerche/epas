@@ -1,5 +1,14 @@
 <footer>
   <div class="container-fluid">
-    <p>Copyright &copy; 2021 <a href="https://www.iit.cnr.it">Istituto di Informatica e Telematica</a> del <a href="https://www.cnr.it">Consiglio Nazionale delle Ricerche</a> #{if templateUtility}- versione ${templateUtility.getVersion()}#{/if}</p>
+    <p>
+      Copyright &copy; 2021 
+      <a href="https://www.iit.cnr.it">Istituto di Informatica e Telematica</a> 
+      del 
+      <a href="https://www.cnr.it">Consiglio Nazionale delle Ricerche</a> 
+      - versione ${controllers.ApplicationInfo.getVersion()}
+      #{if controllers.ApplicationInfo.isCookiePolicyEnabled()}
+      - <a href="@{ApplicationInfo.privacyPolicy}">Privacy Policy</a>
+	  #{/if}
+      </p>
   </div>
 </footer>

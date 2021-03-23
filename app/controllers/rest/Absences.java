@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
@@ -375,7 +374,6 @@ public class Absences extends Controller {
    * parametri HTTP passati.
    * Questo metodo può essere chiamato solo via HTTP GET.
    */
-  @SuppressWarnings("resource")
   public static void attachment(Long id) throws IOException {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val absence = getAbsenceFromRequest(id);
@@ -393,7 +391,7 @@ public class Absences extends Controller {
     log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
         absence.absenceFile.type(), absence.id, absence.absenceFile.getFile());
 
-    var filename = String.format("assenza-%s-%s",
+    String filename = String.format("assenza-%s-%s",
         absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
       filename = 
