@@ -96,6 +96,14 @@ InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
 InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
 InformationType.ILLNESS_INFORMATION =Informazione di malattia
+
+InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
+InformationRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede
+InformationRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+InformationRequestEventType.COMPLETE=Richiesta completata
+InformationRequestEventType.DELETE=Richiesta cancellata
+InformationRequestEventType.EXPIRING=Richiesta scaduta
+
 serviceRequest.day =Giorno
 serviceRequest.beginAt =Ora inizio
 serviceRequest.finishTo =Ora fine

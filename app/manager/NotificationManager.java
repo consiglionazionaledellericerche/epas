@@ -22,9 +22,11 @@ import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import dao.AbsenceDao;
 import dao.GroupDao;
+import dao.InformationRequestDao;
 import dao.RoleDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
+import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +56,9 @@ import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
@@ -77,6 +82,7 @@ public class NotificationManager {
   private AbsenceComponentDao componentDao;
   private GroupDao groupDao;
   private ConfigurationManager configurationManager;
+  private InformationRequestDao requestDao;
 
 
   /**
@@ -85,13 +91,14 @@ public class NotificationManager {
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao,
-      ConfigurationManager configurationManager) {
+      ConfigurationManager configurationManager, InformationRequestDao requestDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
     this.componentDao = componentDao;
     this.groupDao = groupDao;
     this.configurationManager = configurationManager;
+    this.requestDao = requestDao;
 
   }
 
@@ -103,6 +110,7 @@ public class NotificationManager {
   private static final String BASE_URL = Play.configuration.getProperty("application.baseUrl");
   private static final String PATH = "absencerequests/show";
   private static final String COMPETENCE_PATH = "competencerequests/show";
+  private static final String INFORMATION_PATH = "informationrequests/show";
 
 
   /**
@@ -1204,24 +1212,36 @@ public class NotificationManager {
     final Person person = informationRequest.person;
     final String template;
     if (Crud.CREATE == operation) {
-      template = "%s ha inserito una nuova richiesta di assenza: %s";
+      template = "%s ha inserito una nuova richiesta di flusso informativo: %s";
     } else if (Crud.UPDATE == operation) {
-      template = "%s ha modificato una richiesta di assenza: %s";
+      template = "%s ha modificato una richiesta di flusso informativo: %s";
     } else if (Crud.DELETE == operation) {
-      template = "%s ha eliminato una richiesta di assenza: %s";
+      template = "%s ha eliminato una richiesta di flusso informativo: %s";
     } else {
       template = null;
     }
     final String message =
         String.format(template, person.fullName(), informationRequest.startAt.toString());
-
+    NotificationSubject subject = null;
+    switch (informationRequest.informationType) {
+      case ILLNESS_INFORMATION:
+        subject = NotificationSubject.ILLNESS_INFORMATION;
+        break;
+      case SERVICE_INFORMATION:
+        subject = NotificationSubject.SERVICE_INFORMATION;
+        break;
+      case TELEWORK_INFORMATION:
+        subject = NotificationSubject.TELEWORK_INFORMATION;
+        break;
+      default:
+        break;
+    }
+    final NotificationSubject notificationSubject = subject;
     // se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (informationRequest.isFullyApproved()) {
       Notification.builder().destination(person.user).message(message)
-      .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+      .subject(subject, informationRequest.id).create();
       // ...e all'amministratore del personale
-
-
     }
     final Role roleDestination = getProperRole(informationRequest);
     if (roleDestination == null) {
@@ -1238,7 +1258,7 @@ public class NotificationManager {
     //TODO: specificare il subject della richiesta testando l'informationType della InformationRequest
     users.forEach(user -> {
       Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+      .subject(notificationSubject, informationRequest.id).create();
     });
 
 
@@ -1258,14 +1278,14 @@ public class NotificationManager {
     }
     return role;
   }
-  
+
   /**
-   * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione della richiesta
-   * d'assenza.
+   * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione del 
+   * flusso informativo.
    *
    * @param currentUser l'utente corrente che esegue la chiamata
-   * @param absenceRequest la richiesta d'assenza da processare
-   * @param insert se stiamo facendo un inserimento di una nuova richiesta d'assenza
+   * @param informationRequest la richiesta di flusso informativo da processare
+   * @param insert se stiamo facendo un inserimento di un nuovo flusso informativo
    */
   public void sendEmailInformationRequestPolicy(User currentUser, 
       InformationRequest informationRequest, boolean insert) {
@@ -1276,12 +1296,12 @@ public class NotificationManager {
       sendEmailInformationRequest(informationRequest);
     }
   }
-  
+
 
   /**
    * Metodo che invia la mail all'utente responsabile dell'approvazione.
    *
-   * @param absenceRequest la richiesta d'assenza
+   * @param informationRequest il flusso informativo
    * @param currentUser l'utente a cui inviare la mail
    */
   private void sendEmailInformationRequest(InformationRequest informationRequest) {
@@ -1325,12 +1345,12 @@ public class NotificationManager {
   /**
    * Metodo che compone il corpo della mail da inviare.
    *
-   * @param absenceRequest la richiesta d'assenza
+   * @param informationRequest il flusso informativo
    * @param user l'utente a cui inviare la mail
    * @return il corpo della mail da inviare all'utente responsabile dell'approvazione.
    */
   private String createInformationRequestEmail(InformationRequest informationRequest, User user) {
-    
+
     String requestType = "";
     if (informationRequest.informationType == InformationType.SERVICE_INFORMATION) {
       requestType = Messages.get("InformationType.SERVICE_INFORMATION");
@@ -1344,25 +1364,45 @@ public class NotificationManager {
     message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
         informationRequest.person.fullName()));
     message.append(String.format("\r\n per una assenza di tipo: %s", requestType));
-//    if (informationRequest.startAt.isEqual(informationRequest.endTo)) {
-//      message.append(String.format("\r\n per il giorno: %s",
-//          informationRequest.startAt.toLocalDate().toString()));
-//    } else {
-//      message.append(String.format("\r\n dal: %s",
-//          informationRequest.startAt.toLocalDate().toString()));
-//      message.append(
-//          String.format("  al: %s", informationRequest.endTo.toLocalDate().toString()));
-//    }
+
+    switch (informationRequest.informationType) {
+      case ILLNESS_INFORMATION:
+        IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
+        if (illnessRequest.beginDate.isEqual(illnessRequest.endDate)) {
+          message.append(String.format("\r\n per il giorno: %s",
+              informationRequest.startAt.toLocalDate().toString()));
+        } else {
+          message.append(String.format("\r\n dal: %s",
+              informationRequest.startAt.toLocalDate().toString()));
+          message.append(String.format("  al: %s", 
+              informationRequest.endTo.toLocalDate().toString()));
+        }
+        break;
+      case SERVICE_INFORMATION:
+        ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
+        message.append(String.format("\r\n per il giorno: %s", serviceRequest.day.toString()));
+        message.append(String.format("\r\n dalle %s", serviceRequest.beginAt.toString()));
+        message.append(String.format("\r\n alle %s", serviceRequest.finishTo.toString()));
+        break;
+      case TELEWORK_INFORMATION:
+        TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
+        message.append(String.format("\r\n per il mese di %s", 
+            DateUtility.fromIntToStringMonth(teleworkRequest.month)));
+        message.append(String.format("\r\n dell'anno %s", teleworkRequest.year));
+        break;
+      default:
+        break;
+    }
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
     }
 
-    baseUrl = baseUrl + PATH + "?id=" + informationRequest.id + "&type=" + informationRequest.informationType;
+    baseUrl = baseUrl + INFORMATION_PATH + "?id=" + informationRequest.id + "&type=" + informationRequest.informationType;
 
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
   }
-  
+
 }

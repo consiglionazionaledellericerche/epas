@@ -102,6 +102,11 @@ public abstract class InformationRequest extends BaseModel{
   public List<InformationRequestEvent> events = Lists.newArrayList();
   
   @Transient
+  public InformationRequestEvent actualEvent() {
+    return this.events.get(0);
+  }
+  
+  @Transient
   public boolean isOfficeHeadApproved() {
     return officeHeadApproved != null;
   }
