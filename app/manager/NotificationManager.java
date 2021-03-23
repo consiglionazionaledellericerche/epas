@@ -769,12 +769,16 @@ public class NotificationManager {
    * @param competenceRequest la richiesta di competenza con tutti i parametri.
    */
   public void sendEmailToUser(Optional<AbsenceRequest> absenceRequest, 
-      Optional<CompetenceRequest> competenceRequest) {
+      Optional<CompetenceRequest> competenceRequest, 
+      Optional<InformationRequest> informationRequest) {
     if (absenceRequest.isPresent()) {
       sendEmailAbsenceRequestConfirmation(absenceRequest.get());
     }
     if (competenceRequest.isPresent()) {
       sendEmailCompetenceRequestConfirmation(competenceRequest.get());
+    }
+    if (informationRequest.isPresent()) {
+      sendEmailInformationRequestConfirmation(informationRequest.get());
     }
 
   }
@@ -1405,4 +1409,69 @@ public class NotificationManager {
     return message.toString();
   }
 
+  private void sendEmailInformationRequestConfirmation(InformationRequest informationRequest) {
+    Verify.verifyNotNull(informationRequest);
+    final Person person = informationRequest.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    try {
+      simpleEmail.addTo(person.email);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    String requestType = "";
+    if (informationRequest.informationType.equals(InformationType.SERVICE_INFORMATION)) {
+      requestType = Messages.get("InformationType.SERVICE_INFORMATION");
+    } else if (informationRequest.informationType.equals(InformationType.TELEWORK_INFORMATION)) {
+      requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
+    } else {
+      requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
+    }
+    simpleEmail.setSubject("ePas Approvazione flusso");
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", person.fullName()));
+    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s",
+        requestType));
+    //TODO: completare specificando a seconda del tipo di richiesta approvata
+//    message.append(String.format("\r\n per i giorni %s - %s", 
+//        informationRequest.startAt.toLocalDate(), informationRequest.endTo.toLocalDate()));
+    switch (informationRequest.informationType) {
+      case ILLNESS_INFORMATION:
+        IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
+        if (illnessRequest.beginDate.isEqual(illnessRequest.endDate)) {
+          message.append(String.format("\r\n per il giorno: %s",
+              informationRequest.startAt.toLocalDate().toString()));
+        } else {
+          message.append(String.format("\r\n dal: %s",
+              informationRequest.startAt.toLocalDate().toString()));
+          message.append(String.format("  al: %s", 
+              informationRequest.endTo.toLocalDate().toString()));
+        }
+        break;
+      case SERVICE_INFORMATION:
+        ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
+        message.append(String.format("\r\n per il giorno: %s", serviceRequest.day.toString()));
+        message.append(String.format("\r\n dalle %s", serviceRequest.beginAt.toString()));
+        message.append(String.format("\r\n alle %s", serviceRequest.finishTo.toString()));
+        break;
+      case TELEWORK_INFORMATION:
+        TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
+        message.append(String.format("\r\n per il mese di %s", 
+            DateUtility.fromIntToStringMonth(teleworkRequest.month)));
+        message.append(String.format("\r\n dell'anno %s", teleworkRequest.year));
+        break;
+      default:
+        break;
+    }
+    val mailBody = message.toString();
+    try {
+      simpleEmail.setMsg(mailBody);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    Mail.send(simpleEmail);
+    log.info("Inviata email per approvazione di flusso richiesta: {}. "
+        + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}", 
+        informationRequest, person.email, simpleEmail.getSubject(), mailBody);
+
+  }
 }

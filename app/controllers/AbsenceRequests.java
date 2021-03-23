@@ -552,7 +552,8 @@ public class AbsenceRequests extends Controller {
     boolean approved = absenceRequestManager.approval(absenceRequest, user);
 
     if (approved) {
-      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
+      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
+          Optional.absent(), Optional.absent());
 
       flash.success("Operazione conclusa correttamente");
     } else {

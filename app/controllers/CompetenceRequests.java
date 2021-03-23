@@ -405,7 +405,8 @@ public class CompetenceRequests extends Controller {
     
     if (approved) {
       notificationManager
-      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent());
 
       flash.success("Operazione conclusa correttamente");
     } else {

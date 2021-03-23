@@ -646,9 +646,6 @@ then
   $c.grant();
 end
 
-
-
-
 rule isEmployeeForFlows
 when
   $uro: UsersRolesOffices()
@@ -656,6 +653,17 @@ when
   $ar: AbsenceRequest(person == $uro.user.person)
   $c: PermissionCheck(action in (
        "AbsenceRequests.show"), target == $ar, granted == false)
+then
+$c.grant();
+end
+
+rule isEmployeeForInformationFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $ir: InformationRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "InformationRequests.show"), target == $ir, granted == false)
 then
 $c.grant();
 end
@@ -707,7 +715,7 @@ when
 		"InformationRequests.serviceExit",
 		"InformationRequests.list",
 		"InformationRequests.blank",
-		"InformationRequests.save",
+		"InformationRequests.show",
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
@@ -813,6 +821,15 @@ when
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showInformationRequest
+when 
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
+  $ir: InformationRequest(person != currentOperator.person)
+  $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
 then
   $c.grant();
 end
@@ -1337,6 +1354,19 @@ when
         "AbsenceRequests.show",
         "AbsenceRequests.approval",
         "AbsenceRequests.disapproval",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",       
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1376,6 +1406,19 @@ when
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
         "AbsenceRequests.show",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",  
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1411,6 +1454,35 @@ when
 		"AbsenceRequests.approval",
 		"AbsenceRequests.disapproval"		
 		), target == $ar, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_showForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ir: InformationRequest()
+ $c: PermissionCheck(action in (
+		"InformationRequests.show"
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ir: InformationRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
 then
  $c.grant();
 end

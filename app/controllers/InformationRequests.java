@@ -23,6 +23,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
 import dao.PersonDao;
+import helpers.Web;
 import helpers.validators.StringIsTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -301,8 +302,8 @@ public class InformationRequests extends Controller {
         Optional.of(illnessRequest), Optional.of(teleworkRequest), user);
 
     if (approved) {
-      //TODO: inviare segnalazione
-      //notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
+      notificationManager.sendEmailToUser(Optional.absent(), Optional.absent(), 
+          Optional.fromNullable(request));
       log.debug("Inviata mail con approvazione");
       flash.success("Operazione conclusa correttamente");
     } else {
@@ -356,5 +357,49 @@ public class InformationRequests extends Controller {
       render("@show", request, user);
     }
     render("@show", request, user);
+  }
+  
+  /**
+   * Mostra al template la richiesta.
+   *
+   * @param id l'id della richiesta da visualizzare
+   * @param type la tipologia di richiesta
+   */
+  public static void show(long id, InformationType type) {
+    InformationRequest informationRequest = informationRequestDao.getById(id);
+    notFoundIfNull(informationRequest);
+    rules.checkIfPermitted(informationRequest);
+    User user = Security.getUser().get();
+    boolean disapproval = false;
+    render(informationRequest, type, user, disapproval);
+  }
+  
+  /**
+   * Form di cancellazione di un flusso informativo.
+   *
+   * @param id del flusso da cancellare.
+   */
+  public static void delete(long id) {
+    InformationRequest informationRequest = informationRequestDao.getById(id);
+    notFoundIfNull(informationRequest);
+    rules.checkIfPermitted(informationRequest);
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    switch (informationRequest.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = informationRequestDao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = informationRequestDao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = informationRequestDao.getTeleworkById(id).get();
+    }
+    informationRequestManager.executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
+        Optional.of(teleworkRequest), Security.getUser().get().person,
+        InformationRequestEventType.DELETE, Optional.absent());
+    flash.success(Web.msgDeleted(AbsenceRequest.class));
+    list(informationRequest.informationType);
   }
 }
