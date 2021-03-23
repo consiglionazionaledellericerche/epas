@@ -72,6 +72,21 @@ public enum NotificationSubject {
    * Notifiche relative ai flussi di lavoro per competenza.
    */
   COMPETENCE_REQUEST,
+  
+  /*
+   * Notifica per malattia
+   */
+  ILLNESS_INFORMATION,
+  
+  /*
+   * Notifica per uscita di servizio
+   */
+  SERVICE_INFORMATION,
+  
+  /*
+   * Notifica per telelavoro
+   */
+  TELEWORK_INFORMATION,
 
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.

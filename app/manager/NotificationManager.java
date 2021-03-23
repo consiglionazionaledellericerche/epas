@@ -47,6 +47,7 @@ import models.absences.JustifiedType;
 import models.absences.definitions.DefaultGroup;
 import models.base.InformationRequest;
 import models.enumerate.AccountRole;
+import models.enumerate.InformationType;
 import models.enumerate.NotificationSubject;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
@@ -141,19 +142,19 @@ public class NotificationManager {
         verso, stamping.place, stamping.reason);
 
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          if (operation != Crud.DELETE) {
-            Notification.builder().destination(user).message(message)
-            .subject(NotificationSubject.STAMPING, stamping.id).create();
-          } else {
-            // per la notifica delle delete niente redirect altrimenti tocca
-            // andare a prelevare l'entity dallo storico
-            Notification.builder().destination(user).message(message)
-            .subject(NotificationSubject.STAMPING).create();
-          }
-        });
+    .map(uro -> uro.user).forEach(user -> {
+      if (operation != Crud.DELETE) {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.STAMPING, stamping.id).create();
+      } else {
+        // per la notifica delle delete niente redirect altrimenti tocca
+        // andare a prelevare l'entity dallo storico
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.STAMPING).create();
+      }
+    });
   }
 
   /**
@@ -190,12 +191,12 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
-          || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message)
-          .subject(NotificationSubject.ABSENCE, absence.id).create();
-        });
+    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message)
+      .subject(NotificationSubject.ABSENCE, absence.id).create();
+    });
     /*
      * Verifico se si tratta di un 661 e invio la mail al responsabile di gruppo se esiste...
      */
@@ -501,11 +502,11 @@ public class NotificationManager {
     });
 
     person.office.usersRolesOffices.stream().filter(uro -> uro.role.name.equals(role.name))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message.toString())
-          .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id)
-          .create();
-        });
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message.toString())
+      .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id)
+      .create();
+    });
   }
 
   /**
@@ -565,38 +566,38 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
-        .map(uro -> uro.user).forEach(user -> {
-          SimpleEmail simpleEmail = new SimpleEmail();
-          // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
-          if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
-            Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
-            if (!group.isPresent()) {
-              return;
-            }
-            if (!group.get().sendFlowsEmail) {
-              log.info("Non verrà inviata la mail al responsabile del gruppo {} "
-                  + "poichè l'invio è stato disattivato.", user.person.fullName());
-              return;
-            }
-          }
-          try {
-            simpleEmail.addTo(user.person.email);
-          } catch (EmailException e) {
-            e.printStackTrace();
-          }
-          simpleEmail.setSubject("ePas Approvazione flusso");
-          val mailBody = createAbsenceRequestEmail(absenceRequest, user);
-          try {
-            simpleEmail.setMsg(mailBody);
-          } catch (EmailException e) {
-            e.printStackTrace();
-          }
-          Mail.send(simpleEmail);
-          log.info(
-              "Inviata email per richiesta di flusso richiesta: {}. "
-                  + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-                  absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
-        });
+    .map(uro -> uro.user).forEach(user -> {
+      SimpleEmail simpleEmail = new SimpleEmail();
+      // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+      if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
+        Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
+        if (!group.isPresent()) {
+          return;
+        }
+        if (!group.get().sendFlowsEmail) {
+          log.info("Non verrà inviata la mail al responsabile del gruppo {} "
+              + "poichè l'invio è stato disattivato.", user.person.fullName());
+          return;
+        }
+      }
+      try {
+        simpleEmail.addTo(user.person.email);
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      simpleEmail.setSubject("ePas Approvazione flusso");
+      val mailBody = createAbsenceRequestEmail(absenceRequest, user);
+      try {
+        simpleEmail.setMsg(mailBody);
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      Mail.send(simpleEmail);
+      log.info(
+          "Inviata email per richiesta di flusso richiesta: {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+              absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+    });
   }
 
   /**
@@ -740,12 +741,12 @@ public class NotificationManager {
       return;
     }
     person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
-          Notification.builder().destination(user).message(message)
-          .subject(NotificationSubject.COMPETENCE, competence.id).create();
-        });
+    .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
+        || uro.role.name.equals(Role.SEAT_SUPERVISOR))
+    .map(uro -> uro.user).forEach(user -> {
+      Notification.builder().destination(user).message(message)
+      .subject(NotificationSubject.COMPETENCE, competence.id).create();
+    });
 
     //sendEmailAbsenceRequestConfirmation(absenceRequest);
 
@@ -929,13 +930,13 @@ public class NotificationManager {
           }
         }
       }
-      
+
     }
 
     if (competenceRequest.employeeApprovalRequired 
         && competenceRequest.employeeApproved == null) {
       user = competenceRequest.teamMate.user;
-      
+
     }
     return user;
   }
@@ -1098,16 +1099,16 @@ public class NotificationManager {
     message.append(String.format("\r\n per il dipendente %s", absenceRequest.person.getFullname()));
     if (dates.size() == 1) {
       message
-          .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", 
-              dates.get(0), type));
+      .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", 
+          dates.get(0), type));
     } else {
       String datesToCheck = "";
       for (LocalDate date : dates) {
         datesToCheck = datesToCheck + date.toString() + " ";
       }
       message
-          .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", 
-              datesToCheck, type));
+      .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", 
+          datesToCheck, type));
     }
 
     message.append(String.format("\r\n per il servizio %s", service));
@@ -1168,11 +1169,11 @@ public class NotificationManager {
     log.info("Inviata email al responsabile/gestore per informazione "
         + "chiusura flusso permesso personale");
   }
-  
+
   //////////////////////////////////////////////////////////////////////////////////////////
   // Notifiche per information request
   //////////////////////////////////////////////////////////////////////////////////////////
-  
+
   /**
    * Il metodo che fa partire la notifica al giusto livello della catena.
    *
@@ -1190,12 +1191,12 @@ public class NotificationManager {
       return;
     }
   }
-  
-  
+
+
   /**
    * Il metodo che si occupa di generare la corretta notifica al giusto utente.
    *
-   * @param absenceRequest la richiesta di assenza da notificare
+   * @param informationRequest la richiesta informativa da notificare
    * @param operation l'operazione da notificare
    */
   private void notifyInformationRequest(InformationRequest informationRequest, Crud operation) {
@@ -1234,44 +1235,134 @@ public class NotificationManager {
     List<User> users =
         person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
-    if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
-      log.info("Notifica al responsabile di gruppo per {}", informationRequest);
-      List<Group> groups = 
-          groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
-      log.debug("Gruppi da controllare {}", groups);
-      for (User user : users) {
-        for (Group group : groups) {
-          if (group.manager.equals(user.person) && group.getPeople().contains(person)) {
-            Notification.builder().destination(user).message(message)
-            .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
-          }
-        }
-      }
-      return;
-    } else {
-      users.forEach(user -> {
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
-      });
-    }
+    //TODO: specificare il subject della richiesta testando l'informationType della InformationRequest
+    users.forEach(user -> {
+      Notification.builder().destination(user).message(message)
+      .subject(NotificationSubject.ABSENCE_REQUEST, informationRequest.id).create();
+    });
+
 
   }
-  
+
   /**
    * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta d'assenza.
    *
-   * @param absenceRequest la richiesta d'assenza
+   * @param informationRequest la richiesta di flusso informativo
    * @return il ruolo a cui inviare la notifica della richiesta di assenza.
    */
   private Role getProperRole(InformationRequest informationRequest) {
     Role role = null;
-
     if (informationRequest.officeHeadApprovalRequired 
         && informationRequest.officeHeadApproved == null) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
-    
     return role;
+  }
+  
+  /**
+   * Metodo pubblico che chiama l'invio delle email ai destinatari all'approvazione della richiesta
+   * d'assenza.
+   *
+   * @param currentUser l'utente corrente che esegue la chiamata
+   * @param absenceRequest la richiesta d'assenza da processare
+   * @param insert se stiamo facendo un inserimento di una nuova richiesta d'assenza
+   */
+  public void sendEmailInformationRequestPolicy(User currentUser, 
+      InformationRequest informationRequest, boolean insert) {
+    if (currentUser.isSystemUser()) {
+      return;
+    }
+    if (insert) {
+      sendEmailInformationRequest(informationRequest);
+    }
+  }
+  
+
+  /**
+   * Metodo che invia la mail all'utente responsabile dell'approvazione.
+   *
+   * @param absenceRequest la richiesta d'assenza
+   * @param currentUser l'utente a cui inviare la mail
+   */
+  private void sendEmailInformationRequest(InformationRequest informationRequest) {
+
+    Verify.verifyNotNull(informationRequest);
+    final Person person = informationRequest.person;
+
+    final Role roleDestination = getProperRole(informationRequest);
+    if (roleDestination == null) {
+      log.warn(
+          "Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
+              + "{} di tipo {} con date {}, {}",
+              informationRequest.person, informationRequest.informationType, informationRequest.startAt, 
+              informationRequest.endTo);
+      return;
+    }
+    person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+    .map(uro -> uro.user).forEach(user -> {
+      SimpleEmail simpleEmail = new SimpleEmail();
+      // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+      try {
+        simpleEmail.addTo(user.person.email);
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      simpleEmail.setSubject("ePas Approvazione flusso");
+      val mailBody = createInformationRequestEmail(informationRequest, user);
+      try {
+        simpleEmail.setMsg(mailBody);
+      } catch (EmailException e) {
+        e.printStackTrace();
+      }
+      Mail.send(simpleEmail);
+      log.info(
+          "Inviata email per richiesta di flusso richiesta: {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+              informationRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+    });
+  }
+
+  /**
+   * Metodo che compone il corpo della mail da inviare.
+   *
+   * @param absenceRequest la richiesta d'assenza
+   * @param user l'utente a cui inviare la mail
+   * @return il corpo della mail da inviare all'utente responsabile dell'approvazione.
+   */
+  private String createInformationRequestEmail(InformationRequest informationRequest, User user) {
+    
+    String requestType = "";
+    if (informationRequest.informationType == InformationType.SERVICE_INFORMATION) {
+      requestType = Messages.get("InformationType.SERVICE_INFORMATION");
+    } else if (informationRequest.informationType == InformationType.TELEWORK_INFORMATION) {
+      requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
+    } else {
+      requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
+    }
+    final StringBuilder message =
+        new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
+    message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
+        informationRequest.person.fullName()));
+    message.append(String.format("\r\n per una assenza di tipo: %s", requestType));
+//    if (informationRequest.startAt.isEqual(informationRequest.endTo)) {
+//      message.append(String.format("\r\n per il giorno: %s",
+//          informationRequest.startAt.toLocalDate().toString()));
+//    } else {
+//      message.append(String.format("\r\n dal: %s",
+//          informationRequest.startAt.toLocalDate().toString()));
+//      message.append(
+//          String.format("  al: %s", informationRequest.endTo.toLocalDate().toString()));
+//    }
+    String baseUrl = BASE_URL;
+    if (!baseUrl.endsWith("/")) {
+      baseUrl = baseUrl + "/";
+    }
+
+    baseUrl = baseUrl + PATH + "?id=" + informationRequest.id + "&type=" + informationRequest.informationType;
+
+    message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
+
+    return message.toString();
   }
   
 }

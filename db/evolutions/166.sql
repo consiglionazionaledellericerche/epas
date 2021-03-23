@@ -16,7 +16,7 @@ CREATE TABLE information_requests(
 CREATE TABLE information_requests_history(
 	id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
 	person_id BIGINT,
 	start_at TIMESTAMP WITHOUT TIME ZONE,
 	end_to TIMESTAMP WITHOUT TIME ZONE,
@@ -41,7 +41,7 @@ CREATE TABLE information_request_events(
 CREATE TABLE information_request_events_history(
 	id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
 	information_request_id BIGINT,
 	owner_id BIGINT REFERENCES users(id),
 	description TEXT,
@@ -60,7 +60,7 @@ CREATE TABLE telework_requests(
 CREATE TABLE telework_requests_history(
 	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
 	context TEXT,
   	year INTEGER,
 	month INTEGER,
@@ -76,7 +76,7 @@ CREATE TABLE illness_requests(
 CREATE TABLE illness_requests_history(
 	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
 	begin_date DATE,
 	end_date DATE,
 	name TEXT,
@@ -94,7 +94,7 @@ CREATE TABLE service_requests(
 CREATE TABLE service_requests_history(
 	information_request_id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
 	day DATE,
 	begin_at TIME WITHOUT TIME ZONE,
 	finish_to TIME WITHOUT TIME ZONE,

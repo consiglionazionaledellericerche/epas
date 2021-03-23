@@ -223,11 +223,11 @@ public class InformationRequests extends Controller {
         approval(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-//        notificationManager.notificationInformationRequestPolicy(request.person.user,
-//            request, true);
+        notificationManager.notificationInformationRequestPolicy(serviceRequest.person.user,
+            serviceRequest, true);
         // invio anche la mail
-//        notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
-//            absenceRequest, true);
+        notificationManager.sendEmailInformationRequestPolicy(serviceRequest.person.user,
+            serviceRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
 
