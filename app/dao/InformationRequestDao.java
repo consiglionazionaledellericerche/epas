@@ -19,14 +19,20 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
+import models.Role;
 import models.UsersRolesOffices;
 import models.base.InformationRequest;
 import models.base.query.QInformationRequest;
@@ -35,12 +41,15 @@ import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.query.QAbsenceRequest;
+import models.flows.query.QAffiliation;
+import models.flows.query.QGroup;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import models.informationrequests.query.QIllnessRequest;
 import models.informationrequests.query.QServiceRequest;
 import models.informationrequests.query.QTeleworkRequest;
+import models.query.QPerson;
 
 /**
  * Dao per i flussi informativi.
@@ -54,21 +63,35 @@ public class InformationRequestDao extends DaoBase {
   InformationRequestDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
   }
-  
-  public List<IllnessRequest> toApproveIllnessResults() {
-    return null;
-  }
-  
-  public List<TeleworkRequest> toApproveTeleworkResults(List<UsersRolesOffices> uroList, 
+
+  public List<InformationRequest> toApproveResults(List<UsersRolesOffices> uroList, 
       Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
-      InformationType informationType, List<Group> groups, Person signer) {
-    return null;
+      InformationType informationType, Person signer) {
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+
+    BooleanBuilder conditions = new BooleanBuilder();
+
+    if (uroList.stream().noneMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      return Lists.newArrayList();
+    }
+    if (fromDate.isPresent()) {
+      conditions.and(informationRequest.startAt.after(fromDate.get()));
+    }
+    if (toDate.isPresent()) {
+      conditions.and(informationRequest.endTo.before(toDate.get()));
+    }   
+    conditions.and(informationRequest.informationType.eq(informationType)
+        .and(informationRequest.flowStarted.isTrue())
+        .and(informationRequest.flowEnded.isFalse()));
+
+    List<InformationRequest> results = new ArrayList<>();
+
+    results.addAll(toApproveResultsAsSeatSuperVisor(uroList, 
+        informationType, signer, conditions));
+
+    return results;
   }
-  
-  public List<ServiceRequest> toApproveServiceResults() {
-    return null;
-  }
-  
+
   /**
    * Lista delle richiesta di assenza per persona e data.
    *
@@ -101,7 +124,7 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(teleworkRequest)
         .where(conditions).orderBy(teleworkRequest.startAt.desc()).fetch();
   }
-  
+
   /**
    * Lista delle richiesta di assenza per persona e data.
    *
@@ -134,7 +157,7 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(illnessRequest)
         .where(conditions).orderBy(illnessRequest.startAt.desc()).fetch();
   }
-  
+
   /**
    * Lista delle richiesta di assenza per persona e data.
    *
@@ -167,38 +190,76 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(serviceRequest)
         .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
   }
-  
+
   public InformationRequest getById(Long id) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    
+
     return getQueryFactory().selectFrom(informationRequest)
         .where(informationRequest.id.eq(id)).fetchFirst();
   }
-  
+
   public Optional<ServiceRequest> getServiceById(Long id) {
-   final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
-   
-   final ServiceRequest result = getQueryFactory()
-       .selectFrom(serviceRequest).where(serviceRequest.id.eq(id)).fetchFirst();
-   return Optional.fromNullable(result);
-       
+    final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+
+    final ServiceRequest result = getQueryFactory()
+        .selectFrom(serviceRequest).where(serviceRequest.id.eq(id)).fetchFirst();
+    return Optional.fromNullable(result);
+
   }
-  
+
   public Optional<IllnessRequest> getIllnessById(Long id) {
     final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
-    
+
     final IllnessRequest result = getQueryFactory()
         .selectFrom(illnessRequest).where(illnessRequest.id.eq(id)).fetchFirst();
     return Optional.fromNullable(result);
-        
-   }
-  
+
+  }
+
   public Optional<TeleworkRequest> getTeleworkById(Long id) {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
-    
+
     final TeleworkRequest result = getQueryFactory()
         .selectFrom(teleworkRequest).where(teleworkRequest.id.eq(id)).fetchFirst();
     return Optional.fromNullable(result);
-        
-   }
+
+  }
+
+
+  /**
+   * Lista delle InformationRequest da Approvare come responsabile di sede.
+   */
+  private List<InformationRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
+      InformationType informationType, Person signer, BooleanBuilder conditions) {
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+      conditions = seatSupervisorQuery(officeList, conditions, signer);
+      return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
+    } else {
+      return Lists.newArrayList();
+    }
+  }
+
+
+  /**
+   * Ritorna le condizioni con l'aggiunta di quelle relative al responsabile di sede.
+   *
+   * @param officeList la lista delle sedi
+   * @param condition le condizioni pregresse
+   * @param signer colui che deve firmare la richiesta
+   * @return le condizioni per determinare se il responsabile di sede è coinvolto nell'approvazione.
+   *    
+   */
+  private BooleanBuilder seatSupervisorQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
+
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    condition.and(informationRequest.person.office.in(officeList))
+    .and(informationRequest.officeHeadApprovalRequired.isTrue()
+        .and(informationRequest.officeHeadApproved.isNull()));
+
+    return condition;
+  }
 }

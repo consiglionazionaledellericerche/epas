@@ -16,11 +16,14 @@
 		<i class="fa fa-recycle fa-fw"></i>  
 		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0 
 		    	|| templateUtility.personalPermissionRequests() > 0 || templateUtility.vacationPastYearAfterDeadlineRequests() > 0
-		    	|| templateUtility.changeReperibilityRequests() > 0}
+		    	|| templateUtility.changeReperibilityRequests() > 0 || templateUtility.teleworkRequests() > 0
+		    	|| templateUtility.serviceRequests() > 0 || templateUtility.illnessRequests() > 0}
       			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
       				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()
       				+ templateUtility.vacationPastYearAfterDeadlineRequests()
-      				+ templateUtility.changeReperibilityRequests()}
+      				+ templateUtility.changeReperibilityRequests()
+      				+ templateUtility.teleworkRequests() + templateUtility.serviceRequests()
+      				+ templateUtility.illnessRequests()}
       			</span>
     		#{/if}       
 	     <!-- visualizza l'username -->
@@ -127,15 +130,15 @@
       
       #{secure.li @InformationRequests.serviceExitToApprove()}
         <i class="fa fa-sign-out" aria-hidden="true"></i>
-        #{if templateUtility.personalPermissionRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+        #{if templateUtility.serviceRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.serviceRequests()}</span>
     	#{/if}
       #{/secure.li}
       
       #{secure.li @InformationRequests.illnessToApprove()}
         <i class="fa fa-h-square" aria-hidden="true"></i>
-        #{if templateUtility.personalPermissionRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+        #{if templateUtility.illnessRequests() > 0}
+      		<span class="label label-danger label-badge">${templateUtility.illnessRequests()}</span>
     	#{/if}
       #{/secure.li}
             

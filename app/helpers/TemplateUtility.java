@@ -76,6 +76,7 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.base.InformationRequest;
 import models.contractual.ContractualReference;
 import models.enumerate.InformationType;
 import models.enumerate.LimitType;
@@ -86,6 +87,8 @@ import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -305,31 +308,45 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<TeleworkRequest> results = informationRequestDao
-        .toApproveTeleworkResults(roleList, Optional.absent(), Optional.absent(), 
-            InformationType.TELEWORK_INFORMATION, groups, user.person);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.TELEWORK_INFORMATION, user.person);
 
     return results.size();
   }
   
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione di uscite di servizio.
+   * @return la quantità di richieste di uscite di servizio pendenti.
+   */
   public final int serviceRequests() {
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    return 0;
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.SERVICE_INFORMATION, user.person);
+
+    return results.size();
   }
   
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di informazione malattia.
+   * @return la quantità di richieste di informazione di malattia pendenti.
+   */
   public final int illnessRequests() {
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    return 0;
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.ILLNESS_INFORMATION, user.person);
+
+    return results.size();
   }
 
 

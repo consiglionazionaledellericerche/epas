@@ -24,6 +24,9 @@ import models.Stamping;
 import models.absences.Absence;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
 import play.mvc.Router;
 
 /**
@@ -144,6 +147,21 @@ public enum NotificationSubject {
         params.put("id", competenceRequest.id);
         params.put("type", competenceRequest.type);
         return toUrl("CompetenceRequests.show", params);
+      case ILLNESS_INFORMATION:
+        final IllnessRequest illnessRequest = IllnessRequest.findById(referenceId);
+        params.put("id", illnessRequest.id);
+        params.put("type", illnessRequest.informationType);
+        return toUrl("InformationRequests.show", params);
+      case SERVICE_INFORMATION:
+        final ServiceRequest serviceRequest = ServiceRequest.findById(referenceId);
+        params.put("id", serviceRequest.id);
+        params.put("type", serviceRequest.informationType);
+        return toUrl("InformationRequests.show", params);
+      case TELEWORK_INFORMATION:
+        final TeleworkRequest teleworkRequest = TeleworkRequest.findById(referenceId);
+        params.put("id", teleworkRequest.id);
+        params.put("type", teleworkRequest.informationType);
+        return toUrl("InformationRequests.show", params);
       case PERSON_HAS_CHANGED_OFFICE:
         //Se non c'è riferimento alla persona allora vuol dire che non è 
         //più gestita dal precedente ufficio.
