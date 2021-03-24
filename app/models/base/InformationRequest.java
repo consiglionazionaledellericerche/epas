@@ -120,5 +120,16 @@ public abstract class InformationRequest extends BaseModel{
   public boolean isFullyApproved() {
     return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
   }
+  
+  /**
+   * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
+   * può cancellare o modificare la richiesta.
+   *
+   * @return true se la richiesta di permesso è ancora modificabile o cancellabile.
+   */
+  @Transient
+  public boolean ownerCanEditOrDelete() {
+    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired);
+  }
 
 }

@@ -370,8 +370,25 @@ public class InformationRequests extends Controller {
     notFoundIfNull(informationRequest);
     rules.checkIfPermitted(informationRequest);
     User user = Security.getUser().get();
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    switch (type) {
+      case SERVICE_INFORMATION:
+        serviceRequest = informationRequestDao.getServiceById(id).get();        
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = informationRequestDao.getIllnessById(id).get();        
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = informationRequestDao.getTeleworkById(id).get();        
+      default:
+        log.info("Passato argomento non conosciuto");
+        break;
+    }
     boolean disapproval = false;
-    render(informationRequest, type, user, disapproval);
+    render(informationRequest, teleworkRequest, illnessRequest, serviceRequest, 
+        type, user, disapproval);
   }
   
   /**

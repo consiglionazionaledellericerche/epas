@@ -104,6 +104,12 @@ InformationRequestEventType.COMPLETE=Richiesta completata
 InformationRequestEventType.DELETE=Richiesta cancellata
 InformationRequestEventType.EXPIRING=Richiesta scaduta
 
+informationRequest.endTo =Fine
+informationRequest.note =Note
+informationRequest.person =Dipendente
+informationRequest.startAt =Inizio
+informationRequest.type =Tipologia
+
 serviceRequest.day =Giorno
 serviceRequest.beginAt =Ora inizio
 serviceRequest.finishTo =Ora fine

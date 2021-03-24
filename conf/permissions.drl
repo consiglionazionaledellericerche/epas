@@ -716,6 +716,7 @@ when
 		"InformationRequests.list",
 		"InformationRequests.blank",
 		"InformationRequests.show",
+		"InformationRequests.delete",
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
@@ -830,6 +831,25 @@ when
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
   $ir: InformationRequest(person != currentOperator.person)
   $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanEditOrDeleteInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ir: InformationRequest(person == currentOperator.person, flowEnded == false,
+  		officeHeadApproved == null)
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), target==$ir, granted == false)
 then
   $c.grant();
 end
