@@ -400,23 +400,23 @@ public class InformationRequests extends Controller {
     InformationRequest informationRequest = informationRequestDao.getById(id);
     notFoundIfNull(informationRequest);
     rules.checkIfPermitted(informationRequest);
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
     switch (informationRequest.informationType) {
       case SERVICE_INFORMATION:
-        serviceRequest = informationRequestDao.getServiceById(id).get();
+        serviceRequest = Optional.fromNullable(informationRequestDao.getServiceById(id).get());
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest = informationRequestDao.getIllnessById(id).get();
+        illnessRequest = Optional.fromNullable(informationRequestDao.getIllnessById(id).get());
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = informationRequestDao.getTeleworkById(id).get();
+        teleworkRequest = Optional.fromNullable(informationRequestDao.getTeleworkById(id).get());
     }
-    informationRequestManager.executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), Security.getUser().get().person,
+    informationRequestManager.executeEvent(serviceRequest, illnessRequest, 
+        teleworkRequest, Security.getUser().get().person,
         InformationRequestEventType.DELETE, Optional.absent());
-    flash.success(Web.msgDeleted(AbsenceRequest.class));
+    flash.success(Web.msgDeleted(InformationRequest.class));
     list(informationRequest.informationType);
   }
 }

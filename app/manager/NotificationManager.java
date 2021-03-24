@@ -1259,12 +1259,54 @@ public class NotificationManager {
     List<User> users =
         person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
-    //TODO: specificare il subject della richiesta testando l'informationType della InformationRequest
     users.forEach(user -> {
       Notification.builder().destination(user).message(message)
       .subject(notificationSubject, informationRequest.id).create();
     });
+  }
+  
+  /**
+   * Notifica che una richiesta informativa è stata respinta da uno degli approvatori del flusso.
+   *
+   * @param informationRequest la richiesta informativa
+   * @param refuser la persona che ha rifiutato la richiesta di assenza.
+   */
+  public void notificationInformationRequestRefused(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Person refuser) {
+    
+    val request = serviceRequest.isPresent() ? serviceRequest.get() : 
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
 
+    Verify.verifyNotNull(request);
+    Verify.verifyNotNull(refuser);
+    NotificationSubject subject = null;
+    StringBuilder message = new StringBuilder()
+        .append(String.format("La richiesta di tipo %s", request.informationType));
+    switch (request.informationType) {
+      case ILLNESS_INFORMATION:
+        subject = NotificationSubject.ILLNESS_INFORMATION;
+        message.append(String.format(" dal giorno %s", illnessRequest.get().beginDate.toString()));
+        message.append(String.format(" al giorno %s", illnessRequest.get().endDate.toString()));        
+        break;
+      case SERVICE_INFORMATION:
+        subject = NotificationSubject.SERVICE_INFORMATION;
+        message.append(String.format(" per il giorno %s", serviceRequest.get().day));
+        break;
+      case TELEWORK_INFORMATION:
+        subject = NotificationSubject.TELEWORK_INFORMATION;
+        message.append(String.format(" per il mese %s", 
+            DateUtility.fromIntToStringMonth(teleworkRequest.get().month)));   
+        message.append(String.format(" dell'anno %s", teleworkRequest.get().year));
+        break;
+      default:
+        break;
+    }
+    message.append(String.format("è stata rifiutata da %s", refuser.getFullname()));
+    final NotificationSubject notificationSubject = subject;
+
+    Notification.builder().destination(request.person.user).message(message.toString())
+    .subject(notificationSubject, request.id).create();
 
   }
 

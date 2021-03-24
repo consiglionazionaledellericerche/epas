@@ -14,7 +14,7 @@
 
 <div class="container">
 #{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
-	#{title title: 'Richiesta per il/i giorno/i '+ illnessRequest.startAt.toLocalDate().format() + ' - ' + illnessRequest.endTo.toLocalDate().format() /}
+	#{title title: 'Richiesta per il/i giorno/i '+ illnessRequest.beginDate.format() + ' - ' + illnessRequest.endDate.format() /}
 #{/if}
 #{elseif type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
 	#{title title: 'Richiesta per il giorno '+ serviceRequest.day.format() + ' dalle ' + serviceRequest.beginAt.format() + ' alle ' + serviceRequest.finishTo.format()/}

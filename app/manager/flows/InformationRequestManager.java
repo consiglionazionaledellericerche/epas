@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
 import manager.services.absences.AbsenceForm;
@@ -68,6 +69,7 @@ public class InformationRequestManager {
   private UsersRolesOfficesDao uroDao;
   private RoleDao roleDao;
   private InformationRequestDao dao;
+  private NotificationManager notificationManager;
   /**
    * DTO per la configurazione delle InformationRequest.
    */
@@ -82,11 +84,13 @@ public class InformationRequestManager {
   
   @Inject
   public InformationRequestManager(ConfigurationManager configurationManager, 
-      UsersRolesOfficesDao uroDao, RoleDao roleDao, InformationRequestDao dao) {
+      UsersRolesOfficesDao uroDao, RoleDao roleDao, InformationRequestDao dao,
+      NotificationManager notificationManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.dao = dao;
+    this.notificationManager = notificationManager;
   }
   
   /**
@@ -203,11 +207,11 @@ public class InformationRequestManager {
 
       case OFFICE_HEAD_REFUSAL:
         // si riparte dall'inizio del flusso.
-        // resetFlow(absenceRequest);
-        // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
         request.flowEnded = true;
         //TODO: aggiungere notifica
-        //notificationManager.notificationAbsenceRequestRefused(request, person);
+        notificationManager.notificationInformationRequestRefused(serviceRequest, 
+            illnessRequest, teleworkRequest, person);
         break;
         
       case DELETE:
