@@ -23,11 +23,13 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
 import dao.PersonDao;
+import dao.UsersRolesOfficesDao;
 import helpers.Web;
 import helpers.validators.StringIsTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -36,9 +38,11 @@ import manager.flows.InformationRequestManager;
 import models.Person;
 import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import models.base.InformationRequest;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestEventType;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
@@ -71,6 +75,8 @@ public class InformationRequests extends Controller {
   static PersonDao personDao;
   @Inject
   static NotificationManager notificationManager;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -139,7 +145,36 @@ public class InformationRequests extends Controller {
   }
   
   public static void listToApprove(InformationType type) {
+    Verify.verifyNotNull(type);
+
+    val person = Security.getUser().get().person;
+    val fromDate = LocalDateTime.now().withDayOfYear(1).withMonth(1).minusMonths(1);
+    log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
+        fromDate);
     
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<InformationRequest> myResults = 
+        informationRequestDao.toApproveResults(roleList, Optional.absent(),
+        Optional.absent(), type, person);
+    List<InformationRequest> approvedResults = 
+        informationRequestDao.totallyApproved(roleList, fromDate,
+        Optional.absent(), type, person);
+    
+    List<Long> idMyResults = myResults.stream().map(ir -> ir.id).collect(Collectors.toList());
+    List<Long> idApprovedResults = approvedResults.stream().map(ir -> ir.id)
+        .collect(Collectors.toList());
+    switch (type) {
+      case ILLNESS_INFORMATION:
+        break;
+      case SERVICE_INFORMATION:
+        break;
+      case TELEWORK_INFORMATION:
+        break;
+    }
+    val config = informationRequestManager.getConfiguration(type, person);
+    val onlyOwn = false;
+
+    render(config, type, onlyOwn, approvedResults, myResults);
   }
   
   public static void blank(Optional<Long> personId, InformationType type) {
