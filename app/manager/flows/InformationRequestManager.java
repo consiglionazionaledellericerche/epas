@@ -397,28 +397,28 @@ public class InformationRequestManager {
    * @param user l'utente che deve approvare
    */
   public void officeHeadApproval(long id, User user) {
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.informationType) {
       case SERVICE_INFORMATION:
-        serviceRequest = dao.getServiceById(id).get();
+        serviceRequest = dao.getServiceById(id);
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest = dao.getIllnessById(id).get();
+        illnessRequest = dao.getIllnessById(id);
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = dao.getTeleworkById(id).get();
+        teleworkRequest = dao.getTeleworkById(id);
     }
     val currentPerson = Security.getUser().get().person;
-    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), Optional.of(teleworkRequest),
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
         currentPerson, InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT,
         Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
-    //TODO: notifica di approvazione
-    //notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    
+    notificationManager.notificationInformationRequestPolicy(user, request, true);
 
   }
   

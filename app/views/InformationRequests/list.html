@@ -66,19 +66,34 @@
 
   #{tabContentItem id:'nonAttivo'}
     #{if type.equals(models.enumerate.InformationType.TELEWORK_INFORMATION)}
- 		#{alert color:'info'}
- 		<p>Al momento non ci sono flussi informativi per telelavoro conclusi.</p>
- 		#{/alert}
+    	#{if teleworksClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi informativi per telelavoro conclusi.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_teleworkTable.html' /}
+	 	#{/else}
  	#{/if}
  	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
- 		#{alert color:'info'}
- 		<p>Al momento non ci sono flussi di informazione per malattia conclusi.</p>
- 		#{/alert}
+ 	    #{if illnessClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di informazione per malattia conclusi.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_illnessTable.html' /}
+	 	#{/else}
  	#{/if}
  	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
- 		#{alert color:'info'}
- 		<p>Al momento non ci sono flussi conclusi di richiesta uscita di servizio.</p>
- 		#{/alert}
+ 		#{if servicesClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi conclusi di richiesta uscita di servizio.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_serviceTable.html' /}
+	 	#{/else}
  	#{/if}
   	
   #{/tabContentItem}

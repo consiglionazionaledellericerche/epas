@@ -122,26 +122,36 @@ public class InformationRequests extends Controller {
         fromDate);
     val config = informationRequestManager.getConfiguration(type, person);
     List<TeleworkRequest> teleworks = Lists.newArrayList();
+    List<TeleworkRequest> teleworksClosed = Lists.newArrayList();
     List<ServiceRequest> services = Lists.newArrayList();
+    List<ServiceRequest> servicesClosed = Lists.newArrayList();
     List<IllnessRequest> illness = Lists.newArrayList();
+    List<IllnessRequest> illnessClosed = Lists.newArrayList();
     switch (type) {
       case TELEWORK_INFORMATION:
         teleworks = informationRequestDao.teleworksByPersonAndDate(person, fromDate, 
             Optional.absent(), InformationType.TELEWORK_INFORMATION, true);
+        teleworksClosed = informationRequestDao.teleworksByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.TELEWORK_INFORMATION, false);
         break;
       case ILLNESS_INFORMATION:
         illness = informationRequestDao.illnessByPersonAndDate(person, fromDate, 
             Optional.absent(), InformationType.ILLNESS_INFORMATION, true);
+        illnessClosed = informationRequestDao.illnessByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.ILLNESS_INFORMATION, false);
         break;
       case SERVICE_INFORMATION:
         services = informationRequestDao.servicesByPersonAndDate(person, fromDate, 
             Optional.absent(), InformationType.SERVICE_INFORMATION, true);
+        servicesClosed = informationRequestDao.servicesByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.SERVICE_INFORMATION, false);
         break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
     }
-    render(teleworks, services, illness, config, type);
+    render(teleworks, services, illness, teleworksClosed, 
+        illnessClosed, servicesClosed, config, type);
   }
   
   public static void listToApprove(InformationType type) {
@@ -331,24 +341,24 @@ public class InformationRequests extends Controller {
    */
   public static void approval(long id) {
     InformationRequest request = informationRequestDao.getById(id);
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
     switch (request.informationType) {
       case SERVICE_INFORMATION:
-        serviceRequest = informationRequestDao.getServiceById(id).get();
+        serviceRequest = informationRequestDao.getServiceById(id);
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest = informationRequestDao.getIllnessById(id).get();
+        illnessRequest = informationRequestDao.getIllnessById(id);
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = informationRequestDao.getTeleworkById(id).get();
+        teleworkRequest = informationRequestDao.getTeleworkById(id);
     }
     notFoundIfNull(request);
     User user = Security.getUser().get();
 
-    boolean approved = informationRequestManager.approval(Optional.of(serviceRequest), 
-        Optional.of(illnessRequest), Optional.of(teleworkRequest), user);
+    boolean approved = informationRequestManager.approval(serviceRequest, 
+        illnessRequest, teleworkRequest, user);
 
     if (approved) {
       notificationManager.sendEmailToUser(Optional.absent(), Optional.absent(), 
