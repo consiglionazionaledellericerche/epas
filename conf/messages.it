@@ -96,6 +96,9 @@ InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
 InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
 InformationType.ILLNESS_INFORMATION =Informazione di malattia
+InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
+InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
+InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
 
 InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
 InformationRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede

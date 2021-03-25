@@ -1,0 +1,50 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set informationRequestTypeLabel: messages.get('InformationType.' + type.toString() + '_TO_APPROVE') /}
+#{set title:('ePAS - ' + informationRequestTypeLabel) /}
+
+#{set breadcrumbs:[(informationRequestTypeLabel):null] /}
+
+%{
+	approvalsRequired = 0;
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	approvalRequired = approvalsRequired > 0
+}%
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+
+  #{tabList}
+    #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}     
+    #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
+  #{/tabList}
+  <br>
+  	#{tabContent}	
+  	  	#{tabContentItem id:'approvandi', active:true}
+  	  	#{if !myIllnessResult.isEmpty()}
+  	  		#{include './tableElements/_toApproveIllnessTable.html' /}
+  	  	#{/if}
+  	  	#{elseif !myServiceResult.isEmpty()}
+  	  		#{include './tableElements/_toApproveServiceTable.html' /}
+  	  	#{/elseif}
+  	  	#{else}
+  	  		#{include './tableElements/_toApproveTeleworkTable.html' /}
+  	  	#{/else} 		
+ 		#{/tabContentItem}
+  		#{tabContentItem id:'nonAttivo'}
+  		#{if !myIllnessResult.isEmpty()}
+  	  		#{include './tableElements/_approvedIllnessTable.html' /}
+  	  	#{/if}
+  	  	#{elseif !myServiceResult.isEmpty()}
+  	  		#{include './tableElements/_approvedServiceTable.html' /}
+  	  	#{/elseif}
+  	  	#{else}
+  	  		#{include './tableElements/_approvedTeleworkTable.html' /}
+  	  	#{/else} 	
+  		#{/tabContentItem}
+ 
+  	#{/tabContent}
+
+</div>

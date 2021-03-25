@@ -163,18 +163,32 @@ public class InformationRequests extends Controller {
     List<Long> idMyResults = myResults.stream().map(ir -> ir.id).collect(Collectors.toList());
     List<Long> idApprovedResults = approvedResults.stream().map(ir -> ir.id)
         .collect(Collectors.toList());
+    List<IllnessRequest> myIllnessResult = Lists.newArrayList();
+    List<IllnessRequest> illnessApprovedResult = Lists.newArrayList();
+    List<ServiceRequest> myServiceResult = Lists.newArrayList();
+    List<ServiceRequest> serviceApprovedResult = Lists.newArrayList();
+    List<TeleworkRequest> myTeleworkResult = Lists.newArrayList();
+    List<TeleworkRequest> teleworkApprovedResult = Lists.newArrayList();
     switch (type) {
       case ILLNESS_INFORMATION:
+        myIllnessResult = informationRequestDao.illnessByIds(idMyResults);
+        illnessApprovedResult = informationRequestDao.illnessByIds(idApprovedResults);
         break;
       case SERVICE_INFORMATION:
+        myServiceResult = informationRequestDao.servicesByIds(idMyResults);
+        serviceApprovedResult = informationRequestDao.servicesByIds(idApprovedResults);
         break;
       case TELEWORK_INFORMATION:
+        myTeleworkResult = informationRequestDao.teleworksByIds(idMyResults);
+        teleworkApprovedResult = informationRequestDao.teleworksByIds(idApprovedResults);
         break;
     }
     val config = informationRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
 
-    render(config, type, onlyOwn, approvedResults, myResults);
+    render(config, type, onlyOwn, approvedResults, myResults, 
+        myIllnessResult, illnessApprovedResult, myServiceResult, serviceApprovedResult,
+        myTeleworkResult, teleworkApprovedResult);
   }
   
   public static void blank(Optional<Long> personId, InformationType type) {

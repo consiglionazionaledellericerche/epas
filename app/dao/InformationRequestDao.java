@@ -258,6 +258,42 @@ public class InformationRequestDao extends DaoBase {
     return Optional.fromNullable(result);
 
   }
+  
+  /**
+   * 
+   * @param ids la lista di id di richieste di malattia
+   * @return la lista delle richieste di malattia appartenenti alla lista di id
+   * passati come parametro.
+   */
+  public List<IllnessRequest> illnessByIds(List<Long> ids) {
+    final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
+    return getQueryFactory().selectFrom(illnessRequest)
+        .where(illnessRequest.id.in(ids)).fetch();
+  }
+  
+  /**
+   * 
+   * @param ids la lista di id di richieste di uscita di servizio
+   * @return la lista delle richieste di uscita di servizio appartenenti 
+   * alla lista di id passati come parametro.
+   */
+  public List<ServiceRequest> servicesByIds(List<Long> ids) {
+    final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+    return getQueryFactory().selectFrom(serviceRequest)
+        .where(serviceRequest.id.in(ids)).fetch();
+  }
+  
+  /**
+   * 
+   * @param ids la lista di id di richieste di telelavoro
+   * @return la lista delle richieste di telelavoro appartenenti alla lista di id
+   * passati come parametro.
+   */
+  public List<TeleworkRequest> teleworksByIds(List<Long> ids) {
+    final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
+    return getQueryFactory().selectFrom(teleworkRequest)
+        .where(teleworkRequest.id.in(ids)).fetch();
+  }
 
 
   /**
