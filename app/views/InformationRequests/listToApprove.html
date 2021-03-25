@@ -17,12 +17,12 @@
   #{breadcrumbs breadcrumbs /}
 
   #{tabList}
-    #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}     
-    #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
+    #{tabItem id:'daApprovare', title:'Flussi da approvare', active:true /}     
+    #{tabItem id:'approvati', title:'Flussi terminati' /}
   #{/tabList}
   <br>
   	#{tabContent}	
-  	  	#{tabContentItem id:'approvandi', active:true}
+  	  	#{tabContentItem id:'daApprovare', active:true}
   	  	#{if !myIllnessResult.isEmpty()}
   	  		#{include './tableElements/_toApproveIllnessTable.html' /}
   	  	#{/if}
@@ -33,7 +33,7 @@
   	  		#{include './tableElements/_toApproveTeleworkTable.html' /}
   	  	#{/else} 		
  		#{/tabContentItem}
-  		#{tabContentItem id:'nonAttivo'}
+  		#{tabContentItem id:'approvati'}
   		#{if !myIllnessResult.isEmpty()}
   	  		#{include './tableElements/_approvedIllnessTable.html' /}
   	  	#{/if}

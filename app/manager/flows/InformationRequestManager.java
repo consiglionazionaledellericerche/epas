@@ -203,13 +203,13 @@ public class InformationRequestManager {
 
       case OFFICE_HEAD_ACKNOWLEDGMENT:
         request.officeHeadApproved = java.time.LocalDateTime.now();
+        request.endTo = java.time.LocalDateTime.now();
         break;
 
       case OFFICE_HEAD_REFUSAL:
         // si riparte dall'inizio del flusso.
         resetFlow(serviceRequest, illnessRequest, teleworkRequest);
         request.flowEnded = true;
-        //TODO: aggiungere notifica
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
             illnessRequest, teleworkRequest, person);
         break;

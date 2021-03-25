@@ -72,7 +72,7 @@
 	 		#{/alert}
 	 	#{/if}
 	 	#{else}
-	 		#{include './tableElements/_teleworkTable.html' /}
+	 		#{include './tableElements/_closedTeleworkTable.html' /}
 	 	#{/else}
  	#{/if}
  	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
@@ -82,7 +82,7 @@
 	 		#{/alert}
 	 	#{/if}
 	 	#{else}
-	 		#{include './tableElements/_illnessTable.html' /}
+	 		#{include './tableElements/_closedIllnessTable.html' /}
 	 	#{/else}
  	#{/if}
  	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
@@ -92,7 +92,7 @@
 	 		#{/alert}
 	 	#{/if}
 	 	#{else}
-	 		#{include './tableElements/_serviceTable.html' /}
+	 		#{include './tableElements/_closedServiceTable.html' /}
 	 	#{/else}
  	#{/if}
   	
