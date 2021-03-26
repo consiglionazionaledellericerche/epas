@@ -288,5 +288,26 @@ public class TeleworkStampings extends Controller {
     
     render(stamping);
   }
+  
+  public static void generateReport(int year, int month) 
+      throws NoSuchFieldException, ExecutionException {
+    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    val currentPerson = Security.getUser().get().person;
+    IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
+
+    if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
+      flash.error("Non esiste situazione mensile per il mese di %s %s",
+          DateUtility.fromIntToStringMonth(month), year);
+
+      YearMonth last = wrperson.getLastActiveMonth();
+      Stampings.stampings(last.getYear(), last.getMonthOfYear());
+    }
+    PersonStampingRecap psDto = stampingsRecapFactory
+        .create(wrperson.getValue(), year, month, true);
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    render(list);
+  }
 
 }
