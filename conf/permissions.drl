@@ -1386,6 +1386,7 @@ when
         "InformationRequests.saveServiceRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
         "InformationRequests.approval",
         "InformationRequests.disapproval",       
 
@@ -1438,6 +1439,7 @@ when
         "InformationRequests.saveServiceRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
         "InformationRequests.approval",
         "InformationRequests.disapproval",  
 

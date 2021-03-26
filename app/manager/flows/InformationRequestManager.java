@@ -19,16 +19,14 @@ package manager.flows;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-import java.time.LocalTime;
-import java.util.List;
-import javax.inject.Inject;
-import org.apache.commons.compress.utils.Lists;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import controllers.Security;
 import dao.InformationRequestDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import java.time.LocalTime;
+import java.util.List;
+import javax.inject.Inject;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -60,6 +58,9 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import org.apache.commons.compress.utils.Lists;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.db.jpa.JPA;
 
 @Slf4j
@@ -70,6 +71,7 @@ public class InformationRequestManager {
   private RoleDao roleDao;
   private InformationRequestDao dao;
   private NotificationManager notificationManager;
+  
   /**
    * DTO per la configurazione delle InformationRequest.
    */
@@ -82,6 +84,14 @@ public class InformationRequestManager {
     boolean officeHeadApprovalRequired;
   }
   
+  /**
+   * Costruttore injector.
+   * @param configurationManager il configuration manager
+   * @param uroDao il dao per gli usersRolesOffices
+   * @param roleDao il dao per i ruoli
+   * @param dao il dao per le informationRequest
+   * @param notificationManager il manager delle notifiche
+   */
   @Inject
   public InformationRequestManager(ConfigurationManager configurationManager, 
       UsersRolesOfficesDao uroDao, RoleDao roleDao, InformationRequestDao dao,
@@ -172,13 +182,13 @@ public class InformationRequestManager {
   }
 
   /**
-   * 
-   * @param serviceRequest
-   * @param illnessRequest
-   * @param teleworkRequest
-   * @param person
-   * @param eventType
-   * @param absent
+   * Metodo che esegue gli eventi del flusso.
+   * @param serviceRequest la richiesta di uscita di servizio (opzionale)
+   * @param illnessRequest la richiesta di informazione di malattia (opzionale)
+   * @param teleworkRequest la richiesta di telelavoro (opzionale)
+   * @param person la persona che esegue la richiesta
+   * @param eventType il tipo di evento da eseguire
+   * @param reason la motivazione
    * @return
    */
   public Optional<String> executeEvent(Optional<ServiceRequest> serviceRequest, 
@@ -186,7 +196,7 @@ public class InformationRequestManager {
       Person person, InformationRequestEventType eventType, Optional<String> reason) {
 
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
 
     val problem = checkAbsenceRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
         person, eventType);
@@ -220,7 +230,7 @@ public class InformationRequestManager {
         break;
       case EPAS_REFUSAL:
         resetFlow(serviceRequest, illnessRequest, teleworkRequest);
-      //TODO: aggiungere notifica
+        //TODO: aggiungere notifica
         //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
 
@@ -251,11 +261,11 @@ public class InformationRequestManager {
    * @return l'eventuale problema riscontrati durante l'approvazione.
    */
   public Optional<String> checkAbsenceRequestEvent(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, Person approver,
-      InformationRequestEventType eventType) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
+      Person approver, InformationRequestEventType eventType) {
     
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
     
     if (eventType == InformationRequestEventType.STARTING_APPROVAL_FLOW) {
       if (!request.person.equals(approver)) {
@@ -290,8 +300,8 @@ public class InformationRequestManager {
    * @param illnessRequest l'eventuale richiesta di malattia
    * @param teleworkRequest l'eventuale richiesta di telelavoro
    */
-  public void resetFlow(Optional<ServiceRequest> serviceRequest, Optional<IllnessRequest> illnessRequest, 
-      Optional<TeleworkRequest> teleworkRequest) {
+  public void resetFlow(Optional<ServiceRequest> serviceRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().flowStarted = false;
       serviceRequest.get().officeHeadApproved = null;
@@ -410,6 +420,9 @@ public class InformationRequestManager {
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id);
+        break;
+      default:
+        break;
     }
     val currentPerson = Security.getUser().get().person;
     executeEvent(serviceRequest, illnessRequest, teleworkRequest,
@@ -443,11 +456,14 @@ public class InformationRequestManager {
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id).get();
+        break;
+      default:
+        break;
     }
     val currentPerson = Security.getUser().get().person;
     executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), currentPerson, InformationRequestEventType.OFFICE_HEAD_REFUSAL,
-        Optional.fromNullable(reason));
+        Optional.of(teleworkRequest), currentPerson, 
+        InformationRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
 

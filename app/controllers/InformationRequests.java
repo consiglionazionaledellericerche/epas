@@ -154,6 +154,11 @@ public class InformationRequests extends Controller {
         illnessClosed, servicesClosed, config, type);
   }
   
+  /**
+   * Genera la pagina con tutte le richieste di flusso informativo del tipo passato
+   * come parametro.
+   * @param type la tipologia di flusso informativo
+   */
   public static void listToApprove(InformationType type) {
     Verify.verifyNotNull(type);
 
@@ -192,6 +197,8 @@ public class InformationRequests extends Controller {
         myTeleworkResult = informationRequestDao.teleworksByIds(idMyResults);
         teleworkApprovedResult = informationRequestDao.teleworksByIds(idApprovedResults);
         break;
+      default:
+        break;
     }
     val config = informationRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
@@ -201,6 +208,11 @@ public class InformationRequests extends Controller {
         myTeleworkResult, teleworkApprovedResult);
   }
   
+  /**
+   * Crea la pagina di inserimento di una nuova richiesta di flusso informativo.
+   * @param personId l'identificativo della persona
+   * @param type la tipologia di flusso informativo da generare
+   */
   public static void blank(Optional<Long> personId, InformationType type) {
     Verify.verifyNotNull(type);
     
@@ -227,7 +239,7 @@ public class InformationRequests extends Controller {
     }
     ServiceRequest serviceRequest = new ServiceRequest();
     IllnessRequest illnessRequest = new IllnessRequest();
-    switch(type) {
+    switch (type) {
       case SERVICE_INFORMATION:
         serviceRequest.person = person;
         serviceRequest.informationType = type;
@@ -238,8 +250,8 @@ public class InformationRequests extends Controller {
         illnessRequest.informationType = type;
         render("@editIllnessRequest", illnessRequest, type, person);
         break;
-        default: 
-          break;
+      default: 
+        break;
     }
   }
   
@@ -250,14 +262,18 @@ public class InformationRequests extends Controller {
   }
   
   public static void editIllnessRequest(IllnessRequest illnessRequest, boolean retroactiveAbsence) {
-    rules.checkIfPermitted(illnessRequest);
-    boolean insertable = true;
-    render(illnessRequest, retroactiveAbsence, insertable);
+    
   }
   
+  /**
+   * Persiste la richiesta di uscita di servizio e avvia il flusso approvativo.
+   * @param serviceRequest la richiesta di uscita di servizio
+   * @param begin l'orario di inizio
+   * @param finish l'orario di fine
+   */
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
-  //rules.checkIfPermitted(serviceRequest);
+    rules.checkIfPermitted(serviceRequest);
     boolean insertable = true;
     serviceRequest.beginAt = informationRequestManager.deparseTime(begin);
     serviceRequest.finishTo = informationRequestManager.deparseTime(finish);
@@ -277,7 +293,7 @@ public class InformationRequests extends Controller {
     boolean isNewRequest = !serviceRequest.isPersistent();
     if (isNewRequest || !serviceRequest.flowStarted) {
       informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest), 
-          Optional.absent(), Optional.absent(),serviceRequest.person,
+          Optional.absent(), Optional.absent(), serviceRequest.person,
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (serviceRequest.person.isSeatSupervisor()) {
         approval(serviceRequest.id);
@@ -296,6 +312,10 @@ public class InformationRequests extends Controller {
     
   }
   
+  /**
+   * Persiste la richiesta e avvia il flusso informativo.
+   * @param illnessRequest la richiesta informativa di malattia
+   */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
     if (illnessRequest.beginDate == null || illnessRequest.endDate == null) {
       Validation.addError("serviceRequest.beginDate",
@@ -311,7 +331,7 @@ public class InformationRequests extends Controller {
     boolean isNewRequest = !illnessRequest.isPersistent();
     if (isNewRequest || !illnessRequest.flowStarted) {
       informationRequestManager.executeEvent(Optional.absent(), 
-          Optional.fromNullable(illnessRequest), Optional.absent(),illnessRequest.person,
+          Optional.fromNullable(illnessRequest), Optional.absent(), illnessRequest.person,
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (illnessRequest.person.isSeatSupervisor()) {
         approval(illnessRequest.id);
@@ -329,6 +349,12 @@ public class InformationRequests extends Controller {
     InformationRequests.list(illnessRequest.informationType);
   }
   
+  /**
+   * Persiste la richiesta di telelavoro e avvia il flusso informativo.
+   * @param personId l'identificativo della persona
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
   public static void saveTeleworkRequest(Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -342,7 +368,7 @@ public class InformationRequests extends Controller {
     boolean isNewRequest = !teleworkRequest.isPersistent();
     if (isNewRequest || !teleworkRequest.flowStarted) {
       informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
-          Optional.fromNullable(teleworkRequest),teleworkRequest.person,
+          Optional.fromNullable(teleworkRequest), teleworkRequest.person,
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (teleworkRequest.person.isSeatSupervisor()) {
         approval(teleworkRequest.id);
@@ -381,6 +407,9 @@ public class InformationRequests extends Controller {
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id);
+        break;
+      default:
+        break;
     }
     notFoundIfNull(request);
     User user = Security.getUser().get();
@@ -434,6 +463,9 @@ public class InformationRequests extends Controller {
           disapproval = true;
           render(teleworkRequest, disapproval);
         }
+        break;
+      default:
+        break;
     }      
     
     if (request.officeHeadApprovalRequired && request.officeHeadApproved == null
@@ -468,7 +500,8 @@ public class InformationRequests extends Controller {
         illnessRequest = informationRequestDao.getIllnessById(id).get();        
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = informationRequestDao.getTeleworkById(id).get();        
+        teleworkRequest = informationRequestDao.getTeleworkById(id).get();   
+        break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
@@ -499,6 +532,9 @@ public class InformationRequests extends Controller {
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = Optional.fromNullable(informationRequestDao.getTeleworkById(id).get());
+        break;
+      default: 
+        break;
     }
     informationRequestManager.executeEvent(serviceRequest, illnessRequest, 
         teleworkRequest, Security.getUser().get().person,
