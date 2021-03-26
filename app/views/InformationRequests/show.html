@@ -20,7 +20,7 @@
 	#{title title: 'Richiesta per il giorno '+ serviceRequest.day.format() + ' dalle ' + serviceRequest.beginAt.format() + ' alle ' + serviceRequest.finishTo.format()/}
 #{/elseif}
 #{else}
-	#{title title: 'Richiesta per il mese '+ teleworkRequest.month + ' anno ' + teleworkRequest.year /}
+	#{title title: 'Richiesta per il mese di '+ templateUtility.monthName(teleworkRequest.month) + ' anno ' + teleworkRequest.year /}
 #{/else}
 <br>
  #{alert color:'info'}
