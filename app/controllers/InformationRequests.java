@@ -337,6 +337,7 @@ public class InformationRequests extends Controller {
     teleworkRequest.month = month;
     teleworkRequest.person = person;
     teleworkRequest.startAt = LocalDateTime.now();
+    teleworkRequest.informationType = InformationType.TELEWORK_INFORMATION;
     teleworkRequest.save();
     boolean isNewRequest = !teleworkRequest.isPersistent();
     if (isNewRequest || !teleworkRequest.flowStarted) {

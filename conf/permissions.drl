@@ -792,7 +792,7 @@ when
   PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
   $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
   	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping", 
-  	"TeleworkStampings.generateReport"), granted == false, target == null)
+  	"TeleworkStampings.generateReport", "InformationRequests.saveTeleworkRequest"), granted == false, target == null)
 then
   $c.grant();
 end

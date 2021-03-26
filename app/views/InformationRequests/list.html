@@ -39,6 +39,14 @@
  		direttamente dalla pagina ad esso dedicata (Menu personale -> Inserimento orario in telelavoro).<br>
  		Troverai il mese da compilare con gli orari fatti in telelavoro e la possibilità di iniziare un flusso di approvazione.</p>
  		#{/alert}
+ 		#{if teleworks.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di richiesta in esecuzione.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_teleworkTable.html' /}
+	 	#{/else}
  	#{/if}
  	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
  		#{if illness.isEmpty()}
