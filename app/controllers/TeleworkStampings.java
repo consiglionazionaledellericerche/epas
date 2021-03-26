@@ -291,6 +291,7 @@ public class TeleworkStampings extends Controller {
   
   public static void generateReport(int year, int month) 
       throws NoSuchFieldException, ExecutionException {
+    LocalDate date = LocalDate.now();
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
     val currentPerson = Security.getUser().get().person;
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
@@ -304,10 +305,10 @@ public class TeleworkStampings extends Controller {
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    
+    String place = currentPerson.office.name;
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
-    render(list);
+    render(list, currentPerson, year, month, date);
   }
 
 }

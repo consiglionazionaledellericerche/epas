@@ -290,10 +290,8 @@ public class InformationRequests extends Controller {
             serviceRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
-
     }
     flash.success("Operazione effettuata correttamente");
-
     InformationRequests.list(serviceRequest.informationType);
     
   }
@@ -319,18 +317,47 @@ public class InformationRequests extends Controller {
         approval(illnessRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        //notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
-        //    absenceRequest, true);
+        notificationManager.notificationInformationRequestPolicy(illnessRequest.person.user,
+            illnessRequest, true);
         // invio anche la mail
-        //notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
-        //    absenceRequest, true);
+        notificationManager.sendEmailInformationRequestPolicy(illnessRequest.person.user,
+            illnessRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
-
     }
     flash.success("Operazione effettuata correttamente");
-
     InformationRequests.list(illnessRequest.informationType);
+  }
+  
+  public static void saveTeleworkRequest(Long personId, int year, int month) {
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    TeleworkRequest teleworkRequest = new TeleworkRequest();
+    teleworkRequest.year = year;
+    teleworkRequest.month = month;
+    teleworkRequest.person = person;
+    teleworkRequest.startAt = LocalDateTime.now();
+    teleworkRequest.save();
+    boolean isNewRequest = !teleworkRequest.isPersistent();
+    if (isNewRequest || !teleworkRequest.flowStarted) {
+      informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
+          Optional.fromNullable(teleworkRequest),teleworkRequest.person,
+          InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (teleworkRequest.person.isSeatSupervisor()) {
+        approval(teleworkRequest.id);
+      } else {
+        // invio la notifica al primo che deve validare la mia richiesta
+        notificationManager.notificationInformationRequestPolicy(teleworkRequest.person.user,
+            teleworkRequest, true);
+        // invio anche la mail
+        notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.person.user,
+            teleworkRequest, true);
+        log.debug("Inviata la richiesta di approvazione");
+      }
+    }
+    flash.success("Operazione effettuata correttamente");
+    InformationRequests.list(teleworkRequest.informationType);
+    
   }
   
   
