@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.TeleworkValidationDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.validators.StringIsTime;
@@ -41,6 +42,7 @@ import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
+import models.TeleworkValidation;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
@@ -76,6 +78,8 @@ public class TeleworkStampings extends Controller {
   static StampingManager stampingManager;
   @Inject
   static TeleworkComunication comunication;
+  @Inject
+  static TeleworkValidationDao validationDao;
 
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
@@ -116,8 +120,12 @@ public class TeleworkStampings extends Controller {
           + "L'applicazione potrebbe essere spenta o non raggiungibile."
           + "Riprovare più tardi");
     }
+    
+    //Recupero la lista dei mesi di telelavoro approvati
+    List<TeleworkValidation> validationList = 
+        validationDao.byPersonYearAndMonth(currentPerson, year, month);
 
-    render(list, year, month);
+    render(list, year, month, validationList);
   }
 
   /**

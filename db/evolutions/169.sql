@@ -1,4 +1,4 @@
-# --- !Ups,
+# --- !Ups
 
 CREATE TABLE telework_validations(
 	id BIGSERIAL PRIMARY KEY,

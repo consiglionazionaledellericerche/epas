@@ -40,6 +40,7 @@ import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
 import models.PersonDay;
 import models.Role;
+import models.TeleworkValidation;
 import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -214,6 +215,15 @@ public class InformationRequestManager {
       case OFFICE_HEAD_ACKNOWLEDGMENT:
         request.officeHeadApproved = java.time.LocalDateTime.now();
         request.endTo = java.time.LocalDateTime.now();
+        if (request.informationType.equals(InformationType.TELEWORK_INFORMATION)) {
+          TeleworkValidation validation = new TeleworkValidation();
+          validation.person = teleworkRequest.get().person;
+          validation.year = teleworkRequest.get().year;
+          validation.month = teleworkRequest.get().month;
+          validation.approved = true;
+          validation.approvationDate = java.time.LocalDate.now();
+          validation.save();
+        }
         break;
 
       case OFFICE_HEAD_REFUSAL:
