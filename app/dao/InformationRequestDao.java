@@ -112,7 +112,7 @@ public class InformationRequestDao extends DaoBase {
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
-   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @param informationType Il tipo di richiesta di assenza specifico
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
   public List<TeleworkRequest> teleworksByPersonAndDate(Person person,
@@ -145,7 +145,7 @@ public class InformationRequestDao extends DaoBase {
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
-   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @param informationType Il tipo di richiesta di assenza specifico
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
   public List<IllnessRequest> illnessByPersonAndDate(Person person,
@@ -178,7 +178,7 @@ public class InformationRequestDao extends DaoBase {
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
-   * @param absenceRequestType Il tipo di richiesta di assenza specifico
+   * @param informationType Il tipo di richiesta di assenza specifico
    * @return La lista delle richieste di assenze sull'intervallo e la persona specificati.
    */
   public List<ServiceRequest> servicesByPersonAndDate(Person person,
@@ -206,7 +206,7 @@ public class InformationRequestDao extends DaoBase {
   }
 
   /**
-   * 
+   * Ritorna la richiesta informativa con id passato come parametro.
    * @param id l'identificativo della richiesta 
    * @return La richiesta con l'id passato come parametro.
    */
@@ -218,7 +218,7 @@ public class InformationRequestDao extends DaoBase {
   }
 
   /**
-   * 
+   * Ritorna la richiesta di uscita di servizio con l'id passato come parametro.
    * @param id l'idendificativo della richiesta di uscita di servizio
    * @return l'uscita di servizio, se esiste, corrispondente all'id passato.
    */
@@ -232,9 +232,9 @@ public class InformationRequestDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param id
-   * @return
+   * Ritorna la richiesta di info per malattia con id passato come parametro.
+   * @param id l'identificativo della richiesta di informazione di malattia
+   * @return la richiesta di info per malattia con id passato come parametro.
    */
   public Optional<IllnessRequest> getIllnessById(Long id) {
     final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
@@ -263,7 +263,7 @@ public class InformationRequestDao extends DaoBase {
    * 
    * @param ids la lista di id di richieste di malattia
    * @return la lista delle richieste di malattia appartenenti alla lista di id
-   * passati come parametro.
+   *     passati come parametro.
    */
   public List<IllnessRequest> illnessByIds(List<Long> ids) {
     final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
@@ -275,7 +275,7 @@ public class InformationRequestDao extends DaoBase {
    * 
    * @param ids la lista di id di richieste di uscita di servizio
    * @return la lista delle richieste di uscita di servizio appartenenti 
-   * alla lista di id passati come parametro.
+   *     alla lista di id passati come parametro.
    */
   public List<ServiceRequest> servicesByIds(List<Long> ids) {
     final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
@@ -287,7 +287,7 @@ public class InformationRequestDao extends DaoBase {
    * 
    * @param ids la lista di id di richieste di telelavoro
    * @return la lista delle richieste di telelavoro appartenenti alla lista di id
-   * passati come parametro.
+   *     passati come parametro.
    */
   public List<TeleworkRequest> teleworksByIds(List<Long> ids) {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
@@ -327,7 +327,7 @@ public class InformationRequestDao extends DaoBase {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.officeHeadApprovalRequired.isTrue()
+        .and(informationRequest.officeHeadApprovalRequired.isTrue()
         .and(informationRequest.officeHeadApproved.isNull()));
 
     return condition;

@@ -24,22 +24,31 @@ import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
 import dao.PersonDao;
 import dao.UsersRolesOfficesDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.Web;
 import helpers.validators.StringIsTime;
+import it.cnr.iit.epas.DateUtility;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.YearMonth;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.NotificationManager;
+import manager.TeleworkStampingManager;
 import manager.flows.InformationRequestManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.base.InformationRequest;
+import models.dto.TeleworkPersonDayDto;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -77,6 +86,12 @@ public class InformationRequests extends Controller {
   static NotificationManager notificationManager;
   @Inject
   static UsersRolesOfficesDao uroDao;
+  @Inject
+  static TeleworkStampingManager teleworkStampingManager;
+  @Inject
+  static IWrapperFactory wrapperFactory;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -541,5 +556,35 @@ public class InformationRequests extends Controller {
         InformationRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(InformationRequest.class));
     list(informationRequest.informationType);
+  }
+  
+  /**
+   * Ritorna il riepilogo del telelavoro dell'anno/mese della persona in oggetto.
+   * @param personId l'identificativo della persona
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @throws NoSuchFieldException
+   * @throws ExecutionException
+   */
+  public static void generateTeleworkReport(Long personId, int year, int month) 
+      throws NoSuchFieldException, ExecutionException {
+    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    IWrapperPerson wrperson = wrapperFactory.create(person);
+
+    if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
+      flash.error("Non esiste situazione mensile per il mese di %s %s",
+          DateUtility.fromIntToStringMonth(month), year);
+
+      YearMonth last = wrperson.getLastActiveMonth();
+      Stampings.stampings(last.getYear(), last.getMonthOfYear());
+    }
+    PersonStampingRecap psDto = stampingsRecapFactory
+        .create(wrperson.getValue(), year, month, true);
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = teleworkStampingManager.getMonthlyStampings(psDto);
+    render(list, person);
   }
 }
