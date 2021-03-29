@@ -46,6 +46,9 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
     public final BooleanPath flowStarted;
 
     //inherited
+    public final BooleanPath fullyApproved;
+
+    //inherited
     public final NumberPath<Long> id;
 
     //inherited
@@ -95,6 +98,7 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
         this.events = _super.events;
         this.flowEnded = _super.flowEnded;
         this.flowStarted = _super.flowStarted;
+        this.fullyApproved = _super.fullyApproved;
         this.id = _super.id;
         this.informationType = _super.informationType;
         this.officeHeadApprovalRequired = _super.officeHeadApprovalRequired;

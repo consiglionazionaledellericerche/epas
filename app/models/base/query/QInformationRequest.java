@@ -37,6 +37,8 @@ public class QInformationRequest extends EntityPathBase<InformationRequest> {
 
     public final BooleanPath flowStarted = createBoolean("flowStarted");
 
+    public final BooleanPath fullyApproved = createBoolean("fullyApproved");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
