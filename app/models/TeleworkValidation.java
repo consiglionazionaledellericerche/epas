@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.envers.Audited;
 import models.base.BaseModel;
 import play.db.jpa.Model;
@@ -26,4 +27,12 @@ public class TeleworkValidation extends BaseModel{
   public boolean approved;
   
   public LocalDate approvationDate;
+  
+  @Transient
+  public boolean isValidated() {
+    if (this.approved && this.approvationDate != null) {
+      return true;
+    }
+    return false;
+  }
 }

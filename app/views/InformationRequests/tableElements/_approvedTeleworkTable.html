@@ -11,7 +11,7 @@
 			
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Mese</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Anno</th>			
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Nome</th>			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Contenuto</th>			
 			
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
@@ -39,7 +39,10 @@
 								
 				<td>#{f.value 'item.month', value:templateUtility.monthName(item.month) /}</td>	    
 				<td>#{f.value 'item.year', value:item.year /}</td>
-				<td>#{f.value 'item.context', value:item.context /}</td>
+				<td><a href="@{InformationRequests.generateTeleworkReport(item.person.id, item.year, item.month)}" data-async-modal="#defaultModal" title="Riepilogo">
+        		Riepilogo mensile
+      			</a>
+      			</td>
 
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>

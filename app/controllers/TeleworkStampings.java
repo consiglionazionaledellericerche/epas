@@ -120,12 +120,17 @@ public class TeleworkStampings extends Controller {
           + "L'applicazione potrebbe essere spenta o non raggiungibile."
           + "Riprovare più tardi");
     }
-    
+    boolean validated = false;
     //Recupero la lista dei mesi di telelavoro approvati
     List<TeleworkValidation> validationList = 
-        validationDao.byPersonYearAndMonth(currentPerson, year, month);
+        validationDao.previousValidations(currentPerson, year, month);
+    Optional<TeleworkValidation> valid = validationDao
+        .byPersonYearAndMonth(currentPerson, year, month);
+    if (valid.isPresent()) {
+      validated = true;
+    }
 
-    render(list, year, month, validationList);
+    render(list, year, month, validationList, validated);
   }
 
   /**

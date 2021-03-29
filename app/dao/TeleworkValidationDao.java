@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
@@ -18,7 +19,7 @@ public class TeleworkValidationDao extends DaoBase {
       IWrapperFactory factory) {
     super(queryFactory, emp);
   }
-  
+
   /**
    * Ritorna la lista delle richieste di telelavoro approvate.
    * @param person la persona di cui cercare le richieste
@@ -26,12 +27,30 @@ public class TeleworkValidationDao extends DaoBase {
    * @param month il mese di riferimento
    * @return la lista delle richiest di telelavoro approvate.
    */
-  public List<TeleworkValidation> byPersonYearAndMonth(Person person, int year, int month) {
+  public Optional<TeleworkValidation> byPersonYearAndMonth(Person person, int year, int month) {
     final QTeleworkValidation teleworkValidation = QTeleworkValidation.teleworkValidation;
-    
+
     final JPQLQuery<TeleworkValidation> query = getQueryFactory(
         ).selectFrom(teleworkValidation).where(teleworkValidation.person.eq(person)
             .and(teleworkValidation.year.eq(year).and(teleworkValidation.month.eq(month)
+                .and(teleworkValidation.approved.isTrue()
+                    .and(teleworkValidation.approvationDate.isNotNull())))));
+    return Optional.fromNullable(query.fetchFirst());
+  }
+
+  /**
+   * Ritorna le validazioni precedenti all'anno/mese passato come parametro.
+   * @param person la persona di cui si cercano le validazioni
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @return le validazioni precedenti all'anno/mese passato come parametro.
+   */
+  public List<TeleworkValidation> previousValidations(Person person, int year, int month) {
+    final QTeleworkValidation teleworkValidation = QTeleworkValidation.teleworkValidation;
+
+    final JPQLQuery<TeleworkValidation> query = getQueryFactory(
+        ).selectFrom(teleworkValidation).where(teleworkValidation.person.eq(person)
+            .and(teleworkValidation.year.eq(year).and(teleworkValidation.month.loe(month)
                 .and(teleworkValidation.approved.isTrue()
                     .and(teleworkValidation.approvationDate.isNotNull())))));
     return query.fetch();
