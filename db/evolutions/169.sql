@@ -22,7 +22,13 @@ CREATE TABLE telework_validations_history(
 	PRIMARY KEY (id, _revision, _revision_type)
 );
 
+ALTER TABLE general_setting ADD COLUMN enable_illness_flow BOOLEAN DEFAULT FALSE;
+ALTER TABLE general_setting_history ADD COLUMN enable_illness_flow BOOLEAN DEFAULT FALSE;
+
 # --- !Downs
 
 DROP TABLE telework_validations_history;
 DROP TABLE telework_validations;
+
+ALTER TABLE general_setting DROP COLUMN enable_illness_flow;
+ALTER TABLE general_setting_history DROP COLUMN enable_illness_flow;

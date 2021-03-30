@@ -82,5 +82,15 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'enableIllnessFlow', parent:'generalSetting', title:'Abilita flusso richiesta malattia', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica se abilitare il flusso per la richiesta informativa per malattia. #{/alert}
+      #{f.booleanRadio 'generalSetting.enableIllnessFlow' /}  		
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 
 #{/accordionGroup}
