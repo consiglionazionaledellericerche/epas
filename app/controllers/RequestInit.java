@@ -253,7 +253,8 @@ public class RequestInit extends Controller {
         "AbsenceGroups.certificationsAbsences");
     
     final Collection<String> personTeleworkSwitcher = ImmutableList.of(
-        "TeleworkStampings.personTeleworkStampings"
+        "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval"
         );
 
     final Collection<String> officeSwitcher = ImmutableList.of(

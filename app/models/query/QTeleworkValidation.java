@@ -24,7 +24,7 @@ public class QTeleworkValidation extends EntityPathBase<TeleworkValidation> {
 
     public static final QTeleworkValidation teleworkValidation = new QTeleworkValidation("teleworkValidation");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<java.time.LocalDate> approvationDate = createDate("approvationDate", java.time.LocalDate.class);
 
@@ -42,6 +42,9 @@ public class QTeleworkValidation extends EntityPathBase<TeleworkValidation> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
+
+    //inherited
+    public final NumberPath<Integer> version = _super.version;
 
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 

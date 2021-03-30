@@ -246,9 +246,9 @@ public class InformationRequestDao extends DaoBase {
   }
 
   /**
-   * 
-   * @param id
-   * @return
+   * Cerca e ritorna la richiesta di telelavoro (se esiste) con id uguale a quello passato.
+   * @param id l'identificativo della richiesta di telelavoro da cercare
+   * @return la richiesta di telelavoro (se esiste) con id uguale a quello passato.
    */
   public Optional<TeleworkRequest> getTeleworkById(Long id) {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
@@ -260,7 +260,8 @@ public class InformationRequestDao extends DaoBase {
   }
   
   /**
-   * 
+   * La lista delle richieste di malattia appartenenti alla lista di id passati
+   *     come parametro.
    * @param ids la lista di id di richieste di malattia
    * @return la lista delle richieste di malattia appartenenti alla lista di id
    *     passati come parametro.
@@ -272,7 +273,8 @@ public class InformationRequestDao extends DaoBase {
   }
   
   /**
-   * 
+   * La lista delle richieste di uscita di servizio appartenenti alla lista 
+   *     di id passati come parametro.
    * @param ids la lista di id di richieste di uscita di servizio
    * @return la lista delle richieste di uscita di servizio appartenenti 
    *     alla lista di id passati come parametro.
@@ -284,7 +286,8 @@ public class InformationRequestDao extends DaoBase {
   }
   
   /**
-   * 
+   * La lista delle richieste di telelavoro appartenenti alla lista di id passati
+   *     come parametro.
    * @param ids la lista di id di richieste di telelavoro
    * @return la lista delle richieste di telelavoro appartenenti alla lista di id
    *     passati come parametro.
@@ -293,6 +296,18 @@ public class InformationRequestDao extends DaoBase {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
     return getQueryFactory().selectFrom(teleworkRequest)
         .where(teleworkRequest.id.in(ids)).fetch();
+  }
+  
+  /**
+   * La lista di tutte le richieste di telelavoro effettuate dalla persona passata come parametro.
+   * @param person la persona di cui ricercare le richieste di telelavoro
+   * @return la lista di tutte le richieste di telelavoro effettuate dalla persona passata 
+   *      come parametro.
+   */
+  public List<TeleworkRequest> personTeleworkList(Person person) {
+    final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
+    return getQueryFactory().selectFrom(teleworkRequest).where(teleworkRequest.person.eq(person))
+        .orderBy(teleworkRequest.year.desc(), teleworkRequest.month.desc()).fetch();
   }
 
 
@@ -349,14 +364,14 @@ public class InformationRequestDao extends DaoBase {
     Preconditions.checkNotNull(fromDate);
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    final QPerson person = QPerson.person;
 
     BooleanBuilder conditions = new BooleanBuilder();
     List<InformationRequest> results = new ArrayList<>();
-    JPQLQuery<InformationRequest> query;
+    
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     conditions.and(informationRequest.startAt.after(fromDate))
-    .and(informationRequest.informationType.eq(informationType).and(informationRequest.flowEnded.isTrue())
+        .and(informationRequest.informationType.eq(informationType)
+        .and(informationRequest.flowEnded.isTrue())
         .and(informationRequest.person.office.in(officeList)));
 
     if (toDate.isPresent()) {
@@ -364,11 +379,10 @@ public class InformationRequestDao extends DaoBase {
     }
 
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      results
-      .addAll(totallyApprovedAsSuperVisor(
+      results.addAll(totallyApprovedAsSuperVisor(
           uros, fromDate, toDate, informationType, signer));
     }
-
+    JPQLQuery<InformationRequest> query;
     query = getQueryFactory().selectFrom(informationRequest).where(conditions)
         .orderBy(informationRequest.startAt.desc());
 
@@ -410,6 +424,5 @@ public class InformationRequestDao extends DaoBase {
     } else {
       return Lists.newArrayList();
     }
-
   }
 }

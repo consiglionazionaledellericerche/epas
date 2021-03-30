@@ -1134,6 +1134,7 @@ when
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
     "TeleworkStampings.personTeleworkStampings",
+    "InformationRequests.handleTeleworkApproval",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -1388,6 +1389,8 @@ when
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
+        "InformationRequests.revokeValidation",
+        "InformationRequests.handleTeleworkApproval",
         "InformationRequests.generateTeleworkReport",
         "InformationRequests.approval",
         "InformationRequests.disapproval",       
@@ -1442,7 +1445,9 @@ when
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
+        "InformationRequests.handleTeleworkApproval",
         "InformationRequests.generateTeleworkReport",
+        "InformationRequests.revokeValidation",
         "InformationRequests.approval",
         "InformationRequests.disapproval",  
 
@@ -1604,6 +1609,7 @@ when
 
         "Stampings.personStamping",
         "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1696,6 +1702,7 @@ when
 		"Stampings.stampingsByAdmin",
 		
 		"TeleworkStampings.personTeleworkStampings",
+		"InformationRequests.handleTeleworkApproval",
 		
         "Vacations.list",
         "Vacations.vacationSummary",

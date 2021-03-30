@@ -19,10 +19,13 @@ package controllers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import dao.InformationRequestDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLite;
+import dao.TeleworkValidationDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -35,19 +38,21 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.joda.time.YearMonth;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.NotificationManager;
 import manager.TeleworkStampingManager;
+import manager.configurations.EpasParam;
 import manager.flows.InformationRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
 import models.Role;
+import models.TeleworkValidation;
 import models.User;
 import models.UsersRolesOffices;
 import models.base.InformationRequest;
+import models.dto.TeleworkApprovalDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.InformationType;
 import models.flows.AbsenceRequest;
@@ -59,6 +64,7 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -92,6 +98,8 @@ public class InformationRequests extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  static TeleworkValidationDao validationDao;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -563,16 +571,16 @@ public class InformationRequests extends Controller {
    * @param personId l'identificativo della persona
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
-   * @throws NoSuchFieldException
-   * @throws ExecutionException
+   * @throws NoSuchFieldException eccezione di mancanza di campo
+   * @throws ExecutionException eccezione in esecuzione
    */
   public static void generateTeleworkReport(Long personId, int year, int month) 
       throws NoSuchFieldException, ExecutionException {
-    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrperson = wrapperFactory.create(person);
-
+    List<TeleworkPersonDayDto> list = Lists.newArrayList();
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
       flash.error("Non esiste situazione mensile per il mese di %s %s",
           DateUtility.fromIntToStringMonth(month), year);
@@ -586,5 +594,60 @@ public class InformationRequests extends Controller {
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = teleworkStampingManager.getMonthlyStampings(psDto);
     render(list, person);
+  }
+  
+  /**
+   * Ritorna la form di gestione approvazioni di telelavoro.
+   * @param personId l'identificativo della persona di cui gestire le richieste/approvazioni
+   *     di telelavoro
+   */
+  public static void handleTeleworkApproval(Long personId) {
+    PersonLite p = null;
+    Person person = personDao.getPersonById(personId);
+    if (person.personConfigurations.stream().noneMatch(pc -> 
+      pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+      List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
+      if (persons.isEmpty()) {
+        flash.error("Non ci sono persone abilitate al telelavoro!!");
+        Stampings.personStamping(personId, Integer.parseInt(session.get("yearSelected")), 
+        Integer.parseInt(session.get("monthSelected")));
+      }
+      p = persons.get(0);
+      
+    }
+    person = personDao.getPersonById(p.id);
+    Preconditions.checkNotNull(person);
+    rules.checkIfPermitted(person.office);
+    List<TeleworkApprovalDto> dtoList = Lists.newArrayList();
+    List<TeleworkRequest> teleworkRequests = informationRequestDao.personTeleworkList(person);
+    TeleworkApprovalDto dto = null;
+    for (TeleworkRequest request : teleworkRequests) {
+      Optional<TeleworkValidation> validation = validationDao
+          .byPersonYearAndMonth(person, request.year, request.month);
+      if (validation.isPresent()) {
+        dto = TeleworkApprovalDto.builder()
+            .teleworkValidation(validation.get())
+            .teleworkRequest(request).build();
+      } else {
+        dto = TeleworkApprovalDto.builder()
+            .teleworkValidation(null)
+            .teleworkRequest(request).build();
+      }
+      dtoList.add(dto);
+    }
+    render(dtoList);
+  }
+  
+  public static void revokeValidation(Long validationId) {
+    Optional<TeleworkValidation> validation = validationDao.getValidationById(validationId);
+    if (validation.isPresent()) {
+      validation.get().delete();
+      flash.success("Validazione rimossa. Effettuare nuova richiesta di approvazione");      
+    } else {
+      flash.error("Validazione sconosciuta! Verificare l'identificativo.");
+    }
+    Stampings.personStamping(Security.getUser().get().person.id, 
+        Integer.parseInt(session.get("yearSelected")), 
+        Integer.parseInt(session.get("monthSelected")));    
   }
 }
