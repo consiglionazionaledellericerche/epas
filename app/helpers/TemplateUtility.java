@@ -31,6 +31,7 @@ import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.InformationRequestDao;
 import dao.MemoizedCollection;
@@ -130,7 +131,7 @@ public class TemplateUtility {
   private final TimeSlotDao timeSlotDao;
   private final CompetenceRequestDao competenceRequestDao;
   private final InformationRequestDao informationRequestDao;
-   
+  private final GeneralSettingDao generalSettingDao;
   
   /**
    * Costruttotore di default per l'injection dei vari componenti.
@@ -148,7 +149,8 @@ public class TemplateUtility {
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
-      CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao) {
+      CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao,
+      GeneralSettingDao generalSettingDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -172,6 +174,7 @@ public class TemplateUtility {
     this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
     this.informationRequestDao = informationRequestDao;
+    this.generalSettingDao = generalSettingDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -190,8 +193,14 @@ public class TemplateUtility {
                 Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
         });    
-    
-    
+  }
+
+  
+  /**
+   * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
+   */
+  public boolean enableIllnessFlow() {
+    return generalSettingDao.generalSetting().enableIllnessFlow;
   }
   
   /**

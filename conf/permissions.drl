@@ -50,7 +50,6 @@ import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
 import models.TeleworkValidation;
-import models.GeneralSetting;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
@@ -3437,15 +3436,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
-then
-  $c.grant();
-end
-
-rule isIllnessRequestEnabled
-when
-  GeneralSetting(enableIllnessFlow == true)
-  $c: PermissionCheck(action in ("InformationRequests.enableIllnessFlow"),
-  	granted == false, target == null)
 then
   $c.grant();
 end

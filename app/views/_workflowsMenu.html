@@ -43,8 +43,6 @@
       <li class="divider"></li>
       #{/secure.check}
     
-      
-
       #{secure.li @AbsenceRequests.vacations()}
         <i class="fa fa-plane" aria-hidden="true"></i>
       #{/secure.li}
@@ -71,14 +69,13 @@
         <i class="fa fa-sign-out" aria-hidden="true"></i>
       #{/secure.li}
       
-      #{secure.check 'InformationRequests.enableIllnessFlow'}
-      #{secure.li @InformationRequests.illness()}
-        <i class="fa fa-h-square" aria-hidden="true"></i>
-      #{/secure.li}
-      <li class="divider"></li>
-      #{/secure.check}
-      
-            
+      #{if templateUtility.enableIllnessFlow()}
+         #{secure.li @InformationRequests.illness()}
+           <i class="fa fa-h-square" aria-hidden="true"></i>
+         #{/secure.li}
+        <li class="divider"></li>
+      #{/if}
+
       #{secure.check 'CompetenceRequests.handleEnabled'}
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
         <i class="fa fa-money" aria-hidden="true"></i>

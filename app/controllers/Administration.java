@@ -370,7 +370,7 @@ public class Administration extends Controller {
    * Mostra i parametri generali dell'applicazione.
    */
   public static void generalSetting() {
-    val generalSetting = generalSettingDao.generalSetting();    
+    val generalSetting = generalSettingDao.generalSetting();
     render("@data", generalSetting);
   }
 
@@ -384,6 +384,7 @@ public class Administration extends Controller {
       render("@data", generalSetting);
     } else {
       generalSetting.save();
+      generalSettingDao.generalSettingInvalidate();
       flash.success(Web.msgSaved(GeneralSetting.class));
       generalSetting();
     }
