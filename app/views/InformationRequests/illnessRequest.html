@@ -15,8 +15,8 @@ Specifica la <strong>data di inizio</strong> , la <strong>data di fine</strong> 
 	#{f.hidden 'illnessRequest.informationType' /}
 	#{f.hidden 'persist', value:persist /}
 	
-	#{f.date 'illnessRequest.beginDate', required:true, value:illnessRequest.beginDate?.format("dd/MM/yyyy") /}
-	#{f.date 'illnessRequest.endDate', required:true, value:illnessRequest.endDate?.format("dd/MM/yyyy") /}
+	#{f.date 'illnessRequest.beginDate', required:true, value:illnessRequest.beginDate?.format() /}
+	#{f.date 'illnessRequest.endDate', required:true, value:illnessRequest.endDate?.format() /}
 	
 	#{f.input 'illnessRequest.name', required:true /}
             

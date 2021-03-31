@@ -340,6 +340,7 @@ public class InformationRequests extends Controller {
    * @param illnessRequest la richiesta informativa di malattia
    */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
+    InformationType type = illnessRequest.informationType;
     if (illnessRequest.beginDate == null || illnessRequest.endDate == null) {
       Validation.addError("illnessRequest.beginDate",
           "Entrambi i campi data devono essere valorizzati");
@@ -347,13 +348,13 @@ public class InformationRequests extends Controller {
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       
-      render("@editServiceRequest", illnessRequest);
+      render("@editIllnessRequest", illnessRequest, type);
     }
     if (illnessRequest.beginDate.isAfter(illnessRequest.endDate)) {
       Validation.addError("illnessRequest.beginDate", 
           "La data di inizio non può essere successiva alla data di fine");
       response.status = 400;
-      render("@editServiceRequest", illnessRequest);
+      render("@editIllnessRequest", illnessRequest, type);
     }
     illnessRequest.startAt = LocalDateTime.now();
     illnessRequest.save();
