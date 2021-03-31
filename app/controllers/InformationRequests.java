@@ -309,6 +309,13 @@ public class InformationRequests extends Controller {
       insertable = false;
       render("@editServiceRequest", serviceRequest, insertable, begin, finish);
     }
+    if (serviceRequest.beginAt.isAfter(serviceRequest.finishTo)) {
+      Validation.addError("serviceRequest.beginAt", 
+          "L'orario di inizio non può essere successivo all'orario di fine");
+      response.status = 400;
+      insertable = false;
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish);
+    }
     
     serviceRequest.startAt = LocalDateTime.now();
     serviceRequest.save();

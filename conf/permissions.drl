@@ -669,6 +669,30 @@ then
 $c.grant();
 end
 
+rule isEmployeeForServiceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $sr: ServiceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "InformationRequests.saveServiceRequest", "InformationRequests.editServiceRequest"), 
+       target == $sr, granted == false)
+then
+$c.grant();
+end
+
+rule isEmployeeForIllnessFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $ir: IllnessRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "InformationRequests.editIllnessRequest", "InformationRequests.saveIllnessRequest"), 
+       target == $ir, granted == false)
+then
+$c.grant();
+end
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
