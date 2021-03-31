@@ -341,12 +341,18 @@ public class InformationRequests extends Controller {
    */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
     if (illnessRequest.beginDate == null || illnessRequest.endDate == null) {
-      Validation.addError("serviceRequest.beginDate",
+      Validation.addError("illnessRequest.beginDate",
           "Entrambi i campi data devono essere valorizzati");
-      Validation.addError("serviceRequest.endDate",
+      Validation.addError("illnessRequest.endDate",
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       
+      render("@editServiceRequest", illnessRequest);
+    }
+    if (illnessRequest.beginDate.isAfter(illnessRequest.endDate)) {
+      Validation.addError("illnessRequest.beginDate", 
+          "La data di inizio non può essere successiva alla data di fine");
+      response.status = 400;
       render("@editServiceRequest", illnessRequest);
     }
     illnessRequest.startAt = LocalDateTime.now();
