@@ -21,7 +21,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import models.base.InformationRequest;
+import play.data.validation.Required;
 import org.hibernate.envers.Audited;
 
 
@@ -32,9 +34,12 @@ import org.hibernate.envers.Audited;
 @PrimaryKeyJoinColumn(name = "informationRequestId")
 public class TeleworkRequest extends InformationRequest {
 
+  @Required
+  @NotNull
   public int month;
-  
+  @Required
+  @NotNull
   public int year;
-  
+
   public String context;
 }

@@ -53,9 +53,9 @@ CREATE TABLE information_request_events_history(
 
 CREATE TABLE telework_requests(
 	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),	
-	context TEXT,
-	year INTEGER,
-	month INTEGER);	
+	context TEXT NOT NULL,
+	year INTEGER NOT NULL,
+	month INTEGER NOT NULL);	
 
 CREATE TABLE telework_requests_history(
 	information_request_id BIGINT NOT NULL,
@@ -69,9 +69,9 @@ CREATE TABLE telework_requests_history(
 
 CREATE TABLE illness_requests(
 	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),
-	begin_date DATE,
-	end_date DATE,
-	name TEXT);	
+	begin_date DATE NOT NULL,
+	end_date DATE NOT NULL,
+	name TEXT NOT NULL);	
 
 CREATE TABLE illness_requests_history(
 	information_request_id BIGINT NOT NULL,
@@ -85,10 +85,10 @@ CREATE TABLE illness_requests_history(
 
 CREATE TABLE service_requests(
 	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),
-	day DATE,
-	begin_at TIME WITHOUT TIME ZONE,
-	finish_to TIME WITHOUT TIME ZONE,
-	reason TEXT);
+	day DATE NOT NULL,
+	begin_at TIME WITHOUT TIME ZONE NOT NULL,
+	finish_to TIME WITHOUT TIME ZONE NOT NULL,
+	reason TEXT );
 	
 
 CREATE TABLE service_requests_history(

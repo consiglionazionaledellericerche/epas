@@ -25,8 +25,10 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
+import play.data.validation.Required;
 
 @Audited
 @Entity
@@ -35,12 +37,17 @@ import models.base.InformationRequest;
 @PrimaryKeyJoinColumn(name = "informationRequestId")
 public class ServiceRequest extends InformationRequest{
 
+  @Required
+  @NotNull
   public LocalDate day;
-  
+  @Required
+  @NotNull
   public LocalTime beginAt;
-  
+  @Required
+  @NotNull
   public LocalTime finishTo;
-  
+  @Required
+  @NotNull
   public String reason;
   
   /**
