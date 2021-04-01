@@ -164,7 +164,7 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
-    if (!Validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
     try {
@@ -229,7 +229,7 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
-    if (!Validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
 
