@@ -456,7 +456,7 @@ public class InformationRequests extends Controller {
 
     if (approved) {
       notificationManager.sendEmailToUser(Optional.absent(), Optional.absent(), 
-          Optional.fromNullable(request));
+          Optional.fromNullable(request), true);
       log.debug("Inviata mail con approvazione");
       flash.success("Operazione conclusa correttamente");
     } else {

@@ -553,7 +553,7 @@ public class AbsenceRequests extends Controller {
 
     if (approved) {
       notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
-          Optional.absent(), Optional.absent());
+          Optional.absent(), Optional.absent(), true);
 
       flash.success("Operazione conclusa correttamente");
     } else {
@@ -580,23 +580,20 @@ public class AbsenceRequests extends Controller {
         && user.hasRoles(Role.GROUP_MANAGER)) {
       // caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
     if (absenceRequest.administrativeApprovalRequired
         && absenceRequest.administrativeApproved == null && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
+    notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
+        Optional.absent(), Optional.absent(), false);
+    flash.error("Richiesta respinta");
     render("@show", absenceRequest, user);
   }
 

@@ -613,7 +613,8 @@ public class NotificationManager {
    *
    * @param absenceRequest la richiesta d'assenza
    */
-  private void sendEmailAbsenceRequestConfirmation(AbsenceRequest absenceRequest) {
+  private void sendEmailAbsenceRequestConfirmation(AbsenceRequest absenceRequest,
+      boolean approval) {
     Verify.verifyNotNull(absenceRequest);
     final Person person = absenceRequest.person;
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -633,7 +634,12 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", person.fullName()));
-    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s", requestType));
+    if (approval) {
+      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s", requestType));
+    } else {
+      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s", requestType));
+    }
+    
     message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
         absenceRequest.endTo.toLocalDate()));
     val mailBody = message.toString();
@@ -767,23 +773,26 @@ public class NotificationManager {
    *
    * @param absenceRequest la richiesta d'assenza con tutti i parametri.
    * @param competenceRequest la richiesta di competenza con tutti i parametri.
+   * @param informationRequest la richiesta informativa con tutti i parametri.
    */
   public void sendEmailToUser(Optional<AbsenceRequest> absenceRequest, 
       Optional<CompetenceRequest> competenceRequest, 
-      Optional<InformationRequest> informationRequest) {
+      Optional<InformationRequest> informationRequest,
+      boolean approval) {
     if (absenceRequest.isPresent()) {
-      sendEmailAbsenceRequestConfirmation(absenceRequest.get());
+      sendEmailAbsenceRequestConfirmation(absenceRequest.get(), approval);
     }
     if (competenceRequest.isPresent()) {
-      sendEmailCompetenceRequestConfirmation(competenceRequest.get());
+      sendEmailCompetenceRequestConfirmation(competenceRequest.get(), approval);
     }
     if (informationRequest.isPresent()) {
-      sendEmailInformationRequestConfirmation(informationRequest.get());
+      sendEmailInformationRequestConfirmation(informationRequest.get(), approval);
     }
 
   }
 
-  private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest) {
+  private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest,
+      boolean approval) {
     Verify.verifyNotNull(competenceRequest);
     final Person person = competenceRequest.person;
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -799,8 +808,14 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
-    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s",
-        requestType));
+    if (approval) {
+      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s",
+          requestType));
+    } else {
+      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s",
+          requestType));
+    }
+    
     message.append(String.format("\r\n per i giorni %s - %s", 
         competenceRequest.startAt.toLocalDate(), competenceRequest.endTo.toLocalDate()));
     val mailBody = message.toString();
@@ -1451,7 +1466,8 @@ public class NotificationManager {
     return message.toString();
   }
 
-  private void sendEmailInformationRequestConfirmation(InformationRequest informationRequest) {
+  private void sendEmailInformationRequestConfirmation(InformationRequest informationRequest,
+      boolean approval) {
     Verify.verifyNotNull(informationRequest);
     final Person person = informationRequest.person;
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -1471,11 +1487,14 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
-    message.append(String.format("\r\nè stata approvata la sua richiesta di : %s",
-        requestType));
-    //TODO: completare specificando a seconda del tipo di richiesta approvata
-//    message.append(String.format("\r\n per i giorni %s - %s", 
-//        informationRequest.startAt.toLocalDate(), informationRequest.endTo.toLocalDate()));
+    if (approval) {
+      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s",
+          requestType));
+    } else {
+      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s",
+          requestType));
+    }
+    
     switch (informationRequest.informationType) {
       case ILLNESS_INFORMATION:
         IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
