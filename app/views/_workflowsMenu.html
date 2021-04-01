@@ -136,14 +136,14 @@
     	#{/if}
       #{/secure.li}
       
-      #{secure.check 'InformationRequests.enableIllnessFlow'}
+      #{if templateUtility.enableIllnessFlow()}
       #{secure.li @InformationRequests.illnessToApprove()}
         <i class="fa fa-h-square" aria-hidden="true"></i>
         #{if templateUtility.illnessRequests() > 0}
       		<span class="label label-danger label-badge">${templateUtility.illnessRequests()}</span>
     	#{/if}
       #{/secure.li}
-      #{/secure.check}
+      #{/if}
 
     </ul>
     *{ end items }*
