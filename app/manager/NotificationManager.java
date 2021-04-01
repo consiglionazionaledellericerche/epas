@@ -1435,8 +1435,10 @@ public class NotificationManager {
         } else {
           message.append(String.format("\r\n dal: %s",
               informationRequest.startAt.toLocalDate().toString()));
-          message.append(String.format("  al: %s", 
-              informationRequest.endTo.toLocalDate().toString()));
+          if (informationRequest.endTo != null) {
+            message.append(String.format("  al: %s", 
+                informationRequest.endTo.toLocalDate().toString()));
+          }
         }
         break;
       case SERVICE_INFORMATION:
