@@ -20,22 +20,22 @@ package models.informationrequests;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
+import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
 @Audited
 @Entity
 @Table(name = "service_requests")
-//@DiscriminatorValue("serviceInformation")
 @PrimaryKeyJoinColumn(name = "informationRequestId")
 public class ServiceRequest extends InformationRequest{
+
+  private static final long serialVersionUID = -8903988859450152320L;
 
   @Required
   @NotNull

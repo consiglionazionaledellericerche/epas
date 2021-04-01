@@ -6,14 +6,17 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.hibernate.envers.Audited;
 import models.base.BaseModel;
-import play.db.jpa.Model;
+import org.hibernate.envers.Audited;
 
+/**
+ * Informazioni sull'approvazione mensile delle attività in telelavoro.
+ * @author Dario Tagliaferri
+ */
 @Entity
 @Table(name = "telework_validations")
 @Audited
-public class TeleworkValidation extends BaseModel{
+public class TeleworkValidation extends BaseModel {
 
   private static final long serialVersionUID = -4472102414284745470L;
   

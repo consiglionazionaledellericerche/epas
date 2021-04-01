@@ -18,7 +18,6 @@
 package models.informationrequests;
 
 import java.time.LocalDate;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -30,9 +29,10 @@ import play.data.validation.Required;
 @Audited
 @Entity
 @Table(name = "illness_requests")
-//@DiscriminatorValue("illnessInformation")
 @PrimaryKeyJoinColumn(name = "informationRequestId")
 public class IllnessRequest extends InformationRequest {
+
+  private static final long serialVersionUID = -6222751376445648447L;
 
   @Required
   @NotNull
