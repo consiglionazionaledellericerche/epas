@@ -296,7 +296,7 @@ public class InformationRequests extends Controller {
    */
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
-    rules.checkIfPermitted(serviceRequest);
+   
     boolean insertable = true;
     serviceRequest.beginAt = informationRequestManager.deparseTime(begin);
     serviceRequest.finishTo = informationRequestManager.deparseTime(finish);

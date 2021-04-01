@@ -18,6 +18,7 @@
 package models.informationrequests;
 
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import models.base.InformationRequest;
@@ -28,7 +29,7 @@ import play.data.validation.Required;
 @Audited
 @Entity
 @Table(name = "telework_requests")
-//@PrimaryKeyJoinColumn(name = "informationRequestId")
+@PrimaryKeyJoinColumn(name = "informationRequestId")
 public class TeleworkRequest extends InformationRequest {
 
   private static final long serialVersionUID = -2647537080585976423L;
