@@ -26,12 +26,11 @@ import dao.UsersRolesOfficesDao;
 import java.time.LocalTime;
 import java.util.List;
 import javax.inject.Inject;
-
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
@@ -83,6 +82,7 @@ public class InformationRequestManager {
     final Person person;
     final InformationType type;
     boolean officeHeadApprovalRequired;
+    boolean administrativeApprovalRequired;
   }
   
   /**
@@ -132,7 +132,22 @@ public class InformationRequestManager {
             (Boolean) configurationManager.configValue(person.office,
                 requestType.officeHeadApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
-
+    }
+    if (requestType.alwaysSkipAdministrativeApproval) {
+      informationRequestConfiguration.administrativeApprovalRequired = false;
+    } else {
+      if (person.isTopQualification()
+          && requestType.administrativeApprovalRequiredTopLevel.isPresent()) {
+        informationRequestConfiguration.administrativeApprovalRequired = 
+            (Boolean) configurationManager.configValue(person.office, 
+                requestType.administrativeApprovalRequiredTopLevel.get(), LocalDate.now());
+      }
+      if (!person.isTopQualification()
+          && requestType.administrativeApprovalRequiredTechnicianLevel.isPresent()) {
+        informationRequestConfiguration.administrativeApprovalRequired = 
+            (Boolean) configurationManager.configValue(person.office, 
+                requestType.administrativeApprovalRequiredTechnicianLevel.get(), LocalDate.now());
+      }
     }
     
     return informationRequestConfiguration;
@@ -162,6 +177,13 @@ public class InformationRequestManager {
         .isEmpty()) {
       problems.add(String.format("Approvazione del responsabile di sede richiesta. "
           + "L'ufficio %s non ha impostato nessun responsabile di sede. "
+          + "Contattare l'ufficio del personale.", person.office.getName()));
+    }
+    if (config.isAdministrativeApprovalRequired() && uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office)
+        .isEmpty()) {
+      problems.add(String.format("Approvazione dell'amministratore del personale richiesta. "
+          + "L'ufficio %s non ha impostato nessun amministratore del personale. "
           + "Contattare l'ufficio del personale.", person.office.getName()));
     }
     return problems;
@@ -232,6 +254,14 @@ public class InformationRequestManager {
         request.flowEnded = true;
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
             illnessRequest, teleworkRequest, person);
+        break;
+        
+      case ADMINISTRATIVE_ACKNOWLEDGMENT:
+        //TODO: completare
+        break;
+        
+      case ADMINISTRATIVE_REFUSAL:
+      //TODO: completare
         break;
         
       case DELETE:

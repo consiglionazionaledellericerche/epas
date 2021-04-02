@@ -678,7 +678,7 @@ public enum EpasParam {
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
+      EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
@@ -688,6 +688,32 @@ public enum EpasParam {
    */
   ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
       "illness_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale.
+   */
+  ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "illness_information_i_iii_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale. 
+   */
+  ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_administrative_approval_required",
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

@@ -26,17 +26,27 @@ import manager.configurations.EpasParam;
 @RequiredArgsConstructor
 public enum InformationType {
 
-  ILLNESS_INFORMATION(false, 
+  ILLNESS_INFORMATION(true, false,
       Optional.of(EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED)),
-  TELEWORK_INFORMATION(false,
+      Optional.of(EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED)),
+  TELEWORK_INFORMATION(false, true,
       Optional.of(EpasParam.TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED)),
-  SERVICE_INFORMATION(false,
+      Optional.of(EpasParam.TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.absent(),
+      Optional.absent()),
+  SERVICE_INFORMATION(false, true,
       Optional.of(EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED));
+      Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.absent(),
+      Optional.absent());
   
   public final boolean alwaysSkipOfficeHeadApproval;
+  public final boolean alwaysSkipAdministrativeApproval;
   public final Optional<EpasParam> officeHeadApprovalRequiredTopLevel;
   public final Optional<EpasParam> officeHeadApprovalRequiredTechnicianLevel;
+  public final Optional<EpasParam> administrativeApprovalRequiredTopLevel;
+  public final Optional<EpasParam> administrativeApprovalRequiredTechnicianLevel;
+
 }
