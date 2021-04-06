@@ -26,6 +26,12 @@ public class QTeleworkRequest extends EntityPathBase<TeleworkRequest> {
 
     public final models.base.query.QInformationRequest _super;
 
+    //inherited
+    public final BooleanPath administrativeApprovalRequired;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> administrativeApproved;
+
     public final StringPath context = createString("context");
 
     //inherited
@@ -93,6 +99,8 @@ public class QTeleworkRequest extends EntityPathBase<TeleworkRequest> {
     public QTeleworkRequest(Class<? extends TeleworkRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this._super = new models.base.query.QInformationRequest(type, metadata, inits);
+        this.administrativeApprovalRequired = _super.administrativeApprovalRequired;
+        this.administrativeApproved = _super.administrativeApproved;
         this.endTo = _super.endTo;
         this.entityId = _super.entityId;
         this.events = _super.events;

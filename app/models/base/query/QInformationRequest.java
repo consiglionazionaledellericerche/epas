@@ -26,6 +26,10 @@ public class QInformationRequest extends EntityPathBase<InformationRequest> {
 
     public final QBaseModel _super = new QBaseModel(this);
 
+    public final BooleanPath administrativeApprovalRequired = createBoolean("administrativeApprovalRequired");
+
+    public final DateTimePath<java.time.LocalDateTime> administrativeApproved = createDateTime("administrativeApproved", java.time.LocalDateTime.class);
+
     public final DateTimePath<java.time.LocalDateTime> endTo = createDateTime("endTo", java.time.LocalDateTime.class);
 
     //inherited

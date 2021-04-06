@@ -77,9 +77,20 @@ public abstract class InformationRequest extends BaseModel{
   public LocalDateTime officeHeadApproved;
   
   /**
+   * Data di approvazione dell'amministratore del personale
+   */
+  public LocalDateTime administrativeApproved;
+  
+  /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   public boolean officeHeadApprovalRequired = true;
+  
+  /**
+   * Indica se è richieta l'approvazione da parte dell'amministrativo.
+   */
+  @Column(name = "administrative_approval_required")
+  public boolean administrativeApprovalRequired = true;
   
   /**
    * Se il flusso è avviato.

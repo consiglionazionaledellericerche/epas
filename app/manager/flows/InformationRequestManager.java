@@ -257,7 +257,9 @@ public class InformationRequestManager {
         break;
         
       case ADMINISTRATIVE_ACKNOWLEDGMENT:
-        //TODO: completare
+        //TODO: completare con controllo su IllnessRequest
+        request.administrativeApproved = java.time.LocalDateTime.now();
+        request.endTo = java.time.LocalDateTime.now();
         break;
         
       case ADMINISTRATIVE_REFUSAL:

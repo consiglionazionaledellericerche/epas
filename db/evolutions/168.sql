@@ -8,6 +8,8 @@ CREATE TABLE information_requests(
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
+	administrative_approved TIMESTAMP WITHOUT TIME ZONE,
+	administrative_approval_required BOOLEAN,
 	flow_started BOOLEAN,
 	flow_ended BOOLEAN,
 	version INT DEFAULT 0
@@ -23,6 +25,8 @@ CREATE TABLE information_requests_history(
 	information_type TEXT,
 	office_head_approved TIMESTAMP WITHOUT TIME ZONE,
 	office_head_approval_required BOOLEAN,
+	administrative_approved TIMESTAMP WITHOUT TIME ZONE,
+	administrative_approval_required BOOLEAN,
 	flow_started BOOLEAN,
 	flow_ended BOOLEAN,
 	PRIMARY KEY (id, _revision, _revision_type)

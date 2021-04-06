@@ -26,6 +26,12 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
 
     public final models.base.query.QInformationRequest _super;
 
+    //inherited
+    public final BooleanPath administrativeApprovalRequired;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> administrativeApproved;
+
     public final DatePath<java.time.LocalDate> beginDate = createDate("beginDate", java.time.LocalDate.class);
 
     public final DatePath<java.time.LocalDate> endDate = createDate("endDate", java.time.LocalDate.class);
@@ -93,6 +99,8 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
     public QIllnessRequest(Class<? extends IllnessRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this._super = new models.base.query.QInformationRequest(type, metadata, inits);
+        this.administrativeApprovalRequired = _super.administrativeApprovalRequired;
+        this.administrativeApproved = _super.administrativeApproved;
         this.endTo = _super.endTo;
         this.entityId = _super.entityId;
         this.events = _super.events;

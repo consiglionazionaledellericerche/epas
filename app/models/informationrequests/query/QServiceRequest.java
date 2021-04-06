@@ -27,6 +27,12 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
     public final models.base.query.QInformationRequest _super;
 
     //inherited
+    public final BooleanPath administrativeApprovalRequired;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> administrativeApproved;
+
+    //inherited
     public final DateTimePath<java.time.LocalDateTime> endTo;
 
     //inherited
@@ -87,6 +93,8 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
     public QServiceRequest(Class<? extends ServiceRequest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this._super = new models.base.query.QInformationRequest(type, metadata, inits);
+        this.administrativeApprovalRequired = _super.administrativeApprovalRequired;
+        this.administrativeApproved = _super.administrativeApproved;
         this.endTo = _super.endTo;
         this.entityId = _super.entityId;
         this.events = _super.events;
