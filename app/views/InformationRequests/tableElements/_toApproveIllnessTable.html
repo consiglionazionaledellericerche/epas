@@ -25,7 +25,10 @@
 			<tr>
 				#{if config.officeHeadApprovalRequired}
 					<th width="20%">Responsabile di sede</th>
-				#{/if}			
+				#{/if}	
+				#{if config.administrativeApprovalRequired}
+					<th width="20%">Amministratore del personale</th>
+				#{/if}		
 		#{/if}
 	</thead>
 
@@ -43,6 +46,9 @@
 
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>
+				#{/if}
+				#{if config.administrativeApprovalRequired}
+					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>

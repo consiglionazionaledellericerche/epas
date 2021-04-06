@@ -357,6 +357,7 @@ public class InformationRequests extends Controller {
       response.status = 400;
       render("@editIllnessRequest", illnessRequest, type);
     }
+    informationRequestManager.configure(illnessRequest);
     illnessRequest.startAt = LocalDateTime.now();
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();

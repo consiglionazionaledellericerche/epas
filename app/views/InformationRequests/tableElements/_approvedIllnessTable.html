@@ -11,15 +11,16 @@
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Nome</th>	
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
-			#{/if}
-			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>			
+			#{/if}		
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
-			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
 		</tr>			
 		#{if approvalRequired}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
 					<th width="20%">Responsabile di sede</th>
+				#{/if}	
+				#{if config.administrativeApprovalRequired}
+					<th width="20%">Amministratore del personale</th>
 				#{/if}		
 		#{/if}
 	</thead>
@@ -37,11 +38,13 @@
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
 				#{/if}
+				#{if config.administrativeApprovalRequired}
+					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
+				#{/if}
 	
-				<td>${item.note}</td>
 				<td>
-				#{secure.check 'AbsenceRequests.show', target: item }
-				#{secure.link @AbsenceRequests.show(item.id, type)}	    	  	
+				#{secure.check 'InformationRequests.show', target: item }
+				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
 	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
 	        	#{/secure.check}

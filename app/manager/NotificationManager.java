@@ -1337,6 +1337,11 @@ public class NotificationManager {
         && informationRequest.officeHeadApproved == null) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
+    if (informationRequest.administrativeApprovalRequired
+        && informationRequest.administrativeApproved == null) {
+      role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+    }
+      
     return role;
   }
 

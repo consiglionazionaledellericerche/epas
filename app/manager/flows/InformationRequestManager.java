@@ -116,7 +116,6 @@ public class InformationRequestManager {
       Person person) {
     val informationRequestConfiguration = new InformationRequestConfiguration(person, requestType);
 
-
     if (requestType.alwaysSkipOfficeHeadApproval) {
       informationRequestConfiguration.officeHeadApprovalRequired = false;
     } else {
@@ -151,6 +150,22 @@ public class InformationRequestManager {
     }
     
     return informationRequestConfiguration;
+  }
+  
+  /**
+   * Imposta nella richiesta di assenza i tipi di approvazione necessari in funzione del tipo di
+   * assenza e della configurazione specifica della sede del dipendente.
+   *
+   * @param absenceRequest la richiesta di assenza.
+   */
+  public void configure(IllnessRequest illnessRequest) {
+    Verify.verifyNotNull(illnessRequest.informationType);
+    Verify.verifyNotNull(illnessRequest.person);
+
+    val config = getConfiguration(illnessRequest.informationType, illnessRequest.person);
+
+    illnessRequest.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
+    illnessRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
   }
   
   /**
@@ -342,7 +357,7 @@ public class InformationRequestManager {
             + "da parte dell'amministrazione del personale.");
       }
       if (!uroDao
-          .getUsersRolesOffices(request.person.user,
+          .getUsersRolesOffices(approver.user,
               roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.person.office)
           .isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"

@@ -131,9 +131,9 @@ public abstract class InformationRequest extends BaseModel{
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {
-    return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved()
+    return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
         && (!this.administrativeApprovalRequired 
-            || this.isAdministrativeApproved()));
+            || this.isAdministrativeApproved());
   }
   
   /**
