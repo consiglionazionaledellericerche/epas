@@ -1913,7 +1913,13 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",
+        "InformationRequests.show"
 
         ), target == null, granted == false)
 then
@@ -2070,7 +2076,13 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",
+        "InformationRequests.show"
 
        ), target == $o, granted == false)
 then

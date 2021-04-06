@@ -221,7 +221,7 @@ public class InformationRequestManager {
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
         (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
 
-    val problem = checkAbsenceRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
+    val problem = checkInformationRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
         person, eventType);
     if (problem.isPresent()) {
       log.warn("Impossibile inserire la richiesta di informazione {}. Problema: {}", request,
@@ -302,7 +302,7 @@ public class InformationRequestManager {
    * @param eventType il tipo di evento.
    * @return l'eventuale problema riscontrati durante l'approvazione.
    */
-  public Optional<String> checkAbsenceRequestEvent(Optional<ServiceRequest> serviceRequest, 
+  public Optional<String> checkInformationRequestEvent(Optional<ServiceRequest> serviceRequest, 
       Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
       Person approver, InformationRequestEventType eventType) {
     
@@ -329,7 +329,25 @@ public class InformationRequestManager {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
-
+    }
+    
+    if (eventType == InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT
+        || eventType == InformationRequestEventType.ADMINISTRATIVE_REFUSAL) {
+      if (!request.administrativeApprovalRequired) {
+        return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
+            + "da parte dell'amministrazione del personale.");
+      }
+      if (request.isAdministrativeApproved()) {
+        return Optional.of("Questa richiesta di assenza è già stata approvata "
+            + "da parte dell'amministrazione del personale.");
+      }
+      if (!uroDao
+          .getUsersRolesOffices(request.person.user,
+              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.person.office)
+          .isPresent()) {
+        return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
+            + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
+      }
     }
 
     return Optional.absent();
@@ -351,6 +369,7 @@ public class InformationRequestManager {
     if (illnessRequest.isPresent()) {
       illnessRequest.get().flowStarted = false;
       illnessRequest.get().officeHeadApproved = null;
+      illnessRequest.get().administrativeApproved = null;
     }
     if (teleworkRequest.isPresent()) {
       teleworkRequest.get().flowStarted = false;
@@ -425,9 +444,18 @@ public class InformationRequestManager {
       }
     }
     if (illnessRequest.isPresent()) {
-      if (!illnessRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      if (illnessRequest.get().officeHeadApprovalRequired 
+          && illnessRequest.get().officeHeadApproved == null
+          && user.hasRoles(Role.SEAT_SUPERVISOR)) {
         // caso di approvazione da parte del responsabile di sede
         officeHeadApproval(illnessRequest.get().id, user);
+        return true;
+      }
+      if (illnessRequest.get().administrativeApprovalRequired
+          && illnessRequest.get().administrativeApproved == null 
+          && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        // caso di approvazione da parte dell'amministratore del personale
+        personnelAdministratorApproval(illnessRequest.get().id, user);
         return true;
       }
     }
@@ -474,7 +502,6 @@ public class InformationRequestManager {
         currentPerson.getFullname());
     
     notificationManager.notificationInformationRequestPolicy(user, request, true);
-
   }
   
  
@@ -508,7 +535,70 @@ public class InformationRequestManager {
         InformationRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
-
+  }
+  
+  /**
+   * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
+   *
+   * @param id l'id della richiesta di assenza.
+   */
+  public void personnelAdministratorApproval(long id, User user) {
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id);
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id);
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id);
+        break;
+      default:
+        break;
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
+        currentPerson, InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT,
+        Optional.absent());
+    log.info("{} approvata dall'amministratore del personale {}.", request,
+        currentPerson.getFullname());
+    
+    notificationManager.notificationInformationRequestPolicy(user, request, true);
+  }
+  
+  /**
+   * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
+   *
+   * @param id l'id della richiesta di flusso informativo.
+   */
+  public void personnelAdministratorDisapproval(long id, String reason) {
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id).get();
+        break;
+      default:
+        break;
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
+        Optional.of(teleworkRequest), currentPerson, 
+        InformationRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di sede {}.", request,
+        currentPerson.getFullname());
   }
 
 }

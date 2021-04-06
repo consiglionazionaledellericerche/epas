@@ -119,6 +119,11 @@ public abstract class InformationRequest extends BaseModel{
     return officeHeadApproved != null;
   }
   
+  @Transient
+  public boolean isAdministrativeApproved() {
+    return administrativeApproved != null;
+  }
+  
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
@@ -126,7 +131,9 @@ public abstract class InformationRequest extends BaseModel{
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {
-    return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
+    return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved()
+        && (!this.administrativeApprovalRequired 
+            || this.isAdministrativeApproved()));
   }
   
   /**
