@@ -364,6 +364,12 @@
         <th>Al</th>
       </tr>
       #{list informationFlows.findAll({!it.epasParam.general}), as:'conf'}
+      #{if !(conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.  ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED)
+      	|| templateUtility.enableIllnessFlow()}
+      	
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
@@ -372,6 +378,8 @@
         <td>${conf.beginDate.format()}</td>
         <td>${conf.calculatedEnd()?.format()}</td>
       </tr>
+       
+      #{/if}
       #{/list}
     </table>
   </div>
