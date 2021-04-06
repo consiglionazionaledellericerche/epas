@@ -36,11 +36,12 @@
   	  		#{include './tableElements/_toApproveTeleworkTable.html' /}
   	  	#{/else} 		
  		#{/tabContentItem}
+ 		
   		#{tabContentItem id:'approvati'}
-  		#{if !myIllnessResult.isEmpty()}
+  		#{if !illnessApprovedResult.isEmpty()}
   	  		#{include './tableElements/_approvedIllnessTable.html' /}
   	  	#{/if}
-  	  	#{elseif !myServiceResult.isEmpty()}
+  	  	#{elseif !serviceApprovedResult.isEmpty()}
   	  		#{include './tableElements/_approvedServiceTable.html' /}
   	  	#{/elseif}
   	  	#{else}

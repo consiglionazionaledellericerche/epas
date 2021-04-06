@@ -42,10 +42,12 @@
 	
 </tr>
 #{list items:informationRequest.events, as:'item'}
-<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_REFUSAL))
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_REFUSAL)
+		|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.ADMINISTRATIVE_REFUSAL))
 	|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.DELETE)} 
 	class="danger" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT))} 
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT)
+		|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT))} 
 	class="success" #{/if}	
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
