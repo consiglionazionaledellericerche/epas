@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Corretta gestione campi non obbligatori id_ordine, anno, numero nell'endpoint per inserimento
 missioni via REST - /rest/missions/amqpreceiver.
+- Aggiunta la possibilità di usufruire di flussi informativi relativamente a temi come telelavoro,
+uscite di servizio e malattia (comunicazioni al responsabile di sede o all'amministratore del personale
+secondo le stesse modalità delle richieste di ferie e riposo compensativo).
 
 ## [2.0.1] - 2021-03-16
 ### Changed
