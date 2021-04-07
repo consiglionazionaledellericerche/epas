@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Corretta gestione campi non obbligatori id_ordine, anno, numero nell'endpoint per inserimento
 missioni via REST - /rest/missions/amqpreceiver.
+
+### Added
 - Aggiunta la possibilità di usufruire di flussi informativi relativamente a temi come telelavoro,
 uscite di servizio e malattia (comunicazioni al responsabile di sede o all'amministratore del personale
 secondo le stesse modalità delle richieste di ferie e riposo compensativo).
@@ -16,8 +18,10 @@ secondo le stesse modalità delle richieste di ferie e riposo compensativo).
 ### Changed
 - Modificato comportamento form di richiesta ferie, adesso sposta la data finale impostandola
 uguale alla data iniziale se si mette una data iniziale successiva alla data finale
+
 ### Fixed
 - Corretta drools per l'accesso all'endpoint REST /rest/absences/insertVacation
+
 ### Added
 - Aggiunto link alla privacy policy (se abilitata) nel footer
 - Aggiunta gestione e visualizzazione delle privacy policy con possibilità di
