@@ -1222,8 +1222,8 @@ ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED = Richiesta presa v
 
 TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli I-III da parte del responsabile di sede
 TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli IV-VIII da parte del responsabile di sede
-SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richista approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
-SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richista approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
+SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
+SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
