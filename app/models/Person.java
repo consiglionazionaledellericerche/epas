@@ -247,6 +247,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<InitializationGroup> initializationGroups;
+  
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<TeleworkValidation> teleworkValidations;
 
   @NotAudited
   public LocalDateTime updatedAt;

@@ -405,7 +405,8 @@ public class CompetenceRequests extends Controller {
     
     if (approved) {
       notificationManager
-      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
+          .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent(), true);
 
       flash.success("Operazione conclusa correttamente");
     } else {
@@ -434,16 +435,16 @@ public class CompetenceRequests extends Controller {
         && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
       //TODO: caso di disapprovazione da parte del supervisore del servizio.
       competenceRequestManager.reperibilityManagerDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
     }
     if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
         && user.hasRoles(Role.EMPLOYEE)) {
       //TODO: caso di disapprovazione da parte del dipendente reperibile
       competenceRequestManager.employeeDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
     }
+    notificationManager
+        .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+        Optional.absent(), false);
+    flash.error("Richiesta respinta");
     render("@show", competenceRequest, user);
   }
 }

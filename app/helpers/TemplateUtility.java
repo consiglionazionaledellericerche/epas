@@ -31,7 +31,9 @@ import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
+import dao.InformationRequestDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -75,7 +77,9 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.base.InformationRequest;
 import models.contractual.ContractualReference;
+import models.enumerate.InformationType;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
@@ -84,6 +88,9 @@ import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
@@ -123,7 +130,8 @@ public class TemplateUtility {
   private final GroupDao groupDao;
   private final TimeSlotDao timeSlotDao;
   private final CompetenceRequestDao competenceRequestDao;
-   
+  private final InformationRequestDao informationRequestDao;
+  private final GeneralSettingDao generalSettingDao;
   
   /**
    * Costruttotore di default per l'injection dei vari componenti.
@@ -141,7 +149,8 @@ public class TemplateUtility {
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
-      CompetenceRequestDao competenceRequestDao) {
+      CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao,
+      GeneralSettingDao generalSettingDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -164,6 +173,8 @@ public class TemplateUtility {
     this.groupDao = groupDao;
     this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
+    this.informationRequestDao = informationRequestDao;
+    this.generalSettingDao = generalSettingDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -182,8 +193,14 @@ public class TemplateUtility {
                 Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
         });    
-    
-    
+  }
+
+  
+  /**
+   * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
+   */
+  public boolean enableIllnessFlow() {
+    return generalSettingDao.generalSetting().enableIllnessFlow;
   }
   
   /**
@@ -287,6 +304,57 @@ public class TemplateUtility {
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
             user.person);
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro.
+   * @return la quantità di richieste di telelavoro pendenti.
+   */
+  public final int teleworkRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.TELEWORK_INFORMATION, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione di uscite di servizio.
+   * @return la quantità di richieste di uscite di servizio pendenti.
+   */
+  public final int serviceRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.SERVICE_INFORMATION, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di informazione malattia.
+   * @return la quantità di richieste di informazione di malattia pendenti.
+   */
+  public final int illnessRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.ILLNESS_INFORMATION, user.person);
+
     return results.size();
   }
 
