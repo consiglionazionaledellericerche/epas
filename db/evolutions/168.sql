@@ -57,7 +57,7 @@ CREATE TABLE information_request_events_history(
 
 CREATE TABLE telework_requests(
 	information_request_id BIGINT NOT NULL REFERENCES information_requests (id),	
-	context TEXT NOT NULL,
+	context TEXT,
 	year INTEGER NOT NULL,
 	month INTEGER NOT NULL);	
 
