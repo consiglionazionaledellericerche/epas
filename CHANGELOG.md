@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Corretta gestione campi non obbligatori id_ordine, anno, numero nell'endpoint per inserimento
 missioni via REST - /rest/missions/amqpreceiver.
+- Corretti controlli di validazione errati sui metodi rest/checkAbsence e rest/insertAbsence.
 
 ### Added
 - Aggiunta la possibilità di usufruire di flussi informativi relativamente a temi come telelavoro,

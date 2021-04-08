@@ -14,16 +14,18 @@
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 		<i class="fa fa-recycle fa-fw"></i>  
-		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0 
-		    	|| templateUtility.personalPermissionRequests() > 0 || templateUtility.vacationPastYearAfterDeadlineRequests() > 0
+		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0
+		    	|| templateUtility.personalPermissionRequests() > 0
 		    	|| templateUtility.changeReperibilityRequests() > 0 || templateUtility.teleworkRequests() > 0
-		    	|| templateUtility.serviceRequests() > 0 || templateUtility.illnessRequests() > 0}
+		    	|| templateUtility.serviceRequests() > 0 || templateUtility.illnessRequests() > 0
+		    	|| templateUtility.personalPermissionRequests() > 0 
+		    	|| templateUtility.changeReperibilityRequests() > 0}
       			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
       				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()
-      				+ templateUtility.vacationPastYearAfterDeadlineRequests()
       				+ templateUtility.changeReperibilityRequests()
       				+ templateUtility.teleworkRequests() + templateUtility.serviceRequests()
       				+ templateUtility.illnessRequests()}
+      				+ templateUtility.changeReperibilityRequests()}
       			</span>
     		#{/if}       
 	     <!-- visualizza l'username -->
@@ -53,13 +55,14 @@
       
       #{secure.li @AbsenceRequests.personalPermissions()}
         <i class="fa fa-exclamation" aria-hidden="true"></i>
+        
       #{/secure.li}
       
-      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.check 'AbsenceRequests.pastYearDisabled'}
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
       #{/secure.li}
-      <li class="divider"></li>
+      
       #{/secure.check}
       
       #{secure.li @InformationRequests.teleworks()}
@@ -77,6 +80,7 @@
       #{/if}
 
       #{secure.check 'CompetenceRequests.handleEnabled'}
+      <li class="divider"></li>
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
         <i class="fa fa-money" aria-hidden="true"></i>
          
@@ -111,12 +115,14 @@
     	#{/if}
       #{/secure.li}
       
-      #{secure.check 'AbsenceRequests.pastYearEnabled'}
+      #{secure.check 'AbsenceRequests.pastYearDisabled'}
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        <!--  
         #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
       		<span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
     	#{/if}
+    	-->
       #{/secure.li}
       #{/secure.check}
       
