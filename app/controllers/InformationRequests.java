@@ -315,7 +315,8 @@ public class InformationRequests extends Controller {
       insertable = false;
       render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
-    
+    informationRequestManager.configure(Optional.absent(), 
+        Optional.of(serviceRequest), Optional.absent());
     serviceRequest.startAt = LocalDateTime.now();
     serviceRequest.save();
     
@@ -324,6 +325,11 @@ public class InformationRequests extends Controller {
       informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest), 
           Optional.absent(), Optional.absent(), serviceRequest.person,
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (serviceRequest.autoApproved()) {
+        informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest), 
+            Optional.absent(), Optional.absent(), serviceRequest.person, 
+            InformationRequestEventType.COMPLETE, Optional.absent());
+      }
       if (serviceRequest.person.isSeatSupervisor()) {
         approval(serviceRequest.id);
       } else {
@@ -362,7 +368,8 @@ public class InformationRequests extends Controller {
       response.status = 400;
       render("@editIllnessRequest", illnessRequest, type);
     }
-    informationRequestManager.configure(illnessRequest);
+    informationRequestManager.configure(Optional.of(illnessRequest), 
+        Optional.absent(), Optional.absent());
     illnessRequest.startAt = LocalDateTime.now();
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();
@@ -402,6 +409,8 @@ public class InformationRequests extends Controller {
     teleworkRequest.startAt = LocalDateTime.now();
     teleworkRequest.informationType = InformationType.TELEWORK_INFORMATION;
     teleworkRequest.save();
+    informationRequestManager.configure(Optional.absent(), 
+        Optional.absent(), Optional.of(teleworkRequest));
     boolean isNewRequest = !teleworkRequest.isPersistent();
     if (isNewRequest || !teleworkRequest.flowStarted) {
       informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
@@ -462,7 +471,11 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    InformationRequests.listToApprove(request.informationType);
+    if (user.person.isSeatSupervisor()) {
+      InformationRequests.listToApprove(request.informationType);
+    } else {
+      InformationRequests.list(request.informationType);
+    }    
 
   }
   

@@ -158,14 +158,19 @@ public class InformationRequestManager {
    *
    * @param absenceRequest la richiesta di assenza.
    */
-  public void configure(IllnessRequest illnessRequest) {
-    Verify.verifyNotNull(illnessRequest.informationType);
-    Verify.verifyNotNull(illnessRequest.person);
+  public void configure(Optional<IllnessRequest> illnessRequest, 
+      Optional<ServiceRequest> serviceRequest, Optional<TeleworkRequest> teleworkRequest) {
+    val request = serviceRequest.isPresent() ? serviceRequest.get() : 
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+    Verify.verifyNotNull(request.informationType);
+    Verify.verifyNotNull(request.person);
 
-    val config = getConfiguration(illnessRequest.informationType, illnessRequest.person);
+    val config = getConfiguration(request.informationType, request.person);
 
-    illnessRequest.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
-    illnessRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
+    request.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
+    if (illnessRequest.isPresent()) {
+      request.administrativeApprovalRequired = config.administrativeApprovalRequired;
+    }    
   }
   
   /**
@@ -252,6 +257,7 @@ public class InformationRequestManager {
       case OFFICE_HEAD_ACKNOWLEDGMENT:
         request.officeHeadApproved = java.time.LocalDateTime.now();
         request.endTo = java.time.LocalDateTime.now();
+        request.flowEnded = true;
         if (request.informationType.equals(InformationType.TELEWORK_INFORMATION)) {
           TeleworkValidation validation = new TeleworkValidation();
           validation.person = teleworkRequest.get().person;
@@ -275,10 +281,17 @@ public class InformationRequestManager {
         //TODO: completare con controllo su IllnessRequest
         request.administrativeApproved = java.time.LocalDateTime.now();
         request.endTo = java.time.LocalDateTime.now();
+        request.flowEnded = true;
         break;
         
       case ADMINISTRATIVE_REFUSAL:
       //TODO: completare
+        break;
+        
+      case COMPLETE:
+        request.officeHeadApproved = java.time.LocalDateTime.now();
+        request.endTo = java.time.LocalDateTime.now();
+        request.flowEnded = true;
         break;
         
       case DELETE:
@@ -457,6 +470,7 @@ public class InformationRequestManager {
         officeHeadApproval(serviceRequest.get().id, user);
         return true;
       }
+      
     }
     if (illnessRequest.isPresent()) {
       if (illnessRequest.get().officeHeadApprovalRequired 

@@ -90,7 +90,7 @@ public abstract class InformationRequest extends BaseModel{
    * Indica se è richieta l'approvazione da parte dell'amministrativo.
    */
   @Column(name = "administrative_approval_required")
-  public boolean administrativeApprovalRequired = true;
+  public boolean administrativeApprovalRequired = false;
   
   /**
    * Se il flusso è avviato.
@@ -147,4 +147,8 @@ public abstract class InformationRequest extends BaseModel{
     return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired);
   }
 
+  @Transient
+  public boolean autoApproved() {
+    return !this.officeHeadApprovalRequired && !this.administrativeApprovalRequired;
+  }
 }
