@@ -274,7 +274,10 @@ public class TeleworkStampings extends Controller {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@insertStamping", stamping, person, date, time);
+    }
     PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
     stamping.setDate(stampingManager.deparseStampingDateTimeAsJavaTime(date, time));
     Optional<Errors> check = manager.checkTeleworkStamping(stamping, pd);
