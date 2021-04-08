@@ -290,8 +290,13 @@ public class InformationRequests extends Controller {
    */
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
-   
+    InformationType type = serviceRequest.informationType;
     boolean insertable = true;
+    if (Validation.hasErrors()) {      
+      response.status = 400;
+      insertable = false;
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
+    }
     serviceRequest.beginAt = informationRequestManager.deparseTime(begin);
     serviceRequest.finishTo = informationRequestManager.deparseTime(finish);
     if (serviceRequest.beginAt == null || serviceRequest.finishTo == null) {
@@ -301,14 +306,14 @@ public class InformationRequests extends Controller {
           "Entrambi i campi data devono essere valorizzati");
       response.status = 400;
       insertable = false;
-      render("@editServiceRequest", serviceRequest, insertable, begin, finish);
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
     if (serviceRequest.beginAt.isAfter(serviceRequest.finishTo)) {
       Validation.addError("serviceRequest.beginAt", 
           "L'orario di inizio non può essere successivo all'orario di fine");
       response.status = 400;
       insertable = false;
-      render("@editServiceRequest", serviceRequest, insertable, begin, finish);
+      render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
     
     serviceRequest.startAt = LocalDateTime.now();
