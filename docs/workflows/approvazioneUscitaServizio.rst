@@ -22,7 +22,7 @@ Le richieste pendenti vengono presentate sotto forma di righe di tabelle contene
 * Le azioni da poter intraprendere sulla richiesta
 
 Se il responsabile di sede decide di approvare la richiesta, il flusso andrà a compimento. 
-Se il reperibile decide invece di respingere la richiesta, verrà proposto uno spazio da riempire con la motivazione 
+Se il responsabile di sede decide invece di respingere la richiesta, verrà proposto uno spazio da riempire con la motivazione 
 del respingimento da inviare al dipendente.
 
 In entrambi i casi, il dipendente richiedente verrà notificato rispetto all’esito della terminazione del flusso 
