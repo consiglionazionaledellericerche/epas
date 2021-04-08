@@ -13,31 +13,25 @@ __________________
 
 Nella pagina troviamo due schede:
 
-* I **flussi attivi**: che contiene la lista delle richieste presentate e non ancora arrivate a conclusione 
-e il pulsante verde che consente la possibilità di sottomettere ulteriori richieste 
+* I **flussi attivi**: che contiene la lista delle richieste presentate e non ancora arrivate a conclusione e il pulsante verde che consente la possibilità di sottomettere ulteriori richieste 
 * I **flussi conclusi**: che contiene la lista delle richieste presentate e arrivate a terminazione con l’esito specificato
 
 Cliccando sul pulsante verde si aprirà una nuova finestra, dalla quale è possibile presentare la richiesta di ferie:
 
-* Cliccando sul link **Info situazione ferie** si apre una tendina contenente la situazione delle ferie residue 
-del dipendente tra anno passato, anno corrente e permessi legge dell’anno corrente
-* Nella parte sottostante si trovano i campi relativi alle date per cui il dipendente richiede le ferie. 
-Il sistema controlla che i giorni richiesti soddisfino alcuni requisiti:
+* Cliccando sul link **Info situazione ferie** si apre una tendina contenente la situazione delle ferie residue del dipendente tra anno passato, anno corrente e permessi legge dell’anno corrente
+* Nella parte sottostante si trovano i campi relativi alle date per cui il dipendente richiede le ferie. Il sistema controlla che i giorni richiesti soddisfino alcuni requisiti:
 
   * la data di inizio non può essere successiva alla data di fine
-  * se la data di inizio e/o di fine è precedente alla data attuale, occorrerà specificare una motivazione nella richiesta di assenza poiché 
-  retroattiva rispetto al giorno attuale
+  * se la data di inizio e/o di fine è precedente alla data attuale, occorrerà specificare una motivazione nella richiesta di assenza poiché retroattiva rispetto al giorno attuale
   
-* Una volta specificate le date, nella parte in basso della schermata comparirà un riepilogo di quanto accadrebbe
- nel caso si sottomettesse, con i parametri evidenziati, la richiesta di ferie:
+* Una volta specificate le date, nella parte in basso della schermata comparirà un riepilogo di quanto accadrebbe nel caso si sottomettesse, con i parametri evidenziati, la richiesta di ferie:
  
   * La data del giorno richiesto
   * il codice di assenza che verrebbe inserito nella data
   * l’esito dell’inserimento
   * qual è il limite utilizzabile per quel codice di assenza che si va ad inserire
   * qual è il limite consumato con quell’inserimento
-* Cliccando su Inserisci, il sistema processa la richiesta inviandola al destinatario corretto sulla base della 
-configurazione specificata (v. :doc:`Configurazione del servizio <configurazioneAssenze>`).
+* Cliccando su Inserisci, il sistema processa la richiesta inviandola al destinatario corretto sulla base della configurazione specificata (v. :doc:`Configurazione del servizio <configurazioneAssenze>`).
 
 Una volta sottomessa la richiesta, il sistema si occuperà di notificare il destinatario della richiesta, 
 secondo configurazione, attraverso una notifica in “stile Facebook” presente nella barra di menu in alto a destra 

@@ -9,8 +9,7 @@ Questa funzionalità dipende dall'attivazione del servizio di cui si è parlato 
 In caso di abilitazione, il link da cliccare risponde al nome *Mie richieste per malattia*.
 Nella pagina troviamo due schede:
 
-* I **flussi attivi**: che contiene la lista delle richieste presentate e non ancora arrivate a conclusione 
-e il pulsante verde che consente la possibilità di sottomettere ulteriori richieste 
+* I **flussi attivi**: che contiene la lista delle richieste presentate e non ancora arrivate a conclusione e il pulsante verde che consente la possibilità di sottomettere ulteriori richieste 
 * I **flussi conclusi**: che contiene la lista delle richieste presentate e arrivate a terminazione con l’esito specificato
 
 Cliccando sul pulsante verde si aprirà una nuova finestra, dalla quale è possibile presentare l'informazione
@@ -20,8 +19,7 @@ La pagina che si apre è molto intuitiva e contiene 3 campi da riempire:
 * Il giorno iniziale di malattia
 * Il giorno finale di malattia
 * Una nota sul tipo di assenza
-* Cliccando su Inserisci, il sistema processa la richiesta inviandola al destinatario corretto sulla base della 
-configurazione specificata (v. :doc:`Configurazione del servizio <configurazioneFlussiInformativi>`).
+* Cliccando su Inserisci, il sistema processa la richiesta inviandola al destinatario corretto sulla base della configurazione specificata (v. :doc:`Configurazione del servizio <configurazioneFlussiInformativi>`).
 
 Una volta sottomessa la richiesta, il sistema si occuperà di notificare il destinatario della richiesta, 
 secondo configurazione, attraverso una notifica in “stile Facebook” presente nella barra di menu in alto a destra 

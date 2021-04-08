@@ -14,27 +14,11 @@ parametri sono visibili soltanto se, a livello di installazione, si decide di us
 il flusso informativo per malattia. L'abilitazione di questa funzionalità, ripetiamo, è **PER INSTALLAZIONE**: qualsiasi
 sede all'interno di ePAS ne potrà usufruire):
 
-* *Richiesta presa visione comunicazione malattia per i livelli I-III da parte del responsabile di sede*: abilitando
-questo parametro si consente al responsabile di sede di prendere visione delle informative da parte del dipendente 
-tecnologo/ricercatore riguardo il suo stato di malattia
-* *Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede*: abilitando
-questo parametro si consente al responsabile di sede di prendere visione delle informative da parte del dipendente 
-tecnico/amministrativo riguardo il suo stato di malattia
-* *Richiesta presa visione comunicazione malattia per i livelli I-III da parte dell'amministratore del personale*: abilitando
-questo parametro si consente all'amministratore del personale di prendere visione delle informative da parte del dipendente 
-tecnologo/ricercatore riguardo il suo stato di malattia
-* *Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte dell'amministratore del personale*: abilitando
-questo parametro si consente all'amministratore del personale di prendere visione delle informative da parte del dipendente 
-tecnico/amministrativo riguardo il suo stato di malattia 
-* *Richiesta presa visione programma mensile di telelavoro per i livelli I-III da parte del responsabile di sede*: abilitando
-questo parametro si consente al responsabile di sede di prendere visione dei riepiloghi di telelavoro generabili
-attraverso la funzionalità di inserimento orario in telelavoro da tecnologi/ricercatori
-* *Richiesta presa visione programma mensile di telelavoro per i livelli IV-VIII da parte del responsabile di sede*: abilitando
-questo parametro si consente al responsabile di sede di prendere visione dei riepiloghi di telelavoro generabili
-attraverso la funzionalità di inserimento orario in telelavoro da tecnici/amministrativi
-* *Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede*: abilitando questo
-parametro si consente al responsabile di sede di prendere visione delle richieste di uscita di servizio effettuate
-dal personale tecnologo/ricercatore
-* *Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede*: abilitando questo
-parametro si consente al responsabile di sede di prendere visione delle richieste di uscita di servizio effettuate
-dal personale tecnico/amministrativo
+* *Richiesta presa visione comunicazione malattia per i livelli I-III da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione delle informative da parte del dipendente tecnologo/ricercatore riguardo il suo stato di malattia
+* *Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione delle informative da parte del dipendente tecnico/amministrativo riguardo il suo stato di malattia
+* *Richiesta presa visione comunicazione malattia per i livelli I-III da parte dell'amministratore del personale*: abilitando questo parametro si consente all'amministratore del personale di prendere visione delle informative da parte del dipendente tecnologo/ricercatore riguardo il suo stato di malattia
+* *Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte dell'amministratore del personale*: abilitando questo parametro si consente all'amministratore del personale di prendere visione delle informative da parte del dipendente tecnico/amministrativo riguardo il suo stato di malattia 
+* *Richiesta presa visione programma mensile di telelavoro per i livelli I-III da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione dei riepiloghi di telelavoro generabili attraverso la funzionalità di inserimento orario in telelavoro da tecnologi/ricercatori
+* *Richiesta presa visione programma mensile di telelavoro per i livelli IV-VIII da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione dei riepiloghi di telelavoro generabili attraverso la funzionalità di inserimento orario in telelavoro da tecnici/amministrativi
+* *Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione delle richieste di uscita di servizio effettuate dal personale tecnologo/ricercatore
+* *Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede*: abilitando questo parametro si consente al responsabile di sede di prendere visione delle richieste di uscita di servizio effettuate dal personale tecnico/amministrativo

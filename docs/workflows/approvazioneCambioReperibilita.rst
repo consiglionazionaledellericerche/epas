@@ -30,8 +30,7 @@ Vengono presentate sotto forma di righe di tabelle contenenti queste informazion
   * Il giorno finale
   
 * Il destinatario
-* Le date di approvazione/disapprovazione che, in base alla configurazione, possono contenere quella
-del reperibile destinatario e/o quella del responsabile del servizio di reperibilità
+* Le date di approvazione/disapprovazione che, in base alla configurazione, possono contenere quella del reperibile destinatario e/o quella del responsabile del servizio di reperibilità
 * Lo stato attuale della richiesta
 * La possibilità di visualizzare nel dettaglio la richiesta
 * Le azioni eseguibili su di essa

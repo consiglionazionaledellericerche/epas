@@ -16,8 +16,7 @@ su chi appartenga ai vari gruppi. Per creare il gruppo l’amministratore deve s
   * Una descrizione del gruppo di lavoro (es.: di cosa si occupa)
   * Il responsabile del gruppo di lavoro
   * La lista dei dipendenti che afferiscono a quel gruppo di lavoro
-  * Se occorre che il responsabile venga notificato da una mail in caso vengano sottomesse richieste di assenza da 
-  parte del personale afferente al proprio gruppo
+  * Se occorre che il responsabile venga notificato da una mail in caso vengano sottomesse richieste di assenza da parte del personale afferente al proprio gruppo
   
 
 Nel caso una persona appartenga a più gruppi, è possibile inserirla nella lista dei dipendendi che afferiscono 
