@@ -329,6 +329,7 @@ public enum DefaultTakable {
 
   T_MALATTIA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
+          DefaultAbsenceType.A_111FR,
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -343,6 +344,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11S,
           DefaultAbsenceType.A_111SCM), 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
+          DefaultAbsenceType.A_111FR,
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -431,7 +433,7 @@ public enum DefaultTakable {
 
 
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
-          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N, DefaultAbsenceType.A_442,
 
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
@@ -476,7 +478,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
-          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N,
+          DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N, DefaultAbsenceType.A_442,
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
           DefaultAbsenceType.A_83, DefaultAbsenceType.A_84, 
