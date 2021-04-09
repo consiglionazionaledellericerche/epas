@@ -117,6 +117,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath telephone = createString("telephone");
 
+    public final SetPath<models.TeleworkValidation, QTeleworkValidation> teleworkValidations = this.<models.TeleworkValidation, QTeleworkValidation>createSet("teleworkValidations", models.TeleworkValidation.class, QTeleworkValidation.class, PathInits.DIRECT2);
+
     public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public final QUser user;

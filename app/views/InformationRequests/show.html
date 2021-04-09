@@ -1,0 +1,72 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set informationRequestTypeLabel: 'Visualizza flusso' /}
+#{set title:('ePAS - ' + informationRequestTypeLabel) /}
+
+#{if informationRequest.person != user.person }
+#{set breadcrumbs:['Richieste assenza':@InformationRequests.listToApprove(informationRequest.informationType), ('Visualizza'):null] /}
+#{/if}
+#{else}
+#{set breadcrumbs:['Mie richieste':@InformationRequests.list(informationRequest.informationType), ('Visualizza'):null] /}
+#{/else}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
+	#{title title: 'Richiesta per il/i giorno/i '+ illnessRequest.beginDate.format() + ' - ' + illnessRequest.endDate.format() /}
+#{/if}
+#{elseif type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
+	#{title title: 'Richiesta per il giorno '+ serviceRequest.day.format() + ' dalle ' + serviceRequest.beginAt.format() + ' alle ' + serviceRequest.finishTo.format()/}
+#{/elseif}
+#{else}
+	#{title title: 'Richiesta per il mese di '+ templateUtility.monthName(teleworkRequest.month) + ' anno ' + teleworkRequest.year /}
+#{/else}
+<br>
+ #{alert color:'info'}
+    <p>Elenco degli stati di approvazione della <strong>#{f.value 'informationRequest.informationType', value:informationRequest.informationType /}</strong>
+    per <strong>#{f.value 'informationRequest.person.fullname', value:informationRequest.person.fullname /}</strong>:</p>
+ #{/alert}
+ <div class="container-fluid center color:info">
+ 
+ 	#{f.view 'informationRequest.startAt', value:informationRequest.startAt != null ? informationRequest.startAt : ' ' /}<br>
+	#{f.view 'informationRequest.endTo', value:informationRequest.endTo != null ? informationRequest.endTo : ' ' /}
+
+</div>	
+<table class="table table-striped">
+<tr>
+	<th>Autore</th>
+	<th>Data e ora sottomissione</th>
+	<th>Tipo evento</th>
+	<th>Descrizione</th>
+	
+</tr>
+#{list items:informationRequest.events, as:'item'}
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_REFUSAL)
+		|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.ADMINISTRATIVE_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.DELETE)} 
+	class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT)
+		|| item.eventType.equals(models.flows.enumerate.InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT))} 
+	class="success" #{/if}	
+	>
+	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
+	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
+	<td>#{f.value 'item.description', value:item.description /}</td>
+</tr>
+#{/list}
+</table>
+
+	#{b.buttons center:true}
+		#{secure.check 'InformationRequests.delete', target:informationRequest}
+			#{b.link @delete(informationRequest.id), color:'danger', title:'Revoca' /}
+		#{/secure.check}
+		#{secure.check 'InformationRequests.approval', target:informationRequest}
+			#{b.link @approval(informationRequest.id), color:'success', title:'Approva'/}
+		#{/secure.check}
+		#{secure.check 'InformationRequests.disapproval', target:informationRequest}
+			#{b.link @disapproval(informationRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
+		#{/secure.check}
+	#{/b.buttons}
+</div>

@@ -1,0 +1,27 @@
+#{modalAsync id:'defaultModal', title:('Prospetto mensile di telelavoro per ' + person.fullname)}
+<table class="table table-striped table-hover table-condensed center">
+
+    <tr>
+      <th>Giorno</th>
+      <th>Inizio<br> Giornata</th>
+      <th>Inizio <br>pausa pranzo</th>
+      <th>Fine <br>pausa pranzo</th>
+      <th>Fine <br>giornata</th>
+      <th>Interruzione <br>dalle</th>
+      <th>Interruzione <br>alle</th>
+    </tr>
+
+#{list items:list, as:'day'}
+<tr>
+	<td>${day.personDay.date.shortDayName()}</td>
+	<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(0) != null ? day.beginEnd.get(0).formattedHour() : ' '}</td>
+	<td>${!day.meal.isEmpty() && day.meal.get(0) != null ? day.meal.get(0).formattedHour() : ' '}</td>
+	<td>${!day.meal.isEmpty() && day.meal.get(1) != null ? day.meal.get(1).formattedHour() : ' '}</td>
+	<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(1) != null ? day.beginEnd.get(1).formattedHour() : ' '}</td>
+	<td>${!day.interruptions.isEmpty() && day.interruptions.get(0) != null ? day.interruptions.get(0).formattedHour() : ' '}</td>
+	<td>${!day.interruptions.isEmpty() && day.interruptions.get(1) != null ? day.interruptions.get(1).formattedHour() : ' '}</td>
+</tr>
+#{/list}
+
+</table>
+#{/modalAsync}

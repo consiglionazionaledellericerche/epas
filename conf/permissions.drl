@@ -49,10 +49,18 @@ import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
+import models.TeleworkValidation;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.CompetenceRequest;
+
+import models.base.InformationRequest;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
+import models.enumerate.InformationType;
 
 import security.PermissionCheck;
 
@@ -639,9 +647,6 @@ then
   $c.grant();
 end
 
-
-
-
 rule isEmployeeForFlows
 when
   $uro: UsersRolesOffices()
@@ -652,6 +657,18 @@ when
 then
 $c.grant();
 end
+
+rule isEmployeeForInformationFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $ir: InformationRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "InformationRequests.show"), target == $ir, granted == false)
+then
+$c.grant();
+end
+
 
 rule IsEmployee
 when
@@ -694,6 +711,18 @@ when
 		"CompetenceRequests.delete",
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
+		
+		/*Richiesta flusso informativo*/
+		"InformationRequests.illness",
+		"InformationRequests.serviceExit",
+		"InformationRequests.list",
+		"InformationRequests.blank",
+		"InformationRequests.show",
+		"InformationRequests.delete",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveIllnessRequest",
 		
 		
      	/* Ferie */
@@ -764,7 +793,8 @@ when
   $p: Person() from currentOperator.person
   PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
   $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
-  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping"), granted == false, target == null)
+  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping", 
+  	"TeleworkStampings.generateReport", "InformationRequests.saveTeleworkRequest"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -795,6 +825,34 @@ when
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showInformationRequest
+when 
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
+  $ir: InformationRequest(person != currentOperator.person)
+  $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanEditOrDeleteInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ir: InformationRequest(person == currentOperator.person, flowEnded == false,
+  		officeHeadApproved == null)
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), target==$ir, granted == false)
 then
   $c.grant();
 end
@@ -1077,6 +1135,7 @@ when
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
     "TeleworkStampings.personTeleworkStampings",
+    "InformationRequests.handleTeleworkApproval",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -1319,6 +1378,23 @@ when
         "AbsenceRequests.show",
         "AbsenceRequests.approval",
         "AbsenceRequests.disapproval",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.revokeValidation",
+        "InformationRequests.handleTeleworkApproval",
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",       
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1358,6 +1434,23 @@ when
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
         "AbsenceRequests.show",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.handleTeleworkApproval",
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.revokeValidation",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",  
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1393,6 +1486,35 @@ when
 		"AbsenceRequests.approval",
 		"AbsenceRequests.disapproval"		
 		), target == $ar, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_showForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ir: InformationRequest()
+ $c: PermissionCheck(action in (
+		"InformationRequests.show"
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule RolePersonnelAdminAndSeatSuperVisor_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN)) from $uro.role
+ $ir: InformationRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
 then
  $c.grant();
 end
@@ -1488,6 +1610,7 @@ when
 
         "Stampings.personStamping",
         "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1580,6 +1703,7 @@ when
 		"Stampings.stampingsByAdmin",
 		
 		"TeleworkStampings.personTeleworkStampings",
+		"InformationRequests.handleTeleworkApproval",
 		
         "Vacations.list",
         "Vacations.vacationSummary",
@@ -1789,7 +1913,13 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",
+        "InformationRequests.show"
 
         ), target == null, granted == false)
 then
@@ -1946,7 +2076,13 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",
+        "InformationRequests.show"
 
        ), target == $o, granted == false)
 then
@@ -2975,6 +3111,34 @@ when
 then
  $c.grant();
 end
+
+/************************************************************************************************
+ * Regola per permettere la fruizione del pulsante di inserimento di un nuovo flusso informativo
+ ************************************************************************************************/
+ 
+ rule blankInformationRequest
+ when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION))
+  $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
+ then
+  $c.grant();
+ end
+ 
+/**********************************************************************************
+ * Regola per usufruire del flusso per le richieste di presa visione del telelavoro
+ **********************************************************************************/
+ 
+ rule canUseTeleworkFlow
+ when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "InformationRequests.teleworks", target == null, granted == false)
+ then
+  $c.grant();
+ end
 
 
 /*******************************************************************************

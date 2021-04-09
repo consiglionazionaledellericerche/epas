@@ -1,0 +1,32 @@
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>Compila il form sottostante per avviare un flusso di richiesta uscita di servizio.
+Specifica la <strong>data</strong>, l'ora di <strong>inizio</strong>, l'ora di <strong>fine</strong> e la motivazione.<br>  
+</p>
+#{/alert}
+</div>
+
+
+#{form action:@saveServiceRequest(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'serviceRequest.id' /}
+	#{f.hidden 'serviceRequest.person.id' /}
+	#{f.hidden 'serviceRequest.informationType' /}
+	#{f.hidden 'persist', value:persist /}
+	
+	#{f.date 'serviceRequest.day', required:true, value:serviceRequest.day.format() /}
+
+	#{f.input 'begin', required:true /}
+	#{f.input 'finish', required:true /}
+	
+	#{f.input 'serviceRequest.reason', required:true /}
+            
+	#{b.buttons center:true}
+		 #{b.link @list(type), color:'default', title:'Indietro' /}
+		 
+         #{b.submit 'Inserisci'/}
+         
+         
+    #{/b.buttons}
+#{/form}

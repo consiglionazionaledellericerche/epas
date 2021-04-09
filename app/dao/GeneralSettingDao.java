@@ -17,6 +17,9 @@
 
 package dao;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
@@ -33,9 +36,20 @@ import models.query.QGeneralSetting;
  */
 public class GeneralSettingDao extends DaoBase {
 
+  LoadingCache<String, GeneralSetting> generalSettingCache;
+  private final static String cacheKey = "gs";
+  
   @Inject
   GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
+    this.generalSettingCache = CacheBuilder.newBuilder().build(
+        new CacheLoader<String, GeneralSetting>() {
+          public GeneralSetting load(String key) {
+          return Optional.ofNullable(queryFactory
+              .selectFrom(QGeneralSetting.generalSetting).fetchOne())
+              .orElseGet(GeneralSetting::new);
+          }
+        });
   }
 
   /**
@@ -44,8 +58,13 @@ public class GeneralSettingDao extends DaoBase {
    * @return le impostazioni generali.
    */
   public GeneralSetting generalSetting() {
-    return Optional.ofNullable(queryFactory
-        .selectFrom(QGeneralSetting.generalSetting).fetchOne())
-        .orElseGet(GeneralSetting::new);
+    return generalSettingCache.getUnchecked(cacheKey);
+  }
+  
+  /**
+   * Invalida la cache sui GeneralSetting.
+   */
+  public void generalSettingInvalidate() {
+    generalSettingCache.invalidate(cacheKey);
   }
 }

@@ -65,9 +65,12 @@ public class TeleworkStampingManager {
    */
   public List<TeleworkDto> getSpecificTeleworkStampings(PersonDay pd, 
       List<TeleworkStampTypes> stampTypes) {
+    if (pd.id == null) {
+      return Lists.newArrayList();
+    }
     @val
     java.util.List<models.dto.TeleworkDto> teleworkStampings;
-    try {
+    try {      
       teleworkStampings = comunication.getList(pd.id);
     } catch (NoSuchFieldException | ExecutionException e) {
       throw new RuntimeException(e);
