@@ -82,6 +82,16 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'enableUniqueDailyShift', parent:'generalSetting', title:'Permette un unico slot di turno per la stessa persona nel giorno', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita ad un solo slot di turno per la stessa persona in un giorno. #{/alert}
+      #{f.booleanRadio 'generalSetting.enableUniqueDailyShift' /}  		
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
   #{accordionItem 'enableIllnessFlow', parent:'generalSetting', title:'Abilita flusso richiesta malattia', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
