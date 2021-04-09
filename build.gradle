@@ -8,9 +8,6 @@ apply plugin: 'eclipse'
 
 repositories {
   jcenter()
-  maven {
-    url  "https://dl.bintray.com/besmartbeopen/querydsl-spatial"
-  } 
   flatDir {
     dirs 'lib'
   }
