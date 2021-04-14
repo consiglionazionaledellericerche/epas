@@ -64,10 +64,12 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
   </tr>
+  #{if psDto.year < 2021 && psDto.month < 3}
   <tr>
     <td class="col-xs-10">Residuo da anno precedente utilizzato questo mese come recupero riposo compensativo chiusura ente (91CE)</td>
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
   </tr>
+  #{/if}
   <tr class="warning">
     <td class="col-xs-10">Residuo da anno precedente disponibile alla fine del mese</td>
     <td class="col-xs-2"><strong>${mese.value.remainingMinutesLastYear.toHourTime()}</strong></td>
@@ -142,6 +144,7 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
   </tr>
   #{/if}
+  #{if psDto.year < 2021 && psDto.month < 3}
   #{if mese.value.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente != 0}
   <tr>
     <td class="col-xs-10">Residuo da anno corrente utilizzato come recupero riposo compensativi chiusura ente (91CE)</td>
@@ -154,7 +157,7 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
     <td class="col-xs-2 danger">${mese.value.riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese.toHourTimeWithMinus()}</td>
   </tr>
   #{/if}
-
+  #{/if}
   <tr class="warning">
     <td class="col-xs-10">Residuo di questo anno a fine mese</td>
     <td class="col-xs-2"><strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong></td>
