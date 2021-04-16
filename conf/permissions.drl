@@ -1502,16 +1502,32 @@ then
  $c.grant();
 end
 
-rule RolePersonnelAdminAndSeatSuperVisor_editAndApprovalForInformationFlows
+rule RoleSeatSuperVisor_editAndApprovalForInformationFlows
 when
  $uro: UsersRolesOffices()
- Role(name in (Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN)) from $uro.role
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $ir: InformationRequest(flowEnded == false)
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.saveServiceRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+
+rule PersonnelAdmin_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $ir: IllnessRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
@@ -1704,6 +1720,7 @@ when
 		
 		"TeleworkStampings.personTeleworkStampings",
 		"InformationRequests.handleTeleworkApproval",
+		
 		
         "Vacations.list",
         "Vacations.vacationSummary",
@@ -1919,7 +1936,9 @@ when
         "InformationRequests.listToApprove",
         "InformationRequests.approval",
         "InformationRequests.disapproval",
-        "InformationRequests.show"
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport"
 
         ), target == null, granted == false)
 then
@@ -2080,9 +2099,11 @@ when
         
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",
-        "InformationRequests.approval",
-        "InformationRequests.disapproval",
-        "InformationRequests.show"
+//        "InformationRequests.approval",
+//        "InformationRequests.disapproval",
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport"
 
        ), target == $o, granted == false)
 then
