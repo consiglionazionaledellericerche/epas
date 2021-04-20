@@ -19,22 +19,26 @@ package controllers.rest.v2;
 
 import cnr.sync.dto.v2.PersonCreateDto;
 import cnr.sync.dto.v2.PersonShowDto;
+import cnr.sync.dto.v2.PersonShowTerseDto;
 import cnr.sync.dto.v2.PersonUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
+import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonManager;
 import manager.UserManager;
 import models.Person;
@@ -69,13 +73,24 @@ public class Persons extends Controller {
    * individuata con i parametri passati. 
    */
   @BasicAuth
-  public static void list(Long id, String code, String codeId) {
+  public static void list(Long id, String code, String codeId, LocalDate atDate, Boolean terse) {
     RestUtils.checkMethod(request, HttpMethod.GET);
+    if (atDate == null) {
+      atDate = LocalDate.now();
+    }
+
     val office = Offices.getOfficeFromRequest(id, code, codeId);
-    
-    val list = 
-        office.persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
-    renderJSON(gsonBuilder.create().toJson(list));
+    val persons = personDao.list(Optional.<String>absent(), Sets.newHashSet(office), false, 
+        JodaConverters.javaToJodaLocalDate(atDate), JodaConverters.javaToJodaLocalDate(atDate), false).list();
+    if (terse != null && terse) {
+      val list = 
+          persons.stream().map(p -> PersonShowTerseDto.build(p)).collect(Collectors.toList());
+      renderJSON(gsonBuilder.create().toJson(list));      
+    } else {
+      val list = 
+          persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
+      renderJSON(gsonBuilder.create().toJson(list));  
+    }
   }
 
   /**
