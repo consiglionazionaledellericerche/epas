@@ -150,3 +150,9 @@ Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate
 
   $ http -a istituto_xxx_registry_manager
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/list?id=101
+      
+Dalla versione 2.0.3 il metodo ritorna solo la lista del personale attivo al momento della chiamata.
+Inoltre adesso supporta il parametro *atDate* con cui è possibile passare una data con cui
+verificare i contratti attivi a quella data. Infine  è possibile utilizzare il parametro *terse*
+per avere solo informazioni principali del personale.
+
