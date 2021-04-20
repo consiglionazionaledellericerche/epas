@@ -34,7 +34,9 @@ La visualizzazione dei dati di una persona è tramite una *HTTP GET* all'indiriz
 Per individuare la persona è possibile utilizzare una delle cinque chiavi candidate presenti sulle
 persone:
 
- - *id*, *email*, *eppn*, *perseoPersonId*, *fiscalCode*. 
+ - *id*, *email*, *eppn*, *perseoPersonId*, *fiscalCode*, *number*.
+
+Il campo *number* corrisponde alla matricola.
 
 .. code-block:: bash
 
@@ -88,7 +90,7 @@ Oppure per esempio per codice fiscale con questa chiamata:
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?fiscalCode=GLLGLL74P10G702B
 
 Nel caso vengano passati più parametri nella ricerca della persona l'ordine con cui viene cercata
-la persona è **id, email, eppn, perseoPersonId, fiscalCode**.
+la persona è **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 Person Create
 -------------
@@ -112,7 +114,7 @@ La creazione di una persona è possibile tramite una *HTTP PUT* all'indirizzo
 
 Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:
 
-  - **id, email, eppn, perseoPersonId, fiscalCode**.
+  - **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 .. code-block:: bash
 
@@ -129,7 +131,7 @@ La cancellazione di una persona è possibile tramite una *HTTP DELETE* all'indir
 
 Per individuare la persona da eliminare si utilizzano gli stessi parametri previsti per la show:
 
-  - **id, email, eppn, perseoPersonId, fiscalCode**.
+  - **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 .. code-block:: bash
 

@@ -25,7 +25,7 @@ Le informazioni relative alle aspettative di un singolo dipendente in uno spefic
 disponibili tramite una HTTP GET all'indirizzo **/rest/v2/leaves/byPersonAndYear**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*, l'anno tramite il campo *year*.
+*id, email, eppn, perseoPersonId, fiscalCode, number*, l'anno tramite il campo *year*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.
 

@@ -32,7 +32,7 @@ anno sono disponibili tramite una HTTP GET all'indirizzo
 **/rest/absences/absencesInPeriod**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 
@@ -78,7 +78,7 @@ l'effettivo inserimento. Questa operazione è fruibile utilizzando l'endpoint
 **/rest/absences/checkAbsence**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
@@ -116,7 +116,7 @@ Analogamente al metodo precedente per controllare un'assenza è possibile effett
 inserimento di una assenza tramite una *HTTP PUT* all'endpoint **/rest/absences/insertAbsence**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 Il codice dell'assenza deve essere indicato con il parametro *absenceCode*.
@@ -161,7 +161,7 @@ L'inserimento di una assenza di tipo ferie è possibile tramite una *HTTP PUT* a
 **/rest/absences/insertVacation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 
@@ -222,7 +222,7 @@ i limiti temporali di inizio e fine delle assenze da cancellare.
 Questa operazione può essere seguita con una *HTTP DELETE* all'endpoint **/rest/absences/deleteAbsencesInPeriod**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
 Il periodo può essere specificato tramite le variabili *begin* ed *end* con data nel formato
 *YYYY-MM-dd*.
 Il codice dell'assenze da cancellare deve essere indicato con il parametro *absenceCode*.
