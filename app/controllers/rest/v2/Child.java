@@ -63,9 +63,9 @@ public class Child extends Controller {
    * parametro (uniformemente ai metodi REST sulle persone). 
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode) {
+      String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
     List<ChildrenShowDto> childs = 
         person.personChildren.stream().map(c -> ChildrenShowDto.build(c))

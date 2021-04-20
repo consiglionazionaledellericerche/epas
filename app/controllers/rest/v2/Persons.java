@@ -83,9 +83,9 @@ public class Persons extends Controller {
    * passati. 
    */
   public static void show(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
     rules.checkIfPermitted(person.office);
 
@@ -136,12 +136,12 @@ public class Persons extends Controller {
   @BasicAuth
   public static void update(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
-      String body) throws JsonParseException, JsonMappingException, IOException {
+      String number, String body) throws JsonParseException, JsonMappingException, IOException {
     RestUtils.checkMethod(request, HttpMethod.PUT);
 
     log.debug("Update person -> request.body = {}", body);
 
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
@@ -178,9 +178,9 @@ public class Persons extends Controller {
    */
   @BasicAuth
   public static void delete(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
     
     if (!person.contracts.isEmpty()) {
@@ -207,15 +207,16 @@ public class Persons extends Controller {
    */
   @Util
   public static Person getPersonFromRequest(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+      String number) {
     if (id == null && email == null && eppn == null 
-        && personPerseoId == null && fiscalCode == null) {
+        && personPerseoId == null && fiscalCode == null && number == null) {
       JsonResponse.badRequest("I parametri per individuare la persona non sono presenti");
     }
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "

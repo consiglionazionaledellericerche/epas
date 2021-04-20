@@ -79,9 +79,9 @@ public class Contracts extends Controller {
    * parametro (uniformemente ai metodi REST sulle persone). 
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode) {
+      String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
     List<ContractShowTerseDto> contracts = 
         person.contracts.stream().map(c -> ContractShowTerseDto.build(c))

@@ -47,9 +47,9 @@ public class Vacations extends Controller {
    * Informazioni sulla situazione delle ferie di una persona ad una certa data.
    */
   public static void byPersonAndYear(Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, Integer year) {
+      Long personPerseoId, String fiscalCode, String number, Integer year) {
 
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
     log.debug("Chiamata Vacations::byPersonAndYear, person={}, year = {}", 
         person.getFullname(), year);
