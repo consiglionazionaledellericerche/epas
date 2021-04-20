@@ -101,9 +101,9 @@ public class Affiliations extends Controller {
    *     questo momento, se false (il default) le include tutte.
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode, boolean includeInactive) {
+      String fiscalCode, String number, boolean includeInactive) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
 
     List<AffiliationShowDto> affiliations = Lists.newArrayList();

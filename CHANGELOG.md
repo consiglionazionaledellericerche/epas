@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 al momento della chiamata, inoltre adesso supporta il parametro *atDate* con cui è possibile
 passare una data con cui verificare i contratti attivi a quella data. Inoltre è possibile
 utilizzare il parametro *terse* per avere solo informazioni principali del personale.
+### Added
+- Aggiunta possiblità di cercare le persone per matricola nei metodi REST.
 
 ## [2.0.2] - 2021-04-09
 ### Fixed

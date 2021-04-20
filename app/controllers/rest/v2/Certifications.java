@@ -115,8 +115,8 @@ public class Certifications extends Controller {
    * di una dipendente nell'anno/mese passati come parametro.
    */
   public static void getMonthValidationStatusByPerson(Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
@@ -138,13 +138,13 @@ public class Certifications extends Controller {
    */
   @BasicAuth
   public static void getMonthSituation(
-      Long id, String email, String eppn, 
-      Long personPersoId, String fiscalCode, int year, int month) {
+      Long id, String email, String eppn, Long personPersoId, String fiscalCode,
+      String number, int year, int month) {
 
     log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPersoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPersoId, fiscalCode, number);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "

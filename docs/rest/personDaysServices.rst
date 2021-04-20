@@ -26,7 +26,7 @@ Le informazioni di un singolo giorno sulle timbrature e assenze di una persona �
 una HTTP GET all'indirizzo **/rest/v3/personDays/getDaySituation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone: 
-*id, email, eppn, perseoPersonId, fiscalCode*, la data tramite il campo *date*.
+*id, email, eppn, perseoPersonId, fiscalCode, number*, la data tramite il campo *date*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it, 
 cambiatelo con un utente appropriato per la vostra sede.
 
@@ -79,7 +79,7 @@ servizio con luogo e/o motivazione di un dipendente è possibile utilizzare una 
 **/rest/v3/personDays/offSiteWorkByPersonAndMonth**.
 
 La persona può essere individuata passando i parametri identificativi delle persone: 
-*id, email, eppn, perseoPersonId, fiscalCode*, i parametri *year* e *month* sono utilizzati per
+*id, email, eppn, perseoPersonId, fiscalCode, number*, i parametri *year* e *month* sono utilizzati per
 individuare l'anno ed il mese.
 
 .. code-block:: bash
