@@ -68,9 +68,11 @@
       #{secure.li @InformationRequests.teleworks()}
         <i class="fa fa-laptop" aria-hidden="true"></i>
       #{/secure.li}
+      #{secure.check 'InformationRequests.serviceExit'}
       #{secure.li @InformationRequests.serviceExit()}
         <i class="fa fa-sign-out" aria-hidden="true"></i>
       #{/secure.li}
+      #{/secure.check}
       
       #{if templateUtility.enableIllnessFlow()}
          #{secure.li @InformationRequests.illness()}
