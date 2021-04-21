@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.joda.time.LocalDate;
 
-
+/**
+ * Classe di check per l'inserimento delle assenze.
+ *
+ */
 public class CheckAbsenceInsert {
 
   public int totalAbsenceInsert;

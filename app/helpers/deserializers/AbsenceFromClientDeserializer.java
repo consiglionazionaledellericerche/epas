@@ -33,6 +33,10 @@ import models.Person;
 import models.exports.AbsenceFromClient;
 import org.joda.time.LocalDate;
 
+/**
+ * Deserializza le assenze provenienti da client.
+ *
+ */
 @Slf4j
 @StaticInject
 public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFromClient> {

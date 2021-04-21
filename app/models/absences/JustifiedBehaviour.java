@@ -41,6 +41,10 @@ public class JustifiedBehaviour extends BaseModel {
 
   private static final long serialVersionUID = -3532986170397408935L;
 
+  /**
+   * Enumerato per la gestione del comportamento di un'assenza.
+   *
+   */
   public enum JustifiedBehaviourName {
     minimumTime,
     maximumTime,

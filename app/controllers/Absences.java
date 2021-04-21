@@ -316,7 +316,8 @@ public class Absences extends Controller {
     String filename = String.format("assenza-%s-%s",
         absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
-      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+      filename = String.format("%s%s", filename, 
+          ImageUtils.fileExtension(absence.absenceFile).get());
     }
 
     log.debug("Allegato relativo all'assenza: {}", absence.absenceFile.getFile());

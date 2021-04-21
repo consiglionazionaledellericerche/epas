@@ -22,6 +22,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import manager.configurations.EpasParam;
 
+/**
+ * Enumerato che gestisce la tipologia di richiesta informativa.
+ * @author dario
+ *
+ */
 @Getter
 @RequiredArgsConstructor
 public enum InformationType {

@@ -31,6 +31,11 @@ public class TeleworkValidation extends BaseModel {
   
   public LocalDate approvationDate;
   
+  /**
+   * Verifica che il telelavoro sia stato validato.
+   * 
+   * @return se la validazione del telelavoro è presente o meno.
+   */
   @Transient
   public boolean isValidated() {
     if (this.approved && this.approvationDate != null) {

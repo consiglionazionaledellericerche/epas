@@ -8,6 +8,10 @@ import models.dto.TeleworkDto.TeleworkDtoBuilder;
 import models.enumerate.TeleworkStampTypes;
 import models.informationrequests.TeleworkRequest;
 
+/**
+ * Dto per l'approvazione delle richieste di telelavoro.
+ *
+ */
 @Data
 @Builder()
 public class TeleworkApprovalDto {

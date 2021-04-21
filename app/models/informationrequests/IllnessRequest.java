@@ -22,8 +22,8 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import org.hibernate.envers.Audited;
 import models.base.InformationRequest;
+import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
 @Audited

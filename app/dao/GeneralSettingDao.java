@@ -37,7 +37,7 @@ import models.query.QGeneralSetting;
 public class GeneralSettingDao extends DaoBase {
 
   LoadingCache<String, GeneralSetting> generalSettingCache;
-  private final static String cacheKey = "gs";
+  private static final String cacheKey = "gs";
   
   @Inject
   GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {

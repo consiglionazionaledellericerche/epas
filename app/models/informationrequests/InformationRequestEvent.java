@@ -35,6 +35,12 @@ import models.flows.enumerate.InformationRequestEventType;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
+/**
+ * Evento del flusso di approvazione di una richiesta informativa.
+ * 
+ * @author dario
+ *
+ */
 @Builder
 @ToString
 @Entity

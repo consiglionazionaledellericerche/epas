@@ -37,8 +37,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.PersonManager;
 import manager.UserManager;
 import models.Person;
@@ -81,7 +81,8 @@ public class Persons extends Controller {
 
     val office = Offices.getOfficeFromRequest(id, code, codeId);
     val persons = personDao.list(Optional.<String>absent(), Sets.newHashSet(office), false, 
-        JodaConverters.javaToJodaLocalDate(atDate), JodaConverters.javaToJodaLocalDate(atDate), false).list();
+        JodaConverters.javaToJodaLocalDate(atDate), 
+        JodaConverters.javaToJodaLocalDate(atDate), false).list();
     if (terse != null && terse) {
       val list = 
           persons.stream().map(p -> PersonShowTerseDto.build(p)).collect(Collectors.toList());

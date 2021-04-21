@@ -365,8 +365,8 @@ public class InformationRequestDao extends DaoBase {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.officeHeadApprovalRequired.isTrue()
-        .and(informationRequest.officeHeadApproved.isNull()));
+        .and(informationRequest.officeHeadApprovalRequired.isTrue()
+            .and(informationRequest.officeHeadApproved.isNull()));
 
     return condition;
   }
@@ -385,8 +385,8 @@ public class InformationRequestDao extends DaoBase {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.administrativeApprovalRequired.isTrue()
-        .and(informationRequest.administrativeApproved.isNull()));
+        .and(informationRequest.administrativeApprovalRequired.isTrue()
+            .and(informationRequest.administrativeApproved.isNull()));
 
     return condition;
   }
@@ -412,9 +412,9 @@ public class InformationRequestDao extends DaoBase {
 
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     conditions.and(informationRequest.startAt.after(fromDate))
-    .and(informationRequest.informationType.eq(informationType)
-        .and(informationRequest.flowEnded.isTrue())
-        .and(informationRequest.person.office.in(officeList)));
+        .and(informationRequest.informationType.eq(informationType)
+            .and(informationRequest.flowEnded.isTrue())
+              .and(informationRequest.person.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -442,9 +442,9 @@ public class InformationRequestDao extends DaoBase {
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(informationRequest.startAt.after(fromDate))
-    .and(informationRequest.informationType.eq(informationType)
-        .and(informationRequest.flowEnded.isTrue())
-        .and(informationRequest.person.office.eq(signer.office)));
+        .and(informationRequest.informationType.eq(informationType)
+            .and(informationRequest.flowEnded.isTrue())
+              .and(informationRequest.person.office.eq(signer.office)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));

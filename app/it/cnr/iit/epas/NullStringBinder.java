@@ -22,6 +22,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import play.data.binding.TypeBinder;
 
+/**
+ * Binder per il controllo delle stringhe nulle.
+ *
+ */
 public class NullStringBinder implements TypeBinder<String> {
 
   @SuppressWarnings("rawtypes")
