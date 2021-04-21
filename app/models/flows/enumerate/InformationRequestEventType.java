@@ -1,5 +1,12 @@
 package models.flows.enumerate;
 
+/**
+ * Enumerato per le tipologie di stato nel flusso di approvazione delle richieste
+ * di flusso informativo.
+ * 
+ * @author dario
+ *
+ */
 public enum InformationRequestEventType {
 
   STARTING_APPROVAL_FLOW,

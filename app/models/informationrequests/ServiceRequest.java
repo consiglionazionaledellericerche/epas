@@ -34,7 +34,7 @@ import play.data.validation.Required;
 @Entity
 @Table(name = "service_requests")
 @PrimaryKeyJoinColumn(name = "informationRequestId")
-public class ServiceRequest extends InformationRequest{
+public class ServiceRequest extends InformationRequest {
 
   private static final long serialVersionUID = -8903988859450152320L;
 

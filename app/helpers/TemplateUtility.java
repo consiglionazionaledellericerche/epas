@@ -309,6 +309,7 @@ public class TemplateUtility {
   
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro.
+   * 
    * @return la quantità di richieste di telelavoro pendenti.
    */
   public final int teleworkRequests() {
@@ -326,6 +327,7 @@ public class TemplateUtility {
   
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di approvazione di uscite di servizio.
+   * 
    * @return la quantità di richieste di uscite di servizio pendenti.
    */
   public final int serviceRequests() {
@@ -343,6 +345,7 @@ public class TemplateUtility {
   
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di informazione malattia.
+   * 
    * @return la quantità di richieste di informazione di malattia pendenti.
    */
   public final int illnessRequests() {

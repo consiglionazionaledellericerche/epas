@@ -17,7 +17,10 @@
 
 package models;
 
-
+/**
+ * Enumerato per la gestione degli identificativi applicati alle singole timbrature.
+ *
+ */
 public enum StampModificationTypeCode {
 
   /*

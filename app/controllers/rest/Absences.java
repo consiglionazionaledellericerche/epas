@@ -42,8 +42,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -292,7 +292,7 @@ public class Absences extends Controller {
       @CheckWith(LocalDateNotTooFar.class) @Required LocalDate end) {
 
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
+    
 
     if (Validation.hasErrors()) {
       JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
@@ -303,7 +303,8 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
-
+    val person = Persons.getPersonFromRequest(id, email, eppn, 
+        personPerseoId, fiscalCode, number);
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
     rules.checkIfPermitted(person.office);

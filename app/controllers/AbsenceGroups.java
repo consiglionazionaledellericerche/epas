@@ -571,8 +571,9 @@ public class AbsenceGroups extends Controller {
    * @param minutes minuti
    */
   public static void insert(
-      Long personId, @CheckWith(LocalDateNotTooFar.class) LocalDate from, CategoryTab categoryTab,                      //tab
-      @CheckWith(LocalDateNotTooFar.class) LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      Long personId, @CheckWith(LocalDateNotTooFar.class) LocalDate from, 
+      CategoryTab categoryTab, @CheckWith(LocalDateNotTooFar.class) LocalDate to, 
+      LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
       boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 

@@ -70,10 +70,20 @@ public class Notification extends MutableModel {
     return subject.toUrl(subjectId);
   }
 
+  /**
+   * Interfaccia per la creazione del tipo di notifica.
+   * @author dario
+   *
+   */
   public interface NotificationBuilderTypeCreate {
     Notification create();
   }
 
+  /**
+   * Interfaccia per la creazione della notifica.
+   * @author dario
+   *
+   */
   public interface NotificationBuilderType {
 
     NotificationBuilderTypeCreate subject(NotificationSubject type);

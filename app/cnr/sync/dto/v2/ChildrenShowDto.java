@@ -48,6 +48,7 @@ public class ChildrenShowDto {
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
+  
   /**
    * Nuova instanza di un PersonShowTerseDto contenente i valori 
    * dell'oggetto person passato.

@@ -13,6 +13,10 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+/**
+ * Gestisce le informazioni sull'applicazione e le informazioni di privacy.
+ *
+ */
 @With(Resecure.class)
 public class ApplicationInfo extends Controller {
 

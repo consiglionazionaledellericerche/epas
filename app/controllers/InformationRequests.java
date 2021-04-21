@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.NotificationManager;
 import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
@@ -632,12 +632,12 @@ public class InformationRequests extends Controller {
     PersonLite p = null;
     Person person = personDao.getPersonById(personId);
     if (person.personConfigurations.stream().noneMatch(pc -> 
-      pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
         flash.error("Non ci sono persone abilitate al telelavoro!!");
         Stampings.personStamping(personId, Integer.parseInt(session.get("yearSelected")), 
-        Integer.parseInt(session.get("monthSelected")));
+            Integer.parseInt(session.get("monthSelected")));
       }
       p = persons.get(0);
       
@@ -665,6 +665,10 @@ public class InformationRequests extends Controller {
     render(dtoList);
   }
   
+  /**
+   * Revoca la validazione ad un telelavoro.
+   * @param validationId l'identificativo della validazione
+   */
   public static void revokeValidation(Long validationId) {
     Optional<TeleworkValidation> validation = validationDao.getValidationById(validationId);
     if (validation.isPresent()) {

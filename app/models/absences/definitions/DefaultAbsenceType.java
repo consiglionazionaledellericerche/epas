@@ -682,8 +682,9 @@ public enum DefaultAbsenceType {
 
   A_111("111", "Malattia", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0,
       null, Sets.newHashSet(), null, null, false, true), 
-  A_111FR("111FR", "Dipendenti con fragilità non SW", false, ImmutableSet.of(JustifiedTypeName.all_day), 
-      0, true, false, 0, null, Sets.newHashSet(), null, null, false, true), 
+  A_111FR("111FR", "Dipendenti con fragilità non SW", false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), 
+      null, null, false, true), 
   A_111VM("111VM", "gg visite/terapie/prest. spec. <= 9MM malat", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(),
       null, null, false, true), 
@@ -1004,8 +1005,9 @@ public enum DefaultAbsenceType {
 
   A_441("441", "permesso esami", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false,
       0, null, Sets.newHashSet(), null, null, false, true), 
-  A_442("442", "permesso congr.conv.seminari ecc.", false, ImmutableSet.of(JustifiedTypeName.all_day), 
-      0, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
+  A_442("442", "permesso congr.conv.seminari ecc.", false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), 
+      null, null, false, true), 
   A_6N("6N", "permesso motivi privati non retribuito", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(),
       null, null, false, true), 
@@ -1711,6 +1713,11 @@ public enum DefaultAbsenceType {
     this.isRealAbsenceType = isRealAbsenceType;
   }
 
+  /**
+   * sottoclasse che definisce il comportamento.
+   * @author dario
+   *
+   */
   public static class Behaviour {
     public JustifiedBehaviourName name;
     public Integer data;
