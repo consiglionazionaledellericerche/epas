@@ -669,6 +669,15 @@ then
 $c.grant();
 end
 
+rule isEmployeeForServiceExit
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $c: PermissionCheck(action == "InformationRequests.serviceExit", target == null, granted == false)
+then
+$c.grant();
+end
 
 rule IsEmployee
 when
@@ -714,7 +723,7 @@ when
 		
 		/*Richiesta flusso informativo*/
 		"InformationRequests.illness",
-		"InformationRequests.serviceExit",
+		//"InformationRequests.serviceExit",
 		"InformationRequests.list",
 		"InformationRequests.blank",
 		"InformationRequests.show",

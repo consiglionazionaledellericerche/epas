@@ -37,7 +37,7 @@ public enum InformationType {
       Optional.absent(),
       Optional.absent()),
   SERVICE_INFORMATION(false, true,
-      Optional.of(EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.absent(),
       Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.absent());
