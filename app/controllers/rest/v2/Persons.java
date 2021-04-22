@@ -236,8 +236,8 @@ public class Persons extends Controller {
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
-          + "email = {}, eppn = {}, personPersoId = {}, fiscalCode = {}", 
-          email, eppn, personPerseoId, fiscalCode);
+          + "email = {}, eppn = {}, personPersoId = {}, fiscalCode = {}, number = {}", 
+          email, eppn, personPerseoId, fiscalCode, number);
       JsonResponse.notFound("Non è stato possibile individuare la persona in ePAS con "
           + "i parametri passati.");
     }
