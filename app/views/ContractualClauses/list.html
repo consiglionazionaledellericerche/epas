@@ -1,24 +1,27 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Istituti contrattuali'  /}
+#{set breadcrumbs:['Istituti contrattuali':null] /}
 
 <div class="container">
 
+#{breadcrumbs breadcrumbs /}
 
 #{title title:'Istituti contrattuali' /}
-  
+
 #{accordionGroup 'contractual_clauses_and_references'}
 
-  #{secure.check 'ContractualClauses.manage'}
   #{accordionItem 'contractual_clauses', parent:'contractual_clauses_and_references', 
 		title:'Configurazione degli istituti contrattuali', open:true, color:'info'}
-	  
-	  <div class="row text-center">
-		#{secure.link @blank(), class:'btn btn-primary',fa:'plus' }
-			Nuovo istituto contrattuale
-		#{/secure.link}
+
+	  #{secure.check 'ContractualClauses.manage'}
+	    <div class="row text-center">
+		  #{secure.link @blank(), class:'btn btn-primary',fa:'plus' }
+		    Nuovo istituto contrattuale
+		  #{/secure.link}
 	  </div>
-  
+	  #{/secure.check}
+
 	  <table class="table table-bordered" datatable> 
 	   <thead>
 	 	<tr>
@@ -49,9 +52,9 @@
 		    <td>
 				#{secure.check 'ContractualClauses.show'}
 					#{b.link @show(contractualClause.id), class:'btn btn-default btn-sm'}
-		    		<i class="fa fa-book"></i> Mostra		    	
+		    		<i class="fa fa-book"></i> Mostra
 		    		#{/b.link}
-		    	#{/secure.check}		    
+		    	#{/secure.check}
 		    	#{secure.check 'ContractualClauses.edit'}
 		    		#{b.link @edit(contractualClause.id), class:'btn btn-primary btn-sm'}
 		    			<i class="fa fa-pencil-square-o"></i> Modifica
@@ -62,8 +65,7 @@
 		 #{/list}
 	 </tbody>
 	 </table>
-  #{/accordionItem}  
-  #{/secure.check}
-    	
+  #{/accordionItem}
+
 #{/accordionGroup}
 </div>

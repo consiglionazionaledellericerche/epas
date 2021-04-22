@@ -1,8 +1,11 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title:'ePAS - Riferimenti normativo/contrattuali' /}
+#{set breadcrumbs:['Riferimenti normativi/contrattuali':@list(), (contractualReference.name):null] /}
 
  <div class="container">
+   #{breadcrumbs breadcrumbs /}
+
     #{form @save(),class:'form-horizontal', method:'POST', enctype:'multipart/form-data'}
 
     #{alert color:'info'}
@@ -37,9 +40,9 @@
 		#{f.date 'contractualReference.endDate' /}
 				
         <div class="container center">
-            <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
 	        <input class="btn btn-primary" type="submit" value="Ok">
 	        <a class="btn btn-danger" href="@{delete(contractualReference.id)}">Elimina</a>
+	        <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
         </div>
    #{/form}
 

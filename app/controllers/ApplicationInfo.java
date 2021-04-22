@@ -34,6 +34,11 @@ public class ApplicationInfo extends Controller {
     return generalSettingDao.generalSetting().cookiePolicyEnabled;
   }
 
+  @Util
+  public static boolean isRegulationsEnabled() {
+    return generalSettingDao.generalSetting().regulationsEnabled;
+  }
+
   /**
    * Preleva l'informazione della versione corrente dal file VERSION utilizzando
    * la cache se il dato è presente.

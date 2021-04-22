@@ -734,12 +734,15 @@ when
 		"InformationRequests.saveIllnessRequest",
 		
 		
-     	/* Ferie */
-     	"Vacations.show",
-     	"Vacations.personVacationSummary",
+        /* Ferie */
+        "Vacations.show",
+        "Vacations.personVacationSummary",
 
-       	/* Competenze */
-     	"Competences.competences",
+        /* Competenze */
+        "Competences.competences",
+
+        "ContractualReferences.list",
+        "ContractualReferences.getFile",
 
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -3448,7 +3451,7 @@ when
 
         "ContractualClauses.list", "ContractualClauses.blank",
         "ContractualClauses.edit", "ContractualClauses.save",
-        "ContractualClauses.show",
+        "ContractualClauses.show", "ContractualReferences.getFile",
         "ContractualClauses.delete", "ContractualClauses.manage")
         , granted == false)
 then
