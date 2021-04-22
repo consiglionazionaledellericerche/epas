@@ -551,7 +551,7 @@ public final class PersonDao extends DaoBase {
   public Optional<Person> byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
       Long id, String eppn, String email, Long perseoId, String fiscalCode, String number) {
     if (id == null && eppn == null && email == null && perseoId == null 
-        && fiscalCode == null) {
+        && fiscalCode == null && number == null) {
       return Optional.absent();
     }
     if (id != null) {
