@@ -1009,6 +1009,7 @@ Persons.list= Lista Persone
 Persons.workGroup= Gruppo Di Lavoro
 PrintTags.listPersonForPrintTags= Stampa Cartellino
 PrintTags.showTag= Stampa Cartellino Presenze
+PrintTags.autocertOffsite =Stampa timbrature fuori sede
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
 Stampings.missingStamping= Riepilogo problemi sui giorni

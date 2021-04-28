@@ -12,6 +12,7 @@
   'MealTickets.mealTickets',
   'Charts.excelFile',
   'PrintTags.showTag',
+  'PrintTags.autocertOffsite',
   'Persons.changePassword',
   'Absences.absencesVisibleForEmployee'] /}
 
@@ -111,6 +112,10 @@
 	  #{/secure.li}
       
       #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
+      <i class="fa fa-print" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @PrintTags.autocertOffsite(session.get("yearSelected"), session.get("monthSelected")) }
       <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}
 
