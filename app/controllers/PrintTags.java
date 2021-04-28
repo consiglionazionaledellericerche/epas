@@ -163,4 +163,13 @@ public class PrintTags extends Controller {
 
     render(personList, date, year, month, forAll, office);
   }
+  
+  public static void autocertOffsite(int year, int month) {
+    Person person = Security.getUser().get().person;
+    List<PrintTagsInfo> dtoList = Lists.newArrayList();
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+    log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
+    List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
+    renderPDF(dtoList, offSiteWorkingTemp);
+  }
 }

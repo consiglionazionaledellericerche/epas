@@ -679,6 +679,17 @@ then
 $c.grant();
 end
 
+rule autocertOffsite
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "PrintTags.autocertOffsite", target == null, granted == false)
+then
+$c.grant();
+end
+
 rule IsEmployee
 when
   $uro: UsersRolesOffices()
