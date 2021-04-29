@@ -12,6 +12,9 @@ passare una data con cui verificare i contratti attivi a quella data. Inoltre è
 utilizzare il parametro *terse* per avere solo informazioni principali del personale.
 ### Added
 - Aggiunta possiblità di cercare le persone per matricola nei metodi REST.
+### Added
+- Aggiunta la configurabilità della visibilità del menu Normativa e migliorata la gestione dei
+permessi di questa parte
 
 ## [2.0.2] - 2021-04-09
 ### Fixed

@@ -116,11 +116,15 @@
           #{include './_configMenu.html' /}
         #{/if}
 
-		*{ Ruoli di Sistema e Gestori istituti contrattuali }*
-		#{secure.check 'ContractualClauses.list'}
+        *{ Ruoli di Sistema e Gestori istituti contrattuali }*
+        #{if controllers.ApplicationInfo.isRegulationsEnabled()
+          || currentUser?.roles.contains(models.enumerate.AccountRole.DEVELOPER)
+          || currentUser?.roles.contains(models.enumerate.AccountRole.ADMIN
+          || currentUser?.roles.contains(models.enumerate.AccountRole.ADMIN_MINI)
+          || currentUser?.roles.contains(models.enumerate.AccountRole.CONTRACTUAL_MANAGER))}
           #{include '/_regulationsMenu.html' /}
-        #{/secure.check}
-        
+        #{/if}
+
         *{ Ruoli di Sistema }*
         #{if currentUser?.roles.contains(models.enumerate.AccountRole.DEVELOPER) || currentUser?.roles.contains(models.enumerate.AccountRole.ADMIN)}
           #{include '/_toolsMenu.html' /}

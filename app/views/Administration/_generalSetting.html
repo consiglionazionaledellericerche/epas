@@ -15,6 +15,18 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'regulationsSettings', parent:'generalSetting', title:'Impostazioni Menu normativa', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}
+        Abilita la visualizzazione del menu <em>Normativa</em> a tutti i dipendenti.
+      #{/alert}
+      #{f.booleanRadio 'generalSetting.regulationsEnabled' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
   #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
