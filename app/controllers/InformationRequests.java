@@ -642,6 +642,9 @@ public class InformationRequests extends Controller {
       p = persons.get(0);
       
     }
+    if (p != null) {
+      person = personDao.getPersonById(p.id); 
+    }
     person = personDao.getPersonById(p.id);
     Preconditions.checkNotNull(person);
     rules.checkIfPermitted(person.office);
