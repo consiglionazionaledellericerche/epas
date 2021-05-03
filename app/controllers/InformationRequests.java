@@ -645,7 +645,7 @@ public class InformationRequests extends Controller {
     if (p != null) {
       person = personDao.getPersonById(p.id); 
     }
-    person = personDao.getPersonById(p.id);
+    
     Preconditions.checkNotNull(person);
     rules.checkIfPermitted(person.office);
     List<TeleworkApprovalDto> dtoList = Lists.newArrayList();
