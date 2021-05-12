@@ -118,6 +118,21 @@ then
   $c.grant();
 end
 
+
+/*
+ * Permesso per la visualizzazione dei flussi informativi
+ */
+rule isInformationFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
+then
+  $c.grant();
+end
+
 /*
  * Permesso per la visualizzazione dei flussi di richiesta competenze
  */
