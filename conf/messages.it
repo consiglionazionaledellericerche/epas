@@ -1218,6 +1218,8 @@ CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione d
 
 CHANGE_REPERIBILITY_REQUEST =Richiesta cambio reperibilità
 
+ENABLE_INFORMATION_FLOWS =Abilitazione flussi informativi
+
 ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte del responsabile di sede
 ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede
 ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte dell'amministratore del personale

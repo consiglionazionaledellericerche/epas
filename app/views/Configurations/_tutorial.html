@@ -339,6 +339,15 @@
       </p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_INFORMATION_FLOWS) }
+      <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
+      integrato di approvazione/presa visione dei flussi informativi. <br>
+      Esso permette di far richiedere al dipendente tecnico/amministrativo un'uscita per servizio al proprio responsabile di sede, 
+      o a qualsiasi qualifica, se preventivamente abilitata, la possibilità di farsi approvare le informazioni per il telelavoro. 
+     
+      </p>
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }
       <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un ricercatore/tecnologo
       richieda l'approvazione del responsabile di sede.      

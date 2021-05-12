@@ -669,6 +669,20 @@ public enum EpasParam {
   //#####################################################################
   //INFORMATION FLOWS PARAMS
   
+  
+  /**
+   * Attivazione o meno delle richieste di straordinario.
+   */
+  ENABLE_INFORMATION_FLOWS(
+      "enable_information_flows",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  
   /**
    * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
    * del responsabile di sede.
