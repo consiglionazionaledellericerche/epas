@@ -458,17 +458,20 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
-
-
+    boolean allDay = true;
+    if (absenceForm.absenceTypeSelected != null 
+        && absenceForm.absenceTypeSelected.code.equals("661M")) {
+      allDay = false;
+    }
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
-        compensatoryRestAvailable, retroactiveAbsence, periodChain);
+        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay);
   }
 
   /**
    * Salvataggio di una richiesta di assenza.
    */
   public static void save(@Required @Valid AbsenceRequest absenceRequest, 
-      Integer hours, Integer minutes, boolean persist) {
+      Integer hours, Integer minutes, boolean allDay) {
 
     log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
 
@@ -485,10 +488,15 @@ public class AbsenceRequests extends Controller {
       absenceRequest.endTo = absenceRequest.startAt;
     }
     
-    if (hours != null && minutes != null) {
+    if (!allDay) {
       absenceRequest.hours = hours;
-      absenceRequest.minutes = minutes;
+      if (minutes != null) {
+        absenceRequest.minutes = minutes;
+      } else {
+        absenceRequest.minutes = 0;
+      }      
     }
+    
 
     boolean isNewRequest = !absenceRequest.isPersistent();
     List<LocalDate> troubleDays = absenceRequestManager.getTroubleDays(absenceRequest);
