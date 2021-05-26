@@ -60,8 +60,8 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	     
 	     *{ seleziona minuti }*    
 	     #{if absenceForm.hasHourMinutesChoice() }
-	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
-	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
+	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours != null ? absenceForm.hours : hours, byEquals:'true' /}
+	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes != null ? absenceForm.minutes : 0, byEquals:'true' /}
 	     #{/if}
 	     #{/if}
 	
@@ -108,9 +108,11 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
       	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
       	#{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
       	#{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
-      
+        #{f.hidden 'allDay', value:allDay /}
       	#{f.hidden 'hours', value:absenceForm.hours /}
+
       	#{f.hidden 'minutes', value:absenceForm.minutes /}
+      	
     	#{/if}
     #{/if}
 
