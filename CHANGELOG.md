@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.3] - unreleased
+## [2.1.0] - 2021-06-04
 ### Changed
+- Utilizzo della versione play 1.6.0 ed aggiornamento dipendenze varie.
 - L'endpoint REST /rest/v2/persons/list adesso ritorna solo la lista del personale attivo 
 al momento della chiamata, inoltre adesso supporta il parametro *atDate* con cui è possibile
 passare una data con cui verificare i contratti attivi a quella data. Inoltre è possibile

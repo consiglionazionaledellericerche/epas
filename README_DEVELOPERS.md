@@ -1,10 +1,10 @@
 ePAS - Electronic Personnel Attendance System
 ==============================================
 
-ePAS è un'applicazione java basata su Play Framework versione 1.5.x e 
+ePAS è un'applicazione java basata su Play Framework versione 1.6.x e 
 database postgresql.
 Per il setup dell'ambiente di sviluppo è necessario aver installato sul 
-proprio PC java 11, il [play framework 1.5.x](https://www.playframework.com/documentation/1.5.x/install)
+proprio PC java 11, il [play framework 1.6.x](https://www.playframework.com/documentation/1.5.x/install)
 ed avere accesso ad un dabatase postgresql (dalla versione 9.5 in poi).
 
 Di seguito alcune istruzioni per poter eseguire il debug o aggiungere nuove
@@ -30,7 +30,7 @@ all'interno della quale è necessario rimuovere dagli _arguments_ questa opzione
 ```
  -Djava.endorsed.dirs="/home/cristian/java/play-1.5.3/framework/endorsed"
 ```
-visto che non più compatibile con Java 11.
+visto che non più compatibile con Java 11 (naturalmente verificate il path corretto della vostra home).
 
 La configurazione per l'accesso al db e per sovrascriscrivere i paremetri tipici
 dello sviluppo è nel file _conf/dev.conf_.
