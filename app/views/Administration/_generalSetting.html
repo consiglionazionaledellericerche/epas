@@ -114,5 +114,14 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-
+  #{accordionItem 'maxDaysInPastForRestStampings', parent:'generalSetting', title:'Giorni nel passato per timbrature via REST', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica il numero massimo di giorni nel passato per timbrature via REST#{/alert}
+      #{f.input 'generalSetting.maxDaysInPastForRestStampings' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 #{/accordionGroup}
