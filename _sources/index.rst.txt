@@ -32,10 +32,10 @@ rilasciati anche questi come opensource:
    techAdmin/index
    user/index
    missions/index
+   workflows/index   
    applicationAdmin/index
    rest/index
    sysadmin/index
-   workflows/index
 
 .. toctree::
    :hidden:
