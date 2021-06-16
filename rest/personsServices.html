@@ -928,9 +928,10 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 persone:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><em>id</em>, <em>email</em>, <em>eppn</em>, <em>perseoPersonId</em>, <em>fiscalCode</em>.</p></li>
+<li><p><em>id</em>, <em>email</em>, <em>eppn</em>, <em>perseoPersonId</em>, <em>fiscalCode</em>, <em>number</em>.</p></li>
 </ul>
 </div></blockquote>
+<p>Il campo <em>number</em> corrisponde alla matricola.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
     GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?email<span class="o">=</span>galileo.galilei@cnr.it
 </pre></div>
@@ -975,7 +976,7 @@ persone:</p>
 </pre></div>
 </div>
 <p>Nel caso vengano passati più parametri nella ricerca della persona l'ordine con cui viene cercata
-la persona è <strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p>
+la persona è <strong>id, email, eppn, perseoPersonId, fiscalCode, number</strong>.</p>
 </div>
 <div class="section" id="person-create">
 <h2><span class="section-number">7.7.3. </span>Person Create<a class="headerlink" href="#person-create" title="Link a questa intestazione">¶</a></h2>
@@ -995,7 +996,7 @@ la persona è <strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p>
 <p>Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p></li>
+<li><p><strong>id, email, eppn, perseoPersonId, fiscalCode, number</strong>.</p></li>
 </ul>
 </div></blockquote>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
@@ -1011,7 +1012,7 @@ la persona è <strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p>
 <p>Per individuare la persona da eliminare si utilizzano gli stessi parametri previsti per la show:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p></li>
+<li><p><strong>id, email, eppn, perseoPersonId, fiscalCode, number</strong>.</p></li>
 </ul>
 </div></blockquote>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
@@ -1033,6 +1034,10 @@ la persona è <strong>id, email, eppn, perseoPersonId, fiscalCode</strong>.</p>
     GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/list?id<span class="o">=</span><span class="m">101</span>
 </pre></div>
 </div>
+<p>Dalla versione 2.0.3 il metodo ritorna solo la lista del personale attivo al momento della chiamata.
+Inoltre adesso supporta il parametro <em>atDate</em> con cui è possibile passare una data con cui
+verificare i contratti attivi a quella data. Infine  è possibile utilizzare il parametro <em>terse</em>
+per avere solo informazioni principali del personale.</p>
 </div>
 </div>
 

@@ -919,7 +919,7 @@ ruolo <em>Lettore informazioni</em>.</p>
 <p>Le informazioni di un singolo giorno sulle timbrature e assenze di una persona è fruibile tramite
 una HTTP GET all'indirizzo <strong>/rest/v3/personDays/getDaySituation</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>, la data tramite il campo <em>date</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>, la data tramite il campo <em>date</em>.
 Negli esempi successivi viene utilizzato il parametro <a class="reference external" href="mailto:email=galileo&#46;galilei&#37;&#52;&#48;cnr&#46;it">email=galileo<span>&#46;</span>galilei<span>&#64;</span>cnr<span>&#46;</span>it</a>,
 cambiatelo con un utente appropriato per la vostra sede.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
@@ -963,7 +963,7 @@ rendicontazione dei progetti.</p>
 servizio con luogo e/o motivazione di un dipendente è possibile utilizzare una GET alll'endpoint
 <strong>/rest/v3/personDays/offSiteWorkByPersonAndMonth</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>, i parametri <em>year</em> e <em>month</em> sono utilizzati per
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>, i parametri <em>year</em> e <em>month</em> sono utilizzati per
 individuare l'anno ed il mese.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
     GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/offSiteWorkByPersonAndMonth

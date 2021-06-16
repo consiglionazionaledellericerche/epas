@@ -925,7 +925,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 anno sono disponibili tramite una HTTP GET all'indirizzo
 <strong>/rest/absences/absencesInPeriod</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.</p>
 <p>Negli esempi successivi viene utilizzato il parametro <a class="reference external" href="mailto:email=galileo&#46;galilei&#37;&#52;&#48;cnr&#46;it">email=galileo<span>&#46;</span>galilei<span>&#64;</span>cnr<span>&#46;</span>it</a>,
@@ -965,7 +965,7 @@ cambiatelo con un utente appropriato per la vostra sede.</p>
 l'effettivo inserimento. Questa operazione è fruibile utilizzando l'endpoint
 <strong>/rest/absences/checkAbsence</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenza deve essere indicato con il parametro <em>absenceCode</em>.</p>
@@ -998,7 +998,7 @@ tipo il seguente:</p>
 <p>Analogamente al metodo precedente per controllare un'assenza è possibile effettuare l'operazione di
 inserimento di una assenza tramite una <em>HTTP PUT</em> all'endpoint <strong>/rest/absences/insertAbsence</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenza deve essere indicato con il parametro <em>absenceCode</em>.
@@ -1037,7 +1037,7 @@ un metodo REST per l'inserimento delle assenze di tipo ferie in cui non viene pa
 L'inserimento di una assenza di tipo ferie è possibile tramite una <em>HTTP PUT</em> all'endpoint
 <strong>/rest/absences/insertVacation</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
@@ -1089,7 +1089,7 @@ il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.</p>
 i limiti temporali di inizio e fine delle assenze da cancellare.
 Questa operazione può essere seguita con una <em>HTTP DELETE</em> all'endpoint <strong>/rest/absences/deleteAbsencesInPeriod</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenze da cancellare deve essere indicato con il parametro <em>absenceCode</em>.</p>

@@ -925,7 +925,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indirizzo
 <strong>/rest/v2/contracts/byPerson</strong>.</p>
 <p>La persona può essere individuata passando i soliti parametri identificativi delle persone:
-<em>id, email, eppn, perseoPersonId, fiscalCode</em>.</p>
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
     GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/byPerson
     <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
