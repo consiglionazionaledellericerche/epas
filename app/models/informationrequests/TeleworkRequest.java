@@ -25,7 +25,11 @@ import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
-
+/**
+ * classe relativa alla richiesta di telelavoro.
+ * @author dario
+ *
+ */
 @Audited
 @Entity
 @Table(name = "telework_requests")

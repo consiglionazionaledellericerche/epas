@@ -33,6 +33,8 @@ public class GeneralSetting extends BaseModel {
 
   private static final long serialVersionUID = 881278299637007974L;
 
+  public boolean regulationsEnabled = false;
+  
   //Cookie policy
   public boolean cookiePolicyEnabled = false;
   public String cookiePolicyContent;
@@ -73,10 +75,13 @@ public class GeneralSetting extends BaseModel {
   public boolean saturdayHolidayShift = true;
   
   public boolean roundingShiftQuantity = false;
+  
+  public boolean enableUniqueDailyShift = true;
     
   // Fine parametri gestione giorni di turno
   
   // Parametri visualizzazione richieste di flusso
   
   public boolean enableIllnessFlow = false;
+
 }

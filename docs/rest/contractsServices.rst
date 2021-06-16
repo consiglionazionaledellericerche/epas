@@ -33,7 +33,7 @@ La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indir
 **/rest/v2/contracts/byPerson**.
 
 La persona può essere individuata passando i soliti parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*.
+*id, email, eppn, perseoPersonId, fiscalCode, number*.
 
 .. code-block:: bash
 

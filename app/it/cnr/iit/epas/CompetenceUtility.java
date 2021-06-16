@@ -42,6 +42,10 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import play.i18n.Messages;
 
+/**
+ * Classe di utilità per la gestione delle competenze.
+ *
+ */
 @Slf4j
 public class CompetenceUtility {
 

@@ -65,9 +65,9 @@ public class Leaves extends Controller {
    * @param year anno in cui cercare le aspettative
    */
   public static void byPersonAndYear(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode, Integer year, boolean includeDetails) {
+      String fiscalCode, String number, Integer year, boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
 
     LocalDate start = new LocalDate(LocalDate.now().getYear(), 1, 1);

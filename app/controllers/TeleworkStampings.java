@@ -21,9 +21,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import dao.PersonDao;
+import dao.PersonDao.PersonLite;
 import dao.PersonDayDao;
 import dao.TeleworkValidationDao;
-import dao.PersonDao.PersonLite;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.validators.StringIsTime;
@@ -150,17 +150,20 @@ public class TeleworkStampings extends Controller {
     Person person = personDao.getPersonById(personId);
     PersonLite p = null;
     if (person.personConfigurations.stream().noneMatch(pc -> 
-      pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
         flash.error("Non ci sono persone abilitate al telelavoro!!");
         Stampings.personStamping(personId, Integer.parseInt(session.get("yearSelected")), 
-        Integer.parseInt(session.get("monthSelected")));
+            Integer.parseInt(session.get("monthSelected")));
       }
       p = persons.get(0);
       
     }
-    person = personDao.getPersonById(p.id);
+    if (p != null) {
+      person = personDao.getPersonById(p.id); 
+    }
+    
     Preconditions.checkNotNull(person);
 
     rules.checkIfPermitted(person.office);
@@ -329,7 +332,7 @@ public class TeleworkStampings extends Controller {
    */
   public static void generateReport(int year, int month) 
       throws NoSuchFieldException, ExecutionException {
-    LocalDate date = LocalDate.now();
+    
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
     val currentPerson = Security.getUser().get().person;
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
@@ -343,7 +346,7 @@ public class TeleworkStampings extends Controller {
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    
+    LocalDate date = LocalDate.now();
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
     render(list, currentPerson, year, month, date);

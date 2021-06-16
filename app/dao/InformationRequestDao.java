@@ -24,14 +24,12 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import lombok.val;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -39,12 +37,6 @@ import models.UsersRolesOffices;
 import models.base.InformationRequest;
 import models.base.query.QInformationRequest;
 import models.enumerate.InformationType;
-import models.flows.AbsenceRequest;
-import models.flows.Group;
-import models.flows.enumerate.AbsenceRequestType;
-import models.flows.query.QAbsenceRequest;
-import models.flows.query.QAffiliation;
-import models.flows.query.QGroup;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
@@ -324,7 +316,8 @@ public class InformationRequestDao extends DaoBase {
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
 
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR) 
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = seatSupervisorQuery(officeList, conditions, signer);
       return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
@@ -364,8 +357,8 @@ public class InformationRequestDao extends DaoBase {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.officeHeadApprovalRequired.isTrue()
-        .and(informationRequest.officeHeadApproved.isNull()));
+        .and(informationRequest.officeHeadApprovalRequired.isTrue()
+            .and(informationRequest.officeHeadApproved.isNull()));
 
     return condition;
   }
@@ -384,8 +377,8 @@ public class InformationRequestDao extends DaoBase {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.administrativeApprovalRequired.isTrue()
-        .and(informationRequest.administrativeApproved.isNull()));
+        .and(informationRequest.administrativeApprovalRequired.isTrue()
+            .and(informationRequest.administrativeApproved.isNull()));
 
     return condition;
   }
@@ -411,9 +404,9 @@ public class InformationRequestDao extends DaoBase {
 
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     conditions.and(informationRequest.startAt.after(fromDate))
-    .and(informationRequest.informationType.eq(informationType)
-        .and(informationRequest.flowEnded.isTrue())
-        .and(informationRequest.person.office.in(officeList)));
+        .and(informationRequest.informationType.eq(informationType)
+            .and(informationRequest.flowEnded.isTrue())
+              .and(informationRequest.person.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -441,9 +434,9 @@ public class InformationRequestDao extends DaoBase {
     List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(informationRequest.startAt.after(fromDate))
-    .and(informationRequest.informationType.eq(informationType)
-        .and(informationRequest.flowEnded.isTrue())
-        .and(informationRequest.person.office.eq(signer.office)));
+        .and(informationRequest.informationType.eq(informationType)
+            .and(informationRequest.flowEnded.isTrue())
+              .and(informationRequest.person.office.eq(signer.office)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));

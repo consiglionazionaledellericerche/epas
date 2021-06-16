@@ -201,6 +201,7 @@ public class AbsenceForm {
     } 
     if (this.minutes <= 0 && this.hours <= 0) {
       this.hours = 1;
+      this.minutes = 0;
     }
 
     return;

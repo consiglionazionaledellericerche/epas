@@ -74,11 +74,10 @@ public class PersonDays extends Controller {
    * personPerseoId o fiscalCode) in un giorno specifico (date).
    */
   public static void getDaySituation(
-      Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, 
-      LocalDate date) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, 
+      String number, LocalDate date) {
     log.debug("Chiamata getDaySituation, email = {}, date = {}", email, date);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
@@ -181,8 +180,8 @@ public class PersonDays extends Controller {
    * nell'anno/mese passati come parametro.
    */
   public static void getMonthSituationByPerson(Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
@@ -204,8 +203,8 @@ public class PersonDays extends Controller {
    * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
    */
   public static void offSiteWorkByPersonAndMonth(Long id, String email, String eppn,
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }

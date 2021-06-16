@@ -45,8 +45,8 @@ import play.data.validation.Required;
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
-@Table(name="information_requests")
-public abstract class InformationRequest extends BaseModel{
+@Table(name = "information_requests")
+public abstract class InformationRequest extends BaseModel {
   
   private static final long serialVersionUID = -3294556588987879116L;
 
@@ -77,7 +77,7 @@ public abstract class InformationRequest extends BaseModel{
   public LocalDateTime officeHeadApproved;
   
   /**
-   * Data di approvazione dell'amministratore del personale
+   * Data di approvazione dell'amministratore del personale.
    */
   public LocalDateTime administrativeApproved;
   

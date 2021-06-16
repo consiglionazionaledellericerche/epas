@@ -13,6 +13,10 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+/**
+ * Gestisce le informazioni sull'applicazione e le informazioni di privacy.
+ *
+ */
 @With(Resecure.class)
 public class ApplicationInfo extends Controller {
 
@@ -28,6 +32,11 @@ public class ApplicationInfo extends Controller {
   @Util
   public static boolean isCookiePolicyEnabled() {
     return generalSettingDao.generalSetting().cookiePolicyEnabled;
+  }
+
+  @Util
+  public static boolean isRegulationsEnabled() {
+    return generalSettingDao.generalSetting().regulationsEnabled;
   }
 
   /**

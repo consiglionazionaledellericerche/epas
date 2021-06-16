@@ -29,6 +29,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath enableIllnessFlow = createBoolean("enableIllnessFlow");
 
+    public final BooleanPath enableUniqueDailyShift = createBoolean("enableUniqueDailyShift");
+
     public final StringPath endDailyShift = createString("endDailyShift");
 
     public final StringPath endNightlyShift = createString("endNightlyShift");
@@ -45,6 +47,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
+
+    public final BooleanPath regulationsEnabled = createBoolean("regulationsEnabled");
 
     public final BooleanPath roundingShiftQuantity = createBoolean("roundingShiftQuantity");
 

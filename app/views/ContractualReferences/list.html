@@ -1,24 +1,26 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Riferimenti normativi/contrattuali'  /}
+#{set breadcrumbs:['Riferimenti normativi/contrattuali':null] /}
+
 
 <div class="container">
-
-
+#{breadcrumbs breadcrumbs /}
 #{title title:'Riferimenti normativi/contrattuali' /}
-  
+
 #{accordionGroup 'contractual_clauses_and_references'}
 
-  #{secure.check 'ContractualClauses.manage'}
   #{accordionItem 'contractual_references', parent:'contractual_clauses_and_references', 
-		title:'Gestione dei riferimenti normativo/contrattuali', open:true, color:'info'}
-	  
+		title:'Riferimenti normativo/contrattuali', open:true, color:'info'}
+
+     #{secure.check 'ContractualReferences.blank'}
 	  <div class="row text-center">
 		#{secure.link @blank(), class:'btn btn-primary',fa:'plus' }
 			Nuovo riferimento normativo/contrattuale
 		#{/secure.link}
 	  </div>
-  
+     #{/secure.check}
+
 	  <table class="table table-bordered" datatable> 
 	   <thead>
 	 	<tr>
@@ -27,36 +29,39 @@
 	 	  <th>Al</th>
 	 	  <th>Istituti contrattuali</th>
 	 	  <th>File</th>
-	 	  <th>Azioni</th>
+	 	  #{secure.check 'ContractualReferences.manage'}
+	 	    <th>Azioni</th>
+	 	  #{/secure.check}
 	 	</tr>
 	   </thead>
 	   <tbody>
 		 #{list items:contractualReferences, as:'contractualReference'}
 		  <tr>
 		    <td>
-		      ${contractualReference.name}		      
+		      ${contractualReference.name}
 		    </td>
 		    <td>${contractualReference.beginDate?.format()}</td>
 		    <td>${contractualReference.endDate?.format()}</td>
 		    <td>
 			  #{list items:contractualReference.contractualClauses, as:'contractualClause'}
 			    <span class="label label-success">${contractualClause.name}</span> <br>
-			  #{/list}    
+			  #{/list}
 		    </td>
 		    <td>
-		       ${contractualReference.filename}
+		       <i class="fa fa-download"></i> <a href="@{getFile(contractualReference.id)}">${contractualReference.filename}</a>
 		    </td>
-		    <td>
-		    	#{secure.link @edit(contractualReference.id), class:'btn btn-primary btn-sm'}
-		    		<i class="fa fa-pencil-square-o"></i> Modifica		    			    	
-		    	#{/secure.link}
-		    </td>
+		    #{secure.check 'ContractualReferences.manage'}
+		      <td>
+		        #{secure.link @edit(contractualReference.id), class:'btn btn-primary btn-sm'}
+		          <i class="fa fa-pencil-square-o"></i> Modifica
+		        #{/secure.link}
+		      </td>
+		    #{/secure.check}
 		  </tr>
 		 #{/list}
 	 </tbody>
 	 </table>
-  #{/accordionItem}  
-  #{/secure.check}
-    	
+  #{/accordionItem}
+
 #{/accordionGroup}
 </div>

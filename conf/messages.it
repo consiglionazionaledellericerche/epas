@@ -422,6 +422,7 @@ forceInsert= Forza Inserimento
 generalSetting =Impostazioni generali di sistema
 generalSetting.cookiePolicyEnabled=Visualizzazione del banner per la cookie policy abilitato
 generalSetting.cookiePolicyContent=Pagina (HTML) con la cookie policy
+generalSetting.regulationsEnabled=Menu Normativa attivo per i dipendenti 
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
@@ -434,6 +435,7 @@ generalSetting.handleGroupsByInstitute =Gestisci i gruppi per istituto
 generalSetting.saturdayHolidayShift =Sabato da considerare festivo
 generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
 generalSetting.enableIllnessFlow =Abilita flusso richiesta informativa per malattia
+generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno per un turnista
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -1008,6 +1010,7 @@ Persons.list= Lista Persone
 Persons.workGroup= Gruppo Di Lavoro
 PrintTags.listPersonForPrintTags= Stampa Cartellino
 PrintTags.showTag= Stampa Cartellino Presenze
+PrintTags.autocertOffsite =Stampa timbrature fuori sede
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
 Stampings.missingStamping= Riepilogo problemi sui giorni
@@ -1214,6 +1217,8 @@ CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta ap
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 
 CHANGE_REPERIBILITY_REQUEST =Richiesta cambio reperibilità
+
+ENABLE_INFORMATION_FLOWS =Abilitazione flussi informativi
 
 ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte del responsabile di sede
 ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede

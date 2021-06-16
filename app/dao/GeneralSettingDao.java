@@ -22,9 +22,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.Optional;
 import javax.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import models.GeneralSetting;
 import models.query.QGeneralSetting;
 
@@ -34,10 +36,12 @@ import models.query.QGeneralSetting;
  * @author Cristian Lucchesi
  *
  */
+@Singleton
+@Slf4j
 public class GeneralSettingDao extends DaoBase {
 
   LoadingCache<String, GeneralSetting> generalSettingCache;
-  private final static String cacheKey = "gs";
+  private static final String cacheKey = "gs";
   
   @Inject
   GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
@@ -57,7 +61,7 @@ public class GeneralSettingDao extends DaoBase {
    *
    * @return le impostazioni generali.
    */
-  public GeneralSetting generalSetting() {
+  public GeneralSetting generalSetting()  {
     return generalSettingCache.getUnchecked(cacheKey);
   }
   
@@ -65,6 +69,7 @@ public class GeneralSettingDao extends DaoBase {
    * Invalida la cache sui GeneralSetting.
    */
   public void generalSettingInvalidate() {
+    log.info("Cache invalidata");
     generalSettingCache.invalidate(cacheKey);
   }
 }

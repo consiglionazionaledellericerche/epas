@@ -74,12 +74,12 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getDaySituation(
-      Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, LocalDate date) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+      String number, LocalDate date) {
     log.debug(
         "getDaySituation -> id={}, email={}, eppn={}, personPerseoId={}, fiscalCode={}, date={}", 
         id, email, eppn, personPerseoId, fiscalCode, date);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }

@@ -24,7 +24,7 @@
       				+ templateUtility.vacationRequests() + templateUtility.personalPermissionRequests()
       				+ templateUtility.changeReperibilityRequests()
       				+ templateUtility.teleworkRequests() + templateUtility.serviceRequests()
-      				+ templateUtility.illnessRequests()}
+      				+ templateUtility.illnessRequests()
       				+ templateUtility.changeReperibilityRequests()}
       			</span>
     		#{/if}       
@@ -65,12 +65,15 @@
       
       #{/secure.check}
       
+      #{secure.check 'InformationRequests.enabled'}
       #{secure.li @InformationRequests.teleworks()}
         <i class="fa fa-laptop" aria-hidden="true"></i>
       #{/secure.li}
+      #{secure.check 'InformationRequests.serviceExit'}
       #{secure.li @InformationRequests.serviceExit()}
         <i class="fa fa-sign-out" aria-hidden="true"></i>
       #{/secure.li}
+      #{/secure.check}
       
       #{if templateUtility.enableIllnessFlow()}
          #{secure.li @InformationRequests.illness()}
@@ -78,7 +81,8 @@
          #{/secure.li}
         <li class="divider"></li>
       #{/if}
-
+	  #{/secure.check}
+	  
       #{secure.check 'CompetenceRequests.handleEnabled'}
       <li class="divider"></li>
       #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
@@ -126,6 +130,7 @@
       #{/secure.li}
       #{/secure.check}
       
+      #{secure.check 'InformationRequests.enabled'}
       <li class="divider"></li>
       
       #{secure.li @InformationRequests.teleworksToApprove()}
@@ -150,6 +155,7 @@
     	#{/if}
       #{/secure.li}
       #{/if}
+      #{/secure.check}
 
     </ul>
     *{ end items }*

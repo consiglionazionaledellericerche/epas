@@ -42,8 +42,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -102,10 +102,10 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void absencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, LocalDate begin, LocalDate end) {
+      String fiscalCode, String number, LocalDate begin, LocalDate end) {
     Person person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode).orNull();
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -145,12 +145,12 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void insertAbsence(
-      Long id, String eppn, String email, Long personPerseoId, String fiscalCode,
+      Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
       String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
       @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes) {
     Person person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, 
-            eppn, email, personPerseoId, fiscalCode).orNull();
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
+            eppn, email, personPerseoId, fiscalCode, number).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -210,15 +210,15 @@ public class Absences extends Controller {
   @BasicAuth
   public static void checkAbsence(
       Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, String absenceCode, 
+      String fiscalCode, String number, String absenceCode, 
       @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
       @CheckWith(LocalDateNotTooFar.class) LocalDate end, 
       Integer hours, Integer minutes)
           throws JsonProcessingException {
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number);
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -287,12 +287,12 @@ public class Absences extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void deleteAbsencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, @Required String absenceCode,
+      String fiscalCode, String number, @Required String absenceCode,
       @CheckWith(LocalDateNotTooFar.class) @Required LocalDate begin, 
       @CheckWith(LocalDateNotTooFar.class) @Required LocalDate end) {
 
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    
 
     if (Validation.hasErrors()) {
       JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
@@ -303,7 +303,8 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
-
+    val person = Persons.getPersonFromRequest(id, email, eppn, 
+        personPerseoId, fiscalCode, number);
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
     rules.checkIfPermitted(person.office);
@@ -327,9 +328,9 @@ public class Absences extends Controller {
    * Inserimento di giorni di ferie con seleziona automatica dei codici da parte di ePAS.
    */
   public static void insertVacation(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, @Required LocalDate begin, @Required LocalDate end) {
+      String fiscalCode, String number, @Required LocalDate begin, @Required LocalDate end) {
 
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
     if (Validation.hasErrors()) {
       JsonResponse.badRequest("Mandatory parameters missing (begin, end)");

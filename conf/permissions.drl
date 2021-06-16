@@ -118,6 +118,21 @@ then
   $c.grant();
 end
 
+
+/*
+ * Permesso per la visualizzazione dei flussi informativi
+ */
+rule isInformationFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
+then
+  $c.grant();
+end
+
 /*
  * Permesso per la visualizzazione dei flussi di richiesta competenze
  */
@@ -669,6 +684,26 @@ then
 $c.grant();
 end
 
+rule isEmployeeForServiceExit
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $c: PermissionCheck(action == "InformationRequests.serviceExit", target == null, granted == false)
+then
+$c.grant();
+end
+
+rule autocertOffsite
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "PrintTags.autocertOffsite", target == null, granted == false)
+then
+$c.grant();
+end
 
 rule IsEmployee
 when
@@ -714,7 +749,7 @@ when
 		
 		/*Richiesta flusso informativo*/
 		"InformationRequests.illness",
-		"InformationRequests.serviceExit",
+		//"InformationRequests.serviceExit",
 		"InformationRequests.list",
 		"InformationRequests.blank",
 		"InformationRequests.show",
@@ -725,12 +760,15 @@ when
 		"InformationRequests.saveIllnessRequest",
 		
 		
-     	/* Ferie */
-     	"Vacations.show",
-     	"Vacations.personVacationSummary",
+        /* Ferie */
+        "Vacations.show",
+        "Vacations.personVacationSummary",
 
-       	/* Competenze */
-     	"Competences.competences",
+        /* Competenze */
+        "Competences.competences",
+
+        "ContractualReferences.list",
+        "ContractualReferences.getFile",
 
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -1502,16 +1540,32 @@ then
  $c.grant();
 end
 
-rule RolePersonnelAdminAndSeatSuperVisor_editAndApprovalForInformationFlows
+rule RoleSeatSuperVisor_editAndApprovalForInformationFlows
 when
  $uro: UsersRolesOffices()
- Role(name in (Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN)) from $uro.role
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
  $ir: InformationRequest(flowEnded == false)
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.saveServiceRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+
+rule PersonnelAdmin_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $ir: IllnessRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
@@ -1704,6 +1758,7 @@ when
 		
 		"TeleworkStampings.personTeleworkStampings",
 		"InformationRequests.handleTeleworkApproval",
+		
 		
         "Vacations.list",
         "Vacations.vacationSummary",
@@ -1919,7 +1974,9 @@ when
         "InformationRequests.listToApprove",
         "InformationRequests.approval",
         "InformationRequests.disapproval",
-        "InformationRequests.show"
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport"
 
         ), target == null, granted == false)
 then
@@ -2080,9 +2137,11 @@ when
         
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",
-        "InformationRequests.approval",
-        "InformationRequests.disapproval",
-        "InformationRequests.show"
+//        "InformationRequests.approval",
+//        "InformationRequests.disapproval",
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport"
 
        ), target == $o, granted == false)
 then
@@ -3418,7 +3477,7 @@ when
 
         "ContractualClauses.list", "ContractualClauses.blank",
         "ContractualClauses.edit", "ContractualClauses.save",
-        "ContractualClauses.show",
+        "ContractualClauses.show", "ContractualReferences.getFile",
         "ContractualClauses.delete", "ContractualClauses.manage")
         , granted == false)
 then

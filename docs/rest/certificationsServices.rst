@@ -26,7 +26,7 @@ di un singolo dipendente in uno spefico anno sono disponibili tramite una HTTP G
 **/rest/v2/certifications/getMonthSituation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*, l'anno tramite il campo *year*, il mese con il
+*id, email, eppn, perseoPersonId, fiscalCode, number*, l'anno tramite il campo *year*, il mese con il
 campo *month*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.

@@ -155,13 +155,15 @@ public class InformationRequestManager {
   /**
    * Imposta nella richiesta di assenza i tipi di approvazione necessari in funzione del tipo di
    * assenza e della configurazione specifica della sede del dipendente.
-   *
-   * @param absenceRequest la richiesta di assenza.
+   * 
+   * @param illnessRequest l'opzionale richiesta di malattia
+   * @param serviceRequest l'opzionale richiesta di uscita di servizio
+   * @param teleworkRequest l'opzionale richiesta di telelavoro
    */
   public void configure(Optional<IllnessRequest> illnessRequest, 
       Optional<ServiceRequest> serviceRequest, Optional<TeleworkRequest> teleworkRequest) {
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-      (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
     Verify.verifyNotNull(request.informationType);
     Verify.verifyNotNull(request.person);
 
@@ -285,7 +287,7 @@ public class InformationRequestManager {
         break;
         
       case ADMINISTRATIVE_REFUSAL:
-      //TODO: completare
+        //TODO: completare
         break;
         
       case COMPLETE:

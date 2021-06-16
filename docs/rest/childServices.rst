@@ -33,7 +33,7 @@ La lista dei figli/figlie di una persona è fruibile tramite una HTTP GET all'in
 **/rest/v2/child/byPerson**.
 
 La persona può essere individuata passando i soliti parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*.
+*id, email, eppn, perseoPersonId, fiscalCode, number*.
 
 .. code-block:: bash
 
