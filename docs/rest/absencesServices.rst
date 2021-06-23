@@ -211,7 +211,7 @@ Per individuare l'assenza da eliminare si utilizza il parametro *id* dell'assenz
 .. code-block:: bash
 
   $ http -a istituto_xxx_absence_manager 
-      GET https://epas-demo.devel.iit.cnr.it/rest/absences/delete 
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/delete 
       id==107109
 
 Cancellazione delle assenze di uno stesso tipo in un periodo
@@ -227,7 +227,8 @@ Il periodo può essere specificato tramite le variabili *begin* ed *end* con dat
 *YYYY-MM-dd*.
 Il codice dell'assenze da cancellare deve essere indicato con il parametro *absenceCode*.
 
-::
+.. code-block:: bash
+
   $ http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/deleteAbsencesInPeriod email==galileo.galilei@cnr.it begin==2021-02-15 end==2021-02-16 absenceCode==31
 
 

@@ -19,7 +19,7 @@ require:
     - play -> pdf 0.9:
        exclude:
         - jaxen -> jaxen *
-    - org.mnode.ical4j -> ical4j 1.0.6
+    - org.mnode.ical4j -> ical4j 3.0.25
     - org.jsoup -> jsoup 1.13.1
     - org.dbunit -> dbunit 2.5.1
     - org.mockito -> mockito-core 3.11.0
@@ -51,7 +51,7 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
-        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *        
+        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
     - com.querydsl -> querydsl-apt 4.2.2:
        exclude:
         - asm -> asm *
@@ -103,11 +103,6 @@ repositories:
          artifact:  "https://github.com/jackmoore/colorbox"
          contains:
             - com.github -> *
-    - bsbo_play_modules:
-        type: http
-        artifact: https://dl.bintray.com/besmartbeopen/play-modules/[module]-[revision].zip
-        contains:
-            - play-modules -> *
     - compatibility:
         type: local
         artifact: ${application.path}/[module]-[revision].jar
