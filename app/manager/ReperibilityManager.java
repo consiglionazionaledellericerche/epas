@@ -29,6 +29,8 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import helpers.BadRequest;
+import java.time.Duration;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,7 +51,6 @@ import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
@@ -949,9 +950,8 @@ public class ReperibilityManager {
 
 
   private VEvent createIcalEvent(Date startDate, int sequence, String eventLabel) {
-    VEvent reperibilityPeriod = new VEvent(startDate, new Dur(sequence, 0, 0, 0), eventLabel);
+    VEvent reperibilityPeriod = new VEvent(startDate, Duration.ofDays(sequence), eventLabel);
     reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
-
     return reperibilityPeriod;
   }
 

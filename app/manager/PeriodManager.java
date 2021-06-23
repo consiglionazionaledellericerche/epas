@@ -22,7 +22,6 @@ import com.google.common.base.Verify;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import edu.emory.mathcs.backport.java.util.Collections;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collection;
@@ -97,7 +96,7 @@ public class PeriodManager {
           propertyInPeriod.getOwner().periods(propertyInPeriod.getType())) {
       originals.add(originalPeriod);
     }
-    Collections.sort(originals);
+    originals = originals.stream().sorted().collect(Collectors.toList());
 
     DateInterval periodInterval =
         new DateInterval(propertyInPeriod.getBeginDate(), propertyInPeriod.getEndDate());
@@ -239,7 +238,7 @@ public class PeriodManager {
    */
   private final Optional<DateInterval> getDateIntervalPeriod(List<IPropertyInPeriod> periods) {
     //Costruzione intervallo covered
-    Collections.sort(periods);
+    periods = periods.stream().sorted().collect(Collectors.toList());
     LocalDate begin = null;
     LocalDate end = null;
     for (IPropertyInPeriod period : periods) {
@@ -339,7 +338,7 @@ public class PeriodManager {
       if (periods.isEmpty()) {
         continue; //caso di parametro ancora non definito
       }
-      Collections.sort(periods);
+      periods.stream().sorted().collect(Collectors.toList());
 
       // Sistemo il primo
       IPropertyInPeriod first = periods.get(0);
