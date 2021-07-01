@@ -263,6 +263,15 @@ public class AbsenceService {
     List<CriticalError> criticalErrors = Lists.newArrayList();
     LocalDate currentDate = from;
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
+    long start = System.currentTimeMillis();
+    log.trace("inizio creazione catena periodi, person = {}, from = {}, to = {}", 
+        person.getFullname(), from, to);
+    
+    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
+    List<Contract> fetchedContracts = person.contracts; // TODO: fetch
+    List<InitializationGroup> initializationGroups =
+        absenceComponentDao.personInitializationGroups(person);
+
     while (true) {
 
       // Preparare l'assenza da inserire
@@ -273,11 +282,6 @@ public class AbsenceService {
       if (specifiedMinutes != null) {
         absenceToInsert.justifiedMinutes = specifiedMinutes;
       }
-
-      List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
-      List<Contract> fetchedContracts = person.contracts; // TODO: fetch
-      List<InitializationGroup> initializationGroups =
-          absenceComponentDao.personInitializationGroups(person);
 
       PeriodChain periodChain =
           serviceFactories.buildPeriodChain(person, groupAbsenceType, currentDate, previousInserts,
@@ -295,6 +299,8 @@ public class AbsenceService {
         break;
       }
     }
+    log.trace("fine creazione catena periodi in {} millsecondi. Person = {}, from = {}, to = {}", 
+        person.getFullname(), from, to, System.currentTimeMillis() - start);
 
     return buildInsertReport(chains, criticalErrors);
 
