@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -603,6 +604,19 @@ public class AbsenceGroups extends Controller {
     }
     render(absenceForm, insertReport, forceInsert, recoveryDate);
 
+  }
+
+
+  /**
+   * Metodo di test
+   */
+  public static void orderedAbsences(Long personId, LocalDate start, LocalDate end) {    
+    log.info("orderedAbsences: personId = {}, start = {}, end = {}", personId, start, end);
+    long startTime = System.currentTimeMillis();
+    Person person = Person.findById(personId);
+    val absences = absenceComponentDao.orderedAbsences(person, start, end, Sets.newHashSet());
+    renderText("absences.size = %s. Prelevate in %d millisecondi.", 
+        absences.size(), System.currentTimeMillis() - startTime);
   }
 
   /**
