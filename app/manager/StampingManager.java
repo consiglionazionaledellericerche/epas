@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import controllers.Security;
+import dao.GeneralSettingDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
@@ -51,6 +52,9 @@ import play.i18n.Messages;
 
 /**
  * Manager per la gestione delle timbrature.
+ *
+ * @author Cristian Lucchesi
+ *
  */
 @Slf4j
 public class StampingManager {
@@ -63,6 +67,7 @@ public class StampingManager {
   private final StampingDao stampingDao;
   private final NotificationManager notificationManager;
   private final IWrapperFactory wrapperFactory;
+  private final GeneralSettingDao generalSettingDao;
 
   /**
    * Injection.
@@ -79,7 +84,8 @@ public class StampingManager {
       PersonDayManager personDayManager,
       PersonStampingDayRecapFactory stampingDayRecapFactory,
       ConsistencyManager consistencyManager, StampingDao stampingDao,
-      NotificationManager notificationManager, IWrapperFactory wrapperFactory) {
+      NotificationManager notificationManager, IWrapperFactory wrapperFactory,
+      GeneralSettingDao generalSettingDao) {
 
     this.personDayDao = personDayDao;
     this.personDao = personDao;
@@ -89,6 +95,7 @@ public class StampingManager {
     this.stampingDao = stampingDao;
     this.notificationManager = notificationManager;
     this.wrapperFactory = wrapperFactory;
+    this.generalSettingDao = generalSettingDao;
   }
 
 
@@ -175,6 +182,15 @@ public class StampingManager {
   }
 
   /**
+   * Controlla che la timbratura da inserire non sia troppo nel passato.
+   */
+  public boolean isTooFarInPast(LocalDateTime dateTime) {
+    return dateTime.compareTo(
+      LocalDateTime.now().minusDays(
+        generalSettingDao.generalSetting().maxDaysInPastForRestStampings)) < 0;
+  }
+
+  /**
    * Metodo che salva la timbratura.
    *
    * @param stamping la timbratura da persistere
@@ -231,6 +247,7 @@ public class StampingManager {
 
     // Check della richiesta
     Verify.verifyNotNull(stampingFromClient);
+    Verify.verifyNotNull(stampingFromClient.dateTime);
 
     final Person person = stampingFromClient.person;
     // Recuperare il personDay

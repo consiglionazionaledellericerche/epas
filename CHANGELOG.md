@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.1.3] - UNRELEASED
+### Changed
+- Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
+
 ## [2.1.2] - 2021-07-01
 ### Changed
 - Modifica query per prelevare le assenze di una persona in un periodo perché la precedente
@@ -23,7 +28,6 @@ passare una data con cui verificare i contratti attivi a quella data. Inoltre è
 utilizzare il parametro *terse* per avere solo informazioni principali del personale.
 ### Added
 - Aggiunta possiblità di cercare le persone per matricola nei metodi REST.
-### Added
 - Aggiunta la configurabilità della visibilità del menu Normativa e migliorata la gestione dei
 permessi di questa parte
 

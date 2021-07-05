@@ -436,6 +436,7 @@ generalSetting.saturdayHolidayShift =Sabato da considerare festivo
 generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
 generalSetting.enableIllnessFlow =Abilita flusso richiesta informativa per malattia
 generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno per un turnista
+generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passato per cui è possibile inserire timbrature via REST
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
