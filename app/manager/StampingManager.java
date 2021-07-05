@@ -52,9 +52,8 @@ import play.i18n.Messages;
 
 /**
  * Manager per la gestione delle timbrature.
- */
-/**
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @Slf4j
