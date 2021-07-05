@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3] - UNRELEASED
 ### Changed
+- Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
 - Aggiunta evoluzione per correggere impostazione begin_date dei person_configurations
 del parametro TELEWORK_STAMPINGS.
 
@@ -28,7 +29,6 @@ passare una data con cui verificare i contratti attivi a quella data. Inoltre è
 utilizzare il parametro *terse* per avere solo informazioni principali del personale.
 ### Added
 - Aggiunta possiblità di cercare le persone per matricola nei metodi REST.
-### Added
 - Aggiunta la configurabilità della visibilità del menu Normativa e migliorata la gestione dei
 permessi di questa parte
 
