@@ -162,6 +162,7 @@ public class AbsenceRequestDao extends DaoBase {
                 .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
           .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions))
+          .distinct()
           .fetch();
       results.addAll(queryResults);
     }
