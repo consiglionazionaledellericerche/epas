@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
 - Corretta query per prelevare lista assenza da approvare in modo da non mostrare duplicati
+- Nella disattivazione dei gruppi redirect verso la lista dei gruppi dell'ufficio corrente
 
 ## [2.1.2] - 2021-07-01
 ### Changed

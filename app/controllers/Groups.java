@@ -125,15 +125,16 @@ public class Groups extends Controller {
       group.affiliations.stream().forEach(a -> a.delete());
       //elimino il gruppo.
       group.delete();
+      flash.success(Web.msgDeleted(Group.class));
       log.info("Eliminato gruppo {}", group.name);
     } else {
       group.endDate = LocalDate.now();
       group.save();
       log.info("Disattivato gruppo {}", group.name);
+      flash.success("Gruppo disattivato con successo");
     }
 
-    flash.success(Web.msgDeleted(Group.class));
-    showGroups(group.manager.office.id);
+    showGroups(group.office.id);
   }
 
   /**
