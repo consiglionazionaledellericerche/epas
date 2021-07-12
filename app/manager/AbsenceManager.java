@@ -443,10 +443,15 @@ public class AbsenceManager {
       ar.setAbsenceInError(absence);
 
     } else {
-      // check sulla reperibilità
+      // check sulla reperibilità e turno
       if (checkIfAbsenceInReperibilityOrInShift(person, date)) {
         ar.setDayInReperibilityOrShift(true);
       }
+      //controllo se la persona è in reperibilità
+      ar.setDayInReperibility(
+          personReperibilityDayDao.getPersonReperibilityDay(person, date).isPresent());
+      //controllo se la persona è in turno
+      ar.setDayInShift(personShiftDayDao.getPersonShiftDay(person, date).isPresent());
 
       final PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
 
