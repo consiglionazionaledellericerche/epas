@@ -105,6 +105,7 @@ public class AbsenceRequestDao extends DaoBase {
       conditions.and(absenceRequest.flowEnded.eq(true));
     }
     return getQueryFactory().selectFrom(absenceRequest)
+        .join(absenceRequest.person).fetchJoin()
         .where(conditions).orderBy(absenceRequest.startAt.desc()).fetch();
   }
 
@@ -156,7 +157,7 @@ public class AbsenceRequestDao extends DaoBase {
       conditions = managerQuery(officeList, conditions, signer);
       final QAffiliation affiliation = QAffiliation.affiliation;
       List<AbsenceRequest> queryResults = getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person, person)
+          .join(absenceRequest.person, person).fetchJoin()
           .join(person.affiliations, affiliation)
             .on(affiliation.beginDate.before(LocalDate.now())
                 .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
@@ -172,31 +173,37 @@ public class AbsenceRequestDao extends DaoBase {
   /**
    * Lista delle AbsenceRequest da Approvare come responsabile di sede.
    */
-  private List<AbsenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
+  public List<AbsenceRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
       Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
 
-    BooleanBuilder conditions = new BooleanBuilder();
+    BooleanBuilder baseConditions = new BooleanBuilder();
 
     if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       return Lists.newArrayList();
     }
     if (fromDate.isPresent()) {
-      conditions.and(absenceRequest.startAt.after(fromDate.get()));
+      baseConditions.and(absenceRequest.startAt.after(fromDate.get()));
     }
     if (toDate.isPresent()) {
-      conditions.and(absenceRequest.endTo.before(toDate.get()));
+      baseConditions.and(absenceRequest.endTo.before(toDate.get()));
     }    
-    conditions.and(absenceRequest.type.eq(absenceRequestType)
+    baseConditions.and(absenceRequest.type.eq(absenceRequestType)
             .and(absenceRequest.flowStarted.isTrue())
             .and(absenceRequest.flowEnded.isFalse()));
 
+    BooleanBuilder conditions = new BooleanBuilder();
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
-      conditions = seatSupervisorQuery(officeList, conditions, signer);
-      return getQueryFactory().selectFrom(absenceRequest).where(conditions).fetch();
+      val urosSupervisor = uros.stream().filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).collect(Collectors.toList());
+      for (UsersRolesOffices uro : urosSupervisor) {
+        conditions = conditions.or(seatSupervisorQuery(Lists.newArrayList(uro.office), baseConditions, signer));
+      };
+      return getQueryFactory().selectFrom(absenceRequest)
+          .join(absenceRequest.person).fetchJoin()
+          .join(absenceRequest.events).fetchJoin()
+          .where(conditions).fetch();
     } else {
       return Lists.newArrayList();
     }
@@ -251,7 +258,7 @@ public class AbsenceRequestDao extends DaoBase {
           .and(person.office.eq(signer.office));
       final QAffiliation affiliation = QAffiliation.affiliation;      
       query = getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person, person)
+          .join(absenceRequest.person, person).fetchJoin()
           .join(person.affiliations, affiliation)
             .on(affiliation.beginDate.before(LocalDate.now())
               .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
@@ -288,7 +295,7 @@ public class AbsenceRequestDao extends DaoBase {
               .or(absenceRequest.officeHeadApprovalForManagerRequired.isNotNull()))
           .and(person.office.in(officeList));
       return getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person, person)
+          .join(absenceRequest.person, person).fetchJoin()
           .where(person.office.in(
               uros.stream().map(
                   userRoleOffice -> userRoleOffice.office)
@@ -343,16 +350,17 @@ public class AbsenceRequestDao extends DaoBase {
           .and(person.office.in(officeList));
       final QAffiliation affiliation = QAffiliation.affiliation;
       query = getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person, person)
+          .join(absenceRequest.person, person).fetchJoin()
           .join(person.affiliations, affiliation)
           .join(affiliation.group, group)
           .where(group.manager.eq(signer).and(conditions))
           .orderBy(absenceRequest.startAt.desc());
     } else {
       query = getQueryFactory()
-          .selectFrom(absenceRequest).where(conditions)
-          .orderBy(absenceRequest.startAt.desc())
-          ;
+          .selectFrom(absenceRequest)
+          .join(absenceRequest.person).fetchJoin()
+          .where(conditions)
+          .orderBy(absenceRequest.startAt.desc());
     }
 
     results.addAll(query.fetch());
@@ -383,7 +391,7 @@ public class AbsenceRequestDao extends DaoBase {
           .and(absenceRequest.officeHeadApproved.isNotNull())
           .and(person.office.in(officeList));
       return getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person, person)
+          .join(absenceRequest.person, person).fetchJoin()
           .join(person.office, office)
           .where(office.in(uros.stream().map(
               userRoleOffices -> userRoleOffices.office)

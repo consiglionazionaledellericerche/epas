@@ -239,6 +239,7 @@ public class AbsenceRequests extends Controller {
   public static void listToApprove(AbsenceRequestType type) {
     Verify.verifyNotNull(type);
 
+    long start = System.currentTimeMillis();
     val person = Security.getUser().get().person;
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
@@ -254,7 +255,8 @@ public class AbsenceRequests extends Controller {
         Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-
+    log.debug("Preparate richieste da approvare per {} in {} ms", 
+        person.getFullname(), System.currentTimeMillis() - start);
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
