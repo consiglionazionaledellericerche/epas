@@ -41,6 +41,7 @@ public class PersonMonthRecapDto {
   private Integer year;
   private Integer month;
   private PersonShowTerseDto person;
+  private int basedWorkingDays;
 
   @Builder.Default
   private List<PersonDayShowTerseDto> personDays = Lists.newArrayList();
