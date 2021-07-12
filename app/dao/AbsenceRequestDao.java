@@ -321,7 +321,8 @@ public class AbsenceRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     List<AbsenceRequest> results = new ArrayList<>();
     JPQLQuery<AbsenceRequest> query;
-    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    List<Office> officeList = uros.stream().filter(uro -> !uro.role.name.equals(Role.EMPLOYEE))
+        .map(u -> u.office).collect(Collectors.toList());
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())
             .and(absenceRequest.person.office.in(officeList)));
@@ -353,6 +354,7 @@ public class AbsenceRequestDao extends DaoBase {
           .orderBy(absenceRequest.startAt.desc())
           ;
     }
+
     results.addAll(query.fetch());
     return results;
   }
