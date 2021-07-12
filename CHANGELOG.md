@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3] - UNRELEASED
 ### Changed
+- Modificata query per flussi da approvare da parte dei responsabili di sede per mostrare
+solo quelli della propria sede e non anche di sedi dove si hanno altri ruoli
 - Corretta query per prelevare flussi completati nel caso di presenze gestite da 
 personale di un'altra sede
 - Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
