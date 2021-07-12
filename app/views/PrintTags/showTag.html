@@ -170,5 +170,44 @@
   <br>Totale monte ore a fine mese: <strong>${(mese.value.remainingMinutesLastYear+mese.value.remainingMinutesCurrentYear).toHourTime()}</strong>
   #{/list}
 
+#{if dto.includeStampingDetails == true && !dto.historyStampingsList.isEmpty()}
+<div class="break">
+  &nbsp;
+</div>
+<h2 id="stampingsDetailsTitle">Dettagli Timbrature modificate dall'amministratore</h2>
+<table>
+  <tr>
+    <th>&{'stamping'}</th>
+    <th>&{'date.modified'}</th>
+    <th>&{'history.type'}</th>
+    <th>&{'done.by'}</th>
+    <th>&{'stamping.way'}</th>
+    <th>&{'stamping.stampType'}</th>
+    <th>&{'stamping.note'}</th>
+    <th>&{'stamping.reason'}</th>
+    <th>&{'stamping.place'}</th>
+  </tr>
+
+  #{list dto.historyStampingsList,as:'stampHistory'}
+  <tr>
+    <td colspan="7" class="emptycell"></td>
+  </tr>
+  #{list stampHistory, as:'history'}
+  <tr>
+    <td>${history.value?.date.format()}</td>
+    <td>${history.formattedRevisionDate()}</td>
+    <td>${history.type}</td>
+    <td>${history.formattedOwner()}</td>
+    <td>${history.value?.way.label()}</td>
+    <td>${history.value?.stampType.label()}</td>
+    <td>${history.value?.note}</td>
+    <td>${history.value?.reason}</td>
+    <td>${history.value?.place}</td>
+  </tr>
+  #{/list}
+  #{/list}
+</table>
+#{/if}
+
 #{/list}
 </body>

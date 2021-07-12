@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.3] - UNRELEASED
 ### Changed
 - Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
+- Corretta query per prelevare lista assenza da approvare in modo da non mostrare duplicati
+- Nella disattivazione dei gruppi redirect verso la lista dei gruppi dell'ufficio corrente
 - Aggiunta evoluzione per correggere impostazione begin_date dei person_configurations
 del parametro TELEWORK_STAMPINGS.
 
