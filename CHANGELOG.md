@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [2.1.3] - UNRELEASED
 ### Changed
 - Corretta query per prelevare flussi completati nel caso di presenze gestite da 
@@ -12,6 +11,8 @@ personale di un'altra sede
 - Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
 - Corretta query per prelevare lista assenza da approvare in modo da non mostrare duplicati
 - Nella disattivazione dei gruppi redirect verso la lista dei gruppi dell'ufficio corrente
+- Aggiunta evoluzione per correggere impostazione begin_date dei person_configurations
+del parametro TELEWORK_STAMPINGS.
 
 ## [2.1.2] - 2021-07-01
 ### Changed
