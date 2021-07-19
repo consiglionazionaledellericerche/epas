@@ -354,7 +354,7 @@
       </p>
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED) }
-      <p>bilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
       richieda l'approvazione del responsabile di sede.      
       </p>
     #{/if}
@@ -365,8 +365,18 @@
       </p>
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED) }
-      <p>bilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
       richieda l'approvazione dell'amministratore del personale.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnologo/ricercatore
+      richieda l'approvazione del responsabile del gruppo di lavoro di cui il dipendente fa parte.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      richieda l'approvazione del responsabile del gruppo di lavoro di cui il dipendente fa parte.      
       </p>
     #{/if}
     
@@ -389,6 +399,11 @@
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED) }
       <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnici/amministrativi venga inviata
        al responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnici/amministrativi venga inviata
+       al responsabile del gruppo di lavoro di cui fanno parte.      
       </p>
     #{/if}
     

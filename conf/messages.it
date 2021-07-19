@@ -1225,11 +1225,15 @@ ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione
 ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede
 ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte dell'amministratore del personale
 ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte dell'amministratore del personale
+ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED=Richiesta presa visione comunicazione malattia per i ilvelli I-III da parte del responsabile di gruppo
+ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta presa visione comunicazione malattia per i ilvelli IV-VIII da parte del responsabile di gruppo
 
 TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli I-III da parte del responsabile di sede
 TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli IV-VIII da parte del responsabile di sede
+
 SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
+SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di gruppo
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
