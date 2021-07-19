@@ -20,6 +20,7 @@ package manager.recaps.personstamping;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import controllers.Resecure;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Contract;
@@ -51,6 +53,7 @@ import org.joda.time.YearMonth;
  *
  * @author Alessandro Martelli
  */
+@Slf4j
 public class PersonStampingRecap {
 
   private static final int MIN_IN_OUT_COLUMN = 2;
@@ -61,6 +64,9 @@ public class PersonStampingRecap {
 
   public boolean currentMonth = false;
 
+  //Informazioni sui permessi della persona
+  public boolean canEditStampings = false;
+  
   //Informazioni sul mese
   public int numberOfCompensatoryRestUntilToday = 0;
   public int basedWorkingDays = 0;
@@ -112,6 +118,11 @@ public class PersonStampingRecap {
       IWrapperFactory wrapperFactory,
       int year, int month, Person person, boolean considerExitingNow) {
 
+    //DATI DELLA PERSONA
+    canEditStampings = Resecure.check("Stampings.edit", null);
+    long start = System.currentTimeMillis();
+    log.trace("inizio creazione nuovo PersonStampingRecap. Person = {}, year = {}, month = {}", 
+        person.getFullname(), year, month);
     this.person = person;
     this.month = month;
     this.year = year;
@@ -157,6 +168,7 @@ public class PersonStampingRecap {
 
     LocalDate today = LocalDate.now();
 
+    long startDayRecaps = System.currentTimeMillis();
     for (PersonDay pd : totalPersonDays) {
       personDayManager.setValidPairStampings(pd.stampings);
 
@@ -196,6 +208,7 @@ public class PersonStampingRecap {
         }
       }
     }
+    log.trace("terminato calcolo dayRecaps in {} ms", System.currentTimeMillis() - startDayRecaps);
 
     //Riattivarlo... 
     this.positiveResidualInMonth = 0;
@@ -218,6 +231,7 @@ public class PersonStampingRecap {
     } else {
       this.absenceToRecoverYet = true;
     }        
-    
+    log.debug("fine creazione nuovo PersonStampingRecap in {} ms. Person = {}, year = {}, month = {}", 
+        System.currentTimeMillis() - start, person.getFullname(), year, month);
   }
 }
