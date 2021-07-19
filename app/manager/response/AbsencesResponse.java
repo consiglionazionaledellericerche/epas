@@ -80,6 +80,14 @@ public class AbsencesResponse {
 
   @Getter
   @Setter
+  private boolean isDayInReperibility = false;
+
+  @Getter
+  @Setter
+  private boolean isDayInShift = false;
+
+  @Getter
+  @Setter
   private Absence absenceAdded;
   
   @Getter

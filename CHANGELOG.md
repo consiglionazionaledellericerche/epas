@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3] - UNRELEASED
 ### Changed
+- Corretti controlli per invio email in reperibilità con codice di riposo compensativo.
 - Corretta query per prelevare flussi completati nel caso di presenze gestite da 
 personale di un'altra sede
 - Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
