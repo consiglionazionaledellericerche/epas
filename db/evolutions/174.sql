@@ -1,0 +1,25 @@
+# --- !Ups
+
+CREATE INDEX absence_requests_end_to_idx ON absence_requests(end_to);
+CREATE INDEX absence_requests_flow_ended_idx ON absence_requests(flow_ended);
+CREATE INDEX absence_requests_manager_approved_idx ON absence_requests(manager_approved);
+CREATE INDEX absence_requests_administrative_approval_required_idx ON absence_requests(administrative_approval_required);
+CREATE INDEX absence_requests_administrative_approved_idx ON absence_requests(administrative_approved);
+CREATE INDEX absence_requests_office_head_approval_for_manager_required_idx ON absence_requests(office_head_approval_for_manager_required);
+CREATE INDEX absence_requests_office_head_approval_required_idx ON absence_requests(office_head_approval_required);
+CREATE INDEX absence_requests_office_head_approved_idx ON absence_requests(office_head_approved);
+CREATE INDEX absence_requests_start_at_idx ON absence_requests(start_at);
+CREATE INDEX absence_requests_type_idx ON absence_requests(type);
+
+# --- !Downs
+
+DROP INDEX absence_requests_end_to_idx;
+DROP INDEX absence_requests_flow_ended_idx;
+DROP INDEX absence_requests_manager_approved_idx;
+DROP INDEX absence_requests_administrative_approval_required_idx;
+DROP INDEX absence_requests_administrative_approved_idx;
+DROP INDEX absence_requests_office_head_approval_for_manager_required_idx;
+DROP INDEX absence_requests_office_head_approval_required_idx;
+DROP INDEX absence_requests_office_head_approved_idx;
+DROP INDEX absence_requests_start_at_idx;
+DROP INDEX absence_requests_type_idx;

@@ -11,3 +11,4 @@ UPDATE person_configurations
 # --- !Downs
 
 -- non è necessaria una down
+
