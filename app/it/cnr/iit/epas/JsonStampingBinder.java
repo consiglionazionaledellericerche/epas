@@ -20,13 +20,13 @@ package it.cnr.iit.epas;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import org.joda.time.LocalDateTime;
+import injection.StaticInject;
 import lombok.extern.slf4j.Slf4j;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
-import org.joda.time.LocalDateTime;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 

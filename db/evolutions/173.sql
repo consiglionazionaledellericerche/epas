@@ -1,25 +1,14 @@
 # --- !Ups
 
-CREATE INDEX absence_requests_end_to_idx ON absence_requests(end_to);
-CREATE INDEX absence_requests_flow_ended_idx ON absence_requests(flow_ended);
-CREATE INDEX absence_requests_manager_approved_idx ON absence_requests(manager_approved);
-CREATE INDEX absence_requests_administrative_approval_required_idx ON absence_requests(administrative_approval_required);
-CREATE INDEX absence_requests_administrative_approved_idx ON absence_requests(administrative_approved);
-CREATE INDEX absence_requests_office_head_approval_for_manager_required_idx ON absence_requests(office_head_approval_for_manager_required);
-CREATE INDEX absence_requests_office_head_approval_required_idx ON absence_requests(office_head_approval_required);
-CREATE INDEX absence_requests_office_head_approved_idx ON absence_requests(office_head_approved);
-CREATE INDEX absence_requests_start_at_idx ON absence_requests(start_at);
-CREATE INDEX absence_requests_type_idx ON absence_requests(type);
+UPDATE person_configurations 
+  SET begin_date = subquery.begin_date_telework 
+  FROM 
+    (SELECT pc.person_id, pc2.begin_date AS begin_date_telework FROM person_configurations pc 
+     JOIN person_configurations pc2 ON pc.person_id = pc2.person_id 
+     WHERE pc.field_value = 'true' AND pc.epas_param = 'TELEWORK_STAMPINGS' AND pc2.epas_param = 'TELEWORK' AND pc.begin_date <> pc2.begin_date) AS subquery 
+  WHERE epas_param = 'TELEWORK_STAMPINGS' AND field_value = 'true' AND person_configurations.person_id = subquery.person_id;
 
 # --- !Downs
 
-DROP INDEX absence_requests_end_to_idx;
-DROP INDEX absence_requests_flow_ended_idx;
-DROP INDEX absence_requests_manager_approved_idx;
-DROP INDEX absence_requests_administrative_approval_required_idx;
-DROP INDEX absence_requests_administrative_approved_idx;
-DROP INDEX absence_requests_office_head_approval_for_manager_required_idx;
-DROP INDEX absence_requests_office_head_approval_required_idx;
-DROP INDEX absence_requests_office_head_approved_idx;
-DROP INDEX absence_requests_start_at_idx;
-DROP INDEX absence_requests_type_idx;
+-- non è necessaria una down
+

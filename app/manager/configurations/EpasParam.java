@@ -736,6 +736,32 @@ public enum EpasParam {
       Office.class),
   
   /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale.
+   */
+  ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED(
+      "illness_information_i_iii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale. 
+   */
+  ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
    * Per i livelli I-III è necessaria la presa visione del telelavoro da parte 
    * del responsabile di sede.
    */
@@ -780,6 +806,19 @@ public enum EpasParam {
    */
   SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
       "service_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle uscite di servizio da parte 
+   * del responsabile di gruppo.
+   */
+  SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "service_information_iv_viii_manager_approval_required",
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
