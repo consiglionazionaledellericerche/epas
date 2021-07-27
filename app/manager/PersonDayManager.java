@@ -430,7 +430,7 @@ public class PersonDayManager {
     //Caso assenza giornaliera
     if (getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, getAllDay(personDay).get().absenceType.timeForMealTicket);
       return personDay;
     }
 
