@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.3] - UNRELEASED
+## [2.1.3] - 2021-08-05
 ### Changed
 
 - Rivisti filtri per mostrare flussi terminati a responsabili di più sedi
@@ -18,6 +18,8 @@ personale di un'altra sede
 - Nella disattivazione dei gruppi redirect verso la lista dei gruppi dell'ufficio corrente
 - Aggiunta evoluzione per correggere impostazione begin_date dei person_configurations
 del parametro TELEWORK_STAMPINGS.
+- Aggiunto controllo che le timbrature per motivi di servizi siano modificabili ed
+  eliminabili dal dipendente abilitato solo se inserite dal dipendente
 
 ## [2.1.2] - 2021-07-01
 ### Changed
