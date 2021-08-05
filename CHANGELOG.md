@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2021-08-05
+### Changed
+
+- Rivisti filtri per mostrare flussi terminati a responsabili di più sedi
+- Modificata query per flussi da approvare da parte dei responsabili di sede per mostrare
+solo quelli della propria sede e non anche di sedi dove si hanno altri ruoli
+- Corretti controlli per invio email in reperibilità con codice di riposo compensativo.
+- Corretta query per prelevare flussi completati nel caso di presenze gestite da 
+personale di un'altra sede
+- Inserito parametro e controllo per tempo massimo nel passato per inserimento timbrature
+- Corretta query per prelevare lista assenza da approvare in modo da non mostrare duplicati
+- Nella disattivazione dei gruppi redirect verso la lista dei gruppi dell'ufficio corrente
+- Aggiunta evoluzione per correggere impostazione begin_date dei person_configurations
+del parametro TELEWORK_STAMPINGS.
+- Aggiunto controllo che le timbrature per motivi di servizi siano modificabili ed
+  eliminabili dal dipendente abilitato solo se inserite dal dipendente
+
+## [2.1.2] - 2021-07-01
+### Changed
+- Modifica query per prelevare le assenze di una persona in un periodo perché la precedente
+impattiva in alcuni casi molto negativamente sulle prestazioni del sistema.
+
 ## [2.1.1] - 2021-06-23
 ### Changed
 - Ritorno alla versione play 1.5.3 per problemi di compatibilità con le fastergt e la 
@@ -18,7 +40,6 @@ passare una data con cui verificare i contratti attivi a quella data. Inoltre è
 utilizzare il parametro *terse* per avere solo informazioni principali del personale.
 ### Added
 - Aggiunta possiblità di cercare le persone per matricola nei metodi REST.
-### Added
 - Aggiunta la configurabilità della visibilità del menu Normativa e migliorata la gestione dei
 permessi di questa parte
 

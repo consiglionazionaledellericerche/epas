@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.PersonManager;
 import lombok.val;
 import models.Office;
 import models.Person;
@@ -68,7 +69,9 @@ public class PersonDays extends Controller {
   private static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
-
+  @Inject
+  static PersonManager personManager;
+  
   /**
    * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
    * personPerseoId o fiscalCode) in un giorno specifico (date).
@@ -119,10 +122,10 @@ public class PersonDays extends Controller {
     List<PersonDay> personDays = 
         personDayDao.getPersonDaysByOfficeInPeriod(
             office, date, date.dayOfMonth().withMaximumValue());
-    
+
     val personDayMap = 
         personDays.stream().collect(Collectors.groupingBy(PersonDay::getPerson));
-    
+
     List<PersonMonthRecapDto> monthRecaps = Lists.newArrayList();
     personDayMap.forEach((p, pds) -> {      
       monthRecaps.add(PersonMonthRecapDto.builder()
@@ -189,6 +192,8 @@ public class PersonDays extends Controller {
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     val monthRecap = 
         PersonMonthRecapDto.builder().year(year).month(month)
+        .basedWorkingDays(
+            personManager.basedWorkingDays(personDays, person.contracts, null))
         .person(PersonShowTerseDto.build(person))
         .personDays(personDays.stream().map(pd -> PersonDayShowTerseDto.build(pd))
             .collect(Collectors.toList()))

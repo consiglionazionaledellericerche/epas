@@ -83,5 +83,11 @@ public class GeneralSetting extends BaseModel {
   // Parametri visualizzazione richieste di flusso
   
   public boolean enableIllnessFlow = false;
+  
+  /**
+   * Numero massimo di giorni nel passato per cui è possibile
+   * inserire timbrature via REST.
+   */
+  public int maxDaysInPastForRestStampings = 90;
 
 }

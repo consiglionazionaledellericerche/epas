@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -51,7 +53,6 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceTrouble;
 import models.absences.query.QAbsenceType;
-import models.absences.query.QAbsenceTypeJustifiedBehaviour;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
@@ -71,6 +72,7 @@ import play.db.jpa.JPA;
  *
  * @author Alessandro Martelli
  */
+@Slf4j
 public class AbsenceComponentDao extends DaoBase {
 
   @Inject
@@ -490,9 +492,11 @@ public class AbsenceComponentDao extends DaoBase {
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
-    final QAbsenceTypeJustifiedBehaviour behaviour =
-        QAbsenceTypeJustifiedBehaviour.absenceTypeJustifiedBehaviour;
 
+    long start = System.currentTimeMillis();
+    log.trace("Inizio metodo orderedAbsences, person={}, begin={}, end={}, codeSet={}",
+        person.getFullname(), begin, end, codeSet);
+    
     BooleanBuilder conditions = new BooleanBuilder();
     if (begin != null) {
       conditions.and(absence.personDay.date.goe(begin));
@@ -508,11 +512,6 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(absence.absenceType, absenceType).fetchJoin()
         .leftJoin(absenceType.complationGroup).fetchJoin()
         .leftJoin(absenceType.replacingGroup).fetchJoin()
-        .leftJoin(absenceType.takableGroup).fetchJoin()
-        .leftJoin(absenceType.takenGroup).fetchJoin()
-        .leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
-        .leftJoin(behaviour.justifiedBehaviour).fetchJoin()
-        .leftJoin(absence.troubles).fetchJoin()
         .leftJoin(absence.personDay).fetchJoin()
         .where(absence.personDay.person.eq(person)
             .and(conditions)).distinct().fetch();
@@ -523,7 +522,9 @@ public class AbsenceComponentDao extends DaoBase {
             Absence::getPersonDay, (s1, s2) -> {
               return s2.date.compareTo(s1.date);
             });
-    return absences.stream().sorted(absenceComparator).collect(Collectors.toList());
+    val result = absences.stream().sorted(absenceComparator).collect(Collectors.toList());
+    log.trace("Terminato metodo orderedAbsences in {} millisecondi", System.currentTimeMillis() - start);
+    return result;
   }
 
   /**

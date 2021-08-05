@@ -364,10 +364,12 @@
         <th>Al</th>
       </tr>
       #{list informationFlows.findAll({!it.epasParam.general}), as:'conf'}
-      #{if !(conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED
+        #{if !(conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED
       	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED
       	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED
-      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED)
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED
+		|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED)
       	|| templateUtility.enableIllnessFlow()}
       	#{if !(conf.epasParam == manager.configurations.EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED)}
       <tr>
@@ -378,7 +380,7 @@
         <td>${conf.beginDate.format()}</td>
         <td>${conf.calculatedEnd()?.format()}</td>
       </tr>
-       #{/if}
+         #{/if}
       #{/if}
       #{/list}
     </table>

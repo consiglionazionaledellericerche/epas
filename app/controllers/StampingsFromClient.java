@@ -69,6 +69,11 @@ public class StampingsFromClient extends Controller {
       JsonResponse.notFound();
     }
 
+    // Controllo timbratura con data troppo vecchia
+    if (stampingManager.isTooFarInPast(body.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data troppo nel passato");
+    }
+
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, true).isPresent()) {
       JsonResponse.conflict();
