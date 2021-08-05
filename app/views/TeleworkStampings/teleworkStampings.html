@@ -20,10 +20,14 @@
 	al proprio responsabile di sede prima di procedere.</p>
 	#{/alert}
 	#{/if}
+	#{secure.check 'TeleworkStampings.generateReport'}
 	<div class="text-center">
+	
     <a class="btn btn-success" href="@{TeleworkStampings.generateReport(year, month)}"><i class="fa fa-flag-o"></i>
       Genera report mensile </a>
+   
 	</div>
+	 #{/secure.check}
 	#{list items:list, as:'day'}
       <ul class="list-group">
      	 <li class="list-group-item  list-group-item-grey">

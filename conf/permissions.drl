@@ -837,6 +837,14 @@ then
   $c.grant();
 end
 
+rule EmployeeCanSubmitTeleworkRequest
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck(action == "TeleworkStampings.generateReport", granted == false, target == null)
+then
+  $c.grant();
+end
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
