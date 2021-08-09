@@ -194,20 +194,17 @@ public class AbsenceRequestDao extends DaoBase {
             .and(absenceRequest.flowStarted.isTrue())
             .and(absenceRequest.flowEnded.isFalse()));
 
-    BooleanBuilder conditions = new BooleanBuilder();
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      val urosSupervisor = uros.stream().filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).collect(Collectors.toList());
-      for (UsersRolesOffices uro : urosSupervisor) {
-        conditions = conditions.or(seatSupervisorQuery(Lists.newArrayList(uro.office), baseConditions, signer));
-      };
-      return getQueryFactory().selectFrom(absenceRequest)
-          .join(absenceRequest.person).fetchJoin()
-          .join(absenceRequest.events).fetchJoin()
-          .where(conditions).fetch();
-    } else {
-      return Lists.newArrayList();
-    }
-
+    val urosSupervisor = uros.stream().filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
+        .collect(Collectors.toList());
+    val uroOffices = urosSupervisor.stream().map(uro -> uro.office)
+        .collect(Collectors.toList());
+    return getQueryFactory().selectFrom(absenceRequest)
+        .join(absenceRequest.person).fetchJoin()
+        .join(absenceRequest.events).fetchJoin()
+        .where(
+            baseConditions, absenceRequest.person.office.in(uroOffices), 
+            seatSupervisorCondition(absenceRequest))
+        .fetch();
   }
 
   /**
@@ -412,16 +409,12 @@ public class AbsenceRequestDao extends DaoBase {
    *
    * @param officeList la lista delle sedi
    * @param condition le condizioni pregresse
-   * @param signer colui che deve firmare la richiesta
    * @return le condizioni per determinare se il responsabile di sede è coinvolto nell'approvazione
    *     delle ferie.
    */
-  private BooleanBuilder seatSupervisorQuery(List<Office> officeList, 
-      BooleanBuilder condition, Person signer) {
-
-    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
-    condition.and(absenceRequest.person.office.in(officeList))
-        .andAnyOf(
+  private BooleanBuilder seatSupervisorCondition(QAbsenceRequest absenceRequest) {
+    BooleanBuilder condition = new BooleanBuilder();
+    condition.andAnyOf(
             //per i manager è richiesta solo l'approvazione da parte del responsabile di sede
             absenceRequest.officeHeadApprovalForManagerRequired.isTrue()
             .and(absenceRequest.officeHeadApproved.isNull()),
@@ -436,10 +429,7 @@ public class AbsenceRequestDao extends DaoBase {
             absenceRequest.officeHeadApprovalRequired.isTrue()
                 .and(absenceRequest.officeHeadApproved.isNull())
                 .and(absenceRequest.managerApprovalRequired.isFalse()));
-
     return condition;
-
-
   }
 
 
