@@ -710,6 +710,8 @@ sourceDateResidual=Data inizializzazione
 sourceDateVacation=Data inizializzazione
 
 stamping= Timbratura
+stamping.date =Data
+stamping.hour =Orario
 stamping.in= Timbratura di ingresso
 stamping.note= Note
 stamping.place= Luogo
