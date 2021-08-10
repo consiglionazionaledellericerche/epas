@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.4] - UNRELEASED
 ### Changed
  - Corretta la query per mostrare le assenza da approvare dei responsabili di più sedi
+ - Nel pdf con la lista delle timbrature fuori sede aggiunto l'orario della timbrature
 
 ## [2.1.3] - 2021-08-05
 ### Changed

@@ -1,7 +1,8 @@
 <h2 id="stampingsDetailsTitle">Dettagli Timbrature lavoro fuori sede</h2>
 <table>
   <tr>
-    <th>&{'stamping'}</th>
+    <th>&{'stamping.date'}</th>
+    <th>&{'stamping.hour'}</th>
     <th>&{'stamping.way'}</th>
     <th>&{'stamping.stampType'}</th>
     <th>&{'stamping.note'}</th>
@@ -13,6 +14,7 @@
   
   <tr>
     <td>${offSiteStamp?.date.format()}</td>
+    <td>${offSiteStamp?.stamping.formattedHour()}</td>
     <td>${offSiteStamp?.stamping.way.label()}</td>
     <td>${offSiteStamp?.stamping.stampType.label()}</td>
     <td>${offSiteStamp?.note}</td>
