@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretta la query per mostrare le assenza da approvare dei responsabili di più sedi
  - Nel pdf con la lista delle timbrature fuori sede aggiunto l'orario della timbrature
+ - Nella lista dei badge di una persona mostrata anche la sorgente timbratura associata al
+   numero di badge
 
 ## [2.1.3] - 2021-08-05
 ### Changed
