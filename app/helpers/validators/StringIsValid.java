@@ -28,6 +28,8 @@ import play.data.validation.Check;
  */
 public class StringIsValid extends Check {
 
+  private final static int MIN_STRING_LENGTH = 3;
+  
   @Override
   public boolean isSatisfied(Object validatedObject, Object value) {
 
@@ -37,10 +39,10 @@ public class StringIsValid extends Check {
     if (!(value instanceof String)) {
       return false;
     }
-    final String string = (String) value;    
+    final String string = (String) value;
 
-    if (!string.matches("^[A-Za-zÀ-ÖØ-öø-ÿ0-9 _]*$")) {
-      setMessage("Inserisci una stringa valida");
+    if (string.length() < MIN_STRING_LENGTH) {
+      setMessage(String.format("Il testo deve essere di almeno %d caratteri", MIN_STRING_LENGTH));
       return false;
     }
     if (string.matches("^[0-9 ]+$")) {

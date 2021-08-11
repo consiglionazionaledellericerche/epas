@@ -255,8 +255,8 @@ public class AbsenceRequests extends Controller {
         Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-    log.debug("Preparate richieste da approvare per {} in {} ms", 
-        person.getFullname(), System.currentTimeMillis() - start);
+    log.debug("Preparate richieste da approvare per {} in {} ms. Da approvare = {}", 
+        person.getFullname(), System.currentTimeMillis() - start, myResults.size());
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
