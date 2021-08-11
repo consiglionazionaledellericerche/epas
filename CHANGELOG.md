@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Nella lista dei badge di una persona mostrata anche la sorgente timbratura associata al
    numero di badge
  - reso più blando il controllo sulle stringhe valide nei testi inseriti dagli utenti
+ - introdotto piano ferie 20+3
 
 ## [2.1.3] - 2021-08-05
 ### Changed
