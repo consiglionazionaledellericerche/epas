@@ -87,6 +87,7 @@ public class InformationRequestManager {
   
   /**
    * Costruttore injector.
+   * 
    * @param configurationManager il configuration manager
    * @param uroDao il dao per gli usersRolesOffices
    * @param roleDao il dao per i ruoli
@@ -213,6 +214,7 @@ public class InformationRequestManager {
   
   /**
    * Metodo di utilità per parsare una stringa e renderla un LocalTime.
+   * 
    * @param time la stringa contenente l'ora
    * @return il LocalTime corrispondente alla stringa passata come parametro.
    */

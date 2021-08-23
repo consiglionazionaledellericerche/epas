@@ -16,9 +16,9 @@
     <tr>
       <th>Giorno</th>
       <th>Inizio Giornata</th>
-      <th>Inizio pausa pranzo</th>
-      <th>Fine pausa pranzo</th>
       <th>Fine giornata</th>
+      <th>Inizio pausa pranzo</th>
+      <th>Fine pausa pranzo</th>      
       <th>Interruzione dalle</th>
       <th>Interruzione alle</th>
     </tr>
@@ -26,12 +26,23 @@
 #{list items:list, as:'day'}
 <tr>
 	<td>${day.personDay.date.shortDayName()}</td>
-	<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(0) != null ? day.beginEnd.get(0).formattedHour() : ' '}</td>
-	<td>${!day.meal.isEmpty() && day.meal.get(0) != null ? day.meal.get(0).formattedHour() : ' '}</td>
-	<td>${!day.meal.isEmpty() && day.meal.get(1) != null ? day.meal.get(1).formattedHour() : ' '}</td>
-	<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(1) != null ? day.beginEnd.get(1).formattedHour() : ' '}</td>
-	<td>${!day.interruptions.isEmpty() && day.interruptions.get(0) != null ? day.interruptions.get(0).formattedHour() : ' '}</td>
-	<td>${!day.interruptions.isEmpty() && day.interruptions.get(1) != null ? day.interruptions.get(1).formattedHour() : ' '}</td>
+	#{list items: day.beginEnd, as:'beginEnd'}
+		<td>#{if beginEnd.stampType.equals(models.enumerate.TeleworkStampTypes.INIZIO_TELELAVORO)}
+				${beginEnd.formattedHour()}
+			#{/if}
+			#{elseif beginEnd.stampType.equals(models.enumerate.TeleworkStampTypes.FINE_TELELAVORO)}
+				${beginEnd.formattedHour()}
+			#{/elseif}
+			#{else}
+			 -
+			#{/else}</td>
+	#{/list}
+	#{list items: day.meal, as:'meal'}
+		<td>${meal.formattedHour()}</td>
+	#{/list}
+	#{list items: day.interruptions, as:'interruption'}
+		<td>${interruption.formattedHour()}</td>
+	#{/list}
 </tr>
 #{/list}
 
