@@ -57,7 +57,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
       if (jsonObject.get("anno") != null) {
-        mission.anno = jsonObject.get("anno").getAsInt();        
+        mission.anno = jsonObject.get("anno").getAsInt();
       }
       if (jsonObject.get("numero") != null) {
         mission.numero = jsonObject.get("numero").getAsLong();

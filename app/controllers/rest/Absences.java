@@ -273,9 +273,7 @@ public class Absences extends Controller {
     //i diritti di gestione delle assenze sull'office della persona passata.
     rules.checkIfPermitted(absence.personDay.person.office);
 
-    absenceManager.removeAbsencesInPeriod(
-        absence.personDay.person, absence.personDay.date, 
-        absence.personDay.date, absence.absenceType);
+    absenceManager.removeAbsence(absence);
 
     log.info("Deleted absence {} via REST", absence);
     JsonResponse.ok();
