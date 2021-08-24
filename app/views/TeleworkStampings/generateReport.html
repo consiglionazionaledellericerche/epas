@@ -25,24 +25,13 @@
 
 #{list items:list, as:'day'}
 <tr>
-	<td>${day.personDay.date.shortDayName()}</td>
-	#{list items: day.beginEnd, as:'beginEnd'}
-		<td>#{if beginEnd.stampType.equals(models.enumerate.TeleworkStampTypes.INIZIO_TELELAVORO)}
-				${beginEnd.formattedHour()}
-			#{/if}
-			#{elseif beginEnd.stampType.equals(models.enumerate.TeleworkStampTypes.FINE_TELELAVORO)}
-				${beginEnd.formattedHour()}
-			#{/elseif}
-			#{else}
-			 -
-			#{/else}</td>
-	#{/list}
-	#{list items: day.meal, as:'meal'}
-		<td>${meal.formattedHour()}</td>
-	#{/list}
-	#{list items: day.interruptions, as:'interruption'}
-		<td>${interruption.formattedHour()}</td>
-	#{/list}
+	<td>${day.displayDay()}</td>
+	<td>${day.beginDay != null ? day.beginDay.formattedHour() : ' '}</td>
+	<td>${day.endDay != null ? day.endDay.formattedHour() : ' '}</td>
+	<td>${day.beginMeal != null ? day.beginMeal.formattedHour() : ' '}</td>
+	<td>${day.endMeal != null ? day.endMeal.formattedHour() : ' '}</td>
+	<td>${day.beginInterruption != null ? day.beginInterruption.formattedHour() : ' '}</td>
+	<td>${day.endInterruption != null ? day.endInterruption.formattedHour() : ' '}</td>
 </tr>
 #{/list}
 
