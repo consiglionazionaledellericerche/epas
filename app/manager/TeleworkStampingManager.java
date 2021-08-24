@@ -21,9 +21,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -35,10 +37,12 @@ import manager.services.telework.errors.Errors;
 import manager.services.telework.errors.TeleworkStampingError;
 import manager.telework.service.TeleworkComunication;
 import models.PersonDay;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
+
 
 /**
  * Classe per l'interfacciamento con il servizio REST di Timbrature per telelavoro.
@@ -223,6 +227,63 @@ public class TeleworkStampingManager {
 
     return dtoList;
   }
+  
+  public List<NewTeleworkDto> stampingsForReport(PersonStampingRecap psDto) 
+      throws NoSuchFieldException, ExecutionException {
+    List<PersonStampingDayRecap> pastDaysRecap = 
+        psDto.daysRecap.stream().filter(d -> {
+          return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+        }).collect(Collectors.toList());
+    List<NewTeleworkDto> dtoList = Lists.newArrayList();
+    for (PersonStampingDayRecap day : pastDaysRecap) {
+     
+      List<TeleworkDto> list = Lists.newArrayList();
+      if (day.personDay.id == null) {
+        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+      } else {
+        list = comunication.getList(day.personDay.id);        
+      }
+            
+      if (list.isEmpty()) {
+        //TODO: aggiungere il pezzo in cui si creano i teleworkDto vuoti nel caso non esistano 
+        log.trace("Non ci sono timbrature associate al giorno in applicazione telework-stampings!");
+
+      } else {  
+        java.time.LocalDate date = null;
+        NewTeleworkDto dto = null;
+        for (TeleworkDto stamping : list) {
+          if (date == null || !stamping.getDate().toLocalDate().isEqual(date)) {
+            dto = new NewTeleworkDto();
+            date = stamping.getDate().toLocalDate();
+            dto.date = stamping.getDate().toLocalDate();
+          }
+          
+          TeleworkStampTypes stampType = stamping.getStampType();
+          if (stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
+            dto.beginDay = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+            dto.endDay = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
+            dto.beginMeal = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+            dto.endMeal = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE)) {
+            dto.beginInterruption = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+            dto.endInterruption = stamping;
+          }       
+        }
+        dtoList.add(dto);
+      }      
+    }
+    return dtoList;
+  }
+  
 
   /**
    * Verifica se l'inserimento di una timbratura in un giorno può dare origine ad un errore di 

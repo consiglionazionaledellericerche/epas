@@ -45,6 +45,7 @@ import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
 import models.TeleworkValidation;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
@@ -333,7 +334,7 @@ public class TeleworkStampings extends Controller {
   public static void generateReport(int year, int month) 
       throws NoSuchFieldException, ExecutionException {
     
-    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    List<NewTeleworkDto> list = Lists.newArrayList();
     val currentPerson = Security.getUser().get().person;
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
@@ -348,7 +349,7 @@ public class TeleworkStampings extends Controller {
         .create(wrperson.getValue(), year, month, true);
     LocalDate date = LocalDate.now();
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
-    list = manager.getMonthlyStampings(psDto);
+    list = manager.stampingsForReport(psDto);
     render(list, currentPerson, year, month, date);
   }
   
