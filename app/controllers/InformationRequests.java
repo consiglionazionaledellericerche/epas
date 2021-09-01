@@ -486,46 +486,49 @@ public class InformationRequests extends Controller {
    * @param id l'id della richiesta di assenza
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
-    InformationRequest request = informationRequestDao.getById(id);
+    InformationRequest informationRequest = informationRequestDao.getById(id);
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
-    notFoundIfNull(request);
+    notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
-    switch (request.informationType) {
+    switch (informationRequest.informationType) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(serviceRequest, disapproval);
+          render(serviceRequest, informationRequest, disapproval);
         }
         break;
       case ILLNESS_INFORMATION:
         illnessRequest = informationRequestDao.getIllnessById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(illnessRequest, disapproval);
+          render(illnessRequest, informationRequest, disapproval);
         }
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(teleworkRequest, disapproval);
+          render(teleworkRequest, informationRequest, disapproval);
         }
         break;
       default:
         break;
     }      
     
-    if (request.officeHeadApprovalRequired && request.officeHeadApproved == null
+    if (informationRequest.officeHeadApprovalRequired 
+        && informationRequest.officeHeadApproved == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       informationRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
-      render("@show", request, user);
+      InformationType type = informationRequest.informationType;
+      render("@show", informationRequest, type, serviceRequest, 
+          illnessRequest, teleworkRequest, user);
     }
-    render("@show", request, user);
+    render("@show", informationRequest, user);
   }
   
   /**
