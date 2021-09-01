@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
 ### Changed
+ - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
+   non è presente un utente in sessione (per esempio nei job)
+ - Corretta generazione parametri di configurazione alla creazione di un nuova persona
+   tramite il job di sincronizzazione degli uffici
  - La rimozione via REST di una singola assenza adesso rimuove solo quella indicata e non tutte
    quelle con lo stesso tipo nello stesso giorno.
 

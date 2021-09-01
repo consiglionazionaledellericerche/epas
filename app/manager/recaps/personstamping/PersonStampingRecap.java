@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import controllers.Resecure;
+import controllers.Security;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -45,6 +46,7 @@ import models.dto.AbsenceToRecoverDto;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.mvc.Scope.Session;
 
 /**
  * Oggetto che modella il contenuto della vista contenente il tabellone timbrature. Gerarchia:
@@ -119,7 +121,10 @@ public class PersonStampingRecap {
       int year, int month, Person person, boolean considerExitingNow) {
 
     //DATI DELLA PERSONA
-    canEditStampings = Resecure.check("Stampings.edit", null);
+    if (Session.current() != null && 
+        Security.getUser() != null && Security.getUser().isPresent()) {
+      canEditStampings = Resecure.check("Stampings.edit", null);
+    }
     long start = System.currentTimeMillis();
     log.trace("inizio creazione nuovo PersonStampingRecap. Person = {}, year = {}, month = {}", 
         person.getFullname(), year, month);
