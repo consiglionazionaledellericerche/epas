@@ -545,26 +545,26 @@ public class InformationRequestManager {
    * @param reason la motivazione del rifiuto
    */
   public void officeHeadDisapproval(long id, String reason) {
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.informationType) {
       case SERVICE_INFORMATION:
-        serviceRequest = dao.getServiceById(id).get();
+        serviceRequest = dao.getServiceById(id);
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest = dao.getIllnessById(id).get();
+        illnessRequest = dao.getIllnessById(id);
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = dao.getTeleworkById(id).get();
+        teleworkRequest = dao.getTeleworkById(id);
         break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().person;
-    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), currentPerson, 
+    executeEvent(serviceRequest, illnessRequest, 
+        teleworkRequest, currentPerson, 
         InformationRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
