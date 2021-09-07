@@ -940,9 +940,16 @@ public class Competences extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
+      
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@editShift", cat, officePeople, office);
+      Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
+      cat.shiftTypes.forEach(item -> {
+        List<PersonShiftShiftType> psstList = shiftDao
+            .getAssociatedPeopleToShift(item, Optional.fromNullable(LocalDate.now()));
+        map.put(item, psstList);
+      });
+      render("@editShift", cat, map, officePeople, office);
     }
 
     cat.office = office;
