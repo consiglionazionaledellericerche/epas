@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
 ### Changed
+ - Corretti riferimenti a istituto e direttore nell'esportazione dei PDF delle reperibilità
  - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
    non è presente un utente in sessione (per esempio nei job)
  - Corretta generazione parametri di configurazione alla creazione di un nuova persona
