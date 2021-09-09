@@ -12,7 +12,7 @@
 	mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
 	anno = firstOfMonth.plusMonths(mm).year().getAsText();
 }%
-<h1>Istituto di Informatica e Telematica </h1>
+<h1>${office.institute.name}</h1>
 
 <div class="table">
 	<table class="mensile">
@@ -50,12 +50,12 @@
 
 <div class="firma dir">
 	<strong>Il Direttore</strong> <br />
-	Dott. ${seatSupervisor}
+	${seatSupervisor}
 </div>
 
 <div class="firma resp">
 	<strong>Il Responsabile</strong><br />
-	Dott. ${supervisor}
+	${supervisor}
 </div>
 
 #{ifnot inconsistentAbsence.isEmpty()}

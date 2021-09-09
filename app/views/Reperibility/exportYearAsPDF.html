@@ -2,15 +2,15 @@
 
 <html>
     <head>
-        <title>Istituto di Informatica e Telematica Piano delle Reperibilità ${year} Gruppo ${description}</title>
+        <title>${office.institute.name} Piano delle Reperibilità ${year} Gruppo ${description}</title>
         
         <link rel="stylesheet" href="@{'/public/stylesheets/calendars/sistorgReportPDF.css'}" type="text/css" />
         <link rel="stylesheet" href="@{'/public/stylesheets/calendars/reperibilityPDF.css'}" type="text/css" />
     </head>
     <body>
-        <h1>Istituto di Informatica e Telematica </h1>
+        <h1>${office.institute.name}</h1>
         <h2>Piano delle Reperibilità ${year} <br/>  <em>${description}</em> </h2>
-        	
+
 %{
 	int mm = 0;
 	int gg = 0;
@@ -82,7 +82,7 @@
 %{
 		mm++;
 }%
-#{if (mm % 4) == 0}		
+#{if (mm % 4) == 0}
 	</div>
 	<div class="page">
 #{/if}
@@ -119,12 +119,12 @@
       
       <div class="firma dir">
       <strong>Il Direttore</strong> <br />
-      Dott. Marco Conti
+      {seatsupervisor}
       </div>
       
       <div class="firma resp">
       <strong>Il Responsabile</strong><br />
-      Dott. ${supervisor}
+      ${supervisor}
       </div>
   </body>
 </html>
