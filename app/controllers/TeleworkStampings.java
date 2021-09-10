@@ -142,8 +142,10 @@ public class TeleworkStampings extends Controller {
    * @param personId l'identificativo della persona
    * @param year l'anno 
    * @param month il mese
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public static void personTeleworkStampings(Long personId, Integer year, Integer month) {
+  public static void personTeleworkStampings(Long personId, Integer year, Integer month) throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.personStamping(personId, LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear());
@@ -179,22 +181,47 @@ public class TeleworkStampings extends Controller {
       YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
       personTeleworkStampings(personId, last.getYear(), last.getMonthOfYear());
     }
+    
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
-    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
-    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
+
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrPerson.getValue(), year, month, true);
-    for (PersonStampingDayRecap day : psDto.daysRecap) {      
-
-      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-          .personDay(day.personDay)
-          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-          .build();
-      list.add(dto);      
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    if (list.isEmpty()) {
+      flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
+          + "L'applicazione potrebbe essere spenta o non raggiungibile."
+          + "Riprovare più tardi");
     }
+    boolean validated = false;
+    //Recupero la lista dei mesi di telelavoro approvati
+    List<TeleworkValidation> validationList = 
+        validationDao.previousValidations(person, year, month);
+    Optional<TeleworkValidation> valid = validationDao
+        .byPersonYearAndMonth(person, year, month);
+    if (valid.isPresent()) {
+      validated = true;
+    }
+    
+    
+    
+//    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+//    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
+//    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
+//    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
+//    PersonStampingRecap psDto = stampingsRecapFactory
+//        .create(wrPerson.getValue(), year, month, true);
+//    for (PersonStampingDayRecap day : psDto.daysRecap) {      
+//
+//      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
+//          .personDay(day.personDay)
+//          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
+//          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
+//          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
+//          .build();
+//      list.add(dto);      
+//    }
     render(year, month, list, person);
   }
 
