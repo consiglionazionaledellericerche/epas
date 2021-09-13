@@ -176,7 +176,7 @@ public class Stampings extends Controller {
    * @param year     anno
    * @param month    mese
    */
-  public static void personStamping(final Long personId, final Integer year, final Integer month) {
+  public static void personStamping(final Long personId, int year, int month) {
 
     if (personId == null) {
       flash.error(
@@ -193,8 +193,8 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(person.office);
 
     val yearMonth = new YearMonth(
-        Optional.fromNullable(year).or(YearMonth.now().getYear()),
-        Optional.fromNullable(month).or(YearMonth.now().getMonthOfYear()));
+        year != 0 ? year : YearMonth.now().getYear(),
+        month != 0 ? month : YearMonth.now().getMonthOfYear());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
