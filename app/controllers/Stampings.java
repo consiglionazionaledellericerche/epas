@@ -240,21 +240,21 @@ public class Stampings extends Controller {
    * @param date la data in cui si vuole inserire la timbratura
    */
   public static void insert(Long personId, LocalDate date) {
-    
+    notFoundIfNull(personId);
     final Person person = personDao.getPersonById(personId);
-
     notFoundIfNull(person);
 
+    Preconditions.checkNotNull(date);
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     rules.checkIfPermitted(person);
-    
+
     List<StampTypes> offsite = Lists.newArrayList();
     offsite.add(StampTypes.LAVORO_FUORI_SEDE);
     boolean insertOffsite = false;
     boolean insertNormal = true;
     boolean autocertification = false;
-    
+
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
       render(person, date, offsite, insertOffsite, insertNormal, autocertification);
@@ -267,21 +267,21 @@ public class Stampings extends Controller {
         insertNormal = false;        
       }
     }
-    
+
     if (user.person != null && user.person.equals(person) 
         && !wrperson.isTechnician()) {
       if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
         autocertification = true;
       }
     }
-    
+
     if (autocertification == true  && insertOffsite == true) {
       insertOffsite = false;
     }
     render(person, date, offsite, insertOffsite, insertNormal, autocertification);
   }
 
-  
+
   /**
    * Modifica timbratura dall'amministratore.
    *
