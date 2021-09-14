@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
 ### Changed
+ - Portato a 700ms il tempo minimo per log su metodi lenti
  - Corretti riferimenti a istituto e direttore nell'esportazione dei PDF delle reperibilità
  - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
    non è presente un utente in sessione (per esempio nei job)
