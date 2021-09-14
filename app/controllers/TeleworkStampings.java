@@ -204,25 +204,8 @@ public class TeleworkStampings extends Controller {
       validated = true;
     }
     
-    
-    
-//    List<TeleworkPersonDayDto> list = Lists.newArrayList();
-//    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
-//    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
-//    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
-//    PersonStampingRecap psDto = stampingsRecapFactory
-//        .create(wrPerson.getValue(), year, month, true);
-//    for (PersonStampingDayRecap day : psDto.daysRecap) {      
-//
-//      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-//          .personDay(day.personDay)
-//          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-//          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-//          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-//          .build();
-//      list.add(dto);      
-//    }
-    render(year, month, list, person);
+
+    render(year, month, list, person, validated, validationList);
   }
 
   /**
