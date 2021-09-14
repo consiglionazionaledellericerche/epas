@@ -66,9 +66,9 @@ public class MetricsModule extends AbstractModule {
   public static final String LOG_MIN_DURATION_REQUEST = "log_min_duration_request";
 
   /**
-   * Durata minima predefinta: 0.5 secondi
+   * Durata minima predefinta: 0.7 secondi
    */
-  public static final long DEFAULT_MIN_DURATION_REQUEST = 500_000_000L;
+  public static final long DEFAULT_MIN_DURATION_REQUEST = 700_000_000L;
 
   /**
    * Fornisce il PrometheusMeterRegistry per l'injection.
