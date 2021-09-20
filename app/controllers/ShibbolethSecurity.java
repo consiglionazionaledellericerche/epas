@@ -88,6 +88,8 @@ public class ShibbolethSecurity extends controllers.shib.Security {
       log.trace("Permission list for {} {}: {}",
           person.name, person.surname, person.user.usersRolesOffices);
     } else {
+      flash.error(
+          "Autenticazione shibboleth riuscita ma utente con eppn=%s non presente in ePAS", eppn);
       log.warn("Person with email {} successfully logged in Shibboleth but unknonw to ePAS", eppn);
     }
 
