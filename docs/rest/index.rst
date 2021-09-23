@@ -34,6 +34,7 @@ di ePAS in produzione del vostro ente.
    groupsAndAffiliationsServices
    leavesServices
    personDaysServices
+   competencesServices
    personsServices
    childServices
    stampingsServices
