@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.5] - UNRELEASED
 ### Added
+ - Aggiunti metodi REST per la visualizzazione delle informazioni relative alle competenze
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS

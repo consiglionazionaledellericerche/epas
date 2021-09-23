@@ -3554,6 +3554,13 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
@@ -3602,6 +3609,8 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.personCompetenceCodes",
+        
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
@@ -3653,6 +3662,13 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
 
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
