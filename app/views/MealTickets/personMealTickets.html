@@ -79,6 +79,7 @@
     <table class="table center">
       <tr>
         <th>Codice</th>
+        <th>Tipo</th>
         <th>Consegnato il</th>
         <th>Scadenza</th>
       </tr>
@@ -86,6 +87,7 @@
       #{if block_index <= 3 }
       <tr>
         <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
+        <td>${block.blockType.description}</td>
         <td>${block.getDate()?.format()}</td>
         <td>${block.getExpireDate()?.format()}</td>
       </tr>
