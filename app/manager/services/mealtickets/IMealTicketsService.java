@@ -23,6 +23,7 @@ import java.util.List;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 
 /**
@@ -55,8 +56,8 @@ public interface IMealTicketsService {
    * @param expireDate la data di scadenza
    * @return la lista dei buoni
    */
-  List<MealTicket> buildBlockMealTicket(String codeBlock, Integer first, Integer last,
-      LocalDate expireDate, Office office);
+  List<MealTicket> buildBlockMealTicket(String codeBlock, BlockType blockType, Integer first, 
+      Integer last, LocalDate expireDate, Office office);
 
   /**
    * Verifica che nel contratto precedente a contract siano avanzati dei buoni pasto assegnati. In

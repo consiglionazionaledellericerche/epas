@@ -44,6 +44,7 @@ import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
@@ -268,6 +269,7 @@ public class MealTickets extends Controller {
    * @param expireDate       data scadenza
    */
   public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
+      @Required BlockType blockType,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
       @Valid @Required @CheckWith(LocalDateIsNotFuture.class) LocalDate deliveryDate, 
@@ -308,7 +310,7 @@ public class MealTickets extends Controller {
     }
 
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
+    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
         ticketNumberFrom, ticketNumberTo, expireDate, office));
 
     ticketToAddOrdered.forEach(ticket -> {

@@ -36,6 +36,7 @@ import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.PersonDay;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -155,8 +156,8 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    * @return la lista dei buoni
    */
   @Override
-  public List<MealTicket> buildBlockMealTicket(String codeBlock, Integer first, Integer last,
-      LocalDate expireDate, Office office) {
+  public List<MealTicket> buildBlockMealTicket(String codeBlock, BlockType blockType,
+      Integer first, Integer last, LocalDate expireDate, Office office) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
@@ -165,6 +166,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       MealTicket mealTicket = new MealTicket();
       mealTicket.expireDate = expireDate;
       mealTicket.block = codeBlock;
+      mealTicket.blockType = blockType;
       mealTicket.office = office;
       mealTicket.number = i;
 
