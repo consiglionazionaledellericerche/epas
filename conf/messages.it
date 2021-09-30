@@ -223,6 +223,7 @@ child.surname= Cognome
 child.taxCode= Codice fiscale
 personChildren=Figlio Dipendente
 
+blockType =Tipologia blocco
 codeBlock=Codice Blocco
 
 code=Codice
@@ -1057,6 +1058,9 @@ AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
 AccountRole.REGISTRY_MANAGER= Gestore anagrafica
+
+BlockType.papery =Carteceo
+BlockType.electronic = Elettronico
 
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)
