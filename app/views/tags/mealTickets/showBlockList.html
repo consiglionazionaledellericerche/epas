@@ -7,6 +7,7 @@ showType: delivered / returned /
 <thead>
 <tr>
   <th>Codice</th>
+  <th>Tipologia</th>
   <th>Consegnato il</th>
   <th>Scadenza</th>
   *{
@@ -31,6 +32,7 @@ showType: delivered / returned /
   <td>
     <strong>${block.codeBlock}</strong> (${block.first}-${block.last})
   </td>
+  <td>${block.blockType.description}</td>
   <td data-order="${block.getDate()}">${block.getDate()?.format()}</td>
   <td data-order="${block.getExpireDate()}">${block.getExpireDate()?.format()}</td>
   *{
