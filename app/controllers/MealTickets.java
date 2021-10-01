@@ -521,7 +521,64 @@ public class MealTickets extends Controller {
     editPersonMealTickets(contract.id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
+  
+  /**
+   * Ritorna il blocchetto di cui aggiornare la tipologia di blocchetto.
+   * @param contractId l'identificativo del contratto
+   * @param codeBlock il codice del blocchetto
+   * @param first il primo buono del blocchetto
+   * @param last l'ultimo buono del blocchetto
+   */
+  public static void convertPersonCodeBlock(Long contractId, String codeBlock, 
+      int first, int last) {
 
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+
+    Preconditions.checkState(mealTicketList.size() > 0);
+
+    BlockMealTicket block = MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
+        MealTicketStaticUtility.blockPortion(mealTicketList, contract, first, last),
+        Optional.<DateInterval>absent()).get(0);
+
+    render(contract, codeBlock, block);
+  }
+
+  /**
+   * Modifica la tipologia del blocchetto di buoni pasto da cartaceo a elettronico
+   * o viceversa.
+   * @param contractId l'identificativo del contratto
+   * @param codeBlock il codice del blocchetto da modificare
+   */
+  public static void performConvertPersonCodeBlock(Long contractId, String codeBlock) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+    
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+    Preconditions.checkState(mealTicketList.size() > 0);
+    
+    for (MealTicket mealTicket : mealTicketList) {
+      if (mealTicket.blockType.equals(BlockType.papery)) {
+        mealTicket.blockType = BlockType.electronic;        
+      } else {
+        mealTicket.blockType = BlockType.papery;
+      }
+      mealTicket.save();
+    }
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
+    MealTicketRecap recap = currentRecap.get();
+    Person person = contract.person;
+    render("@editPersonMealTickets", person, recap, LocalDate.now().getYear(), 
+        LocalDate.now().getMonthOfYear());
+  }
+  
+  
   /**
    * Funzione di Ricerca di un blocco nel database ePAS.
    *
