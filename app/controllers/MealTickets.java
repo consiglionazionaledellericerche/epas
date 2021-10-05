@@ -627,4 +627,7 @@ public class MealTickets extends Controller {
     render(office, code, blocks);
   }
 
+  public static void whichBlock(Long contractId, int year, int month) {
+    render(); 
+  }
 }
