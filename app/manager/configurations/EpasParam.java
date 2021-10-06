@@ -28,6 +28,7 @@ import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.Office;
 import models.Person;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -1004,6 +1005,10 @@ public enum EpasParam {
 
       if (value instanceof IpList) {
         return Joiner.on(IP_LIST_SEPARATOR + "\n").join(((IpList) value).ipList);
+      }
+      
+      if (value instanceof BlockType) {
+        return value.toString();
       }
 
       return null;
