@@ -183,6 +183,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  MEAL_TICKET_BLOCK_TYPE("meal_ticket_block_type",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.ENUM,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   DAY_OF_PATRON("dayOfPatron",
       EpasParamCategory.PERIODIC,
@@ -907,7 +915,7 @@ public enum EpasParam {
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
-    EMAIL, IP_LIST, INTEGER, BOOLEAN;
+    EMAIL, IP_LIST, INTEGER, BOOLEAN, ENUM;
 
     /**
      * Rappresenta un intervallo di LocalTime.
