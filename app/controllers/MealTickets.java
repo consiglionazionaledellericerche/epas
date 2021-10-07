@@ -34,10 +34,12 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import manager.ConsistencyManager;
+import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
+import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
@@ -521,7 +523,7 @@ public class MealTickets extends Controller {
     editPersonMealTickets(contract.id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
-  
+
   /**
    * Ritorna il blocchetto di cui aggiornare la tipologia di blocchetto.
    * @param contractId l'identificativo del contratto
@@ -558,11 +560,11 @@ public class MealTickets extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
-    
+
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
     Preconditions.checkState(mealTicketList.size() > 0);
-    
+
     for (MealTicket mealTicket : mealTicketList) {
       if (mealTicket.blockType.equals(BlockType.papery)) {
         mealTicket.blockType = BlockType.electronic;        
@@ -577,8 +579,8 @@ public class MealTickets extends Controller {
     render("@editPersonMealTickets", person, recap, LocalDate.now().getYear(), 
         LocalDate.now().getMonthOfYear());
   }
-  
-  
+
+
   /**
    * Funzione di Ricerca di un blocco nel database ePAS.
    *
@@ -627,7 +629,54 @@ public class MealTickets extends Controller {
     render(office, code, blocks);
   }
 
+  /**
+   * Quale tipologia di blocchetto viene associata alla maturazione dei buoni pasto nel mese.
+   * @param contractId l'identificativo del contratto
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
   public static void whichBlock(Long contractId, int year, int month) {
-    render(); 
+
+    Contract contract = contractDao.getContractById(contractId);
+
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.person.isPersistent());
+    rules.checkIfPermitted(contract.person.office);
+    YearMonth yearMonth = new YearMonth(year, month);
+    YearMonth previousYearMonth = new YearMonth(year, month - 1);
+    ContractMonthRecap monthRecap = contractMonthRecapDao
+        .getContractMonthRecap(contract, yearMonth);
+    ContractMonthRecap previousMonthRecap = contractMonthRecapDao
+        .getContractMonthRecap(contract, previousYearMonth);
+    MealTicketRecap recap = mealTicketService.create(contract).orNull();
+    Preconditions.checkNotNull(recap);
+    int buoniCartacei = 0;
+    int buoniElettronici = 0;
+    int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
+    List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
+    for (BlockMealTicket block : list) {
+      if (buoniCartacei + buoniElettronici <= buoniUsati) {
+        switch (block.getBlockType()) {
+          case papery:
+            buoniCartacei = buoniCartacei + block.getDimBlock();
+            break;
+          case electronic:
+            buoniElettronici = buoniElettronici + block.getDimBlock();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    BlockType blockType = null;
+    final java.util.Optional<Configuration> conf = 
+        contract.person.office.configurations.stream()
+        .filter(configuration -> 
+        configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+    if (conf.isPresent()) {
+      blockType = blockType.valueOf(conf.get().fieldValue);
+    }
+
+    render(month, year, contract, buoniCartacei, buoniElettronici, buoniUsati, blockType); 
   }
 }

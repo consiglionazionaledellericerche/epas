@@ -1,5 +1,12 @@
 #{modalAsync title:'Gestione Blocco Buoni Pasto'}
 
 <div>
+#{alert color:'warning'}
+<p>Dalla configurazione risulta che la sede ${contract.person.office.name} utilizzi i buoni di tipo <strong>${blockType.description}</strong></p>
+<p>Nel mese di ${templateUtility.monthName(month)} ${year} il dipendente ${contract.person.getFullname()} 
+ha coperto i ${buoniUsati} buoni maturati con <strong>${buoniCartacei}</strong> buoni cartacei e <strong>${buoniElettronici}</strong> buoni elettronici
+
+</p> 
+#{/alert}
 </div>
 #{/modalAsync}

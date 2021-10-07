@@ -38,6 +38,7 @@ public class RichiestaInserimentoAttestati {
 
     public String matricola;
     public Integer numBuoniPasto = null;
+    public Integer numBuoniPastoElettronici = null;
     public List<InsertRigaAssenza> righeAssenza = Lists.newArrayList();
     public List<InsertRigaCompetenza> righeCompetenza = Lists.newArrayList();
     public List<InsertRigaFormazione> righeFormazione = Lists.newArrayList();
