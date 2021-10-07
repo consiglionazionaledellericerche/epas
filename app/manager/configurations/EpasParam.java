@@ -1051,6 +1051,8 @@ public enum EpasParam {
             return Integer.parseInt(value);
           case BOOLEAN:
             return Boolean.parseBoolean(value);
+          case ENUM:
+            return BlockType.valueOf(value);
           default:
             log.warn("Tipo non riconosciuto: {}", type);
         }
