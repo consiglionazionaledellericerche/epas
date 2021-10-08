@@ -53,6 +53,7 @@ public class MealTicketBlockTypeJob extends Job {
       BlockType blockType = null;
       TipoBlocchettoSede tipo = null;
       log.info("Richiedo ad attestati info per sede: {}", office.name);
+      //chiedo ad attestati l'informazione...
       try {
         tipo = certificationsComunication
             .getTipoBlocchetto(date.getYear(), date.getMonthOfYear(), office);
@@ -64,7 +65,7 @@ public class MealTicketBlockTypeJob extends Job {
         log.error("Errore in esecuzione del job MealTicketBlockTypeJob: {}", ex.toString());
         ex.printStackTrace();
       }
-
+      //verifico che sia coerente
       switch (tipo.tipoBuonoPasto) {
         case "C":
           blockType = BlockType.papery;
@@ -81,6 +82,7 @@ public class MealTicketBlockTypeJob extends Job {
           return;
           
       }
+      //aggiorno la configurazione
       Configuration newConfiguration = (Configuration) configurationManager
           .updateEnum(EpasParam.MEAL_TICKET_BLOCK_TYPE, office, blockType, 
               Optional.absent(), Optional.absent(), false);
