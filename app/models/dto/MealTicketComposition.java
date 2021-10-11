@@ -16,20 +16,11 @@
  */
 
 
-package models.enumerate;
+package models.dto;
 
-public enum BlockType {
+public class MealTicketComposition {
 
-  electronic("Elettronico"),
-  papery("Cartaceo");
+  public Integer paperyMealTicket;
+  public Integer electronicMealTicket;
   
-  public String description;
-  
-  BlockType(String description) {
-    this.description = description;
-  }
-  
-  public String getDescription() {
-    return description;
-  }
 }

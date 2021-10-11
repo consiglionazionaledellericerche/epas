@@ -650,33 +650,44 @@ public class MealTickets extends Controller {
         .getContractMonthRecap(contract, previousYearMonth);
     MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
+    BlockType blockType = null;
     int buoniCartacei = 0;
     int buoniElettronici = 0;
     int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
+    int buoniDaConteggiare = 0;
+    int buoniPastoPassati = monthRecap.buoniPastoDaInizializzazione > 0 
+        ? monthRecap.buoniPastoDaInizializzazione + monthRecap.buoniPastoConsegnatiNelMese
+            : monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese;
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
-    for (BlockMealTicket block : list) {
-      if (buoniCartacei + buoniElettronici <= buoniUsati) {
-        switch (block.getBlockType()) {
-          case papery:
-            buoniCartacei = buoniCartacei + block.getDimBlock();
-            break;
-          case electronic:
-            buoniElettronici = buoniElettronici + block.getDimBlock();
-            break;
-          default:
-            break;
+    
+    if (monthRecap.remainingMealTickets < 0) {
+      //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
+      buoniDaConteggiare = buoniPastoPassati - buoniUsati;
+      
+      final java.util.Optional<Configuration> conf = 
+          contract.person.office.configurations.stream()
+          .filter(configuration -> 
+          configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+      if (conf.isPresent()) {
+        blockType = blockType.valueOf(conf.get().fieldValue);
+      }
+    } else {
+      int dimBlocchetto = 0;
+      int buoniCoprenti = 0;
+      buoniDaConteggiare = buoniPastoPassati - buoniUsati - monthRecap.remainingMealTickets;
+      for (BlockMealTicket block : list) {
+        dimBlocchetto = block.getDimBlock();
+        while (dimBlocchetto > 0 || buoniDaConteggiare == 0) {
+          dimBlocchetto--;
+          buoniDaConteggiare--;
+          buoniCoprenti++;
+          //Va controllata anche la tipologia di blocchetto che si sta usando per 
+          //coprire i buoni maturati.
         }
       }
     }
-    BlockType blockType = null;
-    final java.util.Optional<Configuration> conf = 
-        contract.person.office.configurations.stream()
-        .filter(configuration -> 
-        configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-    if (conf.isPresent()) {
-      blockType = blockType.valueOf(conf.get().fieldValue);
-    }
-
-    render(month, year, contract, buoniCartacei, buoniElettronici, buoniUsati, blockType); 
+    
+    render(month, year, contract, buoniCartacei, buoniElettronici, 
+        buoniUsati, blockType, buoniDaConteggiare); 
   }
 }
