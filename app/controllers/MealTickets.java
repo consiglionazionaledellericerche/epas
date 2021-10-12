@@ -692,7 +692,7 @@ public class MealTickets extends Controller {
       buoniDaConteggiare = buoniUsati;
       for (BlockMealTicket block : list) {
         dimBlocchetto = block.getDimBlock();
-        while (buoniDaConteggiare != 0 || dimBlocchetto == 0) {          
+        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {          
           switch (block.getBlockType()) {
             case papery:
               buoniCartacei++;
