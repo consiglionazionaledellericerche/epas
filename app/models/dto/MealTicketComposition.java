@@ -18,9 +18,13 @@
 
 package models.dto;
 
+import models.enumerate.BlockType;
+
 public class MealTicketComposition {
 
   public Integer paperyMealTicket;
   public Integer electronicMealTicket;
+  public boolean isBlockMealTicketTypeKnown;
+  public BlockType blockType;
   
 }

@@ -30,6 +30,7 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.validators.LocalDateIsNotFuture;
 import it.cnr.iit.epas.DateInterval;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
@@ -46,6 +47,7 @@ import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
+import models.dto.MealTicketComposition;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -64,6 +66,7 @@ import security.SecurityRules;
  * Controller per la gestione dei buoni pasto.
  */
 @With({Resecure.class})
+@Slf4j
 public class MealTickets extends Controller {
 
   @Inject
@@ -643,11 +646,10 @@ public class MealTickets extends Controller {
     Preconditions.checkArgument(contract.person.isPersistent());
     rules.checkIfPermitted(contract.person.office);
     YearMonth yearMonth = new YearMonth(year, month);
-    YearMonth previousYearMonth = new YearMonth(year, month - 1);
+
     ContractMonthRecap monthRecap = contractMonthRecapDao
         .getContractMonthRecap(contract, yearMonth);
-    ContractMonthRecap previousMonthRecap = contractMonthRecapDao
-        .getContractMonthRecap(contract, previousYearMonth);
+
     MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
     BlockType blockType = null;
@@ -659,35 +661,56 @@ public class MealTickets extends Controller {
         ? monthRecap.buoniPastoDaInizializzazione + monthRecap.buoniPastoConsegnatiNelMese
             : monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese;
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
-    
+    MealTicketComposition composition = new MealTicketComposition();
     if (monthRecap.remainingMealTickets < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
       buoniDaConteggiare = buoniPastoPassati - buoniUsati;
-      
+      composition.isBlockMealTicketTypeKnown = false;
       final java.util.Optional<Configuration> conf = 
           contract.person.office.configurations.stream()
           .filter(configuration -> 
           configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-      if (conf.isPresent()) {
+      if (conf.isPresent()) {        
         blockType = blockType.valueOf(conf.get().fieldValue);
+        switch (blockType) {
+          case electronic:
+            buoniElettronici = buoniDaConteggiare;            
+            break;
+          case papery:
+            buoniCartacei = buoniDaConteggiare;
+            break;
+          default:
+            log.warn("Errore nel parsing dell'enumerato per il tipo di blocchetto. Verificare.");
+            break;
+        }
+        composition.blockType = blockType;
       }
+
     } else {
       int dimBlocchetto = 0;
-      int buoniCoprenti = 0;
-      buoniDaConteggiare = buoniPastoPassati - buoniUsati - monthRecap.remainingMealTickets;
+      composition.isBlockMealTicketTypeKnown = true;
+      buoniDaConteggiare = buoniUsati;
       for (BlockMealTicket block : list) {
         dimBlocchetto = block.getDimBlock();
-        while (dimBlocchetto > 0 || buoniDaConteggiare == 0) {
+        while (buoniDaConteggiare != 0 || dimBlocchetto == 0) {          
+          switch (block.getBlockType()) {
+            case papery:
+              buoniCartacei++;
+              break;
+            case electronic:
+              buoniElettronici++;
+              break;
+            default:
+              break;
+          }
           dimBlocchetto--;
           buoniDaConteggiare--;
-          buoniCoprenti++;
-          //Va controllata anche la tipologia di blocchetto che si sta usando per 
-          //coprire i buoni maturati.
         }
       }
     }
-    
-    render(month, year, contract, buoniCartacei, buoniElettronici, 
-        buoniUsati, blockType, buoniDaConteggiare); 
+    composition.electronicMealTicket = buoniElettronici;
+    composition.paperyMealTicket = buoniCartacei;
+
+    render(month, year, contract, composition); 
   }
 }
