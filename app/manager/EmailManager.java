@@ -136,4 +136,18 @@ public class EmailManager {
 
     sendMail(Optional.<String>absent(), person.email, subject, message);
   }
+  
+  /**
+   * Metodo che informa via mail la persona del controllo del green pass.
+   * @param person la persona a cui inviare la mail informativa
+   */
+  public void infoDrawnPersonForCheckingGreenPass(Person person) {
+    Preconditions.checkState(person != null && person.isPersistent());
+    
+    final String message = String.format("Invio mail per controllo green pass a %s", 
+        person.fullName());
+    final String subject = "Controllo green pass";
+    
+    sendMail(Optional.absent(), person.email, subject, message);
+  }
 }

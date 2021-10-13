@@ -17,12 +17,12 @@
 
 package models;
 
-import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 @Entity
