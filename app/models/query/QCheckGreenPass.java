@@ -26,7 +26,7 @@ public class QCheckGreenPass extends EntityPathBase<CheckGreenPass> {
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
-    public final DatePath<java.time.LocalDate> checkDate = createDate("checkDate", java.time.LocalDate.class);
+    public final DatePath<org.joda.time.LocalDate> checkDate = createDate("checkDate", org.joda.time.LocalDate.class);
 
     public final BooleanPath checked = createBoolean("checked");
 

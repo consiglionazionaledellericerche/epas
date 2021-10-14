@@ -19,12 +19,12 @@ package controllers;
 
 import dao.CheckGreenPassDao;
 import dao.OfficeDao;
-import java.time.LocalDate;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.CheckGreenPass;
 import models.Office;
+import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -57,9 +57,21 @@ public class CheckGreenPasses extends Controller {
     if (year == null || month == null || day == null) {
       date = LocalDate.now();
     } else {
-      date = LocalDate.of(year, month, day);
+      date = new LocalDate(year, month, day);
     }
     List<CheckGreenPass> list = passDao.listByDate(date, office);
-    render(list);
+    render(list, office, date);
+  }
+  
+  public static void addPerson() {
+    render();
+  }
+  
+  public static void deletePerson(long personId) {
+    render();
+  }
+  
+  public static void checkPerson(long personId) {
+    render();
   }
 }

@@ -21,13 +21,14 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
-import java.time.LocalDate;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.CheckGreenPass;
 import models.Office;
 import models.query.QCheckGreenPass;
+import org.joda.time.LocalDate;
+
 
 
 public class CheckGreenPassDao extends DaoBase {

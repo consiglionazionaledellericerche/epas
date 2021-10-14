@@ -146,8 +146,29 @@ public class EmailManager {
     
     final String message = String.format("Invio mail per controllo green pass a %s", 
         person.fullName());
-    final String subject = "Controllo green pass";
+    final String subject = "Cara/o,\n" 
+        + "\n" 
+        + "Per adempiere agli obblighi derivanti dalla nota del Direttore Generale 0067412 del "
+        + "13 ottobre 2021 sei pregata/o di recarti immediatamente dal personale preposto ai "
+        + "controlli (Antonella Mamone, o in caso di sua assenza Carlo Carbone) munito di "
+        + "green pass o altri documenti equipollenti. Nel caso non fosse possibile procedere "
+        + "immediatamente al controllo, a causa di un'attività lavorativa in corso che non possa "
+        + "essere interrotta, invia una e-mail al Direttore e in cc ai due preposti con "
+        + "l’indicazione della motivazione per il ritardo nella presentazione del Green Pass e "
+        + "di quando terminerà l’attività in corso. "
+        + "Appena completata l’attività in corso si proceda immediatamente alla "
+        + "presentazione del green pass."
+        + "\n" 
+        + "\n" 
+        + "Si ricorda che in caso di mancata presentazione del green pass, o altri documenti "
+        + "equipollenti, sarai considerato/a “assente ingiustificato” e il direttore dovrà "
+        + "comunicarlo all’ufficio gestione delle risorse umane per le opportune azioni del caso. "
+        + "\n" 
+        + "\n" 
+        + "Si ringrazia per la collaborazione\n" 
+        + "\n" 
+        + "Il Direttore IIT";
     
-    sendMail(Optional.absent(), person.email, subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), person.email, subject, message);
   }
 }

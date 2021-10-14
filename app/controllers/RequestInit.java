@@ -59,12 +59,18 @@ public class RequestInit extends Controller {
   static UserDao userDao;
 
   static final String TELEWORK_CONF = "telework.stampings.active";
+  
+  static final String GREENPASS_CONF = "greenpass.active";
 
   @Before(priority = 1)
   static void injectMenu() {
 
     if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF, "false"))) {
       renderArgs.put("teleworkStampingsActive", true);
+    }
+    
+    if ("true".equals(Play.configuration.getProperty(GREENPASS_CONF, "false"))) {
+      renderArgs.put("greenPassActive", true);
     }
     
     Optional<User> user = Security.getUser();
@@ -184,6 +190,7 @@ public class RequestInit extends Controller {
 
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
@@ -200,6 +207,7 @@ public class RequestInit extends Controller {
         "TeleworkStampings.personTeleworkStampings",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Stampings.dailyPresenceForPersonInCharge",
         "Absences.manageAttachmentsPerCode",
         "Absences.showGeneralMonthlyAbsences",
@@ -260,6 +268,7 @@ public class RequestInit extends Controller {
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Vacations.list",
         "Absences.showGeneralMonthlyAbsences",
         "Absences.manageAttachmentsPerCode",
@@ -321,6 +330,7 @@ public class RequestInit extends Controller {
         "Stampings.missingStamping",
         "Stampings.holidaySituation",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Vacations.list",
         "Persons.list",
         "Persons.edit",

@@ -17,8 +17,8 @@ import play.jobs.On;
 import play.jobs.OnApplicationStart;
 
 @Slf4j
-@OnApplicationStart(async = true)
-//@On("0 15 11 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 11.15
+//@OnApplicationStart(async = true)
+@On("0 15 11 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 11.15
 public class CheckGreenPassJob extends Job {
   
   static final String GREENPASS_CONF = "greenpass.active";
@@ -49,7 +49,7 @@ public class CheckGreenPassJob extends Job {
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office: offices) {
       log.info("Seleziono la lista dei sorteggiati per {}", office.name);
-      list = passManager.peopleActiveInDate(LocalDate.now().minusDays(1), office);
+      list = passManager.peopleActiveInDate(LocalDate.now(), office);
       listDrawn = passManager.peopleDrawn(list);
       if (listDrawn.isEmpty()) {
         log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
