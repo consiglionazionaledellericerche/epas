@@ -88,4 +88,15 @@ public class CheckGreenPassDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+  /**
+   * Conta le volte in cui una persona è stata controllata.
+   * @param person la persona di cui controllare il numero di volte in cui è stata
+   *     controllata
+   * @return quante volte la persona passata come parametro è stata controllata.
+   */
+  public long howManyTimesChecked(Person person) {
+    final QCheckGreenPass checkGreenPass = QCheckGreenPass.checkGreenPass;
+    return getQueryFactory().selectFrom(checkGreenPass)
+        .where(checkGreenPass.person.eq(person)).fetchCount();
+  }
 }
