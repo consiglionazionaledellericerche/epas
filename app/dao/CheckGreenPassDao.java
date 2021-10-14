@@ -17,6 +17,7 @@
 
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
@@ -26,7 +27,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.CheckGreenPass;
 import models.Office;
+import models.Person;
 import models.query.QCheckGreenPass;
+import models.query.QPerson;
 import org.joda.time.LocalDate;
 
 
@@ -49,11 +52,40 @@ public class CheckGreenPassDao extends DaoBase {
    */
   public List<CheckGreenPass> listByDate(LocalDate date, Office office) {
     final QCheckGreenPass checkGreenPass = QCheckGreenPass.checkGreenPass;
+    final QPerson person = QPerson.person;
     final JPQLQuery<CheckGreenPass> query = getQueryFactory()
-        .selectFrom(checkGreenPass).where(checkGreenPass.checkDate.eq(date)
-            .and(checkGreenPass.person.office.eq(office)));
+        .selectFrom(checkGreenPass).leftJoin(checkGreenPass.person, person)
+        .where(checkGreenPass.checkDate.eq(date)
+            .and(person.office.eq(office)))
+        .orderBy(person.surname.asc());
     
     return query.fetch();
+  }
+  
+  /**
+   * Ritorna, se esiste, il checkGreenPass identificato dall'id passato come parametro.
+   * @param checkGreenPassId l'identificativo del checkGreenPass
+   * @return l'optional contenenente o meno l'oggetto identificato dall'id passato come parametro.
+   */
+  public CheckGreenPass getById(long checkGreenPassId) {
+    final QCheckGreenPass checkGreenPass = QCheckGreenPass.checkGreenPass;
+    final CheckGreenPass result = getQueryFactory().selectFrom(checkGreenPass)
+        .where(checkGreenPass.id.eq(checkGreenPassId)).fetchFirst();
+    return result;
+  }
+  
+  /**
+   * Verifica se esiste già una entry in tabella per la persona e la data passati.
+   * @param person la persona da controllare
+   * @param date la data in cui controllare
+   * @return se esiste il check green pass per i parametri passati.
+   */
+  public Optional<CheckGreenPass> byPersonAndDate(Person person, LocalDate date) {
+    final QCheckGreenPass checkGreenPass = QCheckGreenPass.checkGreenPass;
+    final CheckGreenPass result = getQueryFactory().selectFrom(checkGreenPass)
+        .where(checkGreenPass.person.eq(person)
+            .and(checkGreenPass.checkDate.eq(date))).fetchFirst();
+    return Optional.fromNullable(result);
   }
 
 }

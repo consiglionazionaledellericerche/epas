@@ -15,8 +15,9 @@
   #{else}
     <p>
   #{secure.check 'CheckGreenPasses.addPerson'}
+ 
   	<div class="text-center">
-    <a class="btn btn-success" href="@{CheckGreenPasses.addPerson}" data-async-modal="#defaultModal"><i class="fa fa-user-plus"></i>
+    <a class="btn btn-success" href="@{CheckGreenPasses.addPerson(office.id, date.format())}" data-async-modal="#defaultModal"><i class="fa fa-user-plus"></i>
       Inserisci un nuovo nominativo </a>
   	</div>
   #{/secure.check}
@@ -32,8 +33,8 @@
   		<tr>
   		<td>${item.person.fullName()}</td>
   		<td>#{if item.checked}SI #{/if} #{else}NO #{/else}</td>
-  		<td><a class="btn btn-info btn-xs" href="@{CheckGreenPasses.checkPerson(item.id)}" color="info" title="Rimuovi">Aggiorna</a></td>
-  		<td><a class="btn btn-danger btn-xs" href="@{CheckGreenPasses.deletePerson(item.id)}" data-async-modal="#defaultModal" color="danger" title="Rimuovi"></a></a></td>
+  		<td><a class="btn btn-info btn-xs" href="@{CheckGreenPasses.checkPerson(item.id)}" color="info" title="Aggiorna stato">Aggiorna</a></td>
+  		<td><a class="btn btn-danger btn-xs" href="@{CheckGreenPasses.deletePerson(item.id)}" color="danger" title="Rimuovi"></a></a></td>
   		</tr>
   		#{/list}
   	</table>

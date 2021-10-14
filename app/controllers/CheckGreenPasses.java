@@ -20,10 +20,13 @@ package controllers;
 import dao.CheckGreenPassDao;
 import dao.OfficeDao;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.CheckGreenPassManager;
 import models.CheckGreenPass;
 import models.Office;
+import models.Person;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -39,6 +42,9 @@ public class CheckGreenPasses extends Controller {
   static SecurityRules rules;
   @Inject
   static CheckGreenPassDao passDao;
+  @Inject
+  static CheckGreenPassManager manager;
+  
 
   /**
    * Ritorna la lista dei sorteggiati per il check del green pass.
@@ -63,15 +69,74 @@ public class CheckGreenPasses extends Controller {
     render(list, office, date);
   }
   
-  public static void addPerson() {
-    render();
+  /**
+   * Genera la form di inserimento di una nuova unità di personale da verificare.
+   * @param officeId l'identificativo della sede
+   * @param date la data
+   */
+  public static void addPerson(Long officeId, LocalDate date) {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    
+    List<Person> list = manager.peopleActiveInDate(date, office);
+    List<CheckGreenPass> greenPassList = manager.peopleDrawn(list);
+    List<Person> filtered = list.stream().filter(p -> greenPassList.stream()
+        .noneMatch(gp -> gp.person.equals(p))).collect(Collectors.toList());    
+    
+    render(filtered);
   }
   
-  public static void deletePerson(long personId) {
-    render();
+  /**
+   * Salva la nuova persona di cui controllare il green pass.
+   * @param person la persona da controllare
+   */
+  public static void save(Person person) {
+    notFoundIfNull(person);
+    CheckGreenPass greenPass = new CheckGreenPass();
+    LocalDate date = LocalDate.now();
+    greenPass.person = person;
+    greenPass.checkDate = date;
+    greenPass.checked = false;
+    greenPass.save();
+    Office office = person.office;
+    List<CheckGreenPass> list = passDao.listByDate(date, office);
+    render("@dailySituation", list, office, date);
   }
   
-  public static void checkPerson(long personId) {
-    render();
+  /**
+   * Elimina il check di green pass dell'identificativo passato.
+   * @param checkGreenPassId l'identificativo di green pass da eliminare
+   */
+  public static void deletePerson(long checkGreenPassId) {
+    CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
+    notFoundIfNull(greenPass);
+    Office office = greenPass.person.office;
+    LocalDate date = greenPass.checkDate;
+    greenPass.delete();
+    List<CheckGreenPass> list = passDao.listByDate(date, office);
+    flash.error("Eliminato controllo per %s", greenPass.person.fullName());
+    render("@dailySituation", list, office, date);
+  }
+  
+  /**
+   * Aggiorna lo stato del checkGreenPass.
+   * @param checkGreenPassId l'identificativo del checkGreenPass da aggiornare
+   */
+  public static void checkPerson(long checkGreenPassId) {
+    
+    CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
+    notFoundIfNull(greenPass);
+    rules.checkIfPermitted(greenPass.person.office);
+    if (greenPass.checked) {
+      greenPass.checked = false;
+    } else {
+      greenPass.checked = true;
+    }
+    greenPass.save();
+    Office office = greenPass.person.office;
+    LocalDate date = greenPass.checkDate;
+    List<CheckGreenPass> list = passDao.listByDate(date, office);
+    flash.success("Aggiornato il controllo per %s", greenPass.person.fullName());
+    render("@dailySituation", list, office, date);
   }
 }

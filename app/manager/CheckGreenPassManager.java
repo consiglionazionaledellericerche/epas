@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import dao.CheckGreenPassDao;
 import dao.PersonDao;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +41,14 @@ public class CheckGreenPassManager {
   
   private final PersonDao personDao;
   private final StampingManager stampingManager;
+  private final CheckGreenPassDao passDao;
   
   @Inject
-  public CheckGreenPassManager(PersonDao personDao, StampingManager stampingManager) {
+  public CheckGreenPassManager(PersonDao personDao, StampingManager stampingManager,
+      CheckGreenPassDao passDao) {
     this.personDao = personDao;
     this.stampingManager = stampingManager;
+    this.passDao = passDao;
   }
   
   /**
@@ -80,6 +84,7 @@ public class CheckGreenPassManager {
    * @return la lista di checkGreenPass su persone selezionate.
    */
   public List<CheckGreenPass> peopleDrawn(List<Person> list) {
+    //TODO:migliorare l'algoritmo controllando anche chi è già stato controllato e quante volte
     double number = (list.size() * 25) / 100;
     Integer peopleToDraw = new Integer((int) number);
     int counter = 1;
@@ -105,13 +110,19 @@ public class CheckGreenPassManager {
   private List<CheckGreenPass> listDrawn(List<Person> list) {
     List<CheckGreenPass> checkGreenPassList = Lists.newArrayList();
     for (Person person : list) {
-      CheckGreenPass gp = new CheckGreenPass();
-      gp.person = person;
-      gp.checked = false;
-      gp.checkDate = LocalDate.now();
-      gp.save();
-      checkGreenPassList.add(gp);
-      log.debug("Salvato checkgreenpass per {}", person.fullName());
+      Optional<CheckGreenPass> obj = passDao.byPersonAndDate(person, LocalDate.now());
+      if (!obj.isPresent()) {
+        CheckGreenPass gp = new CheckGreenPass();
+        gp.person = person;
+        gp.checked = false;
+        gp.checkDate = LocalDate.now();
+        gp.save();
+        checkGreenPassList.add(gp);
+        log.debug("Salvato checkgreenpass per {}", person.fullName());
+      } else {
+        checkGreenPassList.add(obj.get());
+      }
+      
     }
     return checkGreenPassList;
   }
