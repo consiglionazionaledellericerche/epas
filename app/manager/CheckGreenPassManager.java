@@ -27,10 +27,12 @@ import dao.PersonDao;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +76,7 @@ public class CheckGreenPassManager {
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office: offices) {
       log.info("Seleziono la lista dei sorteggiati per {}", office.name);
-      list = peopleActiveInDate(LocalDate.now(), office);
+      list = peopleActiveInDate(LocalDate.now().minusDays(10), office);
       listDrawn = peopleDrawn(list);
       if (listDrawn.isEmpty()) {
         log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
@@ -133,61 +135,44 @@ public class CheckGreenPassManager {
     //preparo una mappa con chiave il numero dei sorteggi e valore la lista
     //di persone che hanno subito quel numero di sorteggi
     Map<Long, List<Person>> totalMap = checkedPeople(list);
-    
-    //metto da parte la lista di quelli meno sorteggiati
-    List<Person> lessChecked = lessCheckedPeople(totalMap);
-    
+          
+    List<Person> peopleChecked = Lists.newArrayList();
     List<Person> peopleDrawn = Lists.newArrayList();    
     
-    if (lessChecked.size() < peopleToDraw) {
-      // se la lista di quelli meno sorteggiati è di dimensione inferiore alla quantità di 
-      // persone da sorteggiare devo armeggiare...
-      
-      //intanto tra le persone da sorteggiare ci metto quelli della lista
-      peopleDrawn.addAll(lessChecked);
-      
-      //mi metto da parte la lista di quelli più sorteggiati
-      List<Person> moreChecked = moreCheckedPeople(totalMap);
-      
-      Map<Integer, Person> map = Maps.newHashMap();
-      int counter = 1;    
-      for (Person person : moreChecked) {
-        map.put(counter, person);
-        counter++;
+    boolean completed = false;
+    SortedSet<Long> keySet = (SortedSet<Long>) totalMap.keySet();
+    Iterator<Long> itr = totalMap.keySet().iterator();
+    int people = 0;
+    //itero sulle chiavi della mappa
+    while (itr.hasNext() && !completed) {
+      Long key = itr.next();
+      peopleChecked = totalMap.get(key);  
+      //controllo che le persone selezionate siano in numero sufficiente a coprire quelle
+      //che devono essere selezionate
+      if (people + peopleChecked.size() < peopleToDraw) {
+        people = people + peopleChecked.size();
+        //inserisco tra le persone sorteggiate quelle che sicuramente ci devono andare
+        peopleDrawn.addAll(peopleChecked);
+      } else {
+        completed = true; 
       }
-      
-      //guardo quante persone tra quelli più sorteggiati devo andare a prendere per 
-      //coprire la quantità di persone sorteggiate totali
-      int temp = peopleToDraw - lessChecked.size();
-      while (temp > 0) {
-        int random = (int) (Math.random() * peopleToDraw + 1);
-        Person p = map.get(random);
-        if (p != null) {
-          peopleDrawn.add(p);
-          map.remove(random);
-          temp--;
-        }
-      }
-      
-    } else {
-      //caso facile: prendo tutte le persone dalla lista dei meno sorteggiati e tra questi 
-      //scelgo random
-      Map<Integer, Person> map = Maps.newHashMap();
-      int counter = 1;    
-      for (Person person : lessChecked) {
-        map.put(counter, person);
-        counter++;
-      }
-      
-      int temp = peopleToDraw;
-      while (temp > 0) {
-        int random = (int) (Math.random() * peopleToDraw + 1);
-        Person p = map.get(random);
-        if (p != null) {
-          peopleDrawn.add(p);
-          map.remove(random);
-          temp--;
-        }
+    }
+    //inizio a costruire la mappa per le persone da sorteggiare
+    Map<Integer, Person> map = Maps.newHashMap();
+    int counter = 1;    
+    for (Person person : peopleChecked) {
+      map.put(counter, person);
+      counter++;
+    }
+    //sorteggio le persone
+    int temp = peopleToDraw - peopleDrawn.size();
+    while (temp > 0) {
+      int random = (int) (Math.random() * peopleToDraw + 1);
+      Person p = map.get(random);
+      if (p != null) {
+        peopleDrawn.add(p);
+        map.remove(random);
+        temp--;
       }
     }
     
@@ -229,24 +214,5 @@ public class CheckGreenPassManager {
     
     return map;
   }
-  
-  private List<Person> lessCheckedPeople(Map<Long, List<Person>> map) {
-    Long low = null;
-    for (Long key : map.keySet()) {
-      if (low == null || key.intValue() < low) {
-        low = key;
-      }
-    }
-    return map.get(low);
-  }
-  
-  private List<Person> moreCheckedPeople(Map<Long, List<Person>> map) {
-    Long high = null;
-    for (Long key : map.keySet()) {
-      if (high == null || key.intValue() > high) {
-        high = key;
-      }
-    }
-    return map.get(high);
-  }
+    
 }
