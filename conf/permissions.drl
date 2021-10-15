@@ -1425,6 +1425,13 @@ when
         "AbsenceRequests.approval",
         "AbsenceRequests.disapproval",
         
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
         /*Flussi informativi*/
         "InformationRequests.list",
         "InformationRequests.listToApprove",
@@ -1480,6 +1487,13 @@ when
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
         "AbsenceRequests.show",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
         
         /*Flussi informativi*/
         "InformationRequests.list",
@@ -1978,6 +1992,13 @@ when
         "Affiliations.delete",
         "Affiliations.edit",
         
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",
         "InformationRequests.approval",
@@ -2142,6 +2163,13 @@ when
         "Affiliations.save",
         "Affiliations.delete",
         "Affiliations.edit",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
         
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",

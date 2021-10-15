@@ -77,7 +77,7 @@ public class CheckGreenPasses extends Controller {
   public static void addPerson(Long officeId, LocalDate date) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+    rules.checkIfPermitted(office);
     List<Person> list = manager.peopleActiveInDate(date, office);
     List<CheckGreenPass> greenPassList = manager.peopleDrawn(list);
     List<Person> filtered = list.stream().filter(p -> greenPassList.stream()
@@ -92,6 +92,7 @@ public class CheckGreenPasses extends Controller {
    */
   public static void save(Person person) {
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.office);
     CheckGreenPass greenPass = new CheckGreenPass();
     LocalDate date = LocalDate.now();
     greenPass.person = person;
@@ -110,6 +111,7 @@ public class CheckGreenPasses extends Controller {
   public static void deletePerson(long checkGreenPassId) {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
+    rules.checkIfPermitted(greenPass.person.office);
     Office office = greenPass.person.office;
     LocalDate date = greenPass.checkDate;
     greenPass.delete();

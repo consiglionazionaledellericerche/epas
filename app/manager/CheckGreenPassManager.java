@@ -46,6 +46,12 @@ public class CheckGreenPassManager {
   private final StampingManager stampingManager;
   private final CheckGreenPassDao passDao;
 
+  /**
+   * Costruttore manager.
+   * @param personDao il dao sulle persone
+   * @param stampingManager il manager per le timbrature
+   * @param passDao il dao per il check green pass
+   */
   @Inject
   public CheckGreenPassManager(PersonDao personDao, StampingManager stampingManager,
       CheckGreenPassDao passDao) {
@@ -90,7 +96,7 @@ public class CheckGreenPassManager {
 
     //double number = (list.size() * 25) / 100;
     // conteggio quante persone sorteggiare
-    BigDecimal num = new BigDecimal((list.size() * 25) /100);
+    BigDecimal num = new BigDecimal((list.size() * 25) / 100);
     num = num.setScale(0, RoundingMode.UP);
     Integer peopleToDraw = num.round(MathContext.DECIMAL64).intValue();
     
