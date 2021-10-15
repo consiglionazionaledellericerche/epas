@@ -76,7 +76,7 @@ public class CheckGreenPassManager {
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office: offices) {
       log.info("Seleziono la lista dei sorteggiati per {}", office.name);
-      list = peopleActiveInDate(LocalDate.now().minusDays(10), office);
+      list = peopleActiveInDate(LocalDate.now(), office);
       listDrawn = peopleDrawn(list);
       if (listDrawn.isEmpty()) {
         log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
