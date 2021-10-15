@@ -141,4 +141,9 @@ public class CheckGreenPasses extends Controller {
     flash.success("Aggiornato il controllo per %s", greenPass.person.fullName());
     render("@dailySituation", list, office, date);
   }
+  
+  public static void checkGreenPassProcedure() {
+    manager.checkGreenPassProcedure();
+    renderText("Procedura completata");
+  }
 }

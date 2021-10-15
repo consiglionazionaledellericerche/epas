@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.CheckGreenPassDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -45,6 +46,8 @@ public class CheckGreenPassManager {
   private final PersonDao personDao;
   private final StampingManager stampingManager;
   private final CheckGreenPassDao passDao;
+  private final OfficeDao officeDao;
+  private final EmailManager emailManager;
 
   /**
    * Costruttore manager.
@@ -54,12 +57,39 @@ public class CheckGreenPassManager {
    */
   @Inject
   public CheckGreenPassManager(PersonDao personDao, StampingManager stampingManager,
-      CheckGreenPassDao passDao) {
+      CheckGreenPassDao passDao, OfficeDao officeDao, EmailManager emailManager) {
     this.personDao = personDao;
     this.stampingManager = stampingManager;
     this.passDao = passDao;
+    this.officeDao = officeDao;
+    this.emailManager = emailManager;
   }
 
+  /**
+   * Procedura di check del green pass.
+   */
+  public void checkGreenPassProcedure() {
+    List<Person> list = Lists.newArrayList();
+    List<CheckGreenPass> listDrawn = Lists.newArrayList();
+    List<Office> offices = officeDao.allEnabledOffices();
+    for (Office office: offices) {
+      log.info("Seleziono la lista dei sorteggiati per {}", office.name);
+      list = peopleActiveInDate(LocalDate.now(), office);
+      listDrawn = peopleDrawn(list);
+      if (listDrawn.isEmpty()) {
+        log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
+            office.name);        
+      } else {
+        for (CheckGreenPass gp : listDrawn) {
+          //Invio una mail a ciascun dipendente selezionato
+          emailManager.infoDrawnPersonForCheckingGreenPass(gp.person);
+          log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
+        }
+      }
+      
+    }
+  }
+  
   /**
    * Ritorna la lista delle persone attive sulla sede office in data date.
    * @param date la data in cui cercare le persone
