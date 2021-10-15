@@ -191,6 +191,9 @@ public class RequestInit extends Controller {
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
         "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
@@ -208,6 +211,9 @@ public class RequestInit extends Controller {
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
         "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Stampings.dailyPresenceForPersonInCharge",
         "Absences.manageAttachmentsPerCode",
         "Absences.showGeneralMonthlyAbsences",
@@ -269,6 +275,9 @@ public class RequestInit extends Controller {
         "Stampings.missingStamping",
         "Stampings.dailyPresence",
         "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Vacations.list",
         "Absences.showGeneralMonthlyAbsences",
         "Absences.manageAttachmentsPerCode",
