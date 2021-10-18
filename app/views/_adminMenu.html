@@ -49,12 +49,6 @@
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/secure.li}
       
-      #{if greenPassActive}
-      	  #{secure.li @CheckGreenPasses.dailySituation(currentData.year, currentData.month, currentData.day, currentData.officeId) }
-	      	<i class="fa fa-h-square" aria-hidden="true"></i>
-	      #{/secure.li}
-      #{/if}
-      
       #{if teleworkStampingsActive}
 	      #{secure.li @TeleworkStampings.personTeleworkStampings(currentData.personId, currentData.year, currentData.month) }
 	      	<i class="fa fa-clock-o" aria-hidden="true"></i>
