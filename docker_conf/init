@@ -398,6 +398,13 @@ sed 's#{{TELEWORK_PASS}}#'"${TELEWORK_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Fine configurazione parametri telework-stampings
 
+### Configurazione dell'attivazione del controllo del Green Pass
+
+GREENPASS_ACTIVE=${GREENPASS_ACTIVE:-false}
+
+sed 's#{{GREENPASS_ACTIVE}}#'"${GREENPASS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
+
+### Fine configurazione parametri relativi al Green PAss
 
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
