@@ -1024,6 +1024,7 @@ Stampings.stampings= Situazione Mensile
 TeleworkStampings.teleworkStampings= Inserimento orario in telelavoro
 TeleworkStampings.personTeleworkStampings= Orari dipendenti in telelavoro
 InformationRequests.handleTeleworkApproval =Gestione approvazioni telelavoro
+CheckGreenPasses.dailySituation =Check giornaliero green pass
 
 Stats.general =Statistiche utilizzatori
 

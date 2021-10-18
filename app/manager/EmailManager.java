@@ -21,12 +21,17 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.CheckGreenPass;
 import models.Person;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import play.Play;
 import play.libs.Mail;
 
@@ -67,7 +72,8 @@ public class EmailManager {
    * @param subject l'oggetto della mail
    * @param message il messaggio
    */
-  public void sendMail(Optional<String> from, String to, String subject, String message) {
+  public void sendMail(Optional<String> from, String to, Optional<String> cc, 
+      String subject, String message) {
 
     SimpleEmail simpleEmail = new SimpleEmail();
 
@@ -76,6 +82,9 @@ public class EmailManager {
         simpleEmail.setFrom(from.get());
       }
       simpleEmail.addTo(to);
+      if (cc.isPresent()) {
+        simpleEmail.addCc(cc.get());
+      }      
       simpleEmail.setSubject(subject);
       simpleEmail.setMsg(message);
     } catch (EmailException ex) {
@@ -101,7 +110,7 @@ public class EmailManager {
 
     final String subject = "ePas Recupero Password";
 
-    sendMail(Optional.<String>absent(), person.email, subject, message);
+    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
   }
 
   /**
@@ -134,6 +143,65 @@ public class EmailManager {
 
     final String subject = "Nuovo inserimento Utente in ePas";
 
-    sendMail(Optional.<String>absent(), person.email, subject, message);
+    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
+  }
+  
+  /**
+   * Metodo che informa via mail la persona del controllo del green pass.
+   * @param person la persona a cui inviare la mail informativa
+   */
+  public void infoDrawnPersonForCheckingGreenPass(Person person) {
+    Preconditions.checkState(person != null && person.isPersistent());
+    
+    final String subject = String.format("Invio mail per controllo green pass a %s", 
+        person.fullName());
+    final String message = "Cara/o,\n" 
+        + "\n" 
+        + "Per adempiere agli obblighi derivanti dalla nota del Direttore Generale 0067412 del "
+        + "13 ottobre 2021 sei pregata/o di recarti immediatamente dal personale preposto ai "
+        + "controlli (Antonella Mamone, o in caso di sua assenza Carlo Carbone) munito di "
+        + "green pass o altri documenti equipollenti. Nel caso non fosse possibile procedere "
+        + "immediatamente al controllo, a causa di un'attività lavorativa in corso che non possa "
+        + "essere interrotta, invia una e-mail al Direttore e in cc ai due preposti con "
+        + "l’indicazione della motivazione per il ritardo nella presentazione del Green Pass e "
+        + "di quando terminerà l’attività in corso. "
+        + "Appena completata l’attività in corso si proceda immediatamente alla "
+        + "presentazione del green pass."
+        + "\n" 
+        + "\n" 
+        + "Si ricorda che in caso di mancata presentazione del green pass, o altri documenti "
+        + "equipollenti, sarai considerato/a “assente ingiustificato” e il direttore dovrà "
+        + "comunicarlo all’ufficio gestione delle risorse umane per le opportune azioni del caso. "
+        + "\n" 
+        + "\n" 
+        + "Si ringrazia per la collaborazione\n" 
+        + "\n" 
+        + "Il Direttore IIT";
+    
+    sendMail(Optional.of("direttore@iit.cnr.it"), person.email, Optional.absent(), 
+        subject, message);
+  }
+  
+  /**
+   * Informa via mail l'amministrazione e l'ufficio tecnico di chi devono contattare
+   * per il check del green pass.
+   * @param peopleSelected la lista di persone selezionate
+   * @param date la data in cui sono selezionate
+   */
+  public void infoPeopleSelected(List<CheckGreenPass> peopleSelected, LocalDate date) {
+    Preconditions.checkState(peopleSelected != null);
+    DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/yyyy");
+    final String subject = String.format("Lista selezionati per controllo del %s", 
+        date.toString(df));
+    final String message = 
+        String.format("La lista dei dipendenti da controllare per il %s : \r\n", date);
+    for (CheckGreenPass gp: peopleSelected) {
+      message.concat(gp.person.getFullname() + "\r\n");
+    }
+    
+    sendMail(Optional.of("direttore@iit.cnr.it"), "antonella.mamone@iit.cnr.it", 
+        Optional.of("marco.conti@iit.cnr.it"), subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), "carlo.carbone@iit.cnr.it", 
+        Optional.absent(), subject, message);
   }
 }

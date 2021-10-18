@@ -250,6 +250,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<TeleworkValidation> teleworkValidations;
+  
+  /**
+   * Nuova relazione con la tabella di check giornaliero del green pass.
+   */
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<CheckGreenPass> checkGreenPass;
 
   @NotAudited
   public LocalDateTime updatedAt;
