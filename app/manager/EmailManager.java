@@ -72,7 +72,8 @@ public class EmailManager {
    * @param subject l'oggetto della mail
    * @param message il messaggio
    */
-  public void sendMail(Optional<String> from, String to, String subject, String message) {
+  public void sendMail(Optional<String> from, String to, Optional<String> cc, 
+      String subject, String message) {
 
     SimpleEmail simpleEmail = new SimpleEmail();
 
@@ -81,6 +82,9 @@ public class EmailManager {
         simpleEmail.setFrom(from.get());
       }
       simpleEmail.addTo(to);
+      if (cc.isPresent()) {
+        simpleEmail.addCc(cc.get());
+      }      
       simpleEmail.setSubject(subject);
       simpleEmail.setMsg(message);
     } catch (EmailException ex) {
@@ -106,7 +110,7 @@ public class EmailManager {
 
     final String subject = "ePas Recupero Password";
 
-    sendMail(Optional.<String>absent(), person.email, subject, message);
+    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
   }
 
   /**
@@ -139,7 +143,7 @@ public class EmailManager {
 
     final String subject = "Nuovo inserimento Utente in ePas";
 
-    sendMail(Optional.<String>absent(), person.email, subject, message);
+    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
   }
   
   /**
@@ -174,7 +178,8 @@ public class EmailManager {
         + "\n" 
         + "Il Direttore IIT";
     
-    sendMail(Optional.of("direttore@iit.cnr.it"), person.email, subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), person.email, Optional.absent(), 
+        subject, message);
   }
   
   /**
@@ -194,7 +199,9 @@ public class EmailManager {
       message.concat(gp.person.getFullname() + "\r\n");
     }
     
-    sendMail(Optional.of("direttore@iit.cnr.it"), "antonella.mamone@iit.cnr.it", subject, message);
-    sendMail(Optional.of("direttore@iit.cnr.it"), "carlo.carbone@iit.cnr.it", subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), "antonella.mamone@iit.cnr.it", 
+        Optional.of("marco.conti@iit.cnr.it"), subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), "carlo.carbone@iit.cnr.it", 
+        Optional.absent(), subject, message);
   }
 }
