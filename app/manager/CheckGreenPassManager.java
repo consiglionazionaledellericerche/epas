@@ -70,13 +70,13 @@ public class CheckGreenPassManager {
   /**
    * Procedura di check del green pass.
    */
-  public void checkGreenPassProcedure() {
+  public void checkGreenPassProcedure(LocalDate date) {
     List<Person> list = Lists.newArrayList();
     List<CheckGreenPass> listDrawn = Lists.newArrayList();
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office: offices) {
       log.info("Seleziono la lista dei sorteggiati per {}", office.name);
-      list = peopleActiveInDate(LocalDate.now(), office);
+      list = peopleActiveInDate(date, office);
       listDrawn = peopleDrawn(list);
       if (listDrawn.isEmpty()) {
         log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 

@@ -142,8 +142,8 @@ public class CheckGreenPasses extends Controller {
     render("@dailySituation", list, office, date);
   }
   
-  public static void checkGreenPassProcedure() {
-    manager.checkGreenPassProcedure();
+  public static void checkGreenPassProcedure(LocalDate date) {
+    manager.checkGreenPassProcedure(date);
     renderText("Procedura completata");
   }
 }

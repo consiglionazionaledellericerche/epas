@@ -44,7 +44,7 @@ public class CheckGreenPassJob extends Job {
     }
     
     log.info("Start Check Green Pass Job");
-    passManager.checkGreenPassProcedure();
+    passManager.checkGreenPassProcedure(LocalDate.now());
     log.info("End Check Green Pass Job");
   }
 }
