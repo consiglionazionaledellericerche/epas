@@ -71,24 +71,28 @@ public class CheckGreenPassManager {
    * Procedura di check del green pass.
    */
   public void checkGreenPassProcedure(LocalDate date) {
+    final Office iit = officeDao.byCodeId("223400").get();
     List<Person> list = Lists.newArrayList();
     List<CheckGreenPass> listDrawn = Lists.newArrayList();
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office: offices) {
-      log.info("Seleziono la lista dei sorteggiati per {}", office.name);
-      list = peopleActiveInDate(date, office);
-      listDrawn = peopleDrawn(list);
-      if (listDrawn.isEmpty()) {
-        log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
-            office.name);        
-      } else {
-        for (CheckGreenPass gp : listDrawn) {
-          //Invio una mail a ciascun dipendente selezionato
-          emailManager.infoDrawnPersonForCheckingGreenPass(gp.person);
-          log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
+      if (office.equals(iit)) {
+        log.info("Seleziono la lista dei sorteggiati per {}", office.name);
+        list = peopleActiveInDate(date, office);
+        listDrawn = peopleDrawn(list);
+        if (listDrawn.isEmpty()) {
+          log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
+              office.name);        
+        } else {
+          for (CheckGreenPass gp : listDrawn) {
+            //Invio una mail a ciascun dipendente selezionato
+            emailManager.infoDrawnPersonForCheckingGreenPass(gp.person);
+            log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
+          }
         }
+        emailManager.infoPeopleSelected(listDrawn, date);
       }
-      
+
     }
   }
   

@@ -21,12 +21,17 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.CheckGreenPass;
 import models.Person;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import play.Play;
 import play.libs.Mail;
 
@@ -144,9 +149,9 @@ public class EmailManager {
   public void infoDrawnPersonForCheckingGreenPass(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
     
-    final String message = String.format("Invio mail per controllo green pass a %s", 
+    final String subject = String.format("Invio mail per controllo green pass a %s", 
         person.fullName());
-    final String subject = "Cara/o,\n" 
+    final String message = "Cara/o,\n" 
         + "\n" 
         + "Per adempiere agli obblighi derivanti dalla nota del Direttore Generale 0067412 del "
         + "13 ottobre 2021 sei pregata/o di recarti immediatamente dal personale preposto ai "
@@ -170,5 +175,26 @@ public class EmailManager {
         + "Il Direttore IIT";
     
     sendMail(Optional.of("direttore@iit.cnr.it"), person.email, subject, message);
+  }
+  
+  /**
+   * Informa via mail l'amministrazione e l'ufficio tecnico di chi devono contattare
+   * per il check del green pass.
+   * @param peopleSelected la lista di persone selezionate
+   * @param date la data in cui sono selezionate
+   */
+  public void infoPeopleSelected(List<CheckGreenPass> peopleSelected, LocalDate date) {
+    Preconditions.checkState(peopleSelected != null);
+    DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/yyyy");
+    final String subject = String.format("Lista selezionati per controllo del %s", 
+        date.toString(df));
+    final String message = 
+        String.format("La lista dei dipendenti da controllare per il %s : \r\n", date);
+    for (CheckGreenPass gp: peopleSelected) {
+      message.concat(gp.person.getFullname() + "\r\n");
+    }
+    
+    sendMail(Optional.of("direttore@iit.cnr.it"), "antonella.mamone@iit.cnr.it", subject, message);
+    sendMail(Optional.of("direttore@iit.cnr.it"), "carlo.carbone@iit.cnr.it", subject, message);
   }
 }
