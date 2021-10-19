@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -171,7 +172,7 @@ public class CheckGreenPassManager {
     //sorteggio le persone
     int temp = peopleToDraw - peopleDrawn.size();
     while (temp > 0) {
-      int random = (int) (Math.random() * peopleToDraw + 1);
+      int random = ThreadLocalRandom.current().nextInt(1, map.size() + 1);
       Person p = map.get(random);
       if (p != null) {
         peopleDrawn.add(p);
