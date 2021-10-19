@@ -46,6 +46,9 @@ public enum VacationCode {
   // Part time verticale 4 giorni
   CODE_22_3("22+3", 22, 3),
   CODE_21_3("21+3", 21, 3),
+  
+  //Part time ciclico verticale 83,3%
+  CODE_23_3("23+3", 23, 3),
 
   
   /* Vecchie progressioni obsolete (ma attuate in qualche caso) */
@@ -111,6 +114,9 @@ public enum VacationCode {
     }
     if (this.vacations == 32) {
       return accruedProgression32(days);
+    }
+    if (this.vacations == 23) {
+      return accruedProgression23(days);
     }
     return 0;
   }
@@ -740,6 +746,55 @@ public enum VacationCode {
     }
     
   }
+  
+  /**
+   * Progressione su 23 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression23(int days) {
+
+    if (days <= 0) {
+      return 0;
+    }
+    if (days >= 1 && days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 2;
+    }
+    if (days >= 46 && days <= 75) {
+      return 4;
+    }
+    if (days >= 76 && days <= 106) {
+      return 7;
+    }
+    if (days >= 107 && days <= 136) {
+      return 9;
+    }
+    if (days >= 137 && days <= 167) {
+      return 11;
+    }
+    if (days >= 168 && days <= 197) {
+      return 14;
+    }
+    if (days >= 198 && days <= 227) {
+      return 16;
+    }
+    if (days >= 228 && days <= 258) {
+      return 18;
+    }
+    if (days >= 259 && days <= 288) {
+      return 21;
+    }
+    if (days >= 289 && days <= 319) {
+      return 23;
+    } else {
+      return 23;
+    }
+  }
+
   
   /**
    * Progressione su 14 giorni.
