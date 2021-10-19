@@ -307,8 +307,7 @@ public class OfficeDao extends DaoBase {
   }
   
   /**
-   * 
-   * @return la lista di tutte le sedi attualmente abilitate e non chiuse.
+   * Lista di tutte le sedi attualmente abilitate e non chiuse.
    */
   public List<Office> allEnabledOffices() {
     final QOffice office = QOffice.office;

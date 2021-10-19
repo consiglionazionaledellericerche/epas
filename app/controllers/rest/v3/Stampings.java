@@ -104,7 +104,8 @@ public class Stampings extends Controller {
     }
 
     // Controlla che la timbratura da inserire non sia troppo nel passato.
-    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting().maxDaysInPastForRestStampings;
+    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting()
+        .maxDaysInPastForRestStampings;
     if (stampingCreateDto.getDateTime()
         .compareTo(LocalDateTime.now().minusDays(maxDaysInPastForRestStampings)) < 0) {
       JsonResponse.badRequest("Timbratura con data troppo nel passato");

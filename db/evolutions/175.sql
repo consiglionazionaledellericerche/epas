@@ -1,11 +1,22 @@
 # --- !Ups
 
-ALTER TABLE meal_ticket ADD COLUMN block_type TEXT;
-ALTER TABLE meal_ticket_history ADD COLUMN block_type TEXT;
-
-UPDATE meal_ticket SET block_type = 'papery';
+CREATE TABLE check_green_pass (
+	id BIGSERIAL PRIMARY KEY,
+	person_id BIGINT REFERENCES persons(id),
+	check_date DATE,
+	checked BOOLEAN,
+	version INT DEFAULT 0);
+	
+CREATE TABLE check_green_pass_history (
+	id BIGINT NOT NULL,
+	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
+	person_id BIGINT,
+	check_date DATE,
+	checked BOOLEAN,
+	PRIMARY KEY (id, _revision, _revision_type));
 
 # --- !Downs
 
-ALTER TABLE meal_ticket_history DROP COLUMN block_type;
-ALTER TABLE meal_ticket DROP COLUMN block_type;
+DROP TABLE check_green_pass_history;
+DROP TABLE check_green_pass;

@@ -51,6 +51,7 @@ import models.TeleworkValidation;
 import models.User;
 import models.UsersRolesOffices;
 import models.base.InformationRequest;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkApprovalDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.InformationType;
@@ -94,6 +95,8 @@ public class InformationRequests extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static TeleworkValidationDao validationDao;
+  @Inject
+  static TeleworkStampingManager manager;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -610,7 +613,9 @@ public class InformationRequests extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrperson = wrapperFactory.create(person);
-    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+   
+    List<NewTeleworkDto> list = Lists.newArrayList();
+    
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
       flash.error("Non esiste situazione mensile per il mese di %s %s",
           DateUtility.fromIntToStringMonth(month), year);
@@ -622,7 +627,8 @@ public class InformationRequests extends Controller {
         .create(wrperson.getValue(), year, month, true);
     
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
-    list = teleworkStampingManager.getMonthlyStampings(psDto);
+    
+    list = manager.stampingsForReport(psDto);
     render(list, person);
   }
   
