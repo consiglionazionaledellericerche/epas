@@ -193,15 +193,16 @@ public class EmailManager {
     DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/yyyy");
     final String subject = String.format("Lista selezionati per controllo del %s", 
         date.toString(df));
-    final String message = 
-        String.format("La lista dei dipendenti da controllare per il %s : \r\n", date);
+    StringBuilder sb = new StringBuilder()
+        .append(String.format("La lista dei dipendenti da controllare per il %s : \r\n", date));
+    
     for (CheckGreenPass gp: peopleSelected) {
-      message.concat(gp.person.getFullname() + "\r\n");
+      sb.append(gp.person.getFullname() + "\r\n");
     }
     
     sendMail(Optional.of("direttore@iit.cnr.it"), "antonella.mamone@iit.cnr.it", 
-        Optional.of("marco.conti@iit.cnr.it"), subject, message);
+        Optional.of("marco.conti@iit.cnr.it"), subject, sb.toString());
     sendMail(Optional.of("direttore@iit.cnr.it"), "carlo.carbone@iit.cnr.it", 
-        Optional.absent(), subject, message);
+        Optional.absent(), subject, sb.toString());
   }
 }
