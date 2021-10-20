@@ -83,7 +83,7 @@ public class CheckGreenPassManager {
         listDrawn = peopleDrawn(list);
         if (listDrawn.isEmpty()) {
           log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
-              office.name);        
+              office.name);
         } else {
           for (CheckGreenPass gp : listDrawn) {
             //Invio una mail a ciascun dipendente selezionato
@@ -91,7 +91,7 @@ public class CheckGreenPassManager {
             log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
           }
         }
-        emailManager.infoPeopleSelected(listDrawn, date);
+        emailManager.infoPeopleSelected(listDrawn, date,list.size());
       }
 
     }
@@ -133,50 +133,53 @@ public class CheckGreenPassManager {
 
     //double number = (list.size() * 25) / 100;
     // conteggio quante persone sorteggiare
-    BigDecimal num = new BigDecimal((list.size() * 25) / 100);
+    BigDecimal num = BigDecimal.valueOf(list.size()).multiply(BigDecimal.valueOf(0.25));
     num = num.setScale(0, RoundingMode.UP);
     Integer peopleToDraw = num.round(MathContext.DECIMAL64).intValue();
-    
+
+    log.info("Ci sono da sorteggiare {} persone su {} dipendenti presenti",
+        peopleToDraw, list.size());
+
     //preparo una mappa con chiave il numero dei sorteggi e valore la lista
     //di persone che hanno subito quel numero di sorteggi
     Map<Long, List<Person>> totalMap = checkedPeople(list);
-          
+
     List<Person> peopleChecked = Lists.newArrayList();
-    List<Person> peopleDrawn = Lists.newArrayList();    
-    
+    List<Person> peopleDrawn = Lists.newArrayList();
+
     boolean completed = false;
-    SortedSet<Long> keySet = (SortedSet<Long>) totalMap.keySet();
+
     Iterator<Long> itr = totalMap.keySet().iterator();
     int people = 0;
     //itero sulle chiavi della mappa
     while (itr.hasNext() && !completed) {
       Long key = itr.next();
-      peopleChecked = totalMap.get(key);  
+      peopleChecked = totalMap.get(key);
+      log.debug("Ci sono {} persone sorteggiate {} volta/e", peopleChecked.size(), key);
       //controllo che le persone selezionate siano in numero sufficiente a coprire quelle
       //che devono essere selezionate
       if (people + peopleChecked.size() < peopleToDraw) {
         people = people + peopleChecked.size();
         //inserisco tra le persone sorteggiate quelle che sicuramente ci devono andare
         peopleDrawn.addAll(peopleChecked);
+        log.info("Aggiungo {} persone tra quelle sorteggiate perché estratte solo {} volta/e",
+            peopleChecked.size(), key);
       } else {
-        completed = true; 
+        completed = true;
       }
     }
-    //inizio a costruire la mappa per le persone da sorteggiare
-    Map<Integer, Person> map = Maps.newHashMap();
-    int counter = 1;    
-    for (Person person : peopleChecked) {
-      map.put(counter, person);
-      counter++;
-    }
+    log.info("Ci sono {} persone da cui estrarre {} sorteggiati rimanenti.",
+        peopleChecked.size(), peopleToDraw - peopleDrawn.size());
+
     //sorteggio le persone
     int temp = peopleToDraw - peopleDrawn.size();
+
     while (temp > 0) {
-      int random = ThreadLocalRandom.current().nextInt(1, map.size() + 1);
-      Person p = map.get(random);
+      int random = ThreadLocalRandom.current().nextInt(0, peopleChecked.size());
+      Person p = peopleChecked.get(random);
       if (p != null) {
         peopleDrawn.add(p);
-        map.remove(random);
+        peopleChecked.remove(random);
         temp--;
       }
     }
@@ -212,11 +215,11 @@ public class CheckGreenPassManager {
       list = map.get(count);
       if (list == null) {
         list = Lists.newArrayList();
+        map.put(count, list);
       }
       list.add(person);
-      map.put(count, list);
     }
-    
+
     return map;
   }
     

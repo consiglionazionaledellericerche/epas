@@ -21,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
-import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -36,13 +35,10 @@ import org.joda.time.LocalDate;
 
 public class CheckGreenPassDao extends DaoBase {
 
-  private final IWrapperFactory factory;
   
   @Inject
-  CheckGreenPassDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      IWrapperFactory factory) {
+  CheckGreenPassDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
-    this.factory = factory;    
   }
   
   /**
