@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
 ### Changed
+ - Corretta data per inizio secondo anno ferie per i contratti continuativi
  - Portato a 700ms il tempo minimo per log su metodi lenti
  - Corretti riferimenti a istituto e direttore nell'esportazione dei PDF delle reperibilità
  - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
