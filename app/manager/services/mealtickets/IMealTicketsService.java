@@ -21,8 +21,10 @@ import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
+import models.dto.MealTicketComposition;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 
@@ -67,6 +69,18 @@ public interface IMealTicketsService {
    * @return il numero di buoni pasto trasferiti fra un contratto e l'altro.
    */
   int mealTicketsLegacy(Contract contract);
+  
+  /**
+   * Genera una composizione che determina con che tipo di buoni pasto si copre la maturazione
+   * mensile dei buoni in base ai giorni di presenza.
+   * 
+   * @param recap il recap della situazione dei buoni pasto
+   * @param monthRecap il recap sul contratto mensile
+   * @param contract il contratto su cui verificare la situazione dei buoni pasto
+   * @return la composizione con cui gestire la maturazione dei buoni pasto in un anno/mese.
+   */
+  MealTicketComposition whichBlock(MealTicketRecap recap, ContractMonthRecap monthRecap, 
+      Contract contract);
 
   
 }

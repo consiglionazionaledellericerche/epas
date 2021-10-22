@@ -21,9 +21,11 @@ import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
+import play.jobs.OnApplicationStart;
 
 @Slf4j
-@On("0 0 6 * * ?") //tutte le mattine alle 6.00
+//@On("0 0 6 * * ?") //tutte le mattine alle 6.00
+//@OnApplicationStart
 public class MealTicketBlockTypeJob extends Job {
   
   @Inject

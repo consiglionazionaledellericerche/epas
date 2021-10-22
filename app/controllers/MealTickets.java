@@ -30,10 +30,10 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.validators.LocalDateIsNotFuture;
 import it.cnr.iit.epas.DateInterval;
-import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
@@ -652,64 +652,9 @@ public class MealTickets extends Controller {
 
     MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
-    BlockType blockType = null;
-    int buoniCartacei = 0;
-    int buoniElettronici = 0;
-    int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
-    int buoniDaConteggiare = 0;
-    int buoniPastoPassati = monthRecap.buoniPastoDaInizializzazione > 0 
-        ? monthRecap.buoniPastoDaInizializzazione + monthRecap.buoniPastoConsegnatiNelMese
-            : monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese;
-    List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
-    MealTicketComposition composition = new MealTicketComposition();
-    if (monthRecap.remainingMealTickets < 0) {
-      //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
-      buoniDaConteggiare = buoniPastoPassati - buoniUsati;
-      composition.isBlockMealTicketTypeKnown = false;
-      final java.util.Optional<Configuration> conf = 
-          contract.person.office.configurations.stream()
-          .filter(configuration -> 
-          configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-      if (conf.isPresent()) {        
-        blockType = blockType.valueOf(conf.get().fieldValue);
-        switch (blockType) {
-          case electronic:
-            buoniElettronici = buoniDaConteggiare;            
-            break;
-          case papery:
-            buoniCartacei = buoniDaConteggiare;
-            break;
-          default:
-            log.warn("Errore nel parsing dell'enumerato per il tipo di blocchetto. Verificare.");
-            break;
-        }
-        composition.blockType = blockType;
-      }
 
-    } else {
-      int dimBlocchetto = 0;
-      composition.isBlockMealTicketTypeKnown = true;
-      buoniDaConteggiare = buoniUsati;
-      for (BlockMealTicket block : list) {
-        dimBlocchetto = block.getDimBlock();
-        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {          
-          switch (block.getBlockType()) {
-            case papery:
-              buoniCartacei++;
-              break;
-            case electronic:
-              buoniElettronici++;
-              break;
-            default:
-              break;
-          }
-          dimBlocchetto--;
-          buoniDaConteggiare--;
-        }
-      }
-    }
-    composition.electronicMealTicket = buoniElettronici;
-    composition.paperyMealTicket = buoniCartacei;
+    MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
+
 
     render(month, year, contract, composition); 
   }
