@@ -1984,7 +1984,8 @@ when
         "InformationRequests.disapproval",
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
-        "InformationRequests.generateTeleworkReport"
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.serviceExitToApprove"
 
         ), target == null, granted == false)
 then
