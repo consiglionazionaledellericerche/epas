@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.5] - UNRELEASED
 ### Added
+ - Aggiunta visualizzazione uscite di servizio per gli amministratori del personale
  - Estrazione random di personale per controllo greenpass (feature specifica IIT)
  - Aggiunti metodi REST per la visualizzazione delle informazioni relative alle competenze
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
