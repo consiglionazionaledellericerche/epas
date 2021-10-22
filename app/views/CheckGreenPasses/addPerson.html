@@ -1,0 +1,13 @@
+#{modalAsync id:'defaultModal', title:'Aggiungi dipendente da controllare' }
+
+
+#{form action:@save(), method:'POST', autocomplete:false,
+	class:'form form-horizontal', 'data-spinner':'#modalSpinner' }
+
+	#{f.selectModel 'person', items:filtered /}
+	#{b.buttons center:true}
+		#{b.submit 'Inserisci'/}
+	#{/b.buttons}
+#{/form}
+
+#{/modalAsync}

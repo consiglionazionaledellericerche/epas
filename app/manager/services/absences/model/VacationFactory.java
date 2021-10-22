@@ -412,7 +412,8 @@ public class VacationFactory {
     List<AbsencePeriod> fixed = Lists.newArrayList();
     
     LocalDate secondYearStart = contract.getPreviousContract() != null
-        ? contract.getPreviousContract().beginDate : contract.beginDate.plusYears(1);
+        ? contract.getPreviousContract().beginDate.plusYears(1)
+            : contract.beginDate.plusYears(1);
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {

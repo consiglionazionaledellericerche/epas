@@ -383,6 +383,7 @@ VacationCode.CODE_32_4= 32+4
 VacationCode.CODE_9_1= 9+1
 VacationCode.CODE_13_2= 13+2
 VacationCode.CODE_14_2= 14+2
+VacationCode.CODE_23_3= 23+3
 
 date= Data
 
@@ -1024,6 +1025,7 @@ Stampings.stampings= Situazione Mensile
 TeleworkStampings.teleworkStampings= Inserimento orario in telelavoro
 TeleworkStampings.personTeleworkStampings= Orari dipendenti in telelavoro
 InformationRequests.handleTeleworkApproval =Gestione approvazioni telelavoro
+CheckGreenPasses.dailySituation =Check giornaliero green pass
 
 Stats.general =Statistiche utilizzatori
 

@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Verifica Giornaliera Green Pass'  /}
+
+<div class="container">
+
+  #{title title:'Verfica giornaliera del Green Pass del ' + date.format() + ' - ' + office?.name /}
+  
+  #{if list.isEmpty()}
+  	#{alert color:'info'}
+  	<p>La lista dei dipendenti sorteggiati per il check del Green Pass per il ${date.format()} non è ancora stata redatta.
+  	Si ricorda che la lista verrà prodotta alle 11.15 di ogni giorno.</p>
+  	#{/alert}
+  #{/if}
+  #{else}
+    <p>
+  #{secure.check 'CheckGreenPasses.addPerson'}
+ 
+  	<div class="text-center">
+    <a class="btn btn-success" href="@{CheckGreenPasses.addPerson(office.id, date.format())}" data-async-modal="#defaultModal"><i class="fa fa-user-plus"></i>
+      Inserisci un nuovo nominativo </a>
+  	</div>
+  #{/secure.check}
+  </p>
+  	<table class="table table-striped table-hover table-condensed center">
+  		<tr>
+  		<th>Nominativo</th>
+  		<th>Controllato</th>
+  		<th>Aggiorna Stato</th>
+  		<th>Rimuovi</th>
+  		</tr>
+  		#{list items:list, as:'item'}
+  		<tr>
+  		<td>${item.person.fullName()}</td>
+  		<td>#{if item.checked}SI #{/if} #{else}NO #{/else}</td>
+  		<td><a class="btn btn-info btn-xs" href="@{CheckGreenPasses.checkPerson(item.id)}" color="info" title="Aggiorna stato">Aggiorna</a></td>
+  		<td><a class="btn btn-danger btn-xs" href="@{CheckGreenPasses.deletePerson(item.id)}" color="danger" title="Rimuovi"></a></a></td>
+  		</tr>
+  		#{/list}
+  	</table>
+  #{/else}
+  
+</div>

@@ -6,11 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.5] - UNRELEASED
 ### Added
+ - Estrazione random di personale per controllo greenpass (feature specifica IIT)
  - Aggiunti metodi REST per la visualizzazione delle informazioni relative alle competenze
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
 ### Changed
+ - Corretta la visualizzazione degli orari in telelavoro per gli amministratori del personale
+ - Corretta data per inizio secondo anno ferie per i contratti continuativi
  - Portato a 700ms il tempo minimo per log su metodi lenti
  - Corretti riferimenti a istituto e direttore nell'esportazione dei PDF delle reperibilità
  - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
