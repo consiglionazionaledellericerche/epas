@@ -231,9 +231,10 @@ public class Certifications extends Controller {
           break;
         case MEAL:
           CertificationMealTicketDto meal = CertificationMealTicketDto.builder()
-              //inserire qui il campo intero della somma tra elettronici e cartacei
-              //e negli altri campi del dto i valori specifici
-              .quantity(Integer.parseInt(entry.getValue().content))
+              .quantity(Integer.parseInt(entry.getValue().content.split(";")[0]) 
+                  + Integer.parseInt(entry.getValue().content.split(";")[1]))
+              .paperyTickets(Integer.parseInt(entry.getValue().content.split(";")[0]))
+              .electronicTickets(Integer.parseInt(entry.getValue().content.split(";")[1]))
               .build();
           mealTickets.add(meal);
           break;
