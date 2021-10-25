@@ -20,6 +20,7 @@ package models;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Getter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -33,6 +34,7 @@ public class CheckGreenPass extends BaseModel {
 
   public LocalDate checkDate;
   
+  @Getter
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)

@@ -20,6 +20,7 @@ package models.flows;
 
 import com.beust.jcommander.internal.Lists;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -138,7 +139,7 @@ public class AbsenceRequest extends MutableModel {
   public boolean officeHeadApprovalForManagerRequired = true;
 
   @NotAudited
-  @OneToMany(mappedBy = "absenceRequest")
+  @OneToMany(mappedBy = "absenceRequest", cascade = CascadeType.REMOVE)
   @OrderBy("createdAt DESC")
   public List<AbsenceRequestEvent> events = Lists.newArrayList();
 
