@@ -218,9 +218,15 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_23M, 
           DefaultAbsenceType.A_23U), 30, null),
   
-  T_COVID50(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_COVID50), 
-      ImmutableSet.of(DefaultAbsenceType.A_COVID50), -1, null),
+//  T_COVID50(AmountType.units, 
+//      ImmutableSet.of(DefaultAbsenceType.A_COVID50), 
+//      ImmutableSet.of(DefaultAbsenceType.A_COVID50), -1, null),
+  
+  T_COV50(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_COV50, 
+          DefaultAbsenceType.A_COV50M), 
+      ImmutableSet.of(DefaultAbsenceType.A_COV50, 
+          DefaultAbsenceType.A_COV50M), -1, null),
 
   T_25(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25, 
@@ -450,7 +456,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_400, DefaultAbsenceType.A_410,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19, 
-          DefaultAbsenceType.A_COVID19BP),
+          DefaultAbsenceType.A_COVID19BP, DefaultAbsenceType.A_98CV),
           ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -494,7 +500,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_400, DefaultAbsenceType.A_410,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_COVID19,
-          DefaultAbsenceType.A_COVID19BP),
+          DefaultAbsenceType.A_COVID19BP, DefaultAbsenceType.A_98CV),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 
