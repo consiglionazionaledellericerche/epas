@@ -48,6 +48,11 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
       Sets.newHashSet(), null, null, true, false),
   
+  A_98CV("98CV",
+      "Assente ingiustificato no grennpass", false,
+      ImmutableSet.of(JustifiedTypeName.nothing), 0, true, false, 0, null,
+      Sets.newHashSet(), null, null, true, false),
+  
   
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
@@ -470,7 +475,19 @@ public enum DefaultAbsenceType {
 
   A_COVID50("COVID50", "Congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
-      Sets.newHashSet(), null, null, false, true), 
+      Sets.newHashSet(), null, new LocalDate(2021,9,30), false, true), 
+  
+  A_COV50("COV50", "congedo parentale straordinario al 50%.", 
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
+      Sets.newHashSet(), new LocalDate(2021,10,1), null, false, true), 
+  
+  A_COV50M("COV50M", "Congedo parentale straordinario al 50% in ore e minuti.", 
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
+      false, true), 
+  A_COV50H7("COV50H7", "Congedo parentale straordinario al 50% completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true),
   
   A_25("25", "Astensione facoltativa post partum 30% primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,

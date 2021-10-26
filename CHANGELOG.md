@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.5] - UNRELEASED
 ### Added
+ - Aggiunto codice 98CV per le giornate senza giustificazione in caso di mancata mostra del green pass
+ - Aggiunti codici COV50 giornaliero e a ore e minuti per il congedo parentale al 50% in periodo covid
  - Aggiunto parametro di sede contenente l'informazione su quale sia il tipo di blocchetto di buono pasto utilizzato
  - Aggiunta visualizzazione uscite di servizio per gli amministratori del personale
  - Estrazione random di personale per controllo greenpass (feature specifica IIT)
