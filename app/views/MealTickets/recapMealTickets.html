@@ -78,7 +78,8 @@
 	  	    #{/else}
 	  	    
 	  	    <td>${recap.buoniPastoConsegnatiNelMese}</td>
-	  	    <td>${recap.buoniPastoUsatiNelMese}</td>
+	  	    <td><a href="@{MealTickets.whichBlock(recap.contract.id, year, month)}" data-async-modal="#defaultModal">
+	  	    	${recap.buoniPastoUsatiNelMese}</a></td>
 	  	    <!-- remaining cell -->
 	  	    #{if recap.remainingMealTickets >= 5}
 	  	      <td class="success">

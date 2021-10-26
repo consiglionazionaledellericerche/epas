@@ -223,6 +223,7 @@ child.surname= Cognome
 child.taxCode= Codice fiscale
 personChildren=Figlio Dipendente
 
+blockType =Tipologia blocco
 codeBlock=Codice Blocco
 
 code=Codice
@@ -1060,6 +1061,9 @@ AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
 AccountRole.REGISTRY_MANAGER= Gestore anagrafica
 
+BlockType.papery =Carteceo
+BlockType.electronic = Elettronico
+
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)
 
@@ -1153,6 +1157,7 @@ NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
 DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
 SEND_ADMIN_NOTIFICATION=Invio di notifiche agli amministratori del personale  
+MEAL_TICKET_BLOCK_TYPE=Tipologia blocchetti buoni pasto
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
@@ -1249,6 +1254,7 @@ configurationDto.booleanNewValue=Nuovo Valore
 configurationDto.stringNewValue=Nuovo Valore
 configurationDto.integerNewValue=Nuovo Valore
 configurationDto.localdateNewValue=Nuovo Valore
+configurationDto.blockTypeNewValue=Nuovo Valore
 
 whichTolerance =Quando applicare la tolleranza
 

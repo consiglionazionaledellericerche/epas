@@ -50,6 +50,13 @@
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.MEAL_TICKET_BLOCK_TYPE) }
+      <p>In questa sezione è possibile specificare quale sia la tipologia di default dei blocchetti di
+      buoni pasto che la sede <strong>${configuration.office.name}</strong> utilizza.<br>
+      Il sistema comunica giornalmente con Attestati dove questa informazione risiede e si aggiorna, tuttavia
+      è possibile modificare manualmente qui la tipologia di blocchetto selezionando quella corretta.</p> 
+    #{/if}
+    
     #{secure.check 'Configurations.disableDateStartMealTicket'}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.DATE_START_MEAL_TICKET) }
    

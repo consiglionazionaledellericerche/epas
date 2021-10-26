@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.5] - UNRELEASED
 ### Added
+ - Aggiunto parametro di sede contenente l'informazione su quale sia il tipo di blocchetto di buono pasto utilizzato
  - Aggiunta visualizzazione uscite di servizio per gli amministratori del personale
  - Estrazione random di personale per controllo greenpass (feature specifica IIT)
  - Aggiunti metodi REST per la visualizzazione delle informazioni relative alle competenze
@@ -13,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
 ### Changed
+ - Cambiato l'algoritmo che determina con quale tipologia di buoni pasto vengono coperti i buoni maturati nel mese
+   prima dell'invio dei dati ad Attestati
  - Corretta la visualizzazione degli orari in telelavoro per gli amministratori del personale
  - Corretta data per inizio secondo anno ferie per i contratti continuativi
  - Portato a 700ms il tempo minimo per log su metodi lenti

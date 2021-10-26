@@ -207,6 +207,16 @@ public class Configurations extends Controller {
             "valore non valido. Formato accettato HH:mm-HH:mm");
       }
     }
+    if (epasParam.epasParamValueType.equals(EpasParamValueType.ENUM)) {
+      if (configurationDto.blockTypeNewValue == null) {
+        Validation.addError("configurationDto.blockTypeNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateEnum(epasParam,
+            configuration.getOwner(), configurationDto.blockTypeNewValue,
+            Optional.fromNullable(configurationDto.validityBegin),
+            Optional.fromNullable(configurationDto.validityEnd), false);
+      }
+    }
 
     return newConfiguration;
   }

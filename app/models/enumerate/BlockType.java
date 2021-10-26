@@ -15,20 +15,21 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cnr.sync.dto.v2;
 
-import lombok.Builder;
-import lombok.Data;
+package models.enumerate;
 
-/**
- * Dati esportati in Json per la quantità mensile di buoni pasto
- * assegnati ad un dipendente.
- */ 
-@Data
-@Builder
-public class CertificationMealTicketDto {
+public enum BlockType {
 
-  public Integer quantity;
-  public Integer paperyTickets;
-  public Integer electronicTickets;
+  electronic("Elettronico"),
+  papery("Cartaceo");
+  
+  public String description;
+  
+  BlockType(String description) {
+    this.description = description;
+  }
+  
+  public String getDescription() {
+    return description;
+  }
 }

@@ -305,10 +305,9 @@ public class OfficeDao extends DaoBase {
     final QOffice office = QOffice.office;
     return queryFactory.selectFrom(office).where(office.institute.eq(institute)).fetch();
   }
-
+  
   /**
-   * 
-   * @return la lista di tutte le sedi attualmente abilitate e non chiuse.
+   * Lista di tutte le sedi attualmente abilitate e non chiuse.
    */
   public List<Office> allEnabledOffices() {
     final QOffice office = QOffice.office;

@@ -33,17 +33,22 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
+import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
+import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.User;
+import models.dto.MealTicketComposition;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
@@ -61,6 +66,7 @@ import security.SecurityRules;
  * Controller per la gestione dei buoni pasto.
  */
 @With({Resecure.class})
+@Slf4j
 public class MealTickets extends Controller {
 
   @Inject
@@ -268,6 +274,7 @@ public class MealTickets extends Controller {
    * @param expireDate       data scadenza
    */
   public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
+      @Required BlockType blockType,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
       @Required @Min(1) @Max(99) Integer ticketNumberTo,
       @Valid @Required @CheckWith(LocalDateIsNotFuture.class) LocalDate deliveryDate, 
@@ -308,7 +315,7 @@ public class MealTickets extends Controller {
     }
 
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, 
+    ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
         ticketNumberFrom, ticketNumberTo, expireDate, office));
 
     ticketToAddOrdered.forEach(ticket -> {
@@ -521,6 +528,63 @@ public class MealTickets extends Controller {
   }
 
   /**
+   * Ritorna il blocchetto di cui aggiornare la tipologia di blocchetto.
+   * @param contractId l'identificativo del contratto
+   * @param codeBlock il codice del blocchetto
+   * @param first il primo buono del blocchetto
+   * @param last l'ultimo buono del blocchetto
+   */
+  public static void convertPersonCodeBlock(Long contractId, String codeBlock, 
+      int first, int last) {
+
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+
+    Preconditions.checkState(mealTicketList.size() > 0);
+
+    BlockMealTicket block = MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
+        MealTicketStaticUtility.blockPortion(mealTicketList, contract, first, last),
+        Optional.<DateInterval>absent()).get(0);
+
+    render(contract, codeBlock, block);
+  }
+
+  /**
+   * Modifica la tipologia del blocchetto di buoni pasto da cartaceo a elettronico
+   * o viceversa.
+   * @param contractId l'identificativo del contratto
+   * @param codeBlock il codice del blocchetto da modificare
+   */
+  public static void performConvertPersonCodeBlock(Long contractId, String codeBlock) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.person.office);
+
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+    Preconditions.checkState(mealTicketList.size() > 0);
+
+    for (MealTicket mealTicket : mealTicketList) {
+      if (mealTicket.blockType.equals(BlockType.papery)) {
+        mealTicket.blockType = BlockType.electronic;        
+      } else {
+        mealTicket.blockType = BlockType.papery;
+      }
+      mealTicket.save();
+    }
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
+    MealTicketRecap recap = currentRecap.get();
+    Person person = contract.person;
+    render("@editPersonMealTickets", person, recap, LocalDate.now().getYear(), 
+        LocalDate.now().getMonthOfYear());
+  }
+
+
+  /**
    * Funzione di Ricerca di un blocco nel database ePAS.
    *
    * @param code codice match
@@ -568,4 +632,30 @@ public class MealTickets extends Controller {
     render(office, code, blocks);
   }
 
+  /**
+   * Quale tipologia di blocchetto viene associata alla maturazione dei buoni pasto nel mese.
+   * @param contractId l'identificativo del contratto
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void whichBlock(Long contractId, int year, int month) {
+
+    Contract contract = contractDao.getContractById(contractId);
+
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.person.isPersistent());
+    rules.checkIfPermitted(contract.person.office);
+    YearMonth yearMonth = new YearMonth(year, month);
+
+    ContractMonthRecap monthRecap = contractMonthRecapDao
+        .getContractMonthRecap(contract, yearMonth);
+
+    MealTicketRecap recap = mealTicketService.create(contract).orNull();
+    Preconditions.checkNotNull(recap);
+
+    MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
+
+
+    render(month, year, contract, composition); 
+  }
 }

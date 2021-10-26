@@ -1,0 +1,19 @@
+#{modalAsync title:'Gestione Blocco Buoni Pasto'}
+
+<div>
+#{alert color:'warning'}
+#{if composition.isBlockMealTicketTypeKnown}
+<p>Il dipendente ${contract.person.getFullname()} copre i suoi buoni maturati con ${composition.paperyMealTicket} buoni 
+pasto cartacei e ${composition.electronicMealTicket} buoni pasto elettronici.
+</p> 
+#{/if}
+#{else}
+<p>Non è possibile ricavare la tipologia dei blocchi di buoni pasto con cui coprire la maturazione dei 
+${composition.paperyMealTicket != null ? composition.paperyMealTicket : composition.electronicMealTicket} buoni di 
+${contract.person.getFullname()}. Si fa riferimento quindi a quanto presente come configurazione di sede, ovvero buoni
+pasto di tipo <strong>${composition.blockType.description}</strong>. 
+</p>
+#{/else}
+#{/alert}
+</div>
+#{/modalAsync}

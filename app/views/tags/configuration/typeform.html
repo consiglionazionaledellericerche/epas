@@ -43,6 +43,10 @@
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
 	  #{f.input 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue /}
 	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.ENUM) }
+	  #{f.selectEnum 'configurationDto.blockTypeNewValue', items:models.enumerate.BlockType,value:_configurationDto.blockTypeNewValue /}
+	#{/if}
+	
     
 	
   #{/if}
@@ -86,6 +90,9 @@
 	#{/if}
 	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.LOCALTIME_INTERVAL) }
 	  #{f.simpleView 'configurationDto.stringNewValue', value:_configurationDto.stringNewValue, hidden:true /}
+	#{/if}
+	#{if _configuration.epasParam.epasParamValueType.equals(manager.configurations.EpasParam.EpasParamValueType.ENUM) }
+	  #{f.simpleView 'configurationDto.blockTypeNewValue', value:_configurationDto.blockTypeNewValue, hidden:true /}
 	#{/if}
 		  
 	  *{ vedi se ti vanno bene }*  		
