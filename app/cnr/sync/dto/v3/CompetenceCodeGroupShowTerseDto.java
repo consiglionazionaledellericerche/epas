@@ -19,24 +19,11 @@ package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
-import java.time.LocalDateTime;
 import javax.inject.Inject;
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.Data;
 import lombok.ToString;
 import models.CompetenceCodeGroup;
-import models.Stamping;
-import models.Stamping.WayType;
-import models.enumerate.LimitType;
-import models.enumerate.LimitUnit;
-import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 /**
  * DTO per l'esportazione via REST delle informazioni 

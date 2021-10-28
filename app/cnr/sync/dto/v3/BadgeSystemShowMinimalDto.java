@@ -17,46 +17,46 @@
 
 package cnr.sync.dto.v3;
 
+import cnr.sync.dto.v2.OfficeDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
-import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
-import models.PersonCompetenceCodes;
+import models.BadgeSystem;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * di un codice di competenza (straordinari, turni, etc).
+ * DTO per esportare via JSON le informazioni minimali di un gruppo badge.
  *
  * @author Cristian Lucchesi
- * @version 3
  *
  */
-@StaticInject
 @ToString
 @Data
-public class PersonCompetenceCodeShowDto {
+@EqualsAndHashCode
+public class BadgeSystemShowMinimalDto {
 
   private Long id;
-  private LocalDate beginDate;
-  private LocalDate endDate;
-  
-  private CompetenceCodeShowTerseDto competenceCode;
 
-  @JsonIgnore
+  private String name;
+
+  private OfficeDto office;
+
+  private boolean enabled;
+
   @Inject
+  @JsonIgnore
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un BadgeSystemTerseDto contenente i valori 
+   * dell'oggetto badgeSystem passato.
    */
-  public static PersonCompetenceCodeShowDto build(PersonCompetenceCodes personCompetenceCodes) {
-    val dto = modelMapper.map(personCompetenceCodes, PersonCompetenceCodeShowDto.class);
-    dto.setCompetenceCode(CompetenceCodeShowTerseDto.build(personCompetenceCodes.competenceCode));
+  public static BadgeSystemShowMinimalDto build(BadgeSystem badgeSystem) {
+    val dto = modelMapper.map(badgeSystem, BadgeSystemShowMinimalDto.class);
+    dto.setOffice(OfficeDto.build(badgeSystem.office));
     return dto;
   }
 }

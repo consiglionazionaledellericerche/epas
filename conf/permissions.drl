@@ -1228,6 +1228,20 @@ when
 	    "BadgeSystems.list",
 	    "BadgeSystems.blank",
 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete",
+        
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
 		"Institutes.save",
@@ -1350,7 +1364,21 @@ when
 	   "BadgeSystems.joinPersonNumbers",
   	   "BadgeSystems.joinOldBadgeNumbers",
   	   "BadgeSystems.delete",
-  	   
+
+ 	   "rest.v3.BadgeSystems.byOffice",
+       "rest.v3.BadgeSystems.show",
+
+       "rest.v3.BadgeReaders.byOffice",
+       "rest.v3.BadgeReaders.show",
+
+       "rest.v3.Badges.byOffice",
+       "rest.v3.Badges.byBadgeSystem",
+       "rest.v3.Badges.byPerson",
+       "rest.v3.Badges.show",
+       "rest.v3.Badges.create",
+       "rest.v3.Badges.update",
+       "rest.v3.Badges.delete",
+
   	   "Zones.insertZone",
   	   "Zones.linkZones",
   	   "Zones.save",
@@ -3718,6 +3746,60 @@ when
 
 
        ), granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni utente con ruolo BADGE_MANAGER
+ ******************************************************************************/
+rule BadgeManager
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule BadgeManager_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == $o, granted == false)
 then
  $c.grant();
 end

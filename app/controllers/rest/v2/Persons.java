@@ -86,7 +86,7 @@ public class Persons extends Controller {
     if (terse != null && terse) {
       val list = 
           persons.stream().map(p -> PersonShowTerseDto.build(p)).collect(Collectors.toList());
-      renderJSON(gsonBuilder.create().toJson(list));      
+      renderJSON(gsonBuilder.create().toJson(list));
     } else {
       val list = 
           persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());

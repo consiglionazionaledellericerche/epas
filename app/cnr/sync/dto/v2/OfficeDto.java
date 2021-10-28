@@ -18,7 +18,10 @@
 package cnr.sync.dto.v2;
 
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
+import models.Office;
 
 /**
  * Informazioni esportate in Json per l'ufficio.
@@ -26,12 +29,28 @@ import lombok.Data;
  * @author Cristian Lucchesi
  *
  */
+@ToString
+@Builder
 @Data
 public class OfficeDto {
 
-  private int id;
+  private Long id;
   private String name;
   private String code;
   private String codeId;
   private LocalDateTime updatedAt;
+  
+  /**
+   * Nuova instanza di un OfficeDto contenente i valori 
+   * dell'oggetto office passato.
+   */
+  public static OfficeDto build(Office office) {
+    return OfficeDto.builder()
+        .id(office.id)
+        .name(office.name)
+        .code(office.code)
+        .codeId(office.codeId)
+        .updatedAt(office.updatedAt)
+        .build();
+  }
 }

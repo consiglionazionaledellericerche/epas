@@ -18,49 +18,64 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dao.BadgeReaderDao;
+import dao.BadgeSystemDao;
+import dao.PersonDao;
 import injection.StaticInject;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.val;
-import models.CompetenceCodeGroup;
-import models.enumerate.LimitType;
-import models.enumerate.LimitUnit;
+import models.Badge;
 import org.modelmapper.ModelMapper;
-import org.testng.collections.Lists;
+import play.data.validation.Required;
 
 /**
- * Dati esportati in Json per il PersonDay completi di persona.
+ * Dati per la creazione via REST di un badge associato ad una persona.
  *
  * @author Cristian Lucchesi
- * @version 3
  *
  */
 @StaticInject
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CompetenceCodeGroupShowDto extends CompetenceCodeGroupShowTerseDto {
+public class BadgeCreateDto extends BadgeUpdateDto {
 
-  private LimitType limitType;
-  private Integer limitValue;
-  private LimitUnit limitUnit;
-  
-  private List<CompetenceCodeShowTerseDto> competenceCodes = Lists.newArrayList();
+  @Required
+  private Long personId;
 
-  @JsonIgnore
+  @Required
+  private Long badgeSystemId;
+
+  @Required
+  private Long badgeReaderId;
+
   @Inject
+  @JsonIgnore
   static ModelMapper modelMapper;
 
+  @Inject
+  @JsonIgnore
+  static PersonDao personDao;
+
+  @Inject
+  @JsonIgnore
+  static BadgeReaderDao badgeReaderDao;
+
+  @Inject
+  @JsonIgnore
+  static BadgeSystemDao badgeSystemDao;
+
   /**
-   * Nuova instanza di un PersonDayShowDto contenente i valori 
-   * dell'oggetto personDay passato.
+   * Nuova istanza di un oggetto Badge a partire dai 
+   * valori presenti nel rispettivo DTO.
    */
-  public static CompetenceCodeGroupShowDto build(CompetenceCodeGroup ccg) {
-    val dto = modelMapper.map(ccg, CompetenceCodeGroupShowDto.class);
-    dto.setCompetenceCodes(ccg.competenceCodes.stream()
-        .map(cc -> CompetenceCodeShowTerseDto.build(cc)).collect(Collectors.toList()));
-    return dto;
+  public static Badge build(BadgeCreateDto badgeCreateDto) {
+    val badge = modelMapper.map(badgeCreateDto, Badge.class);
+    badge.person = personDao.getPersonById(badgeCreateDto.getPersonId());
+    badge.badgeReader = badgeReaderDao.byId(badgeCreateDto.getBadgeReaderId());
+    badge.badgeSystem = badgeSystemDao.byId(badgeCreateDto.getBadgeSystemId());
+    return badge;
   }
+
 }
