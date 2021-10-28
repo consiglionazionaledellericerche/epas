@@ -33,14 +33,11 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
-import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
-import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
@@ -66,7 +63,6 @@ import security.SecurityRules;
  * Controller per la gestione dei buoni pasto.
  */
 @With({Resecure.class})
-@Slf4j
 public class MealTickets extends Controller {
 
   @Inject

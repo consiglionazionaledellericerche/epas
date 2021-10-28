@@ -22,7 +22,6 @@ import dao.OfficeDao;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import manager.CheckGreenPassManager;
 import models.CheckGreenPass;
 import models.Office;
@@ -32,7 +31,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-@Slf4j
 @With({Resecure.class})
 public class CheckGreenPasses extends Controller {
   

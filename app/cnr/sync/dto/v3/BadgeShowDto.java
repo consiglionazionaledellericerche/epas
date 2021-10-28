@@ -19,44 +19,43 @@ package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
-import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
-import models.PersonCompetenceCodes;
+import models.Badge;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * di un codice di competenza (straordinari, turni, etc).
+ * DTO per l'esportazione via REST delle informazioni di un badge.
  *
  * @author Cristian Lucchesi
  * @version 3
- *
  */
 @StaticInject
 @ToString
 @Data
-public class PersonCompetenceCodeShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class BadgeShowDto extends BadgeShowTerseDto {
 
-  private Long id;
-  private LocalDate beginDate;
-  private LocalDate endDate;
-  
-  private CompetenceCodeShowTerseDto competenceCode;
+  private Long badgeReaderId;
+  private Long badgeSystemId;
 
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un BadgeShowDto contenente i valori 
+   * dell'oggetto badge passato.
    */
-  public static PersonCompetenceCodeShowDto build(PersonCompetenceCodes personCompetenceCodes) {
-    val dto = modelMapper.map(personCompetenceCodes, PersonCompetenceCodeShowDto.class);
-    dto.setCompetenceCode(CompetenceCodeShowTerseDto.build(personCompetenceCodes.competenceCode));
+  public static BadgeShowDto build(Badge badge) {
+    val dto = modelMapper.map(badge, BadgeShowDto.class);
+    dto.setBadgeReaderId(badge.badgeReader.id);
+    if (badge.badgeSystem != null) {
+      dto.setBadgeSystemId(badge.badgeSystem.id);
+    }
     return dto;
   }
 }

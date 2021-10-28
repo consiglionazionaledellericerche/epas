@@ -41,4 +41,5 @@ di ePAS in produzione del vostro ente.
    vacationServices
    workingTimeTypesServices
    missionsServices
+   badgeServices
 

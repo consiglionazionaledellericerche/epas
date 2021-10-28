@@ -15,17 +15,20 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package controllers.rest.v2;
+package controllers.rest.v3;
 
-import cnr.sync.dto.v2.ChildrenCreateDto;
-import cnr.sync.dto.v2.ChildrenShowDto;
-import cnr.sync.dto.v2.ChildrenUpdateDto;
+import cnr.sync.dto.v3.BadgeCreateDto;
+import cnr.sync.dto.v3.BadgeShowDto;
+import cnr.sync.dto.v3.BadgeShowTerseDto;
+import cnr.sync.dto.v3.BadgeUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
-import dao.PersonChildrenDao;
-import dao.PersonDao;
+import controllers.rest.v2.Offices;
+import controllers.rest.v2.Persons;
+import dao.BadgeDao;
+import dao.BadgeSystemDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
@@ -33,32 +36,71 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import models.PersonChildren;
+import lombok.extern.slf4j.Slf4j;
+import models.Badge;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 import security.SecurityRules;
 
 /**
- * Controller per la gestione dei figli/figlie dei dipendenti.
+ * API Rest per la gestione dei badge.
+ *
+ * @author Cristian Lucchesi
+ * @since version 3
  */
 @Slf4j
 @With(Resecure.class)
-public class Child extends Controller {
+public class Badges extends Controller {
 
-  @Inject 
+  @Inject
   static SecurityRules rules;
+
+  @Inject
+  static BadgeDao badgeDao;
+
+  @Inject
+  static BadgeSystemDao badgeSystemDao;
+  
   @Inject
   static GsonBuilder gsonBuilder;
-  @Inject
-  static PersonChildrenDao childrenDao;
-  @Inject
-  static PersonDao personDao;
 
   /**
-   * Figli/figlie di un dipendente.
+   * Badge dei dipendenti di un ufficio.
+   * L'ufficio è individuato tramite una delle chiavi del ufficio passate come
+   * parametro (uniformemente ai metodi REST sugli uffici). 
+   */
+  public void byOffice(Long id, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+
+    val office = Offices.getOfficeFromRequest(id, code, codeId);
+    rules.checkIfPermitted(office);
+
+    val badges = badgeDao.byOffice(office);
+    renderJSON(gsonBuilder.create().toJson(
+        badges.stream().map(BadgeShowTerseDto::build).collect(Collectors.toSet())));
+  }
+
+  /**
+   * Badge associati ad un gruppo badge (badgeSystem).
+   * Il gruppo badge è individuato tramite il suo id.
+   */
+  public void byBadgeSystem(Long id) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+
+    notFoundIfNull(id);
+    val badgeSystem = badgeSystemDao.byId(id);
+    notFoundIfNull(badgeSystem);
+    rules.checkIfPermitted(badgeSystem.office);
+
+    val badges = badgeSystemDao.badges(badgeSystem);
+    renderJSON(gsonBuilder.create().toJson(
+        badges.stream().map(BadgeShowTerseDto::build).collect(Collectors.toSet())));
+  }
+  
+  /**
+   * Badge di un dipendente.
    * La persona è individuata tramite una delle chiavi della persona passate come
    * parametro (uniformemente ai metodi REST sulle persone). 
    */
@@ -67,72 +109,71 @@ public class Child extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
-    List<ChildrenShowDto> childs = 
-        person.personChildren.stream().map(c -> ChildrenShowDto.build(c))
+    List<BadgeShowDto> badges = 
+        person.badges.stream().map(c -> BadgeShowDto.build(c))
         .collect(Collectors.toList());
-    renderJSON(gsonBuilder.create().toJson(childs));
+    renderJSON(gsonBuilder.create().toJson(badges));
   }
 
   /**
-   * Restituisce il JSON con il figlio/figlia cercato per id. 
+   * Restituisce il JSON con il badge cercato per id. 
    */
   public static void show(Long id) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val children = getChildrenFromRequest(id);
-    renderJSON(gsonBuilder.create().toJson(ChildrenShowDto.build(children)));
+    val badge = getBadgeFromRequest(id);
+    renderJSON(gsonBuilder.create().toJson(BadgeShowDto.build(badge)));
   }
 
   /**
-   * Crea un figlio/figlia con i valori passati via JSON.
+   * Crea un badge con i valori passati via JSON.
    * Questo metodo può essere chiamato solo in HTTP POST.
    */
   public static void create(String body) 
       throws JsonParseException, JsonMappingException, IOException {
     RestUtils.checkMethod(request, HttpMethod.POST);
-    log.debug("Create children -> request.body = {}", body);
+    log.debug("Create badge -> request.body = {}", body);
     if (body == null) {
       JsonResponse.badRequest();
     }
     val gson = gsonBuilder.create();
-    val childrenDto = gson.fromJson(body, ChildrenCreateDto.class); 
-    val validationResult = validation.valid(childrenDto); 
+    val badgeDto = gson.fromJson(body, BadgeCreateDto.class); 
+    val validationResult = validation.valid(badgeDto); 
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
 
-    val children = ChildrenCreateDto.build(childrenDto);
-    if (!validation.valid(children).ok) {
+    val badge = BadgeCreateDto.build(badgeDto);
+    if (!validation.valid(badge).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(badge.person.office);
 
-    children.person = personDao.getPersonById(childrenDto.getPersonId());
-    children.save();
+    badge.save();
 
-    log.info("Created children {} via REST", children);
-    renderJSON(gson.toJson(ChildrenShowDto.build(children)));
+    log.info("Created badge {} via REST", badge);
+    renderJSON(gson.toJson(BadgeShowDto.build(badge)));
   }
 
   /**
-   * Aggiorna i dati di un figlio/figlia individuato per id
+   * Aggiorna i dati di badge individuato per id
    * con i valori passati nel body HTTP come JSON.
    * Questo metodo può essere chiamato solo via HTTP PUT.
    */
   public static void update(Long id, String body) 
       throws JsonParseException, JsonMappingException, IOException {
     RestUtils.checkMethod(request, HttpMethod.PUT);
-    val children = getChildrenFromRequest(id);
+    val badge = getBadgeFromRequest(id);
     if (body == null) {
       JsonResponse.badRequest();
     }
 
     val gson = gsonBuilder.create();
-    val childrenDto = gson.fromJson(body, ChildrenUpdateDto.class); 
-    val validationResult = validation.valid(childrenDto); 
+    val badgeDto = gson.fromJson(body, BadgeUpdateDto.class); 
+    val validationResult = validation.valid(badgeDto); 
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
@@ -140,54 +181,54 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(badge.person.office);
 
-    if (!validation.valid(children).ok) {
+    if (!validation.valid(badge).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
-    childrenDto.update(children);
-    children.save();
+    badgeDto.update(badge);
+    badge.save();
 
-    log.info("Updated children {} via REST", children);
-    renderJSON(gson.toJson(ChildrenShowDto.build(children)));
+    log.info("Updated badge {} via REST", badge);
+    renderJSON(gson.toJson(BadgeShowDto.build(badge)));
   }
 
   /**
-   * Effettua la cancellazione di un figlio/figlia individuata con i 
+   * Effettua la cancellazione di un badge individuato con i 
    * parametri HTTP passati.
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void delete(Long id) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val children = getChildrenFromRequest(id);
+    val badge = getBadgeFromRequest(id);
 
-    children.delete();
-    log.info("Deleted children {} via REST", children);
+    badge.delete();
+    log.info("Deleted badge {} via REST", badge);
     JsonResponse.ok();
   }
 
   /**
-   * Cerca il/la figlio/a in funzione del id passato.
+   * Cerca il badge in funzione del id passato.
    *
-   * @return il/la figlio/a se trovato, altrimenti torna direttamente 
+   * @return il badge se trovato, altrimenti torna direttamente 
    *     una risposta HTTP 404.
    */
   @Util
-  private static PersonChildren getChildrenFromRequest(Long id) {
+  private static Badge getBadgeFromRequest(Long id) {
     if (id == null) {
       JsonResponse.notFound();
     }
 
-    val children = childrenDao.getById(id);
+    val badge = badgeDao.byId(id);
 
-    if (children == null) {
+    if (badge == null) {
       JsonResponse.notFound();
     }
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(children.person.office);
-    return children;
+    rules.checkIfPermitted(badge.person.office);
+    return badge;
   }
 }

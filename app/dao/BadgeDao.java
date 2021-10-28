@@ -26,6 +26,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import models.Badge;
 import models.BadgeReader;
+import models.BadgeSystem;
+import models.Office;
 import models.Person;
 import models.query.QBadge;
 
@@ -82,4 +84,19 @@ public class BadgeDao extends DaoBase {
         .fetch();
   }
 
+  public List<Badge> byOffice(Office office) {
+    final QBadge badge = QBadge.badge;
+    
+    return queryFactory.selectFrom(badge)
+        .where(badge.badgeSystem.office.eq(office))
+        .fetch();
+  }
+
+  public List<Badge> byBadgeSystem(BadgeSystem badgeSystem) {
+    final QBadge badge = QBadge.badge;
+    
+    return queryFactory.selectFrom(badge)
+        .where(badge.badgeSystem.eq(badgeSystem))
+        .fetch();
+  }
 }
