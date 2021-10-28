@@ -254,14 +254,11 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int buoniElettronici = 0;
     int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
     int buoniDaConteggiare = 0;
-    int buoniPastoPassati = monthRecap.buoniPastoDaInizializzazione > 0 
-        ? monthRecap.buoniPastoDaInizializzazione + monthRecap.buoniPastoConsegnatiNelMese
-            : monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese;
     MealTicketComposition composition = new MealTicketComposition();
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
     if (monthRecap.remainingMealTickets < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
-      buoniDaConteggiare = buoniPastoPassati - buoniUsati;
+      buoniDaConteggiare = buoniUsati;
       composition.isBlockMealTicketTypeKnown = false;
       final java.util.Optional<Configuration> conf = 
           contract.person.office.configurations.stream()
