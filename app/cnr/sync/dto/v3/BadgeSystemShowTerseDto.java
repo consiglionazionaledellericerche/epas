@@ -17,46 +17,47 @@
 
 package cnr.sync.dto.v3;
 
+import cnr.sync.dto.v2.OfficeDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
-import java.time.LocalDate;
+import com.google.common.collect.Sets;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
-import models.PersonCompetenceCodes;
+import models.BadgeSystem;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * di un codice di competenza (straordinari, turni, etc).
+ * DTO per esportare via JSON le informazioni principali di un gruppo badge.
  *
  * @author Cristian Lucchesi
- * @version 3
  *
  */
-@StaticInject
 @ToString
 @Data
-public class PersonCompetenceCodeShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class BadgeSystemShowTerseDto extends BadgeSystemShowMinimalDto {
 
-  private Long id;
-  private LocalDate beginDate;
-  private LocalDate endDate;
+  private String description;
+
+  private Set<BadgeReaderShowMinimalDto> badgeReaders = Sets.newHashSet();
   
-  private CompetenceCodeShowTerseDto competenceCode;
-
-  @JsonIgnore
   @Inject
+  @JsonIgnore
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un BadgeSystemTerseDto contenente i valori 
+   * dell'oggetto badgeSystem passato.
    */
-  public static PersonCompetenceCodeShowDto build(PersonCompetenceCodes personCompetenceCodes) {
-    val dto = modelMapper.map(personCompetenceCodes, PersonCompetenceCodeShowDto.class);
-    dto.setCompetenceCode(CompetenceCodeShowTerseDto.build(personCompetenceCodes.competenceCode));
+  public static BadgeSystemShowTerseDto build(BadgeSystem badgeSystem) {
+    val dto = modelMapper.map(badgeSystem, BadgeSystemShowTerseDto.class);
+    dto.setOffice(OfficeDto.build(badgeSystem.office));
+    dto.setBadgeReaders(badgeSystem.badgeReaders.stream().map(br -> BadgeReaderShowMinimalDto.buildMinimal(br))
+        .collect(Collectors.toSet()));
     return dto;
   }
 }

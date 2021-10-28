@@ -82,12 +82,12 @@ public class Affiliations extends Controller {
     if (!includeInactive) {
       affiliations = group.affiliations.stream()
           .filter(a -> a.isActive())
-          .map(a -> AffiliationShowDto.build(a))          
+          .map(a -> AffiliationShowDto.build(a))
           .collect(Collectors.toList());
     } else {
       affiliations = group.affiliations.stream()
           .map(a -> AffiliationShowDto.build(a))
-          .collect(Collectors.toList());      
+          .collect(Collectors.toList());
     }
     renderJSON(gsonBuilder.create().toJson(affiliations));
   }
@@ -110,12 +110,12 @@ public class Affiliations extends Controller {
     if (!includeInactive) {
       affiliations = person.affiliations.stream()
           .filter(a -> a.isActive())
-          .map(a -> AffiliationShowDto.build(a))          
+          .map(a -> AffiliationShowDto.build(a))
           .collect(Collectors.toList());
     } else {
       affiliations = person.affiliations.stream()
           .map(a -> AffiliationShowDto.build(a))
-          .collect(Collectors.toList());      
+          .collect(Collectors.toList());
     }
     renderJSON(gsonBuilder.create().toJson(affiliations));
   }

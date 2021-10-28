@@ -74,5 +74,9 @@ public final class JsonResponse {
     throw new RenderJson(String.format(WITH_MSG, CONFLICT, message));
   }
 
+  public static void unauthorized(String message) {
+    Http.Response.current().status = Http.StatusCode.UNAUTHORIZED;
+    throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.UNAUTHORIZED, message));    
+  }
 }
 

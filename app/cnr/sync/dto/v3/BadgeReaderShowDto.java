@@ -18,45 +18,46 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Sets;
 import injection.StaticInject;
-import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
-import models.PersonCompetenceCodes;
+import models.BadgeReader;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * di un codice di competenza (straordinari, turni, etc).
+ * Dati esportati in Json per un BadgeReader (lettore badge).
  *
  * @author Cristian Lucchesi
- * @version 3
  *
  */
 @StaticInject
 @ToString
 @Data
-public class PersonCompetenceCodeShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class BadgeReaderShowDto extends BadgeReaderShowTerseDto {
 
-  private Long id;
-  private LocalDate beginDate;
-  private LocalDate endDate;
-  
-  private CompetenceCodeShowTerseDto competenceCode;
+  private Set<BadgeShowTerseDto> badges = Sets.newHashSet();
 
-  @JsonIgnore
   @Inject
+  @JsonIgnore
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un BadgeReaderShowDto contenente i valori 
+   * dell'oggetto badgeReader passato.
    */
-  public static PersonCompetenceCodeShowDto build(PersonCompetenceCodes personCompetenceCodes) {
-    val dto = modelMapper.map(personCompetenceCodes, PersonCompetenceCodeShowDto.class);
-    dto.setCompetenceCode(CompetenceCodeShowTerseDto.build(personCompetenceCodes.competenceCode));
+  public static BadgeReaderShowDto build(BadgeReader badgeReader) {
+    val dto = modelMapper.map(badgeReader, BadgeReaderShowDto.class);
+    dto.setUsername(badgeReader.user.username);
+    dto.setBadgeSystems(badgeReader.badgeSystems.stream().map(bs -> BadgeSystemShowTerseDto.build(bs))
+            .collect(Collectors.toList()));
+    dto.setBadges(badgeReader.badges.stream().map(BadgeShowTerseDto::build).collect(Collectors.toSet()));
     return dto;
   }
 }
