@@ -77,10 +77,10 @@ public class CheckGreenPasses extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     List<Person> list = manager.peopleActiveInDate(date, office);
-    List<CheckGreenPass> greenPassList = manager.peopleDrawn(list);
+    List<CheckGreenPass> greenPassList = manager.peopleDrawn(office, list, date);
     List<Person> filtered = list.stream().filter(p -> greenPassList.stream()
         .noneMatch(gp -> gp.person.equals(p))).collect(Collectors.toList());    
-    
+
     render(filtered);
   }
   
@@ -140,7 +140,7 @@ public class CheckGreenPasses extends Controller {
     render("@dailySituation", list, office, date);
   }
   
-  public static void checkGreenPassProcedure(LocalDate date) {
+  public static void checkGreenPassProcedure(LocalDate date, boolean lastAttempt) {
     manager.checkGreenPassProcedure(date);
     renderText("Procedura completata");
   }

@@ -30,9 +30,7 @@ import java.math.RoundingMode;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -43,6 +41,10 @@ import models.Office;
 import models.Person;
 import org.joda.time.LocalDate;
 
+/**
+ * @author cristian
+ *
+ */
 @Slf4j
 public class CheckGreenPassManager {
 
@@ -52,6 +54,8 @@ public class CheckGreenPassManager {
   private final OfficeDao officeDao;
   private final EmailManager emailManager;
 
+  private final static double PEOPLE_TO_DRAW_EACH_ATTEMPT = 0.15;
+  
   /**
    * Costruttore manager.
    * @param personDao il dao sulle persone
@@ -69,6 +73,29 @@ public class CheckGreenPassManager {
   }
 
   /**
+   * Il numeero delle persone da conteggiare è una percentuale del numero di persone
+   * presenti in sede.
+   * 
+   * @param numberOfActivePeople numero di persone attive in sede 
+   * @param lastAttempt true se è l'ultima estrazione del giorno
+   * @return
+   */
+  private Integer peopleToDrawn(Integer numberOfActivePeople) {
+
+    BigDecimal percentageToDrawn = BigDecimal.valueOf(PEOPLE_TO_DRAW_EACH_ATTEMPT);
+
+    // conteggio quante persone sorteggiare
+    BigDecimal numberOfPeopletoDraw = 
+        BigDecimal.valueOf(numberOfActivePeople).multiply(percentageToDrawn);
+    numberOfPeopletoDraw = numberOfPeopletoDraw.setScale(0, RoundingMode.UP);
+    numberOfPeopletoDraw.round(MathContext.DECIMAL64).intValue();
+
+    log.info("Ci sono da sorteggiare {} persone su {} dipendenti presenti.",
+        numberOfPeopletoDraw, numberOfActivePeople);
+    return numberOfPeopletoDraw.intValue();
+  }
+
+  /**
    * Procedura di check del green pass.
    */
   public void checkGreenPassProcedure(LocalDate date) {
@@ -80,7 +107,7 @@ public class CheckGreenPassManager {
       if (office.equals(iit)) {
         log.info("Seleziono la lista dei sorteggiati per {}", office.name);
         list = peopleActiveInDate(date, office);
-        listDrawn = peopleDrawn(list);
+        listDrawn = peopleDrawn(office, list, date);
         if (listDrawn.isEmpty()) {
           log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
               office.name);
@@ -126,23 +153,33 @@ public class CheckGreenPassManager {
 
   /**
    * Ritorna la lista di checkGreenPass su persone selezionate.
+   *
    * @param list la lista di persone attive
    * @return la lista di checkGreenPass su persone selezionate.
    */
-  public List<CheckGreenPass> peopleDrawn(List<Person> list) {
+  public List<CheckGreenPass> peopleDrawn(
+      final Office office, final List<Person> list, final LocalDate date) {
 
-    //double number = (list.size() * 25) / 100;
-    // conteggio quante persone sorteggiare
-    BigDecimal num = BigDecimal.valueOf(list.size()).multiply(BigDecimal.valueOf(0.25));
-    num = num.setScale(0, RoundingMode.UP);
-    Integer peopleToDraw = num.round(MathContext.DECIMAL64).intValue();
+    log.info("{} ({}) -> effettuo il sorteggio tra {} presenti.", 
+        office.name, date, list.size());
 
-    log.info("Ci sono da sorteggiare {} persone su {} dipendenti presenti",
-        peopleToDraw, list.size());
+    Integer numberOfPeopleToDraw = peopleToDrawn(list.size());
+
+    List<Person> peopleAlreadyDrawnInDate = 
+        passDao.listByDate(date, office).stream()
+          .map(cgp -> cgp.getPerson())
+          .collect(Collectors.toList());
+
+    List<Person> peopleToDraw = Lists.newArrayList(list);
+    peopleToDraw.removeAll(peopleAlreadyDrawnInDate);
+
+    log.info("{} ({}) -> {} persone non sorteggiabili "
+        + "perché già sorteggiate. Numero di sorteggiabili: {}.", 
+        office.name, date, peopleAlreadyDrawnInDate.size(), peopleToDraw.size());
 
     //preparo una mappa con chiave il numero dei sorteggi e valore la lista
     //di persone che hanno subito quel numero di sorteggi
-    Map<Long, List<Person>> totalMap = checkedPeople(list);
+    Map<Long, List<Person>> totalMap = checkedPeople(peopleToDraw);
 
     List<Person> peopleChecked = Lists.newArrayList();
     List<Person> peopleDrawn = Lists.newArrayList();
@@ -158,7 +195,7 @@ public class CheckGreenPassManager {
       log.debug("Ci sono {} persone sorteggiate {} volta/e", peopleChecked.size(), key);
       //controllo che le persone selezionate siano in numero sufficiente a coprire quelle
       //che devono essere selezionate
-      if (people + peopleChecked.size() < peopleToDraw) {
+      if (people + peopleChecked.size() < numberOfPeopleToDraw) {
         people = people + peopleChecked.size();
         //inserisco tra le persone sorteggiate quelle che sicuramente ci devono andare
         peopleDrawn.addAll(peopleChecked);
@@ -169,10 +206,10 @@ public class CheckGreenPassManager {
       }
     }
     log.info("Ci sono {} persone da cui estrarre {} sorteggiati rimanenti.",
-        peopleChecked.size(), peopleToDraw - peopleDrawn.size());
+        peopleChecked.size(), numberOfPeopleToDraw - peopleDrawn.size());
 
     //sorteggio le persone
-    int temp = peopleToDraw - peopleDrawn.size();
+    int temp = numberOfPeopleToDraw - peopleDrawn.size();
 
     while (temp > 0) {
       int random = ThreadLocalRandom.current().nextInt(0, peopleChecked.size());
@@ -183,7 +220,7 @@ public class CheckGreenPassManager {
         temp--;
       }
     }
-    
+
     return listDrawn(peopleDrawn);
   }
 
@@ -198,7 +235,7 @@ public class CheckGreenPassManager {
         gp.checkDate = LocalDate.now();
         gp.save();
         checkGreenPassList.add(gp);
-        log.debug("Salvato checkgreenpass per {}", person.fullName());
+        log.info("Salvato checkgreenpass per {}", person.fullName());
       } else {
         checkGreenPassList.add(obj.get());
       }
