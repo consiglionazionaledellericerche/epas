@@ -194,22 +194,28 @@ public class EmailManager {
     DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/yyyy");
     final String subject = String.format("Lista selezionati per controllo del %s",
         date.toString(df));
-    StringBuilder sb = new StringBuilder()
-        .append(String.format(
-            "\r\nSono state sorteggiate %d persone su un totale di %s persone che hanno timbrature nel giorno %s.\r\n", 
-            peopleSelected.size(), numberOfActivePeople, date.toString(df)));
-    sb.append(String.format("Lista dei dipendenti da controllare per il %s:\r\n\r\n", date.toString(df)));
+    StringBuilder sb = new StringBuilder();
+    
+    if (peopleSelected.isEmpty()) {
+      sb.append("Nessuna persona sorteggiata per oggi, "
+          + "ignorare questa email se si tratta di un giorno festivo.\r\n");
+    } else {
+      sb.append(String.format(
+          "\r\nSono state sorteggiate %d persone su un totale di %s persone che hanno timbrature nel giorno %s.\r\n", 
+          peopleSelected.size(), numberOfActivePeople, date.toString(df)));
+      sb.append(String.format("Lista dei dipendenti da controllare per il %s:\r\n\r\n", date.toString(df)));
 
-    peopleSelected.sort(
-        new Comparator<CheckGreenPass>() {
-          @Override
-          public int compare(CheckGreenPass cgp1, CheckGreenPass cgp2) {
-            return cgp1.person.surname.compareTo(cgp2.person.surname);
-          }
-        });
+      peopleSelected.sort(
+          new Comparator<CheckGreenPass>() {
+            @Override
+            public int compare(CheckGreenPass cgp1, CheckGreenPass cgp2) {
+              return cgp1.person.surname.compareTo(cgp2.person.surname);
+            }
+          });
 
-    for (CheckGreenPass gp: peopleSelected) {
-      sb.append(gp.person.getFullname() + "\r\n");
+      for (CheckGreenPass gp: peopleSelected) {
+        sb.append(gp.person.getFullname() + "\r\n");
+      }      
     }
 
     sendMail(Optional.of("epas@iit.cnr.it"), "antonella.mamone@iit.cnr.it", 
