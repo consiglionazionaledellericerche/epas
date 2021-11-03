@@ -153,7 +153,11 @@ public enum DefaultComplation {
   
   C_COV50(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_COV50M), 
-      ImmutableSet.of(DefaultAbsenceType.A_COV50H7)),
+      ImmutableSet.of(DefaultAbsenceType.A_COV50H)),
+  
+  C_COV00(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_COV00M), 
+      ImmutableSet.of(DefaultAbsenceType.A_COV00H)),
   
   C_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23M), 
