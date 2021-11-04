@@ -40,17 +40,27 @@ public enum DefaultAbsenceType {
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, true, false),
+      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false),
   
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
       + "con maturazione buono pasto", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, null, true, false),
+      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false),
   
   A_98CV("98CV",
       "Assente ingiustificato no grennpass", false,
       ImmutableSet.of(JustifiedTypeName.nothing), 0, true, false, 0, null,
+      Sets.newHashSet(), null, null, true, false),
+  
+  A_39LA("39LA",
+      "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
+      Sets.newHashSet(), null, null, true, false),
+  
+  A_40LA("40LA",
+      "Lavoro agile per quarantena/isolamento fiduciario", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, true, false),
   
   
@@ -475,17 +485,29 @@ public enum DefaultAbsenceType {
 
   A_COVID50("COVID50", "Congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
-      Sets.newHashSet(), null, new LocalDate(2021,9,30), false, true), 
+      Sets.newHashSet(), null, new LocalDate(2021, 9, 30), false, true), 
   
   A_COV50("COV50", "congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
-      Sets.newHashSet(), new LocalDate(2021,10,1), null, false, true), 
+      Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true), 
   
   A_COV50M("COV50M", "Congedo parentale straordinario al 50% in ore e minuti.", 
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
       false, true), 
-  A_COV50H7("COV50H7", "Congedo parentale straordinario al 50% completamento giornata", 
+  A_COV50H("COV50H", "Congedo parentale straordinario al 50% completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true),
+  
+  A_COV00("COV00", "congedo parentale straordinario al 0%.", 
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
+      Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true), 
+  
+  A_COV00M("COV00M", "Congedo parentale straordinario al 0% in ore e minuti.", 
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
+      false, true), 
+  A_COV00H("COV00H", "Congedo parentale straordinario al 0% completamento giornata", 
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
       JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true),
   
