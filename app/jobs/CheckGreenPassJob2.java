@@ -11,8 +11,8 @@ import play.jobs.Job;
 import play.jobs.On;
 
 @Slf4j
-@On("0 15 10 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 10.15
-public class CheckGreenPassJob extends Job<Void> {
+@On("0 0 14 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 10.15
+public class CheckGreenPassJob2 extends Job<Void> {
 
   static final String GREENPASS_CONF = "greenpass.active";
   
