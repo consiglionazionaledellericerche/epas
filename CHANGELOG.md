@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.5] - UNRELEASED
+## [2.1.5] - 2021-11-09
 ### Added
+ - Aggiunto plugin per ordinamento corretto date in datatable
  - Aggiunto codice 98CV per le giornate senza giustificazione in caso di mancata mostra del green pass
  - Aggiunti codici COV50 giornaliero e a ore e minuti per il congedo parentale al 50% in periodo covid
  - Aggiunto parametro di sede contenente l'informazione su quale sia il tipo di blocchetto di buono pasto utilizzato
