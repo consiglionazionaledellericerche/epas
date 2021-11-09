@@ -673,12 +673,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../rest/groupsAndAffiliationsServices.html">8.4. Consultazione e Gestione Gruppi e Affiliazione via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rest/leavesServices.html">8.5. Consultazione Periodi di Aspettativa dei dipendenti via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rest/personDaysServices.html">8.6. Consultazione situazione giornaliera dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">8.7. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">8.8. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">8.9. Gestione delle timbrature via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">8.10. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">8.11. Consultazione delle tipologie di orario di lavoro via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">8.12. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/competencesServices.html">8.7. Consultazione situazione competenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">8.8. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">8.9. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">8.10. Gestione delle timbrature via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">8.11. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">8.12. Consultazione delle tipologie di orario di lavoro via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">8.13. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/badgeServices.html">8.14. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
@@ -847,12 +849,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../rest/groupsAndAffiliationsServices.html">8.4. Consultazione e Gestione Gruppi e Affiliazione via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rest/leavesServices.html">8.5. Consultazione Periodi di Aspettativa dei dipendenti via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../rest/personDaysServices.html">8.6. Consultazione situazione giornaliera dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">8.7. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">8.8. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">8.9. Gestione delle timbrature via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">8.10. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">8.11. Consultazione delle tipologie di orario di lavoro via REST</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">8.12. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/competencesServices.html">8.7. Consultazione situazione competenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">8.8. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">8.9. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">8.10. Gestione delle timbrature via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">8.11. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">8.12. Consultazione delle tipologie di orario di lavoro via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">8.13. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/badgeServices.html">8.14. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
@@ -899,28 +903,32 @@
             </div>
           
           
-  <div class="section" id="gestione-badge">
+  <section id="gestione-badge">
 <h1><span class="section-number">3.2. </span>Gestione badge<a class="headerlink" href="#gestione-badge" title="Link a questa intestazione">¶</a></h1>
 <p>In questa schermata è possibile associare un gruppo badge a una sorgente timbrature precedentemente
 creata.</p>
-<div class="figure align-center" id="id1">
+<figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="../_images/gruppoBadgeMain.png"><img alt="../_images/gruppoBadgeMain.png" src="../_images/gruppoBadgeMain.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.7 </span><span class="caption-text">Schermata di creazione dei gruppi badge</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.7 </span><span class="caption-text">Schermata di creazione dei gruppi badge</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>Nella parte superiore della pagina è presente un avviso che spiega come sono associati i badge alla
 sorgente e quali hanno diritto di timbrare su quella sorgente.</p>
 <p>Sotto l'avviso si vede la lista dei gruppi badge già creati. Per ognuno degli elementi della lista
 è esplicitato il nome, la sede su cui ha diritto e l’eventuale sorgente timbrature a cui è
 associato (viene visualizzata la scritta da configurare in rosso se ancora non è stato associato ad
 alcuna sede).</p>
-<div class="section" id="inserimento-nuovo-gruppo-badge">
+<section id="inserimento-nuovo-gruppo-badge">
 <h2><span class="section-number">3.2.1. </span>Inserimento nuovo gruppo badge<a class="headerlink" href="#inserimento-nuovo-gruppo-badge" title="Link a questa intestazione">¶</a></h2>
 <p>Per inserire un nuovo gruppo di badge è sufficiente cliccare sul bottone verde sulla destra della
 pagina contrassegnato dalla scritta: “<em>Nuovo gruppo badge</em>”:</p>
-<div class="figure align-center" id="id2">
+<figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/nuovoGruppoBadge.png"><img alt="../_images/nuovoGruppoBadge.png" src="../_images/nuovoGruppoBadge.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.8 </span><span class="caption-text">Finestra per creare il nuovo gruppo badge</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.8 </span><span class="caption-text">Finestra per creare il nuovo gruppo badge</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>A questo punto dovrà essere compilato ogni campo, assegnare un nome al gruppo badge (usare
 possibilmente un nome particolarmente esplicativo di modo da rendersi bene conto a primo impatto
 <em>CHI</em> timbra in quel gruppo es.: <em>Gruppo badge IIT per lettore badge</em>) e popolare la sede su cui
@@ -928,30 +936,36 @@ quel gruppo badge sarà attivo selezionandola dalla lista che compare cliccando 
 obbligatorio <strong>Sede</strong>.</p>
 <p>Una volta salvato il gruppo, questo dovrà essere associato a una sorgente di timbratura, per farlo
 v. <a class="reference internal" href="sorgentiTimbrature.html"><span class="doc">Sorgenti timbratura</span></a>.</p>
-</div>
-<div class="section" id="configurazione-gruppo-badge-su-lettore">
+</section>
+<section id="configurazione-gruppo-badge-su-lettore">
 <h2><span class="section-number">3.2.2. </span>Configurazione gruppo badge su lettore<a class="headerlink" href="#configurazione-gruppo-badge-su-lettore" title="Link a questa intestazione">¶</a></h2>
 <p>Cliccando sul nome del gruppo badge presente nella lista, è possibile aprire il menu di
 configurazione dello stesso:</p>
-<div class="figure align-center" id="id3">
+<figure class="align-center" id="id3">
 <a class="reference internal image-reference" href="../_images/configurazioneGruppoBadgeSuLettore.png"><img alt="../_images/configurazioneGruppoBadgeSuLettore.png" src="../_images/configurazioneGruppoBadgeSuLettore.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.9 </span><span class="caption-text">Pagina per la gestione dei gruppi di badge sui lettori</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.9 </span><span class="caption-text">Pagina per la gestione dei gruppi di badge sui lettori</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>La prima pagina visualizzata è quella relativa al riepilogo del gruppo badge selezionato:
 vengono mostrate le informazioni del lettore badge oltre a, se già associate, la lista delle
 sorgenti timbrature su cui quel gruppo badge è abilitato a timbrare.</p>
 <p>La seconda tab è quella relativa ai Badge:</p>
-<div class="figure align-center" id="id4">
+<figure class="align-center" id="id4">
 <a class="reference internal image-reference" href="../_images/badgeDiGruppoBadge.png"><img alt="../_images/badgeDiGruppoBadge.png" src="../_images/badgeDiGruppoBadge.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.10 </span><span class="caption-text">Pagina per la associazione dei singoli badge al gruppo</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.10 </span><span class="caption-text">Pagina per la associazione dei singoli badge al gruppo</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>A questo livello è possibile vedere la lista dei badge assegnati al lettore selezionato.
 Se non ci fossero ancora badge associati al gruppo, è possibile farlo cliccando su
 <em>Associa badge &lt;nome gruppo&gt; per &lt;nome sorgente timbrature&gt;</em>:</p>
-<div class="figure align-center" id="id5">
+<figure class="align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/associaBadgeAGruppo.png"><img alt="../_images/associaBadgeAGruppo.png" src="../_images/associaBadgeAGruppo.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.11 </span><span class="caption-text">Pagina per la associazione del singolo badge alla persona</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.11 </span><span class="caption-text">Pagina per la associazione del singolo badge alla persona</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>n questa finestra si può associare alla singola persona, appartenente alla sede a cui il
 lettore badge può inviare le timbrature, il numero badge che si desidera e che deve essere univoco
 (i controlli di univocità vengono fatti dal sistema). Una volta selezionata la persona e inserito
@@ -960,19 +974,23 @@ con il codice badge inserito appartiene al gruppo &lt;<em>Gruppo badge</em>&gt; 
 &lt;<em>lettore badge</em>&gt;.</p>
 <p>A questo punto, la lista di badge presenti nella schermata precedente viene popolata in questo
 modo:</p>
-<div class="figure align-center" id="id6">
+<figure class="align-center" id="id6">
 <a class="reference internal image-reference" href="../_images/badgeAssociati.png"><img alt="../_images/badgeAssociati.png" src="../_images/badgeAssociati.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.12 </span><span class="caption-text">Lista di badge associati al gruppo</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
-</div>
-</div>
-<div class="section" id="impostazioni-avanzate-per-configurazione-gruppo-badge">
+<figcaption>
+<p><span class="caption-number">Fig. 3.12 </span><span class="caption-text">Lista di badge associati al gruppo</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="impostazioni-avanzate-per-configurazione-gruppo-badge">
 <h2><span class="section-number">3.2.3. </span>Impostazioni avanzate per configurazione gruppo badge<a class="headerlink" href="#impostazioni-avanzate-per-configurazione-gruppo-badge" title="Link a questa intestazione">¶</a></h2>
 <p>Nel caso in cui si volessero configurare i numeri badge per tutti i dipendenti appartenenti a una
 certa sede, sarà sufficiente cliccare sulla tab <em>Avanzate</em>:</p>
-<div class="figure align-center" id="id7">
+<figure class="align-center" id="id7">
 <a class="reference internal image-reference" href="../_images/avanzateBadge.png"><img alt="../_images/avanzateBadge.png" src="../_images/avanzateBadge.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.13 </span><span class="caption-text">Impostazioni avanzate per configurare i badge appartenenti a un gruppo</span><a class="headerlink" href="#id7" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.13 </span><span class="caption-text">Impostazioni avanzate per configurare i badge appartenenti a un gruppo</span><a class="headerlink" href="#id7" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>ePAS fornisce la possibilità di utilizzare come numero univoco per il badge sia il numero di
 matricola (pannello superiore), sia il vecchio codice “numero badge” nel caso in cui la lista
 persone presente nell’installazione di ePAS sia precedente all’ultima modifica del codice
@@ -984,18 +1002,20 @@ Evitando all’amministratore tecnico qualsiasi ulteriore step aggiuntivo.</p>
 ciascuna persona presente nella sede (ed elencata come si vede in figura), il proprio vecchio
 codice (che veniva utilizzato come riferimento per sapere chi aveva effettuato la timbratura sul
 lettore). Anche in questo caso l’amministratore tecnico non dovrà eseguire ulteriori passi.</p>
-</div>
-<div class="section" id="elimina">
+</section>
+<section id="elimina">
 <h2><span class="section-number">3.2.4. </span>Elimina<a class="headerlink" href="#elimina" title="Link a questa intestazione">¶</a></h2>
 <p>L’ultima tab presente nel menu è quella relativa alla possibilità di eliminare un gruppo badge:</p>
-<div class="figure align-center" id="id8">
+<figure class="align-center" id="id8">
 <a class="reference internal image-reference" href="../_images/eliminaGruppo.png"><img alt="../_images/eliminaGruppo.png" src="../_images/eliminaGruppo.png" style="width: 768.0px; height: 432.0px;" /></a>
-<p class="caption"><span class="caption-number">Fig. 3.14 </span><span class="caption-text">Finestra per l’eliminazione del gruppo di badge</span><a class="headerlink" href="#id8" title="Link a questa immagine">¶</a></p>
-</div>
+<figcaption>
+<p><span class="caption-number">Fig. 3.14 </span><span class="caption-text">Finestra per l’eliminazione del gruppo di badge</span><a class="headerlink" href="#id8" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
 <p>Sarà possibile eliminare un gruppo badge solo e soltanto se non è associato ad alcuna sorgente
 di timbratura v. <a class="reference internal" href="sorgentiTimbrature.html"><span class="doc">Sorgenti timbratura</span></a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           
