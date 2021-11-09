@@ -336,6 +336,7 @@ $(function($) {
       }
       $('[data-target="' + target + '"]').webuiPopover('hide');
     });
+    $.fn.dataTable.moment( 'DD/MM/YYYY', 'it' );
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
@@ -362,6 +363,20 @@ $(function($) {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
+    //le richieste di assenza hanno bisogno di un ordinamento decrescente sulla prima colonna
+    this.find('[datatable-absencerequest]').DataTable({
+      "order": [
+        [0, "desc"]
+      ],
+      "pageLength": 10,
+      "lengthMenu": [
+        [10, 15, 20, 25, 50, 100, -1],
+        [10, 15, 20, 25, 50, 100, "Tutti"]
+      ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });    
     //i buoni pasto hanno bisogno di un doppio ordinamento... per quello hanno una regola speciale.
     this.find('[datatable-mealTicket]').DataTable({
       "order": [
