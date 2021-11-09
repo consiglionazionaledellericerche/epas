@@ -44,6 +44,7 @@ import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
+import models.enumerate.BlockType;
 import models.query.QConfiguration;
 import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
@@ -260,6 +261,24 @@ public class ConfigurationManager {
   public IPropertyInPeriod updateInteger(EpasParam epasParam, IPropertiesInPeriodOwner target,
       Integer value, Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType == EpasParamValueType.INTEGER);
+    return build(epasParam, target,
+        EpasParamValueType.formatValue(value), begin, end, false, persist);
+  }
+  
+  /**
+   * Aggiunge una nuova configurazione di tipo enumerato.
+   * 
+   * @param epasParam parametro
+   * @param target il target
+   * @param value valore
+   * @param begin inizio
+   * @param end fine
+   * @param persist se persistito
+   * @return configurazione
+   */
+  public IPropertyInPeriod updateEnum(EpasParam epasParam, IPropertiesInPeriodOwner target,
+      BlockType value, Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
+    Preconditions.checkState(epasParam.epasParamValueType == EpasParamValueType.ENUM);
     return build(epasParam, target,
         EpasParamValueType.formatValue(value), begin, end, false, persist);
   }

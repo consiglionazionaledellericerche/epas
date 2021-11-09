@@ -8,36 +8,32 @@
 
 <div class="container">
 
-	<table class="table">
-      <thead>
-      <tr>
-        <th>Giorno</th>
-        <th>Inizio telelavoro</th>
-        <th>Fine telelavoro</th>
-        <th>Inizio pranzo</th>
-        <th>Fine pranzo</th>
-        <th>Inizio interruzione</th>
-        <th>Fine interruzione</th>        
-      </tr>
-      </thead>
-      <tbody>
-      #{list items:list, as:'day'}
-
-      <tr  #{if (!day.hasTeleworkStampingsWellFormed() || !day.isTeleworkInDay()) 
-      && (day.personDay.stampings.isEmpty() || day.isTeleworkInDay())
-      && (!day.personDay.isHoliday)} class="warning" webui-popover-hover
-    			data-content="Giornata incompleta: verificare orari inseriti e/o codice telelavoro (103)"#{/if}>
-      <td #{if day.personDay.isHoliday}class="danger" webui-popover-hover data-content="festivo" #{/if}>${day.personDay.date.shortDayName()}</td>
-      <td>${!day.beginEnd.isEmpty() && day.beginEnd.get(0) != null ? day.beginEnd.get(0).date.toLocalTime() : '-'}</td>
-      <td>${!day.beginEnd.isEmpty() && day.beginEnd.get(1) != null ? day.beginEnd.get(1).date.toLocalTime() : '-'}</td>
-      <td>${!day.meal.isEmpty() && day.meal.get(0) != null ? day.meal.get(0).date.toLocalTime() : '-'}</td>
-      <td>${!day.meal.isEmpty() && day.meal.get(1) != null ? day.meal.get(1).date.toLocalTime() : '-'}</td>
-      <td>${!day.interruptions.isEmpty() && day.interruptions.get(0) != null ? day.interruptions.get(0).date.toLocalTime() : '-'}</td>
-      <td>${!day.interruptions.isEmpty() && day.interruptions.get(1) != null ? day.interruptions.get(1).date.toLocalTime() : '-' }</td>
-      </tr>
-
-      #{/list}
-      </tbody>
-    </table>
+	#{list items:list, as:'day'}
+      <ul class="list-group">
+     	 <li class="list-group-item  list-group-item-grey">
+     	 
+          <h4>
+          #{if day.personDay.isHoliday}
+          	<span class="label label-danger">${day.personDay.date.shortDayName()}</span></h4>
+          #{/if}
+          #{else}
+          	<span class="label label-info">${day.personDay.date.shortDayName()}</span></h4>
+          #{/else}
+          
+          </li>
+          #{if (day.hasTeleworkStampingsWellFormed() && day.isTeleworkInDay()) 
+          || (!day.personDay.stampings.isEmpty() && !day.isTeleworkInDay())}
+          <li class="list-group-item  list-group-item-bianco">
+          #{/if}
+          #{else}
+          <li class="list-group-item  list-group-item-warning" webui-popover-hover
+    			data-content="Giornata incompleta: verificare orari inseriti e/o codice telelavoro (103)">
+          #{/else}
+            #{include './_info.html' /}
+          </li>
+      </ul>
+	#{/list}
 
 </div>
+
+<div id="modalDeleteStamping" class="modal fade container" tabindex="-1"></div>

@@ -30,7 +30,6 @@ import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import helpers.BadRequest;
 import java.time.Duration;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

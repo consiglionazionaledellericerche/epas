@@ -36,6 +36,7 @@ import dao.wrapper.IWrapperPerson;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -673,6 +674,29 @@ public class AbsenceManager {
       
     }
     return absence;
+  }
+
+  /**
+   * Rimuove una singola assenza.
+   *
+   * @param absence
+   */
+  public void removeAbsence(Absence absence) {
+    val pd = absence.personDay;
+    val person = pd.person;
+    
+    if (absence.absenceFile.exists()) {
+      absence.absenceFile.getFile().delete();
+    }
+
+    absence.delete();
+    pd.absences.remove(absence);
+    pd.workingTimeInMission = 0;
+    pd.isTicketForcedByAdmin = false;
+    pd.save();
+    consistencyManager.updatePersonSituation(person.id, pd.date);
+    log.info("Rimossa assenza del {} per {}", 
+        absence.date, absence.personDay.person.getFullname());
   }
 
   /**

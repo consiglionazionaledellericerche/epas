@@ -167,9 +167,9 @@ public class Child extends Controller {
   }
 
   /**
-   * Cerca il contratto in funzione del id passato.
+   * Cerca il/la figlio/a in funzione del id passato.
    *
-   * @return il contratto se trovato, altrimenti torna direttamente 
+   * @return il/la figlio/a se trovato, altrimenti torna direttamente 
    *     una risposta HTTP 404.
    */
   @Util

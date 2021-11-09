@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
@@ -51,8 +51,8 @@ import models.TeleworkValidation;
 import models.User;
 import models.UsersRolesOffices;
 import models.base.InformationRequest;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkApprovalDto;
-import models.dto.TeleworkPersonDayDto;
 import models.enumerate.InformationType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
@@ -94,6 +94,8 @@ public class InformationRequests extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static TeleworkValidationDao validationDao;
+  @Inject
+  static TeleworkStampingManager manager;
 
   public static void teleworks() {
     list(InformationType.TELEWORK_INFORMATION);
@@ -486,46 +488,49 @@ public class InformationRequests extends Controller {
    * @param id l'id della richiesta di assenza
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
-    InformationRequest request = informationRequestDao.getById(id);
+    InformationRequest informationRequest = informationRequestDao.getById(id);
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
-    notFoundIfNull(request);
+    notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
-    switch (request.informationType) {
+    switch (informationRequest.informationType) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(serviceRequest, disapproval);
+          render(serviceRequest, informationRequest, disapproval);
         }
         break;
       case ILLNESS_INFORMATION:
         illnessRequest = informationRequestDao.getIllnessById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(illnessRequest, disapproval);
+          render(illnessRequest, informationRequest, disapproval);
         }
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(teleworkRequest, disapproval);
+          render(teleworkRequest, informationRequest, disapproval);
         }
         break;
       default:
         break;
     }      
     
-    if (request.officeHeadApprovalRequired && request.officeHeadApproved == null
+    if (informationRequest.officeHeadApprovalRequired 
+        && informationRequest.officeHeadApproved == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       informationRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
-      render("@show", request, user);
+      InformationType type = informationRequest.informationType;
+      render("@show", informationRequest, type, serviceRequest, 
+          illnessRequest, teleworkRequest, user);
     }
-    render("@show", request, user);
+    render("@show", informationRequest, user);
   }
   
   /**
@@ -607,7 +612,9 @@ public class InformationRequests extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrperson = wrapperFactory.create(person);
-    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+   
+    List<NewTeleworkDto> list = Lists.newArrayList();
+    
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
       flash.error("Non esiste situazione mensile per il mese di %s %s",
           DateUtility.fromIntToStringMonth(month), year);
@@ -619,7 +626,8 @@ public class InformationRequests extends Controller {
         .create(wrperson.getValue(), year, month, true);
     
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
-    list = teleworkStampingManager.getMonthlyStampings(psDto);
+    
+    list = manager.stampingsForReport(psDto);
     render(list, person);
   }
   

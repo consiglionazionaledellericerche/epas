@@ -22,7 +22,6 @@ import cnr.sync.dto.v3.StampingShowDto;
 import cnr.sync.dto.v3.StampingUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.common.base.Optional;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
 import dao.GeneralSettingDao;
@@ -33,8 +32,8 @@ import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.StampingManager;
 import models.exports.StampingFromClient;
@@ -104,7 +103,8 @@ public class Stampings extends Controller {
     }
 
     // Controlla che la timbratura da inserire non sia troppo nel passato.
-    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting().maxDaysInPastForRestStampings;
+    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting()
+        .maxDaysInPastForRestStampings;
     if (stampingCreateDto.getDateTime()
         .compareTo(LocalDateTime.now().minusDays(maxDaysInPastForRestStampings)) < 0) {
       JsonResponse.badRequest("Timbratura con data troppo nel passato");

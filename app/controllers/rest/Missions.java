@@ -57,10 +57,6 @@ public class Missions extends Controller {
     log.warn(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
   }
   
-  private static void logError(String description, MissionFromClient body) {
-    log.error(MissionManager.LOG_PREFIX +  "{}. Messaggio: {}", description, body);
-  }
-  
   /**
    * metodo che processa il messaggio ricevuto dal kraken-listener.
    *
@@ -135,7 +131,7 @@ public class Missions extends Controller {
     if (success) {
       logInfo("Messaggio inserito con successo", body);
     } else {
-      logError("Non è stato possibile inserire il messaggio", body);
+      logWarn("Non è stato possibile inserire il messaggio", body);
       JsonResponse.conflict();
     }
 

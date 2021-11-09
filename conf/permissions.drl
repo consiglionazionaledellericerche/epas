@@ -837,6 +837,14 @@ then
   $c.grant();
 end
 
+rule EmployeeCanSubmitTeleworkRequest
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck(action == "TeleworkStampings.generateReport", granted == false, target == null)
+then
+  $c.grant();
+end
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
@@ -1220,6 +1228,20 @@ when
 	    "BadgeSystems.list",
 	    "BadgeSystems.blank",
 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete",
+        
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
 		"Institutes.save",
@@ -1342,7 +1364,21 @@ when
 	   "BadgeSystems.joinPersonNumbers",
   	   "BadgeSystems.joinOldBadgeNumbers",
   	   "BadgeSystems.delete",
-  	   
+
+ 	   "rest.v3.BadgeSystems.byOffice",
+       "rest.v3.BadgeSystems.show",
+
+       "rest.v3.BadgeReaders.byOffice",
+       "rest.v3.BadgeReaders.show",
+
+       "rest.v3.Badges.byOffice",
+       "rest.v3.Badges.byBadgeSystem",
+       "rest.v3.Badges.byPerson",
+       "rest.v3.Badges.show",
+       "rest.v3.Badges.create",
+       "rest.v3.Badges.update",
+       "rest.v3.Badges.delete",
+
   	   "Zones.insertZone",
   	   "Zones.linkZones",
   	   "Zones.save",
@@ -1417,6 +1453,13 @@ when
         "AbsenceRequests.approval",
         "AbsenceRequests.disapproval",
         
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
         /*Flussi informativi*/
         "InformationRequests.list",
         "InformationRequests.listToApprove",
@@ -1472,6 +1515,13 @@ when
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
         "AbsenceRequests.show",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
         
         /*Flussi informativi*/
         "InformationRequests.list",
@@ -1970,13 +2020,21 @@ when
         "Affiliations.delete",
         "Affiliations.edit",
         
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",
         "InformationRequests.approval",
         "InformationRequests.disapproval",
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
-        "InformationRequests.generateTeleworkReport"
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.serviceExitToApprove"
 
         ), target == null, granted == false)
 then
@@ -2135,6 +2193,13 @@ when
         "Affiliations.delete",
         "Affiliations.edit",
         
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
         "InformationRequests.illnessToApprove",
         "InformationRequests.listToApprove",
 //        "InformationRequests.approval",
@@ -2166,6 +2231,8 @@ when
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
+        "MealTickets.convertPersonCodeBlock",
+        "MealTickets.performConvertPersonCodeBlock",
         "MealTickets.mealTicketsLegacy"), target == null, granted == false)
 then
  $c.grant();
@@ -2187,6 +2254,8 @@ when
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
+        "MealTickets.convertPersonCodeBlock",
+        "MealTickets.performConvertPersonCodeBlock",
         "MealTickets.mealTicketsLegacy"), target == $o, granted == false)
 then
  $c.grant();
@@ -3546,6 +3615,13 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
@@ -3594,6 +3670,8 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.personCompetenceCodes",
+        
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
@@ -3646,6 +3724,13 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
+
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
         "rest.Absences.checkAbsenceByPerseoId",
@@ -3661,6 +3746,60 @@ when
 
 
        ), granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni utente con ruolo BADGE_MANAGER
+ ******************************************************************************/
+rule BadgeManager
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule BadgeManager_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == $o, granted == false)
 then
  $c.grant();
 end

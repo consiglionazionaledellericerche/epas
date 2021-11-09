@@ -28,6 +28,7 @@ import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.Office;
 import models.Person;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -180,6 +181,14 @@ public enum EpasParam {
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  MEAL_TICKET_BLOCK_TYPE("meal_ticket_block_type",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.ENUM,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
@@ -907,7 +916,7 @@ public enum EpasParam {
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
-    EMAIL, IP_LIST, INTEGER, BOOLEAN;
+    EMAIL, IP_LIST, INTEGER, BOOLEAN, ENUM;
 
     /**
      * Rappresenta un intervallo di LocalTime.
@@ -997,6 +1006,10 @@ public enum EpasParam {
       if (value instanceof IpList) {
         return Joiner.on(IP_LIST_SEPARATOR + "\n").join(((IpList) value).ipList);
       }
+      
+      if (value instanceof BlockType) {
+        return value.toString();
+      }
 
       return null;
     }
@@ -1038,6 +1051,8 @@ public enum EpasParam {
             return Integer.parseInt(value);
           case BOOLEAN:
             return Boolean.parseBoolean(value);
+          case ENUM:
+            return BlockType.valueOf(value);
           default:
             log.warn("Tipo non riconosciuto: {}", type);
         }

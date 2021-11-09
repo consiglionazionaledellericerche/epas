@@ -206,10 +206,20 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_6, DefaultTakable.T_25, DefaultComplation.C_25, DefaultGroup.G_24,
       false, true), 
-  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+  //  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+  //      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+  //      PeriodType.always, DefaultTakable.T_COVID50, null, null,
+  //      false, true),   
+  
+  G_COV50("COV50 - Congedo parentale straordinario al 50%.",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
-      PeriodType.always, DefaultTakable.T_COVID50, null, null,
-      false, true),   
+      PeriodType.always, DefaultTakable.T_COV50, DefaultComplation.C_COV50, null,
+      false, true),
+  
+  G_COV00("COV00 - Congedo parentale straordinario al 0%.",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_COV00, DefaultComplation.C_COV00, null,
+      false, true),
 
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
       "23/25/24 - Astensione facoltativa post partum primo figlio",

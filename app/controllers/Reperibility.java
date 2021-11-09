@@ -396,7 +396,15 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportYearAsPDF(int year, Long type) {
+  public static void exportYearAsPDF(Integer year, Long type) {
+
+    if (type == null) {
+      log.info("Chiamato metodo exportYearAsPDF con parametro obbligatorio type = null");
+      badRequest("Parametro obbligatorio 'type' non presente");
+    }
+    if (year == null) {
+      year = LocalDate.now().getYear();
+    }
 
     log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
@@ -434,7 +442,7 @@ public class Reperibility extends Controller {
     }
 
     renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, 
-        description, supervisor, seatSupervisor);
+        description, supervisor, seatSupervisor, office);
   }
 
 

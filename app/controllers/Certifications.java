@@ -264,7 +264,6 @@ public class Certifications extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
-
     PersonCertData personCertData = null;
     try {
       // Costruisco lo status generale

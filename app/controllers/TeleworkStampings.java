@@ -31,13 +31,12 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.StampingManager;
 import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
-import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.telework.errors.Errors;
@@ -45,9 +44,9 @@ import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
 import models.TeleworkValidation;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
-import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
@@ -141,8 +140,10 @@ public class TeleworkStampings extends Controller {
    * @param personId l'identificativo della persona
    * @param year l'anno 
    * @param month il mese
+   * @throws ExecutionException 
+   * @throws NoSuchFieldException 
    */
-  public static void personTeleworkStampings(Long personId, Integer year, Integer month) {
+  public static void personTeleworkStampings(Long personId, Integer year, Integer month) throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.personStamping(personId, LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear());
@@ -178,23 +179,31 @@ public class TeleworkStampings extends Controller {
       YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
       personTeleworkStampings(personId, last.getYear(), last.getMonthOfYear());
     }
+    
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
-    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
-    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
+
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrPerson.getValue(), year, month, true);
-    for (PersonStampingDayRecap day : psDto.daysRecap) {      
-
-      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-          .personDay(day.personDay)
-          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-          .build();
-      list.add(dto);      
+    
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    if (list.isEmpty()) {
+      flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
+          + "L'applicazione potrebbe essere spenta o non raggiungibile."
+          + "Riprovare più tardi");
     }
-    render(year, month, list, person);
+    boolean validated = false;
+    //Recupero la lista dei mesi di telelavoro approvati
+    List<TeleworkValidation> validationList = 
+        validationDao.previousValidations(person, year, month);
+    Optional<TeleworkValidation> valid = validationDao
+        .byPersonYearAndMonth(person, year, month);
+    if (valid.isPresent()) {
+      validated = true;
+    }
+    
+
+    render(year, month, list, person, validated, validationList);
   }
 
   /**
@@ -333,7 +342,7 @@ public class TeleworkStampings extends Controller {
   public static void generateReport(int year, int month) 
       throws NoSuchFieldException, ExecutionException {
     
-    List<TeleworkPersonDayDto> list = Lists.newArrayList();
+    List<NewTeleworkDto> list = Lists.newArrayList();
     val currentPerson = Security.getUser().get().person;
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
@@ -348,7 +357,7 @@ public class TeleworkStampings extends Controller {
         .create(wrperson.getValue(), year, month, true);
     LocalDate date = LocalDate.now();
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
-    list = manager.getMonthlyStampings(psDto);
+    list = manager.stampingsForReport(psDto);
     render(list, currentPerson, year, month, date);
   }
   

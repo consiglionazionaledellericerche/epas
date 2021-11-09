@@ -701,7 +701,7 @@ public class Competences extends Controller {
     FileInputStream inputStream = competenceManager
         .getCompetenceGroupInYearMonth(year, month, personList, group);
     renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() 
-        + DateUtility.fromIntToStringMonth(month) + year + ".csv");
+    + DateUtility.fromIntToStringMonth(month) + year + ".csv");
   }
 
   /**
@@ -896,8 +896,13 @@ public class Competences extends Controller {
   public static void addShift(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
-    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
+    List<Office> linkedOffices = Lists.newArrayList();
     rules.checkIfPermitted(office);
+    if (Security.getUser().get().isSystemUser()) {
+      linkedOffices = officeDao.allEnabledOffices();
+    } else {
+      linkedOffices = officeDao.byInstitute(office.institute);
+    }
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     boolean nuovo = true;
@@ -940,9 +945,16 @@ public class Competences extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
+
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-      render("@editShift", cat, officePeople, office);
+      Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
+      cat.shiftTypes.forEach(item -> {
+        List<PersonShiftShiftType> psstList = shiftDao
+            .getAssociatedPeopleToShift(item, Optional.fromNullable(LocalDate.now()));
+        map.put(item, psstList);
+      });
+      render("@editShift", cat, map, officePeople, office);
     }
 
     cat.office = office;
@@ -1074,9 +1086,14 @@ public class Competences extends Controller {
    */
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
-    Office office = cat.office;
-    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
+    List<Office> linkedOffices = Lists.newArrayList();
+    Office office = cat.office;    
     rules.checkIfPermitted(office);
+    if (Security.getUser().get().isSystemUser()) {
+      linkedOffices = officeDao.allEnabledOffices();
+    } else {
+      linkedOffices = officeDao.byInstitute(office.institute);
+    }    
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -1358,7 +1375,7 @@ public class Competences extends Controller {
    * @param type l'attovità di turno
    */
   public static void deleteActivity(ShiftType type) {
-    
+
     rules.checkIfPermitted(type.shiftCategories.office);
     if (!type.personShiftDays.isEmpty()) {
       flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
@@ -1369,7 +1386,7 @@ public class Competences extends Controller {
     if (!type.personShiftShiftTypes.isEmpty()) {
       log.debug("L'attività {} è ancora referenziata a qualche persona");
       type.personShiftShiftTypes.stream().forEach(psst -> psst.delete());
-      
+
     }
     type.delete();
     log.info("Eliminata attività {}", type.type);
@@ -1545,7 +1562,7 @@ public class Competences extends Controller {
     }
 
     rules.checkIfPermitted(type.office);
-    
+
     List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
     List<PersonCompetenceCodes> people = competenceCodeDao
         .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()));
@@ -1553,9 +1570,9 @@ public class Competences extends Controller {
         .filter(pr -> pr.startDate != null 
         && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
         .collect(Collectors.toList());
-    
+
     if (Validation.hasErrors()) {
-      
+
       response.status = 400;     
       LocalDate date = LocalDate.now();
       render("@manageReperibility", type, date, people, linkedPeople);

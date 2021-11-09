@@ -42,6 +42,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.data.validation.Unique;
 import play.db.jpa.Blob;
 
 /**
@@ -82,8 +83,8 @@ public class Absence extends BaseModel {
   public Set<AbsenceTrouble> troubles = Sets.newHashSet();
 
   //Nuovo campo per la gestione delle missioni in caso di modifica delle date
+  @Unique(value = "externalIdentifier,personDay")
   public Long externalIdentifier;
-
 
   //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
   public LocalDate expireRecoverDate;
@@ -96,7 +97,6 @@ public class Absence extends BaseModel {
 
   public String note;
 
-  
   @Override
   public String toString() {
     if (personDay == null) {

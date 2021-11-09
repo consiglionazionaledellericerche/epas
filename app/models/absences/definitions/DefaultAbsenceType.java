@@ -40,11 +40,26 @@ public enum DefaultAbsenceType {
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, true, false),
+      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false),
   
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
       + "con maturazione buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false),
+  
+  A_98CV("98CV",
+      "Assente ingiustificato no grennpass", false,
+      ImmutableSet.of(JustifiedTypeName.nothing), 0, true, false, 0, null,
+      Sets.newHashSet(), null, null, true, false),
+  
+  A_39LA("39LA",
+      "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), null, null, true, false),
+  
+  A_40LA("40LA",
+      "Lavoro agile per quarantena/isolamento fiduciario", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
       Sets.newHashSet(), null, null, true, false),
   
@@ -470,7 +485,31 @@ public enum DefaultAbsenceType {
 
   A_COVID50("COVID50", "Congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
-      Sets.newHashSet(), null, null, false, true), 
+      Sets.newHashSet(), null, new LocalDate(2021, 9, 30), false, true), 
+  
+  A_COV50("COV50", "congedo parentale straordinario al 50%.", 
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
+      Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true), 
+  
+  A_COV50M("COV50M", "Congedo parentale straordinario al 50% in ore e minuti.", 
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
+      false, true), 
+  A_COV50H("COV50H", "Congedo parentale straordinario al 50% completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true),
+  
+  A_COV00("COV00", "congedo parentale straordinario al 0%.", 
+      false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
+      Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true), 
+  
+  A_COV00M("COV00M", "Congedo parentale straordinario al 0% in ore e minuti.", 
+      true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
+      false, true), 
+  A_COV00H("COV00H", "Congedo parentale straordinario al 0% completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true),
   
   A_25("25", "Astensione facoltativa post partum 30% primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
@@ -1195,7 +1234,9 @@ public enum DefaultAbsenceType {
       120, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
   A_95046E("95046E", "perm. funz. pubb. O. E. provinciali 6 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      360, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
+      360, false, false, 0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true), 
   A_95046P("95046P", "perm. funz. pubb. Pres. Cons. provin. 6 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
       360, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
@@ -1207,7 +1248,9 @@ public enum DefaultAbsenceType {
       420, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
   A_95047E("95047E", "perm. funz. pubb. O. E. provinciali  7 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      420, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
+      420, false, false, 0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true), 
   A_95047P("95047P", "perm. funz. pubb. Pres. Cons. provin. 7 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
       420, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
@@ -1405,7 +1448,9 @@ public enum DefaultAbsenceType {
       60, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
   A_95043E("95043E",  "perm. funz. pubb. O. E. provinciali 3 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      180, false, false,  0, null, Sets.newHashSet(), null, null, false, true), 
+      180, false, false,  0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true), 
   A_95002("95002", "perm. funz. pubb. non retribuito 2 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
       120, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
@@ -1429,7 +1474,9 @@ public enum DefaultAbsenceType {
       300, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
   A_95044E("95044E", "perm.f unz. pubb. O. E. provinciali 4 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      240, false, false, 0, null, Sets.newHashSet(), null, null, false, true),
+      240, false, false, 0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true),
   A_95006("95006", "perm. funz. pubb. non retribuito 6 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
       360, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
@@ -1453,7 +1500,9 @@ public enum DefaultAbsenceType {
       60, false, false, 0, null, Sets.newHashSet(), null, null, false, true),
   A_95045E("95045E", "perm. funz. pubb. O. E. provinciali 5 h",
       false,  ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      300, false, false, 0, null, Sets.newHashSet(), null, null, false, true),
+      300, false, false, 0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true),
   A_95011E("95011E", "perm. funz. pubb. O. E. citta metrop. 1 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
       60, false, false, 0,  null, Sets.newHashSet(), null,  null, false, true), 
@@ -1466,7 +1515,7 @@ public enum DefaultAbsenceType {
 
   A_95042E("95042E", "perm. funz. pubb. O. E. provinciali 2 h", false,
       ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, false, 0, null,
-      Sets.newHashSet(), null, null, false, true), 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false, true), 
   A_95025P("95025P", "perm. funz. pubb. Presidenti circo. 5 h", false,
       ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 300, false, false, 0, null,
       Sets.newHashSet(), null, null, false, true), 
@@ -1487,7 +1536,9 @@ public enum DefaultAbsenceType {
       false, 0, null, Sets.newHashSet(), null, null, false, true), 
   A_95041E("95041E", "perm. funz. pubb. O. E. provinciali  1 h",
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes),
-      60, false, false, 0, null, Sets.newHashSet(), null, null, false, true), 
+      60, false, false, 0, null, Sets.newHashSet(
+          new Behaviour(JustifiedBehaviourName.no_overtime)), 
+      null, null, false, true), 
   A_95041P("95041P", "perm. funz. pubb. Pres.Cons. provin. 1 h", false,
       ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 60,
       false, false, 0, null, Sets.newHashSet(), null, null,

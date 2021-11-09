@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.5] - 2021-11-09
+### Added
+ - Aggiunto plugin per ordinamento corretto date in datatable
+ - Aggiunto codice 98CV per le giornate senza giustificazione in caso di mancata mostra del green pass
+ - Aggiunti codici COV50 giornaliero e a ore e minuti per il congedo parentale al 50% in periodo covid
+ - Aggiunto parametro di sede contenente l'informazione su quale sia il tipo di blocchetto di buono pasto utilizzato
+ - Aggiunta visualizzazione uscite di servizio per gli amministratori del personale
+ - Estrazione random di personale per controllo greenpass (feature specifica IIT)
+ - Aggiunti metodi REST per la visualizzazione delle informazioni relative alle competenze
+ - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
+ - Controllo sul parametro personId nella controller.Stampings::insert
+ - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
+### Changed
+ - Cambiato l'algoritmo che determina con quale tipologia di buoni pasto vengono coperti i buoni maturati nel mese
+   prima dell'invio dei dati ad Attestati
+ - Corretta la visualizzazione degli orari in telelavoro per gli amministratori del personale
+ - Corretta data per inizio secondo anno ferie per i contratti continuativi
+ - Portato a 700ms il tempo minimo per log su metodi lenti
+ - Corretti riferimenti a istituto e direttore nell'esportazione dei PDF delle reperibilità
+ - Condizionato controllo sui permessi di editing delle assenze per funzionare anche quando 
+   non è presente un utente in sessione (per esempio nei job)
+ - Corretta generazione parametri di configurazione alla creazione di un nuova persona
+   tramite il job di sincronizzazione degli uffici
+ - La rimozione via REST di una singola assenza adesso rimuove solo quella indicata e non tutte
+   quelle con lo stesso tipo nello stesso giorno.
+
 ## [2.1.4] - 2021-08-11
 ### Changed
  - Corretta la query per mostrare le assenza da approvare dei responsabili di più sedi

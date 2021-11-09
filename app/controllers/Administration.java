@@ -30,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.CompetenceCodeDao;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
 import dao.PersonDao;
@@ -92,6 +93,7 @@ import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.enumerate.LimitType;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -159,7 +161,9 @@ public class Administration extends Controller {
   static AbsenceComponentDao absenceComponentDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
-  
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+
   /**
    * metodo che renderizza la pagina di utilities.
    */
@@ -657,6 +661,26 @@ public class Administration extends Controller {
     renderText("Ok");
   }
 
+  /**
+   * Metodo che applica le competenze a presenza mensile/giornaliera a tutti gli
+   * uffici (come per il BonusJob).
+   *
+   * @param year l'anno
+   * @param month il mese
+   */
+  public static void applyBonusAllOffices(int year, int month) {
+    YearMonth yearMonth = new YearMonth(year, month);
+    List<CompetenceCode> codeList = competenceCodeDao
+        .getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+    codeList = competenceCodeDao.getCompetenceCodeByLimitType(LimitType.entireMonth);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+  }
+  
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
    *
