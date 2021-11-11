@@ -77,6 +77,9 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
+  //#######################################
+  // PERSON PARAMS
+
   OFF_SITE_STAMPING("off_site_stamping",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -168,6 +171,15 @@ public enum EpasParam {
       Person.class),
   
   PARENTAL_LEAVE_AND_CHILD_ILLNESS("parental_leave_and_child_illness",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE("agile_work_or_disabled_people_assistance",
 
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,

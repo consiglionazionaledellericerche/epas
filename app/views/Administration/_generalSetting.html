@@ -124,4 +124,14 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'enableCovid19Param', parent:'generalSetting', title:'Abilita parametri auto inserimento Covid19', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione dei parametri per autoinserimento assenza covid19/covid19bp#{/alert}
+      #{f.booleanRadio 'generalSetting.enableAutoconfigCovid19' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 #{/accordionGroup}

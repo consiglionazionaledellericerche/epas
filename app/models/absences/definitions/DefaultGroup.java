@@ -106,6 +106,10 @@ public enum DefaultGroup {
   G_COVID19("COVID19 - Codice emergenza Covid-19", "", DefaultCategoryType.COVID_19, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
+  
+  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", DefaultCategoryType.COD39_LA, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
+      null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
@@ -449,6 +453,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeAgileWorkOrDisabledPeopleAssistanceCodes() {
+    return getCodes(DefaultGroup.G_39LA);
   }
   
   /**

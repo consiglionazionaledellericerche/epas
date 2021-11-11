@@ -195,6 +195,14 @@ public class TemplateUtility {
         });    
   }
 
+  /**
+   * Verifica se nella configurazione posso abilitare l'auto inserimento covid19.
+   * @return se nella configurazione generale ho abilitato il covid19 come parametro per 
+   *        auto inserimento.
+   */
+  public boolean enableCovid() {
+    return generalSettingDao.generalSetting().enableAutoconfigCovid19;
+  }
   
   /**
    * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.

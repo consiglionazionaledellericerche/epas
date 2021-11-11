@@ -83,6 +83,7 @@ public enum DefaultCategoryType {
   STUDIO_DIPENDENTI("Permesso studio", 19, DefaultTab.STUDIO_DIPENDENTI), 
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI), 
   COVID_19("Emergenza Covid-19", 22, DefaultTab.COVID19), 
+  COD39_LA("Lavoro agile assistenza dis/immunodepressi", 22, DefaultTab.ALTRI_CODICI),
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 23, DefaultTab.ORE_AGGIUNTIVE_DIPENDENTI), 
   ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
       24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
