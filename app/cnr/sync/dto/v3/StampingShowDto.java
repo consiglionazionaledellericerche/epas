@@ -43,7 +43,7 @@ public class StampingShowDto {
   private Long id;
   private LocalDateTime date;
   private WayType way;
-  private StampTypeDto stampType;
+  private String stampType;
   private String place;
   private String reason;
   private boolean markedByAdmin;
@@ -63,6 +63,7 @@ public class StampingShowDto {
   public static StampingShowDto build(Stamping stamping) {
     val dto = modelMapper.map(stamping, StampingShowDto.class);
     dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
+    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
     return dto;
   }
 }

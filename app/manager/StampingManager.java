@@ -286,7 +286,8 @@ public class StampingManager {
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
         ? stampingFromClient.zona : null;
     stamping.note = stampingFromClient.note;
-
+    stamping.reason = stampingFromClient.reason;
+    stamping.place = stampingFromClient.place;
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
