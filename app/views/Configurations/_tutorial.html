@@ -244,6 +244,11 @@
 	  </p> 
     #{/if}
    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza 39LA per poter assistere un parente disabile od immunodepresso in lavoro agile.
+	  </p> 
+    #{/if}
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>

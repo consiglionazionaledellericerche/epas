@@ -440,6 +440,7 @@ generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
 generalSetting.enableIllnessFlow =Abilita flusso richiesta informativa per malattia
 generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno per un turnista
 generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passato per cui è possibile inserire timbrature via REST
+generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione 
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -1196,6 +1197,7 @@ ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
 PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
 SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
+AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 
 
 DAYS=Ricalcoli giornalieri.
