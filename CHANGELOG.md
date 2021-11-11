@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretta gestione dei parametri luogo e motivazione per il metodo REST /stampingsfromclient/create
  - Corretta gestione del parametro reasonType per il metodo REST /rest/v3/stampings/create e /rest/v3/stampings/update
+ - Aggiunta parametrizzazione della visibilità della configurazione personale per l'autoinserimento dei codici covid19
+ - Aggiunta configurazione per l'auto inserimento dei codici 39LA
  
 ## [2.1.5] - 2021-11-09
 ### Added
