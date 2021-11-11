@@ -115,8 +115,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.place = jsonObject.get("luogo").getAsString();
       }
       
-      if (jsonObject.get("luogo") != null) {
-        stamping.place = jsonObject.get("luogo").getAsString();
+      if (jsonObject.get("motivazione") != null) {
+        stamping.reason = jsonObject.get("motivazione").getAsString();
       }
       
       if (jsonObject.has("matricolaFirma") && !jsonObject.get("matricolaFirma").isJsonNull()) {
