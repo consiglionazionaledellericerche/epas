@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Corretta gestione dei parametri luogo e motivazione per il metodo REST /stampingsfromclient/create
  - Corretta gestione del parametro reasonType per il metodo REST /rest/v3/stampings/create e /rest/v3/stampings/update
  - Corretto controllo dei parametri nel metodo REST /rest/absences/deleteAbsencesInPeriod
- 
+ - Corrette date riportate nell'email per informare sulla richiesta di cambio reperibilità 
  
 ## [2.1.5] - 2021-11-09
 ### Added
