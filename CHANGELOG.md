@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [2.2.0] - UNRELEASED
+### Added
+ - Aggiunta parametrizzazione della visibilità della configurazione personale per l'autoinserimento dei codici covid19
+ - Aggiunta configurazione per l'auto inserimento dei codici 39LA
+
 ### Changed
  - Corretta gestione dei parametri luogo e motivazione per il metodo REST /stampingsfromclient/create
  - Corretta gestione del parametro reasonType per il metodo REST /rest/v3/stampings/create e /rest/v3/stampings/update
- - Aggiunta parametrizzazione della visibilità della configurazione personale per l'autoinserimento dei codici covid19
- - Aggiunta configurazione per l'auto inserimento dei codici 39LA
+ - Corretto controllo dei parametri nel metodo REST /rest/absences/deleteAbsencesInPeriod
+ 
  
 ## [2.1.5] - 2021-11-09
 ### Added
@@ -24,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
+
 ### Changed
  - Cambiato l'algoritmo che determina con quale tipologia di buoni pasto vengono coperti i buoni maturati nel mese
    prima dell'invio dei dati ad Attestati
@@ -49,7 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3] - 2021-08-05
 ### Changed
-
 - Rivisti filtri per mostrare flussi terminati a responsabili di più sedi
 - Modificata query per flussi da approvare da parte dei responsabili di sede per mostrare
 solo quelli della propria sede e non anche di sedi dove si hanno altri ruoli
