@@ -50,7 +50,7 @@ public enum DefaultAbsenceType {
   
   A_98CV("98CV",
       "Assente ingiustificato no grennpass", false,
-      ImmutableSet.of(JustifiedTypeName.nothing), 0, true, false, 0, null,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null,
       Sets.newHashSet(), null, null, true, false),
   
   A_39LA("39LA",
