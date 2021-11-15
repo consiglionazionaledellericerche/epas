@@ -107,7 +107,8 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
   
-  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", DefaultCategoryType.COD39_LA, 1,
+  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", 
+      DefaultCategoryType.COD39_LA, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
       null, false, true),
 
