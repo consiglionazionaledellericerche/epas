@@ -84,6 +84,7 @@ public class NotificationManager {
   private ConfigurationManager configurationManager;
   private InformationRequestDao requestDao;
 
+  final static String dateFormatter = "dd/MM/YYYY";
 
   /**
    * Default constructor.
@@ -684,7 +685,7 @@ public class NotificationManager {
    * @return il corpo della mail da inviare all'utente responsabile dell'approvazione.
    */
   private String createAbsenceRequestEmail(AbsenceRequest absenceRequest, User user) {
-    final String dateFormatter = "dd/MM/YYYY";
+    
     String requestType = "";
     if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
@@ -835,9 +836,19 @@ public class NotificationManager {
       message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s",
           requestType));
     }
-    
-    message.append(String.format("\r\n per i giorni %s - %s", 
-        competenceRequest.startAt.toLocalDate(), competenceRequest.endTo.toLocalDate()));
+
+    if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
+      message.append(String.format("\r\n per il giorno %s con il giorno %s.", 
+          competenceRequest.beginDateToGive.toString(dateFormatter), 
+          competenceRequest.beginDateToAsk.toString(dateFormatter)));  
+    } else {
+      message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.", 
+          competenceRequest.beginDateToGive.toString(dateFormatter), 
+          competenceRequest.endDateToGive.toString(dateFormatter), 
+          competenceRequest.beginDateToAsk.toString(dateFormatter), 
+          competenceRequest.endDateToAsk.toString(dateFormatter)));
+    }
+
     val mailBody = message.toString();
     try {
       simpleEmail.setMsg(mailBody);
@@ -927,25 +938,25 @@ public class NotificationManager {
     }
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", user.person.fullName()));
-    message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
+    message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
         competenceRequest.person.fullName()));
-    message.append(String.format("\r\ndi tipo: %s", requestType));
+    message.append(String.format(" di tipo %s.", requestType));
     if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
-      message.append(String.format("\r\nper il giorno: %s", 
+      message.append(String.format("\r\n per il giorno %s", 
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
-      message.append(String.format("\r\nin cambio del giorno: %s", 
-          competenceRequest.beginDateToGive));
+      message.append(String.format("\r\n in cambio del giorno %s", 
+          competenceRequest.beginDateToGive.toString(dateFormatter)));
     } else {
-      message.append(String.format("\r\n dal: %s", 
+      message.append(String.format("\r\n dal %s", 
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
-      message.append(String.format("  al: %s", 
+      message.append(String.format(" al %s", 
           competenceRequest.endDateToAsk.toString(dateFormatter)));
       message.append(String.format("\r\n in cambio dei giorni dal %s", 
           competenceRequest.beginDateToGive.toString(dateFormatter)));
-      message.append(String.format("  al: %s", 
+      message.append(String.format(" al %s", 
           competenceRequest.endDateToGive.toString(dateFormatter)));
     }
-    message.append(String.format("\r\ncondestinatario: %s", competenceRequest.teamMate.fullName()));
+    message.append(String.format("\r\n con destinatario %s", competenceRequest.teamMate.fullName()));
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
