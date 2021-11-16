@@ -213,6 +213,10 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, true, 0, null,
       Sets.newHashSet(), null, null, false, true),
 
+  A_C16("C16", "Cong. gravi motivi familiari NR", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
+      null, false, true), 
+  
   A_C17("C17", "Congedo assistenza figlio disabile L. 104/92", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false, true), 
@@ -310,7 +314,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(), null, null, false, true), 
   A_89M("89M", "Permesso diritto allo studio in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, false, true), 
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, false, true), 
   A_98("98", "Assenza Ingiustificata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, false, true), 
