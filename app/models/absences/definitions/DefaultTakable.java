@@ -123,6 +123,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_39LA), 
       ImmutableSet.of(DefaultAbsenceType.A_39LA), 
       -1, null),
+  
+  T_SMART(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_SMART), 
+      ImmutableSet.of(DefaultAbsenceType.A_SMART), 
+      -1, null),
 
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
