@@ -557,6 +557,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
     final GroupAbsenceType cod39LA = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_39LA.name()).get();
+    final GroupAbsenceType smart = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_SMART.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -650,6 +652,10 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person, 
           EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE)) {
         groupsPermitted.add(cod39LA);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.SMARTWORKING)) {
+        groupsPermitted.add(smart);
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);

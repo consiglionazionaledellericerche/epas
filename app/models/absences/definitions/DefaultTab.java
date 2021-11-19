@@ -47,6 +47,8 @@ public enum DefaultTab {
   LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 14), 
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
   COVID19("Emergenza covid-19", 16), 
+  COD39LA("Assistenza parenti immunodepressi", 18),
+  SMART("Smartworking", 17),
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
   CONGEDI_PARENTALI_DIPENDENTI("Congedi Parentali dipendenti", 24),
   VISITA_MEDICA_DIPENDENTI("Visita medica dipendenti", 24),

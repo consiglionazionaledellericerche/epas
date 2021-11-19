@@ -205,6 +205,15 @@ public class TemplateUtility {
   }
   
   /**
+   * Verifica se nella configurazione posso abilitare l'auto inserimento smartworking.
+   * @return se nella configurazione generale ho abilitato lo smartworking come parametro per 
+   *        auto inserimento.
+   */
+  public boolean enableSmartworking() {
+    return generalSettingDao.generalSetting().enableAutoconfigSmartworking;
+  }
+  
+  /**
    * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
    */
   public boolean enableIllnessFlow() {
