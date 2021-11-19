@@ -464,6 +464,10 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.G_39LA);
   }
   
+  public static List<String> employeeSmartworking() {
+    return getCodes(DefaultGroup.G_SMART);
+  }
+  
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */

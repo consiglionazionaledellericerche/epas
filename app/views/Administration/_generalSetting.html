@@ -134,4 +134,14 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'enableSmartworkingParam', parent:'generalSetting', title:'Abilita parametri auto inserimento smartworking', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione dei parametri per autoinserimento assenza smartworking#{/alert}
+      #{f.booleanRadio 'generalSetting.enableAutoconfigSmartworking' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 #{/accordionGroup}
