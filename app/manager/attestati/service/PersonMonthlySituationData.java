@@ -28,6 +28,7 @@ import dao.PersonMonthRecapDao;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
@@ -47,13 +48,12 @@ import org.joda.time.YearMonth;
 /**
  * Rappresenta i dati della situazione mensile di una persona.
  */
+@Slf4j
 public class PersonMonthlySituationData {
 
-  private final PersonDayManager personDayManager;
   private final PersonMonthRecapDao personMonthRecapDao;
   private final AbsenceDao absenceDao;
   private final CompetenceDao competenceDao;
-  private final PersonDayDao personDayDao;
   private final IMealTicketsService mealTicketService;
   private final ContractDao contractDao;
   private final ContractMonthRecapDao contractMonthRecapDao;
@@ -75,11 +75,9 @@ public class PersonMonthlySituationData {
       CompetenceDao competenceDao, PersonDayDao personDayDao, 
       IMealTicketsService mealTicketService, ContractDao contractDao,
       ContractMonthRecapDao contractMonthRecapDao) {
-    this.personDayManager = personDayManager;
     this.personMonthRecapDao = personMonthRecapDao;
     this.absenceDao = absenceDao;
     this.competenceDao = competenceDao;
-    this.personDayDao = personDayDao;
     this.mealTicketService = mealTicketService;
     this.contractDao = contractDao;
     this.contractMonthRecapDao = contractMonthRecapDao;
@@ -271,15 +269,16 @@ public class PersonMonthlySituationData {
     for (Contract contract : contractList) {
       ContractMonthRecap monthRecap = contractMonthRecapDao
           .getContractMonthRecap(contract, yearMonth);
-
-      MealTicketRecap recap = mealTicketService.create(contract).orNull();
-      MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
-      buoniCartacei = buoniCartacei + composition.paperyMealTicket;
-      buoniElettronici = buoniElettronici + composition.electronicMealTicket;
+      if (monthRecap == null) {
+        log.info("ContractMonthRecap non presente nel mese {}/{} per {} ( id = {} )",
+            month, year, person.getFullname(), person.id);
+      } else {
+        MealTicketRecap recap = mealTicketService.create(contract).orNull();
+        MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
+        buoniCartacei = buoniCartacei + composition.paperyMealTicket;
+        buoniElettronici = buoniElettronici + composition.electronicMealTicket;
+      }
     }
-    
-    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
-        .getPersonDayInMonth(person, new YearMonth(year, month)));
 
     certification.content = String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici);
 
