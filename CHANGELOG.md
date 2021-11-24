@@ -5,7 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.2.0] - UNRELEASED
+## [2.2.1] - UNRELEASED
+### Added
+ - Aggiunta modellazione del codice 31_2020 per la gestione delle ferie 2020 prorogate oltre il 31/12/2021
+
+### Changed
+ - Corretta visualizzazione delle tab nella form di inserimento delle assenze da parte dell'amministratore del personale
+   parametrando la visibilità sulla base del fatto che i codici di quella tab siano expired o meno
+
+## [2.2.0] - 2021-11-23
 ### Added
  - Aggiunta parametrizzazione della visibilità della configurazione personale per l'autoinserimento dei codici covid19
  - Aggiunta configurazione per l'auto inserimento dei codici 39LA
