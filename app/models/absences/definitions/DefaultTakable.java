@@ -148,6 +148,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_OAM),
       9600, null),
 
+  T_PERMESSI_SINDACALI(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7M),
+      ImmutableSet.of(DefaultAbsenceType.A_7M),
+      -1, null),
+  
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M),
       ImmutableSet.of(DefaultAbsenceType.A_92M),
