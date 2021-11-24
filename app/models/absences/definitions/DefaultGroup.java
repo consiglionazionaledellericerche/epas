@@ -115,6 +115,10 @@ public enum DefaultGroup {
       DefaultCategoryType.COD39_LA, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
       null, false, true),
+  
+  G_7("7 - Permessi sindacali", "", DefaultCategoryType.ALTRI_CODICI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_PERMESSI_SINDACALI, 
+      DefaultComplation.C_7, null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
