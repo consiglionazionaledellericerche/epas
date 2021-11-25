@@ -850,6 +850,7 @@ complationUsed=Completato
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
+wtt.enableAdjustmentForQuantity=Riproporziona quantità codici
 wtt= Tipo Orario
 reproportionEnabled= Riproporziona quantità codici
 

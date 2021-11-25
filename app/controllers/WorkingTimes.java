@@ -632,5 +632,35 @@ public class WorkingTimes extends Controller {
     }
   }
 
+  /**
+   * Genera la form per il cambio della capacità di riproporzionare la quantità
+   * dei codici di assenza.
+   * @param wttId identificativo dell'orario di lavoro
+   * @param officeId identificativo della sede di lavoro
+   */
+  public static void changeEnableAdjustment(Long wttId, Long officeId) {
+    WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
+    notFoundIfNull(wtt);
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    render(wtt, office);
+  }
+  
+  /**
+   * Salva le modifiche effettuate sull'orario di lavoro.
+   * @param wtt l'orario di lavoro
+   * @param officeId l'identificativo della sede
+   */
+  public static void executeChangeEnableAdjustment(WorkingTimeType wtt, Long officeId) {
+    notFoundIfNull(wtt);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    wtt.save();
+    manageOfficeWorkingTime(office.id);
+  }
 
 }
