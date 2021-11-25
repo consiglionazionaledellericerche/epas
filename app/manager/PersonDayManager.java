@@ -1751,19 +1751,20 @@ public class PersonDayManager {
 
         val previousShortPermission = 
             personDay.absences.stream().filter(a -> a.absenceType.code.equals("PB")).findFirst();
-
-        if (inShift || isAllDayAbsencePresent) {
-          if (previousShortPermission.isPresent()) {            
-            previousShortPermission.get().delete();
+       
+        if (inShift || isAllDayAbsencePresent || personDay.isHoliday()) {
+          if (previousShortPermission.isPresent()) {
+            //Viene fatta prima la merge perché l'assenza è detached
+            previousShortPermission.get().merge()._delete();
             log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti"
-                + " assenze giornaliere oppure il dipendente è in turno.",
+                + " assenze giornaliere oppure il dipendente è in turno, oppure è un giorno festivo.",
                 previousShortPermission.get().justifiedMinutes, personDay.date, 
                 personDay.person.getFullname());
             return;
           } else {
             log.debug("Le timbrature di {} del giorno {} NON necessitano di controlli sulla fascia "
                 + "obbligatoria poichè sono presenti assenze giornaliere oppure il dipendente "
-                + "è in turno.",
+                + "è in turno, oppure è un giorno festivo.",
                 personDay.person, personDay.date);
             return;
           }

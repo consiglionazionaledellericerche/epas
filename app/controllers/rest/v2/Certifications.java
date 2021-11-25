@@ -173,10 +173,12 @@ public class Certifications extends Controller {
    * @param month il mese
    */
   public static void getMonthSituationByOffice(String sedeId, int year, int month) {
-    log.debug("Richieste informazioni mensili da applicazione esterna");
+    log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
+        sedeId, year, month);
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
-      notFound();
+      JsonResponse.notFound(
+        String.format("Ufficio con sedeId = %s non trovato", sedeId));
     }
     rules.checkIfPermitted(office.get()); 
     Set<Office> offices = Sets.newHashSet();
