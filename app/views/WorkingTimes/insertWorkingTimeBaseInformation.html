@@ -28,6 +28,17 @@
 		
   	   #{f.input 'name', required:true /}
   	   
+  	   #{alert color:'warning'}
+  	   <p>
+  	   Mettere a "SI" in caso di:
+  	   <ul>
+  	   <li><strong>Qualsiasi</strong> tipo di part time ORIZZONTALE (ad eccezione di un orario <em>maternità/allattamento</em>)</li>
+  	   <li>In caso di part time VERTICALE con percentuale della prestazione lavorativa <strong>INFERIORE AL 50%</strong></li>
+  	   </ul>
+  	   </p>
+  	   #{/alert}
+  	   #{f.booleanRadio 'reproportionEnabled', required:true /}
+  	   
   	   #{secure.check 'WorkingTimeType.externalId'}
   	     #{f.input 'externalId' /}
   	   #{/secure.check}

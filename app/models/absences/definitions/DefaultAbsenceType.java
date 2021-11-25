@@ -873,7 +873,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(), null, null, false, false, true),
 
   A_7M("7M", "Permesso sindacale in ore e minuti", true,
-      ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
+      ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, true, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
       false, true, true), 
   

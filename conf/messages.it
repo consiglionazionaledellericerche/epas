@@ -851,6 +851,7 @@ complationUsed=Completato
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
 wtt= Tipo Orario
+reproportionEnabled= Riproporziona quantità codici
 
 WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
 WorkingTimeTypePattern.VERTICAL = Orario Verticale

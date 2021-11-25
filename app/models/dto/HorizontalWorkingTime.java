@@ -53,6 +53,8 @@ public class HorizontalWorkingTime {
   public List<String> holidays;
 
   public boolean mealTicketEnabled = true;
+  
+  public boolean reproportionAbsenceCodesEnabled = true;
 
   @Min(1)
   @Max(23)
@@ -96,7 +98,7 @@ public class HorizontalWorkingTime {
 
     this.name = wtt.description;
     this.holidays = Lists.newArrayList();
-
+    this.reproportionAbsenceCodesEnabled = wtt.enableAdjustmentForQuantity;
 
     for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
 
@@ -157,6 +159,7 @@ public class HorizontalWorkingTime {
     wtt.office = office;
     wtt.disabled = false;
     wtt.externalId = this.externalId;
+    wtt.enableAdjustmentForQuantity = this.reproportionAbsenceCodesEnabled;
 
     wtt.save();
 
