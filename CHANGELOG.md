@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretta visualizzazione delle tab nella form di inserimento delle assenze da parte dell'amministratore del personale
    parametrando la visibilità sulla base del fatto che i codici di quella tab siano expired o meno
+ - Le timbrature fuori orario di presenza obbligatoria effettuate nel festivo non generano più permessi brevi
 
 ## [2.2.0] - 2021-11-23
 ### Added
