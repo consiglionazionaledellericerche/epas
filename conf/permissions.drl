@@ -1982,6 +1982,8 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
+        "WorkingTimes.changeEnableAdjustment",
+        "WorkingTimes.executeChangeEnableAdjustment",
 
         "Configurations.show",
         "Configurations.edit",
@@ -2158,6 +2160,8 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
+        "WorkingTimes.changeEnableAdjustment",
+        "WorkingTimes.executeChangeEnableAdjustment",
 
      	"Configurations.show",
 
