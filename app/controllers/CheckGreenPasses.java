@@ -31,6 +31,11 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller green pass.
+ * @author dario
+ *
+ */
 @With({Resecure.class})
 public class CheckGreenPasses extends Controller {
   
@@ -46,6 +51,7 @@ public class CheckGreenPasses extends Controller {
 
   /**
    * Ritorna la lista dei sorteggiati per il check del green pass.
+   * 
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param day il giorno di riferimento
@@ -69,6 +75,7 @@ public class CheckGreenPasses extends Controller {
   
   /**
    * Genera la form di inserimento di una nuova unità di personale da verificare.
+   * 
    * @param officeId l'identificativo della sede
    * @param date la data
    */
@@ -86,6 +93,7 @@ public class CheckGreenPasses extends Controller {
   
   /**
    * Salva la nuova persona di cui controllare il green pass.
+   * 
    * @param person la persona da controllare
    */
   public static void save(Person person) {
@@ -104,6 +112,7 @@ public class CheckGreenPasses extends Controller {
   
   /**
    * Elimina il check di green pass dell'identificativo passato.
+   * 
    * @param checkGreenPassId l'identificativo di green pass da eliminare
    */
   public static void deletePerson(long checkGreenPassId) {
@@ -120,6 +129,7 @@ public class CheckGreenPasses extends Controller {
   
   /**
    * Aggiorna lo stato del checkGreenPass.
+   * 
    * @param checkGreenPassId l'identificativo del checkGreenPass da aggiornare
    */
   public static void checkPerson(long checkGreenPassId) {

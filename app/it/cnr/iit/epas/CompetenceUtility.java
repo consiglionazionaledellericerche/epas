@@ -22,14 +22,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import dao.PersonDayDao;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import dao.PersonDayDao;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.services.PairStamping;
@@ -40,6 +38,8 @@ import models.PersonShiftDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.ShiftSlot;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import play.i18n.Messages;
 
 /**
