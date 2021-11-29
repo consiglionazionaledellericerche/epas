@@ -84,7 +84,7 @@ public class NotificationManager {
   private ConfigurationManager configurationManager;
   private InformationRequestDao requestDao;
 
-  final static String dateFormatter = "dd/MM/YYYY";
+  final String dateFormatter = "dd/MM/YYYY";
 
   /**
    * Default constructor.
@@ -956,7 +956,8 @@ public class NotificationManager {
       message.append(String.format(" al %s", 
           competenceRequest.endDateToGive.toString(dateFormatter)));
     }
-    message.append(String.format("\r\n con destinatario %s", competenceRequest.teamMate.fullName()));
+    message.append(String.format("\r\n con destinatario %s", 
+        competenceRequest.teamMate.fullName()));
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";

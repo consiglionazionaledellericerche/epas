@@ -42,6 +42,7 @@ import models.Person;
 import org.joda.time.LocalDate;
 
 /**
+ * Manager per il check giornaliero del green pass.
  * @author cristian
  *
  */
@@ -54,7 +55,7 @@ public class CheckGreenPassManager {
   private final OfficeDao officeDao;
   private final EmailManager emailManager;
 
-  private final static double PEOPLE_TO_DRAW_EACH_ATTEMPT = 0.15;
+  private final double PEOPLE_TO_DRAW_EACH_ATTEMPT = 0.15;
   
   /**
    * Costruttore manager.
@@ -73,12 +74,11 @@ public class CheckGreenPassManager {
   }
 
   /**
-   * Il numeero delle persone da conteggiare è una percentuale del numero di persone
+   * Il numero delle persone da conteggiare è una percentuale del numero di persone
    * presenti in sede.
    * 
    * @param numberOfActivePeople numero di persone attive in sede 
-   * @param lastAttempt true se è l'ultima estrazione del giorno
-   * @return
+   * @return il numero di persone da conteggiare.
    */
   private Integer peopleToDrawn(Integer numberOfActivePeople) {
 
@@ -103,7 +103,7 @@ public class CheckGreenPassManager {
     List<Person> list = Lists.newArrayList();
     List<CheckGreenPass> listDrawn = Lists.newArrayList();
     List<Office> offices = officeDao.allEnabledOffices();
-    for (Office office: offices) {
+    for (Office office : offices) {
       if (office.equals(iit)) {
         log.info("Seleziono la lista dei sorteggiati per {}", office.name);
         list = peopleActiveInDate(date, office);
@@ -118,7 +118,7 @@ public class CheckGreenPassManager {
             log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
           }
         }
-        emailManager.infoPeopleSelected(listDrawn, date,list.size());
+        emailManager.infoPeopleSelected(listDrawn, date, list.size());
       }
 
     }
@@ -126,6 +126,7 @@ public class CheckGreenPassManager {
   
   /**
    * Ritorna la lista delle persone attive sulla sede office in data date.
+   * 
    * @param date la data in cui cercare le persone
    * @param office la sede su cui cercare le persone
    * @return la lista di persone attive nella sede office in data date.

@@ -47,8 +47,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
@@ -608,7 +608,7 @@ public class AbsenceGroups extends Controller {
 
 
   /**
-   * Metodo di test
+   * Metodo di test.
    */
   public static void orderedAbsences(Long personId, LocalDate start, LocalDate end) {    
     log.info("orderedAbsences: personId = {}, start = {}, end = {}", personId, start, end);

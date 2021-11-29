@@ -33,26 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
-import manager.flows.AbsenceRequestManager.AbsenceRequestConfiguration;
-import manager.services.absences.AbsenceForm;
-import manager.services.absences.AbsenceService.InsertReport;
 import models.Person;
-import models.PersonDay;
 import models.Role;
 import models.TeleworkValidation;
 import models.User;
-import models.absences.Absence;
-import models.absences.AbsenceType;
-import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType;
-import models.absences.JustifiedType.JustifiedTypeName;
-import models.absences.definitions.DefaultAbsenceType;
 import models.base.InformationRequest;
 import models.enumerate.InformationType;
-import models.flows.AbsenceRequest;
-import models.flows.AbsenceRequestEvent;
-import models.flows.enumerate.AbsenceRequestEventType;
-import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
@@ -60,9 +46,13 @@ import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import play.db.jpa.JPA;
 
+
+/**
+ * Classe di costruzione information request.
+ * @author dario
+ * 
+ */
 @Slf4j
 public class InformationRequestManager {
 
@@ -86,8 +76,7 @@ public class InformationRequestManager {
   }
   
   /**
-   * Costruttore injector.
-   * 
+   * Costruttore injector. 
    * @param configurationManager il configuration manager
    * @param uroDao il dao per gli usersRolesOffices
    * @param roleDao il dao per i ruoli
@@ -155,8 +144,7 @@ public class InformationRequestManager {
   
   /**
    * Imposta nella richiesta di assenza i tipi di approvazione necessari in funzione del tipo di
-   * assenza e della configurazione specifica della sede del dipendente.
-   * 
+   * assenza e della configurazione specifica della sede del dipendente.   * 
    * @param illnessRequest l'opzionale richiesta di malattia
    * @param serviceRequest l'opzionale richiesta di uscita di servizio
    * @param teleworkRequest l'opzionale richiesta di telelavoro
@@ -179,7 +167,6 @@ public class InformationRequestManager {
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
    * tipo di assenza.
-   *
    * @param requestType il tipo di assenza da controllare
    * @param person la persona per cui controllare il tipo di assenza
    * @return la lista degli eventuali problemi riscontrati.
@@ -213,8 +200,7 @@ public class InformationRequestManager {
   }
   
   /**
-   * Metodo di utilità per parsare una stringa e renderla un LocalTime.
-   * 
+   * Metodo di utilità per parsare una stringa e renderla un LocalTime.   * 
    * @param time la stringa contenente l'ora
    * @return il LocalTime corrispondente alla stringa passata come parametro.
    */
@@ -326,7 +312,6 @@ public class InformationRequestManager {
 
   /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
-   * 
    * @param serviceRequest l'eventuale richiesta di uscita di servizio
    * @param illnessRequest l'eventuale richiesta di malattia
    * @param teleworkRequest l'eventuale richiesta di telelavoro
@@ -386,8 +371,7 @@ public class InformationRequestManager {
   }
 
   /**
-   * Rimuove tutte le eventuali approvazioni ed impostata il flusso come da avviare.
-   * 
+   * Rimuove tutte le eventuali approvazioni ed impostata il flusso come da avviare. 
    * @param serviceRequest l'eventuale richiesta di uscita di servizio
    * @param illnessRequest l'eventuale richiesta di malattia
    * @param teleworkRequest l'eventuale richiesta di telelavoro
@@ -457,8 +441,7 @@ public class InformationRequestManager {
   }
   
   /**
-   * segue l'approvazione del flusso controllando i vari casi possibili.
-   * 
+   * Segue l'approvazione del flusso controllando i vari casi possibili. 
    * @param serviceRequest l'eventuale richiesta di uscita di servizio
    * @param illnessRequest l'eventuale richiesta di informazione malattia
    * @param teleworkRequest l'eventuale richiesta di approvazione telelavoro
@@ -539,8 +522,7 @@ public class InformationRequestManager {
   
  
   /**
-   * Disapprovazione richiesta di flusso informativo da parte del responsabile di sede.
-   * 
+   * Disapprovazione richiesta di flusso informativo da parte del responsabile di sede. 
    * @param id id della richiesta di assenza.
    * @param reason la motivazione del rifiuto
    */
@@ -572,8 +554,8 @@ public class InformationRequestManager {
   
   /**
    * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
-   *
    * @param id l'id della richiesta di assenza.
+   * @param user l'utente che approva.
    */
   public void personnelAdministratorApproval(long id, User user) {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
@@ -605,8 +587,8 @@ public class InformationRequestManager {
   
   /**
    * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
-   *
    * @param id l'id della richiesta di flusso informativo.
+   * @param reason la motivazione della respinta.
    */
   public void personnelAdministratorDisapproval(long id, String reason) {
     ServiceRequest serviceRequest = null;

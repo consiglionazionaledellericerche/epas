@@ -149,6 +149,7 @@ public class EmailManager {
   
   /**
    * Metodo che informa via mail la persona del controllo del green pass.
+   * 
    * @param person la persona a cui inviare la mail informativa
    */
   public void infoDrawnPersonForCheckingGreenPass(Person person) {
@@ -186,10 +187,12 @@ public class EmailManager {
   /**
    * Informa via mail l'amministrazione e l'ufficio tecnico di chi devono contattare
    * per il check del green pass.
+   * 
    * @param peopleSelected la lista di persone selezionate
    * @param date la data in cui sono selezionate
    */
-  public void infoPeopleSelected(List<CheckGreenPass> peopleSelected, LocalDate date, Integer numberOfActivePeople) {
+  public void infoPeopleSelected(List<CheckGreenPass> peopleSelected, LocalDate date, 
+      Integer numberOfActivePeople) {
     Preconditions.checkState(peopleSelected != null);
     DateTimeFormatter df = DateTimeFormat.forPattern("dd/MM/yyyy");
     final String subject = String.format("Lista selezionati per controllo del %s",
@@ -201,9 +204,11 @@ public class EmailManager {
           + "ignorare questa email se si tratta di un giorno festivo.\r\n");
     } else {
       sb.append(String.format(
-          "\r\nSono state sorteggiate %d persone su un totale di %s persone che hanno timbrature nel giorno %s.\r\n", 
+          "\r\nSono state sorteggiate %d persone su un totale di %s persone che hanno "
+          + "timbrature nel giorno %s.\r\n", 
           peopleSelected.size(), numberOfActivePeople, date.toString(df)));
-      sb.append(String.format("Lista dei dipendenti da controllare per il %s:\r\n\r\n", date.toString(df)));
+      sb.append(String.format("Lista dei dipendenti da controllare per il "
+          + "%s:\r\n\r\n", date.toString(df)));
 
       peopleSelected.sort(
           new Comparator<CheckGreenPass>() {

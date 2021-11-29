@@ -34,8 +34,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -493,7 +493,7 @@ public class AbsenceComponentDao extends DaoBase {
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
 
-    long start = System.currentTimeMillis();
+    final long start = System.currentTimeMillis();
     log.trace("Inizio metodo orderedAbsences, person={}, begin={}, end={}, codeSet={}",
         person.getFullname(), begin, end, codeSet);
     
@@ -523,7 +523,8 @@ public class AbsenceComponentDao extends DaoBase {
               return s2.date.compareTo(s1.date);
             });
     val result = absences.stream().sorted(absenceComparator).collect(Collectors.toList());
-    log.trace("Terminato metodo orderedAbsences in {} millisecondi", System.currentTimeMillis() - start);
+    log.trace("Terminato metodo orderedAbsences in {} millisecondi", 
+        System.currentTimeMillis() - start);
     return result;
   }
 

@@ -12,6 +12,11 @@ import models.Person;
 import models.TeleworkValidation;
 import models.query.QTeleworkValidation;
 
+/**
+ * Dao per i controlli sul telelavoro.
+ * @author dario
+ *
+ */
 public class TeleworkValidationDao extends DaoBase {
 
   @Inject
@@ -22,6 +27,7 @@ public class TeleworkValidationDao extends DaoBase {
 
   /**
    * Ritorna la lista delle richieste di telelavoro approvate.
+   * 
    * @param person la persona di cui cercare le richieste
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -40,6 +46,7 @@ public class TeleworkValidationDao extends DaoBase {
 
   /**
    * Ritorna le validazioni precedenti all'anno/mese passato come parametro.
+   * 
    * @param person la persona di cui si cercano le validazioni
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -58,6 +65,7 @@ public class TeleworkValidationDao extends DaoBase {
   
   /**
    * Ritorna la lista di tutte le validazioni di telelavoro relative alla persona passata.
+   * 
    * @param person la persona di cui si richiedono le validazioni passate
    * @return la lista di tutte le validazioni di telelavoro relative alla persona passata.
    */
@@ -72,6 +80,7 @@ public class TeleworkValidationDao extends DaoBase {
   
   /**
    * Ritorna la validazione, se esiste, con id passato come parametro.
+   * 
    * @param id l'identificativo della validazione da ricercare
    * @return la validazione, se esiste, con id passato come parametro.
    */
