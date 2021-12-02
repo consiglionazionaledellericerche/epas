@@ -1007,8 +1007,13 @@ public class Competences extends Controller {
   public static void editReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     Office office = type.office;
-    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
+    List<Office> linkedOffices = Lists.newArrayList();
     rules.checkIfPermitted(office);
+    if (Security.getUser().get().isSystemUser()) {
+      linkedOffices = officeDao.allEnabledOffices();
+    } else {
+      linkedOffices = officeDao.byInstitute(office.institute);
+    }   
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
     //TODO: caricare la lista delle competenze mensili
