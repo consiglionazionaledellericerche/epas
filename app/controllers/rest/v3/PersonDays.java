@@ -170,8 +170,9 @@ public class PersonDays extends Controller {
           personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
       if (pd == null) {
         log.info("Non sono presenti informazioni per {} nel giorno {}", person.getFullname(), date);
+      } else {
+        personDayDtos.add(PersonDayShowDto.build(pd));  
       }
-      personDayDtos.add(PersonDayShowDto.build(pd));
     }
 
     val gson = gsonBuilder.create();
