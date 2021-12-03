@@ -19,15 +19,16 @@ package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
+import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
-import models.CompetenceCodeGroup;
+import models.absences.AbsenceType;
 import org.modelmapper.ModelMapper;
 
 /**
  * DTO per l'esportazione via REST delle informazioni 
- * principali di gruppo di codici di competenza.
+ * principali di una tipologia di codici di assenza.
  *
  * @author Cristian Lucchesi
  * @version 3
@@ -36,20 +37,30 @@ import org.modelmapper.ModelMapper;
 @StaticInject
 @ToString
 @Data
-public class CompetenceCodeGroupShowTerseDto {
+public class AbsenceTypeShowTerseDto {
 
   private Long id;
-  private String label;
+  private String code;
 
+  private String certificateCode;
+  private String description;
+
+  private LocalDate validFrom;
+  private LocalDate validTo;
+
+  private boolean internalUse; 
+  private boolean consideredWeekEnd;
+  private Integer justifiedTime;
+  
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
 
   /**
-   * Nuova instanza di un CompetenceCodeGroupShowTerseDto contenente i valori 
-   * dell'oggetto competenceCodeGroup passato.
+   * Nuova instanza di un AbsenceTypeShowTerseDto contenente i valori 
+   * dell'oggetto absenceType passato.
    */
-  public static CompetenceCodeGroupShowTerseDto build(CompetenceCodeGroup ccg) {
-    return modelMapper.map(ccg, CompetenceCodeGroupShowTerseDto.class);
+  public static AbsenceTypeShowTerseDto build(AbsenceType absenceType) {
+    return modelMapper.map(absenceType, AbsenceTypeShowTerseDto.class);
   }
 }

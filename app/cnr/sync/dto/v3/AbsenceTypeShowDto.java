@@ -18,38 +18,52 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Sets;
 import injection.StaticInject;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
-import lombok.ToString;
-import models.CompetenceCodeGroup;
+import lombok.EqualsAndHashCode;
+import lombok.val;
+import models.absences.AbsenceType;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni 
- * principali di gruppo di codici di competenza.
+ * Dati esportati in Json per la tipologia di Assenza.
  *
  * @author Cristian Lucchesi
  * @version 3
  *
  */
 @StaticInject
-@ToString
 @Data
-public class CompetenceCodeGroupShowTerseDto {
+@EqualsAndHashCode(callSuper = true)
+public class AbsenceTypeShowDto extends AbsenceTypeShowTerseDto {
 
-  private Long id;
-  private String label;
+  private boolean timeForMealTicket;
+
+  private Set<String> justifiedTypesPermitted = Sets.newHashSet();
+  
+  private Integer replacingTime;
+ 
+  private String documentation; 
+  
+  private boolean reperibilityCompatible;
 
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
 
   /**
-   * Nuova instanza di un CompetenceCodeGroupShowTerseDto contenente i valori 
-   * dell'oggetto competenceCodeGroup passato.
+   * Nuova instanza di un AbsenceTypeShowDto contenente i valori 
+   * dell'oggetto absenceType passato.
    */
-  public static CompetenceCodeGroupShowTerseDto build(CompetenceCodeGroup ccg) {
-    return modelMapper.map(ccg, CompetenceCodeGroupShowTerseDto.class);
+  public static AbsenceTypeShowDto build(AbsenceType at) {
+    val dto = modelMapper.map(at, AbsenceTypeShowDto.class);
+    dto.setJustifiedTypesPermitted(
+        at.justifiedTypesPermitted.stream()
+          .map(jt -> jt.name.name()).collect(Collectors.toSet()));    
+    return dto;
   }
 }

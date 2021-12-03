@@ -108,6 +108,7 @@ Per individuare la tipologia di competenza è possibile passare il campo **id**.
 Il risultato sarà del tipo:
 
 .. code-block:: bash
+
   {
     "competenceCodes": [
         {
