@@ -32,7 +32,7 @@
     <link rel="index" title="Indice" href="../index.html">
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
     <link rel="up" title="8. Servizi REST di ePAS" href="index.html">
-    <link rel="next" title="9. Configurazioni per l&#39;amministratore di sistema" href="../sysadmin/index.html">
+    <link rel="next" title="8.15. Consultazione delle tipologie di assenze via REST" href="absenceTypesServices.html">
     <link rel="prev" title="8.13. Inserimento ordini e rimborsi di missione REST" href="missionsServices.html">
 
 
@@ -681,6 +681,7 @@
 <li class="toctree-l2"><a class="reference internal" href="workingTimeTypesServices.html">8.12. Consultazione delle tipologie di orario di lavoro via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="missionsServices.html">8.13. Inserimento ordini e rimborsi di missione REST</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">8.14. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absenceTypesServices.html">8.15. Consultazione delle tipologie di assenze via REST</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
@@ -857,6 +858,7 @@
 <li class="toctree-l2"><a class="reference internal" href="workingTimeTypesServices.html">8.12. Consultazione delle tipologie di orario di lavoro via REST</a></li>
 <li class="toctree-l2"><a class="reference internal" href="missionsServices.html">8.13. Inserimento ordini e rimborsi di missione REST</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">8.14. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absenceTypesServices.html">8.15. Consultazione delle tipologie di assenze via REST</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
@@ -908,7 +910,7 @@
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione e gestione dei badge
 che comprende i metodi per la visualizzazione, la creazione, la modifica e la cancellazione dei
 badge.
-I badge sono legati ad una sorgente timbratura (denominate come BadgeReader o lettore badge) ed
+I badge sono legati ad una sorgente timbratura (denominata come BadgeReader o lettore badge) ed
 anche al gruppo badge (citato anche come BadgeSystem).
 Le informazioni relative alle sorgenti timbrature ed ai gruppi badge della propria sede sono
 fondamentali quando si va a creare un nuovo badge, per questo motivo nell'interfaccia REST
@@ -924,8 +926,8 @@ conflitto con quello di altri istituti) ed una volta creato l'utente assegnateli
 ruolo <em>Gestore Badge</em>.</p>
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
-<section id="bagdereader-byoffice">
-<h2><span class="section-number">8.14.2. </span>BagdeReader byOffice<a class="headerlink" href="#bagdereader-byoffice" title="Link a questa intestazione">¶</a></h2>
+<section id="badgereader-byoffice">
+<h2><span class="section-number">8.14.2. </span>BadgeReader byOffice<a class="headerlink" href="#badgereader-byoffice" title="Link a questa intestazione">¶</a></h2>
 <p>La lista delle sorgenti timbrature (BadgeReader) di una sede è fruibile tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
 <dl class="simple">
@@ -955,11 +957,11 @@ all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
            <span class="p">}</span>
         <span class="p">}</span>
      <span class="p">],</span>
-     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisaBadge&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
      <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
      <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span>
       <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
    <span class="p">},</span>
    <span class="p">{</span>
@@ -977,14 +979,240 @@ all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
          <span class="p">}</span>
        <span class="p">}</span>
      <span class="p">],</span>
-     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;cosenzaBadge&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;cosenza-xxx-yyy&quot;</span><span class="p">,</span>
      <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
      <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
       <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Sede di Cosenza&quot;</span><span class="p">,</span>
       <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;cosenza-xxx-yyy&quot;</span>
   <span class="p">}</span>
 <span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="badgereader-show">
+<h2><span class="section-number">8.14.3. </span>BadgeReader show<a class="headerlink" href="#badgereader-show" title="Link a questa intestazione">¶</a></h2>
+<p>Per ogni BadgeReader è possibile avere le informazioni ad esso collegate tramite una HTTP GET
+all'indirizzo <strong>/rest/v3/badgeReaders/show</strong>.</p>
+<p>Per individuare il BadgeReader è necessario utilizzare il suo <strong>id</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badgeReaders/show <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+          <span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span> <span class="p">[</span>
+              <span class="p">{</span>
+                  <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
+                  <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                  <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                  <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
+              <span class="p">}</span>
+          <span class="p">],</span>
+          <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044000&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223400&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
+          <span class="p">}</span>
+      <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="nt">&quot;badges&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;1234111&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">99</span><span class="p">,</span>
+          <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galileo@cnr.it&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Gallilei Gallileo&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
+              <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
+          <span class="p">}</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;1235111&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">140</span><span class="p">,</span>
+          <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;FBCLNR74P10G702B&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+              <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9801&quot;</span>
+          <span class="p">}</span>
+      <span class="p">}],</span>
+    <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="badgesystem-byoffice">
+<h2><span class="section-number">8.14.4. </span>BadgeSystem byOffice<a class="headerlink" href="#badgesystem-byoffice" title="Link a questa intestazione">¶</a></h2>
+<p>La lista dei gruppi badge (BadgeSystem) di una sede è fruibile tramite una HTTP GET
+all'indirizzo <strong>/rest/v3/badgeSystems/byOffice</strong>.</p>
+<dl class="simple">
+<dt>Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate presenti sugli uffici:</dt><dd><ul class="simple">
+<li><p>id, codeId (corrisponde al <em>sede id</em> di Attestati).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badgeSystems/byOffice
+    <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">{</span>
+      <span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">{</span>
+              <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
+              <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
+          <span class="p">}</span>
+      <span class="p">],</span>
+      <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Gruppo Badge sede di Pisa&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044000&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223400&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="badgesystem-show">
+<h2><span class="section-number">8.14.5. </span>BadgeSystem show<a class="headerlink" href="#badgesystem-show" title="Link a questa intestazione">¶</a></h2>
+<p>Per ogni BadgeSystem è possibile avere le informazioni ad esso collegate tramite una HTTP GET
+all'indirizzo <strong>/rest/v3/badgesystems/show</strong>.</p>
+<p>Per individuare il BadgeSystem è necessario utilizzare il suo <strong>id</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badgeSystems/show <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
+</pre></div>
+</div>
+</section>
+<section id="badge-byoffice">
+<h2><span class="section-number">8.14.6. </span>Badge byOffice<a class="headerlink" href="#badge-byoffice" title="Link a questa intestazione">¶</a></h2>
+<p>La lista di tutti i badge associati ad una sede (cioè quelli associati a tutti gruppi badge della sede)
+è possibile ottenerla una HTTP GET all'indirizzo <strong>/rest/v3/badges/byOffice</strong>.</p>
+<dl class="simple">
+<dt>Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate presenti sugli uffici:</dt><dd><ul class="simple">
+<li><p>id, codeId (corrisponde al <em>sede id</em> di Attestati).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badges/byOffice <span class="nv">codeId</span><span class="o">==</span><span class="m">223400</span>
+</pre></div>
+</div>
+</section>
+<section id="badge-bybadgesystem">
+<h2><span class="section-number">8.14.7. </span>Badge byBadgeSystem<a class="headerlink" href="#badge-bybadgesystem" title="Link a questa intestazione">¶</a></h2>
+<p>La lista di tutti i badge associati ad un gruppo è possibile ottenerla una HTTP GET all'indirizzo <strong>/rest/v3/badges/byBadgeSystem</strong>.</p>
+<p>Per individuare il BadgeSystem è necessario utilizzare il suo <strong>id</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badges/byBadgeSystem <span class="nv">codeId</span><span class="o">==</span><span class="m">223400</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2><span class="section-number">8.14.8. </span>Badge byBadgeSystem<a class="headerlink" href="#id1" title="Link a questa intestazione">¶</a></h2>
+<p>La lista di tutti i badge associati ad una persone è possibile ottenerla una HTTP GET
+all'indirizzo <strong>/rest/v3/badges/byPerson</strong>.</p>
+<p>Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>id, email, eppn, perseoPersonId, fiscalCode, number</strong>.</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badges/byPerson <span class="nv">eppn</span><span class="o">==</span>galileo.galilei@cnr.it
+</pre></div>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+  <span class="p">{</span>
+      <span class="nt">&quot;badgeReaderId&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;badgeSystemId&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">161</span><span class="p">,</span>
+      <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span>
+          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
+          <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
+      <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="badge-show">
+<h2><span class="section-number">8.14.9. </span>Badge show<a class="headerlink" href="#badge-show" title="Link a questa intestazione">¶</a></h2>
+<p>Per ogni Badge è possibile avere le informazioni ad esso collegate tramite una HTTP GET
+all'indirizzo <strong>/rest/v3/badges/show</strong>.</p>
+<p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/badges/show <span class="nv">id</span><span class="o">==</span><span class="m">161</span>
+</pre></div>
+</div>
+</section>
+<section id="badge-create">
+<h2><span class="section-number">8.14.10. </span>Badge create<a class="headerlink" href="#badge-create" title="Link a questa intestazione">¶</a></h2>
+<p>La creazione di un badge è possibile tramite una <em>HTTP POST</em> all'indirizzo
+<strong>/rest/v2/badges/create</strong> passando un json contenente i quattro campi obbligatori per la creazione di un badge:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>code</strong>, <strong>personId</strong>, <strong>badge_reader_id</strong>, <strong>badgeSystemId</strong></p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    POST https://epas-demo.devel.iit.cnr.it/rest/v2/badges/create
+    <span class="nv">code</span><span class="o">=</span>9801bis <span class="nv">personId</span><span class="o">=</span><span class="m">1234</span> <span class="nv">badgeReaderId</span><span class="o">=</span><span class="m">1</span> <span class="nv">badgeSystemId</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+</section>
+<section id="badge-update">
+<h2><span class="section-number">8.14.11. </span>Badge Update<a class="headerlink" href="#badge-update" title="Link a questa intestazione">¶</a></h2>
+<p>L'aggiornamento di un badge è possibile tramite una <em>HTTP PUT</em> ad un indirizzo del tipo
+<strong>/rest/v2/badges/update?id={id_badge_da_aggiornare}</strong>.</p>
+<p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong> e passarlo come parametro nell'url, non nel JSON.</p>
+<p>Nel corpo della PUT, come JSON, è possibile passare solo il campo <strong>code</strong> che è l'unico modificabile.
+Per cambiare il campo <strong>badgeReaderId</strong> o il campo <strong>badgeSystemId</strong> è necessario eliminare il badge
+e re-inserirlo con i dati corretti.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    PUT https://epas-demo.devel.iit.cnr.it/rest/v2/badges/update
+    <span class="nv">id</span><span class="o">==</span><span class="m">161</span> <span class="nv">code</span><span class="o">=</span>9801tris
+</pre></div>
+</div>
+</section>
+<section id="badge-delete">
+<h2><span class="section-number">8.14.12. </span>Badge Delete<a class="headerlink" href="#badge-delete" title="Link a questa intestazione">¶</a></h2>
+<p>La cancellazione di un badge è possibile tramite una <em>HTTP DELETE</em> all'indirizzo
+<strong>/rest/v2/persons/delete</strong>.</p>
+<p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong> e passarlo come parametro nell'url, non nel JSON.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
+    DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/badges/delete?id<span class="o">=</span><span class="m">310</span>
 </pre></div>
 </div>
 </section>
@@ -993,7 +1221,7 @@ all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
 
           
             <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
-                  <a href="../sysadmin/index.html" class="" title="9. Configurazioni per l&#39;amministratore di sistema" accesskey="n" rel="next"><span class="section-number">9. </span>Configurazioni per l'amministratore di sistema</a>
+                  <a href="absenceTypesServices.html" class="" title="8.15. Consultazione delle tipologie di assenze via REST" accesskey="n" rel="next"><span class="section-number">8.15. </span>Consultazione delle tipologie di assenze via REST</a>
               </div>
             
           </div>

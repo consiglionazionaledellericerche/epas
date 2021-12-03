@@ -104,12 +104,13 @@ La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo
       POST https://epas-demo.devel.iit.cnr.it/rest/v2/persons/create
       number=99999 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
-L'unica cosa da notare è che per associare la persona è necessario indicare il campo officeId (201 nel caso di epas-demo.devel.iit.cnr.it per ISTI - Pisa).
+L'unica cosa da notare è che per associare la persona all'ufficio correto è necessario indicare
+il campo officeId.
 
 Person Update
 -------------
 
-La creazione di una persona è possibile tramite una *HTTP PUT* all'indirizzo
+L'aggiornamento di una persona è possibile tramite una *HTTP PUT* all'indirizzo
 **/rest/v2/persons/update**.
 
 Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:
@@ -119,7 +120,7 @@ Per individuare la persona da aggiornare si utilizzano gli stessi parametri prev
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager
-      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@isti.cnr.it
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@cnr.it
       number=99991 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
 
