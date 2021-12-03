@@ -430,7 +430,8 @@ public class PersonDayManager {
     //Caso assenza giornaliera
     if (getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
-      setTicketStatusIfNotForced(personDay, getAllDay(personDay).get().absenceType.timeForMealTicket);
+      setTicketStatusIfNotForced(personDay, getAllDay(personDay).get()
+          .absenceType.timeForMealTicket);
       return personDay;
     }
 
@@ -502,7 +503,7 @@ public class PersonDayManager {
 
     // Il caso di assenze a giustificazione "quello che manca"
     if (getCompleteDayAndAddOvertime(personDay).isPresent()) {      
-      int missingTime = wttd.workingTime - personDay.getTimeAtWork() - personDay.getDecurtedMeal();
+      int missingTime = wttd.workingTime - personDay.getTimeAtWork();
       if (personDay.isHoliday) {
         //Nel caso "quello che manca", tipicamente per le missioni non si permette l'attivazione
         //delle ore da timbrature nel festivo perché gestite tramite le ore aggiuntive in missione.
@@ -516,7 +517,7 @@ public class PersonDayManager {
 
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
-          personDay.setTimeAtWork(computedTimeAtWork + missingTime);
+          personDay.setTimeAtWork(personDay.getTimeAtWork() + missingTime);
           if (!personDay.isTicketForcedByAdmin) {
             personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
                 .get().getAbsenceType().timeForMealTicket;
