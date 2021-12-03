@@ -55,9 +55,10 @@ public class BadgeSystemShowDto extends BadgeSystemShowTerseDto {
   public static BadgeSystemShowDto build(BadgeSystem badgeSystem) {
     val dto = modelMapper.map(badgeSystem, BadgeSystemShowDto.class);
 
-    dto.setBadgeReaders(badgeSystem.badgeReaders.stream().map(bs -> BadgeReaderShowMinimalDto.buildMinimal(bs))
-            .collect(Collectors.toSet()));
-    dto.setBadges(badgeSystem.badges.stream().map(BadgeShowTerseDto::build).collect(Collectors.toSet()));
+    dto.setBadgeReaders(badgeSystem.badgeReaders.stream()
+        .map(bs -> BadgeReaderShowMinimalDto.buildMinimal(bs)).collect(Collectors.toSet()));
+    dto.setBadges(badgeSystem.badges.stream().map(BadgeShowTerseDto::build)
+        .collect(Collectors.toSet()));
     return dto;
   }
 }

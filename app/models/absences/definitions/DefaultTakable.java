@@ -118,6 +118,16 @@ public enum DefaultTakable {
     ImmutableSet.of(DefaultAbsenceType.A_COVID19, DefaultAbsenceType.A_COVID19BP), 
     ImmutableSet.of(DefaultAbsenceType.A_COVID19, DefaultAbsenceType.A_COVID19BP), 
     -1, null),
+  
+  T_39LA(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
+      -1, null),
+  
+  T_SMART(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_SMART), 
+      ImmutableSet.of(DefaultAbsenceType.A_SMART), 
+      -1, null),
 
   T_0(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_0M), 
@@ -138,6 +148,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_OAM),
       9600, null),
 
+  T_PERMESSI_SINDACALI(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7M),
+      ImmutableSet.of(DefaultAbsenceType.A_7M),
+      -1, null),
+  
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M),
       ImmutableSet.of(DefaultAbsenceType.A_92M),
@@ -172,6 +187,11 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_94), 
       -1, null),
 
+  T_FERIE_CNR_PROROGA_2020(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_31_2020), 
+      ImmutableSet.of(DefaultAbsenceType.A_31_2020), 
+      22, null),
+  
   T_FERIE_CNR_PROROGA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, 
           DefaultAbsenceType.A_32, 
@@ -632,7 +652,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_14, DefaultAbsenceType.A_142, 
           DefaultAbsenceType.A_143, DefaultAbsenceType.A_54A17,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
+          DefaultAbsenceType.A_C16), 
       ImmutableSet.of(
           DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
           DefaultAbsenceType.A_25, DefaultAbsenceType.A_25H7,
@@ -652,7 +673,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_14, DefaultAbsenceType.A_142, 
           DefaultAbsenceType.A_143, DefaultAbsenceType.A_54A17,
           //DefaultAbsenceType.A_17C,
-          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
+          DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
+          DefaultAbsenceType.A_C16), 
       -1, null),
 
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 

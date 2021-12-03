@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.2.1] - 2021-12-03
+### Added
+ - Aggiunta modellazione del codice 31_2020 per la gestione delle ferie 2020 prorogate oltre il 31/12/2021
+ - Aggiunti Endpoint REST per la consultazione delle tipologie di codici di assenza
+
+### Changed
+ - Corretta visualizzazione delle tab nella form di inserimento delle assenze da parte dell'amministratore del personale
+   parametrando la visibilità sulla base del fatto che i codici di quella tab siano expired o meno
+ - Le timbrature fuori orario di presenza obbligatoria effettuate nel festivo non generano più permessi brevi
+ - Corretto metodo REST personDays/getDaySituationByOffice in caso di riepiloghi giornalieri non presenti
+
+## [2.2.0] - 2021-11-23
+### Added
+ - Aggiunta parametrizzazione della visibilità della configurazione personale per l'autoinserimento dei codici covid19
+ - Aggiunta configurazione per l'auto inserimento dei codici 39LA
+
+### Changed
+ - Corretto calcolo buoni pasto maturati quando non sono presenti ne timbrature ne presenze nel mese 
+ - Corretta gestione dei parametri luogo e motivazione per il metodo REST /stampingsfromclient/create
+ - Corretta gestione del parametro reasonType per il metodo REST /rest/v3/stampings/create e /rest/v3/stampings/update
+ - Corretto controllo dei parametri nel metodo REST /rest/absences/deleteAbsencesInPeriod
+ - Corrette date riportate nell'email per informare sulla richiesta di cambio reperibilità 
+ 
 ## [2.1.5] - 2021-11-09
 ### Added
  - Aggiunto plugin per ordinamento corretto date in datatable
@@ -16,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto controllo di concorrenza su inserimento multiplo via REST della stessa missione
  - Controllo sul parametro personId nella controller.Stampings::insert
  - Messaggio di errore per utente autenticato con Shibboleth ma eppn non presente in ePAS
+
 ### Changed
  - Cambiato l'algoritmo che determina con quale tipologia di buoni pasto vengono coperti i buoni maturati nel mese
    prima dell'invio dei dati ad Attestati
@@ -41,7 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.3] - 2021-08-05
 ### Changed
-
 - Rivisti filtri per mostrare flussi terminati a responsabili di più sedi
 - Modificata query per flussi da approvare da parte dei responsabili di sede per mostrare
 solo quelli della propria sede e non anche di sedi dove si hanno altri ruoli

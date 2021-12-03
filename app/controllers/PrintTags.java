@@ -164,6 +164,12 @@ public class PrintTags extends Controller {
     render(personList, date, year, month, forAll, office);
   }
   
+  /**
+   * Genera la pagina di timbrature autocertificate per lavoro fuori sede
+   * nell'anno/mese passati come parametro.
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
   public static void autocertOffsite(int year, int month) {
     Person person = Security.getUser().get().person;
     List<PrintTagsInfo> dtoList = Lists.newArrayList();

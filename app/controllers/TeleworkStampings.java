@@ -31,8 +31,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.PersonDayManager;
 import manager.StampingManager;
 import manager.TeleworkStampingManager;
@@ -57,6 +57,11 @@ import play.mvc.Http;
 import play.mvc.With;
 import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle timbrature in telelavoro.
+ * @author dario
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class TeleworkStampings extends Controller {
@@ -140,10 +145,11 @@ public class TeleworkStampings extends Controller {
    * @param personId l'identificativo della persona
    * @param year l'anno 
    * @param month il mese
-   * @throws ExecutionException 
-   * @throws NoSuchFieldException 
+   * @throws ExecutionException eccezione in esecuzione
+   * @throws NoSuchFieldException  eccezione di mancanza di parametro
    */
-  public static void personTeleworkStampings(Long personId, Integer year, Integer month) throws NoSuchFieldException, ExecutionException {
+  public static void personTeleworkStampings(Long personId, Integer year, Integer month) 
+      throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.personStamping(personId, LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear());
@@ -334,6 +340,7 @@ public class TeleworkStampings extends Controller {
   
   /**
    * Genera il report mensile di telelavoro.
+   * 
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @throws NoSuchFieldException eccezione di mancanza di parametro

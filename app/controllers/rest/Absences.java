@@ -291,11 +291,7 @@ public class Absences extends Controller {
 
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     
-
     if (Validation.hasErrors()) {
-      JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
-    }
-    if (!Validation.hasErrors()) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
     if (begin == null || end == null || begin.isAfter(end)) {

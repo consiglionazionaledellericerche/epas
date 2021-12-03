@@ -106,6 +106,19 @@ public enum DefaultGroup {
   G_COVID19("COVID19 - Codice emergenza Covid-19", "", DefaultCategoryType.COVID_19, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
+  
+  G_SMART("SMART - Smartworking", "", DefaultCategoryType.SMART, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
+      null, false, true),
+  
+  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", 
+      DefaultCategoryType.COD39_LA, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
+      null, false, true),
+  
+  G_7("7 - Permessi sindacali", "", DefaultCategoryType.ALTRI_CODICI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_PERMESSI_SINDACALI, 
+      DefaultComplation.C_7, null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
@@ -143,7 +156,12 @@ public enum DefaultGroup {
 
   FERIE_CNR("31/94/32 - Ferie e permessi legge", "", DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
-      null, false, false), 
+      null, false, false),
+  
+  FERIE_CNR_PROROGA_2020("31 - Proroga 2020", "", DefaultCategoryType.FERIE_CNR, 0,
+      GroupAbsenceTypePattern.programmed, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false), 
+  
 
   //  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
@@ -449,6 +467,14 @@ public enum DefaultGroup {
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeAgileWorkOrDisabledPeopleAssistanceCodes() {
+    return getCodes(DefaultGroup.G_39LA);
+  }
+  
+  public static List<String> employeeSmartworking() {
+    return getCodes(DefaultGroup.G_SMART);
   }
   
   /**

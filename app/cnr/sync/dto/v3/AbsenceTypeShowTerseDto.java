@@ -17,53 +17,50 @@
 
 package cnr.sync.dto.v3;
 
-import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import injection.StaticInject;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
-import lombok.val;
-import models.Stamping;
-import models.Stamping.WayType;
+import models.absences.AbsenceType;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni di una timbratura.
+ * DTO per l'esportazione via REST delle informazioni 
+ * principali di una tipologia di codici di assenza.
  *
  * @author Cristian Lucchesi
  * @version 3
+ *
  */
 @StaticInject
 @ToString
 @Data
-public class StampingShowDto {
+public class AbsenceTypeShowTerseDto {
 
   private Long id;
-  private LocalDateTime date;
-  private WayType way;
-  private String stampType;
-  private String place;
-  private String reason;
-  private boolean markedByAdmin;
-  private boolean markedByEmployee;
-  private String note;
-  private String stampingZone;
-  private PersonShowTerseDto person;
+  private String code;
 
+  private String certificateCode;
+  private String description;
+
+  private LocalDate validFrom;
+  private LocalDate validTo;
+
+  private boolean internalUse; 
+  private boolean consideredWeekEnd;
+  private Integer justifiedTime;
+  
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un AbsenceTypeShowTerseDto contenente i valori 
+   * dell'oggetto absenceType passato.
    */
-  public static StampingShowDto build(Stamping stamping) {
-    val dto = modelMapper.map(stamping, StampingShowDto.class);
-    dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
-    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
-    return dto;
+  public static AbsenceTypeShowTerseDto build(AbsenceType absenceType) {
+    return modelMapper.map(absenceType, AbsenceTypeShowTerseDto.class);
   }
 }

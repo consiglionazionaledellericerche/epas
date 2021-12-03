@@ -46,8 +46,8 @@ public class CompetenceCodeGroupShowTerseDto {
   static ModelMapper modelMapper;
 
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un CompetenceCodeGroupShowTerseDto contenente i valori 
+   * dell'oggetto competenceCodeGroup passato.
    */
   public static CompetenceCodeGroupShowTerseDto build(CompetenceCodeGroup ccg) {
     return modelMapper.map(ccg, CompetenceCodeGroupShowTerseDto.class);

@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.NotificationManager;
 import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
@@ -120,9 +120,10 @@ public class InformationRequests extends Controller {
   public static void serviceExitToApprove() {
     listToApprove(InformationType.SERVICE_INFORMATION);
   }
-  
+
   /**
    * Ritorna la lista delle richieste del tipo passato come parametro.
+   * 
    * @param type il tipo di flusso informativo da richiedere
    */
   public static void list(InformationType type) {
@@ -176,7 +177,8 @@ public class InformationRequests extends Controller {
   /**
    * Genera la pagina con tutte le richieste di flusso informativo del tipo passato
    * come parametro.
-   * @param type la tipologia di flusso informativo
+   * 
+   * @param type la tipologia di flusso informativo.
    */
   public static void listToApprove(InformationType type) {
     Verify.verifyNotNull(type);
@@ -229,6 +231,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Crea la pagina di inserimento di una nuova richiesta di flusso informativo.
+   * 
    * @param personId l'identificativo della persona
    * @param type la tipologia di flusso informativo da generare
    */
@@ -286,6 +289,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Persiste la richiesta di uscita di servizio e avvia il flusso approvativo.
+   * 
    * @param serviceRequest la richiesta di uscita di servizio
    * @param begin l'orario di inizio
    * @param finish l'orario di fine
@@ -351,6 +355,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Persiste la richiesta e avvia il flusso informativo.
+   * 
    * @param illnessRequest la richiesta informativa di malattia
    */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
@@ -397,6 +402,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Persiste la richiesta di telelavoro e avvia il flusso informativo.
+   * 
    * @param personId l'identificativo della persona
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
@@ -633,6 +639,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Ritorna la form di gestione approvazioni di telelavoro.
+   * 
    * @param personId l'identificativo della persona di cui gestire le richieste/approvazioni
    *     di telelavoro
    */
@@ -678,6 +685,7 @@ public class InformationRequests extends Controller {
   
   /**
    * Revoca la validazione ad un telelavoro.
+   * 
    * @param validationId l'identificativo della validazione
    */
   public static void revokeValidation(Long validationId) {

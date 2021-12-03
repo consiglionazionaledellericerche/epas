@@ -48,7 +48,6 @@ import models.query.QPerson;
 
 /**
  * Dao per i flussi informativi.
- * 
  * @author dario
  *
  */
@@ -62,7 +61,6 @@ public class InformationRequestDao extends DaoBase {
   /**
    * Metodo che ritorna la lista delle richieste di flusso corrispondenti ai
    * parametri passati.
-   * 
    * @param uroList la lista dei ruoli sulle sedi
    * @param fromDate da quale data cercare le richieste (opzionale)
    * @param toDate a quale data cercare le richieste (opzionale)
@@ -106,7 +104,6 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Lista delle richiesta di assenza per persona e data.
-   *
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -139,7 +136,6 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Lista delle richiesta di assenza per persona e data.
-   *
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -172,7 +168,6 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Lista delle richiesta di assenza per persona e data.
-   *
    * @param person La persona della quale recuperare le richieste di assenza
    * @param fromDate La data iniziale dell'intervallo temporale da considerare
    * @param toDate La data finale dell'intervallo temporale da considerare (opzionale)
@@ -205,6 +200,7 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Ritorna la richiesta informativa con id passato come parametro.
+   * 
    * @param id l'identificativo della richiesta 
    * @return La richiesta con l'id passato come parametro.
    */
@@ -217,6 +213,7 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Ritorna la richiesta di uscita di servizio con l'id passato come parametro.
+   * 
    * @param id l'idendificativo della richiesta di uscita di servizio
    * @return l'uscita di servizio, se esiste, corrispondente all'id passato.
    */
@@ -231,6 +228,7 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Ritorna la richiesta di info per malattia con id passato come parametro.
+   * 
    * @param id l'identificativo della richiesta di informazione di malattia
    * @return la richiesta di info per malattia con id passato come parametro.
    */
@@ -245,6 +243,7 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * Cerca e ritorna la richiesta di telelavoro (se esiste) con id uguale a quello passato.
+   * 
    * @param id l'identificativo della richiesta di telelavoro da cercare
    * @return la richiesta di telelavoro (se esiste) con id uguale a quello passato.
    */
@@ -260,6 +259,7 @@ public class InformationRequestDao extends DaoBase {
   /**
    * La lista delle richieste di malattia appartenenti alla lista di id passati
    *     come parametro.
+   *
    * @param ids la lista di id di richieste di malattia
    * @return la lista delle richieste di malattia appartenenti alla lista di id
    *     passati come parametro.
@@ -273,6 +273,7 @@ public class InformationRequestDao extends DaoBase {
   /**
    * La lista delle richieste di uscita di servizio appartenenti alla lista 
    *     di id passati come parametro.
+   *
    * @param ids la lista di id di richieste di uscita di servizio
    * @return la lista delle richieste di uscita di servizio appartenenti 
    *     alla lista di id passati come parametro.
@@ -286,6 +287,7 @@ public class InformationRequestDao extends DaoBase {
   /**
    * La lista delle richieste di telelavoro appartenenti alla lista di id passati
    *     come parametro.
+   *
    * @param ids la lista di id di richieste di telelavoro
    * @return la lista delle richieste di telelavoro appartenenti alla lista di id
    *     passati come parametro.
@@ -298,6 +300,7 @@ public class InformationRequestDao extends DaoBase {
 
   /**
    * La lista di tutte le richieste di telelavoro effettuate dalla persona passata come parametro.
+   * 
    * @param person la persona di cui ricercare le richieste di telelavoro
    * @return la lista di tutte le richieste di telelavoro effettuate dalla persona passata 
    *      come parametro.
@@ -310,7 +313,12 @@ public class InformationRequestDao extends DaoBase {
 
 
   /**
-   * Lista delle InformationRequest da Approvare come responsabile di sede.
+   * Ritorna la lista delle informationRequest da approvare come responsabile di sede.
+   * @param uros la lista degli userRoleOffice
+   * @param informationType il tipo di richiesta
+   * @param signer il firmatario della richiesta
+   * @param conditions le condizioni da applicare alla ricerca
+   * @return Lista delle InformationRequest da Approvare come responsabile di sede.
    */
   private List<InformationRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
       InformationType informationType, Person signer, BooleanBuilder conditions) {

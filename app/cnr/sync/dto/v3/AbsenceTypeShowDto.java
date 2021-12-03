@@ -17,53 +17,53 @@
 
 package cnr.sync.dto.v3;
 
-import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Sets;
 import injection.StaticInject;
-import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
-import lombok.ToString;
+import lombok.EqualsAndHashCode;
 import lombok.val;
-import models.Stamping;
-import models.Stamping.WayType;
+import models.absences.AbsenceType;
 import org.modelmapper.ModelMapper;
 
 /**
- * DTO per l'esportazione via REST delle informazioni di una timbratura.
+ * Dati esportati in Json per la tipologia di Assenza.
  *
  * @author Cristian Lucchesi
  * @version 3
+ *
  */
 @StaticInject
-@ToString
 @Data
-public class StampingShowDto {
+@EqualsAndHashCode(callSuper = true)
+public class AbsenceTypeShowDto extends AbsenceTypeShowTerseDto {
 
-  private Long id;
-  private LocalDateTime date;
-  private WayType way;
-  private String stampType;
-  private String place;
-  private String reason;
-  private boolean markedByAdmin;
-  private boolean markedByEmployee;
-  private String note;
-  private String stampingZone;
-  private PersonShowTerseDto person;
+  private boolean timeForMealTicket;
+
+  private Set<String> justifiedTypesPermitted = Sets.newHashSet();
+  
+  private Integer replacingTime;
+ 
+  private String documentation; 
+  
+  private boolean reperibilityCompatible;
 
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
   /**
-   * Nuova instanza di un StampingShowTerseDto contenente i valori 
-   * dell'oggetto stamping passato.
+   * Nuova instanza di un AbsenceTypeShowDto contenente i valori 
+   * dell'oggetto absenceType passato.
    */
-  public static StampingShowDto build(Stamping stamping) {
-    val dto = modelMapper.map(stamping, StampingShowDto.class);
-    dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
-    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
+  public static AbsenceTypeShowDto build(AbsenceType at) {
+    val dto = modelMapper.map(at, AbsenceTypeShowDto.class);
+    dto.setJustifiedTypesPermitted(
+        at.justifiedTypesPermitted.stream()
+          .map(jt -> jt.name.name()).collect(Collectors.toSet()));    
     return dto;
   }
 }

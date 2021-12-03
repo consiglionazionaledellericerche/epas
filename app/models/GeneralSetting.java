@@ -84,6 +84,11 @@ public class GeneralSetting extends BaseModel {
   
   public boolean enableIllnessFlow = false;
   
+  // Parametro per abilitazione visualizzazione parametro covid19
+  public boolean enableAutoconfigCovid19 = false;
+  
+  public boolean enableAutoconfigSmartworking = false;
+  
   /**
    * Numero massimo di giorni nel passato per cui è possibile
    * inserire timbrature via REST.
