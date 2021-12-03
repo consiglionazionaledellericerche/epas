@@ -5,9 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.2.1] - UNRELEASED
+## [2.2.1] - 2021-12-03
 ### Added
  - Aggiunta modellazione del codice 31_2020 per la gestione delle ferie 2020 prorogate oltre il 31/12/2021
+ - Aggiunti Endpoint REST per la consultazione delle tipologie di codici di assenza
 
 ### Changed
  - Corretta visualizzazione delle tab nella form di inserimento delle assenze da parte dell'amministratore del personale

@@ -3423,7 +3423,10 @@ when
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == null, granted == false)
 then
@@ -3450,7 +3453,10 @@ when
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == $o, granted == false)
 then
@@ -3481,7 +3487,10 @@ when
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), granted == false)
 then
@@ -3672,7 +3681,10 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == null, granted == false)
 then
@@ -3722,8 +3734,10 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
 
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == $o, granted == false)
 then
@@ -3782,8 +3796,10 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
 
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), granted == false)
 then
