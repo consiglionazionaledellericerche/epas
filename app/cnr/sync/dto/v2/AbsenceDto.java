@@ -17,6 +17,7 @@
 
 package cnr.sync.dto.v2;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 import models.absences.Absence;
@@ -34,12 +35,14 @@ import org.joda.time.LocalDate;
 @Data
 public class AbsenceDto {
 
+  private Long id;
   private LocalDate date;
   private String code;
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
-  
+  private LocalDateTime updatedAt;
+
   /**
    * Builder del dto.
    *
@@ -48,11 +51,13 @@ public class AbsenceDto {
    */
   public static AbsenceDto build(Absence absence) {
     return AbsenceDto.builder()
+        .id(absence.id)
         .date(absence.date)
         .code(absence.getCode())
         .justifiedTime(absence.justifiedTime())
         .justifiedType(absence.justifiedType.name.name())
         .note(absence.note)
+        .updatedAt(absence.updatedAt)
         .build();
   }
 }

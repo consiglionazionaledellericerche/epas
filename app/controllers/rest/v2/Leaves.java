@@ -116,7 +116,7 @@ public class Leaves extends Controller {
   @Util
   private static List<AbsencePeriodDto> toAbsencesPeriods(List<Absence> absences,
       boolean includeDetails) {
-    List<AbsencePeriodDto> aps = Lists.newArrayList();
+    List<AbsencePeriodDto> abs = Lists.newArrayList();
     LocalDate previousDate = null;
     String previousCode = null;
     Person previousPerson = null;
@@ -134,7 +134,7 @@ public class Leaves extends Controller {
                 absence.absenceType.code, 
                 JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
         currentAbsencePeriod.setEnd(currentAbsencePeriod.getStart());
-        aps.add(currentAbsencePeriod);
+        abs.add(currentAbsencePeriod);
       } else {
         currentAbsencePeriod.setEnd(JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
       }
@@ -146,6 +146,6 @@ public class Leaves extends Controller {
       previousDate = absence.personDay.date;
     }
     
-    return aps;
+    return abs;
   }
 }

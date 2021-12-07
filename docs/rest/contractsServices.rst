@@ -112,7 +112,7 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
                  "office": null
               }
            }
-        ],     
+        ],
   }
 
 
