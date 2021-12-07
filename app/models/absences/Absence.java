@@ -20,6 +20,7 @@ package models.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -29,6 +30,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
@@ -96,6 +99,15 @@ public class Absence extends BaseModel {
   public Set<TimeVariation> timeVariations = Sets.newHashSet();
 
   public String note;
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
   @Override
   public String toString() {
