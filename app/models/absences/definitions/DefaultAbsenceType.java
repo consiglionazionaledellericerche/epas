@@ -54,7 +54,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false, true),
   
   A_98CV("98CV",
-      "Assente ingiustificato no grennpass", false,
+      "Assente ingiustificato no greenpass", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null,
       Sets.newHashSet(), null, null, true, false, true),
   
