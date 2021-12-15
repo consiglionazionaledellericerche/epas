@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0] - UNRELEASED
 ### Added
  - Aggiunti campi externalId e updatedAt nell'esportazione via REST delle assenze
+ - Aggiunto campo externalId a crud Gruppi.
 
 ## [2.2.1] - 2021-12-03
 ### Added
