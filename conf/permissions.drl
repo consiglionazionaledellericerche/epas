@@ -869,7 +869,7 @@ end
 rule showAbsenceRequest
 when 
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
-  $ar: AbsenceRequest(person != currentOperator.person)
+  $ar: AbsenceRequest(person != currentOperator.person, person.office.institute == currentOperator.person.office.institute)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
@@ -1547,18 +1547,6 @@ when
         "Configurations.uploadAttachment"
 
         ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-rule RoleSeatSuperVisor_showForFlows
-when
- $uro: UsersRolesOffices()
- Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ar: AbsenceRequest()
- $c: PermissionCheck(action in (
-		"AbsenceRequests.show"
-		), target == $ar, granted == false)
 then
  $c.grant();
 end
