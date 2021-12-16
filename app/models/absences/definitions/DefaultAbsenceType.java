@@ -857,6 +857,16 @@ public enum DefaultAbsenceType {
   A_45("45", "Congedo straordinario permesso per matrimonio", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true),
+  
+
+  A_46("46", "cong.str./permesso richiamo armi", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
+      null, false, true, true),
+  
+
+  A_46RA("46RA", "cong.str/permesso richiamo armi 1gg", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
+      null, false, true, true),
 
   A_100("100", "Festività locali", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       false, 0, null, Sets.newHashSet(), null, null, false, true, true),
