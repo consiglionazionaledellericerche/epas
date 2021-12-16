@@ -454,6 +454,7 @@ group.description =Descrizione
 group.manager =Responsabile
 group.people =Afferenti al gruppo
 group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
+group.externalId =External id
 groups =Gruppi di lavoro
 
 history.back= Indietro
