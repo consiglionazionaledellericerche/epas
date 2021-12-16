@@ -241,16 +241,17 @@ public class NotificationManager {
     final Person person = absenceRequest.person;
     final String template;
     if (Crud.CREATE == operation) {
-      template = "%s ha inserito una nuova richiesta di assenza: %s";
+      template = "%s ha inserito una nuova richiesta di assenza (%s): %s";
     } else if (Crud.UPDATE == operation) {
-      template = "%s ha modificato una richiesta di assenza: %s";
+      template = "%s ha modificato una richiesta di assenza (%s): %s";
     } else if (Crud.DELETE == operation) {
-      template = "%s ha eliminato una richiesta di assenza: %s";
+      template = "%s ha eliminato una richiesta di assenza (%s): %s";
     } else {
       template = null;
     }
     final String message =
-        String.format(template, person.fullName(), absenceRequest.startAt.toString(DF));
+        String.format(template, person.fullName(), absenceRequest.id, 
+            absenceRequest.startAt.toString(DF));
 
     // se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (absenceRequest.isFullyApproved()) {
@@ -546,14 +547,11 @@ public class NotificationManager {
    * @param insert se si tratta di inserimento (per ora unico caso contemplato)
    */
   public void notificationAbsenceRequestPolicy(User currentUser, AbsenceRequest absenceRequest,
-      boolean insert) {
+      Crud operation) {
     if (currentUser.isSystemUser()) {
       return;
     }
-    if (insert) {
-      notifyAbsenceRequest(absenceRequest, Crud.CREATE);
-      return;
-    }
+    notifyAbsenceRequest(absenceRequest, operation);
   }
 
   /**
@@ -614,7 +612,8 @@ public class NotificationManager {
           } catch (EmailException e) {
             e.printStackTrace();
           }
-          simpleEmail.setSubject("ePas Approvazione flusso");
+          simpleEmail.setSubject(
+              String.format("ePas Approvazione flusso (%s)", absenceRequest.id));
           val mailBody = createAbsenceRequestEmail(absenceRequest, user);
           try {
             simpleEmail.setMsg(mailBody);
@@ -757,11 +756,11 @@ public class NotificationManager {
     final Person person = competence.person;
     String template;
     if (Crud.CREATE == operation) {
-      template = "%s ha inserito una nuova: %s - %s";
+      template = "%s ha inserito una nuova competenza: %s - %s";
     } else if (Crud.UPDATE == operation) {
-      template = "%s ha modificato una: %s - %s";
+      template = "%s ha modificato una competenza: %s - %s";
     } else if (Crud.DELETE == operation) {
-      template = "%s ha eliminato una: %s - %s";
+      template = "%s ha eliminato una competenza: %s - %s";
     } else {
       template = null;
     }

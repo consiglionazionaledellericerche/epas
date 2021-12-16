@@ -1066,7 +1066,7 @@ AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
 AccountRole.REGISTRY_MANAGER= Gestore anagrafica
 
-BlockType.papery =Carteceo
+BlockType.papery =Cartaceo
 BlockType.electronic = Elettronico
 
 CalculationType.standard_CNR=Calcolo standard CNR

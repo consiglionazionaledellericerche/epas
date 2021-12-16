@@ -41,6 +41,7 @@ import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
+import manager.NotificationManager.Crud;
 import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;
 import manager.services.absences.AbsenceForm;
@@ -562,7 +563,7 @@ public class AbsenceRequestManager {
     log.info("{} approvata dal responsabile di gruppo {}.", absenceRequest,
         currentPerson.getFullname());
 
-    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, Crud.UPDATE);
   }
 
   /**
@@ -584,7 +585,7 @@ public class AbsenceRequestManager {
         Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", absenceRequest,
         currentPerson.getFullname());
-    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, Crud.UPDATE);
 
   }
 
@@ -600,7 +601,7 @@ public class AbsenceRequestManager {
         Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.", absenceRequest,
         currentPerson.getFullname());
-    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, true);
+    notificationManager.notificationAbsenceRequestPolicy(user, absenceRequest, Crud.UPDATE);
 
   }
 
