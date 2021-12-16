@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.AbsenceManager;
 import manager.NotificationManager;
+import manager.NotificationManager.Crud;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.flows.AbsenceRequestManager;
@@ -518,7 +519,7 @@ public class AbsenceRequests extends Controller {
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
-            absenceRequest, true);
+            absenceRequest, Crud.CREATE);
         // invio anche la mail
         notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
             absenceRequest, true);
@@ -620,6 +621,9 @@ public class AbsenceRequests extends Controller {
     absenceRequestManager.executeEvent(absenceRequest, Security.getUser().get().person,
         AbsenceRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(AbsenceRequest.class));
+    // invio la notifica a chi doveva validare la mia richiesta
+    notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
+        absenceRequest, Crud.DELETE);
     list(absenceRequest.type);
   }
 
