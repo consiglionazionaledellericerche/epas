@@ -518,10 +518,10 @@ public class PersonDayManager {
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
           personDay.setTimeAtWork(personDay.getTimeAtWork() + missingTime);
-          if (!personDay.isTicketForcedByAdmin) {
-            personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
-                .get().getAbsenceType().timeForMealTicket;
-          }          
+//          if (!personDay.isTicketForcedByAdmin) {
+//            personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
+//                .get().getAbsenceType().timeForMealTicket;
+//          }          
         }        
       }
 
