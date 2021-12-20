@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -68,7 +69,6 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle persone.

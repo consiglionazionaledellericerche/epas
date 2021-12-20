@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
@@ -66,7 +67,6 @@ import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle assenze.

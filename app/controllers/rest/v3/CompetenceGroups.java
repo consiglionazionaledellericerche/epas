@@ -20,6 +20,7 @@ package controllers.rest.v3;
 import cnr.sync.dto.v3.CompetenceCodeGroupShowDto;
 import cnr.sync.dto.v3.CompetenceCodeGroupShowTerseDto;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.CompetenceCodeDao;
 import helpers.JsonResponse;
@@ -30,7 +31,6 @@ import javax.inject.Inject;
 import lombok.val;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per l'esportazione delle informazioni sui gruppi di competenze

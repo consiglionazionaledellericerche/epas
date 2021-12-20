@@ -19,8 +19,8 @@ package common.metrics;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import common.injection.StaticInject;
 import controllers.Security;
-import injection.StaticInject;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

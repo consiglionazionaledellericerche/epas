@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -77,7 +78,6 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**

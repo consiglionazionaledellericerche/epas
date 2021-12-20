@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package security;
+package common.security;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
@@ -23,11 +23,13 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import common.injection.AutoRegister;
+import common.security.SecurityModule.SecurityLogin;
 import controllers.Security;
-import injection.AutoRegister;
 import java.util.Map;
 import models.User;
 import org.drools.KnowledgeBase;
+import play.Play;
 import play.mvc.Http;
 
 /**
@@ -38,9 +40,17 @@ import play.mvc.Http;
 @AutoRegister
 public class SecurityModule implements Module {
 
+  @FunctionalInterface
+  public interface SecurityLogin {
+    boolean isLegacy();
+  }
+
   public static final String REMOTE_ADDRESS = "request.remoteAddress";
   public static final String REQUESTS_CHECKS = "requests.checks";
   public static final String NO_REQUEST_ADDRESS = "localhost";
+  private static final String SECURITY_LEGACY = "security.legacy";
+  private static final String SECURITY_LOGIN = "security.login";
+  private static final String LEGACY = "legacy";
 
   @Provides
   @Named("request.action")
@@ -66,6 +76,17 @@ public class SecurityModule implements Module {
   public String currentIpAddress() {
     return Http.Request.current() != null ? Http.Request.current().remoteAddress
         : NO_REQUEST_ADDRESS;
+  }
+
+  @Provides @Named(SECURITY_LEGACY)
+  public Boolean isSecurityLegacy() {
+    return LEGACY.equalsIgnoreCase(Play.configuration.getProperty(SECURITY_LOGIN, LEGACY));
+  }
+
+  // questo per evitare il provider non digerito in automatico dal play-inject
+  @Provides
+  public SecurityLogin securityType(@Named(SECURITY_LEGACY) Boolean securityLegacy) {
+    return () -> securityLegacy;
   }
 
   @Provides

@@ -62,7 +62,7 @@ import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import models.enumerate.InformationType;
 
-import security.PermissionCheck;
+import common.security.PermissionCheck;
 
 global models.User currentOperator;
 

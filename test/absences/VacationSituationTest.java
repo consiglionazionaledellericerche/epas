@@ -19,10 +19,10 @@ package absences;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
-import injection.StaticInject;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.VacationSituation;
 import models.Contract;

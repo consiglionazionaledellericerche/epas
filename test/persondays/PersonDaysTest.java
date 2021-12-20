@@ -20,7 +20,7 @@ package persondays;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.util.List;
 import lombok.val;
 import manager.PersonDayManager;

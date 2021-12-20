@@ -22,7 +22,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 import javax.persistence.EntityManager;
 import play.db.jpa.JPA;
 

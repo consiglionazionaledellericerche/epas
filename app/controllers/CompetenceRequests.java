@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -54,7 +55,6 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di straordinario dei dipendenti.

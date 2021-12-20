@@ -15,9 +15,9 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import common.injection.StaticInject;
 import controllers.shib.MockShibboleth;
 import dao.PersonDao;
-import injection.StaticInject;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

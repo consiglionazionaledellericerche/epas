@@ -18,8 +18,8 @@
 package missions;
 
 import com.google.inject.Inject;
+import common.injection.StaticInject;
 import dao.PersonDao;
-import injection.StaticInject;
 import lombok.val;
 import manager.MissionManager;
 import manager.services.absences.AbsenceService;

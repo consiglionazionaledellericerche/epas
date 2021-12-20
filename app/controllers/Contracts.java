@@ -23,6 +23,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -62,7 +63,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei contratti.

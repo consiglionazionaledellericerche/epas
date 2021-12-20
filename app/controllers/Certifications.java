@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
@@ -51,7 +52,6 @@ import org.joda.time.YearMonth;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Il controller per l'invio dei dati certificati al nuovo attestati.

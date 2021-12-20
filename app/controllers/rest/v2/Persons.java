@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
@@ -45,7 +46,6 @@ import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione delle persone.

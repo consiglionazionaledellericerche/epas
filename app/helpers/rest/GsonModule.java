@@ -22,7 +22,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 import lombok.val;
 
 /**

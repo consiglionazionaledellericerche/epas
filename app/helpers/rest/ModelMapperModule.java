@@ -19,8 +19,8 @@ package helpers.rest;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import common.injection.AutoRegister;
 import helpers.JodaConverters;
-import injection.AutoRegister;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

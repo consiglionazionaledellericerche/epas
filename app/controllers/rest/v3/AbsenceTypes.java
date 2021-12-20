@@ -20,6 +20,7 @@ import cnr.sync.dto.v3.AbsenceTypeShowDto;
 import cnr.sync.dto.v3.AbsenceTypeShowTerseDto;
 import com.beust.jcommander.internal.Lists;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.AbsenceTypeDao;
 import helpers.JsonResponse;
@@ -34,7 +35,6 @@ import models.absences.AbsenceType;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la consultazione dei codici di assenza.
