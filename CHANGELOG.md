@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunti campi externalId e updatedAt nell'esportazione via REST delle assenze
  - Aggiunto campo externalId a crud Gruppi.
  - Inviata notifica a responsabili per eliminazione richiesta di assenza
-  
+ - Aggiunto controllo abilitazione Shibboleth per autenticazione tramite SAML
+
 ### Changed
  - Aggiornata libreria org.graylog2 -> gelfj per il supporto al GELF 1.1
  - Corretta sostituzione credenziali attestati nel init docker
