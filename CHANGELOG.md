@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
 ### Changed
  - Aggiornata libreria org.graylog2 -> gelfj per il supporto al GELF 1.1
+ - Corretta sostituzione credenziali attestati nel init docker
 
 ## [2.2.1] - 2021-12-03
 ### Added
