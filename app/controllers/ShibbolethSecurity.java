@@ -69,6 +69,11 @@ public class ShibbolethSecurity extends controllers.shib.Security {
    */
   static void onAuthenticated() {
     log.debug("Security: Security.onAuthenticated()");
+    if (!Play.configuration.getProperty("shib.login", "false").equalsIgnoreCase("true")) {
+      log.warn("Bloccato tentativo di autenticazione Shibboleth perché non attivo");
+      session.clear();
+      badRequest("Autenticazione Shibboleth non abilitata.");
+    }
 
     String eppn = session.get("eppn");
     log.debug("Trasformazione dell'utente shibboleth in utente locale, email = {}", eppn);
