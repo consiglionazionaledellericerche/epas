@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Aggiornata libreria org.graylog2 -> gelfj per il supporto al GELF 1.1
  - Corretta sostituzione credenziali attestati nel init docker
+ . Corretto controllo per visualizzazione richieste di ferie da parte dei responsabili di sede
 
 ## [2.2.1] - 2021-12-03
 ### Added
