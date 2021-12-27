@@ -255,7 +255,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime),
           new Behaviour(JustifiedBehaviourName.minimumTime, 60),
           new Behaviour(JustifiedBehaviourName.maximumTime, 300)),
-      new LocalDate(2018, 7, 1), null, false, true, true),
+      new LocalDate(2018, 7, 1), null, true, true, true),
 
   A_661G("661G", "Permesso orario per motivi personali intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
