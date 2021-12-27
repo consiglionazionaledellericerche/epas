@@ -389,18 +389,8 @@ public class Stampings extends Controller {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    
-    if (stamping.way == null) {
-      validation.addError("stamping.way", "Obbligatorio");
-    }
-    if (Strings.isNullOrEmpty(stamping.reason)) {
-      validation.addError("stamping.reason", "Obbligatorio");
-    }
-    if (Strings.isNullOrEmpty(stamping.place)) {
-      validation.addError("stamping.place", "Obbligatorio");
-    }
-   
+    notFoundIfNull(person);  
+  
     //Temporaneo per la validazione
     stamping.date = LocalDateTime.now();
     validation.valid(stamping);
