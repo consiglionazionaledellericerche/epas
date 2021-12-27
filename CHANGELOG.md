@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Corretta sostituzione credenziali attestati nel init docker
  - Corretto controllo per visualizzazione richieste di ferie da parte dei responsabili di sede
  - Corretta validazione dell'orario nell'inserimento lavoro fuori sede
- 
+ - Corretta validazione tipologia in inserimento orario telelavoro
+
 ## [2.2.1] - 2021-12-03
 ### Added
  - Aggiunta modellazione del codice 31_2020 per la gestione delle ferie 2020 prorogate oltre il 31/12/2021
