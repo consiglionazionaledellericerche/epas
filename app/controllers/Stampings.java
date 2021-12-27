@@ -70,6 +70,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.CheckWith;
@@ -399,6 +400,10 @@ public class Stampings extends Controller {
     if (Strings.isNullOrEmpty(stamping.place)) {
       validation.addError("stamping.place", "Obbligatorio");
     }
+   
+    //Temporaneo per la validazione
+    stamping.date = LocalDateTime.now();
+    validation.valid(stamping);
 
     if (validation.hasErrors()) {
       response.status = 400;     
