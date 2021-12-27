@@ -70,6 +70,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import play.data.binding.As;
 import play.data.validation.CheckWith;
@@ -388,20 +389,13 @@ public class Stampings extends Controller {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);
-    
-    if (stamping.way == null) {
-      Validation.addError("stamping.way", "Obbligatorio");
-    }
-    if (Strings.isNullOrEmpty(stamping.reason)) {
-      Validation.addError("stamping.reason", "Obbligatorio");
-    }
-    if (Strings.isNullOrEmpty(stamping.place)) {
-      Validation.addError("stamping.place", "Obbligatorio");
-    }
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
-    val validationResult = validation.valid(stamping);
-    if (!validationResult.ok) {
+    notFoundIfNull(person);  
+  
+    //Temporaneo per la validazione
+    stamping.date = LocalDateTime.now();
+    validation.valid(stamping);
+
+    if (validation.hasErrors()) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
@@ -415,7 +409,8 @@ public class Stampings extends Controller {
       }
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
-    
+
+    stamping.date = stampingManager.deparseStampingDateTime(date, time);
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
