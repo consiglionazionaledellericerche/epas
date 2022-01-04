@@ -95,6 +95,10 @@ public class AbsenceType extends BaseModel {
   public Integer justifiedTime;
   
   @Getter
+  @Column(name = "to_update")
+  public boolean toUpdate = true;
+  
+  @Getter
   @ManyToMany
   @JoinTable(name = "absence_types_justified_types", 
       joinColumns = { @JoinColumn(name = "absence_types_id") }, 
