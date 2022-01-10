@@ -23,6 +23,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
@@ -48,6 +49,7 @@ import play.db.jpa.JPA;
 /**
  * Service per i Contratti.
  */
+@Slf4j
 public class ContractService {
 
   private final AbsenceDao absenceDao;
@@ -181,6 +183,8 @@ public class ContractService {
 
       absenceManager.saveAbsences(insertReport, abs.personDay.person, abs.personDay.date, null, 
           justifiedType, groupAbsenceType);
+      log.info("Salvata assenza {} nel giorno {} per {}", abs.absenceType.code, 
+          abs.personDay.date, abs.personDay.person);
     }
 
   }
