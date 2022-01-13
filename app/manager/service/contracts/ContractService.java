@@ -178,6 +178,12 @@ public class ContractService {
           abs.absenceType.defaultTakableGroup(), 
           abs.personDay.date, abs.personDay.date,
           absenceType, justifiedType, hours, minutes, false, absenceManager);
+      if (insertReport.absencesToPersist.isEmpty()) {
+        insertReport = absenceService.insert(abs.personDay.person, 
+            abs.absenceType.defaultTakableGroup(), 
+            abs.personDay.date, abs.personDay.date,
+            abs.absenceType, justifiedType, hours, minutes, true, absenceManager);
+      }
 
       absenceManager.saveAbsences(insertReport, abs.personDay.person, abs.personDay.date, null, 
           justifiedType, groupAbsenceType);
