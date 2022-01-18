@@ -23,10 +23,13 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.history.ContractHistoryDao;
+import dao.history.HistoryValue;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
@@ -95,6 +98,10 @@ public class Contracts extends Controller {
   static PersonDayDao personDayDao;
   @Inject
   static ContractService contractService;
+  @Inject
+  static ContractHistoryDao historyDao;
+  @Inject
+  static AbsenceDao absenceDao;
 
   /**
    * I contratti del dipendente.
@@ -388,6 +395,33 @@ public class Contracts extends Controller {
           confirmed, isTemporaryMissing, recomputeRecap, sourceDateRecoveryDay, 
           linkedToPreviousContract);
     } else {
+      // Controllo eventuali assenze future prima di chiudere il contratto.
+      List<HistoryValue<Contract>> list = historyDao.lastRevision(contract.id);
+      
+      HistoryValue<Contract> item = list.get(0);
+      if ((item.value.endDate == null && contract.endDate != null) 
+          || (item.value.endContract == null && contract.endContract != null)) {
+        PersonDay pd = personDayDao.getMoreFuturePersonDay(contract.person);
+        if ((contract.endDate != null && pd.date.isAfter(contract.endDate)) 
+            || (contract.endContract != null && pd.date.isAfter(contract.endContract))) {
+          //Cancellazione dei personday successivi alla fine del contratto
+          LocalDate from = null;
+          if (contract.endDate != null && contract.endContract == null) {
+            from = contract.endDate;
+          } 
+          if (contract.endContract != null && contract.endDate == null) {
+            from = contract.endContract;
+          }
+          if (contract.endContract != null && contract.endDate != null) {
+            from = contract.endContract;
+          }
+          List<Absence> absenceFutureList = absenceDao
+              .absenceInPeriod(contract.person, from, Optional.fromNullable(pd.date));
+          for (Absence absence : absenceFutureList) {
+            absence.delete();
+          }
+        }
+      }
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
       } else {
