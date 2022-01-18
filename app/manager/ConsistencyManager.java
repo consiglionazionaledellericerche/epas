@@ -197,6 +197,40 @@ public class ConsistencyManager {
   }
 
   /**
+   * Ricalcolo della situazione di una lista di persone dal mese e anno specificati ad oggi.
+   *
+   * @param personList la lista delle persone da ricalcolare
+   * @param fromDate dalla data
+   * @param onlyRecap se si vuole aggiornare solo i riepiloghi
+   */
+  public void fixPersonSituation(List<Person> personList, LocalDate fromDate, boolean onlyRecap) {
+
+    final List<Promise<Void>> results = new ArrayList<>();
+    for (Person p : personList) {
+
+      results.add(new Job<Void>() {
+
+        @Override
+        public void doJob() {
+          final Person person = Person.findById(p.id);
+
+          if (onlyRecap) {
+            updatePersonRecaps(person.id, fromDate);
+          } else {
+            updatePersonSituation(person.id, fromDate);
+          }
+
+          personDayInTroubleManager.cleanPersonDayInTrouble(person);
+          log.debug("Elaborata la persona ... {}", person);
+        }
+      }.now());
+
+    }
+    Promise.waitAll(results);
+    log.info("Conclusa procedura FixPersonsSituation con parametri!");
+  }
+
+  /**
    * Ricalcola i riepiloghi mensili del contratto a partire dalla data from.
    *
    * @param personId id della persona
