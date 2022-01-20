@@ -357,6 +357,12 @@ cmts.beginDate= Data Inizio
 cmts.endDate= Data Fine
 cmts.timeSlot= Fascia oraria
 
+pwt.description= Nome orario
+pwt.beginDate= Data Inizio
+pwt.endDate= Data fine
+beginTime= Ora di inizio
+endTime= Ora di fine
+
 vp.beginDate= Data Inizio
 vp.endDate= Data Fine
 vp.vacationCode=Piano Ferie
@@ -1293,6 +1299,9 @@ onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a l
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 begin.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 finish.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+beginTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+endTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
 person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200

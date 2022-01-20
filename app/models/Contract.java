@@ -251,6 +251,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     if (type.equals(ContractMandatoryTimeSlot.class)) {
       return Sets.newHashSet(contractMandatoryTimeSlots);
     }
+    if (type.equals(PersonalWorkingTime.class)) {
+      return Sets.newHashSet(personalWorkingTimes);
+    }
     return null;
   }
 

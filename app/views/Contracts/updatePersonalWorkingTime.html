@@ -18,7 +18,7 @@
     <th>Dal</th>
     <th>Al</th>
 	<th>Orario</th>
-	<th>Elimina</th>
+	<th>Azioni</th>
   </tr>
   #{list items:contract.personalWorkingTimes, as:'item'}
   <tr>
@@ -27,9 +27,9 @@
 	<td>#{if item.endDate} ${item.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
 	<td>${item.workingTime}</td>
 	<td>
-		#{secure.check 'Contracts.deleteContractMandatoryTimeSlot'}
-			#{b.edit @Contracts.updateContractMandatoryTimeSlot('id': contract.id, 'cmts.id': item.id) /}
-			#{b.delete @Contracts.deleteContractMandatoryTimeSlot(item.id) /}
+		#{secure.check 'Contracts.deletePersonalWorkingTime'}
+			#{b.edit @Contracts.updatePersonalWorkingTime('id': contract.id, 'pwt.id': item.id) /}
+			#{b.delete @Contracts.deletePersonalWorkingTime(item.id) /}
 		#{/secure.check}
 	</td>
   </tr>
@@ -56,6 +56,8 @@
 	<div class="alert alert-info">
 	  <p>Utilizzare questa form per definire il nuovo periodo di orario di lavoro
 	  personalizzato selezionando la data di inizio e la data di fine periodo.</p>
+	  <p>Inserire l'orario di inizio e l'orario di fine che il dipendente deve rispettare.
+	  I due campi sono <strong>obbligatori</strong>.</p>
 	  <p>Lasciando vuoto il campo <strong>&{'pwt.endDate'}</strong> il nuovo orario personalizzato
 	  verrà applicato fino alla fine del contratto.<p>
 	  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo 
@@ -67,21 +69,24 @@
 		#{f.hidden 'pwt.contract.id' /}
 		#{f.hidden 'pwt.id' /}
 		
-		#{if !confirmed}				 
+		#{if !confirmed}	
+			 #{f.input 'pwt.description', required:true /}			 
 			 #{f.date 'pwt.beginDate', value:pwt.beginDate?.format(), required:true /}
 			 #{f.date 'pwt.endDate', value:pwt.endDate?.format() /}
-			 #{f.input 'pwt.workingTime', required:true /}
+			 #{f.input 'beginTime', popover:'true', required:true /}
+			 #{f.input 'endTime', popover:'true', required:true /}
 			 #{b.buttons center:true}
 			   #{b.submit 'Applica'/}
 			 #{/b.buttons}
 		#{/if}
 		#{else}
 		      #{f.hidden 'confirmed' /}
-			  #{f.simpleView 'cmts.beginDate', value:cmts.beginDate?.format(), hidden:true /}
-			  #{f.simpleView 'cmts.endDate', value:cmts.endDate?.format(), hidden:true /}
-			  #{f.simpleView 'cmts.timeSlot' /}
-			  #{f.hidden 'cmts.timeSlot.id' /}
-			  
+		      #{f.simpleView 'pwt.description', hidden:true /}
+			  #{f.simpleView 'pwt.beginDate', value:pwt.beginDate?.format(), hidden:true /}
+			  #{f.simpleView 'pwt.endDate', value:pwt.endDate?.format(), hidden:true /}
+			  #{f.simpleView 'beginTime', hidden:true /}
+			  #{f.simpleView 'endTime', hidden:true /}
+			  			  
 			  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
 			  #{b.buttons center:true}
 			    #{b.cancel @updatePersonalWorkingTime(contract.id) /}
