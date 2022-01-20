@@ -957,6 +957,7 @@ Contracts.personContracts= Dati Contrattuali
 Contracts.updateContractStampProfile= Presenza Automatica
 Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
+Contracts.updatePersonalWorkingTime= Orario di lavoro personale
 Contracts.updateContractMandatoryTimeSlot= Fascia oraria obbligatoria
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali

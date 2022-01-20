@@ -148,6 +148,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OrderBy("beginDate")
   public Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
   
+  @Getter
+  @NotAudited
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @OrderBy("beginDate")
+  public Set<PersonalWorkingTime> personalWorkingTimes = Sets.newHashSet();
+  
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")

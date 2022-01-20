@@ -55,6 +55,7 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.absences.Absence;
@@ -605,7 +606,50 @@ public class Contracts extends Controller {
     }
 
   }
+  
+  /**
+   * Crud gestione periodi di orario di lavoro personalizzato.
+   *
+   * @param id contratto
+   */
+  public static void updatePersonalWorkingTime(Long id, PersonalWorkingTime pwt) {
 
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    if (pwt == null) {
+      pwt = new PersonalWorkingTime();
+    }
+    pwt.contract = contract;
+
+    render("@updatePersonalWorkingTime", wrappedContract, contract, pwt);
+  }
+  
+  /**
+   * Salva il nuovo periodo di orario di lavoro personalizzato.
+   * 
+   * @param pwt l'orario di lavoro personalizzato
+   * @param confirmed conferma se true
+   */
+  public static void savePersonalWorkingTime(PersonalWorkingTime pwt, boolean confirmed) {
+    
+  }
+
+  /**
+   * Cancella un orario di lavoro personalizzato.
+   * 
+   * @param id identificativo dell'orario da cancellare
+   * @param confirmed conferma se true
+   */
+  public static void deletePersonalWorkingTime (Long id, boolean confirmed) {
+    
+  }
+  
+  
   /**
    * Crud gestione periodi fascia oraria obbligatoria.
    *

@@ -75,6 +75,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final BooleanPath timeForMealTicket = createBoolean("timeForMealTicket");
 
+    public final BooleanPath toUpdate = createBoolean("toUpdate");
+
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 
     public final DatePath<org.joda.time.LocalDate> validTo = createDate("validTo", org.joda.time.LocalDate.class);
