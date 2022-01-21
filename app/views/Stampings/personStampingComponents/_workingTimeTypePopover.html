@@ -16,8 +16,14 @@
     Soglia pomeridiana per buono pasto: <strong>${dayRecap.wttd.get().ticketAfternoonThreshold.printHourMinute()}</strong><br>
     Lavoro da effettuare dopo la soglia pomeridiana: <strong>${dayRecap.wttd.get().ticketAfternoonWorkingTime.printHourMinute()}</strong><br>
   #{/if}
-  Finestra intervallo pranzo: <strong>${dayRecap.lunchInterval}</strong> (estremi compresi)<br>
-  Finestra apertura/chiusura sede: <strong>${dayRecap.workInterval}</strong> (estremi compresi)
+  Finestra intervallo pranzo: <strong>${dayRecap.lunchInterval}</strong> (estremi compresi)<br>  
+   
+  #{if dayRecap.pwttd.present}
+  	Finestra PERSONALE inizio/fine lavoro: <strong>${dayRecap.personalWorkInterval.get()}</strong> (estremi compresi)
+  #{/if}
+  #{else}
+  	Finestra apertura/chiusura sede: <strong>${dayRecap.workInterval}</strong> (estremi compresi)
+  #{/else}
 </div>
 #{/if}
 #{else}

@@ -649,7 +649,13 @@ public class Contracts extends Controller {
 
     IWrapperContract wrappedContract = wrapperFactory.create(pwt.contract);
     Contract contract = pwt.contract;
-    pwt.workingTime = beginTime + " - " + endTime;
+    if (!beginTime.contains(":")) {
+      beginTime = beginTime.substring(0,2) + ":"+ beginTime.substring(2,4);
+    }
+    if (!endTime.contains(":")) {
+      endTime = endTime.substring(0,2) + ":"+ endTime.substring(2,4);
+    }
+    pwt.workingTime = beginTime + "-" + endTime;
     
     if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(pwt.beginDate,
@@ -696,7 +702,7 @@ public class Contracts extends Controller {
       render("@updatePersonalWorkingTime", contract, pwt, confirmed, recomputeRecap, 
           beginTime, endTime);
     } else {
-      pwt.workingTime = beginTime + " - " + endTime;
+      pwt.workingTime = beginTime + "-" + endTime;
       pwt.save();
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();
