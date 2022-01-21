@@ -637,26 +637,19 @@ public class Contracts extends Controller {
    * @param pwt l'orario di lavoro personalizzato
    * @param confirmed conferma se true
    */
-  public static void savePersonalWorkingTime(PersonalWorkingTime pwt, 
-      @Required @CheckWith(StringIsTime.class) String beginTime, 
-      @Required @CheckWith(StringIsTime.class) String endTime, boolean confirmed) {
+  public static void savePersonalWorkingTime(PersonalWorkingTime pwt, boolean confirmed) {
     
     notFoundIfNull(pwt);
     notFoundIfNull(pwt.contract);
+    notFoundIfNull(pwt.timeSlot);
     Verify.verify(pwt.contract.isPersistent());
+    Verify.verify(pwt.timeSlot.isPersistent());
     
     rules.checkIfPermitted(pwt.contract.person.office);
 
     IWrapperContract wrappedContract = wrapperFactory.create(pwt.contract);
     Contract contract = pwt.contract;
-    if (!beginTime.contains(":")) {
-      beginTime = beginTime.substring(0, 2) + ":" + beginTime.substring(2, 4);
-    }
-    if (!endTime.contains(":")) {
-      endTime = endTime.substring(0, 2) + ":" + endTime.substring(2, 4);
-    }
-    pwt.workingTime = beginTime + "-" + endTime;
-    
+        
     if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(pwt.beginDate,
           wrappedContract.getContractDateInterval())) {
@@ -699,10 +692,9 @@ public class Contracts extends Controller {
 
     if (!confirmed) {
       confirmed = true;
-      render("@updatePersonalWorkingTime", contract, pwt, confirmed, recomputeRecap, 
-          beginTime, endTime);
+      render("@updatePersonalWorkingTime", contract, pwt, confirmed, recomputeRecap);
     } else {
-      pwt.workingTime = beginTime + "-" + endTime;
+      
       pwt.save();
       contract = contractDao.getContractById(contract.id);
       contract.person.refresh();

@@ -388,12 +388,8 @@ public class PersonStampingDayRecap {
     if (!pwt.isPresent()) {
       return Optional.absent();
     }
-    final String localTimeFormatter = "HH:mm";
-    String[] times = pwt.get().workingTime.split("-");
-    
-    LocalTime begin = LocalTime.parse(times[0], DateTimeFormat.forPattern(localTimeFormatter));
-    LocalTime end = LocalTime.parse(times[1], DateTimeFormat.forPattern(localTimeFormatter));
-    LocalTimeInterval interval = new LocalTimeInterval(begin, end);
+    LocalTimeInterval interval = 
+        new LocalTimeInterval(pwt.get().timeSlot.beginSlot, pwt.get().timeSlot.endSlot);
     if (interval.to.isBefore(interval.from)) {
       return Optional.absent();
     } else {

@@ -489,7 +489,8 @@ public class ConsistencyManager {
     LocalTimeInterval workInterval = null;
     Optional<PersonalWorkingTime> pwt = pd.getPersonalWorkingTime();
     if (pwt.isPresent()) {
-      workInterval = pwt.get().personalWorkingTime();
+      workInterval = new LocalTimeInterval(pwt.get().timeSlot.beginSlot, 
+          pwt.get().timeSlot.endSlot);
     } else {
       workInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());

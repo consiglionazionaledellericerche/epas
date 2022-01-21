@@ -40,9 +40,13 @@ import play.data.validation.Required;
 @Table(name = "personal_working_times")
 public class PersonalWorkingTime extends PropertyInPeriod implements IPropertyInPeriod {
   
-  public String description;
+  private static final long serialVersionUID = 98286754527639967L;
   
-  public String workingTime;
+  @Getter
+  @Required
+  @ManyToOne
+  @JoinColumn(name = "time_slot_id")
+  public TimeSlot timeSlot;
   
   @Getter
   @Required
@@ -75,49 +79,27 @@ public class PersonalWorkingTime extends PropertyInPeriod implements IPropertyIn
   @Override
   public Object getValue() {
     
-    return this.workingTime;
+    return this.timeSlot;
   }
 
   @Override
   public void setValue(Object value) {
-    this.workingTime = (String) value;
+    this.timeSlot = (TimeSlot) value;
     
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
-    if (otherValue instanceof String) {
-      return this.getValue().equals(((String) otherValue));
+    if (otherValue instanceof TimeSlot) {
+      return this.getValue().equals(((TimeSlot) otherValue));
     }
     return false;
   }
   
   @Override
   public String getLabel() {
-    return Strings.isNullOrEmpty(description) ? String.format("%s", workingTime) 
-        : 
-      String.format("%s (%s)", description, workingTime);
+    return this.timeSlot.getLabel();
   }
   
-  /**
-   * Ritorna l'intervallo orario del dipendente.
-   * 
-   * @return l'opzionale contenente l'intervallo orario del dipendente.
-   */
-  @Transient
-  public LocalTimeInterval personalWorkingTime() {
-    
-    final String localTimeFormatter = "HH:mm";
-    String[] times = this.workingTime.split("-");
-    
-    LocalTime begin = LocalTime.parse(times[0], DateTimeFormat.forPattern(localTimeFormatter));
-    LocalTime end = LocalTime.parse(times[1], DateTimeFormat.forPattern(localTimeFormatter));
-    LocalTimeInterval interval = new LocalTimeInterval(begin, end);
-    if (interval.to.isBefore(interval.from)) {
-      return null;
-    } else {
-      return interval;
-    }    
-  }
-
+  
 }

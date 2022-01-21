@@ -31,8 +31,6 @@ public class QPersonalWorkingTime extends EntityPathBase<PersonalWorkingTime> {
 
     public final QContract contract;
 
-    public final StringPath description = createString("description");
-
     //inherited
     public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
@@ -45,10 +43,10 @@ public class QPersonalWorkingTime extends EntityPathBase<PersonalWorkingTime> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final QTimeSlot timeSlot;
+
     //inherited
     public final NumberPath<Integer> version = _super.version;
-
-    public final StringPath workingTime = createString("workingTime");
 
     public QPersonalWorkingTime(String variable) {
         this(PersonalWorkingTime.class, forVariable(variable), INITS);
@@ -69,6 +67,7 @@ public class QPersonalWorkingTime extends EntityPathBase<PersonalWorkingTime> {
     public QPersonalWorkingTime(Class<? extends PersonalWorkingTime> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
+        this.timeSlot = inits.isInitialized("timeSlot") ? new QTimeSlot(forProperty("timeSlot"), inits.get("timeSlot")) : null;
     }
 
 }

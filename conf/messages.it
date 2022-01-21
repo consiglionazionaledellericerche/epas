@@ -357,11 +357,10 @@ cmts.beginDate= Data Inizio
 cmts.endDate= Data Fine
 cmts.timeSlot= Fascia oraria
 
-pwt.description= Nome orario
+
 pwt.beginDate= Data Inizio
 pwt.endDate= Data fine
-beginTime= Ora di inizio
-endTime= Ora di fine
+pwt.timeSlot=Fascia oraria
 
 vp.beginDate= Data Inizio
 vp.endDate= Data Fine

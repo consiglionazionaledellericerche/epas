@@ -14,7 +14,6 @@
 #{panel title:'Configurazione Attuale', color:'primary'}
 <table class="table table-bordered table-condensed center">
   <tr>
-  	<th>Descrizione</th>
     <th>Dal</th>
     <th>Al</th>
 	<th>Orario</th>
@@ -22,10 +21,9 @@
   </tr>
   #{list items:contract.personalWorkingTimes, as:'item'}
   <tr>
-  	<td>${item.description}</td>
-    <td>${item.beginDate.format()}</td>
+  	<td>${item.beginDate.format()}</td>
 	<td>#{if item.endDate} ${item.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
-	<td>${item.workingTime}</td>
+	<td>${item.timeSlot.label}</td>
 	<td>
 		#{secure.check 'Contracts.deletePersonalWorkingTime'}
 			#{b.edit @Contracts.updatePersonalWorkingTime('id': contract.id, 'pwt.id': item.id) /}
@@ -70,22 +68,22 @@
 		#{f.hidden 'pwt.id' /}
 		
 		#{if !confirmed}	
-			 #{f.input 'pwt.description', required:true /}			 
+			  
 			 #{f.date 'pwt.beginDate', value:pwt.beginDate?.format(), required:true /}
 			 #{f.date 'pwt.endDate', value:pwt.endDate?.format() /}
-			 #{f.input 'beginTime', popover:'true', required:true /}
-			 #{f.input 'endTime', popover:'true', required:true /}
+			 #{f.selectModel 'pwt.timeSlot', 	
+			      items:templateUtility.getEnabledTimeSlotsForOffice(pwt.contract.person.office), required:true /}
 			 #{b.buttons center:true}
 			   #{b.submit 'Applica'/}
 			 #{/b.buttons}
 		#{/if}
 		#{else}
 		      #{f.hidden 'confirmed' /}
-		      #{f.simpleView 'pwt.description', hidden:true /}
+		     
 			  #{f.simpleView 'pwt.beginDate', value:pwt.beginDate?.format(), hidden:true /}
 			  #{f.simpleView 'pwt.endDate', value:pwt.endDate?.format(), hidden:true /}
-			  #{f.simpleView 'beginTime', hidden:true /}
-			  #{f.simpleView 'endTime', hidden:true /}
+			  #{f.simpleView 'pwt.timeSlot' /}
+			  #{f.hidden 'pwt.timeSlot.id' /}
 			  			  
 			  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
 			  #{b.buttons center:true}
