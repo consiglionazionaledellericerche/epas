@@ -27,6 +27,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath cookiePolicyEnabled = createBoolean("cookiePolicyEnabled");
 
+    public final BooleanPath enableAutoconfigCovid19 = createBoolean("enableAutoconfigCovid19");
+
+    public final BooleanPath enableAutoconfigSmartworking = createBoolean("enableAutoconfigSmartworking");
+
     public final BooleanPath enableIllnessFlow = createBoolean("enableIllnessFlow");
 
     public final BooleanPath enableUniqueDailyShift = createBoolean("enableUniqueDailyShift");

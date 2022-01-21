@@ -63,6 +63,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final QPerson person;
 
+    public final SetPath<models.PersonalWorkingTime, QPersonalWorkingTime> personalWorkingTimes = this.<models.PersonalWorkingTime, QPersonalWorkingTime>createSet("personalWorkingTimes", models.PersonalWorkingTime.class, QPersonalWorkingTime.class, PathInits.DIRECT2);
+
     public final QContract previousContract;
 
     public final SimplePath<com.google.common.collect.Range<org.joda.time.LocalDate>> range = createSimple("range", com.google.common.collect.Range.class);

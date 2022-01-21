@@ -6,6 +6,7 @@
   <ul class="nav nav-tabs">
     #{secure.li @Contracts.edit(contract.id) /}
     #{secure.li @Contracts.updateContractWorkingTimeType(contract.id) /}
+    #{secure.li @Contracts.updatePersonalWorkingTime(contract.id) /}
     #{secure.li @Contracts.updateContractMandatoryTimeSlot(contract.id) /}
     #{secure.li @Contracts.updateContractVacationPeriod(contract.id) /}
     #{secure.li @Contracts.updateContractStampProfile(contract.id), target:contract.person.office /}

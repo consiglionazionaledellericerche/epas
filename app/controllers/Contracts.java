@@ -36,6 +36,7 @@ import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -55,11 +56,13 @@ import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -605,7 +608,144 @@ public class Contracts extends Controller {
     }
 
   }
+  
+  /**
+   * Crud gestione periodi di orario di lavoro personalizzato.
+   *
+   * @param id contratto
+   */
+  public static void updatePersonalWorkingTime(Long id, PersonalWorkingTime pwt) {
 
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    if (pwt == null) {
+      pwt = new PersonalWorkingTime();
+    }
+    pwt.contract = contract;
+
+    render("@updatePersonalWorkingTime", wrappedContract, contract, pwt);
+  }
+  
+  /**
+   * Salva il nuovo periodo di orario di lavoro personalizzato.
+   * 
+   * @param pwt l'orario di lavoro personalizzato
+   * @param confirmed conferma se true
+   */
+  public static void savePersonalWorkingTime(PersonalWorkingTime pwt, boolean confirmed) {
+    
+    notFoundIfNull(pwt);
+    notFoundIfNull(pwt.contract);
+    notFoundIfNull(pwt.timeSlot);
+    Verify.verify(pwt.contract.isPersistent());
+    Verify.verify(pwt.timeSlot.isPersistent());
+    
+    rules.checkIfPermitted(pwt.contract.person.office);
+
+    IWrapperContract wrappedContract = wrapperFactory.create(pwt.contract);
+    Contract contract = pwt.contract;
+        
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(pwt.beginDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("pwt.beginDate", "deve appartenere al contratto");
+      }
+      if (pwt.endDate != null && !DateUtility.isDateIntoInterval(pwt.endDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("pwt.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      render("@updatePersonalWorkingTime", pwt, wrappedContract, contract);
+    }
+    
+    val currentPeriods = pwt.getOwner().periods(pwt.getType());
+    if (pwt.isPersistent()) {
+      currentPeriods.remove(pwt);
+    }
+    
+    if (periodManager.isOverlapped(pwt, currentPeriods)) {
+      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, "
+          + "impossibile aggiungerlo", pwt.getLabel());
+      response.status = 400;
+      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", 
+          pwt.getLabel());
+      render("@updatePersonalWorkingTime", pwt, wrappedContract, contract);      
+    }
+
+    val periodRecaps = Lists.newArrayList(currentPeriods);
+    pwt.setRecomputeFrom(pwt.beginDate);   
+    periodRecaps.add(pwt);
+
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+
+    if (!confirmed) {
+      confirmed = true;
+      render("@updatePersonalWorkingTime", contract, pwt, confirmed, recomputeRecap);
+    } else {
+      
+      pwt.save();
+      contract = contractDao.getContractById(contract.id);
+      contract.person.refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(PersonalWorkingTime.class));
+      updatePersonalWorkingTime(contract.id, null);
+    }
+  }
+
+  /**
+   * Cancella un orario di lavoro personalizzato.
+   * 
+   * @param id identificativo dell'orario da cancellare
+   * @param confirmed conferma se true
+   */
+  public static void deletePersonalWorkingTime(Long id, boolean confirmed) {
+    
+    PersonalWorkingTime pwt = PersonalWorkingTime.findById(id);
+
+    notFoundIfNull(pwt);
+
+    rules.checkIfPermitted(pwt.contract.person.office);
+
+    boolean deletion = true;
+    val contract = pwt.contract;
+    if (!confirmed) {
+      IWrapperContract wrappedContract = wrapperFactory.create(pwt.contract);
+      val currentPeriods = pwt.getOwner().periods(pwt.getType());
+      val periodRecaps = Lists.newArrayList(currentPeriods);
+
+      periodRecaps.remove(pwt);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(pwt.beginDate,
+              Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+              periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+      recomputeRecap.recomputeFrom = pwt.beginDate;
+      periodManager.setDays(recomputeRecap);
+      confirmed = true;
+      render("@updatePersonalWorkingTime", pwt, contract, deletion, recomputeRecap);
+    } else {
+      pwt.delete();
+      flash.success(Web.msgDeleted(PersonalWorkingTime.class));
+    }
+    updatePersonalWorkingTime(pwt.contract.id, null);
+  }
+  
+  
   /**
    * Crud gestione periodi fascia oraria obbligatoria.
    *
