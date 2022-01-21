@@ -650,10 +650,10 @@ public class Contracts extends Controller {
     IWrapperContract wrappedContract = wrapperFactory.create(pwt.contract);
     Contract contract = pwt.contract;
     if (!beginTime.contains(":")) {
-      beginTime = beginTime.substring(0,2) + ":"+ beginTime.substring(2,4);
+      beginTime = beginTime.substring(0, 2) + ":" + beginTime.substring(2, 4);
     }
     if (!endTime.contains(":")) {
-      endTime = endTime.substring(0,2) + ":"+ endTime.substring(2,4);
+      endTime = endTime.substring(0, 2) + ":" + endTime.substring(2, 4);
     }
     pwt.workingTime = beginTime + "-" + endTime;
     

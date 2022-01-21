@@ -17,18 +17,22 @@
 
 package models;
 
+import com.google.common.base.Optional;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.testng.util.Strings;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.ToString;
+import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.testng.util.Strings;
 import play.data.validation.Required;
 
 @ToString
@@ -93,6 +97,27 @@ public class PersonalWorkingTime extends PropertyInPeriod implements IPropertyIn
     return Strings.isNullOrEmpty(description) ? String.format("%s", workingTime) 
         : 
       String.format("%s (%s)", description, workingTime);
+  }
+  
+  /**
+   * Ritorna l'intervallo orario del dipendente.
+   * 
+   * @return l'opzionale contenente l'intervallo orario del dipendente.
+   */
+  @Transient
+  public LocalTimeInterval personalWorkingTime() {
+    
+    final String localTimeFormatter = "HH:mm";
+    String[] times = this.workingTime.split("-");
+    
+    LocalTime begin = LocalTime.parse(times[0], DateTimeFormat.forPattern(localTimeFormatter));
+    LocalTime end = LocalTime.parse(times[1], DateTimeFormat.forPattern(localTimeFormatter));
+    LocalTimeInterval interval = new LocalTimeInterval(begin, end);
+    if (interval.to.isBefore(interval.from)) {
+      return null;
+    } else {
+      return interval;
+    }    
   }
 
 }

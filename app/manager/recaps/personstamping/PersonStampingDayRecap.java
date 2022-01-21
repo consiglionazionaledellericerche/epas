@@ -378,19 +378,21 @@ public class PersonStampingDayRecap {
   }
 
   /**
+   * Metodo privato per la restituzione dell'intervallo orario.
    * 
    * @param pwt il personal working time del dipendente.
    * @return l'intervallo orario di lavoro.
    */
-  private Optional<LocalTimeInterval> personalWorkingTimeInterval(Optional<PersonalWorkingTime> pwt) {
+  private Optional<LocalTimeInterval> personalWorkingTimeInterval(
+      Optional<PersonalWorkingTime> pwt) {
     if (!pwt.isPresent()) {
       return Optional.absent();
     }
-    final String LOCALTIME_FORMATTER = "HH:mm";
+    final String localTimeFormatter = "HH:mm";
     String[] times = pwt.get().workingTime.split("-");
     
-    LocalTime begin = LocalTime.parse(times[0], DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
-    LocalTime end = LocalTime.parse(times[1], DateTimeFormat.forPattern(LOCALTIME_FORMATTER));
+    LocalTime begin = LocalTime.parse(times[0], DateTimeFormat.forPattern(localTimeFormatter));
+    LocalTime end = LocalTime.parse(times[1], DateTimeFormat.forPattern(localTimeFormatter));
     LocalTimeInterval interval = new LocalTimeInterval(begin, end);
     if (interval.to.isBefore(interval.from)) {
       return Optional.absent();

@@ -53,6 +53,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
+import models.PersonalWorkingTime;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -484,8 +485,15 @@ public class ConsistencyManager {
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
-    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
+    
+    LocalTimeInterval workInterval = null;
+    Optional<PersonalWorkingTime> pwt = pd.getPersonalWorkingTime();
+    if (pwt.isPresent()) {
+      workInterval = pwt.get().personalWorkingTime();
+    } else {
+      workInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+    }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
