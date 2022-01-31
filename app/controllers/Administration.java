@@ -172,14 +172,23 @@ public class Administration extends Controller {
    */
 
   public static void utilities() {
-    utilities(null, null, null, null);
+    log.debug("Chiamata utilities senza parametri");
+    final List<Person> personList = personDao.list(
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, LocalDate.now(), LocalDate.now(), true)
+        .list();
+    val officeList = officeDao.allEnabledOffices().stream()
+        .sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+    render(personList, officeList);
   }
-  
+
   /**
    * metodo che renderizza la pagina di utilities.
    */
   public static void utilities(Person person, Office office, Integer year, Integer month) {
-
+    log.debug("Chiamata utilities con parametri");
     final List<Person> personList = personDao.list(
         Optional.<String>absent(),
         secureManager.officesWriteAllowed(Security.getUser().get()),
@@ -225,6 +234,8 @@ public class Administration extends Controller {
     
     if (validation.hasErrors()) {
       flash.error("Correggere gli errori evidenziati");
+      log.debug("Errori di validazione in fixPersonSituation, person={}, office={}, year={}, month={}",
+          person, office, year, month);
       validation.keep();
       utilities(person, office, year, month);
     }
