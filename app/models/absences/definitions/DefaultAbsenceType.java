@@ -36,6 +36,11 @@ import org.joda.time.LocalDate;
  *
  */
 public enum DefaultAbsenceType {
+  
+  A_VAC19("VAC-19",
+      "Assenza per la somministrazione del vaccino contro il COVID-19", false,
+      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false, 0, null,
+      Sets.newHashSet(), new LocalDate(2022, 1, 1), null, true, false, false),
 
   A_SMART("SMART",
       "Smartworking a completamento", false,
