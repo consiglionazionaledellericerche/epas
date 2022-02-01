@@ -120,8 +120,8 @@ public enum DefaultTakable {
     -1, null),
   
   T_39LA(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 
       -1, null),
   
   T_SMART(AmountType.units, 
@@ -482,7 +482,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_400, DefaultAbsenceType.A_410,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA),
+          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
           ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -526,7 +527,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_400, DefaultAbsenceType.A_410,
           DefaultAbsenceType.A_409, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA),
+          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 

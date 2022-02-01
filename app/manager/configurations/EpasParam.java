@@ -192,6 +192,10 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+
+  
+  //#######################################################################################
+  // GENERAL PARAMS
   
 
   PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM("people_allowed_insert_medical_exam",

@@ -85,7 +85,7 @@ public class RequestInit extends Controller {
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
-    if (params.get("year") != null) {
+    if (params.get("year") != null && !params.get("year").isEmpty()) {
       year = Integer.valueOf(params.get("year"));
     } else if (session.get("yearSelected") != null) {
       year = Integer.valueOf(session.get("yearSelected"));
@@ -97,7 +97,7 @@ public class RequestInit extends Controller {
 
     // month init ////////////////////////////////////////////////////////////////
     Integer month;
-    if (params.get("month") != null) {
+    if (params.get("month") != null && !params.get("month").isEmpty()) {
       month = Integer.valueOf(params.get("month"));
     } else if (session.get("monthSelected") != null) {
       month = Integer.valueOf(session.get("monthSelected"));
@@ -109,7 +109,7 @@ public class RequestInit extends Controller {
 
     // day init //////////////////////////////////////////////////////////////////
     Integer day;
-    if (params.get("day") != null) {
+    if (params.get("day") != null && !params.get("day").isEmpty()) {
       day = Integer.valueOf(params.get("day"));
     } else if (session.get("daySelected") != null) {
       day = Integer.valueOf(session.get("daySelected"));

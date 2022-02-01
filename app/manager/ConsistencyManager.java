@@ -53,6 +53,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
+import models.PersonalWorkingTime;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -170,6 +171,40 @@ public class ConsistencyManager {
       personList = personDao.list(Optional.<String>absent(), offices, false, fromDate,
           LocalDate.now().minusDays(1), true).list();
     }
+
+    final List<Promise<Void>> results = new ArrayList<>();
+    for (Person p : personList) {
+
+      results.add(new Job<Void>() {
+
+        @Override
+        public void doJob() {
+          final Person person = Person.findById(p.id);
+
+          if (onlyRecap) {
+            updatePersonRecaps(person.id, fromDate);
+          } else {
+            updatePersonSituation(person.id, fromDate);
+          }
+
+          personDayInTroubleManager.cleanPersonDayInTrouble(person);
+          log.debug("Elaborata la persona ... {}", person);
+        }
+      }.now());
+
+    }
+    Promise.waitAll(results);
+    log.info("Conclusa procedura FixPersonsSituation con parametri!");
+  }
+
+  /**
+   * Ricalcolo della situazione di una lista di persone dal mese e anno specificati ad oggi.
+   *
+   * @param personList la lista delle persone da ricalcolare
+   * @param fromDate dalla data
+   * @param onlyRecap se si vuole aggiornare solo i riepiloghi
+   */
+  public void fixPersonSituation(List<Person> personList, LocalDate fromDate, boolean onlyRecap) {
 
     final List<Promise<Void>> results = new ArrayList<>();
     for (Person p : personList) {
@@ -450,8 +485,16 @@ public class ConsistencyManager {
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
-    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
+    
+    LocalTimeInterval workInterval = null;
+    Optional<PersonalWorkingTime> pwt = pd.getPersonalWorkingTime();
+    if (pwt.isPresent()) {
+      workInterval = new LocalTimeInterval(pwt.get().timeSlot.beginSlot, 
+          pwt.get().timeSlot.endSlot);
+    } else {
+      workInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+    }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,

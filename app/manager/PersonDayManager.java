@@ -518,11 +518,12 @@ public class PersonDayManager {
         } else {
           //Time at work è quelle delle timbrature meno la pausa pranzo
           personDay.setTimeAtWork(personDay.getTimeAtWork() + missingTime);
-          if (!personDay.isTicketForcedByAdmin) {
-            personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
-                .get().getAbsenceType().timeForMealTicket;
-          }          
-        }        
+        }
+        if (!personDay.isTicketAvailable && getCompleteDayAndAddOvertime(personDay)
+            .get().getAbsenceType().timeForMealTicket) {
+          personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
+              .get().getAbsenceType().timeForMealTicket;
+        } 
       }
 
     }
@@ -1528,7 +1529,7 @@ public class PersonDayManager {
    *     lavorato in sede.
    */
   private List<PairStamping> computeValidPairStampingsForPresence(List<Stamping> orderedStampings) {
-    
+
     if (orderedStampings.isEmpty()) {
       return Lists.newArrayList();
     }
@@ -1573,7 +1574,7 @@ public class PersonDayManager {
           stampEnter = stamping;
         }
       }
-      
+
     }
     return pairStampings;
   }
@@ -1752,7 +1753,7 @@ public class PersonDayManager {
 
         val previousShortPermission = 
             personDay.absences.stream().filter(a -> a.absenceType.code.equals("PB")).findFirst();
-       
+
         if (inShift || isAllDayAbsencePresent || personDay.isHoliday()) {
           if (previousShortPermission.isPresent()) {
             //Viene fatta prima la merge perché l'assenza è detached
