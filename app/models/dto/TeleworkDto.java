@@ -24,18 +24,20 @@ import lombok.Builder;
 import lombok.Data;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.YearMonth;
+import play.data.validation.Required;
 
 /**
  * Informazioni sulla timbratura per lavoro fuori sede.
  */
 @Data
-@Builder()
+@Builder
 public class TeleworkDto {
   
   private Long id;
 
   private long personDayId;
   
+  @Required
   private TeleworkStampTypes stampType;
   
   private LocalDateTime date;

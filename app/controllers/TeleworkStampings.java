@@ -52,6 +52,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -286,7 +287,7 @@ public class TeleworkStampings extends Controller {
    * @throws NoSuchFieldException eccezione di mancanza di parametro
    */
   public static void save(Long personId, @Required LocalDate date, 
-      @Required TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
+      @Required @Valid TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
           throws NoSuchFieldException, ExecutionException {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 

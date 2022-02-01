@@ -31,6 +31,7 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
@@ -52,6 +53,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
   private Optional<Contract> personDayContract = null;
   private Boolean isFixedTimeAtWorkk = null;
   private Optional<WorkingTimeTypeDay> workingTimeTypeDay = null;
+  private Optional<PersonalWorkingTime> personalWorkingTime = null;
 
   @Inject
   WrapperPersonDay(@Assisted PersonDay pd, ContractDao contractDao,
@@ -291,6 +293,26 @@ public class WrapperPersonDay implements IWrapperPersonDay {
       }
     }
     return last;
+  }
+
+  @Override
+  public Optional<PersonalWorkingTime> getPersonalWorkingTime() {
+    if (this.personalWorkingTime != null) {
+      return this.personalWorkingTime;
+    }
+
+    if (getPersonDayContract().isPresent() 
+        && !getPersonDayContract().get().personalWorkingTimes.isEmpty()) {
+      
+      for (PersonalWorkingTime pwt : getPersonDayContract().get().personalWorkingTimes) {
+        if (DateUtility.isDateIntoInterval(this.value.date,
+            new DateInterval(pwt.beginDate, pwt.endDate))) {
+          return Optional.fromNullable(pwt);
+        }
+      }
+      
+    }
+    return Optional.absent();
   }
 
 }

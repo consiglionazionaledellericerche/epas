@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
+import helpers.TemplateUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import lombok.ToString;
@@ -83,6 +84,7 @@ public class AbsenceService {
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
   private final ConfigurationManager configurationManager;
+  private final TemplateUtility templateUtility;
 
   /**
    * Costruttore injection.
@@ -97,7 +99,7 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility, ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager, SecureManager secureManager,
-      EnumAllineator enumAllineator) {
+      EnumAllineator enumAllineator, TemplateUtility templateUtility) {
     this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
@@ -106,6 +108,7 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
+    this.templateUtility = templateUtility;
   }
 
   /**
@@ -581,14 +584,14 @@ public class AbsenceService {
           groupsPermitted.remove(covid19);
         }
       }
-      groupsPermitted.remove(covid19);
+      //groupsPermitted.remove(covid19);
       groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
-      groupsPermitted.remove(cod39LA);
+      //groupsPermitted.remove(cod39LA);
       for (AbsenceType abt : smart.category.getAbsenceTypes()) {
-        if (abt.isExpired()) {
+        if (abt.isExpired() || !templateUtility.enableSmartworking()) {
           groupsPermitted.remove(smart);
         }
       }

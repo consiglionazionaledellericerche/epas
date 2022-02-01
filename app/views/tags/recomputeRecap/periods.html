@@ -11,7 +11,7 @@
 		    <td>${periodRecap.beginDate.format()}</td>
 			<td>#{if periodRecap.endDate != null} ${periodRecap.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
 			<td>
-			    ${periodRecap.value.label()}
+			    ${periodRecap.value.label() != null ? periodRecap.value.label() : periodRecap.label()}
 			</td>
 		  </tr>
 		  #{/list}

@@ -139,7 +139,7 @@ fi
 if [ -z "${URL_PASS}" ]; then
   sed -n '/URL_PASS/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{URL_PASS}}#'"${URL_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed "s/{{URL_PASS}}/${URL_PASS}/g" -i ${APP_HOME}/conf/prod.conf
 fi
 
 if [ -z "${JOBS_ACTIVE}" ]; then

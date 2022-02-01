@@ -1,0 +1,100 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + contract.person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (contract.person.fullname):@Contracts.personContracts(contract.person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include './_tabs.html' /}
+
+<div class="container" id="updateMts">
+
+#{panel title:'Configurazione Attuale', color:'primary'}
+<table class="table table-bordered table-condensed center">
+  <tr>
+    <th>Dal</th>
+    <th>Al</th>
+	<th>Orario</th>
+	<th>Azioni</th>
+  </tr>
+  #{list items:contract.personalWorkingTimes, as:'item'}
+  <tr>
+  	<td>${item.beginDate.format()}</td>
+	<td>#{if item.endDate} ${item.endDate.format()} #{/if}#{else}<em>Indeterminato</em>#{/else}</td>
+	<td>${item.timeSlot.label}</td>
+	<td>
+		#{secure.check 'Contracts.deletePersonalWorkingTime'}
+			#{b.edit @Contracts.updatePersonalWorkingTime('id': contract.id, 'pwt.id': item.id) /}
+			#{b.delete @Contracts.deletePersonalWorkingTime(item.id) /}
+		#{/secure.check}
+	</td>
+  </tr>
+  #{/list}
+</table>
+#{/panel}
+
+#{if deletion}
+  #{form action:@Contracts.deletePersonalWorkingTime(), class:'form-horizontal'}
+   	#{f.hidden 'confirmed' /}
+	#{f.hidden 'id', value:pwt.id /}
+
+    #{recomputeRecap.show recomputeRecap:recomputeRecap /}
+	#{b.buttons center:true}
+		#{b.cancel @updatePersonalWorkingTime(pwt.contract.id) /}
+		#{b.submit 'Conferma'/}
+    #{/b.buttons}
+  #{/form}
+#{/if} 
+
+#{else}
+	      	
+	#{secure.check 'Contracts.savePersonalWorkingTime'}
+	<div class="alert alert-info">
+	  <p>Utilizzare questa form per definire il nuovo periodo di orario di lavoro
+	  personalizzato selezionando la data di inizio e la data di fine periodo.</p>
+	  <p>Inserire l'orario di inizio e l'orario di fine che il dipendente deve rispettare.
+	  I due campi sono <strong>obbligatori</strong>.</p>
+	  <p>Lasciando vuoto il campo <strong>&{'pwt.endDate'}</strong> il nuovo orario personalizzato
+	  verrà applicato fino alla fine del contratto.<p>
+	  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo 
+	  	delle modifiche e chiesto un comando di conferma. </p>
+	</div>
+	
+	#{form action:@Contracts.savePersonalWorkingTime(), class:'form-horizontal'}
+		
+		#{f.hidden 'pwt.contract.id' /}
+		#{f.hidden 'pwt.id' /}
+		
+		#{if !confirmed}	
+			  
+			 #{f.date 'pwt.beginDate', value:pwt.beginDate?.format(), required:true /}
+			 #{f.date 'pwt.endDate', value:pwt.endDate?.format() /}
+			 #{f.selectModel 'pwt.timeSlot', 	
+			      items:templateUtility.getEnabledTimeSlotsForOffice(pwt.contract.person.office), required:true /}
+			 #{b.buttons center:true}
+			   #{b.submit 'Applica'/}
+			 #{/b.buttons}
+		#{/if}
+		#{else}
+		      #{f.hidden 'confirmed' /}
+		     
+			  #{f.simpleView 'pwt.beginDate', value:pwt.beginDate?.format(), hidden:true /}
+			  #{f.simpleView 'pwt.endDate', value:pwt.endDate?.format(), hidden:true /}
+			  #{f.simpleView 'pwt.timeSlot' /}
+			  #{f.hidden 'pwt.timeSlot.id' /}
+			  			  
+			  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
+			  #{b.buttons center:true}
+			    #{b.cancel @updatePersonalWorkingTime(contract.id) /}
+			    #{b.submit 'Conferma'/}
+			  #{/b.buttons}
+			 
+		#{/else}
+		 
+	#{/form}
+	#{/secure.check}
+#{/else}
+	
+</div>

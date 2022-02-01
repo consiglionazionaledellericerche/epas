@@ -35,6 +35,7 @@
       <th class="group-single">Nome</th>
       <th class="group-single">Assenza</th>
       <th class="group-single">Tempo<br>Lavoro</th>
+      <th class="group-single">Differenza</th>
       #{list items:1..numberOfInOut, as:'i'}
       <th class="group-left">${i}° entrata</th>
       <th class="group-right">${i}° uscita</th>
@@ -58,6 +59,8 @@
       </td>
       <!--Colonna tempo a lavoro-->
       <td class="default-single">${dayRecap.personDay.timeAtWork.printHourMinute()}</td>
+      <!--Colonna differenza-->
+      <td class="default-single">${dayRecap.personDay.difference.printHourMinute()}</td>
       <!--Colonne Assenze-->
       #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 

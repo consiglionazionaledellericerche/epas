@@ -176,6 +176,6 @@ public class PrintTags extends Controller {
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
     log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
     List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
-    renderPDF(dtoList, offSiteWorkingTemp);
+    renderPDF(dtoList, offSiteWorkingTemp, person);
   }
 }

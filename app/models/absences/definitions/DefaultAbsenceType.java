@@ -36,6 +36,11 @@ import org.joda.time.LocalDate;
  *
  */
 public enum DefaultAbsenceType {
+  
+  A_VAC19("VAC-19",
+      "Assenza per la somministrazione del vaccino contro il COVID-19", false,
+      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false, 0, null,
+      Sets.newHashSet(), new LocalDate(2022, 1, 1), null, true, false, false),
 
   A_SMART("SMART",
       "Smartworking a completamento", false,
@@ -45,13 +50,13 @@ public enum DefaultAbsenceType {
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false, true),
+      Sets.newHashSet(), null, null, true, false, true),
   
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
       + "con maturazione buono pasto", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false, true),
+      Sets.newHashSet(), null, null, true, false, true),
   
   A_98CV("98CV",
       "Assente ingiustificato no greenpass", false,
@@ -61,6 +66,12 @@ public enum DefaultAbsenceType {
   A_39LA("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), null, null, true, false, true),
+  
+  A_39LANOBP("39LA",
+      "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso "
+      + "senza buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, true, false, true),
   
   A_40LA("40LA",
@@ -249,7 +260,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime),
           new Behaviour(JustifiedBehaviourName.minimumTime, 60),
           new Behaviour(JustifiedBehaviourName.maximumTime, 300)),
-      new LocalDate(2018, 7, 1), null, false, true, true),
+      new LocalDate(2018, 7, 1), null, true, true, true),
 
   A_661G("661G", "Permesso orario per motivi personali intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,

@@ -4,10 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.0] - UNRELEASED
+## [2.3.0] - 2022-01-21
 ### Added
+ - Aggiunta possibilità di lanciare i ricalcoli per personale di una sede.
  - Aggiunti campi externalId e updatedAt nell'esportazione via REST delle assenze
- - Inviata notifica a responsabili per eliminazione richiesta di assenza 
+ - Aggiunto campo externalId a crud Gruppi.
+ - Inviata notifica a responsabili per eliminazione richiesta di assenza
+ - Aggiunto controllo abilitazione Shibboleth per autenticazione tramite SAML
+ - Aggiunta interfaccia per la definizione di un orario di lavoro personalizzato per il dipendente
+ - Aggiunto controllo nel calcolo del tempo a lavoro che verifica se esiste un orario di lavoro
+   personalizzato che sovrascrive quello della sede.
+
+### Changed
+ - Rimossa possibilità di lanciare i ricalcoli per tutto il personale presente nel sistema.
+ - Aggiornata libreria org.graylog2 -> gelfj per il supporto al GELF 1.1
+ - Corretta sostituzione credenziali attestati nel init docker
+ - Corretto controllo per visualizzazione richieste di ferie da parte dei responsabili di sede
+ - Corretta validazione dell'orario nell'inserimento lavoro fuori sede
+ - Corretta validazione tipologia in inserimento orario telelavoro
 
 ## [2.2.1] - 2021-12-03
 ### Added

@@ -600,10 +600,16 @@ public class Absences extends Controller {
           + "parametro 'Assenze visibili dai dipendenti'.");
       Stampings.stampings(year, month);
     }
-
+    LocalDate date;
+    if (year == 0 || month == 0 || day == 0) {
+      date = LocalDate.now();
+      flash.error("Non sono stati indicati correttamente anno, mese e giorno per la richiesta. "
+          + "Mostrate le assenze di oggi.");
+    } else {
+      date = new LocalDate(year, month, day);
+    }
     Person person = Security.getUser().get().person;
     List<Person> list = personDao.byOffice(person.office);
-    LocalDate date = new LocalDate(year, month, day);
     List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
     render(pdList, person, date);
   }

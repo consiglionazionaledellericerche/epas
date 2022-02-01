@@ -76,7 +76,7 @@ require:
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
-    - org.graylog2 -> gelfj 1.1.15
+    - org.graylog2 -> gelfj 1.1.16
     - org.apache.commons -> commons-csv 1.8
     - org.apache.commons -> commons-compress 1.20
     - io.micrometer -> micrometer-registry-prometheus 1.7.3

@@ -869,7 +869,7 @@ end
 rule showAbsenceRequest
 when 
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
-  $ar: AbsenceRequest(person != currentOperator.person, person.office.institute == currentOperator.person.office.institute)
+  $ar: AbsenceRequest(person != currentOperator.person, person.getInstitute() == currentOperator.person.getInstitute())
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
@@ -1157,6 +1157,7 @@ when
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
     "Contracts.updateContractWorkingTimeType",
+    "Contracts.updatePersonalWorkingTime",
     "Contracts.updateContractMandatoryTimeSlot",
     "Contracts.initializationsStatus",
     "Contracts.initializationsVacation",
@@ -2306,9 +2307,11 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
+        "Contracts.updatePersonalWorkingTime",
         "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.savePersonalWorkingTime",
         "Persons.children",
         "Persons.editChild",
         "Persons.saveChild",
@@ -2418,6 +2421,8 @@ when
         "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.updatePersonalWorkingTime",
+        "Contracts.savePersonalWorkingTime",
         "Persons.children",
         "Persons.editChild",
         "Persons.saveChild",
@@ -2526,6 +2531,8 @@ when
         "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.updatePersonalWorkingTime",
+        "Contracts.savePersonalWorkingTime",
 		"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
