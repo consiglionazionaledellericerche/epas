@@ -197,6 +197,11 @@ public class PersonStampingRecap {
               .getStampMofificationType(StampModificationTypeCode.MARKED_BY_EMPLOYEE);
           stampModificationTypeSet.add(smt);
         }
+        if (stamp.markedByTelework) {
+          StampModificationType smt = stampingDayRecapFactory.stampTypeManager
+              .getStampMofificationType(StampModificationTypeCode.MARKED_BY_TELEWORK);
+          stampModificationTypeSet.add(smt);
+        }
         if (stamp.stampModificationType != null) {
           if (stamp.stampModificationType.code
               .equals(StampModificationTypeCode.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {

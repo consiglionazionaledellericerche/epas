@@ -45,7 +45,8 @@ public enum StampModificationTypeCode {
   TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT("x"),
   ACTUAL_TIME_AT_WORK("f"),
   FIXED_WORKINGTIME("d"),
-  MARKED_BY_EMPLOYEE("md");
+  MARKED_BY_EMPLOYEE("md"),
+  MARKED_BY_TELEWORK("tl");
 
 
   private String code;

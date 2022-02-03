@@ -199,7 +199,7 @@ public class StampingManager {
    *     buon fine, stringa vuota altrimenti.
    */
   public String persistStamping(Stamping stamping, 
-      Person person, User currentUser, boolean newInsert) {
+      Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
     val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
@@ -213,8 +213,14 @@ public class StampingManager {
           stamping.markedByEmployee = false;
           stamping.markedByAdmin = true;
         } else {
-          stamping.markedByEmployee = true;
           stamping.markedByAdmin = false;
+          if (isTeleworkStamping) {
+            stamping.markedByTelework = true;
+            stamping.markedByEmployee = false;
+          } else {
+            stamping.markedByTelework = false;
+            stamping.markedByEmployee = true;
+          }
         }
       }
       stamping.save();

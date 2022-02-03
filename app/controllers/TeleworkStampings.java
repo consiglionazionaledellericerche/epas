@@ -267,9 +267,6 @@ public class TeleworkStampings extends Controller {
       flash.error("Errore nell'eliminazione della timbratura su sistema esterno. Errore %s", 
           result);
     }
-    teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
-        Integer.parseInt(session.get("monthSelected")));
-
     flash.success("Timbratura %s - %s eliminata correttamente", 
         stamping.formattedHour(), stamping.getStampType());
     teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
