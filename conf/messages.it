@@ -1199,6 +1199,7 @@ OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con c
 MATERNITY_PERIOD=Periodo Maternità
 TELEWORK=Auto inserimento codice di assenza per Telelavoro
 TELEWORK_STAMPINGS=Orario in telelavoro
+ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME =Timbrature in telelavoro abilitate anche per orario di lavoro
 DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
 DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 parente disabile
 RIGHT_TO_STUDY=Permessi per diritto allo studio
