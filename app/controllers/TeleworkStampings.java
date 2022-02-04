@@ -264,7 +264,7 @@ public class TeleworkStampings extends Controller {
 
     log.debug("Comunico con il nuovo sistema per la cancellazione della "
         + "timbratura in telelavoro...");     
-
+    stamping = comunication.get(teleworkStampingId);
     int result = 0;
     try {
       result = comunication.delete(teleworkStampingId);
@@ -275,7 +275,6 @@ public class TeleworkStampings extends Controller {
     if (result == Http.StatusCode.NO_RESPONSE) {
       PersonDay pd = personDayDao.getPersonDayById(stamping.getPersonDayId());
       if (pd.person.isTopQualification()) {
-        stamping = comunication.get(teleworkStampingId);
         WayType way = stampingManager.retrieveWayFromTeleworkStamping(stamping);
         LocalDateTime dateTime = new LocalDateTime(stamping.getDate().getYear(), 
             stamping.getDate().getMonthValue(), stamping.getDate().getDayOfMonth(), 
@@ -333,7 +332,8 @@ public class TeleworkStampings extends Controller {
     stamping.setPersonDayId(pd.getId());
     int result = manager.save(stamping);
     if (result == Http.StatusCode.CREATED) {
-      if (person.isTopQualification()) {        
+      if (person.isTopQualification()) { 
+        log.info("Inserisco la stessa timbratura anche nel cartellino di {}", person.fullName());
         Stamping ordinaryStamping = stampingManager
             .generateStampingFromTelework(stamping, pd, time);
         String ordinaryStampingResult = stampingManager

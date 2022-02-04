@@ -35,6 +35,7 @@ public enum StampModificationTypeCode {
     6 | d    | Considerato presente se non ci sono codici di assenza (orario di lavoro
              | autodichiarato)
     7 | md   | Timbratura modificata dal dipendente
+    8 | tl   | Timbratura inserita dalla form del telelavoro per livelli I-III
    */
 
 
