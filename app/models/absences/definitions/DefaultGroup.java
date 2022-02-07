@@ -322,6 +322,11 @@ public enum DefaultGroup {
   TELELAVORO("Telelavoro", "", DefaultCategoryType.TELELAVORO, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_TELELAVORO, null,
       null, false, false),
+  
+  TELELAVORO_RICERCATORI_TECNOLOGI("Telelavoro Ricercatori Tecnologi", "", 
+      DefaultCategoryType.TELELAVORO_RICERCATORI_TECNOLOGI, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_TELELAVORO_RT, null,
+      null, false, false),
 
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_PUBBLICA_FUNZIONE,
@@ -459,6 +464,10 @@ public enum DefaultGroup {
    */
   public static List<String> employeeTeleworkCodes() {
     return getCodes(DefaultGroup.TELELAVORO);
+  }
+  
+  public static List<String> employeeTeleworkWithResidualCodes() {
+    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
   }
 
   public static List<String> employeeDisabledRelativeCodes() {

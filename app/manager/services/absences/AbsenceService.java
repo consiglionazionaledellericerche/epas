@@ -542,6 +542,9 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
     final GroupAbsenceType telework =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
+    final GroupAbsenceType teleworkResearcher =
+        absenceComponentDao.groupAbsenceTypeByName(
+            DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get();
     final GroupAbsenceType disabledPersonAbsence =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledPersonAbsenceTwoHours =
@@ -628,6 +631,11 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
+      }
+      
+      if ((Boolean) confManager.configValue(person, 
+          EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME)) {
+        groupsPermitted.add(teleworkResearcher);
       }
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_PERSON_PERMISSION)) {

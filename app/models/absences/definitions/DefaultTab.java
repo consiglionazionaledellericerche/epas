@@ -43,6 +43,7 @@ public enum DefaultTab {
   FERIE_DIPENDENTI("Ferie e Permessi", 10), 
   RIPOSI_DIPENDENTI("Riposo Compensativo", 11), 
   TELELAVORO("Telelavoro", 12), 
+  TELELAVORO_RICERCATORI_TECNOLOGI("Telelavoro ricercatori tecnologi", 13), 
   LEGGE_104_DIPENDENTI("L. 104 dipendenti", 13),
   LEGGE_104_PARENTI_DIPENDENTI("L. 104 parenti dipendenti", 14), 
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
