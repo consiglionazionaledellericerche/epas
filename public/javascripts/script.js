@@ -16,7 +16,19 @@ $(function($) {
 		$(this).addClass('active');
 		e.preventDefault();
 	});
-		
+
+	//Non viene utilizzata la auto-submit perché non permette
+	//di scrivere correttamente la data ma effettua la submit
+	//prima di terminare di scrivere la data completa
+	$(document.body).on('change', 'input.auto-submit-parent[datepicker]', 
+	function () {
+		var $input = $(this);
+		if ($input.val().length == 10) {
+			$input.parents("form").submit();
+		}
+		return true;
+	});
+
 	/**
 	 * evita i doppi invii sulle submit delle form.
 	 */

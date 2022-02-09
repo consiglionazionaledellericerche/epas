@@ -15,16 +15,17 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 #{/alert}
 </div>
 #{form action:@edit(), method:'POST', autocomplete:false,
-	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
-                        
+	class:'form form-horizontal', 'data-spinner':'#modalSpinner'}
+
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
 
-	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
-	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
-	
+	#{f.date 'absenceRequest.startAt', required:true, class:'auto-submit-parent',
+		value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.endTo', class:'auto-submit-parent',
+		value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 
 	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
 	

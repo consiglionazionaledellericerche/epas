@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - UNRELEASED
+### Changed
+ - Aggiornate dipendenze jquery e bootstrap-datapicker
+ - Rivisti metodi di aggiornamento automatico delle pagine con selezioni di date
+   per migliorare l'accessibilità
+ - Migliorati i tag per la generazione delle input in modo da aggiungere title e aria-label
+   utili per l'accessibiità
+ 
 ## [2.3.0] - 2022-01-21
 ### Added
  - Aggiunta possibilità di lanciare i ricalcoli per personale di una sede.
