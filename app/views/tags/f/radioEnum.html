@@ -5,7 +5,8 @@ disabled: input disabilitato
 }*
 #{f.edit _arg, label:_label, required:_required}
 %{
-value = _value == null ? field.value : _value;
+  value = _value == null ? field.value : _value;
+  label = _label == null ? messages.get(field.name) : _label;
 }%
 #{list _items}
 <label class="radio-inline ${_class}"
@@ -13,8 +14,9 @@ value = _value == null ? field.value : _value;
 #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
 <input type="radio" name="${field.name}" id="${field.id}" value="${_}"
        #{if field.value== _} checked#{/if}
-#{if _disabled} disabled #{/if}
-#{if _readonly} readonly="readonly" #{/if}>
+  #{if _disabled} disabled #{/if}
+  #{if _readonly} readonly="readonly" #{/if}
+  title="${label}" aria-label="${label}">
 ${_.label()}
 </label>
 #{/list}
