@@ -101,8 +101,7 @@ require:
     - com.squareup.okhttp3 -> logging-interceptor 4.6.0
     - io.github.resilience4j -> resilience4j-feign 1.7.1
     - com.auth0 -> jwks-rsa 0.19.0
-    - it.besmartbeopen -> keycloak-client 1.0.0
-
+    - it.cnr.iit -> keycloak-client 1.0.0
 # My custom repository
 
 repositories:
@@ -121,8 +120,4 @@ repositories:
         artifact: ${application.path}/[module]-[revision].jar
         contains:
           - it.cnr.iit -> play-qmodel 1.5.3
-    - besmartbeopen_openrepo:
-        type: iBiblio
-        root: https://dev.besmartbeopen.it/api/v4/projects/161/packages/maven
-        contains:
-          - it.besmartbeopen -> keycloak-client
+          - it.cnr.iit -> keycloak-client 1.0.0
