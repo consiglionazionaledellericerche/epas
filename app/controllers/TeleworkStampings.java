@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLite;
 import dao.PersonDayDao;
@@ -43,12 +44,17 @@ import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.TeleworkValidation;
 import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
@@ -98,6 +104,8 @@ public class TeleworkStampings extends Controller {
   static StampingDao stampingDao;
   @Inject
   static ConsistencyManager consistencyManager;
+  @Inject
+  static AbsenceDao absenceDao;
 
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
@@ -275,16 +283,21 @@ public class TeleworkStampings extends Controller {
     if (result == Http.StatusCode.NO_RESPONSE) {
       PersonDay pd = personDayDao.getPersonDayById(stamping.getPersonDayId());
       if (pd.person.isTopQualification()) {
+
         WayType way = stampingManager.retrieveWayFromTeleworkStamping(stamping);
         LocalDateTime dateTime = new LocalDateTime(stamping.getDate().getYear(), 
             stamping.getDate().getMonthValue(), stamping.getDate().getDayOfMonth(), 
             stamping.getDate().getHour(), stamping.getDate().getMinute(), 
-            stamping.getDate().getSecond());;
+            stamping.getDate().getSecond());
         Optional<Stamping> stampingToDelete = stampingDao.getStamping(dateTime, pd.person, way);
         if (stampingToDelete.isPresent()) {
           stampingToDelete.get().delete();
           consistencyManager.updatePersonSituation(pd.person.id, pd.date);
         }        
+        // Rimuovere il codice 103RT se non ci sono più timbrature nel giorno
+        if (pd.stampings.isEmpty()) {
+          manager.deleteTeleworkAbsenceCode(pd);
+        }
       }
       flash.success("Orario eliminato correttamente");        
     } else {
@@ -338,6 +351,10 @@ public class TeleworkStampings extends Controller {
             .generateStampingFromTelework(stamping, pd, time);
         String ordinaryStampingResult = stampingManager
             .persistStamping(ordinaryStamping, person, person.user, true, true);
+        //Inserisco in automatico il codice 103RT se non già presente
+        if (absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
+          manager.insertTeleworkAbsenceCode(person, date);
+        }
         if (!Strings.isNullOrEmpty(ordinaryStampingResult)) {
           flash.error(ordinaryStampingResult);
         } else {

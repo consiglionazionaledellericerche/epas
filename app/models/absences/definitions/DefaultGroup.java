@@ -466,9 +466,9 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.TELELAVORO);
   }
   
-  public static List<String> employeeTeleworkWithResidualCodes() {
-    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
-  }
+//  public static List<String> employeeTeleworkWithResidualCodes() {
+//    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
+//  }
 
   public static List<String> employeeDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
