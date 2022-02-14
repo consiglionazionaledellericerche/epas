@@ -1,10 +1,10 @@
 package common.oauth2;
 
 import com.google.common.base.Verify;
-import it.besmartbeopen.keycloak.api.RealmsAdminApi;
-import it.besmartbeopen.keycloak.api.UsersApi;
-import it.besmartbeopen.keycloak.model.CredentialRepresentation;
-import it.besmartbeopen.keycloak.model.UserRepresentation;
+import it.cnr.iit.keycloak.api.RealmsAdminApi;
+import it.cnr.iit.keycloak.api.UsersApi;
+import it.cnr.iit.keycloak.model.CredentialRepresentation;
+import it.cnr.iit.keycloak.model.UserRepresentation;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,19 +26,13 @@ import models.User;
 public class UserManager {
 
   private final UsersApi usersApi;
-  private final RealmsAdminApi adminApi;
   private final String realm;
-  private final String client;
 
   @Inject
   public UserManager(@NonNull UsersApi usersApi,
-                     @NonNull RealmsAdminApi adminApi,
-                     @NonNull @Named(OpenIdClientsModule.KEYCLOAK_REALM) String realm,
-                     @NonNull @Named(OpenIdClientsModule.KEYCLOAK_CLIENT_ID) String client) {
+                     @NonNull @Named(OpenIdClientsModule.KEYCLOAK_REALM) String realm) {
     this.usersApi = usersApi;
-    this.adminApi = adminApi;
     this.realm = realm;
-    this.client = client;
   }
 
   /**
@@ -50,7 +44,7 @@ public class UserManager {
     return Optional.ofNullable(user.keycloakId).map(id -> usersApi.realmUsersIdGet(realm, id));
   }
 
-  UserRepresentation byUsername(User user) {
+  Map<String, Object> byUsername(User user) {
     return usersApi.realmUsersGet(realm, Map.of("username", user.username))
         .stream().findFirst().orElseThrow();
   }
@@ -64,26 +58,6 @@ public class UserManager {
     usersApi.realmUsersIdResetPasswordPut(realm, user.keycloakId, data);
   }
 
-  /**
-   * Occorre: il ruolo realm-management -> view-events
-   *
-   * @param user l'operatore di cui individuare l'ultimo accesso
-   * @param num quanti accessi plevare (>=1)
-   * @return le eventuali informazioni sugli ultimi accessi
-   */
-  public List<AccessInfo> lastLogin(@NonNull User user, int num) {
-    Verify.verify(num >= 1);
-    if (user.keycloakId == null) {
-      log.warn("ignoring non keycloak user {}", user);
-      return null;
-    }
-    return adminApi.realmEventsGet(realm,
-        Map.of("type", "LOGIN","client", client, "max", num,
-            "user", user.keycloakId)).stream()
-        .map(item -> new AccessInfo(toLocalDateTime(Instant.ofEpochMilli(item.getTime())),
-            item.getIpAddress()))
-        .collect(Collectors.toList());
-  }
 
   public Integer usersCount() {
     return usersApi.realmUsersCountGet(realm, Map.of());

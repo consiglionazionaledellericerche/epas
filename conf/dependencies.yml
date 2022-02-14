@@ -101,7 +101,8 @@ require:
     - com.squareup.okhttp3 -> logging-interceptor 4.6.0
     - io.github.resilience4j -> resilience4j-feign 1.7.1
     - com.auth0 -> jwks-rsa 0.19.0
-    - it.cnr.iit -> keycloak-client 1.0.0
+    - it.cnr.iit -> keycloak-client 16.1
+
 # My custom repository
 
 repositories:
@@ -121,3 +122,4 @@ repositories:
         contains:
           - it.cnr.iit -> play-qmodel 1.5.3
           - it.cnr.iit -> keycloak-client 1.0.0
+          - it.cnr.iit -> keycloak-client 16.1
