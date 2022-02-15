@@ -20,7 +20,6 @@ package controllers;
 import common.oauth2.OpenIdConnectClient;
 import common.security.SecurityModule;
 import common.security.SecurityRules;
-import dao.UserDao;
 import helpers.LogEnhancer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import models.User;
 import play.Play;
 import play.libs.OAuth2;
@@ -44,6 +44,7 @@ import play.mvc.With;
  *
  * @author Marco Andreini
  */
+@Slf4j
 @With({RequestInit.class, LogEnhancer.class, Metrics.class})
 public class Resecure extends Controller {
 
@@ -139,13 +140,6 @@ public class Resecure extends Controller {
   // ~~~ Utils
   @Util
   static void redirectToOriginalURL() {
-    // effetto collaterale: evento di nuovo current user
-//    try {
-//      bus.post(SecurityEvent.of(getCurrentUser().get(), request.remoteAddress,
-//          SecurityEvent.SecurityEventType.AUTHENTICATED));
-//    } catch (NoSuchElementException e) {
-//      logout();
-//    }
     String url = flash.get(URL);
     if(url == null) {
       url = Play.ctxPath + "/";
@@ -174,10 +168,16 @@ public class Resecure extends Controller {
     try {
       // si verifica la presenza del jwt e si preleva il relativo username
       val jwtUsername = SecurityTokens.retrieveAndValidateJwtUsername();
+      log.debug("JWT username = '{}'", jwtUsername.orElse(null));
       if (jwtUsername.isPresent() && (connected() == null)) {
+        String username = jwtUsername.get(); 
+        if (username.contains("@")) {
+          username = username.substring(0, username.indexOf("@"));
+        }
         // WARNING: lo username viene impostato solo se non c'è; questo per evitare di
         // sovrascrivere l'utente quando autenticato via JWT e in SUDO.
-        session.put(USERNAME, jwtUsername.get());
+        session.put(USERNAME, username);
+        log.info("Impostato nella sessione {} = {}", USERNAME, username);
       }
     } catch (SecurityTokens.InvalidUsername e) {
       // forza lo svuotamento per evitare accessi non graditi
@@ -187,10 +187,12 @@ public class Resecure extends Controller {
 
   @NoCheck
   public static void oauthCallback(String code, String state) {
+    log.debug("Callback received code = {}, state = {}", code, state);
     OAuth2.Response oauthResponse = openIdConnectClient.retrieveAccessToken(code, state, session.get(STATE));
     if (oauthResponse == null) {
       error("Could not retrieve jwt");
     } else {
+      log.debug("OAuth2 Response = {}", response);
       SecurityTokens.setJwtSession(oauthResponse);
       setSessionUsernameIfAvailable();
       redirectToOriginalURL();
