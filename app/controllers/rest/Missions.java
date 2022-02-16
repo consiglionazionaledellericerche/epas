@@ -24,6 +24,7 @@ import dao.OfficeDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonMissionBinder;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import manager.MissionManager;
 import manager.configurations.ConfigurationManager;
@@ -88,7 +89,7 @@ public class Missions extends Controller {
     //Ufficio prelevato tramite il codice sede passato nel JSON
     Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
-    Office office = body.person.office;
+    Office office = body.person.getOffice(new LocalDate(body.dataInizio.toLocalDate())).get();
     
     if (!officeByMessage.isPresent()) {
       logWarn(

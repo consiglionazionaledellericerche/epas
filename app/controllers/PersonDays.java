@@ -75,7 +75,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.person.getOffice(personDay.date).get());
     
     Integer hours = 0;
     Integer minutes = 0;
@@ -98,7 +98,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
     
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.person.getOffice(personDay.date).get());
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.onHoliday) {
@@ -128,7 +128,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.person.getOffice(personDay.date).get());
     
     Integer hours = 0;
     Integer minutes = 0;
@@ -151,7 +151,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
     
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.person.getOffice(personDay.date).get());
     
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.outOpening) {
@@ -180,7 +180,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.person.getOffice(personDay.date).get());
 
     if (!confirmed) {
       confirmed = true;

@@ -355,7 +355,7 @@ public class Configurations extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     List<PersonConfiguration> currentConfiguration = configurationManager
         .getPersonConfigurationsByDate(person, LocalDate.now());
@@ -372,7 +372,7 @@ public class Configurations extends Controller {
 
     PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
-    rules.checkIfPermitted(configuration.person.office);
+    rules.checkIfPermitted(configuration.person.getCurrentOffice().get());
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.epasParam,
         configuration.beginDate, configuration.calculatedEnd(),
@@ -395,7 +395,7 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration.person);
     notFoundIfNull(configuration.person.getCurrentOffice().get());
 
-    rules.checkIfPermitted(configuration.person.office);
+    rules.checkIfPermitted(configuration.person.getCurrentOffice().get());
 
     PersonConfiguration newConfiguration = (PersonConfiguration) compute(configuration,
         configuration.epasParam, configurationDto);

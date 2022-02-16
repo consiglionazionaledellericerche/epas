@@ -93,7 +93,7 @@ public class Affiliations extends Controller {
       render("@blankByPerson", affiliation, activeGroups);
     }
 
-    rules.checkIfPermitted(affiliation.getPerson().office);
+    rules.checkIfPermitted(affiliation.getPerson().getCurrentOffice().get());
     affiliation.save();
 
     log.info("Aggiunta/Modificata affiliazione di {} al gruppo {}", 

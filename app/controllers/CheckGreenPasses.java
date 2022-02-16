@@ -98,7 +98,7 @@ public class CheckGreenPasses extends Controller {
    */
   public static void save(Person person) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     CheckGreenPass greenPass = new CheckGreenPass();
     LocalDate date = LocalDate.now();
     greenPass.person = person;
@@ -118,7 +118,7 @@ public class CheckGreenPasses extends Controller {
   public static void deletePerson(long checkGreenPassId) {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.person.office);
+    rules.checkIfPermitted(greenPass.person.getCurrentOffice().get());
     Office office = greenPass.person.getCurrentOffice().get();
     LocalDate date = greenPass.checkDate;
     greenPass.delete();
@@ -136,7 +136,7 @@ public class CheckGreenPasses extends Controller {
     
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.person.office);
+    rules.checkIfPermitted(greenPass.person.getCurrentOffice().get());
     if (greenPass.checked) {
       greenPass.checked = false;
     } else {

@@ -372,7 +372,7 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
       Long personMonthSituationId) {
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
     checkErrors(begin, end, year, month, value);
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);

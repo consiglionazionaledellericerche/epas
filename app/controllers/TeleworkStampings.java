@@ -174,7 +174,7 @@ public class TeleworkStampings extends Controller {
     
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 

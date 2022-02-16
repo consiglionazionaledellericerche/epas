@@ -191,7 +191,7 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),

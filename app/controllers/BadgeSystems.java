@@ -225,7 +225,7 @@ public class BadgeSystems extends Controller {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     boolean personFixed = true;
 
@@ -371,7 +371,7 @@ public class BadgeSystems extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person.getCurrentOffice().get());
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     render(person);
   }

@@ -372,7 +372,7 @@ public class Competences extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
     boolean certificationsSent = false;
     List<Certification> certificationList = certificationDao
         .personCertifications(person, year, month);
@@ -402,7 +402,7 @@ public class Competences extends Controller {
       Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
 
     LocalDate date = new LocalDate(year, month, 1);
 
@@ -1343,7 +1343,7 @@ public class Competences extends Controller {
   public static void handlePersonShiftShiftType(Long id) {
     PersonShiftShiftType psst = shiftDao.getById(id);
     notFoundIfNull(psst);
-    rules.checkIfPermitted(psst.personShift.person.office);    
+    rules.checkIfPermitted(psst.personShift.person.getCurrentOffice().get());    
     render(psst);
   }
 
@@ -1353,7 +1353,7 @@ public class Competences extends Controller {
    * @param psst l'oggetto associazione tra persona e turno.
    */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
-    rules.checkIfPermitted(psst.personShift.person.office);
+    rules.checkIfPermitted(psst.personShift.person.getCurrentOffice().get());
     psst.save();
     flash.success("Informazioni salvate correttamente");
     manageShiftType(psst.shiftType.id);
@@ -1450,7 +1450,7 @@ public class Competences extends Controller {
   public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.person.office);
+    rules.checkIfPermitted(person.person.getOffice(beginDate).get());
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
     }
@@ -1634,7 +1634,7 @@ public class Competences extends Controller {
   public static void saveReperibilityConfiguration(PersonReperibilityType type, 
       Person person, LocalDate beginDate) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(beginDate).get());
     notFoundIfNull(type);
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");

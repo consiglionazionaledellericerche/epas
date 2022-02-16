@@ -177,7 +177,7 @@ public class Groups extends Controller {
   public static void edit(long groupId) {
     Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.manager.office);
+    rules.checkIfPermitted(group.manager.getCurrentOffice().get());
     Office office = group.manager.getCurrentOffice().get();
     List<Person> peopleForGroups = personDao.byInstitute(office.institute);
     render(group, office, peopleForGroups);

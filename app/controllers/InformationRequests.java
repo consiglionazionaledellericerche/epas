@@ -662,7 +662,7 @@ public class InformationRequests extends Controller {
     }
     
     Preconditions.checkNotNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     List<TeleworkApprovalDto> dtoList = Lists.newArrayList();
     List<TeleworkRequest> teleworkRequests = informationRequestDao.personTeleworkList(person);
     TeleworkApprovalDto dto = null;

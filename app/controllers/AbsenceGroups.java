@@ -815,7 +815,7 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(date).get());
 
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
@@ -872,7 +872,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(initializationGroup.groupAbsenceType);
     notFoundIfNull(initializationGroup.date);
 
-    rules.checkIfPermitted(initializationGroup.person.office);
+    rules.checkIfPermitted(initializationGroup.person.getOffice(initializationGroup.date).get());
 
     PeriodChain periodChain = absenceService.residual(initializationGroup.person,
         initializationGroup.groupAbsenceType, initializationGroup.date);
@@ -930,7 +930,7 @@ public class AbsenceGroups extends Controller {
 
     notFoundIfNull(initializationGroup);
 
-    rules.checkIfPermitted(initializationGroup.person.office);
+    rules.checkIfPermitted(initializationGroup.person.getOffice(initializationGroup.date).get());
 
     initializationGroup.delete();
 
@@ -1342,7 +1342,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
 
     CertificationYearSituation yearSituation = absenceCertificationService
         .buildCertificationYearSituation(person, year, false);
@@ -1359,7 +1359,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     int year = LocalDate.now().getYear();
     if (LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY) {
       year = year - 1;
@@ -1384,7 +1384,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
     LocalDate updateFrom = LocalDate.now();
     LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue()
         .dayOfMonth().withMinimumValue();
