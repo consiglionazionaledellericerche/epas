@@ -230,8 +230,8 @@ public class BadgeSystems extends Controller {
     boolean personFixed = true;
 
     BadgeSystem badgeSystem = null;
-    if (!person.office.badgeSystems.isEmpty()) {
-      badgeSystem = person.office.badgeSystems.get(0);
+    if (!person.getCurrentOffice().get().badgeSystems.isEmpty()) {
+      badgeSystem = person.getCurrentOffice().get().badgeSystems.get(0);
     }
 
     render("@joinBadges", person, badgeSystem, personFixed);
@@ -370,7 +370,7 @@ public class BadgeSystems extends Controller {
   public static void personBadges(Long personId) {
 
     Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person.office);
+    notFoundIfNull(person.getCurrentOffice().get());
     rules.checkIfPermitted(person.office);
 
     render(person);

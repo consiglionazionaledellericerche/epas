@@ -271,7 +271,7 @@ public class Stampings extends Controller {
 
     if (user.person != null && user.person.equals(person) 
         && !wrperson.isTechnician()) {
-      if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+      if (person.getOffice(date).get().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
         autocertification = true;
       }
     }
@@ -402,7 +402,7 @@ public class Stampings extends Controller {
       boolean disableInsert = false;
       User user = Security.getUser().get();
       if (user.person != null) {
-        if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+        if (person.getOffice(date).get().checkConf(EpasParam.WORKING_OFF_SITE, "true") 
             && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
           disableInsert = true;
         }
@@ -629,7 +629,8 @@ public class Stampings extends Controller {
 
     final User user = Security.getUser().get();
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
-    Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(user, role, user.person.office);
+    Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(user, role, 
+        user.person.getCurrentOffice().get());
     List<Person> people = Lists.newArrayList();
     if (uro.isPresent()) {
       
@@ -646,7 +647,7 @@ public class Stampings extends Controller {
     List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
-    Office office = user.person.office;
+    Office office = user.person.getCurrentOffice().get();
     Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;

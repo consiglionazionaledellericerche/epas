@@ -393,7 +393,7 @@ public class Configurations extends Controller {
 
     notFoundIfNull(configuration);
     notFoundIfNull(configuration.person);
-    notFoundIfNull(configuration.person.office);
+    notFoundIfNull(configuration.person.getCurrentOffice().get());
 
     rules.checkIfPermitted(configuration.person.office);
 
@@ -424,8 +424,8 @@ public class Configurations extends Controller {
     }
 
     if (configuration.epasParam.equals(EpasParam.OFF_SITE_STAMPING)
-        && !(Boolean) configurationManager.configValue(configuration.person.office,
-        EpasParam.WORKING_OFF_SITE)) {
+        && !(Boolean) configurationManager
+        .configValue(configuration.person.getCurrentOffice().get(), EpasParam.WORKING_OFF_SITE)) {
       response.status = 400;
       flash.error("Prima abilitare la timbratura per lavoro fuori sede per i dipendenti "
           + "tra i parametri della sede.");

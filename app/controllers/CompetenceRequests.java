@@ -195,7 +195,8 @@ public class CompetenceRequests extends Controller {
     List<PersonReperibilityType> types = Lists.newArrayList();
     boolean insertable = false; 
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-      types = repDao.getReperibilityTypeByOffice(person.office, Optional.of(false))      
+      types = repDao.getReperibilityTypeByOffice(person.getCurrentOffice().get(), 
+          Optional.of(false))      
           .stream().filter(prt -> prt.personReperibilities.stream()
               .anyMatch(pr -> pr.person.equals(person)))
           .collect(Collectors.toList());
@@ -237,7 +238,8 @@ public class CompetenceRequests extends Controller {
         .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
         
     List<PersonReperibilityType> types = repDao
-        .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+        .getReperibilityTypeByOffice(competenceRequest.person.getCurrentOffice().get(), 
+            Optional.of(false))      
         .stream().filter(prt -> prt.personReperibilities.stream()
             .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
         .collect(Collectors.toList());
@@ -312,7 +314,8 @@ public class CompetenceRequests extends Controller {
           .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
           
       List<PersonReperibilityType> types = repDao
-          .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+          .getReperibilityTypeByOffice(competenceRequest.person.getCurrentOffice().get(), 
+              Optional.of(false))      
           .stream().filter(prt -> prt.personReperibilities.stream()
               .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
           .collect(Collectors.toList());

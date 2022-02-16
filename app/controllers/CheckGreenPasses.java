@@ -105,7 +105,7 @@ public class CheckGreenPasses extends Controller {
     greenPass.checkDate = date;
     greenPass.checked = false;
     greenPass.save();
-    Office office = person.office;
+    Office office = person.getCurrentOffice().get();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     render("@dailySituation", list, office, date);
   }
@@ -119,7 +119,7 @@ public class CheckGreenPasses extends Controller {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
     rules.checkIfPermitted(greenPass.person.office);
-    Office office = greenPass.person.office;
+    Office office = greenPass.person.getCurrentOffice().get();
     LocalDate date = greenPass.checkDate;
     greenPass.delete();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
@@ -143,7 +143,7 @@ public class CheckGreenPasses extends Controller {
       greenPass.checked = true;
     }
     greenPass.save();
-    Office office = greenPass.person.office;
+    Office office = greenPass.person.getCurrentOffice().get();
     LocalDate date = greenPass.checkDate;
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     flash.success("Aggiornato il controllo per %s", greenPass.person.fullName());

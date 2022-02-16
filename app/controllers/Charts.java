@@ -214,7 +214,7 @@ public class Charts extends Controller {
   public static void exportFinalSituation() {
     rules.checkIfPermitted(Security.getUser().get().person.office);
     Set<Office> offices = Sets.newHashSet();
-    offices.add(Security.getUser().get().person.office);
+    offices.add(Security.getUser().get().person.getCurrentOffice().get());
     String name = null;
     List<Person> personList = personDao.list(
         Optional.fromNullable(name),
@@ -349,7 +349,8 @@ public class Charts extends Controller {
       List<Long> peopleIds = Lists.newArrayList();
       peopleIds.add(personId);
       file = chartsManager
-          .buildFile(person.office, false, onlyMission, peopleIds, beginDate, endDate, exportFile);
+          .buildFile(person.getCurrentOffice().get(), false, onlyMission, peopleIds, beginDate, 
+              endDate, exportFile);
     } catch (ArchiveException | IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       excelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());

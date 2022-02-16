@@ -246,7 +246,8 @@ public class AbsenceRequests extends Controller {
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
     List<Group> groups = 
-        groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results =
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
@@ -305,7 +306,7 @@ public class AbsenceRequests extends Controller {
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
           LocalDate.now().getMonthOfYear(), true);
-      int maxDays = (Integer) configurationManager.configValue(person.office,
+      int maxDays = (Integer) configurationManager.configValue(person.getCurrentOffice().get(),
           EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
       handleCompensatoryRestSituation = true;
@@ -444,8 +445,8 @@ public class AbsenceRequests extends Controller {
         && absenceRequest.person.isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(absenceRequest.person,
           LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), true);
-      int maxDays = (Integer) configurationManager.configValue(absenceRequest.person.office,
-          EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
+      int maxDays = (Integer) configurationManager.configValue(absenceRequest.person
+          .getCurrentOffice().get(), EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
 
     }

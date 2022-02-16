@@ -84,7 +84,8 @@ public class ReportMailer extends Mailer {
 
     if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
       if (user.get().person != null) {
-        dests = userDao.getUsersWithRoles(user.get().person.office, Role.PERSONNEL_ADMIN).stream()
+        dests = userDao.getUsersWithRoles(user.get().person.getCurrentOffice().get(), 
+            Role.PERSONNEL_ADMIN).stream()
             .filter(u -> u.person != null).map(u -> u.person.email).collect(Collectors.toList());
       }
     } else {

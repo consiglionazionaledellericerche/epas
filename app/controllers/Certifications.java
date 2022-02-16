@@ -280,7 +280,8 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(new LocalDate(year, month, 1)).get(), 
+              new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -355,7 +356,8 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(new LocalDate(year, month, 1)).get(), 
+              new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -366,7 +368,7 @@ public class Certifications extends Controller {
     // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
     // informazioni per una sola persona tramite link (button sulla singola persona)
     if (redirect) {
-      certifications(person.office.id, year, month);
+      certifications(person.getOffice(new LocalDate(year, month, 1)).get().id, year, month);
     }
 
     render("@personStatus", personCertData, stepSize, person);

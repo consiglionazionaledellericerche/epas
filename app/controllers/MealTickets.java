@@ -120,7 +120,8 @@ public class MealTickets extends Controller {
     Integer ticketNumberFrom = 1;
     Integer ticketNumberTo = 22;
 
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
+    LocalDate expireDate = mealTicketDao
+        .getFurtherExpireDateInOffice(person.getCurrentOffice().get());
 
     render(person, recap, recapPrevious, deliveryDate, expireDate, today,
         ticketNumberFrom, ticketNumberTo);
@@ -175,7 +176,8 @@ public class MealTickets extends Controller {
     Integer ticketNumberFrom = 1;
     Integer ticketNumberTo = 22;
 
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(contract.person.office);
+    LocalDate expireDate = mealTicketDao
+        .getFurtherExpireDateInOffice(contract.person.getCurrentOffice().get());
     User admin = Security.getUser().get();
     Person person = contract.person;
     render(person, recap, deliveryDate, admin, expireDate, 
@@ -256,7 +258,7 @@ public class MealTickets extends Controller {
     }
 
     MealTickets.recapMealTickets(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(),
-        contract.person.office.id);
+        contract.person.getCurrentOffice().get().id);
   }
 
   /**
@@ -303,7 +305,7 @@ public class MealTickets extends Controller {
     }
 
     //Controllo dei parametri
-    Office office = person.office;
+    Office office = person.getCurrentOffice().get();
     if (office == null) {
       flash.error("dramma");
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
@@ -599,7 +601,7 @@ public class MealTickets extends Controller {
       } else {
         mealTicket = mealTicketDao
             .getMealTicketsMatchCodeBlock(code, 
-                Optional.of(Security.getUser().get().person.office));
+                Optional.of(Security.getUser().get().person.getCurrentOffice().get()));
       }
       blocks = MealTicketStaticUtility
           .getBlockMealTicketFromOrderedList(mealTicket, Optional.<DateInterval>absent());

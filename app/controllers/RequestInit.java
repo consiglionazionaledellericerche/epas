@@ -147,8 +147,8 @@ public class RequestInit extends Controller {
       }
     }
     // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
-    if (user.get().person != null && user.get().person.office != null) {
-      minYear = user.get().person.office.beginDate.getYear();
+    if (user.get().person != null && user.get().person.getCurrentOffice().get() != null) {
+      minYear = user.get().person.getCurrentOffice().get().beginDate.getYear();
     }
     for (int i = minYear; i <= LocalDate.now().plusYears(1).getYear(); i++) {
       years.add(i);
@@ -167,8 +167,8 @@ public class RequestInit extends Controller {
     } else if (!offices.isEmpty()) {
       officeId = offices.stream()
             .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
-    } else if (currentUser.person != null && currentUser.person.office != null) {
-      officeId = currentUser.person.office.id;      
+    } else if (currentUser.person != null && currentUser.person.getCurrentOffice().get() != null) {
+      officeId = currentUser.person.getCurrentOffice().get().id;      
     }
     
     session.put("officeSelected", officeId);
@@ -394,7 +394,7 @@ public class RequestInit extends Controller {
       //su me stesso, ma la mia sede non appartiene alle sedi che amministro
       //OSS: le action switch person sono tutte in sola lettura quindi il redirect è poco rischioso
       if (!offices.isEmpty() && user.person != null && user.person.id.equals(personId)) {
-        if (!offices.contains(user.person.office)) {
+        if (!offices.contains(user.person.getCurrentOffice().get())) {
           Long personSelected = persons.iterator().next().id;
           session.put("personSelected", personSelected);
           Map<String, Object> args = Maps.newHashMap();

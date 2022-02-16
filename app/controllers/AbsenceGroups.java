@@ -737,7 +737,8 @@ public class AbsenceGroups extends Controller {
     //se l'user è amministratore visualizzo lo switcher del gruppo
     final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
-        || userDao.getUsersWithRoles(person.office, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
+        || userDao.getUsersWithRoles(person.getCurrentOffice().get(), 
+            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
         .contains(currentUser)) {
       isAdmin = true;
     }
@@ -914,8 +915,8 @@ public class AbsenceGroups extends Controller {
       groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
           initializationGroup.date);
     } else {
-      absenceInitializations(initializationGroup.person.office.id,
-          initializationGroup.groupAbsenceType.id);
+      absenceInitializations(initializationGroup.person
+          .getOffice(initializationGroup.date).get().id, initializationGroup.groupAbsenceType.id);
     }
   }
 
@@ -941,8 +942,8 @@ public class AbsenceGroups extends Controller {
       groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
           initializationGroup.date);
     } else {
-      absenceInitializations(initializationGroup.person.office.id,
-          initializationGroup.groupAbsenceType.id);
+      absenceInitializations(initializationGroup.person
+          .getOffice(initializationGroup.date).get().id, initializationGroup.groupAbsenceType.id);
     }
 
   }
@@ -1371,7 +1372,7 @@ public class AbsenceGroups extends Controller {
           + " all'interno della sede selezionata");
     }
 
-    importCertificationsAbsences(person.office.id);
+    importCertificationsAbsences(person.getCurrentOffice().get().id);
 
   }
 
@@ -1425,7 +1426,7 @@ public class AbsenceGroups extends Controller {
 
     flash.success("Tutti i dati sono stati caricati correttamente.");
 
-    importCertificationsAbsences(person.office.id);
+    importCertificationsAbsences(person.getCurrentOffice().get().id);
   }
 
 }

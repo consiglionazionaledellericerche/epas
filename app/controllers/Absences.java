@@ -256,7 +256,7 @@ public class Absences extends Controller {
     //Provvisoriamente mangengo solo quelle di persone dell'office
     List<Absence> absenceList = Lists.newArrayList();
     for (Absence absence : absenceListAux) {
-      if (absence.personDay.person.office.equals(office)) {
+      if (absence.personDay.person.getOffice(absence.personDay.date).get().equals(office)) {
         absenceList.add(absence);
       }
     }
@@ -595,7 +595,8 @@ public class Absences extends Controller {
       Persons.list(null, null);
     }
     if (!(Boolean) confManager
-        .configValue(Security.getUser().get().person.office, EpasParam.ABSENCES_FOR_EMPLOYEE)) {
+        .configValue(Security.getUser().get().person
+            .getOffice(new LocalDate(year, month, day)).get(), EpasParam.ABSENCES_FOR_EMPLOYEE)) {
       flash.error("Per accedere a questa funzione, occorre modificare il valore del "
           + "parametro 'Assenze visibili dai dipendenti'.");
       Stampings.stampings(year, month);
@@ -609,7 +610,7 @@ public class Absences extends Controller {
       date = new LocalDate(year, month, day);
     }
     Person person = Security.getUser().get().person;
-    List<Person> list = personDao.byOffice(person.office);
+    List<Person> list = personDao.byOffice(person.getOffice(new LocalDate(year, month, day)).get());
     List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
     render(pdList, person, date);
   }

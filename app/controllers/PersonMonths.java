@@ -390,7 +390,8 @@ public class PersonMonths extends Controller {
       pm.trainingHours = value;
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-      visualizePeopleTrainingHours(year, month, pm.person.office.id);
+      visualizePeopleTrainingHours(year, month, 
+          pm.person.getOffice(new LocalDate(year, month, 1)).get().id);
       
     } else {
       checkPerson(person);
@@ -398,7 +399,8 @@ public class PersonMonths extends Controller {
     
     if (Validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
-          ImmutableSet.of(person.office), false, null, null, false).list();
+          ImmutableSet.of(person.getOffice(new LocalDate(year, month, 1)).get()), 
+          false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
           person, month, year, begin, end, value, simplePersonList);
@@ -406,7 +408,8 @@ public class PersonMonths extends Controller {
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
-    PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
+    PersonMonths.visualizePeopleTrainingHours(year, month, 
+        person.getOffice(new LocalDate(year, month, 1)).get().id);
   }
 
   /**

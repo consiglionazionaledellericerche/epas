@@ -416,7 +416,7 @@ public class Competences extends Controller {
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
     Competences.enabledCompetences(date.getYear(),
-        date.getMonthOfYear(), person.office.id);
+        date.getMonthOfYear(), person.getOffice(date).get().id);
 
   }
 
@@ -539,7 +539,7 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
-    Office office = person.office;
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
     Competence competence = new Competence(person, code, year, month);
     if (competence.competenceCode.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
@@ -569,7 +569,7 @@ public class Competences extends Controller {
 
     notFoundIfNull(code);
     notFoundIfNull(person);
-    Office office = person.office;
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
     if (code.code.equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person,
           year, month, true);
@@ -588,7 +588,8 @@ public class Competences extends Controller {
 
     notFoundIfNull(competence);
 
-    Office office = competence.person.office;
+    Office office = competence.person
+        .getOffice(new LocalDate(competence.year, competence.month, 1)).get();
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
@@ -809,13 +810,13 @@ public class Competences extends Controller {
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
         Optional.<String>absent(),
-        Sets.newHashSet(user.person.office),
+        Sets.newHashSet(user.person.getOffice(beginMonth).get()),
         false,
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
         Optional.fromNullable(user.person));
     tableFeature = competenceManager.composeTableForOvertime(year, month,
-        null, null, user.person.office, beginMonth, simpleResults, code);
+        null, null, user.person.getOffice(beginMonth).get(), beginMonth, simpleResults, code);
 
     render(tableFeature, year, month, simpleResults);
 
@@ -1588,7 +1589,7 @@ public class Competences extends Controller {
         .stream().filter(e -> (linkedPeople.stream()
             .noneMatch(d -> d.person.equals(e.person))))        
         .map(pcc -> pcc.person).distinct()
-        .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+        .filter(p -> p.getCurrentOffice().get().equals(type.office)).collect(Collectors.toList());
 
     render(available, type);
   }
@@ -1652,7 +1653,7 @@ public class Competences extends Controller {
           .stream().filter(e -> (personAssociated.stream()
               .noneMatch(d -> d.person.equals(e.person))))        
           .map(pcc -> pcc.person).distinct()
-          .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+          .filter(p -> p.getCurrentOffice().get().equals(type.office)).collect(Collectors.toList());
       response.status = 400;
       render("@linkPeopleToReperibility", type, available);
     }
