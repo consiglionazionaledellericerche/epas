@@ -102,7 +102,8 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(group.manager.user, role, group.manager.office);
+        uroDao.getUsersRolesOffices(group.manager.user, role, 
+            group.manager.getCurrentOffice().get());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 

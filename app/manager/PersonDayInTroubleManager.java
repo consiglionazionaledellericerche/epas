@@ -138,7 +138,7 @@ public class PersonDayInTroubleManager {
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       if (!currentContract.isPresent()) {
         log.error("Nessun contratto trovato attivo alla data odierna per {} - {} ", person,
-            person.office);
+            person.getCurrentOffice().get());
         continue;
       }
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
@@ -163,7 +163,7 @@ public class PersonDayInTroubleManager {
         log.trace("Preparo invio mail per {}", person.getFullname());
         SimpleEmail simpleEmail = new SimpleEmail();
         String reply = (String) configurationManager
-            .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+            .configValue(person.getCurrentOffice().get(), EpasParam.EMAIL_TO_CONTACT);
 
         if (!reply.isEmpty()) {
           simpleEmail.addReplyTo(reply);

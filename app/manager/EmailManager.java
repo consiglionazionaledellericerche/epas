@@ -121,10 +121,11 @@ public class EmailManager {
   public void newUserMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 
-    if (!(Boolean) configurationManager.configValue(person.office, EpasParam.SEND_EMAIL)) {
+    if (!(Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
+        EpasParam.SEND_EMAIL)) {
       log.info("Non verrà inviata la mail a {} in quanto "
           + "la sua sede {} ha invio mail disabilitato",
-          person.getFullname(), person.office.name);
+          person.getFullname(), person.getCurrentOffice().get().name);
       return;
     }
     

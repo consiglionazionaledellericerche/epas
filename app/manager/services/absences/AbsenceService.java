@@ -566,7 +566,7 @@ public class AbsenceService {
     final User currentUser = Security.getUser().get();
 
     final boolean officeWriteAdmin =
-        secureManager.officesWriteAllowed(currentUser).contains(person.office);
+        secureManager.officesWriteAllowed(currentUser).contains(person.getCurrentOffice().get());
 
     log.debug("officeWriteAdmin = {}, officeWriteAllowed = {}", officeWriteAdmin,
         secureManager.officesWriteAllowed(currentUser));
@@ -605,24 +605,24 @@ public class AbsenceService {
       // vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
       
-      if ((Boolean) confManager.configValue(person.office, 
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(), 
           EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)) {
         groupsPermitted.add(medicalExams);
       }
 
-      if ((Boolean) confManager.configValue(person.office, EpasParam.WORKING_OFF_SITE)
-          && (Boolean) confManager.configValue(person,
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(), 
+          EpasParam.WORKING_OFF_SITE) && (Boolean) confManager.configValue(person,
               EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
         groupsPermitted.add(employeeOffseat);
       }
 
-      if ((Boolean) confManager.configValue(person.office, EpasParam.TR_VACATIONS)
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(), EpasParam.TR_VACATIONS)
           && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeVacation);
       }
 
-      if ((Boolean) confManager.configValue(person.office, EpasParam.TR_COMPENSATORY)
-          && person.qualification.qualification <= 3) {
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(), 
+          EpasParam.TR_COMPENSATORY) && person.qualification.qualification <= 3) {
         groupsPermitted.add(employeeCompensatory);
       }
 

@@ -218,7 +218,7 @@ public class PersonStampingRecap {
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
     this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
-    LocalDate from = person.office.getBeginDate();
+    LocalDate from = person.getCurrentOffice().get().getBeginDate();
     List<Absence> list = personManager.absencesToRecover(person, from, LocalDate.now(),
         JustifiedTypeName.recover_time);
     this.absencesToRecoverList = personManager.dtoList(list);

@@ -291,7 +291,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public LocalDate dateForInitialization() {
 
-    LocalDate officeBegin = value.person.office.getBeginDate();
+    LocalDate officeBegin = value.person.getCurrentOffice().get().getBeginDate();
     LocalDate personCreation = new LocalDate(value.person.beginDate);
     LocalDate candidate = value.getBeginDate();
 
@@ -332,7 +332,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public boolean noRelevant() {
 
-    LocalDate officeInstallation = value.person.office.getBeginDate();
+    LocalDate officeInstallation = value.person.getCurrentOffice().get().getBeginDate();
 
     return officeInstallation.isAfter(getContractDateInterval().getEnd());
   }

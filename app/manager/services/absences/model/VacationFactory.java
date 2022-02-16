@@ -199,7 +199,8 @@ public class VacationFactory {
     Set<AbsenceType> takable = subSetCode(codes, DefaultAbsenceType.A_31);
     Set<AbsenceType> taken = subSetCode(codes, DefaultAbsenceType.A_31);
     LocalDate beginNextYear = new LocalDate(year + 1, 1, 1);
-    LocalDate endUsableNextYear = vacationsExpireDate(year, person.office);
+    LocalDate endUsableNextYear = vacationsExpireDate(year, 
+        person.getOffice(new LocalDate(year, 1, 1)).get());
     if (contract.calculatedEnd() != null 
         && contract.calculatedEnd().isBefore(endUsableNextYear)) {
       endUsableNextYear = contract.calculatedEnd();

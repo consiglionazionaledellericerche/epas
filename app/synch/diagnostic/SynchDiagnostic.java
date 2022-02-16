@@ -119,9 +119,10 @@ public class SynchDiagnostic {
     }
 
     //Stessa sede ...
-    return epasPerson.office.perseoId != null
+    return epasPerson.getCurrentOffice().get().perseoId != null
         && perseoPerson.perseoOfficeId != null
-        && Objects.equals(epasPerson.office.perseoId, perseoPerson.perseoOfficeId);
+        && Objects.equals(epasPerson.getCurrentOffice().get().perseoId, 
+            perseoPerson.perseoOfficeId);
   }
 
   /**

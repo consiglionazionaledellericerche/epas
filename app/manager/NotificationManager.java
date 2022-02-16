@@ -150,7 +150,7 @@ public class NotificationManager {
     final String message = String.format(template, person.fullName(), stamping.date.toString(DTF), 
         verso, stamping.place, stamping.reason);
 
-    person.office.usersRolesOffices.stream()
+    person.getCurrentOffice().get().usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.user).forEach(user -> {
@@ -194,12 +194,12 @@ public class NotificationManager {
     final String message = String.format(template, modifier, absence.personDay.date.toString(DF),
         absence.absenceType.code);
     // controllare se dalla configurazione è possibile notificare le assenze da flusso
-    val config = configurationManager.configValue(person.office, EpasParam.SEND_FLOWS_NOTIFICATION,
-        LocalDate.now());
+    val config = configurationManager.configValue(person.getCurrentOffice().get(), 
+        EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
     }
-    person.office.usersRolesOffices.stream()
+    person.getCurrentOffice().get().usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
             || uro.role.name.equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.user).forEach(user -> {
@@ -210,8 +210,8 @@ public class NotificationManager {
      * Verifico se si tratta di un 661 e invio la mail al responsabile di gruppo se esiste...
      */
     if (groupAbsenceType.name.equals(DefaultGroup.G_661.name())) {
-      val sendManagerNotification = configurationManager.configValue(person.office, 
-          EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
+      val sendManagerNotification = configurationManager.configValue(person.getCurrentOffice()
+          .get(), EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
       if (sendManagerNotification.equals(Boolean.TRUE) 
           && !groupDao.myGroups(absence.personDay.person).isEmpty()) {
         log.debug("Invio la notifica anche al responsabile di gruppo...");
@@ -292,12 +292,14 @@ public class NotificationManager {
       return;
     }
     List<User> users =
-        person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+        person.getCurrentOffice().get().usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
     if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
       List<Group> groups = 
-          groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
+          groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+              Optional.of(false));
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
@@ -387,19 +389,21 @@ public class NotificationManager {
     }
 
     // Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
-    if (secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+    if (secureManager.officesWriteAllowed(currentUser)
+        .contains(currentUser.person.getCurrentOffice().get())) {
       return;
     }
 
     // Se l'user che ha fatto l'inserimento è tecnologo e può autocertificare le timbrature esco
-    if (currentUser.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
+    if (currentUser.person.getCurrentOffice().get()
+        .checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
         && currentUser.person.qualification.qualification <= 3) {
       return;
     }
 
     // negli altri casi notifica agli amministratori del personale ed al responsabile sede
     // controllo se il parametro di abilitazione alle notifiche è true
-    val config = configurationManager.configValue(currentUser.person.office,
+    val config = configurationManager.configValue(currentUser.person.getCurrentOffice().get(),
         EpasParam.SEND_ADMIN_NOTIFICATION, LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
@@ -436,7 +440,8 @@ public class NotificationManager {
 
     // Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
     if (currentUser.person != null
-        && secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+        && secureManager.officesWriteAllowed(currentUser)
+        .contains(currentUser.person.getCurrentOffice().get())) {
       return;
     }
 
@@ -531,7 +536,8 @@ public class NotificationManager {
       message.append(String.format(" %s - %s.", a.absenceType.code, a.personDay.date.toString(DF)));
     });
 
-    person.office.usersRolesOffices.stream().filter(uro -> uro.role.name.equals(role.name))
+    person.getCurrentOffice().get().usersRolesOffices.stream()
+        .filter(uro -> uro.role.name.equals(role.name))
         .map(uro -> uro.user).forEach(user -> {
           Notification.builder().destination(user).message(message.toString())
           .subject(NotificationSubject.ABSENCE, absences.stream().findFirst().get().id)
@@ -544,7 +550,7 @@ public class NotificationManager {
    *
    * @param currentUser l'utente che fa la richiesta
    * @param absenceRequest la richiesta di assenza via flusso
-   * @param insert se si tratta di inserimento (per ora unico caso contemplato)
+   * @param operation se si tratta di inserimento (per ora unico caso contemplato)
    */
   public void notificationAbsenceRequestPolicy(User currentUser, AbsenceRequest absenceRequest,
       Crud operation) {
@@ -592,7 +598,8 @@ public class NotificationManager {
               absenceRequest.endTo);
       return;
     }
-    person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+    person.getCurrentOffice().get().usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).forEach(user -> {
           SimpleEmail simpleEmail = new SimpleEmail();
           // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
@@ -770,11 +777,12 @@ public class NotificationManager {
         yearMonth.toString(DF), competence.competenceCode.code);
     //controllare se dalla configurazione è possibile notificare le competenze da flusso 
     val config = configurationManager
-        .configValue(person.office, EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+        .configValue(person.getCurrentOffice().get(), EpasParam.SEND_FLOWS_NOTIFICATION, 
+            LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
     }
-    person.office.usersRolesOffices.stream()
+    person.getCurrentOffice().get().usersRolesOffices.stream()
         .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
             || uro.role.name.equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.user).forEach(user -> {
@@ -1066,7 +1074,8 @@ public class NotificationManager {
 
     //Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
     if (currentUser.person != null 
-        && secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+        && secureManager.officesWriteAllowed(currentUser)
+        .contains(currentUser.person.getCurrentOffice().get())) {
       return;
     }
 
@@ -1303,7 +1312,7 @@ public class NotificationManager {
       return;
     }
     List<User> users =
-        person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+        person.getCurrentOffice().get().usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).collect(Collectors.toList());
     users.forEach(user -> {
       Notification.builder().destination(user).message(message)
@@ -1400,7 +1409,8 @@ public class NotificationManager {
               informationRequest.startAt, informationRequest.endTo);
       return;
     }
-    person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
+    person.getCurrentOffice().get().usersRolesOffices.stream()
+        .filter(uro -> uro.role.equals(roleDestination))
         .map(uro -> uro.user).forEach(user -> {
           SimpleEmail simpleEmail = new SimpleEmail();
           // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.

@@ -17,6 +17,7 @@
 
 package models;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -90,18 +92,15 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   public List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<Person> persons = Lists.newArrayList();
-
-  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<Configuration> configurations = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<PersonReperibilityType> personReperibilityTypes = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
-  
+
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 
@@ -127,10 +126,14 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @NotAudited
   @OneToMany(mappedBy = "office")
   public List<Attachment> attachments = Lists.newArrayList();
-  
+
   @NotAudited
   @OneToMany(mappedBy = "office")
   public List<MealTicket> tickets = Lists.newArrayList();
+
+  @NotAudited
+  @OneToMany(mappedBy = "office")
+  public List<PersonsOffices> personsOffices = Lists.newArrayList();
 
   @NotAudited
   public LocalDateTime updatedAt;
@@ -200,6 +203,36 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   public boolean checkConf(EpasParam param, String value) {
     return configurations.stream().anyMatch(conf -> conf.epasParam == param
         && conf.fieldValue.equals(value));
+  }
+
+  /**
+   * 
+   * @param date
+   * @return
+   */
+  @Transient
+  public List<Person> peopleInOffice(Optional<LocalDate> date) {
+    LocalDate dateToConsider;
+    if (date.isPresent()) {
+      dateToConsider = date.get();
+    } else {
+      dateToConsider = LocalDate.now();
+    }
+    return this.personsOffices.stream().filter(po -> 
+    !po.beginDate.isAfter(dateToConsider) 
+    && (po.endDate == null || po.endDate.isBefore(dateToConsider)))
+        .map(po -> po.person).collect(Collectors.toList());
+
+  }
+
+  @Transient
+  public List<Person> getPersons() {
+    return peopleInOffice(Optional.<LocalDate>absent());
+  }
+  
+  @Transient
+  public List<UsersRolesOffices> getUsersRolesOffices() {
+    return this.usersRolesOffices;
   }
 
 }

@@ -112,13 +112,13 @@ public class InformationRequestManager {
       if (person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTopLevel.isPresent()) {
         informationRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.office,
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.officeHeadApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
         informationRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.office,
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.officeHeadApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -128,13 +128,13 @@ public class InformationRequestManager {
       if (person.isTopQualification()
           && requestType.administrativeApprovalRequiredTopLevel.isPresent()) {
         informationRequestConfiguration.administrativeApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.office, 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
                 requestType.administrativeApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.administrativeApprovalRequiredTechnicianLevel.isPresent()) {
         informationRequestConfiguration.administrativeApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.office, 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
                 requestType.administrativeApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -183,18 +183,18 @@ public class InformationRequestManager {
     }
     
     if (config.isOfficeHeadApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.office)
-        .isEmpty()) {
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), 
+            person.getCurrentOffice().get()).isEmpty()) {
       problems.add(String.format("Approvazione del responsabile di sede richiesta. "
           + "L'ufficio %s non ha impostato nessun responsabile di sede. "
-          + "Contattare l'ufficio del personale.", person.office.getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
     }
     if (config.isAdministrativeApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.office)
-        .isEmpty()) {
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), 
+            person.getCurrentOffice().get()).isEmpty()) {
       problems.add(String.format("Approvazione dell'amministratore del personale richiesta. "
           + "L'ufficio %s non ha impostato nessun amministratore del personale. "
-          + "Contattare l'ufficio del personale.", person.office.getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
     }
     return problems;
   }
@@ -342,7 +342,7 @@ public class InformationRequestManager {
             + "da parte del responsabile di sede.");
       }
       if (!uroDao.getUsersRolesOffices(approver.user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
-          request.person.office).isPresent()) {
+          request.person.getCurrentOffice().get()).isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
@@ -360,7 +360,7 @@ public class InformationRequestManager {
       }
       if (!uroDao
           .getUsersRolesOffices(approver.user,
-              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.person.office)
+              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.person.getCurrentOffice().get())
           .isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));

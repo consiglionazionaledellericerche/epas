@@ -144,10 +144,10 @@ public class CompetenceRequestManager {
     }
     
     if (config.isEmployeeApprovalRequired() 
-        && personDao.byOffice(person.office).isEmpty()) {
+        && personDao.byOffice(person.getCurrentOffice().get()).isEmpty()) {
       problems.add(String.format("Approvazione di un dipendente richiesta."
           + "L'ufficio %s non ha altri dipendenti."
-          + "Contattare l'ufficio del personale.", person.office.getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
     }
     return problems;
   }
@@ -170,7 +170,7 @@ public class CompetenceRequestManager {
       if (requestType.reperibilityManagerApprovalRequired.isPresent()) {
         competenceRequestConfiguration.reperibilityManagerApprovalRequired = 
             (Boolean) configurationManager.configValue(
-                person.office, requestType.reperibilityManagerApprovalRequired.get(), 
+                person.getCurrentOffice().get(), requestType.reperibilityManagerApprovalRequired.get(), 
                 LocalDate.now());  
       }
     }
@@ -181,7 +181,7 @@ public class CompetenceRequestManager {
       if (requestType.employeeApprovalRequired.isPresent()) {
         competenceRequestConfiguration.employeeApprovalRequired = 
             (Boolean) configurationManager.configValue(
-                person.office, requestType.employeeApprovalRequired.get(), 
+                person.getCurrentOffice().get(), requestType.employeeApprovalRequired.get(), 
                 LocalDate.now());  
       }
     }
@@ -264,7 +264,7 @@ public class CompetenceRequestManager {
             + "da parte di un dipendente");
       }
       if (!uroDao.getUsersRolesOffices(approver.user, roleDao.getRoleByName(Role.EMPLOYEE),
-          competenceRequest.person.office).isPresent()) {
+          competenceRequest.person.getCurrentOffice().get()).isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perchè non ha"
             + " il ruolo di dipendente.", eventType, approver.getFullname()));
       }

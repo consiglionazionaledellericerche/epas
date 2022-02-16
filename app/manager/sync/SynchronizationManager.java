@@ -148,13 +148,14 @@ public class SynchronizationManager {
       epasPerson = personDao.getPersonByNumber(perseoPerson.number);
     }
 
-    if (epasPerson != null) {
+    if (epasPerson != null && epasPerson.getCurrentOffice().isPresent()) {
       log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
           + "Effettuo il cambio di sede.",
-          epasPerson.getFullname(), epasPerson.number, epasPerson.office.getName());
+          epasPerson.getFullname(), epasPerson.number, 
+          epasPerson.getCurrentOffice().get().getName());
 
-      Office oldOffice = epasPerson.office; 
-      epasPerson.office = office;
+      Office oldOffice = epasPerson.getCurrentOffice().get(); 
+      epasPerson.getCurrentOffice().get() = office;
       epasPerson.save();
 
       registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
@@ -200,7 +201,7 @@ public class SynchronizationManager {
 
       log.info("Creata la nuova persona {}, matricola = {}, ufficio = {}",
           newPerson.get().getFullname(), newPerson.get().number, 
-          newPerson.get().office.getName());
+          newPerson.get().getCurrentOffice().get().getName());
 
       syncResult.add(importContracts(newPerson.get()));
 
@@ -208,7 +209,7 @@ public class SynchronizationManager {
       return syncResult.add(
           String.format("Creata la nuova persona %s, matricola = %s, ufficio = %s",
               newPerson.get().getFullname(), newPerson.get().number, 
-              newPerson.get().office.getName()));
+              newPerson.get().getCurrentOffice().get().getName()));
     }
 
   }
@@ -223,7 +224,7 @@ public class SynchronizationManager {
       person.save();
 
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.user, person.office, employee);
+      officeManager.setUro(person.user, person.getCurrentOffice().get(), employee);
       person.save();
       configurationManager.updateConfigurations(person);
     } catch (Exception ex) {

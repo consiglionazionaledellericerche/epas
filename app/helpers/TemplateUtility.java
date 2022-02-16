@@ -235,7 +235,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
@@ -255,7 +256,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.person);
@@ -276,7 +278,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
@@ -297,7 +300,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     List<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
@@ -483,7 +487,7 @@ public class TemplateUtility {
   }
   
   public List<BadgeReader> getAllBadgeReader(Person person) {
-    return badgeReaderDao.getBadgeReaderByOffice(person.office);
+    return badgeReaderDao.getBadgeReaderByOffice(person.getCurrentOffice().get());
   }
 
   public List<CompetenceCode> allCodeList() {
@@ -611,7 +615,7 @@ public class TemplateUtility {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
-      roles = rolesAssignable(user.get().person.office);
+      roles = rolesAssignable(user.get().person.getCurrentOffice().get());
       roles.add(roleDao.getRoleByName(Role.EMPLOYEE));
       return roles;
     }

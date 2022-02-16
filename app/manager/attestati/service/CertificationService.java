@@ -558,7 +558,8 @@ public class CertificationService implements ICertificationService {
 
       try {
         for (StatoAttestatoMese item : certificationsComunication
-            .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {
+            .getStatoAttestatoMese(person.getOffice(new LocalDate(yearMonth.getYear(), 
+                yearMonth.getMonthOfYear(), 1)).get(), year, yearMonth.getMonthOfYear())) {
           if (person.number.equals(item.dipendente.matricola)) {
             statoAttestatoMese = item;
           }

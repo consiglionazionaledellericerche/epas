@@ -420,7 +420,7 @@ public class ConsistencyManager {
    */
   private LocalDate personFirstDateForEpasComputation(Person person, Optional<LocalDate> from) {
 
-    LocalDate officeLimit = person.office.getBeginDate();
+    LocalDate officeLimit = person.getCurrentOffice().get().getBeginDate();
 
     // Calcolo a partire da
     LocalDate lowerBoundDate = new LocalDate(person.beginDate);
@@ -483,7 +483,8 @@ public class ConsistencyManager {
     Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+        pd.getValue().person.getOffice(pd.getValue().getDate()).get(), EpasParam.LUNCH_INTERVAL, 
+        pd.getValue().getDate());
 
     
     LocalTimeInterval workInterval = null;
@@ -493,7 +494,8 @@ public class ConsistencyManager {
           pwt.get().timeSlot.endSlot);
     } else {
       workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        pd.getValue().person.getOffice(pd.getValue().getDate()).get(), 
+        EpasParam.WORK_INTERVAL, pd.getValue().getDate());
     }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
@@ -540,7 +542,8 @@ public class ConsistencyManager {
     if (lastStampingPreviousDay != null && lastStampingPreviousDay.isIn()) {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
-      LocalTime maxHour = (LocalTime) configurationManager.configValue(pd.getValue().person.office,
+      LocalTime maxHour = (LocalTime) configurationManager.configValue(pd.getValue().person
+          .getOffice(pd.getValue().getDate()).get(),
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().stampings);
@@ -606,7 +609,7 @@ public class ConsistencyManager {
           log.error("No vacation period {}", contract.toString());
           continue;
         }
-        
+        // Quale inizio? quello della sede di lavoro attuale o della prima in assoluto?
         LocalDate begin = person.office.getBeginDate();
         LocalDate end = new LocalDate(yearMonthFrom.getYear(), 
             yearMonthFrom.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();

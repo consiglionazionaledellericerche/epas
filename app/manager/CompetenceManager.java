@@ -377,7 +377,8 @@ public class CompetenceManager {
         //Caso Reperibilità:
         if (StringUtils.containsIgnoreCase(comp.competenceCode.competenceCodeGroup.label,
             "reperibili")) {
-          if (!servicesActivated(comp.person.office)) {
+          if (!servicesActivated(comp.person
+              .getOffice(new LocalDate(comp.year, comp.month, 1)).get())) {
             result = Messages.get("CompManager.notConfigured");
             return result;
           }
@@ -494,7 +495,7 @@ public class CompetenceManager {
   private boolean handlerReperibility(Competence comp, Integer value, List<CompetenceCode> group) {
 
     int maxDays = countDaysForReperibility(new YearMonth(comp.year, comp.month),
-        comp.person.office);
+        comp.person.getOffice(new LocalDate(comp.year, comp.month, 1)).get());
 
     List<String> groupCodes = group.stream().map(objA -> {
       String objB = new String();
@@ -502,7 +503,8 @@ public class CompetenceManager {
       return objB;
     }).collect(Collectors.toList());
     List<Competence> peopleMonthList = competenceDao.getCompetencesInOffice(comp.year,
-        comp.month, groupCodes, comp.person.office, false);
+        comp.month, groupCodes, comp.person
+        .getOffice(new LocalDate(comp.year, comp.month, 1)).get(), false);
     int peopleSum = peopleMonthList.stream()
         .filter(competence -> competence.id != comp.id).mapToInt(i -> i.valueApproved).sum();
     if (peopleSum - comp.valueApproved + value > maxDays) {

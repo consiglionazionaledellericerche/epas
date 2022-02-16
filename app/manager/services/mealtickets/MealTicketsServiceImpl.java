@@ -134,7 +134,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
         .getContractDatabaseIntervalForMealTicket();
 
     LocalDate officeStartDate = (LocalDate) configurationManager
-        .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
+        .configValue(contract.person.getCurrentOffice().get(), EpasParam.DATE_START_MEAL_TICKET);
 
     if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
       return Optional.of(intervalForMealTicket);
@@ -261,7 +261,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       buoniDaConteggiare = buoniUsati;
       composition.isBlockMealTicketTypeKnown = false;
       final java.util.Optional<Configuration> conf = 
-          contract.person.office.configurations.stream()
+          contract.person.getCurrentOffice().get().configurations.stream()
           .filter(configuration -> 
           configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
       if (conf.isPresent()) {        

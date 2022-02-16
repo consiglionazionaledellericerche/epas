@@ -17,6 +17,7 @@
 
 package models;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.cnr.iit.epas.NullStringBinder;
@@ -25,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -35,6 +35,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
@@ -210,9 +211,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   public Qualification qualification;
 
-  @ManyToOne
-  @Required
-  public Office office;
+
+  @NotAudited
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  @OrderBy("beginDate")
+  public Set<PersonsOffices> personsOffices = Sets.newHashSet();
 
   /**
    * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede per adesso è
@@ -287,10 +290,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
-  @Transient
-  public Institute getInstitute() {
-    return office == null ? null : office.institute;    
-  }
+//  @Transient
+//  public Institute getInstitute() {
+//    return office == null ? null : office.institute;    
+//  }
   
   /**
    * Lista dei gruppi di una persona alla data odierna.
@@ -404,7 +407,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     //Gli attestati relativi ai MEAL Ticket vengono ignorati perchè vengono 
     //salvati i Certification relativi su ePAS anche se non stati effettivamente inviati
     //ad attestati.
-    final Optional<Certification> ultimo = certifications.stream()
+    final java.util.Optional<Certification> ultimo = certifications.stream()
         .filter(c -> c.certificationType != CertificationType.MEAL)
         .max(Certification.comparator());
     if (ultimo.isPresent()) {
@@ -448,5 +451,29 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   public List<Person> getPersonsInCharge() {
     return groupsPeople.stream().flatMap(g -> g.getPeople().stream()).collect(Collectors.toList());
+  }
+  
+  /**
+   * Con la nuova modellazione occorre considerare quando una persona era afferente a una certa sede
+   * @param date la data opzionale
+   * @return la sede, se esiste, in cui il dipendente era afferente alla data date.
+   */
+  @Transient
+  public Optional<Office> getOffice(LocalDate date) {
+
+    List<PersonsOffices> personOffice = this.personsOffices.stream()
+        .filter(po -> !po.beginDate.isAfter(date)
+            && (po.endDate == null || !po.endDate.isBefore(date)))
+        .collect(Collectors.toList());
+    if (!personOffice.isEmpty()) {
+      return Optional.fromNullable(Office.findById(personOffice.get(0).office.id));      
+    } else {
+      return Optional.absent();
+    }
+  }
+  
+  @Transient
+  public Optional<Office> getCurrentOffice() {
+    return getOffice(LocalDate.now());
   }
 }

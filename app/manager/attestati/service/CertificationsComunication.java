@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import org.joda.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;
@@ -257,8 +258,8 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.office.codeId
-          + "/" + person.number + "/" + year + "/" + month;
+      String url = ATTESTATI_API_URL + "/" + person.getOffice(new LocalDate(year, month, 1)).get()
+          .codeId + "/" + person.number + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();

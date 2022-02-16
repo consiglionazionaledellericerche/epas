@@ -391,7 +391,7 @@ public class PersonManager {
       person.eppn = eppn(person.user.username, person.email);
     }
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.user, person.office, employee);
+    officeManager.setUro(person.user, person.getCurrentOffice().get(), employee);
   }
 
 }
