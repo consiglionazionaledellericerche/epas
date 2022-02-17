@@ -32,6 +32,7 @@ import models.Office;
 import models.query.QContract;
 import models.query.QContractMonthRecap;
 import models.query.QPerson;
+import models.query.QPersonsOffices;
 import org.joda.time.YearMonth;
 
 /**
@@ -62,6 +63,7 @@ public class ContractMonthRecapDao extends DaoBase {
     final QContractMonthRecap recap = QContractMonthRecap.contractMonthRecap;
     final QContract contract = QContract.contract;
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     final BooleanBuilder condition = new BooleanBuilder();
     if (max.isPresent()) {
@@ -72,9 +74,10 @@ public class ContractMonthRecapDao extends DaoBase {
     return getQueryFactory().selectFrom(recap)
         .leftJoin(recap.contract, contract)
         .leftJoin(contract.person, person)
+        .leftJoin(person.personsOffices, personsOffices)
         .where(recap.year.eq(yearMonth.getYear())
             .and(recap.month.eq(yearMonth.getMonthOfYear())
-                .and(person.office.in(offices))
+                .and(personsOffices.office.in(offices))
                 .and(condition))).orderBy(recap.contract.person.surname.asc())
         .fetch();
   }

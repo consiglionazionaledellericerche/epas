@@ -127,7 +127,8 @@ public class UsersRolesOfficesDao extends DaoBase {
       if (uroItem.user.person == null || uroItem.user.person.perseoId == null) {
         continue;
       }
-      if (office.isPresent() && !office.get().equals(uroItem.user.person.office)) {
+      if (office.isPresent() && !office.get()
+          .equals(uroItem.user.person.getCurrentOffice().get())) {
         continue;
       }
       Set<String> personUros = urosMap.get(uroItem.user.person.perseoId);

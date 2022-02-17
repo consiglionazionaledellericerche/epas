@@ -40,6 +40,7 @@ import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
+import models.query.QPersonsOffices;
 import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
 
@@ -76,10 +77,11 @@ public class CompetenceDao extends DaoBase {
 
     final QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(competenceCode)
         .leftJoin(competenceCode.personCompetenceCodes, pcc).fetchJoin()
-        .where(pcc.person.office.eq(office)
+        .leftJoin(pcc.person.personsOffices, personsOffices).fetchJoin()
+        .where(personsOffices.office.eq(office)
             .and(pcc.beginDate.loe(date)
                 .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
         .orderBy(competenceCode.code.asc())
@@ -148,10 +150,10 @@ public class CompetenceDao extends DaoBase {
 
     final QCompetence competence = QCompetence.competence;
     final BooleanBuilder condition = new BooleanBuilder();
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competence.year.eq(year))
         .and(competence.competenceCode.code.in(codes))
-        .and(competence.person.office.eq(office));
+        .and(personsOffices.office.eq(office));
 
     if (untilThisMonth) {
       condition.and(competence.month.loe(month));
@@ -160,6 +162,7 @@ public class CompetenceDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(competence)
+        .leftJoin(competence.person.personsOffices, personsOffices)
         .where(condition).fetch();
   }
 
@@ -170,15 +173,17 @@ public class CompetenceDao extends DaoBase {
   public List<Competence> getCompetenceInYear(Integer year, Optional<Office> office) {
 
     final QCompetence competence = QCompetence.competence;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final BooleanBuilder condition = new BooleanBuilder();
 
     condition.and(competence.year.eq(year));
 
     if (office.isPresent()) {
-      condition.and(competence.person.office.eq(office.get()));
+      condition.and(personsOffices.office.eq(office.get()));
     }
 
     return getQueryFactory().selectFrom(competence)
+        .leftJoin(competence.person.personsOffices, personsOffices)
         .where(condition).orderBy(competence.competenceCode.code.asc())
         .fetch();
   }
