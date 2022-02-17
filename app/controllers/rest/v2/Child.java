@@ -66,7 +66,7 @@ public class Child extends Controller {
       String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     List<ChildrenShowDto> childs = 
         person.personChildren.stream().map(c -> ChildrenShowDto.build(c))
         .collect(Collectors.toList());
@@ -108,7 +108,7 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.person.getCurrentOffice().get());
 
     children.person = personDao.getPersonById(childrenDto.getPersonId());
     children.save();
@@ -140,7 +140,7 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.person.getCurrentOffice().get());
 
     if (!validation.valid(children).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -187,7 +187,7 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.person.getCurrentOffice().get());
     return children;
   }
 }

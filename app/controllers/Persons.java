@@ -171,7 +171,7 @@ public class Persons extends Controller {
       render("@insertPerson", person, contract);
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     person.name = WordUtils.capitalizeFully(person.name);
     person.surname = WordUtils.capitalizeFully(person.surname);
@@ -222,7 +222,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     render(person);
   }
@@ -243,18 +243,18 @@ public class Persons extends Controller {
       edit(person.id);
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
     List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.user);
     if (uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.EMPLOYEE) 
-        && !uro.office.equals(person.office))) {
+        && !uro.office.equals(person.getCurrentOffice().get()))) {
       for (UsersRolesOffices uro : uroList) {
         if (uro.role.name.equals(Role.EMPLOYEE)) {
           uro.delete();
         }
       }
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.user, person.office, employee); 
+      officeManager.setUro(person.user, person.getCurrentOffice().get(), employee); 
     }
 
     person.save();
@@ -277,7 +277,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     render(person);
   }
@@ -298,7 +298,7 @@ public class Persons extends Controller {
     // FIX per oggetto in entityManager monco.
     person.refresh();
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     // FIXME: se non spezzo in transazioni errore HashMap.
     // Per adesso spezzo l'eliminazione della persona in tre fasi.
@@ -344,7 +344,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -365,7 +365,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -440,7 +440,7 @@ public class Persons extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     PersonChildren child = new PersonChildren();
     child.person = person;
     render(child);
@@ -468,7 +468,7 @@ public class Persons extends Controller {
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
     Person person = child.person;
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     if (!confirmed) {
       render("@deleteChild", child);
@@ -518,7 +518,7 @@ public class Persons extends Controller {
       render("@insertChild", child);
     }
 
-    rules.checkIfPermitted(child.person.office);
+    rules.checkIfPermitted(child.person.getCurrentOffice().get());
     child.save();
 
     JPA.em().flush();

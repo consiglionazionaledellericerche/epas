@@ -120,7 +120,7 @@ public class Certifications extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
     val certData = certificationManager.getPersonCertData(person, year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(certData.validate));
@@ -154,7 +154,7 @@ public class Certifications extends Controller {
           + "mail che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getOffice(new LocalDate(year, month, 1)).get());
     
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());

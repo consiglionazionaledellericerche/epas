@@ -97,6 +97,7 @@ public class ConsistencyManager {
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
   private final AbsenceDao absenceDao;
+  private final PersonsOfficesManager personsOfficesManager;
 
   /**
    * Constructor.
@@ -128,7 +129,8 @@ public class ConsistencyManager {
       ShiftManager2 shiftManager2,
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
-      IWrapperFactory wrapperFactory, AbsenceDao absenceDao) {
+      IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
+      PersonsOfficesManager personsOfficesManager) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -145,6 +147,7 @@ public class ConsistencyManager {
     this.personShiftDayDao = personShiftDayDao;
     this.shiftManager2 = shiftManager2;
     this.absenceDao = absenceDao;
+    this.personsOfficesManager = personsOfficesManager;
   }
 
   /**
@@ -291,7 +294,7 @@ public class ConsistencyManager {
     List<Person> personToRecompute = Lists.newArrayList();
 
     if (target instanceof Office) {
-      personToRecompute = ((Office) target).persons;
+      personToRecompute = personsOfficesManager.affiliatePeople((Office) target);
     } else if (target instanceof Person) {
       personToRecompute.add((Person) target);
     }
@@ -609,8 +612,9 @@ public class ConsistencyManager {
           log.error("No vacation period {}", contract.toString());
           continue;
         }
-        // Quale inizio? quello della sede di lavoro attuale o della prima in assoluto?
-        LocalDate begin = person.office.getBeginDate();
+        // Usiamo l'inizio della sede in cui il dipendente stava in yearMonthFrom
+        LocalDate begin = person.getOffice(new LocalDate(yearMonthFrom.getYear(), 
+            yearMonthFrom.getMonthOfYear(), 1)).get().getBeginDate();
         LocalDate end = new LocalDate(yearMonthFrom.getYear(), 
             yearMonthFrom.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
         

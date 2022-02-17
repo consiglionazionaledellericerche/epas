@@ -28,10 +28,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ContractManager;
 import manager.OfficeManager;
+import manager.PersonsOfficesManager;
 import manager.RegistryNotificationManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -61,6 +62,7 @@ public class SynchronizationManager {
   private OfficeManager officeManager;
   private RegistryNotificationManager registryNotificationManager;
   private ConfigurationManager configurationManager;
+  private PersonsOfficesManager personsOfficesManager;
 
   /**
    * Default constructor, useful for injection.  
@@ -70,7 +72,8 @@ public class SynchronizationManager {
       ContractPerseoConsumer contractPerseoConsumer,
       PersonDao personDao, UserManager userManager, 
       ContractManager contractManager, RoleDao roleDao,
-      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager) {
+      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager,
+      PersonsOfficesManager personsOfficesManager) {
     this.peoplePerseoConsumer = peoplePerseoConsumer;
     this.contractPerseoConsumer = contractPerseoConsumer;
     this.personDao = personDao;
@@ -79,6 +82,7 @@ public class SynchronizationManager {
     this.roleDao = roleDao;
     this.officeManager = officeManager;
     this.registryNotificationManager = registryNotificationManager;
+    this.personsOfficesManager = personsOfficesManager;
   }
 
   /**
@@ -155,18 +159,23 @@ public class SynchronizationManager {
           epasPerson.getCurrentOffice().get().getName());
 
       Office oldOffice = epasPerson.getCurrentOffice().get(); 
-      epasPerson.getCurrentOffice().get() = office;
-      epasPerson.save();
+      //Salvo la nuova afferenza alla sede modificando i periodi
+      personsOfficesManager
+      .addPersonInOffice(epasPerson, office, LocalDate.now(), Optional.absent());
+      //      epasPerson.getCurrentOffice().get() = office;
+      //    epasPerson.save();
 
       registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
       return syncResult.add(
           String.format(
-              "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
-              epasPerson.fullName(), oldOffice.name, epasPerson.office.name));
+              "Effettuato il cambio di sede per %s. Vecchia sede %s, nuova sede %s.",
+              epasPerson.fullName(), oldOffice.name, epasPerson.getCurrentOffice().get().name));
     }
 
     // join dell'office (in automatico ancora non c'è...)
-    perseoPerson.office = office;
+    //perseoPerson.office = office;
+    personsOfficesManager
+    .addPersonInOffice(perseoPerson, office, LocalDate.now(), Optional.absent());
     perseoPerson.beginDate =
         LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
     val validation = Validation.current.get(); 

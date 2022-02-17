@@ -159,7 +159,7 @@ public class MealTickets extends Controller {
 
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getOffice(new LocalDate(year, month, 1)).get());
 
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
@@ -192,7 +192,7 @@ public class MealTickets extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getOffice(new LocalDate(year, month, 1)).get());
 
     MealTicketRecap recap;
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
@@ -223,7 +223,7 @@ public class MealTickets extends Controller {
     //Person person = personDao.getPersonById(personId);
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getOffice(new LocalDate(year, month, 1)).get());
 
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
@@ -245,7 +245,7 @@ public class MealTickets extends Controller {
     Preconditions.checkNotNull(contract);
     Preconditions.checkArgument(contract.isPersistent());
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     int mealTicketsTransfered = mealTicketService.mealTicketsLegacy(contract);
 
@@ -282,7 +282,7 @@ public class MealTickets extends Controller {
     Person person = contract.person;
     notFoundIfNull(contract.person);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
     Preconditions.checkState(contract.isPersistent());
     User admin = Security.getUser().get();
 
@@ -366,7 +366,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -395,7 +395,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -454,7 +454,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -482,7 +482,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -538,7 +538,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -562,7 +562,7 @@ public class MealTickets extends Controller {
   public static void performConvertPersonCodeBlock(Long contractId, String codeBlock) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -645,7 +645,7 @@ public class MealTickets extends Controller {
 
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getOffice(new LocalDate(year, month, 1)).get());
     YearMonth yearMonth = new YearMonth(year, month);
 
     ContractMonthRecap monthRecap = contractMonthRecapDao

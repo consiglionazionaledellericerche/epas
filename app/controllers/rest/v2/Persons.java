@@ -103,7 +103,7 @@ public class Persons extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(PersonShowDto.build(person)));
@@ -135,7 +135,7 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
     //nel DTO
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     
     personManager.properPersonCreate(person);
     person.save();
@@ -162,7 +162,7 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     
     val gson = gsonBuilder.create();
     val personDto = gson.fromJson(body, PersonUpdateDto.class); 
@@ -176,7 +176,7 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato 
     //nel DTO
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -197,7 +197,7 @@ public class Persons extends Controller {
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     
     if (!person.contracts.isEmpty()) {
       JsonResponse.conflict(

@@ -76,7 +76,7 @@ public class Stampings extends Controller {
     if (stamping == null) {
       JsonResponse.notFound();
     }
-    rules.checkIfPermitted(stamping.personDay.person.office);
+    rules.checkIfPermitted(stamping.personDay.person.getCurrentOffice().get());
     renderJSON(gsonBuilder.create().toJson(StampingShowDto.build(stamping)));
   }
 
@@ -120,7 +120,7 @@ public class Stampings extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office associato alla persona
     //a cui si riferisce la timbratura
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getCurrentOffice().get());
 
     val stampingFromClient = StampingFromClient.build(stampingCreateDto);
     stampingFromClient.person = person.get();    
@@ -160,7 +160,7 @@ public class Stampings extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office attuale 
     //della persona
-    rules.checkIfPermitted(stamping.getOwner().office);
+    rules.checkIfPermitted(stamping.getOwner().getCurrentOffice().get());
 
     val gson = gsonBuilder.create();
     val stampingDto = gson.fromJson(body, StampingUpdateDto.class); 
@@ -176,7 +176,7 @@ public class Stampings extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office della persona associata 
     //alla timbratura
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     if (!validation.valid(stamping).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -206,7 +206,7 @@ public class Stampings extends Controller {
     }
 
     val person = stamping.personDay.person;
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     stamping.delete();
     consistencyManager.updatePersonSituation(

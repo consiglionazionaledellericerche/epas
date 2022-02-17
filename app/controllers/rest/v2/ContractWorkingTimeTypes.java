@@ -74,8 +74,8 @@ public class ContractWorkingTimeTypes extends Controller {
     }
 
     //Controlla i permessi nel caso si tratti di un orario per un singolo ufficio
-    if (cwtt.contract.person.office != null) {
-      rules.checkIfPermitted(cwtt.contract.person.office);
+    if (cwtt.contract.person.getCurrentOffice().get() != null) {
+      rules.checkIfPermitted(cwtt.contract.person.getCurrentOffice().get());
     }
 
     renderJSON(gsonBuilder.create().toJson(ContractWorkingTimeTypeShowTerseDto.build(cwtt)));
@@ -104,7 +104,7 @@ public class ContractWorkingTimeTypes extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(cwtt.contract.person.office);
+    rules.checkIfPermitted(cwtt.contract.person.getCurrentOffice().get());
     
     cwtt.externalId = externalId;
     cwtt.save();

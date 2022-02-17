@@ -82,7 +82,7 @@ public class Contracts extends Controller {
       String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     List<ContractShowTerseDto> contracts = 
         person.contracts.stream().map(c -> ContractShowTerseDto.build(c))
         .collect(Collectors.toList());
@@ -124,7 +124,7 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     Optional<WorkingTimeType> workingTimeType =  
         contractDto.getWorkingTimeTypeId() == null 
@@ -169,7 +169,7 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
 
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -262,7 +262,7 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.person.getCurrentOffice().get());
     return contract;
   }
 }

@@ -83,7 +83,7 @@ public class PersonDays extends Controller {
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice(date).get());
 
     PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
     if (pd == null) {
