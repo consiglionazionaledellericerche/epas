@@ -17,8 +17,11 @@
 
 package cnr.sync.dto.v2;
 
+import com.google.common.base.Optional;
+import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
+import manager.PersonsOfficesManager;
 import models.Office;
 import models.Person;
 import models.Qualification;
@@ -53,6 +56,9 @@ public class PersonCreateDto {
   @Required
   private Long officeId;
   
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
+  
   /**
    * Nuova istanza di un oggetto person a partire dai 
    * valori presenti nel rispettivo DTO.
@@ -67,8 +73,9 @@ public class PersonCreateDto {
                 ((Qualification) q).qualification == personDto.getQualification().intValue())
               .findFirst().get());        
     }
-    if (personDto.getOfficeId() != null) {
-      person.office = Office.findById(personDto.getOfficeId());  
+    if (personDto.getOfficeId() != null) {      
+      Office office = Office.findById(personDto.getOfficeId());  
+      personsOfficesManager.addPersonInOffice(person, office, LocalDate.now(), Optional.absent());
     }
     person.beginDate = LocalDate.now();
     return person;
