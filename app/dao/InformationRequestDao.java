@@ -45,6 +45,7 @@ import models.informationrequests.query.QServiceRequest;
 import models.informationrequests.query.QTeleworkRequest;
 import models.query.QOffice;
 import models.query.QPerson;
+import models.query.QPersonsOffices;
 
 /**
  * Dao per i flussi informativi.
@@ -364,7 +365,8 @@ public class InformationRequestDao extends DaoBase {
       BooleanBuilder condition, Person signer) {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    condition.and(informationRequest.person.office.in(officeList))
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    condition.and(personsOffices.office.in(officeList))
         .and(informationRequest.officeHeadApprovalRequired.isTrue()
             .and(informationRequest.officeHeadApproved.isNull()));
 
@@ -382,9 +384,9 @@ public class InformationRequestDao extends DaoBase {
    */
   private BooleanBuilder personnelAdminQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    condition.and(informationRequest.person.office.in(officeList))
+    condition.and(personsOffices.office.in(officeList))
         .and(informationRequest.administrativeApprovalRequired.isTrue()
             .and(informationRequest.administrativeApproved.isNull()));
 
@@ -406,7 +408,7 @@ public class InformationRequestDao extends DaoBase {
     Preconditions.checkNotNull(fromDate);
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     BooleanBuilder conditions = new BooleanBuilder();
     List<InformationRequest> results = new ArrayList<>();
 
@@ -414,7 +416,7 @@ public class InformationRequestDao extends DaoBase {
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
-              .and(informationRequest.person.office.in(officeList)));
+              .and(personsOffices.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -424,7 +426,9 @@ public class InformationRequestDao extends DaoBase {
         uros, fromDate, toDate, informationType, signer));
 
     JPQLQuery<InformationRequest> query;
-    query = getQueryFactory().selectFrom(informationRequest).where(conditions)
+    query = getQueryFactory().selectFrom(informationRequest)
+        .leftJoin(informationRequest.person.personsOffices, personsOffices)
+        .where(conditions)
         .orderBy(informationRequest.startAt.desc());
 
     results.addAll(query.fetch());
@@ -435,7 +439,7 @@ public class InformationRequestDao extends DaoBase {
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       InformationType informationType, Person signer) {
     Preconditions.checkNotNull(fromDate);
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     final QPerson person = QPerson.person;
     final QOffice office = QOffice.office;
@@ -444,7 +448,7 @@ public class InformationRequestDao extends DaoBase {
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
-              .and(informationRequest.person.office.eq(signer.office)));
+              .and(personsOffices.in(signer.personsOffices)));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -453,16 +457,17 @@ public class InformationRequestDao extends DaoBase {
       conditions.and(
           informationRequest.officeHeadApprovalRequired.isTrue()              
           .and(informationRequest.officeHeadApproved.isNotNull())
-          .and(person.office.in(officeList)));      
+          .and(personsOffices.office.in(officeList)));      
     } else {
       conditions.and(
           informationRequest.administrativeApprovalRequired.isTrue()              
           .and(informationRequest.administrativeApproved.isNotNull())
-          .and(person.office.in(officeList)));
+          .and(personsOffices.office.in(officeList)));
     }
     return getQueryFactory().selectFrom(informationRequest)
+        .leftJoin(informationRequest.person.personsOffices, personsOffices)
         .join(informationRequest.person, person)
-        .join(person.office, office)
+        //.join(person.office, office)
         .where(office.in(uros.stream().map(
             userRoleOffices -> userRoleOffices.office)
             .collect(Collectors.toSet())).and(conditions))

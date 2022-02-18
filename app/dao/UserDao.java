@@ -43,6 +43,7 @@ import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
+import models.query.QPersonsOffices;
 import models.query.QUser;
 
 /**
@@ -139,10 +140,11 @@ public class UserDao extends DaoBase {
     final QUser user = QUser.user;
     final QPerson person = QPerson.person;
     final QBadgeReader badgeReader = QBadgeReader.badgeReader;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     BooleanBuilder condition = new BooleanBuilder()
         // La persona associata all'utente fa parte di uno degli uffici specificati
-        .andAnyOf(person.office.in(offices),
+        .andAnyOf(personsOffices.office.in(offices),
             // oppure il proprietario dell'utente è tra gli uffici specificati
             user.owner.in(offices));
     // Filtro nome
@@ -157,6 +159,7 @@ public class UserDao extends DaoBase {
 
     return ModelQuery.wrap(getQueryFactory().selectFrom(user).leftJoin(user.person, person)
         .leftJoin(user.badgeReaders, badgeReader)
+        .leftJoin(user.person.personsOffices, personsOffices)
         .where(condition).orderBy(user.username.asc()), user);
   }
 
@@ -228,12 +231,12 @@ public class UserDao extends DaoBase {
         Role.TECHNICAL_ADMIN)) {
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
     }
-    if (user.person.qualification.qualification <= 3
-        && user.person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+    if (user.person.isTopQualification()
+        && user.person.getCurrentOffice().get().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
 
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
     }
-    if (user.person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true")
+    if (user.person.getCurrentOffice().get().checkConf(EpasParam.WORKING_OFF_SITE, "true")
         && user.person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
     } else {

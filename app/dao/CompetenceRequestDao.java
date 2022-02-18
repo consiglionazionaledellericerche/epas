@@ -39,6 +39,7 @@ import models.flows.enumerate.CompetenceRequestType;
 import models.flows.query.QCompetenceRequest;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDateTime;
 
 /**
@@ -98,7 +99,7 @@ public class CompetenceRequestDao extends DaoBase {
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       CompetenceRequestType competenceRequestType, Person signer) {
     Preconditions.checkNotNull(fromDate);
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
@@ -116,7 +117,7 @@ public class CompetenceRequestDao extends DaoBase {
         .and(competenceRequest.type.eq(competenceRequestType)
         .and(competenceRequest.flowStarted.isTrue())
         .and(competenceRequest.flowEnded.isFalse())
-        .and(competenceRequest.person.office.in(officeList)));
+        .and(personsOffices.office.in(officeList)));
 
 
     JPQLQuery<CompetenceRequest> query;
@@ -125,8 +126,9 @@ public class CompetenceRequestDao extends DaoBase {
       .and(competenceRequest.employeeApproved.isNull())
       .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
       .and(competenceRequest.reperibilityManagerApproved.isNull())
-          .and(person.office.eq(signer.office));
+          .and(personsOffices.in(signer.personsOffices));
       query = getQueryFactory().selectFrom(competenceRequest)
+          .leftJoin(competenceRequest.person.personsOffices, personsOffices)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
           .where(pr.personReperibilityType.in(signer.reperibilityTypes).and(conditions));
@@ -207,6 +209,7 @@ public class CompetenceRequestDao extends DaoBase {
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
       Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
@@ -216,7 +219,7 @@ public class CompetenceRequestDao extends DaoBase {
     List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
         .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
-            .and(competenceRequest.person.office.in(officeList)));
+            .and(personsOffices.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
@@ -229,6 +232,7 @@ public class CompetenceRequestDao extends DaoBase {
       
       query = getQueryFactory().selectFrom(competenceRequest)
           .leftJoin(competenceRequest.person, person)
+          .leftJoin(competenceRequest.person.personsOffices, personsOffices)
           .leftJoin(person.reperibility, pr)
           .where(pr.personReperibilityType.in(signer.reperibilityTypes)
               .and(conditions));
@@ -236,8 +240,9 @@ public class CompetenceRequestDao extends DaoBase {
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
         .and(competenceRequest.employeeApproved.isNotNull())
-          .and(person.office.in(officeList));
+          .and(personsOffices.office.in(officeList));
       query = getQueryFactory().selectFrom(competenceRequest)
+          .leftJoin(competenceRequest.person.personsOffices, personsOffices)
           .join(competenceRequest.person, person)
           .where(person.eq(signer).and(conditions));
       results.addAll(query.fetch());
@@ -276,11 +281,12 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder managerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
         .and(competenceRequest.reperibilityManagerApproved.isNull())
         .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
             competenceRequest.employeeApprovalRequired.isFalse())
-          .and(competenceRequest.person.office.in(officeList));
+          .and(personsOffices.office.in(officeList));
     return condition;
 
   }

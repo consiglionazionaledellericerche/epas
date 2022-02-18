@@ -63,6 +63,7 @@ import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
+import models.query.QPersonsOffices;
 import models.query.QUser;
 import models.query.QWorkingTimeType;
 import org.joda.time.LocalDate;
@@ -195,10 +196,11 @@ public final class PersonDao extends DaoBase {
    */
   public List<Person> byInstitute(Institute institute) {
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     return getQueryFactory()
-        .selectFrom(person)
-        .where(person.office.institute.eq(institute)).orderBy(person.surname.asc()).fetch();
+        .selectFrom(person).leftJoin(person.personsOffices, personsOffices)
+        .where(personsOffices.office.institute.eq(institute)).orderBy(person.surname.asc()).fetch();
   }
 
 
@@ -478,15 +480,17 @@ public final class PersonDao extends DaoBase {
   public List<Person> getPersonsWithNumber(Optional<Office> office) {
 
     final QPerson person = QPerson.person;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    
     BooleanBuilder condition =
         new BooleanBuilder(person.number.isNotNull().and(person.number.isNotEmpty()));
 
     if (office.isPresent()) {
-      condition.and(person.office.eq(office.get()));
+      condition.and(personsOffices.office.eq(office.get()));
     }
 
     return getQueryFactory().selectFrom(person)
+        .leftJoin(person.personsOffices, personsOffices)
         .where(condition).orderBy(person.number.asc()).fetch();
   }
 
@@ -761,9 +765,10 @@ public final class PersonDao extends DaoBase {
   private void filterOffices(BooleanBuilder condition, Set<Office> offices) {
 
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     if (offices != null && !offices.isEmpty()) {
-      condition.and(person.office.in(offices));
+      condition.and(personsOffices.office.in(offices));
     }
   }
 
@@ -1023,6 +1028,7 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
     final QOffice office = QOffice.office;
     final QConfiguration config = QConfiguration.configuration;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     final BooleanBuilder baseCondition = new BooleanBuilder();
 
@@ -1055,23 +1061,27 @@ public final class PersonDao extends DaoBase {
 
     final JPQLQuery<Long> personSendEmailTrue = JPAExpressions.selectFrom(person)
         .leftJoin(person.contracts, contract)
-        .leftJoin(person.office, office)
+        .leftJoin(person.personsOffices, personsOffices)
         .leftJoin(office.configurations, config)
-        .where(baseCondition, sendEmailCondition)
+        .where(personsOffices.office.eq(office).and(baseCondition), sendEmailCondition)
         .select(person.id);
 
     final JPQLQuery<Long> personAutocertDisabled = JPAExpressions.selectFrom(person)
         .leftJoin(person.contracts, contract)
-        .leftJoin(person.office, office)
+        .leftJoin(person.personsOffices, personsOffices)
+        //.leftJoin(person.office, office)
         .leftJoin(office.configurations, config)
-        .where(baseCondition, trAutoCertificationDisabledCondition)
+        .where(personsOffices.office.eq(office).and(baseCondition), 
+            trAutoCertificationDisabledCondition)
         .select(person.id);
 
     final JPQLQuery<Long> autocertEnabledOnlyTecnicians = JPAExpressions.selectFrom(person)
         .leftJoin(person.contracts, contract)
-        .leftJoin(person.office, office)
+        .leftJoin(person.personsOffices, personsOffices)
+        //.leftJoin(person.office, office)
         .leftJoin(office.configurations, config)
-        .where(baseCondition, trAutoCertificationEnabledCondition)
+        .where(personsOffices.office.eq(office).and(baseCondition), 
+            trAutoCertificationEnabledCondition)
         .select(person.id);
 
     return queryFactory.selectFrom(person)
@@ -1096,7 +1106,7 @@ public final class PersonDao extends DaoBase {
     final QContract contract = QContract.contract;
     final QOffice office = QOffice.office;
     final QConfiguration config = QConfiguration.configuration;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final BooleanBuilder baseCondition = new BooleanBuilder();
 
     // Requisiti della Persona
@@ -1123,16 +1133,19 @@ public final class PersonDao extends DaoBase {
 
     final JPQLQuery<Long> personSendEmailTrue = JPAExpressions.selectFrom(person)
         .leftJoin(person.contracts, contract)
-        .leftJoin(person.office, office)
+        .leftJoin(person.personsOffices, personsOffices)
+        //.leftJoin(person.office, office)
         .leftJoin(office.configurations, config)
-        .where(baseCondition, sendEmailCondition)
+        .where(personsOffices.office.eq(office).and(baseCondition), sendEmailCondition)
         .select(person.id);
 
     final JPQLQuery<Long> trAutocertEnabled = JPAExpressions.selectFrom(person)
         .leftJoin(person.contracts, contract)
-        .leftJoin(person.office, office)
+        .leftJoin(person.personsOffices, personsOffices)
+        //.leftJoin(person.office, office)
         .leftJoin(office.configurations, config)
-        .where(baseCondition, trAutoCertificationEnabledCondition)
+        .where(personsOffices.office.eq(office).and(baseCondition), 
+            trAutoCertificationEnabledCondition)
         .select(person.id);
 
     return queryFactory.selectFrom(person)
