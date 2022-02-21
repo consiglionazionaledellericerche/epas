@@ -454,7 +454,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
   
   /**
-   * Con la nuova modellazione occorre considerare quando una persona era afferente a una certa sede
+   * Con la nuova modellazione occorre considerare quando una persona era afferente 
+   * a una certa sede.
+   * 
    * @param date la data opzionale
    * @return la sede, se esiste, in cui il dipendente era afferente alla data date.
    */
@@ -466,7 +468,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
             && (po.endDate == null || !po.endDate.isBefore(date)))
         .collect(Collectors.toList());
     if (!personOffice.isEmpty()) {
-      return Optional.fromNullable(Office.findById(personOffice.get(0).office.id));      
+      return Optional.fromNullable(personOffice.get(0).office);      
     } else {
       return Optional.absent();
     }
