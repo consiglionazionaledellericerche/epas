@@ -724,6 +724,7 @@ public final class PersonDao extends DaoBase {
     final QPerson person = QPerson.person;
     final QContract contract = QContract.contract;
     final QAffiliation affiliation = QAffiliation.affiliation;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     
     final JPQLQuery<Person> query = getQueryFactory().selectFrom(person)
 
@@ -738,6 +739,7 @@ public final class PersonDao extends DaoBase {
         .leftJoin(
             person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetchJoin()
         .leftJoin(person.qualification).fetchJoin()
+        .leftJoin(person.personsOffices, personsOffices)
         // order by
         .orderBy(person.surname.asc(), person.name.asc())
         .distinct();
@@ -977,14 +979,17 @@ public final class PersonDao extends DaoBase {
       Set<Office> offices, int year, int month, boolean onlyPeopleInTelework) {
 
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
     Optional<LocalDate> endMonth =
         Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
 
     JPQLQuery<?> lightQuery =
-        getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
+        getQueryFactory().from(person)
+        .leftJoin(person.contracts, QContract.contract)
         .leftJoin(person.personConfigurations, QPersonConfiguration.personConfiguration)
+        .leftJoin(person.personsOffices, personsOffices)
             .orderBy(person.surname.asc(), person.name.asc()).distinct();
 
     lightQuery = personQuery(lightQuery, Optional.absent(), offices, false, beginMonth,

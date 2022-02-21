@@ -290,10 +290,10 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
-//  @Transient
-//  public Institute getInstitute() {
-//    return office == null ? null : office.institute;    
-//  }
+  @Transient
+  public Institute getInstitute() {
+    return !getCurrentOffice().isPresent() ? null : getCurrentOffice().get().institute;    
+  }
   
   /**
    * Lista dei gruppi di una persona alla data odierna.
