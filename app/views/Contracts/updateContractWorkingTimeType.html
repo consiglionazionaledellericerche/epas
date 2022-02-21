@@ -44,7 +44,7 @@
 		 #{f.date 'cwtt.beginDate', value:cwtt.beginDate?.format(), required:true /}
 		 #{f.date 'cwtt.endDate', value:cwtt.endDate?.format() /}
 		 #{f.selectModel 'cwtt.workingTimeType', 	
-		      items:templateUtility.getEnabledWorkingTimeTypeForOffice(cwtt.contract.person.office), required:true /}
+		      items:templateUtility.getEnabledWorkingTimeTypeForOffice(cwtt.contract.person.getCurrentOffice().get()), required:true /}
 		 #{b.buttons center:true}
 		   #{b.submit 'Applica'/}
 		 #{/b.buttons}
