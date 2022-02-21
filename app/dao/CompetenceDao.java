@@ -80,7 +80,7 @@ public class CompetenceDao extends DaoBase {
     final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(competenceCode)
         .leftJoin(competenceCode.personCompetenceCodes, pcc).fetchJoin()
-        .leftJoin(pcc.person.personsOffices, personsOffices).fetchJoin()
+        .leftJoin(pcc.person.personsOffices, personsOffices)
         .where(personsOffices.office.eq(office)
             .and(pcc.beginDate.loe(date)
                 .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))

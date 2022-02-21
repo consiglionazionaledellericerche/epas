@@ -114,8 +114,7 @@ public class ContractDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(contract)
-        .leftJoin(contract.person.personsOffices, personsOffices).fetchJoin(
-            ).where(condition).fetch();
+        .leftJoin(contract.person.personsOffices, personsOffices).where(condition).fetch();
   }
 
   public List<Contract> getActiveContractsInPeriod(LocalDate begin, Optional<LocalDate> end,

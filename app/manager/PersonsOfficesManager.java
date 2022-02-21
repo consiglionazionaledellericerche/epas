@@ -25,14 +25,17 @@ public class PersonsOfficesManager {
   
   /**
    * Ritorna gli affiliati di una sede.
+   * 
    * @param office la sede di cui ritornare gli associati
+   * 
    * @return la lista delle persone associate alla sede passata come parametro.
    */
   public List<Person> affiliatePeople(Office office) {
     
     List<PersonsOffices> peopleList = office.personsOffices.stream()
         .filter(po -> !po.beginDate.isAfter(LocalDate.now()) 
-            && !po.endDate.isBefore(LocalDate.now())).collect(Collectors.toList());
+            && (po.endDate == null || !po.endDate.isBefore(LocalDate.now()) ))
+        .collect(Collectors.toList());
     return peopleList.stream().map(po -> po.person).collect(Collectors.toList());
   }
   
