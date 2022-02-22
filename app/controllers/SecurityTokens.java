@@ -52,7 +52,7 @@ public class SecurityTokens extends Controller {
   }
 
   /**
-   * Risponde con un nuovo token attivo per 1ora.
+   * Risponde con un nuovo token attivo per 1 ora.
    */
   public static void token() {
     String username = Resecure.getCurrentUser().orElseThrow().username;

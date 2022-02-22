@@ -39,5 +39,12 @@
 	    
   </div>
   #{/if}
-
+  #{if oauthEnabled}
+  	<div class="center" id="login-idp-btn">
+		<a class="btn btn-default" href="@{Resecure.oauthLogin()}"> 
+			<img class="col-xs-12" alt="Login tramite OAuth2"
+				src="@{'/public/images/logo-cnr-big.png'}" />
+		</a>
+	</div>
+   #{/if}
 </div>
