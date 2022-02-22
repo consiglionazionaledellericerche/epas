@@ -25,6 +25,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -146,6 +147,13 @@ public class Resecure extends Controller {
     }
     redirect(url);
   }
+
+  //Utilizzata come callback dell'eventuale autenticazione OAuth
+  public static void logout() {
+    session.clear();
+    Application.index();
+  }
+
 
   @Util
   public static void oauthLogout(Map<String, String> data) {
