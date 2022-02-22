@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0] - UNRELEASED
 ### Changed
+ - Aggiornato tag f.edit per problema quando l'attributo label non è presente 
  - Aggiornate dipendenze jquery e bootstrap-datapicker
  - Rivisti metodi di aggiornamento automatico delle pagine con selezioni di date
    per migliorare l'accessibilità
