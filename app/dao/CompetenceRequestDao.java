@@ -161,7 +161,7 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     BooleanBuilder conditions = new BooleanBuilder();
 
     if (roleList.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
@@ -182,6 +182,7 @@ public class CompetenceRequestDao extends DaoBase {
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
+          .leftJoin(person.personsOffices, personsOffices)
           .join(person.reperibility, pr)
           .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
           .fetch();

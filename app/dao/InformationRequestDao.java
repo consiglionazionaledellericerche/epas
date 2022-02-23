@@ -324,12 +324,14 @@ public class InformationRequestDao extends DaoBase {
   private List<InformationRequest> toApproveResultsAsSeatSuperVisor(List<UsersRolesOffices> uros,
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR) 
         || uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = seatSupervisorQuery(officeList, conditions, signer);
-      return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
+      return getQueryFactory().selectFrom(informationRequest)
+          .leftJoin(informationRequest.person.personsOffices, personsOffices)
+          .where(conditions).fetch();
     } else {
       return Lists.newArrayList();
     }
@@ -341,11 +343,13 @@ public class InformationRequestDao extends DaoBase {
   private List<InformationRequest> toApproveResultsAsPersonnelAdmin(List<UsersRolesOffices> uros,
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
       conditions = personnelAdminQuery(officeList, conditions, signer);
-      return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
+      return getQueryFactory().selectFrom(informationRequest)
+          .leftJoin(informationRequest.person.personsOffices, personsOffices)
+          .where(conditions).fetch();
     } else {
       return Lists.newArrayList();
     }
