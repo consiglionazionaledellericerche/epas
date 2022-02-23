@@ -34,6 +34,7 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
@@ -50,11 +51,13 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.PersonsOffices;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.flows.Affiliation;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import play.data.validation.Equals;
@@ -532,4 +535,23 @@ public class Persons extends Controller {
     children(child.person.id);
   }
 
+  /**
+   * 
+   * @param personId
+   */
+  public static void changeOffice(Long personId) {
+    val person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    render(person);
+  }
+  
+  public static void blankByPerson(Long personId) {
+    val person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    val availableOffices = 
+        officeDao.getAllOffices();
+    val personOffice = new PersonsOffices();
+    personOffice.person = person;
+    render(personOffice, person, availableOffices);
+  }
 }

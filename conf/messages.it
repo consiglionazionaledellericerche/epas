@@ -1023,6 +1023,7 @@ Persons.changePassword= Cambio Password
 Persons.children= Figli
 Persons.deletePerson= Elimina
 Persons.edit= Dati Anagrafici
+Persons.changeOffice= Sede di afferenza
 Persons.list= Lista Persone
 Persons.workGroup= Gruppo Di Lavoro
 PrintTags.listPersonForPrintTags= Stampa Cartellino
