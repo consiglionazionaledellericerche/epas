@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto il supporto all'utenticazione tramite OAuth, test effettuati solo con keycloak.
 ### Changed
+ - Inseriti title e aria-label in link per inserimento assenze e ferie in tabellone timbrature
  - Aggiornato tag f.edit per problema quando l'attributo label non è presente 
  - Aggiornate dipendenze jquery e bootstrap-datapicker
  - Rivisti metodi di aggiornamento automatico delle pagine con selezioni di date
