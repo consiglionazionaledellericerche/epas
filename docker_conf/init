@@ -390,13 +390,11 @@ if [ ${OAUTH_LOGIN} = "true" ]; then
   else
     sed 's#{{JWT_KEY}}#'"${JWT_KEY}"'#' -i ${APP_HOME}/conf/prod.conf
   fi
-fi
 else
   sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/KEYCLOAK_CLIENT_ID/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
-
 fi
 
 ### Impostazione Login OAuth

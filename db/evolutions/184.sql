@@ -1,3 +1,5 @@
+# --- !Ups
+
 ALTER TABLE users ADD COLUMN IF NOT EXISTS keycloak_id TEXT;
 ALTER TABLE users_history ADD COLUMN IF NOT EXISTS keycloak_id TEXT;
 
