@@ -68,8 +68,14 @@ public class PersonsOfficesManager {
         po.endDate = beginDate.minusDays(1);
         po.save();
         saveAffiliation(person, office, beginDate, endDate);
-        log.debug("Salvata affiliazione per {} nella sede {} dal {} al {}", 
-            person, office, beginDate, endDate.get());
+        String fineAffiliazione = "";
+        if (endDate.isPresent()) {
+         fineAffiliazione = endDate.get().toString(); 
+        } else {
+          fineAffiliazione = "tempo indeterminato";
+        }
+        log.info("Salvata affiliazione per {} nella sede {} da {} a {}", 
+            person, office, beginDate, fineAffiliazione);
       }
     }    
         

@@ -305,7 +305,7 @@ public class AbsenceRequests extends Controller {
 
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
-          LocalDate.now().getMonthOfYear(), true);
+          LocalDate.now().getMonthOfYear(), true, Optional.absent());
       int maxDays = (Integer) configurationManager.configValue(person.getCurrentOffice().get(),
           EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
@@ -444,7 +444,7 @@ public class AbsenceRequests extends Controller {
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST)
         && absenceRequest.person.isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(absenceRequest.person,
-          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), true);
+          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), true, Optional.absent());
       int maxDays = (Integer) configurationManager.configValue(absenceRequest.person
           .getCurrentOffice().get(), EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;

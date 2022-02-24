@@ -41,6 +41,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TeleworkValidation;
@@ -118,7 +119,7 @@ public class TeleworkStampings extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
     
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
@@ -188,9 +189,10 @@ public class TeleworkStampings extends Controller {
     }
     
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-
+    Optional<Office> officeOwner = Security.getUser().get().person != null 
+        ? Security.getUser().get().person.getCurrentOffice() : Optional.absent();
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrPerson.getValue(), year, month, true);
+        .create(wrPerson.getValue(), year, month, true, officeOwner);
     
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
@@ -362,7 +364,7 @@ public class TeleworkStampings extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
     LocalDate date = LocalDate.now();
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.stampingsForReport(psDto);

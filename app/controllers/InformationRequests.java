@@ -629,7 +629,7 @@ public class InformationRequests extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
     
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     

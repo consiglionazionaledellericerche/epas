@@ -158,7 +158,7 @@ public class Stampings extends Controller {
     }
 
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
 
     Person person = wrperson.getValue();
 
@@ -191,7 +191,7 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),
@@ -207,10 +207,11 @@ public class Stampings extends Controller {
       YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
       personStamping(personId, last.getYear(), last.getMonthOfYear());
     }
-
+    Optional<Office> officeOwner = Security.getUser().get().person != null 
+        ? Security.getUser().get().person.getCurrentOffice() : Optional.absent();
     PersonStampingRecap psDto = 
         stampingsRecapFactory.create(
-            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true, officeOwner);
 
     render(psDto, person, yearMonth);
   }

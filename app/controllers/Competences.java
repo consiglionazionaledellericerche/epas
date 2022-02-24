@@ -542,8 +542,10 @@ public class Competences extends Controller {
     Office office = person.getOffice(new LocalDate(year, month, 1)).get();
     Competence competence = new Competence(person, code, year, month);
     if (competence.competenceCode.code.equals("S1")) {
+      Optional<Office> officeOwner = Security.getUser().get().person != null 
+          ? Security.getUser().get().person.getCurrentOffice() : Optional.absent();
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
-          competence.year, competence.month, true);
+          competence.year, competence.month, true, officeOwner);
       render("@editCompetence", competence, psDto, office, year, month, person);
     }
     render("@editCompetence", competence, office, year, month, person);
@@ -571,8 +573,10 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     Office office = person.getOffice(new LocalDate(year, month, 1)).get();
     if (code.code.equals("S1")) {
+      Optional<Office> officeOwner = Security.getUser().get().person != null 
+          ? Security.getUser().get().person.getCurrentOffice() : Optional.absent();
       PersonStampingRecap psDto = stampingsRecapFactory.create(person,
-          year, month, true);
+          year, month, true, officeOwner);
       render(person, code, year, month, psDto, office, competence);
     }
 
@@ -596,7 +600,7 @@ public class Competences extends Controller {
     String result = "";
 
     if (!Validation.hasErrors()) {
-      result = competenceManager.canAddCompetence(competence, valueApproved);
+      result = competenceManager.canAddCompetence(competence, valueApproved, office);
       if (!result.isEmpty()) {
         Validation.addError("valueApproved", result);
       }
@@ -702,7 +706,7 @@ public class Competences extends Controller {
     FileInputStream inputStream = competenceManager
         .getCompetenceGroupInYearMonth(year, month, personList, group);
     renderBinary(inputStream, "competenze_per_gruppo_" + group.getLabel() 
-    + DateUtility.fromIntToStringMonth(month) + year + ".csv");
+        + DateUtility.fromIntToStringMonth(month) + year + ".csv");
   }
 
   /**

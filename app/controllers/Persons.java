@@ -40,6 +40,7 @@ import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
 import manager.PersonManager;
+import manager.PersonsOfficesManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
@@ -116,6 +117,8 @@ public class Persons extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   static RoleDao roleDao;
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
 
 
   /**
@@ -136,7 +139,8 @@ public class Persons extends Controller {
     rules.checkIfPermitted(office);
 
     List<Person> simplePersonList = personDao
-        .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, null, null, false)
+        .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, 
+            LocalDate.now(), LocalDate.now(), false)
         .list();
 
     List<IWrapperPerson> personList =
@@ -536,8 +540,8 @@ public class Persons extends Controller {
   }
 
   /**
-   * 
-   * @param personId
+   * Genera la form di tutto lo storico di afferenza alla sede.
+   * @param personId l'identificativo della persona di cui cambiare l'ufficio
    */
   public static void changeOffice(Long personId) {
     val person = personDao.getPersonById(personId);
@@ -545,6 +549,10 @@ public class Persons extends Controller {
     render(person);
   }
   
+  /**
+   * Genera la form di cambio afferenza alla sede.
+   * @param personId l'identificativo della persona di cui cambiare l'ufficio
+   */
   public static void blankByPerson(Long personId) {
     val person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -553,5 +561,29 @@ public class Persons extends Controller {
     val personOffice = new PersonsOffices();
     personOffice.person = person;
     render(personOffice, person, availableOffices);
+  }
+  
+  /**
+   * Salva la nuova relazione periodica tra persona e sede.
+   * @param personOffice l'oggetto che contiene l'associazione persona/sede
+   */
+  public static void saveOfficeChanged(@Valid PersonsOffices personOffice) {
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors: {}", validation.errorsMap());
+      val availableOffices = 
+          officeDao.getAllOffices(); 
+      render("@blankByPerson", personOffice, availableOffices);
+    }
+    rules.checkIfPermitted(personOffice.person.getCurrentOffice().get());
+    Optional<LocalDate> end;
+    if (personOffice.endDate != null) {
+      end = Optional.fromNullable(personOffice.endDate);
+    } else {
+      end = Optional.absent();
+    }
+    personsOfficesManager.addPersonInOffice(personOffice.person, personOffice.office, 
+        personOffice.beginDate, end);
+    personOffice.save();
   }
 }

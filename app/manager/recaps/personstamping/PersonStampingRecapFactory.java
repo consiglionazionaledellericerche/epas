@@ -19,9 +19,11 @@ package manager.recaps.personstamping;
 
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
+import com.google.common.base.Optional;
 import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
+import models.Office;
 import models.Person;
 
 /**
@@ -56,11 +58,11 @@ public class PersonStampingRecapFactory {
    * Costruisce il riepilogo mensile delle timbrature.
    */
   public PersonStampingRecap create(Person person, int year, int month, 
-      boolean considerExitingNow) {
+      boolean considerExitingNow, Optional<Office> officeOwner) {
 
     return new PersonStampingRecap(personDayManager, personDayDao,
         personManager, stampingDayRecapFactory,
-        wrapperFactory, year, month, person, considerExitingNow);
+        wrapperFactory, year, month, person, considerExitingNow, officeOwner);
   }
 
 }
