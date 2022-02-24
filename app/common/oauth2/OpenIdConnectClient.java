@@ -51,7 +51,7 @@ public final class OpenIdConnectClient {
   private final Supplier<String> callBackUrl;
   private final String base64Auth;
   private final JwksResolver jwksResolver;
-  // Il campo da considerare per il match dell'utente su Inphase (default: email)
+  // Il campo da considerare per il match dell'utente (default: email)
   private final String jwtField;
 
 
@@ -210,12 +210,4 @@ public final class OpenIdConnectClient {
     }
   }
 
-  /**
-   * Notare che è molto specifico keycloak (versione ~11).
-   *
-   * @return l'indirizzo per la modifica della password.
-   */
-  public String getEditPasswordUrl() {
-    return config.getIssuer() + "/account/password";
-  }
 }

@@ -118,8 +118,7 @@ repositories:
             - com.github -> *
     - compatibility:
         type: local
-        artifact: ${application.path}/[module]-[revision].jar
+        artifact: ${application.path}/jars/[module]-[revision].jar
         contains:
           - it.cnr.iit -> play-qmodel 1.5.3
-          - it.cnr.iit -> keycloak-client 1.0.0
           - it.cnr.iit -> keycloak-client 16.1

@@ -20,6 +20,7 @@ package controllers;
 import common.oauth2.OpenIdConnectClient;
 import common.security.SecurityModule;
 import common.security.SecurityRules;
+import dao.PersonDao;
 import helpers.LogEnhancer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.inject.Inject;
 import lombok.val;
@@ -41,9 +43,11 @@ import play.mvc.Util;
 import play.mvc.With;
 
 /**
- * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste ai controller.
+ * Contiene metodi per l'attivazione dei controlli sui permessi per le richieste
+ * ai controller.
  *
  * @author Marco Andreini
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @With({RequestInit.class, LogEnhancer.class, Metrics.class})
@@ -52,8 +56,11 @@ public class Resecure extends Controller {
   private static final String REALM = "E-PAS";
 
   private static final String USERNAME = "username";
+  public static final String OAUTH = "oauth";
   private static final String URL = "url";
 
+  private static final String OAUTH_LOGIN = "oauth.login";
+  
   //come le chiavi utilizzate in play
   private static final String KEY = "___";
   static final String ACCESS_TOKEN = KEY + "access_token";
@@ -67,23 +74,38 @@ public class Resecure extends Controller {
   static OpenIdConnectClient openIdConnectClient;
   @Inject
   static SecurityModule.SecurityLogin securityLogin;
+  @Inject
+  static PersonDao personDao;
 
   @Before(priority = 1, unless = {"login", "authenticate", "logout", "oauthLogin", "oauthLogout", "oauthCallback"})
   static void checkAccess() throws Throwable {
+    //Se è annotato con NoCheck non si fanno controlli
     if (getActionAnnotation(NoCheck.class) != null
         || getControllerInheritedAnnotation(NoCheck.class) != null) {
       return;
-    }
-    if (getActionAnnotation(BasicAuth.class) != null
-        || getControllerInheritedAnnotation(BasicAuth.class) != null) {
-      if (!Secure.Security.isConnected()) {
-        unauthorized(REALM);
-      }
     } else {
-      Secure.checkAccess();
+      //Cominciano i controlli
+
+      if (oauthLoginEnabled()) {
+        //Si verifica se nel token jwt ci sono informazioni per impostare
+        //l'utente corrente in session
+        setSessionUsernameIfAvailable();
+      }
+
+      //Se l'autenticazione è dichiarata di tipo BasicAuth allora se non c'è 
+      //l'utente si ritorna un 404 con il REALM
+      if (getActionAnnotation(BasicAuth.class) != null
+          || getControllerInheritedAnnotation(BasicAuth.class) != null) {
+        if (!Secure.Security.isConnected()) {
+          unauthorized(REALM);
+        }
+      } else {
+        Secure.checkAccess();
+      }
+      rules.checkIfPermitted();
     }
-    rules.checkIfPermitted();
   }
+
 
   /**
    * True se si può eseguire l'azione sull'istanza, false altrimenti.
@@ -135,9 +157,9 @@ public class Resecure extends Controller {
    * @return  true if the user is connected
    */
   static boolean isConnected() {
-      return session.contains(USERNAME);
+    return session.contains(USERNAME);
   }
-  
+
   // ~~~ Utils
   @Util
   static void redirectToOriginalURL() {
@@ -149,9 +171,10 @@ public class Resecure extends Controller {
   }
 
   //Utilizzata come callback dell'eventuale autenticazione OAuth
-  public static void logout() {
+  public static void logout() throws Throwable {
     session.clear();
-    Application.index();
+    flash.success("secure.logout");
+    Secure.login();
   }
 
 
@@ -172,42 +195,67 @@ public class Resecure extends Controller {
   }
 
   @Util
-  private static void setSessionUsernameIfAvailable() {
+  private static Optional<String> setSessionUsernameIfAvailable() {
+    //Il JWT viene controllato solo se non c'è già una sessione attiva;
+    if (connected() != null) {
+      return Optional.of(connected());
+    }
     try {
       // si verifica la presenza del jwt e si preleva il relativo username
       val jwtUsername = SecurityTokens.retrieveAndValidateJwtUsername();
       log.debug("JWT username = '{}'", jwtUsername.orElse(null));
-      if (jwtUsername.isPresent() && (connected() == null)) {
+
+      if (jwtUsername.isPresent()) {
         String username = jwtUsername.get(); 
-        if (username.contains("@")) {
-          username = username.substring(0, username.indexOf("@"));
+        val person = personDao.byEppn(username);
+        if (person.isPresent()) {
+          username = person.get().user.username;
+          session.put(USERNAME, username);
+          session.put(OAUTH, true);
+          log.info("Login OAuth per l'utente {}", username);
+        } else {
+          log.warn("Ricevuto dal JWT {} contenente un valore che non corrisponde "
+              + "a nessun eppn presente in ePAS.", username);
         }
-        // WARNING: lo username viene impostato solo se non c'è; questo per evitare di
-        // sovrascrivere l'utente quando autenticato via JWT e in SUDO.
-        session.put(USERNAME, username);
-        log.info("Impostato nella sessione {} = {}", USERNAME, username);
       }
+      return jwtUsername;
     } catch (SecurityTokens.InvalidUsername e) {
       // forza lo svuotamento per evitare accessi non graditi
       session.clear();
+      return Optional.empty();
     }
   }
 
   @NoCheck
-  public static void oauthCallback(String code, String state) {
+  public static void oauthCallback(String code, String state) throws Throwable {
     log.debug("Callback received code = {}, state = {}", code, state);
     OAuth2.Response oauthResponse = openIdConnectClient.retrieveAccessToken(code, state, session.get(STATE));
     if (oauthResponse == null) {
       error("Could not retrieve jwt");
     } else {
-      log.debug("OAuth2 Response = {}", response);
+      log.debug("Ricevuta OAuth2 Response, status = {}", response.status);
       SecurityTokens.setJwtSession(oauthResponse);
-      setSessionUsernameIfAvailable();
+      val jwtUsername = setSessionUsernameIfAvailable();
+      if (!isConnected()) {
+        flash.error("Ricevuto dall'authentication server lo username '%s' non associato "
+            + "a nessun utente presente in ePAS",
+            jwtUsername.orElse(""));
+        Secure.login();
+      }
       redirectToOriginalURL();
     }
   }
-  
+
   public static Optional<User> getCurrentUser() {
     return Security.getUser().toJavaUtil();
+  }
+  
+  /**
+   * @return true se l'autenticazione oauth è abilitata in configurazione,
+   *   false altrimenti.
+   */
+  public static boolean oauthLoginEnabled() {
+    return "true".equalsIgnoreCase(
+        Play.configuration.getProperty(OAUTH_LOGIN, "false"));
   }
 }

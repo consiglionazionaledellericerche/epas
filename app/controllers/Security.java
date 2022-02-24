@@ -136,18 +136,8 @@ public class Security extends Secure.Security {
    */
   public static void logout() {
     //Verifico se siamo nel caso di autenticazione OAuth
-    java.util.Optional<String> username;
-    try {
-      username = SecurityTokens.retrieveAndValidateJwtUsername();
-    } catch (SecurityTokens.InvalidUsername invalidUsername) {
-      // possiamo ignorare gli errori perché la sessione viene comunque svuotata
-      username = java.util.Optional.empty();
-    }
-
-    //Caso autenticazione OAuth
-    if (username.isPresent()) {
-
-      log.debug("Logout sessione oauth");
+    if (session.contains(Resecure.OAUTH)) {
+      log.info("Logout sessione oauth per {}", connected());
       // copia della sessione perché nel logout viene svuotata
       val sessionCopy = new HashMap<>(session.all());
       flash.success("secure.logout");

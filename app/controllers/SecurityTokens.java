@@ -24,7 +24,7 @@ import play.mvc.Scope.Session;
  * Integrazione essenziale con JWT per la generazione di token e la
  * successiva rilettura/verifica.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @With(Resecure.class)
 @Slf4j
