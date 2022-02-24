@@ -12,8 +12,7 @@ services:
    ### inalterati i path sui container docker
 
   epas:
-    #image: consiglionazionalericerche/epas
-    image: criluc/epas
+    image: consiglionazionalericerche/epas
     container_name: epas
     volumes:
       - ./epas/logs:/home/epas/epas/logs
