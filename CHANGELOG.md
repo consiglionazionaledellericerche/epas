@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0] - UNRELEASED
 ### Changed
+ - Aggiornata la versione del fullcalendar alla 3.10.2 e della query-ui.
  - Inseriti title e aria-label in link per inserimento assenze e ferie in tabellone timbrature
  - Aggiornato tag f.edit per problema quando l'attributo label non è presente 
  - Aggiornate dipendenze jquery e bootstrap-datapicker
