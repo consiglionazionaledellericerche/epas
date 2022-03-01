@@ -63,7 +63,6 @@ public class Resecure extends Controller {
   
   //come le chiavi utilizzate in play
   private static final String KEY = "___";
-  static final String ACCESS_TOKEN = KEY + "access_token";
   static final String REFRESH_TOKEN = KEY + "refresh_token";
   static final String ID_TOKEN = KEY + "id_token";
   static final String STATE = KEY + "oauth_state";
@@ -206,7 +205,7 @@ public class Resecure extends Controller {
       log.debug("JWT username = '{}'", jwtUsername.orElse(null));
 
       if (jwtUsername.isPresent()) {
-        String username = jwtUsername.get(); 
+        String username = jwtUsername.get();
         val person = personDao.byEppn(username);
         if (person.isPresent()) {
           username = person.get().user.username;
@@ -221,6 +220,7 @@ public class Resecure extends Controller {
       return jwtUsername;
     } catch (SecurityTokens.InvalidUsername e) {
       // forza lo svuotamento per evitare accessi non graditi
+      log.warn("OAuth Login invalid username", e);
       session.clear();
       return Optional.empty();
     }
@@ -242,6 +242,7 @@ public class Resecure extends Controller {
             jwtUsername.orElse(""));
         Secure.login();
       }
+      log.trace("oauthCallback riuscita, faccio il redirect all'url originale");
       redirectToOriginalURL();
     }
   }

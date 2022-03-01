@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import play.Play;
+import play.cache.Cache;
 import play.libs.OAuth2;
 import play.mvc.*;
 import play.mvc.Http.Header;
@@ -25,6 +26,7 @@ import play.mvc.Scope.Session;
  * successiva rilettura/verifica.
  *
  * @author Marco Andreini
+ * @author Cristian Lucchesi
  */
 @With(Resecure.class)
 @Slf4j
@@ -34,6 +36,8 @@ public class SecurityTokens extends Controller {
   public static final String AUTHORIZATION = "authorization";
   private static final String REFRESH_TOKEN = "refresh_token";
   private static final String ID_TOKEN = "id_token";
+  private static final String CACHE_ACCESS_TOKEN_POSTFIX = "__ACCESS_TOKEN";
+
   @Inject
   static OpenIdConnectClient openIdConnectClient;
 
@@ -84,8 +88,9 @@ public class SecurityTokens extends Controller {
   public static java.util.Optional<String> retrieveAndValidateJwtUsername() throws InvalidUsername {
     Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
     String token = null;
-    if (Session.current().contains(Resecure.ACCESS_TOKEN)) {
-      token = Session.current().get(Resecure.ACCESS_TOKEN);
+    //Attenzione dipende dalla Cache
+    if (Cache.get(cacheAccessTokenKey()) != null) {
+      token = (String) Cache.get(cacheAccessTokenKey());
     } else if (authorization != null && authorization.value().startsWith(BEARER)) {
       token = authorization.value().substring(BEARER.length());
     }
@@ -112,20 +117,36 @@ public class SecurityTokens extends Controller {
     }
   }
 
+  /**
+   * La chiave da utilizzare in sessione per l'access token dipende dalla
+   * sessione dell'utente.
+   */
+  @Util
+  public static String cacheAccessTokenKey() {
+    return Session.current().getId() + CACHE_ACCESS_TOKEN_POSTFIX;
+  }
+
   @Util
   public static void setJwtSession(OAuth2.Response oauthResponse) {
-    Session.current().put(Resecure.ACCESS_TOKEN, oauthResponse.accessToken);
-    log.trace("put Jwt in session {}: {}", Session.current().getId(), oauthResponse.accessToken);
+    //XXX l'accesso token viene impostato in Cache e non in sessione perché la sessione
+    //viene inserita in un cookie che ha dimensione massima di 4096 caratteri e questa
+    //dimensione non è sufficiente per contenere anche l'access token.
+    Cache.safeAdd(cacheAccessTokenKey(), oauthResponse.accessToken, Scope.COOKIE_EXPIRE);
+    log.debug("put Jwt in cache con chiave {}. lenght={}, value={}", 
+        cacheAccessTokenKey(), oauthResponse.accessToken.length(), oauthResponse.accessToken);
     val body = oauthResponse.httpResponse.getJson().getAsJsonObject();
     String refreshToken = body.get(REFRESH_TOKEN).getAsString();
     String idToken = body.get(ID_TOKEN).getAsString();
     Session.current().put(Resecure.REFRESH_TOKEN, refreshToken);
+    log.trace("put REFRESH_TOKEN in sessione. Length = {}, value = {}", refreshToken.length(), refreshToken); 
     Session.current().put(Resecure.ID_TOKEN, idToken);
+    log.trace("put ID_TOKEN in sessione. Length = {}, value = {}", idToken.length(), idToken);
   }
 
   @Util
   public static void clearJwtSession() {
-    Session.current().remove(Resecure.ACCESS_TOKEN, Resecure.REFRESH_TOKEN, Resecure.ID_TOKEN);
+    Session.current().remove(Resecure.REFRESH_TOKEN, Resecure.ID_TOKEN);
+    Cache.delete(cacheAccessTokenKey());
   }
 
   @Util
