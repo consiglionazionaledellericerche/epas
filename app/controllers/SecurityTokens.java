@@ -90,8 +90,11 @@ public class SecurityTokens extends Controller {
     String token = null;
     //Attenzione dipende dalla Cache
     if (Cache.get(cacheAccessTokenKey()) != null) {
+      log.debug("Prelevato token aouth dalla cache utilizzando la chiave {}",
+          cacheAccessTokenKey());
       token = (String) Cache.get(cacheAccessTokenKey());
     } else if (authorization != null && authorization.value().startsWith(BEARER)) {
+      log.debug("Prelevato token aouth dall'intestazione http");
       token = authorization.value().substring(BEARER.length());
     }
     if (token == null) {
