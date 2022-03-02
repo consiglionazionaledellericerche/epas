@@ -79,11 +79,10 @@ services:
                                                                                  # con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it
 
       #### Autenticazione OAuth ####
-      #- OAUTH_LOGIN=${OAUTH_LOGIN}                       #Opzionale. default: false. Abilita l'autenticazione keycloak.
+      #- OAUTH_LOGIN=${OAUTH_LOGIN}                       #Opzionale. default: false -- (true,false) -- Abilita l'autenticazione keycloak.
       #- KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}       #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio. default: file://${application.path}/conf/default-keycloak.json. Di solito è un URL dell'IdP OIDC
       #- KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}         #Opzionale. default: false.
       #- KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET} #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio.
-      #- JWT_KEY=${JWT_KEY}                               #Opzionale. se OAUTH_LOGIN è true è bene impostarla in modo che sia mantenuta in caso di riavvio del container.
 
       #### Invio Segnalazioni via email
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
