@@ -17,10 +17,19 @@ $(function($) {
 		e.preventDefault();
 	});
 
+    //Utilizzata sulle select o i campi input (non datepicker) per fare il
+    // submit automatico della form 
+	$(document.body).on('change', 'select.auto-submit-parent, input:not([datepicker]).auto-submit-parent', 
+	function () {
+	    var $select = $(this);
+		$select.parents("form").submit();
+		return true;
+	});
+	
 	//Non viene utilizzata la auto-submit perché non permette
 	//di scrivere correttamente la data ma effettua la submit
 	//prima di terminare di scrivere la data completa
-	$(document.body).on('change', 'input.auto-submit-parent[datepicker]', 
+	$(document.body).on('change', 'input[datepicker].auto-submit-parent', 
 	function () {
 		var $input = $(this);
 		if ($input.val().length == 10) {
@@ -28,6 +37,7 @@ $(function($) {
 		}
 		return true;
 	});
+
 
 	/**
 	 * evita i doppi invii sulle submit delle form.
