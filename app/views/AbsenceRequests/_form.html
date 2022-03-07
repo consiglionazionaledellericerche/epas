@@ -33,7 +33,7 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
      
 	    #{if absenceForm.hasAbsenceTypeChoice()} 
-			 #{f.selectModel 'absenceType', personalizeItems:true}
+			 #{f.selectModel 'absenceType', personalizeItems:true, class:'auto-submit-parent'}
 			   #{if absenceForm.automaticChoiceExists}
 			      <optgroup label="Inserimento Automatico">
 			        <option value=""
@@ -56,13 +56,16 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		 #{/else}
 	   
 	     #{if absenceForm.hasJustifiedTypeChoice() }
-	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected,
+	           class:'auto-submit-parent' /}
 	     #{/if}
 	     
 	     *{ seleziona minuti }*    
 	     #{if absenceForm.hasHourMinutesChoice() }
-	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours != null ? absenceForm.hours : hours, byEquals:'true' /}
-	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes != null ? absenceForm.minutes : 0, byEquals:'true' /}
+	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours != null ? absenceForm.hours : hours, byEquals:'true',
+	           class:'auto-submit-parent' /}
+	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes != null ? absenceForm.minutes : 0, byEquals:'true',
+	           class:'auto-submit-parent' /}
 	     #{/if}
 	     #{/if}
 	
