@@ -771,20 +771,26 @@ public final class PersonDao extends DaoBase {
     final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     if (offices != null && !offices.isEmpty()) {
       condition.and(personsOffices.office.in(offices));
-      if (start.isPresent()) {   
-        if (!forLiteList) {
-          condition.and(personsOffices.beginDate.loe(start.get()));
-        }        
-      }
-
-      if (end.isPresent()) {
-        if (!forLiteList) {
-          condition.andAnyOf(personsOffices.endDate.goe(end.get()), personsOffices.endDate.isNull());
-        }       
-      }
     }
+    if (!forLiteList) {
+      if (start.isPresent()) {
+        condition.and(personsOffices.beginDate.loe(end.get()));
+      }
+      if (end.isPresent()) {
+        condition.andAnyOf(personsOffices.endDate.goe(start.get()), 
+            personsOffices.endDate.isNull());
+      }      
+    } else {
+      if (start.isPresent() && end.isPresent()) {
+        condition.and(personsOffices.beginDate.loe(end.get()));
+        condition.andAnyOf(personsOffices.endDate.isNull(), 
+            personsOffices.endDate.goe(start.get()));
+      }
+      
+    }
+        
   }
-
+   
   /**
    * Filtro sulle date contrattuali.
    *

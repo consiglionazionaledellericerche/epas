@@ -584,6 +584,8 @@ public class Persons extends Controller {
     }
     personsOfficesManager.addPersonInOffice(personOffice.person, personOffice.office, 
         personOffice.beginDate, end);
-    personOffice.save();
+    flash.success("Salvata nuova afferenza per %s nella sede %s", 
+        personOffice.person, personOffice.office);
+    changeOffice(personOffice.person.id);
   }
 }

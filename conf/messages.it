@@ -624,6 +624,11 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+personOffice.person = Persona
+personOffice.office = Sede
+personOffice.beginDate = Data di inizio afferenza
+personOffice.endDate = Data di fine afferenza
+
 ################### CALENDARIO SHIFT #################################################
 
 shift.alreadyInShift= Il dipendente è già in turno sull'attività %s
