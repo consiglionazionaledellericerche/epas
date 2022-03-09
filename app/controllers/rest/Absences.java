@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.rest.v2.Persons;
@@ -63,7 +64,6 @@ import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione/consultazione della assenze via REST.

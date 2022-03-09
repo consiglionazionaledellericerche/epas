@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package security;
+package common.security;
 
 import java.util.Properties;
 import org.drools.KnowledgeBase;

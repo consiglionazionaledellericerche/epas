@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.ContractDao;
@@ -64,7 +65,6 @@ import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
-import security.SecurityRules;
 
 
 /**

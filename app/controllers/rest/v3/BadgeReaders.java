@@ -20,6 +20,7 @@ package controllers.rest.v3;
 import cnr.sync.dto.v3.BadgeReaderShowDto;
 import cnr.sync.dto.v3.BadgeReaderShowTerseDto;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.rest.v2.Offices;
 import dao.BadgeReaderDao;
@@ -33,7 +34,6 @@ import models.BadgeReader;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei lettori badge.

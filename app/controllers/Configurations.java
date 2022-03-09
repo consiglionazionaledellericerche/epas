@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import java.io.File;
@@ -54,7 +55,6 @@ import play.db.jpa.Blob;
 import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle configurazioni.

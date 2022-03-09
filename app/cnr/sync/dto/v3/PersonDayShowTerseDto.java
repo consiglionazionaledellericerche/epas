@@ -19,7 +19,7 @@ package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
