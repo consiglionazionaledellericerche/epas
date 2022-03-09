@@ -19,10 +19,10 @@ package it.cnr.iit.epas;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import org.joda.time.LocalDateTime;
-import injection.StaticInject;
 import lombok.extern.slf4j.Slf4j;
 import models.exports.MissionFromClient;
 import play.data.binding.Global;

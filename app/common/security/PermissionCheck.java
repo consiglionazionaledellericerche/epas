@@ -15,21 +15,47 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package injection;
+package common.security;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.google.common.base.MoreObjects;
+import lombok.Getter;
 
 /**
- * Denote an auto registered guice Module.
+ * Seam like check.
  *
  * @author Marco Andreini
- *
  */
-@Retention(RUNTIME)
-@Target(TYPE)
-public @interface AutoRegister {
+@Getter
+public class PermissionCheck {
+
+  private final PermissionCheckKey key;
+  private boolean granted = false;
+
+  public PermissionCheck(Object target, String action) {
+    key = new PermissionCheckKey(target, action);
+  }
+
+  public String getAction() {
+    return key.getAction();
+  }
+
+  public Object getTarget() {
+    return key.getTarget();
+  }
+
+  public void grant() {
+    this.granted = true;
+  }
+
+  public void revoke() {
+    this.granted = false;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).omitNullValues()
+        .add("action", getAction())
+        .add("target", getTarget())
+        .addValue(granted ? "GRANTED" : "DENIED").toString();
+  }
 }

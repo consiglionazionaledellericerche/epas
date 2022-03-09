@@ -1,9 +1,9 @@
 Funzionalità principali
 =======================
 Lo scopo principale di ePAS è l'acquisizione delle informazioni relative alle 
-timbrature di ingresso/usciata del personale e quelle relative alle assenze 
-giornalierre ed orario, otltre ad effettuare controlli di consistenza e 
-coerenza delle presene sulla base delle indicazioni del contratto nazionale CNR
+timbrature di ingresso/uscita del personale e quelle relative alle assenze 
+giornaliere ed orarie, oltre ad effettuare controlli di consistenza e 
+coerenza delle presenze sulla base delle indicazioni del contratto nazionale CNR
 e delle sue circolari applicative.
 
 Il sistema consente di:

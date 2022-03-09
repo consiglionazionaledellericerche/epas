@@ -1,9 +1,9 @@
 absenceRequest =richiesta di assenza
 
-absenceRequest.endTo =Fine
+absenceRequest.endTo =Data di fine
 absenceRequest.note =Note
 absenceRequest.person =Dipendente
-absenceRequest.startAt =Inizio
+absenceRequest.startAt =Data di inizio
 absenceRequest.type =Tipologia
 absenceRequest.officeHeadApproved =Approvazione responsabile di sede
 absenceRequest.managerApproved =Approvazione responsabile di gruppo
@@ -1303,7 +1303,7 @@ beginTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 endTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
-person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200
+person.perseoId.popover= Utilizzato per il collegamento tra utente ePAS e la anagrafica esterna Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 

@@ -18,10 +18,10 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import common.injection.StaticInject;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
 import dao.PersonDao;
-import injection.StaticInject;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

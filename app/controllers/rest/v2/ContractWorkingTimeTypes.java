@@ -21,6 +21,7 @@ import cnr.sync.dto.v2.ContractWorkingTimeTypeShowTerseDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
@@ -32,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione dell'associazione tra contratto e 

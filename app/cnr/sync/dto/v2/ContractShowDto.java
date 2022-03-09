@@ -19,7 +19,7 @@ package cnr.sync.dto.v2;
 
 import com.beust.jcommander.internal.Sets;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;

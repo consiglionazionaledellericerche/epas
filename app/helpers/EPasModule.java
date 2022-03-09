@@ -19,7 +19,7 @@ package helpers;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.inject.Named;

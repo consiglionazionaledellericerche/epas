@@ -19,7 +19,7 @@ package dao.wrapper;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 
 /**
  * Modulo per la registrazione dei Wrapper da utilizzare via Injection.

@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2022-03-09
+### Added
+ - Aggiunto il supporto all'utenticazione tramite OAuth, test effettuati solo con keycloak.
+### Changed
+ - Corretta visualizzazione assenze annuali, codice VAC19 non era incolonnato correttamente.
+ - Aggiornata la versione del fullcalendar alla 3.10.2 e della query-ui.
+ - Inseriti title e aria-label in link per inserimento assenze e ferie in tabellone timbrature
+ - Aggiornato tag f.edit per problema quando l'attributo label non è presente 
+ - Aggiornate dipendenze jquery e bootstrap-datapicker
+ - Rivisti metodi di aggiornamento automatico delle pagine con selezioni di date
+   per migliorare l'accessibilità
+ - Migliorati i tag per la generazione delle input in modo da aggiungere title e aria-label
+   utili per l'accessibiità
+ 
 ## [2.3.0] - 2022-01-21
 ### Added
  - Aggiunta possibilità di lanciare i ricalcoli per personale di una sede.

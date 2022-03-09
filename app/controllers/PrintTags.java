@@ -22,6 +22,7 @@ import static play.modules.pdf.PDF.renderPDF;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
@@ -45,7 +46,6 @@ import models.dto.PrintTagsInfo;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 @Slf4j
 @With({Resecure.class})
