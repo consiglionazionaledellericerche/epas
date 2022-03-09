@@ -9,7 +9,7 @@ responsabile di sede), troverà in quel menu anche la sezione dedicata all'appro
 si parla in altra sezione.
 
 Richiesta di ferie
-__________________
+------------------
 
 Nella pagina troviamo due schede:
 
@@ -41,7 +41,7 @@ destinatario contenente un link da cliccare che porterà direttamente alla pagin
 sottomessa dal dipendente.
 
 Richiesta riposo compensativo
-_____________________________
+-----------------------------
 
 Alla stregua di quanto descritto per le ferie, anche per il riposo compensativo valgono le stesse regole di 
 sottomissione delle richieste, naturalmente in questo caso il sistema verifica se il dipendente ha a disposizione
@@ -52,7 +52,7 @@ la quantità di riposi compensativi di cui ha ancora diritto nell’anno solare 
 dal regolamento CNR (max. 22 giorni).
 
 Richiesta permesso personale
-____________________________
+----------------------------
 
 Nel caso di richiesta di permesso personale, il sistema permette un'ulteriore specializzazione:
 dal momento che questi permessi sono fruibili in un massimo di 18 ore annuali, il sistema permette la fruizione sia 

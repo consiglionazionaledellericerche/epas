@@ -40,7 +40,7 @@ standard error a seconda del livello di log (ERROR e FATAL vanno su *stderr*).
 La configurazione specifica per questi appender da impostare nel file
 **log4j.prod.properties** è la seguente:
 
-.. code-block::
+.. code-block:: bash
 
   # Standard output appender
   log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -80,7 +80,7 @@ ogni giorno.
 La configurazione specifica per questo appender da impostare nel file 
 **log4j.prod.properties** è la seguente:
 
-.. code-block::
+.. code-block:: bash
 
   log4j.appender.file.Threshold=DEBUG
   log4j.appender.file=org.apache.log4j.DailyRollingFileAppender
@@ -100,7 +100,7 @@ commenti nel *docker-compose.yml* per maggiori informazioni.
 La configurazione specifica per questo appender da impostare nel file
 **log4j.prod.properties** è la seguente:
 
-.. code-block::
+.. code-block:: bash
 
   # Define the graylog2 destination
   log4j.appender.graylog2=org.graylog2.log.GelfAppender

@@ -174,7 +174,63 @@ data il dipendente utilizza un certo orario di lavoro (normale, maternità, 50%.
    :align: center
    
    Schermata di modifica tipo orario
+   
+Orario di lavoro personale
+--------------------------
 
+La tab orario di lavoro personale consente la possibilità di specificare una fascia oraria entro la quale definire
+la propria presenza a lavoro in sede.
+
+Questa funzionalità è utile nei casi in cui ci siano degli orari di lavoro che devono in qualche modo "sovrascrivere" 
+l'orario di lavoro in sede di cui si fa menzione tra i parametri periodici della sede ( :menuselection:`Configurazione --> Parametri` sezione parametri periodici).
+
+I casi più frequenti in cui si può utilizzare questa funzionalità sono da ricercarsi tra:
+
+	* part time orizzontali che devono effettuare il loro orario in una determinata fascia oraria
+	* turnisti che anticipano il proprio orario rispetto all'orario di lavoro previsto per la sede di afferenza
+
+
+.. figure:: _static/images/orarioPersonale.png
+   :scale: 40
+   :align: center
+   
+   Schermata di gestione orario personale
+   
+	
+La fascia oraria da applicare occorre definirla in :menuselection:`Configurazione --> Fasce orarie di lavoro` e se ne trova
+la documentazione in: (v. :doc:`Fasce orarie di lavoro <attendanceRange>`)
+   
+Fascia oraria obbligatoria
+--------------------------
+
+La tab fascia oraria obbligatoria è del tutto analoga a quella precedente di orario di lavoro personale, tuttavia si
+differenzia per un particolare sostanziale: questa schermata serve per definire una fascia di presenza obbligatoria entro
+la quale il dipendente non può essere assente da lavoro.
+Questa funzionalità lavora di pari passo con i permessi personali (36 ore annue) che sono gli unici in grado di "giustificare"
+il tempo non lavorato all'interno della fascia di lavoro obbligatorio.
+
+.. figure:: _static/images/presenzaObbligatoria.png
+   :scale: 40
+   :align: center
+   
+   Schermata di modifica fascia presenza obbligatoria
+
+La fascia oraria da applicare occorre definirla in :menuselection:`Configurazione --> Fasce orarie di lavoro` e se ne trova
+la documentazione in: (v. :doc:`Fasce orarie di lavoro <attendanceRange>`)
+
+Piani ferie
+-----------
+
+In questa scheda è possibile modificare il piano ferie associato a ciascun dipendente.
+In particolare questa funzionalità è *fondamentale* quando si è in presenza di un dipendente che è passato ad un orario
+di lavoro part time di tipo verticale: in questo caso, *per lo stesso periodo di durata dell'orario part time verticale*
+occorre anche definire il piano ferie associato a quel tipo di part time così che i conteggi sulle ferie siano corretti.
+
+.. figure:: _static/images/pianiFerie.png
+   :scale: 40
+   :align: center
+   
+   Schermata di modifica piano ferie
 
 Presenza automatica
 -------------------
