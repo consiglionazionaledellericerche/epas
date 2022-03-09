@@ -22,7 +22,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Personnel Attendance System | 9.1. Configurazione dei log di ePAS</title>
+    <title>Electronic Personnel Attendance System | 9.5. Configurazione dei log di ePAS</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css">
@@ -33,7 +33,7 @@
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
     <link rel="up" title="9. Configurazioni per l&#39;amministratore di sistema" href="index.html">
     <link rel="next" title="Appendice" href="../appendix.html">
-    <link rel="prev" title="9. Configurazioni per l&#39;amministratore di sistema" href="index.html">
+    <link rel="prev" title="9.4. Configurazione autenticazione OIDC" href="autenticazioneOidc.html">
 
 
     <!-- Favicons -->
@@ -685,7 +685,11 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">9. Configurazioni per l'amministratore di sistema</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -722,7 +726,7 @@
 <div class="navbar-toggler--wrap navbar-toggler--wrap--bottom p-3">
   <div class="navbar-toggler navbar-toggler--open p-0 border-0 ml-auto">
     <div class="navbar-toggler-bottom__chapter align-middle text-truncate">
-      <span class="it-list mr-2"></span><span class="section-number">9.1. </span>Configurazione dei log di ePAS
+      <span class="it-list mr-2"></span><span class="section-number">9.5. </span>Configurazione dei log di ePAS
     </div>
   </div>
 </div>
@@ -862,7 +866,11 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">9. Configurazioni per l'amministratore di sistema</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -901,12 +909,12 @@
           </div>-->
           
             <div class="footer-buttons footer-buttons--prev" role="navigation" aria-label="footer navigation">
-                <a href="index.html" class="" title="9. Configurazioni per l&#39;amministratore di sistema" accesskey="p" rel="prev"> Torna a <span class="section-number">9. </span>Configurazioni per l'amministratore di sistema</a>
+                <a href="autenticazioneOidc.html" class="" title="9.4. Configurazione autenticazione OIDC" accesskey="p" rel="prev"> Torna a <span class="section-number">9.4. </span>Configurazione autenticazione OIDC</a>
             </div>
           
           
   <section id="configurazione-dei-log-di-epas">
-<h1><span class="section-number">9.1. </span>Configurazione dei log di ePAS<a class="headerlink" href="#configurazione-dei-log-di-epas" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">9.5. </span>Configurazione dei log di ePAS<a class="headerlink" href="#configurazione-dei-log-di-epas" title="Link a questa intestazione">¶</a></h1>
 <dl>
 <dt>I log in ePAS sono gestiti tramite la Log4J e la loro configurazione può essere</dt><dd><p>effettuata tramite alcuni parametri impostabili nel <em>docker_compose.yml</em>.</p>
 <p>È possibile utilizzare quattro tipo di appender diversi a cui inviare i log:
@@ -933,7 +941,7 @@ standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</
 abilitati più appender contemporanemente, per utilizzare più appender scrivere
 i nomi degli appender separati da virgola (es.: APPENDERS=file, graylog2).</p>
 <section id="appender-di-tipo-stdout-e-stderr">
-<h2><span class="section-number">9.1.1. </span>Appender di tipo stdout e stderr<a class="headerlink" href="#appender-di-tipo-stdout-e-stderr" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.5.1. </span>Appender di tipo stdout e stderr<a class="headerlink" href="#appender-di-tipo-stdout-e-stderr" title="Link a questa intestazione">¶</a></h2>
 <p>Gli appender di tipo <em>stdout</em> e <em>stderr</em> inviano i log sullo standard output e
 standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</em>).</p>
 <p>La configurazione specifica per questi appender da impostare nel file
@@ -959,7 +967,7 @@ standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</
 </div>
 </section>
 <section id="appender-di-tipo-file">
-<h2><span class="section-number">9.1.2. </span>Appender di tipo file<a class="headerlink" href="#appender-di-tipo-file" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.5.2. </span>Appender di tipo file<a class="headerlink" href="#appender-di-tipo-file" title="Link a questa intestazione">¶</a></h2>
 <p>Nel caso si utilizzi l'appender di tipo file i log vengono salvati all'interno
 del container nel file log/epas.log, si consiglia quindi di effettuare all'interno
 del <strong>docker-compose.yml</strong> un mapping del volume tipo:</p>
@@ -982,7 +990,7 @@ ogni giorno.</p>
 </div>
 </section>
 <section id="appender-di-tipo-graylog">
-<h2><span class="section-number">9.1.3. </span>Appender di tipo Graylog<a class="headerlink" href="#appender-di-tipo-graylog" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.5.3. </span>Appender di tipo Graylog<a class="headerlink" href="#appender-di-tipo-graylog" title="Link a questa intestazione">¶</a></h2>
 <p>Le informazioni sull'host graylog a cui inviare i log sono configurabili tramite
 i parametri: <em>GRAYLOG_HOST</em>, <em>GRAYLOG_PORT</em> e <em>GRAYLOG_ORIGIN_HOST</em>, vedere i
 commenti nel <em>docker-compose.yml</em> per maggiori informazioni.</p>

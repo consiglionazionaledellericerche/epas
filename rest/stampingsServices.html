@@ -685,7 +685,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -862,7 +866,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -1039,7 +1047,7 @@ di una timbratura</p>
 <section id="stamping-update">
 <h2><span class="section-number">8.10.5. </span>Stamping Update<a class="headerlink" href="#stamping-update" title="Link a questa intestazione">¶</a></h2>
 <p>La modifica di la timbratura è possibile tramite una <em>HTTP PUT</em> all'indirizzo
-<strong>/rest/v2/stampings/update</strong>.</p>
+<strong>/rest/v3/stampings/update</strong>.</p>
 <p>Per individuare il gruppo è possibile utilizzare solo il campo <strong>id</strong>.
 I campi che è possibile modificare sono i seguenti:</p>
 <blockquote>
@@ -1065,7 +1073,7 @@ la data e ora della timbratura, se è necessario modificare uno di questi campi 
 </section>
 <section id="stamping-delete">
 <h2><span class="section-number">8.10.6. </span>Stamping Delete<a class="headerlink" href="#stamping-delete" title="Link a questa intestazione">¶</a></h2>
-<p>La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo <strong>/rest/v2/stampings/delete</strong></p>
+<p>La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo <strong>/rest/v3/stampings/delete</strong></p>
 <p>Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: <strong>id</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
     DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id<span class="o">=</span><span class="m">398946</span>

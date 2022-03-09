@@ -31,7 +31,7 @@
     <!-- Relations -->
     <link rel="index" title="Indice" href="../index.html">
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
-    <link rel="next" title="9.1. Configurazione dei log di ePAS" href="configurazioneLog.html">
+    <link rel="next" title="9.1. Configurazione autenticazione in ePAS" href="autenticazione.html">
     <link rel="prev" title="8.15. Consultazione delle tipologie di assenze via REST" href="../rest/absenceTypesServices.html">
 
 
@@ -684,7 +684,11 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -861,7 +865,11 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -909,10 +917,24 @@
 <div class="toctree-wrapper compound">
 <p><span class="caption-text">Indice dei contenuti</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="configurazioneLog.html">9.1. Configurazione dei log di ePAS</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-stdout-e-stderr">9.1.1. Appender di tipo stdout e stderr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-file">9.1.2. Appender di tipo file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-graylog">9.1.3. Appender di tipo Graylog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html#autenticazione-locale-ad-epas">9.1.1. Autenticazione locale ad ePAS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneSaml.html#logout-shibboleth-non-supportata">9.3.1. Logout Shibboleth non supportata</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html#match-tra-utenti-keycloak-e-utenti-epas">9.4.1. Match tra utenti Keycloak e utenti ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html#limitazioni-autenticazione-keycloak-e-multi-istanza-di-epas">9.4.2. Limitazioni autenticazione Keycloak e multi istanza di ePAS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configurazioneLog.html">9.5. Configurazione dei log di ePAS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-stdout-e-stderr">9.5.1. Appender di tipo stdout e stderr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-file">9.5.2. Appender di tipo file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html#appender-di-tipo-graylog">9.5.3. Appender di tipo Graylog</a></li>
 </ul>
 </li>
 </ul>
@@ -922,7 +944,7 @@
 
           
             <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
-                  <a href="configurazioneLog.html" class="" title="9.1. Configurazione dei log di ePAS" accesskey="n" rel="next"><span class="section-number">9.1. </span>Configurazione dei log di ePAS</a>
+                  <a href="autenticazione.html" class="" title="9.1. Configurazione autenticazione in ePAS" accesskey="n" rel="next"><span class="section-number">9.1. </span>Configurazione autenticazione in ePAS</a>
               </div>
             
           </div>

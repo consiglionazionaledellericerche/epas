@@ -140,7 +140,7 @@ Stamping Update
 ---------------
 
 La modifica di la timbratura è possibile tramite una *HTTP PUT* all'indirizzo 
-**/rest/v2/stampings/update**.
+**/rest/v3/stampings/update**.
 
 Per individuare il gruppo è possibile utilizzare solo il campo **id**. 
 I campi che è possibile modificare sono i seguenti:
@@ -168,7 +168,7 @@ la data e ora della timbratura, se è necessario modificare uno di questi campi 
 Stamping Delete
 ---------------
 
-La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo **/rest/v2/stampings/delete**
+La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo **/rest/v3/stampings/delete**
 
 Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: **id**.
 

@@ -685,7 +685,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -862,7 +866,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.1. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -1081,7 +1089,7 @@ il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.</p>
 <section id="cancellazione-di-un-assenza">
 <h2><span class="section-number">8.1.6. </span>Cancellazione di un'assenza<a class="headerlink" href="#cancellazione-di-un-assenza" title="Link a questa intestazione">¶</a></h2>
 <p>La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizzo
-<strong>/rest/v2/absences/delete</strong>.</p>
+<strong>/rest/absences/delete</strong>.</p>
 <p>Per individuare l'assenza da eliminare si utilizza il parametro <em>id</em> dell'assenza.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
     DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/delete
