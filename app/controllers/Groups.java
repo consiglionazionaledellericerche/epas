@@ -43,6 +43,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.flows.Group;
 import org.testng.collections.Lists;
+import org.testng.util.Strings;
 import play.data.binding.As;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -83,16 +84,24 @@ public class Groups extends Controller {
       @Valid Group group, Office office,
       @As(binder = JpaReferenceBinder.class)
       Set<Person> people) {
-    log.info("affiltionaPeople = {}", people);
-    if (Validation.hasErrors()) {
+
+    boolean hasErrors = Validation.hasErrors();
+    if (!Strings.isNullOrEmpty(group.externalId) && 
+          groupDao.byOfficeAndExternalId(office, group.externalId).isPresent()) {
+      hasErrors = true;
+      validation.addError("group.externalId", "deve essere univoco");
+    };
+
+    if (hasErrors) {
       response.status = 400;
       List<Person> peopleForGroups = personDao.byInstitute(office.institute);
       log.info("Create groups errors = {}", validation.errorsMap());
       render("@edit", group, office, peopleForGroups);
-    }
+    } 
+
     rules.checkIfPermitted(group.office);
     group.office = office;
-    final boolean isNew = group.id != null;        
+    final boolean isNew = group.id != null;
     group.save();
     log.debug("Salvato gruppo di lavoro: {} per la sede {}", group.name, group.office);
 
