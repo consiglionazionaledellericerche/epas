@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretta attivazione pulsante inserimento richieste assenza nel passato quando
    compilato il campo note.
+ - Corretta gestione null del campo externalId dei gruppi
 
 ## [2.4.0] - 2022-03-09
 ### Added
