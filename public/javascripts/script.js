@@ -19,13 +19,26 @@ $(function($) {
 
     //Utilizzata sulle select o i campi input (non datepicker) per fare il
     // submit automatico della form 
-	$(document.body).on('change', 'select.auto-submit-parent, input:not([datepicker]).auto-submit-parent', 
+	$(document.body).on('change', 'select.auto-submit-parent, input:not([datepicker]).auto-submit-parent',
 	function () {
 	    var $select = $(this);
 		$select.parents("form").submit();
 		return true;
 	});
-	
+
+	//Gestione del campo note nell'inserimento delle assenze nel passato.
+	$(document.body).on('keyup', 'input.absenceRequest_note_input',
+	function () {
+		var $input = $(this);
+		if ($input.val().length > 3) {
+			$("#absenceRequest_insertButton").prop('disabled',false);
+		} else {
+			$("#absenceRequest_insertButton").prop('disabled',true);
+		}
+		$(".absenceRequest_note_hidden").val($input.val());
+		return true;
+	});
+
 	//Non viene utilizzata la auto-submit perché non permette
 	//di scrivere correttamente la data ma effettua la submit
 	//prima di terminare di scrivere la data completa
