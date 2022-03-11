@@ -1,6 +1,6 @@
 #{f.edit _arg, label:_label, required:_required}
 %{
-  label = _label == null ? messages.get(field.name) : _label  
+  label = _label == null ? messages.get(field.name) : _label
 }%
 <div class="input-group">
   <input datepicker
@@ -12,6 +12,6 @@
   #{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}
   #{if _disabled} disabled#{/if}
   #{if _auto_submit_parent} auto-submit-parent#{/if}>
-  <span class="input-group-addon"><i class="fa fa-calendar"></i></span>${_label}
+  <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 </div>
 #{/f.edit}
