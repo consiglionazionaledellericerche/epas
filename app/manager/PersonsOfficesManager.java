@@ -99,6 +99,34 @@ public class PersonsOfficesManager {
     }
     personsOffices.save();    
   }
+  
+  /**
+   * Ritorna il range di date di affiliazione della persona alla sede nel periodo.
+   * @param personOffice l'affiliazione persona/sede
+   * @param begin la data di inizio in cui cercare
+   * @param end la data di fine in cui cercare
+   * @return il range contenente l'affiliazione mensile della persona sulla sede.
+   */
+  public Range<LocalDate> monthlyAffiliation(PersonsOffices personOffice, 
+      LocalDate begin, LocalDate end) {
+    Range<LocalDate> periodRange = Range.closed(begin, end);
+    Range<LocalDate> affiliationRange = null;
+    if (personOffice.endDate != null) {
+      affiliationRange = Range.closed(personOffice.beginDate, personOffice.endDate);
+    } else {
+      affiliationRange = Range.atLeast(personOffice.beginDate);
+    }
+    if (affiliationRange.encloses(periodRange)) {
+      return periodRange;
+    }
+    if (periodRange.contains(affiliationRange.lowerEndpoint())) {
+      return Range.closed(affiliationRange.lowerEndpoint(), periodRange.upperEndpoint());
+    }
+    if (periodRange.contains(affiliationRange.upperEndpoint())) {
+      return Range.closed(periodRange.lowerEndpoint(), affiliationRange.upperEndpoint());
+    }
+    return null;
+  }
 
 
 }

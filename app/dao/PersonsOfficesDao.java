@@ -1,11 +1,13 @@
 package dao;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
+import org.joda.time.LocalDate;
 import dao.wrapper.IWrapperFactory;
 import models.Office;
 import models.Person;
@@ -48,5 +50,24 @@ public class PersonsOfficesDao extends DaoBase{
     return getQueryFactory().selectFrom(personsOffices)
         .where(personsOffices.office.eq(office))
         .orderBy(personsOffices.beginDate.desc()).fetch();
+  }
+  
+  /**
+   * L'affiliazione della persona alla sede nell'anno/mese passati come parametro.
+   * @param person la persona da cercare
+   * @param office la sede su cui cercare
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @return l'associazione periodica della persona alla sede se esiste
+   */
+  public Optional<PersonsOffices> affiliation(Person person, Office office, int year, int month) {
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    return Optional.fromNullable(getQueryFactory().selectFrom(personsOffices)
+        .where(personsOffices.person.eq(person)
+            .and(personsOffices.office.eq(office)).and(personsOffices.beginDate.loe(endMonth))
+            .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.goe(beginMonth)))
+        .fetchFirst());
   }
 }

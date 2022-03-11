@@ -20,6 +20,7 @@ package manager.attestati.service;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import dao.CertificationDao;
@@ -165,8 +166,8 @@ public class CertificationService implements ICertificationService {
    *    models.Person, int, int)
    */
   @Override
-  public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
-      throws ExecutionException {
+  public PersonCertData buildPersonStaticStatus(Person person, int year, int month, 
+      Range<LocalDate> affiliationRange) throws ExecutionException {
 
     PersonCertData personCertData = new PersonCertData();
     personCertData.person = person;
@@ -198,6 +199,7 @@ public class CertificationService implements ICertificationService {
     // Lo stato attuale epas
     // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
+    //TODO: aggiungere qui nel metodo il range e gestirlo internamente al metodo stesso
     actualCertifications = monthData.getCertification(person, year, month);
 
     if (attestatiCertifications != null) {

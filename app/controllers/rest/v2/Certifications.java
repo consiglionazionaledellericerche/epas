@@ -33,6 +33,7 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
 import java.util.List;
@@ -46,6 +47,7 @@ import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
 import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -77,6 +79,8 @@ public class Certifications extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static CertificationManager certificationManager;
+  @Inject
+  static PersonsOfficesDao personOfficeDao;
   
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
@@ -99,7 +103,12 @@ public class Certifications extends Controller {
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
     val validationStatus = new OfficeMonthValidationStatusDto();
     people.stream().forEach(person -> {
-      val certData = certificationManager.getPersonCertData(person, year, month);
+      Optional<PersonsOffices> personOffice = 
+          personOfficeDao.affiliation(person, office.get(), year, month);
+      if (!personOffice.isPresent()) {
+        JsonResponse.notFound("La persona richiesta non afferisce alla sede richiesta");
+      }
+      val certData = certificationManager.getPersonCertData(personOffice.get(), year, month);
       if (certData.validate) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
@@ -120,8 +129,15 @@ public class Certifications extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
-    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
-    val certData = certificationManager.getPersonCertData(person, year, month);
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
+    rules.checkIfPermitted(office);
+    Optional<PersonsOffices> personOffice = 
+        personOfficeDao.affiliation(person, office, year, month);
+    if (!personOffice.isPresent()) {
+      JsonResponse.notFound("Non è stata trovata afferenza ad una sede per la persona "
+          + "passata come parametro");
+    }
+    val certData = certificationManager.getPersonCertData(personOffice.get(), year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(certData.validate));
   }
