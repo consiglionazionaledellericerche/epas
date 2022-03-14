@@ -347,7 +347,6 @@ public class Certifications extends Controller {
     PersonCertData previousCertData = null;
     LocalDate beginMonth = new LocalDate(year, month, 1);
     LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-    Range<LocalDate> range = null;
     Optional<PersonsOffices> personOffice = Optional.absent();
     try {
       // Verifico il periodo di afferenza della person all'office
