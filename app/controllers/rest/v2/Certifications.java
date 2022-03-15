@@ -26,6 +26,7 @@ import cnr.sync.dto.v2.PersonShowTerseDto;
 import cnr.sync.dto.v3.OfficeMonthValidationStatusDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import controllers.Resecure;
@@ -43,6 +44,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.CertificationManager;
+import manager.PersonsOfficesManager;
 import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
 import models.Office;
@@ -81,6 +83,8 @@ public class Certifications extends Controller {
   static CertificationManager certificationManager;
   @Inject
   static PersonsOfficesDao personOfficeDao;
+  @Inject
+  static PersonsOfficesManager personOfficeManager;
   
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
@@ -169,10 +173,16 @@ public class Certifications extends Controller {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente in ePAS la "
           + "mail che serve per la ricerca.");
     }
-
-    rules.checkIfPermitted(person.get().getOffice(new LocalDate(year, month, 1)).get());
-    
-    Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
+    Office office = person.get().getOffice(new LocalDate(year, month, 1)).get();
+    rules.checkIfPermitted(office);
+    Optional<PersonsOffices> personOffice = personOfficeDao
+        .affiliation(person.get(), office, year, month);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    Range<LocalDate> affiliationRange = personOfficeManager
+        .monthlyAffiliation(personOffice.get(), beginMonth, endMonth);
+    Map<String, Certification> map = monthData
+        .getCertification(person.get(), year, month, affiliationRange);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(dto));
@@ -193,8 +203,7 @@ public class Certifications extends Controller {
         sedeId, year, month);
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
-      JsonResponse.notFound(
-        String.format("Ufficio con sedeId = %s non trovato", sedeId));
+      JsonResponse.notFound(String.format("Ufficio con sedeId = %s non trovato", sedeId));
     }
     rules.checkIfPermitted(office.get()); 
     Set<Office> offices = Sets.newHashSet();
@@ -204,8 +213,14 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
+    Optional<PersonsOffices> personOffice = Optional.absent();
     for (Person person : personList) {
-      Map<String, Certification> map = monthData.getCertification(person, year, month);
+      personOffice = personOfficeDao
+          .affiliation(person, office.get(), year, month);
+      Range<LocalDate> affiliationRange = personOfficeManager
+          .monthlyAffiliation(personOffice.get(), start, end);
+      Map<String, Certification> map = monthData
+          .getCertification(person, year, month, affiliationRange);
       CertificationDto dto = generateCertDto(map, year, month, person);
       list.add(dto);
     }
