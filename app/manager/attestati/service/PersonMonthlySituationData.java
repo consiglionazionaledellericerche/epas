@@ -101,7 +101,7 @@ public class PersonMonthlySituationData {
         actualCertifications, affiliationRange);
     actualCertifications = absences(person, year, month, actualCertifications, affiliationRange);
     actualCertifications = competences(person, year, month, actualCertifications);
-    actualCertifications = mealTicket(person, year, month, actualCertifications);
+    actualCertifications = mealTicket(person, year, month, actualCertifications, affiliationRange);
     
     return actualCertifications;
   }
@@ -259,7 +259,7 @@ public class PersonMonthlySituationData {
    * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Range<LocalDate> affiliationRange) {
 
     Certification certification = new Certification();
     certification.person = person;
@@ -269,6 +269,12 @@ public class PersonMonthlySituationData {
     //Inserire qui il conteggio dei buoni pasto
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = begin.dayOfMonth().withMaximumValue();
+    if (Range.closed(begin, end).encloses(affiliationRange) 
+        && (!begin.isEqual(affiliationRange.lowerEndpoint()) 
+            || !end.isEqual(affiliationRange.upperEndpoint()))) {
+      //TODO: è il caso di periodo inferiore al mese nella sede, occorre usare altra soluzione 
+      // per il conteggio dei buoni da inviare
+    }
     List<Contract> contractList = contractDao
         .getActiveContractsInPeriod(person, begin, Optional.of(end));
     YearMonth yearMonth = new YearMonth(year, month);
