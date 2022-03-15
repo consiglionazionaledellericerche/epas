@@ -19,6 +19,7 @@ package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.ContractDao;
@@ -92,8 +93,9 @@ public class PersonMonthlySituationData {
    * @return la mappa contenente le info su assenze, competenze, buoni pasto e ore di formazione 
    *     del dipendente person nell'anno year e nel mese month.
    */
-  public Map<String, Certification> getCertification(Person person, int year, int month) {
-        
+  public Map<String, Certification> getCertification(Person person, int year, int month, 
+      Range<LocalDate> affiliationRange) {
+    //TODO: filtrare ore di formazione, assenze, competenze e buoni sulla base dell'affiliationRange
     Map<String, Certification> actualCertifications = Maps.newHashMap();
     actualCertifications = trainingHours(person, year, month, actualCertifications);
     actualCertifications = absences(person, year, month, actualCertifications);
