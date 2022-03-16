@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package dao;
 
 import com.google.common.base.Optional;
@@ -5,17 +23,21 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.joda.time.LocalDate;
-import dao.wrapper.IWrapperFactory;
 import models.Office;
 import models.Person;
 import models.PersonsOffices;
 import models.absences.Absence;
 import models.query.QPersonsOffices;
+import org.joda.time.LocalDate;
 
-public class PersonsOfficesDao extends DaoBase{
+/**
+ * Dao per le query sull'affiliazione persona/ufficio.
+ * 
+ */
+public class PersonsOfficesDao extends DaoBase {
 
   private final IWrapperFactory factory;
 
@@ -68,6 +90,24 @@ public class PersonsOfficesDao extends DaoBase{
         .where(personsOffices.person.eq(person)
             .and(personsOffices.office.eq(office)).and(personsOffices.beginDate.loe(endMonth))
             .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.goe(beginMonth)))
+        .fetchFirst());
+  }
+  
+  /**
+   * Ritorna l'affiliazione della persona nel periodo compreso tra begin e end.
+   * 
+   * @param person la persona di cui cercare l'affiliazione
+   * @param begin l'inizio del periodo
+   * @param end la fine del periodo
+   * @return l'affiliazione di una persona nel periodo compreso tra begin e end.
+   */
+  public Optional<PersonsOffices> affiliationByPeriod(Person person, LocalDate begin, 
+      LocalDate end) {
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    return Optional.fromNullable(getQueryFactory().selectFrom(personsOffices)
+        .where(personsOffices.person.eq(person)
+            .and(personsOffices.beginDate.loe(begin)
+                .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.goe(end))))
         .fetchFirst());
   }
 }

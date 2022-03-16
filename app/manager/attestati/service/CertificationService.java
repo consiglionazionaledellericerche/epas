@@ -199,7 +199,7 @@ public class CertificationService implements ICertificationService {
     // Lo stato attuale epas
     // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    //TODO: aggiungere qui nel metodo il range e gestirlo internamente al metodo stesso
+    
     actualCertifications = monthData.getCertification(person, year, month, affiliationRange);
 
     if (attestatiCertifications != null) {
