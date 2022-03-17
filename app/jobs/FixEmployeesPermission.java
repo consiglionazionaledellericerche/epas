@@ -17,7 +17,7 @@
 
 package jobs;
 
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.util.List;
 import javax.inject.Inject;
 import manager.OfficeManager;

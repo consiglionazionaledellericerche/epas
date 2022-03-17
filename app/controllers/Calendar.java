@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.GeneralSettingDao;
@@ -64,7 +65,6 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**

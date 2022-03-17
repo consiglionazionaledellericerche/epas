@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.ContractDao;
 import dao.PersonDao;
@@ -49,7 +50,6 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei contratti.

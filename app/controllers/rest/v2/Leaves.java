@@ -23,6 +23,7 @@ import cnr.sync.dto.v3.AbsenceShowTerseDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -39,7 +40,6 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per l'esportazione delle informazioni sulle aspettative.

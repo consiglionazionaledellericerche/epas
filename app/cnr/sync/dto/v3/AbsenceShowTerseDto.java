@@ -18,8 +18,8 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import common.injection.StaticInject;
 import helpers.JodaConverters;
-import injection.StaticInject;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.inject.Inject;

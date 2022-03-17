@@ -23,6 +23,7 @@ import cnr.sync.dto.v2.ChildrenUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -39,7 +40,6 @@ import models.PersonChildren;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei figli/figlie dei dipendenti.

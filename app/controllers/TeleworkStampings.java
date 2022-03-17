@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.PersonDao;
 import dao.PersonDao.PersonLite;
 import dao.PersonDayDao;
@@ -57,7 +58,6 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle timbrature in telelavoro.

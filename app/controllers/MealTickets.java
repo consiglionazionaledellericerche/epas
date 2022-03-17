@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
@@ -57,7 +58,6 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei buoni pasto.

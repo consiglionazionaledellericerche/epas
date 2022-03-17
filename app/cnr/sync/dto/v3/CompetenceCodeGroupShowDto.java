@@ -18,7 +18,7 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;

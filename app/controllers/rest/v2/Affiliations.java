@@ -23,6 +23,7 @@ import cnr.sync.dto.v2.AffiliationUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.AffiliationDao;
 import dao.GroupDao;
@@ -40,7 +41,6 @@ import org.testng.collections.Lists;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei gruppi di persone.

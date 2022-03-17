@@ -22,6 +22,7 @@ import cnr.sync.dto.v3.CompetenceCodeShowTerseDto;
 import cnr.sync.dto.v3.PersonCompetenceCodeShowDto;
 import com.google.common.base.Optional;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.rest.v2.Persons;
 import dao.CompetenceCodeDao;
@@ -37,7 +38,6 @@ import lombok.val;
 import models.CompetenceCode;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per l'esportazione delle informazioni sulle competenze

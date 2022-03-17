@@ -1,3 +1,3 @@
-1003:injection.InjectionPlugin
-1004:security.SecureRulesPlugin
+1003:common.injection.InjectionPlugin
+1004:common.security.SecureRulesPlugin
 1005:helpers.jpa.JpaReferencePlugin

@@ -24,6 +24,7 @@ import cnr.sync.dto.v2.GroupUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.GroupDao;
 import helpers.JsonResponse;
@@ -36,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei gruppi di persone.

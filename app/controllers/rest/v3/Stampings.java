@@ -23,6 +23,7 @@ import cnr.sync.dto.v3.StampingUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.GeneralSettingDao;
 import dao.StampingDao;
@@ -39,7 +40,6 @@ import manager.StampingManager;
 import models.exports.StampingFromClient;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione delle timbrature.

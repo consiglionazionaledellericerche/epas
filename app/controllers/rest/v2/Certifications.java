@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
@@ -56,7 +57,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per consultazione via REST dei dati dei riepiloghi mensili.

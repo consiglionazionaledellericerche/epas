@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import common.security.SecurityRules;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
 import helpers.JsonResponse;
@@ -33,7 +34,6 @@ import models.exports.StampingFromClient;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**

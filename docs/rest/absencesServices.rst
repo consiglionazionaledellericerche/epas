@@ -204,7 +204,7 @@ Cancellazione di un'assenza
 ---------------------------
 
 La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizzo
-**/rest/v2/absences/delete**.
+**/rest/absences/delete**.
 
 Per individuare l'assenza da eliminare si utilizza il parametro *id* dell'assenza.
 

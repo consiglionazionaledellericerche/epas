@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package injection;
+package common.injection;
 
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;

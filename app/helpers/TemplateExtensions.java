@@ -24,7 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.gson.Gson;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import it.cnr.iit.epas.DateUtility;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

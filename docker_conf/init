@@ -359,8 +359,44 @@ else
   sed -n '/LDAP_AUTHENTICATE_USER_SEARCH_DN/!p' -i ${APP_HOME}/conf/prod.conf
 fi
 
-
 ### Fine impostazione autenticazione LDAP
+
+OAUTH_LOGIN=${OAUTH_LOGIN:-false}
+KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}
+KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-epas}
+KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+JWT_KEY=${JWT_KEY}
+
+sed 's#{{OAUTH_LOGIN}}#'"${OAUTH_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
+
+if [ ${OAUTH_LOGIN} = "true" ]; then
+  if [ -z "${KEYCLOAK_CONFIG_URI}" ]; then
+    sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{KEYCLOAK_CONFIG_URI}}#'"${KEYCLOAK_CONFIG_URI}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+  sed 's#{{KEYCLOAK_CLIENT_ID}}#'"${KEYCLOAK_CLIENT_ID}"'#' -i ${APP_HOME}/conf/prod.conf
+  if [ -z "${KEYCLOAK_CLIENT_SECRET}" ]; then
+    sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{KEYCLOAK_CLIENT_SECRET}}#'"${KEYCLOAK_CLIENT_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+  if [ -z "${JWT_KEY}" ]; then
+    sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{JWT_KEY}}#'"${JWT_KEY}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+else
+  sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/KEYCLOAK_CLIENT_ID/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
+fi
+
+### Impostazione Login OAuth
+
+
+### Fine impostazione Login OAuth
 
 ### Impostazione dati dell'ente/azienda che utilzza ePAS
 

@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import common.security.SecurityRules;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -98,7 +99,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle competenze.

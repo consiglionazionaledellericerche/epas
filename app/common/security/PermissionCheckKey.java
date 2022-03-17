@@ -15,19 +15,18 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package injection;
+package common.security;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import lombok.Data;
 
 /**
- * Mark class in order to participate to static injection.
+ * DTO per i dati necessari per il controllo di un permesso.
  *
- * @author Marco Andreini
+ * @since 10/12/15
+ * @author Daniele Murgia
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface StaticInject {
+@Data
+public class PermissionCheckKey {
+  private final Object target;
+  private final String action;
 }
