@@ -6,7 +6,7 @@ edit: se voglio il link a edit
 <h4 style="color: black">
   <i class="fa fa-users"></i>
   #{if _edit}
-  #{secure.check 'Groups.edit', target:_item.manager.office}
+  #{secure.check 'Groups.edit', target:_item.manager.getCurrentOffice().get()}
   <a class="list-group-item-heading" href="@{edit(_item.id)}" data-async-modal="#modalInsertBadgeReader">
     #{/secure.check}
     ${_item.name}</a>

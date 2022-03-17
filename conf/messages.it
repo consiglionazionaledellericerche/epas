@@ -526,6 +526,8 @@ mealTicket=Buono Pasto
 mealTicket.error= Il blocco è già stato assegnato a un dipendente della propria sede
 modifierType= Calcolo Orario
 
+competence.personOffice=Il dipendente in questo mese afferisce a più di una sede di lavoro. \n Il conteggio della competenza potrebbe non essere del tutto corretto. Controllare anche l'invio dell'attestato di presenza.
+
 MealTicketDecision.COMPUTED=Calcolato
 MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
