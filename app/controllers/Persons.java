@@ -589,4 +589,12 @@ public class Persons extends Controller {
         personOffice.person, personOffice.office);
     changeOffice(personOffice.person.id);
   }
+  
+  public static void updateOfficeAffiliation(Long personOfficeId) {
+    
+  }
+  
+  public static void deleteOfficeAffiliation(Long personOfficeId, boolean confirmed) {
+    
+  }
 }

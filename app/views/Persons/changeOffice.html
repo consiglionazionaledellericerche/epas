@@ -20,7 +20,8 @@
 	      <tr>
 	        <th>Sede</th>
 	        <th>Data di inizio</th>
-	        <th>Data di fine</th>	        
+	        <th>Data di fine</th>	
+	        <th>Azioni</th>        
 	      </tr>
 	      </thead>
 	      <tbody>
@@ -28,7 +29,11 @@
 	    <tr>
 	      <td>${personOffice.office.name}</td>
 	      <td>${personOffice.beginDate.format()}</td>
-	      <td>${personOffice.endDate.format()}</td>	      	      
+	      <td>${personOffice.endDate.format()}</td>	  
+	      <td>#{secure.check 'Persons.deleteOfficeAffiliation'}
+			#{b.edit @Persons.updateOfficeAffiliation(personOffice.id) /}
+			#{b.delete @Persons.deleteOfficeAffiliation(personOffice.id, false) /}
+			#{/secure.check}</td>    	      
 	    </tr>
 	    #{/list}
 	    </tbody>
