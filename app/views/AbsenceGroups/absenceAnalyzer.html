@@ -34,7 +34,7 @@
          
          <a href="@{Stampings.personStamping(absence.personDay.person.id, date.year, date.monthOfYear)}">${absence.absenceDate.format()}</a></td>
         <td>${absence.personDay.person.fullname}</td>
-        <td>${absence.personDay.person.office.name}</td>
+        <td>${absence.personDay.person.getCurrentOffice().get().name}</td>
         <td>&{absence.justifiedType?.name}</td>
         <td>${absence.justifiedMinutes}</td>
       </tr>
@@ -68,7 +68,7 @@
          
          <a href="@{Stampings.personStamping(absence.personDay.person.id, date.year, date.monthOfYear)}">${absence.absenceDate.format()}</a></td>
         <td>${absence.personDay.person.fullname}</td>
-        <td>${absence.personDay.person.office.name}</td>
+        <td>${absence.personDay.person.getCurrentOffice().get().name}</td>
         <td>&{absence.justifiedType?.name}</td>
         <td>${absence.justifiedMinutes}</td>
       </tr>

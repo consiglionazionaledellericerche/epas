@@ -29,7 +29,9 @@ import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
@@ -41,8 +43,11 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.PersonManager;
+import manager.PersonsOfficesManager;
 import manager.UserManager;
+import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -67,6 +72,12 @@ public class Persons extends Controller {
   static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
+  @Inject
+  static PersonsOfficesDao personOfficeDao;
+  @Inject
+  static PersonsOfficesManager personOfficeManager;
+  @Inject
+  static OfficeDao officeDao;
 
   /**
    * Lista JSON delle persone che appartengono alla sede
@@ -135,10 +146,14 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
     //nel DTO
-    rules.checkIfPermitted(person.getCurrentOffice().get());
+    Office office = officeDao.getOfficeById(personDto.getOfficeId());
+    rules.checkIfPermitted(office);
     
     personManager.properPersonCreate(person);
-    person.save();
+    
+    personOfficeManager.addPersonInOffice(person, office, org.joda.time.LocalDate.now(), 
+        Optional.absent());
+    personManager.addRoleToPerson(person, office);
 
     log.info("Created person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));

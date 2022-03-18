@@ -4,9 +4,9 @@
   #{alert color:'info'}
   #{if personFixed}
   <p>Nuovo badge per <strong>${person.fullname}</strong></p>
-  #{if templateUtility.getConfiguredBadgeSystems(person.office).empty }
+  #{if templateUtility.getConfiguredBadgeSystems(person.getCurrentOffice().get()).empty }
   <p><strong>Attenzione!!!</strong> Non sono configurati &{'badgeSystems'} per la sede
-    ${person.office.name}.
+    ${person.getCurrentOffice().get().name}.
     Contattare contattare l'amministratore tecnico. </p>
   #{/if}
 
@@ -25,7 +25,7 @@
   #{if personFixed }
   #{f.hidden 'person.id' /}
   #{f.view 'person' /}
-  #{f.selectModel 'badgeSystem', items:templateUtility.getConfiguredBadgeSystems(person.office),
+  #{f.selectModel 'badgeSystem', items:templateUtility.getConfiguredBadgeSystems(person.getCurrentOffice().get()),
   value:badgeSystem, placeholder:'Tutti i gruppi badge' /}
   #{/if}
   #{else}

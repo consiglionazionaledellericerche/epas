@@ -73,10 +73,7 @@ public class PersonCreateDto {
                 ((Qualification) q).qualification == personDto.getQualification().intValue())
               .findFirst().get());        
     }
-    if (personDto.getOfficeId() != null) {      
-      Office office = Office.findById(personDto.getOfficeId());  
-      personsOfficesManager.addPersonInOffice(person, office, LocalDate.now(), Optional.absent());
-    }
+
     person.beginDate = LocalDate.now();
     return person;
   }

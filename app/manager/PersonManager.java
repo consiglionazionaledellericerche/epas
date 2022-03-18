@@ -396,8 +396,17 @@ public class PersonManager {
     if (person.email != null && person.eppn == null) {
       person.eppn = eppn(person.user.username, person.email);
     }
+    person.save();
+  }
+  
+  /**
+   * Aggiunge il ruolo di impiegato alla persona in creazione.
+   * @param person la persona da creare
+   * @param office la sede su cui associare la persona
+   */
+  public void addRoleToPerson(Person person, Office office) {
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.user, person.getCurrentOffice().get(), employee);
+    officeManager.setUro(person.user, office, employee);
   }
   
 

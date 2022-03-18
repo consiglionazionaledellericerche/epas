@@ -34,7 +34,7 @@ public class PersonsOfficesManager {
     
     List<PersonsOffices> peopleList = office.personsOffices.stream()
         .filter(po -> !po.beginDate.isAfter(LocalDate.now()) 
-            && (po.endDate == null || !po.endDate.isBefore(LocalDate.now()) ))
+            && (po.endDate == null || !po.endDate.isBefore(LocalDate.now())))
         .collect(Collectors.toList());
     return peopleList.stream().map(po -> po.person).collect(Collectors.toList());
   }
@@ -57,6 +57,12 @@ public class PersonsOfficesManager {
       rangeAffiliation = Range.greaterThan(beginDate);
     }
     List<PersonsOffices> personAffiliation = personsOfficesDao.listByPerson(person);
+    if (personAffiliation == null || personAffiliation.isEmpty()) {
+      saveAffiliation(person, office, beginDate, endDate);
+      log.info("Salvata affiliazione per {} nella sede {} dal {} ", 
+          person, office, beginDate);
+      return;
+    }
     for (PersonsOffices po : personAffiliation) {
       Range<LocalDate> actualRange = null;
       if (po.endDate == null) {
@@ -70,7 +76,7 @@ public class PersonsOfficesManager {
         saveAffiliation(person, office, beginDate, endDate);
         String fineAffiliazione = "";
         if (endDate.isPresent()) {
-         fineAffiliazione = endDate.get().toString(); 
+          fineAffiliazione = endDate.get().toString(); 
         } else {
           fineAffiliazione = "tempo indeterminato";
         }
@@ -97,7 +103,9 @@ public class PersonsOfficesManager {
     if (end.isPresent()) {
       personsOffices.endDate = end.get();
     }
-    personsOffices.save();    
+    personsOffices.save();  
+    person.personsOffices.add(personsOffices);
+    person.save();
   }
   
   /**

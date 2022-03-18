@@ -35,8 +35,8 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
@@ -167,7 +167,8 @@ public class Persons extends Controller {
    * @param person la persona da inserire
    * @param contract il contratto associato alla persona
    */
-  public static void save(@Valid @Required Person person, @Valid Contract contract) {
+  public static void save(@Valid @Required Person person, @Valid Contract contract, 
+      @Valid Office office) {
 
     if (contract.endDate != null && !contract.endDate.isAfter(contract.beginDate)) {
       Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
@@ -175,17 +176,17 @@ public class Persons extends Controller {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@insertPerson", person, contract);
+      render("@insertPerson", person, contract, office);
     }
 
-    rules.checkIfPermitted(person.getCurrentOffice().get());
+    rules.checkIfPermitted(office);
 
     person.name = WordUtils.capitalizeFully(person.name);
     person.surname = WordUtils.capitalizeFully(person.surname);
-
-    personManager.properPersonCreate(person);
-    person.save();
-
+    person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    personManager.properPersonCreate(person);    
+    personsOfficesManager.addPersonInOffice(person, office, person.beginDate, Optional.absent());
+    personManager.addRoleToPerson(person, office);
     contract.person = person;
 
     if (!contractManager.properContractCreate(contract, Optional.absent(), false)) {
@@ -198,7 +199,7 @@ public class Persons extends Controller {
     person.save();
 
     userManager.generateRecoveryToken(person);
-    emailManager.newUserMail(person);
+    emailManager.newUserMail(person, office);
 
     log.info("Creata nuova persona: id[{}] - {}", person.id, person.fullName());
 
@@ -207,7 +208,7 @@ public class Persons extends Controller {
 
     // La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
-    person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    
     person.save();
 
     configurationManager.updateConfigurations(person);

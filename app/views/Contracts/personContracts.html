@@ -23,10 +23,10 @@
 	      </p>
 	      #{b.buttons center:true}
 	        #{if wrCurrentContract.initializationMissing()}
-	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.getCurrentOffice().get().id), color:'danger', title:'Inizializza'/}
 	        #{/if}
 	        #{else}
-	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
+	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.getCurrentOffice().get().id), color:'danger', title:'Inizializza'/}
 	        #{/else}
 	      #{/b.buttons}
         #{/alert}
