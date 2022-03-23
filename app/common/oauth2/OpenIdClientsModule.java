@@ -43,7 +43,7 @@ public class OpenIdClientsModule extends AbstractModule {
   private static final String KEYCLOAK_ADMIN_URI = "keycloak.admin.uri";
   static final String KEYCLOAK_REALM = "keycloak.realm";
 
-  private static final String KEYCLOAK_JWT_FIELD = "keycloack.jwt.field";
+  private static final String KEYCLOAK_JWT_FIELD = "keycloak.jwt.field";
 
   /**
    * Implementazione generica per un client openid basato sulle classi del play.
