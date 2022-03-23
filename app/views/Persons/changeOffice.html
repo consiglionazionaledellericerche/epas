@@ -9,7 +9,7 @@
 #{include './../Persons/_tabs.html' /}
 
 <div class="container">	
-#{panel title:'Appartenenza alla sede di lavoro di ' + person.getFullname(), color:'primary'}
+#{panel title:'Configurazione attuale di ' + person.getFullname(), color:'primary'}
 
 	#{if (person.personsOffices.isEmpty())}
 	   Al momento non sono presenti affiliazioni ad alcuna sede di lavoro.
@@ -21,7 +21,6 @@
 	        <th>Sede</th>
 	        <th>Data di inizio</th>
 	        <th>Data di fine</th>	
-	        <th>Azioni</th>        
 	      </tr>
 	      </thead>
 	      <tbody>
@@ -29,27 +28,49 @@
 	    <tr>
 	      <td>${personOffice.office.name}</td>
 	      <td>${personOffice.beginDate.format()}</td>
-	      <td>${personOffice.endDate.format()}</td>	  
-	      <td>#{secure.check 'Persons.deleteOfficeAffiliation'}
-			#{b.edit @Persons.updateOfficeAffiliation(personOffice.id) /}
-			#{b.delete @Persons.deleteOfficeAffiliation(personOffice.id, false) /}
-			#{/secure.check}</td>    	      
+	      <td>#{if personOffice.endDate} ${personOffice.endDate.format()} #{/if} #{else}<em>Indeterminato</em>#{/else}</td>	  
 	    </tr>
 	    #{/list}
 	    </tbody>
 	    </table>
 	#{/else}
-
-	#{secure.check 'Persons.blankByPerson'}
-	<div class="text-center">
-	  <p>
-	    <a class="btn btn-success" href="@{Persons.blankByPerson(person.id)}" data-async-modal="#defaultModal">
-	      <span class="glyphicon glyphicon-plus"></span> Inserisci nuova afferenza
-	    </a>
-	  </p>
-	</div>
-	#{/secure.check}
 #{/panel}
-
+#{secure.check 'Persons.blankByPerson'}
+<div class="alert alert-info">
+  <p>Utilizzare questa form per definire il nuovo periodo di afferenza: la sede, la data di inizio e la data di fine periodo.</p>
+  <p>Lasciando vuoto il campo <strong>&{'cwtt.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
+  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+</div>
+	
+#{form action:@Persons.saveOfficeChanged(), class:'form-horizontal',
+		'data-async':'#page_content', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
+	
+	#{f.hidden 'cwtt.contract.id' /}
+	
+	#{if !confirmed}	
+		 #{f.date 'personOffice.beginDate', value:personOffice.beginDate?.format(), required:true /}
+		 #{f.date 'personOffice.endDate', value:personOffice.endDate?.format() /}
+		 #{f.selectModel 'personOffice.office', items:availableOffices, required:true /}
+		 #{b.buttons center:true}
+		   #{b.submit 'Applica'/}
+		 #{/b.buttons}
+	#{/if}
+	#{else}
+	      #{f.hidden 'confirmed' /}
+		  #{f.simpleView 'cwtt.beginDate', value:cwtt.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.endDate', value:cwtt.endDate?.format(), hidden:true /}
+		  #{f.simpleView 'cwtt.workingTimeType' /}
+		  #{f.hidden 'cwtt.workingTimeType.id' /}
+		  
+		  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
+		  #{b.buttons center:true}
+		    #{b.cancel @updateContractWorkingTimeType(contract.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 
+	#{/else}
+	 
+#{/form}
+#{/secure.check}
 </div>
 #{include '_myModal.html' /}

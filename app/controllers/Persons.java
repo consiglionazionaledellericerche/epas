@@ -547,7 +547,11 @@ public class Persons extends Controller {
   public static void changeOffice(Long personId) {
     val person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    render(person);
+    val availableOffices = 
+        officeDao.getAllOffices();
+    val personOffice = new PersonsOffices();
+    personOffice.person = person;
+    render(person, personOffice, availableOffices);
   }
   
   /**
@@ -590,11 +594,4 @@ public class Persons extends Controller {
     changeOffice(personOffice.person.id);
   }
   
-  public static void updateOfficeAffiliation(Long personOfficeId) {
-    
-  }
-  
-  public static void deleteOfficeAffiliation(Long personOfficeId, boolean confirmed) {
-    
-  }
 }
