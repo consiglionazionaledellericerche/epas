@@ -83,7 +83,7 @@ services:
       #- KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}       #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio. default: file://${application.path}/conf/default-keycloak.json. Di solito è un URL dell'IdP OIDC
       #- KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}         #Opzionale. default: false.
       #- KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET} #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio.
-
+      #- KEYCLOAK_JWT_FIELD=${KEYCLOAK_JWT_FIELD}         #Opzionale. default: email
       #### Invio Segnalazioni via email
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
