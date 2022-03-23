@@ -29,10 +29,12 @@ import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +42,13 @@ import lombok.val;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
+import manager.PeriodManager;
 import manager.PersonManager;
 import manager.PersonsOfficesManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceService;
 import models.Badge;
 import models.Contract;
@@ -59,6 +63,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.base.IPropertyInPeriod;
 import models.flows.Affiliation;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
@@ -119,6 +124,8 @@ public class Persons extends Controller {
   static RoleDao roleDao;
   @Inject
   static PersonsOfficesManager personsOfficesManager;
+  @Inject
+  static PeriodManager periodManager;
 
 
   /**
@@ -542,6 +549,7 @@ public class Persons extends Controller {
 
   /**
    * Genera la form di tutto lo storico di afferenza alla sede.
+
    * @param personId l'identificativo della persona di cui cambiare l'ufficio
    */
   public static void changeOffice(Long personId) {
@@ -556,6 +564,7 @@ public class Persons extends Controller {
   
   /**
    * Genera la form di cambio afferenza alla sede.
+
    * @param personId l'identificativo della persona di cui cambiare l'ufficio
    */
   public static void blankByPerson(Long personId) {
@@ -570,22 +579,74 @@ public class Persons extends Controller {
   
   /**
    * Salva la nuova relazione periodica tra persona e sede.
+
    * @param personOffice l'oggetto che contiene l'associazione persona/sede
+   * @param confirmed se confermata la richiesta di cambiamento
    */
-  public static void saveOfficeChanged(@Valid PersonsOffices personOffice) {
+  public static void saveOfficeChanged(@Valid PersonsOffices personOffice, boolean confirmed) {
+    
+    rules.checkIfPermitted(personOffice.person.getCurrentOffice().get());
+    
+    val availableOffices = 
+        officeDao.getAllOffices(); 
+
+    IWrapperPerson wrappedPerson = wrapperFactory.create(personOffice.person);
+    IWrapperContract wrappedContract = wrapperFactory
+        .create(wrappedPerson.getCurrentContract().get());
+    
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      val availableOffices = 
-          officeDao.getAllOffices(); 
-      render("@blankByPerson", personOffice, availableOffices);
+      
+      render("@changeOffice", personOffice, availableOffices);
     }
-    rules.checkIfPermitted(personOffice.person.getCurrentOffice().get());
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(personOffice.beginDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("personOffice.beginDate", "deve appartenere al contratto");
+      }
+      if (personOffice.endDate != null && !DateUtility.isDateIntoInterval(personOffice.endDate,
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("personOffice.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@changeOffice", personOffice, availableOffices);
+    }
+    
     Optional<LocalDate> end;
     if (personOffice.endDate != null) {
       end = Optional.fromNullable(personOffice.endDate);
     } else {
       end = Optional.absent();
+    }
+    
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(personOffice, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional
+            .fromNullable(wrappedPerson.getCurrentContract().get().sourceDateResidual));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
+    if (!confirmed) {
+      confirmed = true;
+      render("@changeOffice", personOffice, availableOffices, confirmed, recomputeRecap);
+    } else {
+      periodManager.updatePeriods(personOffice, true);
+      Contract contract = wrappedPerson.getCurrentContract().get();
+      contract.person.refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(PersonsOffices.class));
+
+      changeOffice(personOffice.person.id);
     }
     personsOfficesManager.addPersonInOffice(personOffice.person, personOffice.office, 
         personOffice.beginDate, end);

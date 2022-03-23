@@ -8,7 +8,7 @@
 
 #{include './../Persons/_tabs.html' /}
 
-<div class="container">	
+<div class="container" id="updateWtt">	
 #{panel title:'Configurazione attuale di ' + person.getFullname(), color:'primary'}
 
 	#{if (person.personsOffices.isEmpty())}
@@ -24,11 +24,11 @@
 	      </tr>
 	      </thead>
 	      <tbody>
-	      #{list person.personsOffices, as:'personOffice'}
+	      #{list person.personsOffices, as:'po'}
 	    <tr>
-	      <td>${personOffice.office.name}</td>
-	      <td>${personOffice.beginDate.format()}</td>
-	      <td>#{if personOffice.endDate} ${personOffice.endDate.format()} #{/if} #{else}<em>Indeterminato</em>#{/else}</td>	  
+	      <td>${po.office.name}</td>
+	      <td>${po.beginDate.format()}</td>
+	      <td>#{if po.endDate} ${po.endDate.format()} #{/if} #{else}<em>Indeterminato</em>#{/else}</td>	  
 	    </tr>
 	    #{/list}
 	    </tbody>
@@ -38,14 +38,14 @@
 #{secure.check 'Persons.blankByPerson'}
 <div class="alert alert-info">
   <p>Utilizzare questa form per definire il nuovo periodo di afferenza: la sede, la data di inizio e la data di fine periodo.</p>
-  <p>Lasciando vuoto il campo <strong>&{'cwtt.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
+  <p>Lasciando vuoto il campo <strong>&{'personOffice.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
   <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
 </div>
 	
 #{form action:@Persons.saveOfficeChanged(), class:'form-horizontal',
 		'data-async':'#page_content', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
 	
-	#{f.hidden 'cwtt.contract.id' /}
+	#{f.hidden 'personOffice.person.id' /}
 	
 	#{if !confirmed}	
 		 #{f.date 'personOffice.beginDate', value:personOffice.beginDate?.format(), required:true /}
@@ -57,14 +57,14 @@
 	#{/if}
 	#{else}
 	      #{f.hidden 'confirmed' /}
-		  #{f.simpleView 'cwtt.beginDate', value:cwtt.beginDate?.format(), hidden:true /}
-		  #{f.simpleView 'cwtt.endDate', value:cwtt.endDate?.format(), hidden:true /}
-		  #{f.simpleView 'cwtt.workingTimeType' /}
-		  #{f.hidden 'cwtt.workingTimeType.id' /}
+		  #{f.simpleView 'personOffice.beginDate', value:personOffice.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'personOffice.endDate', value:personOffice.endDate?.format(), hidden:true /}
+		  #{f.simpleView 'personOffice.office' /}
+		  #{f.hidden 'personOffice.office.id' /}
 		  
 		  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
 		  #{b.buttons center:true}
-		    #{b.cancel @updateContractWorkingTimeType(contract.id) /}
+		    #{b.cancel @changeOffice(person.id) /}
 		    #{b.submit 'Conferma'/}
 		  #{/b.buttons}
 		 
