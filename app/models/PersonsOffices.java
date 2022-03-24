@@ -22,18 +22,25 @@ import java.util.Collection;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.base.PropertyInPeriod;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
 
+/**
+ * Classe di relazione tra la persona e l'ufficio periodicizzata.
+
+ * @author dario
+ *
+ */
 @Entity
 @Audited
 @Table(name = "persons_offices")
-public class PersonsOffices extends PeriodModel{
+public class PersonsOffices extends PropertyInPeriod implements IPropertyInPeriod {
   
   @ManyToOne
   public Person person;
@@ -41,7 +48,11 @@ public class PersonsOffices extends PeriodModel{
   @ManyToOne
   public Office office;
   
-  
+  /**
+   * Metodo per la restituzione del periodo di afferenza di una persona ad una sede.
+
+   * @return il range di date in cui una persona afferisce ad una sede.
+   */
   public Range<LocalDate> dateRange() {
     if (beginDate == null && endDate == null) {
       return Range.all();
@@ -53,6 +64,52 @@ public class PersonsOffices extends PeriodModel{
       return Range.atLeast(beginDate);
     }
     return Range.closed(beginDate, endDate);
+  }
+
+
+  @Override
+  public IPropertiesInPeriodOwner getOwner() {
+    
+    return this.person;
+  }
+
+
+  @Override
+  public void setOwner(IPropertiesInPeriodOwner target) {
+    this.person = (Person) target;    
+  }
+
+
+  @Override
+  public Object getType() {
+    return this.getClass();
+  }
+
+
+  @Override
+  public void setType(Object value) {
+    //questo metodo in questo caso non serve, perchè i periods sono tutti dello stesso tipo.    
+  }
+
+
+  @Override
+  public Object getValue() {
+    return this.office;
+  }
+
+
+  @Override
+  public void setValue(Object value) {
+    this.office = (Office) value;    
+  }
+
+
+  @Override
+  public boolean periodValueEquals(Object otherValue) {
+    if (otherValue instanceof PersonsOffices) {
+      return this.getValue().equals(((PersonsOffices) otherValue));
+    }
+    return false;
   }
 
 }
