@@ -18,7 +18,7 @@ CREATE TABLE persons_offices_history (
   _revision_type SMALLINT NOT NULL,
   person_id BIGINT,
   office_id BIGINT,
-  begin_date DATE NOT NULL,
+  begin_date DATE,
   end_date DATE
 );
 

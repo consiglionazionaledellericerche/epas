@@ -325,7 +325,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     if (type.getClass().equals(EpasParam.class)) {
       return (Collection<IPropertyInPeriod>) filterConfigurations((EpasParam) type);
     }
-    if (type.getClass().equals(PersonsOffices.class)) {
+    if (type.equals(PersonsOffices.class)) {
       return Sets.newHashSet(personsOffices);
     }
     return null;

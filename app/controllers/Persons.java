@@ -589,7 +589,7 @@ public class Persons extends Controller {
     
     val availableOffices = 
         officeDao.getAllOffices(); 
-
+    Person person = personOffice.person;
     IWrapperPerson wrappedPerson = wrapperFactory.create(personOffice.person);
     IWrapperContract wrappedContract = wrapperFactory
         .create(wrappedPerson.getCurrentContract().get());
@@ -598,7 +598,7 @@ public class Persons extends Controller {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
       
-      render("@changeOffice", personOffice, availableOffices);
+      render("@changeOffice", person, personOffice, availableOffices);
     }
     if (!Validation.hasErrors()) {
       if (!DateUtility.isDateIntoInterval(personOffice.beginDate,
@@ -613,7 +613,7 @@ public class Persons extends Controller {
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      render("@changeOffice", personOffice, availableOffices);
+      render("@changeOffice", person, personOffice, availableOffices);
     }
     
     Optional<LocalDate> end;
@@ -634,7 +634,7 @@ public class Persons extends Controller {
     
     if (!confirmed) {
       confirmed = true;
-      render("@changeOffice", personOffice, availableOffices, confirmed, recomputeRecap);
+      render("@changeOffice", person, personOffice, availableOffices, confirmed, recomputeRecap);
     } else {
       periodManager.updatePeriods(personOffice, true);
       Contract contract = wrappedPerson.getCurrentContract().get();

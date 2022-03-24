@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
+import models.Person;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
@@ -270,9 +271,14 @@ public class PeriodManager {
    */
   private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
       List<IPropertyInPeriod> periods) {
-    val beginEndPeriods = getDateIntervalPeriod(periods);
+    Optional<DateInterval> beginEndPeriods = getDateIntervalPeriod(periods);
     if (!beginEndPeriods.isPresent()) {
       return false;
+    }
+    if (owner.getClass().equals(Person.class) 
+        && owner.getBeginDate().isBefore(beginEndPeriods.get().getBegin())) {
+      beginEndPeriods = Optional.fromNullable(beginEndPeriods.get().build(owner.getBeginDate(), 
+          beginEndPeriods.get().getEnd()));
     }
     //Confronto fra intervallo covered e quello dell'owner
     return DateUtility.areIntervalsEquals(beginEndPeriods.get(),
