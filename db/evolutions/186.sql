@@ -24,15 +24,15 @@ CREATE TABLE persons_offices_history (
 
 INSERT INTO persons_offices (person_id, office_id, begin_date, end_date)
 SELECT p.id, p.office_id, p.begin_date, p.end_date
-FROM persons p;
+FROM persons p
+;
 
 INSERT INTO persons_offices_history (id, _revision, _revision_type, person_id, office_id, begin_date, end_date)
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, person_id, office_id, begin_date, end_date
 FROM persons_offices;
 
 
-ALTER TABLE persons_history DROP COLUMN office_id;
-
+ALTER TABLE persons DROP COLUMN office_id;
 
 # ---!Downs
 

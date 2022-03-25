@@ -609,6 +609,9 @@ public class Persons extends Controller {
           wrappedContract.getContractDateInterval())) {
         Validation.addError("personOffice.endDate", "deve appartenere al contratto");
       }
+      if (personOffice.office == null) {
+        Validation.addError("personOffice.office", "Specificare la sede");
+      }
     }
 
     if (Validation.hasErrors()) {
