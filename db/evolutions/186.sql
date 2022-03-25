@@ -23,10 +23,8 @@ CREATE TABLE persons_offices_history (
 );
 
 INSERT INTO persons_offices (person_id, office_id, begin_date, end_date)
-SELECT p.id, p.office_id, c.begin_date, c.end_date
-FROM persons p
-INNER JOIN contracts c ON c.person_id = p.id
-WHERE c.begin_date < now() and (c.end_date is null or c.end_date > now());
+SELECT p.id, p.office_id, p.begin_date, p.end_date
+FROM persons p;
 
 INSERT INTO persons_offices_history (id, _revision, _revision_type, person_id, office_id, begin_date, end_date)
 SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, person_id, office_id, begin_date, end_date
