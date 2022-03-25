@@ -31,9 +31,8 @@ SELECT id, (SELECT MAX(rev) AS rev FROM revinfo), 0, person_id, office_id, begin
 FROM persons_offices;
 
 
-
 ALTER TABLE persons_history DROP COLUMN office_id;
-ALTER TABLE persons DROP COLUMN office_id;
+
 
 # ---!Downs
 
