@@ -121,6 +121,11 @@ public enum DefaultTakable {
     ImmutableSet.of(DefaultAbsenceType.A_COVID19, DefaultAbsenceType.A_COVID19BP), 
     -1, null),
   
+  T_LAGILE(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
+      10, null),
+  
   T_39LA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 
       ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 

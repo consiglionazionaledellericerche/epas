@@ -107,6 +107,10 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
   
+  G_LAGILE("L-AGILE - Codice per lavoro agile", "", DefaultCategoryType.L_AGILE, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_LAGILE, null,
+      null, false, true),
+  
   G_SMART("SMART - Smartworking", "", DefaultCategoryType.SMART, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
       null, false, true),
@@ -520,6 +524,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeCovid19Codes() {
     return getCodes(DefaultGroup.G_COVID19);
+  }
+  
+  public static List<String> employeeAgileCodes() {
+    return getCodes(DefaultGroup.G_LAGILE);
   }
 
   public static List<String> employeeAdditionalHoursCodes() {

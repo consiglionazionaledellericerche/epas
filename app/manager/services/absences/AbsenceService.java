@@ -579,11 +579,11 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsence);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
-      for (AbsenceType abt : covid19.category.getAbsenceTypes()) {
-        if (abt.isExpired()) {
-          groupsPermitted.remove(covid19);
-        }
-      }
+//      for (AbsenceType abt : covid19.category.getAbsenceTypes()) {
+//        if (abt.isExpired()) {
+//          groupsPermitted.remove(covid19);
+//        }
+//      }
       //groupsPermitted.remove(covid19);
       groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
