@@ -93,9 +93,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       15, null),
 
-  T_C1718(AmountType.units,
-      ImmutableSet.of(DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
-      ImmutableSet.of(DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18), 
+  T_C161718(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_C16, DefaultAbsenceType.A_C17, 
+          DefaultAbsenceType.A_C18), 
+      ImmutableSet.of(DefaultAbsenceType.A_C16, DefaultAbsenceType.A_C17, 
+          DefaultAbsenceType.A_C18), 
       -1, null),
 
   T_661(AmountType.minutes, 
