@@ -76,8 +76,8 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ALTRI_104_DIPENDENTI, 0, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_26, null, null, false, false),
 
-  G_C1718("C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C1718, null, null,
+  G_C161718("C16/C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C161718, null, null,
       false, false),
 
   G_661("661 - Permesso orario per motivi personali 18 ore anno", "",
