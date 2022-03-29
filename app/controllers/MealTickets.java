@@ -216,11 +216,9 @@ public class MealTickets extends Controller {
    * Form per la rimozione/riconsegna dei buoni consegnati al dipendente.
    */
   public static void editPersonMealTickets(Long contractId, int year, int month) {
-
+    notFoundIfNull(contractId);
     Contract contract = contractDao.getContractById(contractId);
-    //Person person = personDao.getPersonById(personId);
-    Preconditions.checkState(contract.isPersistent());
-    Preconditions.checkArgument(contract.person.isPersistent());
+    notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
     // riepilogo contratto corrente
