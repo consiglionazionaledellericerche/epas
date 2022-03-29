@@ -550,6 +550,8 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
     final GroupAbsenceType covid19 =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
+    final GroupAbsenceType lagile =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_LAGILE.name()).get();
     final GroupAbsenceType additionalHours =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
@@ -579,16 +581,17 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsence);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
-//      for (AbsenceType abt : covid19.category.getAbsenceTypes()) {
-//        if (abt.isExpired()) {
-//          groupsPermitted.remove(covid19);
-//        }
-//      }
+      for (AbsenceType abt : covid19.category.getAbsenceTypes()) {
+        if (abt.isExpired()) {
+          groupsPermitted.remove(covid19);
+        }
+      }
       //groupsPermitted.remove(covid19);
       groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
+      //groupsPermitted.remove(lagile);
       //groupsPermitted.remove(cod39LA);
       for (AbsenceType abt : smart.category.getAbsenceTypes()) {
         if (abt.isExpired() || !templateUtility.enableSmartworking()) {
@@ -641,6 +644,10 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
         groupsPermitted.add(covid19);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.AGILE_WORK)) {
+        groupsPermitted.add(lagile);
       }
 
       if ((Boolean) confManager.configValue(person, EpasParam.ADDITIONAL_HOURS)) {

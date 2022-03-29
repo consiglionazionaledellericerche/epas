@@ -83,7 +83,7 @@ public enum DefaultCategoryType {
   STUDIO_DIPENDENTI("Permesso studio", 19, DefaultTab.STUDIO_DIPENDENTI), 
   ALTRI_104_DIPENDENTI("Altri congedi legge 104/92", 20, DefaultTab.LEGGE_104_DIPENDENTI), 
   COVID_19("Emergenza Covid-19", 22, DefaultTab.COVID19), 
-  L_AGILE("Lavoro agile", 22, DefaultTab.LAVORO_AGILE), 
+  L_AGILE("Lavoro agile", 23, DefaultTab.LAVORO_AGILE), 
   COD39_LA("Lavoro agile assistenza dis/immunodepressi", 22, DefaultTab.COD39LA),
   SMART("Lavoro agile smartworking", 25, DefaultTab.SMART),
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 23, DefaultTab.ORE_AGGIUNTIVE_DIPENDENTI), 
