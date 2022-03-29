@@ -1209,6 +1209,7 @@ SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
+AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

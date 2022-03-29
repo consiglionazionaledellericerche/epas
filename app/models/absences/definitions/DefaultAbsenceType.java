@@ -47,16 +47,26 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false, 0, null,
       Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false, false),
   
+  A_LAGILE("L-AGILE",
+      "Lavoro agile", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
+      Sets.newHashSet(), new LocalDate(2022, 3, 29), null, true, false, true),
+  
+  A_LAGILEBP("L-AGILE",
+      "Lavoro agile con maturazione buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+      Sets.newHashSet(), new LocalDate(2022, 3, 29), null, true, false, true),
+  
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+      Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
   
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
       + "con maturazione buono pasto", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+      Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
   
   A_98CV("98CV",
       "Assente ingiustificato no greenpass", false,
