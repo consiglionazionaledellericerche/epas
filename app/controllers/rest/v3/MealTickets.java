@@ -168,12 +168,14 @@ public class MealTickets extends Controller {
         RestUtils.checkIfPresent(contract);
         rules.checkIfPermitted(contract.person.office);
 
-        if (codeBlock == null || !codeBlock.isEmpty()) {
+        if (codeBlock == null || codeBlock.isEmpty()) {
             JsonResponse.notFound();
         }
 
         List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.person.office));
-        Preconditions.checkState(mealTicketList.size() > 0);
+        if (mealTicketList.size() <= 0) {
+            JsonResponse.notFound();
+        }
 
         int converted = 0;
         for (MealTicket mealTicket : mealTicketList) {
