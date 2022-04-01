@@ -225,18 +225,10 @@ public class MealTickets extends Controller {
 
         List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock, Optional.fromNullable(contract));
 
-        log.info("mealTicketList.size()>>>> "+mealTicketList.size());
-
         Preconditions.checkState(mealTicketList.size() > 0);
 
         List<MealTicket> mealTicketToRemove = MealTicketStaticUtility
                 .blockPortion(mealTicketList, contract, first, last);
-
-        log.info("contract>>>> "+contract);
-        log.info("first>>>> "+first);
-        log.info("last>>>> "+last);
-
-        log.info("mealTicketToRemove.size()>>>> "+mealTicketToRemove.size());
 
         int deleted = 0;
         LocalDate pastDate = LocalDate.now();
