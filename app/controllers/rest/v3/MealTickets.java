@@ -33,10 +33,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import it.cnr.iit.epas.DateInterval;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import manager.ConsistencyManager;
+import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
@@ -101,16 +103,21 @@ public class MealTickets extends Controller {
         RestUtils.checkIfPresent(contract);
         rules.checkIfPermitted(contract.person.office);
 
-        if (codeBlock == null || !codeBlock.isEmpty()) {
+        if (codeBlock == null || codeBlock.isEmpty()) {
             JsonResponse.notFound();
         }
 
         List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.person.office));
 
-        Preconditions.checkState(mealTicketList.size() > 0);
+        if (mealTicketList.size() <= 0) {
+            JsonResponse.notFound();
+        }
 
-        renderJSON(gsonBuilder.create().toJson(mealTicketList.stream().map(
-                bmt -> MealTicketShowTerseDto.build(bmt)).collect(Collectors.toList())));
+        List<BlockMealTicket> blocks = MealTicketStaticUtility
+                .getBlockMealTicketFromOrderedList(mealTicketList, Optional.<DateInterval>absent());
+
+        renderJSON(gsonBuilder.create().toJson(blocks.stream().map(
+                bmt -> BlockMealTicketShowTerseDto.build(bmt)).collect(Collectors.toList())));
     }
 
     /**
