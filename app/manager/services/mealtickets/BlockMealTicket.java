@@ -165,4 +165,15 @@ public class BlockMealTicket {
     return returned;
   }
 
+  public static class TemplateRow {
+
+    public String codeBlock;
+    public BlockType blockType;
+    public Long contractId;
+    public Integer first;
+    public Integer last;
+    public LocalDate expiredDate;
+    public LocalDate deliveryDate;
+
+  }
 }

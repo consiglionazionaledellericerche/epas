@@ -325,7 +325,6 @@ public class MealTickets extends Controller {
               deliveryDate, expireDate, admin);
         }
       });
-
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();
