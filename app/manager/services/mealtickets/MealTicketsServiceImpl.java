@@ -265,10 +265,10 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
           .filter(configuration -> 
           configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
       if (conf.isPresent()) {        
-        blockType = blockType.valueOf(conf.get().fieldValue);
+        blockType = BlockType.valueOf(conf.get().fieldValue);
         switch (blockType) {
           case electronic:
-            buoniElettronici = buoniDaConteggiare;            
+            buoniElettronici = buoniDaConteggiare;
             break;
           case papery:
             buoniCartacei = buoniDaConteggiare;
