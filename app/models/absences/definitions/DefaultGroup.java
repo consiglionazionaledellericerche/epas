@@ -109,7 +109,7 @@ public enum DefaultGroup {
   
   G_LAGILE("L-AGILE - Codice per lavoro agile", "", DefaultCategoryType.L_AGILE, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_LAGILE, null,
-      null, false, true),
+      null, false, false),
   
   G_SMART("SMART - Smartworking", "", DefaultCategoryType.SMART, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
