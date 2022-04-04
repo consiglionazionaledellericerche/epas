@@ -22,7 +22,7 @@ L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic 
 
 
 Inserimento di un blocchetto di buoni pasto
----------------------------------------------------------------------
+-------------------------------------------
 
 Per effettuare l'inserimento di un blocchetto di buoni pasto è necessario effettuare una *HTTP POST* all'endpoint
 **/mealtickets/create**.
@@ -50,7 +50,7 @@ Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di ris
  - *400*: body delle richiesta HTTP non presente
 
 MealTicket List
--------------
+---------------
 
 La lista di tutti i blocchetti dei buoni pasto associati ad una persona (contratto) è possibile ottenerla una HTTP GET
 all'indirizzo **/rest/v3/mealtickets/list**.
@@ -66,6 +66,7 @@ La *GET* deve avere come parametri obbligatori i seguenti campi:
 La risposta sarà del tipo
 
 .. code-block:: json
+
     [
         {
             "blockType": "papery",
@@ -98,7 +99,7 @@ La risposta sarà del tipo
     ]
 
 MealTicket Show
--------------
+---------------
 La visualizzazione dei dati di un blocchetto di buoni pasto è tramite una *HTTP* GET all'indirizzo
 **/rest/v3/mealtickets/show**.
 
@@ -134,7 +135,7 @@ La risposta sarà del tipo
     ]
 
 MealTicket Delete
-------------
+-----------------
 
 L'eliminazione di un blocchetto di buoni pasto dal contratto di un utente o di alcuni buoni pasto ad esso accosiati,
 è possibile tramite una *HTTP DELETE* all'indirizzo
@@ -155,7 +156,8 @@ che sono parametri obbligatori:
       contractId==1017 codeBlock==5789 first==1 last==22
 
 MealTicket Convert
--------------
+------------------
+
 E' possibile modificare la tipologia di un blocchetto di buoni pasto (da cartaceo a elettronico e viceversa)
 tramite una *HTTP* GET all'indirizzo
 **/rest/v3/mealtickets/convert**.
@@ -171,7 +173,8 @@ Per individuare il blocchetto la *GET* deve avere come parametri obbligatori i s
       GET https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/convert contractId==1017 codeBlock==123456
 
 MealTicket returnBlock
--------------
+----------------------
+
 E' possibile effettuare la riconsegna del blocchetto di buoni pasto (intero o parte di esso) alla sede centrale
 tramite una *HTTP* GET all'indirizzo
 **/rest/v3/mealtickets/returnBlock**.
