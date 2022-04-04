@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package manager.services.mealtickets;
 
 import com.google.common.base.Verify;
@@ -165,15 +164,4 @@ public class BlockMealTicket {
     return returned;
   }
 
-  public static class TemplateRow {
-
-    public String codeBlock;
-    public BlockType blockType;
-    public Long contractId;
-    public Integer first;
-    public Integer last;
-    public LocalDate expiredDate;
-    public LocalDate deliveryDate;
-
-  }
 }

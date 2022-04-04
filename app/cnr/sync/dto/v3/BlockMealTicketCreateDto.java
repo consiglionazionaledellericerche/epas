@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,20 +15,13 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package cnr.sync.dto.v3;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import common.injection.StaticInject;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import manager.services.mealtickets.BlockMealTicket.TemplateRow;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
-import org.modelmapper.ModelMapper;
 import play.data.validation.Required;
-
-import javax.inject.Inject;
 
 /**
  * DTO per creare via JSON le informazioni principali di un
@@ -55,26 +49,4 @@ public class BlockMealTicketCreateDto {
   @Required
   public LocalDate deliveryDate;
 
-  @JsonIgnore
-  @Inject
-  static ModelMapper modelMapper;
-
-  /**
-   * Nuova instanza di un BlockMealTicket a partire dai
-   * valori presenti nel rispettivo DTO.
-   */
-  public static BlockMealTicketCreateDto build(TemplateRow templateRow) {
-
-    BlockMealTicketCreateDto bmt = new BlockMealTicketCreateDto();
-
-    bmt.codeBlock = templateRow.codeBlock;
-    bmt.blockType = templateRow.blockType;
-    bmt.contractId = templateRow.contractId;
-    bmt.first = templateRow.first;
-    bmt.last = templateRow.last;
-    bmt.expiredDate = templateRow.expiredDate;
-    bmt.deliveryDate = templateRow.deliveryDate;
-
-    return bmt;
-  }
 }

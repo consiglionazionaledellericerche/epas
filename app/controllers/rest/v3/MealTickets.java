@@ -33,17 +33,14 @@ import dao.MealTicketDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
-
+import it.cnr.iit.epas.DateInterval;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-
-import it.cnr.iit.epas.DateInterval;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
@@ -51,7 +48,6 @@ import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
 import models.Contract;
 import models.MealTicket;
-import models.Office;
 import models.User;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
@@ -156,7 +152,7 @@ public class MealTickets extends Controller {
         }
 
         if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
-            Validation.addError("first", "sequenza non valida");
+            JsonResponse.badRequest("Numeri di blocchetto non validi, first > last");
         }
 
         val contractId = blockMealTicketCreateDto.getContractId();

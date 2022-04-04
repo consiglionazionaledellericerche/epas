@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,32 +14,19 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package cnr.sync.dto.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.inject.Inject;
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
-import models.Badge;
-import models.Contract;
 import models.MealTicket;
-import models.Office;
-import models.Person;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.modelmapper.ModelMapper;
-import play.data.validation.Required;
-import play.data.validation.Unique;
 
 /**
  * DTO per esportare via JSON le informazioni principali di un buono pasto.
@@ -56,8 +43,6 @@ public class MealTicketShowTerseDto {
   
   private PersonShowTerseDto person;
 
-  //public Contract contract;
-
   private Integer year;
 
   private LocalDate date;
@@ -69,12 +54,6 @@ public class MealTicketShowTerseDto {
   private Integer number;
 
   private String code; /* concatenzazione block + number */
-
-  //public LocalDate expireDate;
-  
-  //private boolean returned = false;
-  
-  //public Office office;
 
   @JsonIgnore
   @Inject
