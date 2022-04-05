@@ -21,10 +21,49 @@ ruolo *Gestore buoni pasto*.
 L'autenticazione da utilizzare è come per gli altri servizi REST quella *Basic Auth*.
 
 
-Inserimento di un blocchetto di buoni pasto
--------------------------------------------
+Inserimento di un blocchetto di buoni pasto per Persona
+-------------------------------------------------------
 
-Per effettuare l'inserimento di un blocchetto di buoni pasto è necessario effettuare una *HTTP POST* all'endpoint
+Per effettuare l'inserimento di un blocchetto di buoni pasto per singola persona è necessario effettuare una *HTTP POST* all'endpoint
+**/mealtickets/createByPerson**.
+La *POST* deve contenere nel body un json con i campi del bloccheto dei buoni pasto che sono obbligatori:
+
+  - *codeBlock*: è un numero obbligatorio. indica il codice del blocchetto dei buoni pasto da inserire nel sistema.
+  - *blockType*, è una stringa obbligatoria *papery* oppure *electronic* indica la tipologia del blocchetto da inserire.
+  - *first*: è un intero obbligatorio. Indica il numero del primo buono pasto.
+  - *last*: è un intero obbligatorio. Indica il numero dell'ultimo buono pasto.
+  - *expiredDate*: è una data obbligatoria. indica la data di scadenza del blocchetto di buoni pasto.
+  - *deliveryDate*: è una data obbligatoria. indica la data in cui è stato consegnato il blocchetto di buoni pasto.
+
+Inoltre è necessario specificare nel json uno o più dei seguenti campi che servono ad identificare la persona a cui
+assegnare il blocchetto dei buoni pasto:
+
+  - *personId*: numero che rappresenta l'Id associato alla persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *fullname*: stringa che rappresenta il nome della persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *fiscalCode*: stringa che rappresenta il codice fiscale della persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *email*: stringa che rappresenta l'email della persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *number*: stringa che rappresenta la matricola della persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *eppn*: stringa che rappresenta eppn della persona a cui aggiungere il blocchetto dei buoni pasto.
+  - *personPerseoId*: numero che rappresenta il perseoId della persona a cui aggiungere il blocchetto dei buoni pasto.
+
+
+Un esempio è il seguente:
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_mealtickets_manager
+      POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/createByPerson
+      personId=4605 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01
+
+Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
+
+ - *200*: blocchetto dei buoni pasto inserito correttamente
+ - *400*: body delle richiesta HTTP non presente
+
+Inserimento di un blocchetto di buoni pasto con contractId
+----------------------------------------------------------
+
+Per effettuare l'inserimento di un blocchetto di buoni pasto avendo il contractId è necessario effettuare una *HTTP POST* all'endpoint
 **/mealtickets/create**.
 La *POST* deve contenere nel body un json con i campi del bloccheto dei buoni pasto che sono:
 

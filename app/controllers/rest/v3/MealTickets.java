@@ -28,8 +28,10 @@ import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Security;
+import controllers.rest.v2.Persons;
 import dao.ContractDao;
 import dao.MealTicketDao;
+import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
@@ -65,6 +67,8 @@ import play.mvc.With;
 @Slf4j
 public class MealTickets extends Controller {
 
+    @Inject
+    private static IWrapperFactory wrapperFactory;
     @Inject
     private static ContractDao contractDao;
     @Inject
@@ -156,6 +160,11 @@ public class MealTickets extends Controller {
         }
 
         val contractId = blockMealTicketCreateDto.getContractId();
+
+        if (contractId == null) {
+            JsonResponse.badRequest("Il contractId è obbligatorio per l'inserimento del blocchetto dei buoni pasto ");
+        }
+
         val contract = contractDao.getContractById(contractId);
         RestUtils.checkIfPresent(contract);
         rules.checkIfPermitted(contract.person.office);
@@ -203,6 +212,98 @@ public class MealTickets extends Controller {
             mealTicket.save();
         }
         consistencyManager.updatePersonRecaps(contract.person.id, deliveryDate);
+        log.info("Added new mealTickets {} via REST", contractUpdated.size());
+
+        JsonResponse.ok();
+    }
+
+
+    /**
+     * Metodo Rest per permettere l'inserimento di un blocchetto di buoni pasto per una persona.
+     * La persona è individuate tramite una delle chiavi della persona passate nel payload
+     *
+     */
+    public static void createByPerson(String body)
+            throws JsonParseException, JsonMappingException, IOException {
+
+        RestUtils.checkMethod(request, HttpMethod.POST);
+
+        log.debug("Create blockMealTickets -> request.body = {}", body);
+
+        // Malformed Json (400)
+        if (body == null) {
+            JsonResponse.badRequest();
+        }
+
+        val gson = gsonBuilder.create();
+
+        val blockMealTicketCreateDto = gson.fromJson(body, BlockMealTicketCreateDto.class);
+        val validationResult = validation.valid(blockMealTicketCreateDto);
+        if (!validationResult.ok) {
+            JsonResponse.badRequest(validation.errorsMap().toString());
+        }
+
+        val personId = blockMealTicketCreateDto.getPersonId();
+        val email = blockMealTicketCreateDto.getEmail();
+        val eppn = blockMealTicketCreateDto.getEppn();
+        val personPerseoId = blockMealTicketCreateDto.getPersonPerseoId();
+        val fiscalCode= blockMealTicketCreateDto.getFiscalCode();
+        val number = blockMealTicketCreateDto.getNumber();
+
+        val person = Persons.getPersonFromRequest(personId, email, eppn, personPerseoId, fiscalCode, number);
+        rules.checkIfPermitted(person.office);
+
+        if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
+            JsonResponse.badRequest("Numeri di blocchetto non validi, first > last");
+        }
+
+        Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
+        RestUtils.checkIfPresent(contract);
+        rules.checkIfPermitted(person.office);
+
+        if (!Security.getUser().isPresent() || Security.getUser().get().person == null) {
+            JsonResponse.notFound("Admin non trovato per effettuare l'inserimento");
+        }
+        User admin = Security.getUser().get();
+
+        // riepilogo contratto corrente
+        Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
+        if (!currentRecap.isPresent()) {
+            JsonResponse.notFound();
+        }
+
+        val codeBlock = blockMealTicketCreateDto.getCodeBlock();
+        val blockType = blockMealTicketCreateDto.getBlockType();
+        val first = blockMealTicketCreateDto.getFirst();
+        val last = blockMealTicketCreateDto.getLast();
+        val expireDate = blockMealTicketCreateDto.getExpiredDate();
+        val deliveryDate = blockMealTicketCreateDto.getDeliveryDate();
+
+        List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
+        ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
+                first, last, expireDate, person.office));
+
+        ticketToAddOrdered.forEach(ticket -> {
+            ticket.contract = contract.get();
+            ticket.date = deliveryDate;
+            ticket.admin = admin.person;
+            validation.valid(ticket);
+        });
+
+        if (Validation.hasErrors()) {
+            JsonResponse.badRequest(validation.errorsMap().toString());
+        }
+
+        Set<Contract> contractUpdated = Sets.newHashSet();
+
+        //Persistenza
+        for (MealTicket mealTicket : ticketToAddOrdered) {
+            mealTicket.date = deliveryDate;
+            mealTicket.contract = contract.get();
+            mealTicket.admin = admin.person;
+            mealTicket.save();
+        }
+        consistencyManager.updatePersonRecaps(person.id, deliveryDate);
         log.info("Added new mealTickets {} via REST", contractUpdated.size());
 
         JsonResponse.ok();

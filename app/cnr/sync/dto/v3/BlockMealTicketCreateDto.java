@@ -39,14 +39,21 @@ public class BlockMealTicketCreateDto {
   @Required
   private BlockType blockType;
   @Required
-  private Long contractId;
-  @Required
   private Integer first;
   @Required
   private Integer last;
   @Required
-  public LocalDate expiredDate;
+  private LocalDate expiredDate;
   @Required
-  public LocalDate deliveryDate;
+  private LocalDate deliveryDate;
+
+  private Long contractId;
+  private Long personId;
+  private String fullname;
+  private String fiscalCode;
+  private String email;
+  private String number; //Matricola
+  private String eppn;
+  private Long personPerseoId;
 
 }
