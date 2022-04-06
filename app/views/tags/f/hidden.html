@@ -9,5 +9,6 @@
  } else if (value instanceof Date) {
    value = value.format()
  }
-}%<input type="hidden" value="${value}" name="${field.name}" id="${field.id}"/>
+}%<input type="hidden" value="${value}" name="${field.name}" 
+         id="${field.id}" #{if _class} class="${_class}"#{/if}/>
 #{/field}

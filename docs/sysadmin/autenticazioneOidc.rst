@@ -23,7 +23,8 @@ nel docker-compose.yml di esempio:
       #- KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}       #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio. default: file://${application.path}/conf/default-keycloak.json. Di solito è un URL dell'IdP OIDC
       #- KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}         #Opzionale. default: false.
       #- KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET} #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio.
-                                                          
+      #- KEYCLOAK_JWT_FIELD=${KEYCLOAK_JWT_FIELD}         #Opzionale. default: email
+
 Per utilizzare l'autenticazione di tipo OAuth è necessario prima di tutto configurare sul proprio
 Identity Provider OIDC un *client OIDC*.
 La configurazione del client prevede di specificare almeno le *Valid Redirect URIs*, ovvero le URL
@@ -60,7 +61,9 @@ Match tra utenti Keycloak e utenti ePAS
 ------------------------------------------
 Una volta autenticati tramite OIDC ePAS riceve un token con le informazioni dell'utente.
 Questo token deve contenere anche il campo *email*, di solito nei profili di default associati
-ai client OIDC il campo *email* è sempre presente.
+ai client OIDC il campo *email* è sempre presente. 
+È possibile modificare il campo prelevato dal token (*email*) specificando un altro campo
+tramite la variabile di ambiente **KEYCLOAK_JWT_FIELD**.
 
 ePAS *ricongiunge* gli utenti autenticati con OIDC con gli utenti interni ad ePAS tramite
 la corrispondenza del campo **ePPN** presente nell'anagrafica di ePAS con il campo *email* presente

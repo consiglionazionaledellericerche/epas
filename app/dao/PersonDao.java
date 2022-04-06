@@ -85,6 +85,19 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dal id.
+   *
+   * @param id l'id della persona.
+   * @return la persona che ha associato l'id.
+   */
+  public Optional<Person> byId(Long id) {
+    final QPerson person = QPerson.person;
+    final Person result = getQueryFactory().selectFrom(person).where(person.id.eq(id))
+        .fetchOne();
+    return Optional.fromNullable(result);
+  }
+  
+  /**
    * Lista di persone attive per anno/mese su set di sedi.
    *
    * @param offices la lista degli uffici

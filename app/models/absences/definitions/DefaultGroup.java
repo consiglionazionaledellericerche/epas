@@ -76,8 +76,8 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ALTRI_104_DIPENDENTI, 0, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_26, null, null, false, false),
 
-  G_C1718("C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C1718, null, null,
+  G_C161718("C16/C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C161718, null, null,
       false, false),
 
   G_661("661 - Permesso orario per motivi personali 18 ore anno", "",
@@ -106,6 +106,10 @@ public enum DefaultGroup {
   G_COVID19("COVID19 - Codice emergenza Covid-19", "", DefaultCategoryType.COVID_19, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
+  
+  G_LAGILE("L-AGILE - Codice per lavoro agile", "", DefaultCategoryType.L_AGILE, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_LAGILE, null,
+      null, false, false),
   
   G_SMART("SMART - Smartworking", "", DefaultCategoryType.SMART, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
@@ -520,6 +524,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeCovid19Codes() {
     return getCodes(DefaultGroup.G_COVID19);
+  }
+  
+  public static List<String> employeeAgileCodes() {
+    return getCodes(DefaultGroup.G_LAGILE);
   }
 
   public static List<String> employeeAdditionalHoursCodes() {
