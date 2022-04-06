@@ -49,6 +49,8 @@ public class BlockMealTicketCreateDto {
 
   private Long contractId;
   private Long personId;
+  @Required
+  private Long adminId;
   private String fullname;
   private String fiscalCode;
   private String email;

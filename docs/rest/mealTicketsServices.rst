@@ -34,6 +34,7 @@ La *POST* deve contenere nel body un json con i campi del bloccheto dei buoni pa
   - *last*: è un intero obbligatorio. Indica il numero dell'ultimo buono pasto.
   - *expiredDate*: è una data obbligatoria. indica la data di scadenza del blocchetto di buoni pasto.
   - *deliveryDate*: è una data obbligatoria. indica la data in cui è stato consegnato il blocchetto di buoni pasto.
+  - *adminId*: è l'id in ePAS dell'amministrativo che ha consegnato i buoni pasto
 
 Inoltre è necessario specificare nel json uno o più dei seguenti campi che servono ad identificare la persona a cui
 assegnare il blocchetto dei buoni pasto:
@@ -53,7 +54,7 @@ Un esempio è il seguente:
 
   $ http -a istituto_xxx_mealtickets_manager
       POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/createByPerson
-      personId=4605 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01
+      personId=4605 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01 adminId=146
 
 Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
 
@@ -74,6 +75,7 @@ La *POST* deve contenere nel body un json con i campi del bloccheto dei buoni pa
   - *last*: è un intero obbligatorio. Indica il numero dell'ultimo buono pasto.
   - *expiredDate*: è una data obbligatoria. indica la data di scadenza del blocchetto di buoni pasto.
   - *deliveryDate*: è una data obbligatoria. indica la data in cui è stato consegnato il blocchetto di buoni pasto.
+  - *adminId*: è l'id in ePAS dell'amministrativo che ha consegnato i buoni pasto
 
 Un esempio è il seguente:
 
@@ -108,10 +110,13 @@ La risposta sarà del tipo
 
     [
         {
+            "adminId": 111,
             "blockType": "papery",
             "codeBlock": "5789",
+            "contractId": 1017
             "first": 6,
             "last": 10,
+            "adminId": 123,
             "person": {
                 "email": "kinzica.desismondi@iit.cnr.it",
                 "eppn": "kinzica.desismondi@cnr.it",

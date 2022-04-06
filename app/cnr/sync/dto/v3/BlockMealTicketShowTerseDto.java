@@ -47,6 +47,8 @@ public class BlockMealTicketShowTerseDto {
   private PersonShowTerseDto person;
   private Long first;
   private Long last;
+  private Long contractId;
+  private Long adminId;
 
   @JsonIgnore
   @Inject
@@ -60,6 +62,8 @@ public class BlockMealTicketShowTerseDto {
     Preconditions.checkNotNull(blockMealTicket);
     val dto = modelMapper.map(blockMealTicket, BlockMealTicketShowTerseDto.class);
     dto.setPerson(PersonShowTerseDto.build(blockMealTicket.getContract().person));
+    dto.setContractId(blockMealTicket.getContract().getId());
+    dto.setAdminId(blockMealTicket.getAdmin().id);
     return dto;
   }
 

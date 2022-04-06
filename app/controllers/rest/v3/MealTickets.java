@@ -31,6 +31,7 @@ import controllers.Security;
 import controllers.rest.v2.Persons;
 import dao.ContractDao;
 import dao.MealTicketDao;
+import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
@@ -50,11 +51,12 @@ import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
 import models.Contract;
 import models.MealTicket;
-import models.User;
+import models.Person;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -77,6 +79,8 @@ public class MealTickets extends Controller {
     private static IMealTicketsService mealTicketService;
     @Inject
     private static MealTicketDao mealTicketDao;
+    @Inject
+    private static PersonDao personDao;
     @Inject
     static ConsistencyManager consistencyManager;
     @Inject
@@ -110,6 +114,9 @@ public class MealTickets extends Controller {
      */
     public static void show(Long contractId, String codeBlock) {
         RestUtils.checkMethod(request, HttpMethod.GET);
+        RestUtils.checkIfPresent(contractId);
+        RestUtils.checkIfPresent(codeBlock);
+
         val contract = contractDao.getContractById(contractId);
         RestUtils.checkIfPresent(contract);
         rules.checkIfPermitted(contract.person.office);
@@ -139,7 +146,6 @@ public class MealTickets extends Controller {
             throws JsonParseException, JsonMappingException, IOException {
 
         RestUtils.checkMethod(request, HttpMethod.POST);
-
         log.debug("Create blockMealTickets -> request.body = {}", body);
 
         // Malformed Json (400)
@@ -148,73 +154,17 @@ public class MealTickets extends Controller {
         }
 
         val gson = gsonBuilder.create();
-
         val blockMealTicketCreateDto = gson.fromJson(body, BlockMealTicketCreateDto.class);
-        val validationResult = validation.valid(blockMealTicketCreateDto);
-        if (!validationResult.ok) {
-            JsonResponse.badRequest(validation.errorsMap().toString());
-        }
-
-        if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
-            JsonResponse.badRequest("Numeri di blocchetto non validi, first > last");
-        }
 
         val contractId = blockMealTicketCreateDto.getContractId();
-
         if (contractId == null) {
             JsonResponse.badRequest("Il contractId è obbligatorio per l'inserimento del blocchetto dei buoni pasto ");
         }
 
         val contract = contractDao.getContractById(contractId);
         RestUtils.checkIfPresent(contract);
-        rules.checkIfPermitted(contract.person.office);
 
-        if (!Security.getUser().isPresent() || Security.getUser().get().person == null) {
-            JsonResponse.notFound("Admin non trovato per effettuare l'inserimento");
-        }
-        User admin = Security.getUser().get();
-
-        // riepilogo contratto corrente
-        Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
-        if (!currentRecap.isPresent()) {
-            JsonResponse.notFound();
-        }
-
-        val codeBlock = blockMealTicketCreateDto.getCodeBlock();
-        val blockType = blockMealTicketCreateDto.getBlockType();
-        val first = blockMealTicketCreateDto.getFirst();
-        val last = blockMealTicketCreateDto.getLast();
-        val expireDate = blockMealTicketCreateDto.getExpiredDate();
-        val deliveryDate = blockMealTicketCreateDto.getDeliveryDate();
-
-        List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-        ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
-                first, last, expireDate, contract.person.office));
-
-        ticketToAddOrdered.forEach(ticket -> {
-            ticket.contract = contract;
-            ticket.date = deliveryDate;
-            ticket.admin = admin.person;
-            validation.valid(ticket);
-        });
-
-        if (Validation.hasErrors()) {
-            JsonResponse.badRequest(validation.errorsMap().toString());
-        }
-
-        Set<Contract> contractUpdated = Sets.newHashSet();
-
-        //Persistenza
-        for (MealTicket mealTicket : ticketToAddOrdered) {
-            mealTicket.date = deliveryDate;
-            mealTicket.contract = contract;
-            mealTicket.admin = admin.person;
-            mealTicket.save();
-        }
-        consistencyManager.updatePersonRecaps(contract.person.id, deliveryDate);
-        log.info("Added new mealTickets {} via REST", contractUpdated.size());
-
-        JsonResponse.ok();
+        _create(blockMealTicketCreateDto, contract);
     }
 
 
@@ -227,8 +177,7 @@ public class MealTickets extends Controller {
             throws JsonParseException, JsonMappingException, IOException {
 
         RestUtils.checkMethod(request, HttpMethod.POST);
-
-        log.debug("Create blockMealTickets -> request.body = {}", body);
+        log.debug("Create blockMealTickets byPerson -> request.body = {}", body);
 
         // Malformed Json (400)
         if (body == null) {
@@ -236,77 +185,118 @@ public class MealTickets extends Controller {
         }
 
         val gson = gsonBuilder.create();
-
         val blockMealTicketCreateDto = gson.fromJson(body, BlockMealTicketCreateDto.class);
-        val validationResult = validation.valid(blockMealTicketCreateDto);
-        if (!validationResult.ok) {
-            JsonResponse.badRequest(validation.errorsMap().toString());
-        }
-
-        val personId = blockMealTicketCreateDto.getPersonId();
-        val email = blockMealTicketCreateDto.getEmail();
-        val eppn = blockMealTicketCreateDto.getEppn();
-        val personPerseoId = blockMealTicketCreateDto.getPersonPerseoId();
-        val fiscalCode= blockMealTicketCreateDto.getFiscalCode();
-        val number = blockMealTicketCreateDto.getNumber();
-
-        val person = Persons.getPersonFromRequest(personId, email, eppn, personPerseoId, fiscalCode, number);
-        rules.checkIfPermitted(person.office);
-
-        if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
-            JsonResponse.badRequest("Numeri di blocchetto non validi, first > last");
-        }
+        
+        val person = Persons.getPersonFromRequest(
+            blockMealTicketCreateDto.getPersonId(), 
+            blockMealTicketCreateDto.getEmail(), 
+            blockMealTicketCreateDto.getEppn(), 
+            blockMealTicketCreateDto.getPersonPerseoId(),
+            blockMealTicketCreateDto.getFiscalCode(), 
+            blockMealTicketCreateDto.getNumber());
 
         Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
-        RestUtils.checkIfPresent(contract);
-        rules.checkIfPermitted(person.office);
+        RestUtils.checkIfPresent(contract.orNull());
 
-        if (!Security.getUser().isPresent() || Security.getUser().get().person == null) {
-            JsonResponse.notFound("Admin non trovato per effettuare l'inserimento");
+        _create(blockMealTicketCreateDto, contract.get());
+    }
+
+    /**
+     * Creazione dei meal ticket associati alle informazioni passate.
+     * 
+     * @param blockMealTicketCreateDto
+     * @param contract i meal ticket vengono associati a questo contratto 
+     */
+    static void _create(BlockMealTicketCreateDto blockMealTicketCreateDto, 
+        Contract contract) {
+
+      RestUtils.checkIfPresent(contract);
+      val person = contract.person;
+      rules.checkIfPermitted(person.office);
+      
+      val validationResult = validation.valid(blockMealTicketCreateDto);
+      if (!validationResult.ok) {
+          JsonResponse.badRequest(validation.errorsMap().toString());
+      }
+
+      val admin = extractAdmin(blockMealTicketCreateDto);
+
+      if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
+          JsonResponse.badRequest("Numeri di blocchetto non validi, first > last");
+      }
+
+      // riepilogo contratto corrente
+      Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
+      if (!currentRecap.isPresent()) {
+          JsonResponse.notFound();
+      }
+
+      val codeBlock = blockMealTicketCreateDto.getCodeBlock();
+      val blockType = blockMealTicketCreateDto.getBlockType();
+      val first = blockMealTicketCreateDto.getFirst();
+      val last = blockMealTicketCreateDto.getLast();
+      val expireDate = blockMealTicketCreateDto.getExpiredDate();
+      val deliveryDate = blockMealTicketCreateDto.getDeliveryDate();
+
+      List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
+      ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
+              first, last, expireDate, person.office));
+
+      ticketToAddOrdered.forEach(ticket -> {
+          ticket.contract = contract;
+          ticket.date = deliveryDate;
+          ticket.admin = admin;
+          validation.valid(ticket);
+      });
+
+      if (Validation.hasErrors()) {
+          JsonResponse.badRequest(validation.errorsMap().toString());
+      }
+
+      Set<Contract> contractUpdated = Sets.newHashSet();
+
+      //Persistenza
+      for (MealTicket mealTicket : ticketToAddOrdered) {
+          mealTicket.date = deliveryDate;
+          mealTicket.contract = contract;
+          mealTicket.admin = admin;
+          mealTicket.save();
+      }
+      consistencyManager.updatePersonRecaps(person.id, deliveryDate);
+      log.info("Added new mealTickets {} via REST", contractUpdated.size());
+
+      JsonResponse.ok();
+    }
+
+    /**
+     * Decide quale utente impostare come chi ha consegnato il buono.
+     * Se è passato il parametro adminId cerca l'utente con quel parametro,
+     * altrimenti cerca se l'utente in sessione ha una persona associata, allora utilizza
+     * quello, infine se non può determinare l'utente restituisce un 404.
+     *
+     * @param blockMealTicketCreateDto
+     * @return la Person che consegna il buono
+     */
+    @Util
+    static Person extractAdmin(BlockMealTicketCreateDto blockMealTicketCreateDto) {
+      Long adminId = null;
+      if (blockMealTicketCreateDto.getAdminId() != null) {
+        val person = personDao.byId(blockMealTicketCreateDto.getAdminId());
+        if (!person.isPresent()) {
+          JsonResponse.notFound(String.format("Admin con id %s non trovato", 
+              blockMealTicketCreateDto.getAdminId()));
+        } else {
+          adminId = person.get().id;
         }
-        User admin = Security.getUser().get();
+      }
+      if (adminId != null && Security.getUser().get().person != null) {
+        adminId = Security.getUser().get().person.id;
+      }
+      if (adminId == null) {
+          JsonResponse.notFound("Admin non trovato per effettuare l'inserimento");
+      }
 
-        // riepilogo contratto corrente
-        Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract.get());
-        if (!currentRecap.isPresent()) {
-            JsonResponse.notFound();
-        }
-
-        val codeBlock = blockMealTicketCreateDto.getCodeBlock();
-        val blockType = blockMealTicketCreateDto.getBlockType();
-        val first = blockMealTicketCreateDto.getFirst();
-        val last = blockMealTicketCreateDto.getLast();
-        val expireDate = blockMealTicketCreateDto.getExpiredDate();
-        val deliveryDate = blockMealTicketCreateDto.getDeliveryDate();
-
-        List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
-        ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
-                first, last, expireDate, person.office));
-
-        ticketToAddOrdered.forEach(ticket -> {
-            ticket.contract = contract.get();
-            ticket.date = deliveryDate;
-            ticket.admin = admin.person;
-            validation.valid(ticket);
-        });
-
-        if (Validation.hasErrors()) {
-            JsonResponse.badRequest(validation.errorsMap().toString());
-        }
-
-        Set<Contract> contractUpdated = Sets.newHashSet();
-
-        //Persistenza
-        for (MealTicket mealTicket : ticketToAddOrdered) {
-            mealTicket.date = deliveryDate;
-            mealTicket.contract = contract.get();
-            mealTicket.admin = admin.person;
-            mealTicket.save();
-        }
-        consistencyManager.updatePersonRecaps(person.id, deliveryDate);
-        log.info("Added new mealTickets {} via REST", contractUpdated.size());
-
-        JsonResponse.ok();
+      return personDao.byId(adminId).get();
     }
 
     /**
