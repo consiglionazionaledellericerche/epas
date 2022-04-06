@@ -43,4 +43,5 @@ di ePAS in produzione del vostro ente.
    missionsServices
    badgeServices
    absenceTypesServices
+   mealTicketsServices
 

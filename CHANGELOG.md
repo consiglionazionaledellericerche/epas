@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.1] - UNRELEASED
 ### Added
  - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
+ - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto
 ### Changed
  - Corretta attivazione pulsante inserimento richieste assenza nel passato quando
    compilato il campo note.

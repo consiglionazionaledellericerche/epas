@@ -2226,7 +2226,17 @@ when
         "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.convertPersonCodeBlock",
         "MealTickets.performConvertPersonCodeBlock",
-        "MealTickets.mealTicketsLegacy"), target == null, granted == false)
+        "MealTickets.mealTicketsLegacy",
+
+        "rest.v3.MealTickets.list",
+        "rest.v3.MealTickets.show",
+        "rest.v3.MealTickets.create",
+        "rest.v3.MealTickets.createByPerson",
+        "rest.v3.MealTickets.convert",
+        "rest.v3.MealTickets.delete",
+        "rest.v3.MealTickets.returnBlock"
+
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -2249,7 +2259,16 @@ when
         "MealTickets.performDeletePersonCodeBlock",
         "MealTickets.convertPersonCodeBlock",
         "MealTickets.performConvertPersonCodeBlock",
-        "MealTickets.mealTicketsLegacy"), target == $o, granted == false)
+        "MealTickets.mealTicketsLegacy",
+
+        "rest.v3.MealTickets.list",
+        "rest.v3.MealTickets.show",
+        "rest.v3.MealTickets.create",
+        "rest.v3.MealTickets.createByPerson",
+        "rest.v3.MealTickets.convert",
+        "rest.v3.MealTickets.delete",
+        "rest.v3.MealTickets.returnBlock"
+        ), target == $o, granted == false)
 then
  $c.grant();
 end
