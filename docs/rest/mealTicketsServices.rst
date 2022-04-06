@@ -54,7 +54,7 @@ Un esempio è il seguente:
 
   $ http -a istituto_xxx_mealtickets_manager
       POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/createByPerson
-      personId=4605 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01 adminId=146
+      personId=4605 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01 adminId=123
 
 Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
 
@@ -83,7 +83,7 @@ Un esempio è il seguente:
 
   $ http -a istituto_xxx_mealtickets_manager
       POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/create
-      contractId=1017 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01
+      contractId=1017 codeBlock=5789 blockType=papery first=1 last=10 expiredDate=2022-05-31 deliveryDate=2022-04-01  adminId=123
 
 Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:
 
