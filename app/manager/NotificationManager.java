@@ -20,6 +20,7 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
+import controllers.Security;
 import dao.AbsenceDao;
 import dao.GroupDao;
 import dao.InformationRequestDao;
@@ -654,10 +655,16 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", person.fullName()));
+    String approver = " ";
+    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+      approver = " da " + Security.getUser().get().person.getFullname();
+    }
     if (approval) {
-      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s", requestType));
+      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s", 
+          approver, requestType));
     } else {
-      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s", requestType));
+      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di : %s", 
+          approver, requestType));
     }
     
     message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
@@ -828,18 +835,22 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
+    String approver = " ";
+    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+      approver = " da " + Security.getUser().get().person.getFullname();
+    }
     if (approval) {
-      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s",
-          requestType));
+      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s",
+          approver, requestType));
     } else {
-      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s",
-          requestType));
+      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di : %s",
+          approver, requestType));
     }
 
     if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
-      message.append(String.format("\r\n per il giorno %s con il giorno %s.", 
-          competenceRequest.beginDateToGive.toString(dateFormatter), 
-          competenceRequest.beginDateToAsk.toString(dateFormatter)));  
+      message.append(String.format("\r\n per il giorno %s con il giorno %s.",
+          competenceRequest.beginDateToGive.toString(dateFormatter),
+          competenceRequest.beginDateToAsk.toString(dateFormatter)));
     } else {
       message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.", 
           competenceRequest.beginDateToGive.toString(dateFormatter), 
@@ -895,13 +906,14 @@ public class NotificationManager {
     }
     if (insert) {
       sendEmailCompetenceRequest(competenceRequest);
-    }    
+    }
   }
 
   private void sendEmailCompetenceRequest(CompetenceRequest competenceRequest) {
     Verify.verifyNotNull(competenceRequest);
     SimpleEmail simpleEmail = new SimpleEmail();
-    final User userDestination = getProperUser(competenceRequest); 
+    final User userDestination = getProperUser(competenceRequest);
+    log.info("Destination = {}", userDestination);
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
           + "{} di tipo {} con date {}, {}", 
@@ -1310,7 +1322,7 @@ public class NotificationManager {
       .subject(notificationSubject, informationRequest.id).create();
     });
   }
-  
+
   /**
    * Notifica che una richiesta informativa è stata respinta da uno degli approvatori del flusso.
    * 
@@ -1358,7 +1370,6 @@ public class NotificationManager {
     .subject(notificationSubject, request.id).create();
 
   }
-
 
 
   /**
@@ -1511,12 +1522,16 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
+    String approver = " ";
+    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+      approver = " da " + Security.getUser().get().person.getFullname();
+    }
     if (approval) {
-      message.append(String.format("\r\nè stata APPROVATA la sua richiesta di : %s",
-          requestType));
+      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s",
+          approver, requestType));
     } else {
-      message.append(String.format("\r\nè stata RESPINTA la sua richiesta di : %s",
-          requestType));
+      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di : %s",
+          approver, requestType));
     }
     
     switch (informationRequest.informationType) {

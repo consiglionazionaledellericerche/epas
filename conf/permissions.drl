@@ -579,9 +579,9 @@ when
   $p: Person() from currentOperator.person
   $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
   $c: PermissionCheck( action in (
-			"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"
-  			), target == $cr, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval"),
+        target == $cr, granted == false)
 then
   $c.grant();
 end
@@ -591,8 +591,10 @@ rule approveDisapproveChangeForSupervisor
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $c: PermissionCheck(action in (
-  		"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == null, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == null)
 then
 $c.grant();
 end
@@ -603,9 +605,12 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
-  		&& reperibilityManagerApproved == null, flowEnded == false)
-  $c: PermissionCheck(action in ("CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+         && reperibilityManagerApproved == null, flowEnded == false)
+  $c: PermissionCheck(action in (
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == $cr, granted == false)
 then
 $c.grant();
 end
