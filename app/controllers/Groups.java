@@ -89,7 +89,7 @@ public class Groups extends Controller {
     if (!Strings.isNullOrEmpty(group.externalId) && 
           groupDao.byOfficeAndExternalId(office, group.externalId).isPresent()) {
       hasErrors = true;
-      validation.addError("group.externalId", "deve essere univoco");
+      Validation.addError("group.externalId", "deve essere univoco");
     };
 
     if (hasErrors) {
