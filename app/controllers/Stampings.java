@@ -395,7 +395,7 @@ public class Stampings extends Controller {
     stamping.date = LocalDateTime.now();
     validation.valid(stamping);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);

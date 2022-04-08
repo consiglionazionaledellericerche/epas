@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - UNRELEASED
+## [2.4.2] - UNRELEASED
+### Changed
+ - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
+   alla presenza della configurazione specifica di attestati (la password di accesso)
+
+## [2.4.1] - 2022-04-06 
 ### Added
  - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
  - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto

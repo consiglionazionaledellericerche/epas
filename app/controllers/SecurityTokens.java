@@ -79,6 +79,8 @@ public class SecurityTokens extends Controller {
   }
 
   public static class InvalidUsername extends Exception {
+    private static final long serialVersionUID = 681032973379857729L;
+
     InvalidUsername(Exception e) {
       super(e);
     }

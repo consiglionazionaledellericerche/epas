@@ -58,21 +58,27 @@ public class RequestInit extends Controller {
   @Inject
   static UserDao userDao;
 
-  static final String TELEWORK_CONF = "telework.stampings.active";
+  static final String TELEWORK_ACTIVE = "telework.stampings.active";
   
-  static final String GREENPASS_CONF = "greenpass.active";
+  static final String GREENPASS_ACTIVE = "greenpass.active";
+
+  static final String ATTESTATI_ACTIVE = "attestati.active";
 
   @Before(priority = 1)
   static void injectMenu() {
 
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF, "false"))) {
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_ACTIVE, "false"))) {
       renderArgs.put("teleworkStampingsActive", true);
     }
-    
-    if ("true".equals(Play.configuration.getProperty(GREENPASS_CONF, "false"))) {
+
+    if ("true".equals(Play.configuration.getProperty(GREENPASS_ACTIVE, "false"))) {
       renderArgs.put("greenPassActive", true);
     }
-    
+
+    if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
+      renderArgs.put("attestatiActive", true);
+    }
+
     Optional<User> user = Security.getUser();
 
     if (!user.isPresent()) {
