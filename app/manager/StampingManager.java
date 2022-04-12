@@ -43,7 +43,9 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.TeleworkDto;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -199,7 +201,7 @@ public class StampingManager {
    *     buon fine, stringa vuota altrimenti.
    */
   public String persistStamping(Stamping stamping, 
-      Person person, User currentUser, boolean newInsert) {
+      Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
     val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
@@ -213,8 +215,14 @@ public class StampingManager {
           stamping.markedByEmployee = false;
           stamping.markedByAdmin = true;
         } else {
-          stamping.markedByEmployee = true;
           stamping.markedByAdmin = false;
+          if (isTeleworkStamping) {
+            stamping.markedByTelework = true;
+            stamping.markedByEmployee = false;
+          } else {
+            stamping.markedByTelework = false;
+            stamping.markedByEmployee = true;
+          }
         }
       }
       stamping.save();
@@ -237,7 +245,61 @@ public class StampingManager {
 
     return result;
   }
+  
+  /**
+   * Crea l'oggetto stamping da persistere sul db di ePAS.
+   * 
+   * @param stamping il dto da cui creare la timbratura
+   * @param pd il personday cui associare la timbratura
+   * @param time l'orario della timbratura
+   * @return l'oggetto stamping correttamente formato.
+   */
+  public Stamping generateStampingFromTelework(TeleworkDto stamping, PersonDay pd, String time) {
+    Stamping persistStamping = new Stamping(pd, 
+        deparseStampingDateTime(pd.date, time));
+    switch (stamping.getStampType()) {
+      case INIZIO_TELELAVORO:
+        persistStamping.way = WayType.in;
+        break;
+      case FINE_TELELAVORO:
+        persistStamping.way = WayType.out;
+        break;
+      case INIZIO_PRANZO_TELELAVORO:
+        persistStamping.way = WayType.out;
+        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        break;
+      case FINE_PRANZO_TELELAVORO:
+        persistStamping.way = WayType.in;
+        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        break;
+      case INIZIO_INTERRUZIONE:
+        persistStamping.way = WayType.out;
+        break;
+      case FINE_INTERRUZIONE:
+        persistStamping.way = WayType.in;
+        break;
+      default:
+        break;
+    }
+    
+    return persistStamping;
+  }
 
+  /**
+   * Ritorna il verso della timbratura corrispondente a quella del dto.
+   * 
+   * @param dto il dto contenente le informazioni della timbratura in telelavoro
+   * @return il verso della timbratura corrispondente.
+   */
+  public WayType retrieveWayFromTeleworkStamping(TeleworkDto dto) {
+    if (dto.getStampType().equals(TeleworkStampTypes.INIZIO_TELELAVORO)
+        || dto.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)
+        || dto.getStampType().equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {      
+        return WayType.in;
+    } else {
+      return WayType.out;
+    }
+  }
 
   /**
    * Stamping dal formato del client al formato ePAS.

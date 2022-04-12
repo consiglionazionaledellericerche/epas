@@ -1186,6 +1186,7 @@ public class Competences extends Controller {
    *
    * @param shiftCategoryId l'id del servzio da configurare
    */
+  @SuppressWarnings("unchecked")
   public static void configureShift(Long shiftCategoryId, int step, Long organizationShift,  
       @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);

@@ -106,6 +106,15 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME("enable_telework_stampings_for_worktime",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
 
   DISABLED_PERSON_PERMISSION("disabled_person_permission",
 

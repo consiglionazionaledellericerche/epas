@@ -899,6 +899,9 @@ public enum DefaultAbsenceType {
   A_103("103", "Telelavoro", false,
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false, 0, null,
       Sets.newHashSet(), null, null, false, false, true), 
+  A_103RT("103", "Telelavoro ricercatori/tecnologi no giust. orario", false,
+      ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0, null,
+      Sets.newHashSet(), null, null, false, false, true), 
   A_103BP("103BP", "Telelavoro buono pasto", false,
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, true, 0, null,
       Sets.newHashSet(), null, null, false, false, true),
@@ -1843,7 +1846,6 @@ public enum DefaultAbsenceType {
 
   /**
    * sottoclasse che definisce il comportamento.
-   * @author dario
    *
    */
   public static class Behaviour {

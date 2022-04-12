@@ -4,8 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.2] - UNRELEASED
+## [2.5.0] - UNRELEASED
 ### Added
+ - Aggiunta possiblità di trattare gli orari in telelavoro inseriti dai livelli I-III
+   come timbrature da conteggiare nel monte orario del dipendente
  - Aggiunto controllo della presenza della configurazione dell'orario di lavoro nei giorni
    calcolati dal metodo REST /rest/v2/certifications/getMonthSituationByOffice
  - Inviata email al responsabile per richieste di cambio turno/reperibilità

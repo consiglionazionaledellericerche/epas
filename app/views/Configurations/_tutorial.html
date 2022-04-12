@@ -194,6 +194,17 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME) }
+      <p><strong>ATTENZIONE! QUESTA FUNZIONALITA' E' VALIDA SOLO PER IL PERSONALE
+      RICERCATORE-TECNOLOGO</strong><br>
+      Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente gli orari di lavoro relativi al Telelavoro e questi verranno contestualmente inseriti
+      nel cartellino del dipendente concorrendo alla formazione del residuo orario del giorno.<br>
+      <strong>NOTA BENE:</strong> utilizzando questa funzionalità è necessario che il dipendente, nei giorni in cui inserisce
+      gli orari in telelavoro, inserisca il codice <strong>103RT</strong> al posto del codice 103.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.RIGHT_TO_STUDY) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi ai permessi per diritto allo studio.

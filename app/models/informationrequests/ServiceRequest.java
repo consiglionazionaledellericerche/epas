@@ -25,7 +25,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import models.Person;
 import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
