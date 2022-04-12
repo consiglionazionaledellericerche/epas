@@ -756,6 +756,31 @@ public class NotificationManager {
   }
 
   /**
+   * Notifica che una richiesta di competenza è stata revocata dal
+   * richiedente.
+   *
+   * @param competenceRequest la richiesta di competenza
+   * @param revoker la persona che ha revocato la richiesta di competenza.
+   */
+  public void notificationCompetenceRequestRevoked(
+      CompetenceRequest competenceRequest, Person revoker) {
+
+    Verify.verifyNotNull(competenceRequest);
+    Verify.verifyNotNull(revoker);
+
+    final String message = 
+        String.format("La richiesta di tipo \"%s\" per il %s "
+            + "è stata revocata da %s",
+            TemplateExtensions.label(competenceRequest.type),
+            TemplateExtensions.format(competenceRequest.startAt),
+            revoker.getFullname());
+
+    Notification.builder().destination(competenceRequest.teamMate.user).message(message)
+    .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+
+  }
+
+  /**
    * Gestore delle notifiche per le competenze.
    */
   private void notifyCompetence(Competence competence, User currentUser, Crud operation) {
@@ -951,23 +976,23 @@ public class NotificationManager {
         .append(String.format("Gentile %s,\r\n", user.person.fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
         competenceRequest.person.fullName()));
-    message.append(String.format(" di tipo %s.", requestType));
+    message.append(String.format(" di tipo %s\r\n", requestType));
     if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
-      message.append(String.format("\r\n per il giorno %s", 
+      message.append(String.format("per il giorno %s", 
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
-      message.append(String.format("\r\n in cambio del giorno %s", 
+      message.append(String.format(" in cambio del giorno %s", 
           competenceRequest.beginDateToGive.toString(dateFormatter)));
     } else {
-      message.append(String.format("\r\n dal %s", 
+      message.append(String.format("dal %s", 
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
       message.append(String.format(" al %s", 
           competenceRequest.endDateToAsk.toString(dateFormatter)));
-      message.append(String.format("\r\n in cambio dei giorni dal %s", 
+      message.append(String.format(" in cambio dei giorni dal %s", 
           competenceRequest.beginDateToGive.toString(dateFormatter)));
       message.append(String.format(" al %s", 
           competenceRequest.endDateToGive.toString(dateFormatter)));
     }
-    message.append(String.format("\r\n con destinatario %s", 
+    message.append(String.format(", con destinatario %s.\r\n",
         competenceRequest.teamMate.fullName()));
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
@@ -977,7 +1002,7 @@ public class NotificationManager {
     baseUrl = baseUrl + COMPETENCE_PATH + "?id=" + competenceRequest.id 
         + "&type=" + competenceRequest.type;
 
-    message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
+    message.append(String.format("\r\nVerifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
   }
@@ -1023,11 +1048,11 @@ public class NotificationManager {
     final String template;
     String typeOfRequest = "";
     if (Crud.CREATE == operation) {
-      template = "%s ha inserito una nuova richiesta di: %s";
+      template = "%s ha inserito una nuova richiesta di %s";
     } else if (Crud.UPDATE == operation) {
-      template = "%s ha modificato una richiesta di: %s";
+      template = "%s ha modificato una richiesta di %s";
     } else if (Crud.DELETE == operation) {
-      template = "%s ha eliminato una richiesta di: %s";
+      template = "%s ha eliminato una richiesta di %s";
     } else {
       template = null;
     }
@@ -1163,13 +1188,13 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", receiver.getFullname()));
-    message.append(String.format("\r\n è stata approvata la richiesta di : %s", requestType));
-    message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
+    message.append(String.format("\r\nè stata approvata la richiesta di : %s", requestType));
+    message.append(String.format("\r\nper i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
         absenceRequest.endTo.toLocalDate()));
-    message.append(String.format("\r\n per il dipendente %s", absenceRequest.person.getFullname()));
+    message.append(String.format("\r\nper il dipendente %s", absenceRequest.person.getFullname()));
     if (dates.size() == 1) {
       message
-          .append(String.format("\r\n Nel giorno %s il dipendente risulta però in %s", 
+          .append(String.format("\r\nNel giorno %s il dipendente risulta però in %s", 
               dates.get(0), type));
     } else {
       String datesToCheck = "";
@@ -1177,12 +1202,12 @@ public class NotificationManager {
         datesToCheck = datesToCheck + date.toString() + " ";
       }
       message
-          .append(String.format("\r\n Nei giorni %s il dipendente risulta però in %s", 
+          .append(String.format("\r\nNei giorni %s il dipendente risulta però in %s", 
               datesToCheck, type));
     }
 
     message.append(String.format("\r\n per il servizio %s", service));
-    message.append(String.format("\r\n Verificare la compatibilità delle date delle assenze con "
+    message.append(String.format("\r\nVerificare la compatibilità delle date delle assenze con "
         + "la schedulazione del dipendente nel servizio"));
     val mailBody = message.toString();
     try {
@@ -1224,10 +1249,10 @@ public class NotificationManager {
     simpleEmail.setSubject("ePas Notifica terminazione flusso permesso personale");
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", manager.getFullname()));
-    message.append(String.format("\r\n è stata approvata la richiesta di : %s", requestType));
-    message.append(String.format("\r\n per il giorno %s", absence.date));
-    message.append(String.format("\r\n che giustifica %s", justifiedTime));
-    message.append(String.format("\r\n per il dipendente %s", 
+    message.append(String.format("\r\nè stata approvata la richiesta di %s", requestType));
+    message.append(String.format(" per il giorno %s", absence.date));
+    message.append(String.format(" che giustifica %s", justifiedTime));
+    message.append(String.format(" per il dipendente %s.", 
         absence.getPersonDay().person.getFullname()));
     val mailBody = message.toString();
     try {
@@ -1454,36 +1479,36 @@ public class NotificationManager {
     }
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
-    message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
+    message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
         informationRequest.person.fullName()));
-    message.append(String.format("\r\n per una assenza di tipo: %s", requestType));
+    message.append(String.format("\r\nper una assenza di tipo: %s", requestType));
 
     switch (informationRequest.informationType) {
       case ILLNESS_INFORMATION:
         IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
         if (illnessRequest.beginDate.isEqual(illnessRequest.endDate)) {
-          message.append(String.format("\r\n per il giorno: %s",
+          message.append(String.format(" per il giorno: %s",
               informationRequest.startAt.toLocalDate().toString()));
         } else {
-          message.append(String.format("\r\n dal: %s",
+          message.append(String.format(" dal: %s",
               informationRequest.startAt.toLocalDate().toString()));
           if (informationRequest.endTo != null) {
-            message.append(String.format("  al: %s", 
+            message.append(String.format(" al: %s", 
                 informationRequest.endTo.toLocalDate().toString()));
           }
         }
         break;
       case SERVICE_INFORMATION:
         ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
-        message.append(String.format("\r\n per il giorno: %s", serviceRequest.day.toString()));
-        message.append(String.format("\r\n dalle %s", serviceRequest.beginAt.toString()));
-        message.append(String.format("\r\n alle %s", serviceRequest.finishTo.toString()));
+        message.append(String.format("\r\nper il giorno: %s", serviceRequest.day.toString()));
+        message.append(String.format(" dalle %s", serviceRequest.beginAt.toString()));
+        message.append(String.format(" alle %s", serviceRequest.finishTo.toString()));
         break;
       case TELEWORK_INFORMATION:
         TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
         message.append(String.format("\r\n per il mese di %s", 
             DateUtility.fromIntToStringMonth(teleworkRequest.month)));
-        message.append(String.format("\r\n dell'anno %s", teleworkRequest.year));
+        message.append(String.format(" dell'anno %s", teleworkRequest.year));
         break;
       default:
         break;
@@ -1496,7 +1521,7 @@ public class NotificationManager {
     baseUrl = baseUrl + INFORMATION_PATH + "?id=" + informationRequest.id + "&type=" 
         + informationRequest.informationType;
 
-    message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
+    message.append(String.format("\r\nVerifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
   }
@@ -1527,10 +1552,10 @@ public class NotificationManager {
       approver = " da " + Security.getUser().get().person.getFullname();
     }
     if (approval) {
-      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s",
+      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di %s",
           approver, requestType));
     } else {
-      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di : %s",
+      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di %s",
           approver, requestType));
     }
     
@@ -1541,23 +1566,23 @@ public class NotificationManager {
           message.append(String.format("\r\n per il giorno: %s",
               informationRequest.startAt.toLocalDate().toString()));
         } else {
-          message.append(String.format("\r\n dal: %s",
+          message.append(String.format(" dal: %s",
               informationRequest.startAt.toLocalDate().toString()));
-          message.append(String.format("  al: %s", 
+          message.append(String.format(" al: %s", 
               informationRequest.endTo.toLocalDate().toString()));
         }
         break;
       case SERVICE_INFORMATION:
         ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
-        message.append(String.format("\r\n per il giorno: %s", serviceRequest.day.toString()));
-        message.append(String.format("\r\n dalle %s", serviceRequest.beginAt.toString()));
-        message.append(String.format("\r\n alle %s", serviceRequest.finishTo.toString()));
+        message.append(String.format("\r\nper il giorno %s", serviceRequest.day.toString()));
+        message.append(String.format(" dalle %s", serviceRequest.beginAt.toString()));
+        message.append(String.format(" alle %s", serviceRequest.finishTo.toString()));
         break;
       case TELEWORK_INFORMATION:
         TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
-        message.append(String.format("\r\n per il mese di %s", 
+        message.append(String.format("\r\nper il mese di %s", 
             DateUtility.fromIntToStringMonth(teleworkRequest.month)));
-        message.append(String.format("\r\n dell'anno %s", teleworkRequest.year));
+        message.append(String.format("\r\ndell'anno %s", teleworkRequest.year));
         break;
       default:
         break;

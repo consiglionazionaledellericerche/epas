@@ -330,6 +330,7 @@ public class CompetenceRequestManager {
 
       case DELETE:
         competenceRequest.flowEnded = true;
+        notificationManager.notificationCompetenceRequestRevoked(competenceRequest, person);
         break;
       case EPAS_REFUSAL:
         resetFlow(competenceRequest);
