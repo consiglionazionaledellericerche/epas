@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto controllo della presenza della configurazione dell'orario di lavoro nei giorni
    calcolati dal metodo REST /rest/v2/certifications/getMonthSituationByOffice
+ - Inviata email al responsabile per richieste di cambio turno/reperibilità
+ - Inviata notifica al collega in caso di revoca di una richiesta di cambio turno/reperibilità
 ### Changed
  - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
    alla presenza della configurazione specifica di attestati (la password di accesso)
