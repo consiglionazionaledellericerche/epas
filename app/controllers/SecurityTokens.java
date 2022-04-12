@@ -159,6 +159,7 @@ public class SecurityTokens extends Controller {
     // legge il jwt evitando la signature perché lo issuer non è noto a priori
     int i = jwt.lastIndexOf('.');
     String withoutSignature = jwt.substring(0, i + 1);
+    @SuppressWarnings("rawtypes")
     val untrusted = Jwts.parserBuilder().build().parseClaimsJwt(withoutSignature);
     String issuer = untrusted.getBody().getIssuer();
     Object jwtBody;

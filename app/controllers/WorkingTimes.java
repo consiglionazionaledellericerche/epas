@@ -267,6 +267,7 @@ public class WorkingTimes extends Controller {
   }
 
   private static List<VerticalWorkingTime> processed(String key) {
+    @SuppressWarnings("unchecked")
     List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
     if (vwtProcessedList == null) {
       vwtProcessedList = Lists.newArrayList();

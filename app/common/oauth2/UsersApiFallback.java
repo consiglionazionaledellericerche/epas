@@ -1,8 +1,10 @@
 package common.oauth2;
 
-import com.google.common.collect.ImmutableList;
 import it.cnr.iit.keycloak.api.UsersApi;
-import it.cnr.iit.keycloak.model.*;
+import it.cnr.iit.keycloak.model.ApiResponse;
+import it.cnr.iit.keycloak.model.CredentialRepresentation;
+import it.cnr.iit.keycloak.model.FederatedIdentityRepresentation;
+import it.cnr.iit.keycloak.model.UserRepresentation;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

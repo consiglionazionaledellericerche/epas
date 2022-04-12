@@ -173,6 +173,7 @@ public class TeleworkStampings extends Controller {
     PersonLite p = null;
     if (person.personConfigurations.stream().noneMatch(pc -> 
     pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+      @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
         flash.error("Non ci sono persone abilitate al telelavoro!!");
