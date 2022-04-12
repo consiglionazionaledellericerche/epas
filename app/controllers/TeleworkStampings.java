@@ -28,6 +28,7 @@ import dao.PersonDao.PersonLite;
 import dao.PersonDayDao;
 import dao.StampingDao;
 import dao.TeleworkValidationDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.Web;
@@ -45,12 +46,14 @@ import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.absences.AbsenceService;
 import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.absences.definitions.DefaultGroup;
 import models.TeleworkValidation;
 import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
@@ -101,6 +104,11 @@ public class TeleworkStampings extends Controller {
   static ConsistencyManager consistencyManager;
   @Inject
   static AbsenceDao absenceDao;
+  @Inject
+  static AbsenceService absenceService;
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
+
 
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
@@ -341,14 +349,19 @@ public class TeleworkStampings extends Controller {
     stamping.setPersonDayId(pd.getId());
     int result = manager.save(stamping);
     if (result == Http.StatusCode.CREATED) {
-      if (person.isTopQualification()) { 
+      if (person.isTopQualification() &&
+          person.checkConf(EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME, "true")) {
         log.info("Inserisco la stessa timbratura anche nel cartellino di {}", person.fullName());
         Stamping ordinaryStamping = stampingManager
             .generateStampingFromTelework(stamping, pd, time);
         String ordinaryStampingResult = stampingManager
             .persistStamping(ordinaryStamping, person, person.user, true, true);
-        //Inserisco in automatico il codice 103RT se non già presente
-        if (absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
+        //Inserisco in automatico il codice 103RT se il dipendente
+        //è abilitato all'inserimento di questo codice e se non già presente
+        if (absenceService.groupsPermitted(person, false)
+              .contains(absenceComponentDao
+                .groupAbsenceTypeByName(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get()) &&
+            absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
           manager.insertTeleworkAbsenceCode(person, date);
         }
         if (!Strings.isNullOrEmpty(ordinaryStampingResult)) {

@@ -32,16 +32,16 @@ import play.data.validation.Required;
 @Data
 @Builder
 public class TeleworkDto {
-  
+
   private Long id;
 
   private long personDayId;
-  
+
   @Required
   private TeleworkStampTypes stampType;
-  
+
   private LocalDateTime date;
-    
+
   private String note;
 
   /**
@@ -56,7 +56,7 @@ public class TeleworkDto {
   public boolean isPersistent() {
     return id != null;
   }
-  
+
   /**
    * Orario formattato come HH:mm.
    *
@@ -71,7 +71,7 @@ public class TeleworkDto {
       return "";
     }
   }
-  
+
   @Override
   public String toString() {
     return "Id timbratura: " + id + ", PersonDayId: " + personDayId + ", Causale: " 
