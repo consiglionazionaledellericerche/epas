@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
@@ -57,7 +58,6 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei buoni pasto.
@@ -216,11 +216,9 @@ public class MealTickets extends Controller {
    * Form per la rimozione/riconsegna dei buoni consegnati al dipendente.
    */
   public static void editPersonMealTickets(Long contractId, int year, int month) {
-
+    notFoundIfNull(contractId);
     Contract contract = contractDao.getContractById(contractId);
-    //Person person = personDao.getPersonById(personId);
-    Preconditions.checkState(contract.isPersistent());
-    Preconditions.checkArgument(contract.person.isPersistent());
+    notFoundIfNull(contract);
     rules.checkIfPermitted(contract.person.office);
 
     // riepilogo contratto corrente
@@ -327,7 +325,6 @@ public class MealTickets extends Controller {
               deliveryDate, expireDate, admin);
         }
       });
-
     }
 
     Set<Contract> contractUpdated = Sets.newHashSet();

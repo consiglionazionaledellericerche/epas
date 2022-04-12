@@ -68,7 +68,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
+import common.security.SecurityRules;
 
 /**
  * Controller per la gestione dei contratti.

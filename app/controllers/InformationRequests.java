@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.InformationRequestDao;
 import dao.PersonDao;
 import dao.PersonDao.PersonLite;
@@ -63,7 +64,6 @@ import play.data.validation.CheckWith;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di flusso informativo dei dipendenti.

@@ -217,6 +217,12 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi al lavoro agile di cui alla nota del DG 22278 del 22 marzo 2022.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ADDITIONAL_HOURS) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi alle ore aggiuntive effettuate presso strutture terze e di cui il CNR non è tenuto a 

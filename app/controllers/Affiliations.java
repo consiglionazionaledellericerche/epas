@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.SecurityRules;
 import dao.AffiliationDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -31,7 +32,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle affiliazione delle persone ai gruppi.

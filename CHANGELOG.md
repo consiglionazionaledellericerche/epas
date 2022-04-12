@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - UNRELEASED
+### Added
+ - Aggiunta possiblità di trattare gli orari in telelavoro inseriti dai livelli I-III
+   come timbrature da conteggiare nel monte orario del dipendente
+ - Aggiunto controllo della presenza della configurazione dell'orario di lavoro nei giorni
+   calcolati dal metodo REST /rest/v2/certifications/getMonthSituationByOffice
+ - Inviata email al responsabile per richieste di cambio turno/reperibilità
+ - Inviata notifica al collega in caso di revoca di una richiesta di cambio turno/reperibilità
+### Changed
+ - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
+   alla presenza della configurazione specifica di attestati (la password di accesso)
+
+## [2.4.1] - 2022-04-06 
+### Added
+ - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
+ - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto
+### Changed
+ - Corretta attivazione pulsante inserimento richieste assenza nel passato quando
+   compilato il campo note.
+ - Corretta gestione null del campo externalId dei gruppi
+
+## [2.4.0] - 2022-03-09
+### Added
+ - Aggiunto il supporto all'utenticazione tramite OAuth, test effettuati solo con keycloak.
+### Changed
+ - Corretta visualizzazione assenze annuali, codice VAC19 non era incolonnato correttamente.
+ - Aggiornata la versione del fullcalendar alla 3.10.2 e della query-ui.
+ - Inseriti title e aria-label in link per inserimento assenze e ferie in tabellone timbrature
+ - Aggiornato tag f.edit per problema quando l'attributo label non è presente 
+ - Aggiornate dipendenze jquery e bootstrap-datapicker
+ - Rivisti metodi di aggiornamento automatico delle pagine con selezioni di date
+   per migliorare l'accessibilità
+ - Migliorati i tag per la generazione delle input in modo da aggiungere title e aria-label
+   utili per l'accessibiità
+ 
 ## [2.3.0] - 2022-01-21
 ### Added
  - Aggiunta possibilità di lanciare i ricalcoli per personale di una sede.

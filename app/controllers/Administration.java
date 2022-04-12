@@ -228,15 +228,15 @@ public class Administration extends Controller {
       @Required Integer year, @Required Integer month, boolean onlyRecap) {
 
     if (person == null && office == null || (!person.isPersistent() && !office.isPersistent())) {
-      validation.addError("person", "Obbligatorio specificare un utente o un ufficio");
-      validation.addError("office", "Obbligatorio specificare un utente o un ufficio");
+      Validation.addError("person", "Obbligatorio specificare un utente o un ufficio");
+      Validation.addError("office", "Obbligatorio specificare un utente o un ufficio");
     }
     
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       flash.error("Correggere gli errori evidenziati");
       log.debug("Errori di validazione in fixPersonSituation, person={}, office={}, year={}, month={}",
           person, office, year, month);
-      validation.keep();
+      Validation.keep();
       utilities(person, office, year, month);
     }
 

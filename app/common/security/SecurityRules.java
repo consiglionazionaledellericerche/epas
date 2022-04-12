@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package security;
+package common.security;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

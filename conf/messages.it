@@ -1,9 +1,9 @@
 absenceRequest =richiesta di assenza
 
-absenceRequest.endTo =Fine
+absenceRequest.endTo =Data di fine
 absenceRequest.note =Note
 absenceRequest.person =Dipendente
-absenceRequest.startAt =Inizio
+absenceRequest.startAt =Data di inizio
 absenceRequest.type =Tipologia
 absenceRequest.officeHeadApproved =Approvazione responsabile di sede
 absenceRequest.managerApproved =Approvazione responsabile di gruppo
@@ -1210,6 +1210,7 @@ SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
+AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
@@ -1304,7 +1305,7 @@ beginTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 endTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
-person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200
+person.perseoId.popover= Utilizzato per il collegamento tra utente ePAS e la anagrafica esterna Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 

@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.SecurityRules;
 import dao.CheckGreenPassDao;
 import dao.OfficeDao;
 import java.util.List;
@@ -29,7 +30,6 @@ import models.Person;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller green pass.

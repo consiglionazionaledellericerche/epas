@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.TimeSlotDao;
 import dao.wrapper.IWrapperFactory;
@@ -37,7 +38,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei TimeSlot.

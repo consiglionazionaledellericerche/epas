@@ -126,3 +126,23 @@ produzione di Pisa, eliminare la copia locale e sostituirla con quella prelevata
 Ad esempio:
 
  $ fab -H epas.tools.iit.cnr.it copybackup epas-devel
+ 
+Generazione del Jar con le classi per l'interazione con KeyCloak
+----------------------------------------------------------------
+
+La definizione OpenAPI delle interfacce REST del keycloak può essere presa da un progetto come 
+questo:
+ - https://github.com/ccouzens/keycloak-openapi
+
+Per generare le classi JAVA relative a api, client e modello è possibile utilizzare un generatore
+come questo:
+ - https://openapi-generator.tech/
+
+Nel caso di ePAS le classi sono state generate in questo modo:
+
+    $ java -jar openapi-generator-cli.jar generate -i 16.1.json -g java -o ./keycloak-client \
+      --additional-properties=groupId=it.iit.cnr,apiPackage=it.cnr.iit.keycloak.api,modelPackage=it.cnr.iit.keycloak.model,invokerPackage=it.cnr.iit.keycloak.invoker,library=feign
+
+Una volta generate le classi è possibile generare il jar da includere tra le dipendenze del progetto:
+
+    $ cd keycloak-client/src/main/ && jar cvf keycloak-client.jar -C java/ .

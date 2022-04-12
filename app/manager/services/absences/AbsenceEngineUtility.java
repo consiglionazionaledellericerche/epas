@@ -162,6 +162,7 @@ public class AbsenceEngineUtility {
       amount = 0;
     } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
         || absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day_limit)
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)
         || absence.getJustifiedType().getName()
           .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
       amount = absenceWorkingTime(person, absence);
@@ -180,7 +181,7 @@ public class AbsenceEngineUtility {
     } else if (absence.getJustifiedType().getName()
         .equals(JustifiedTypeName.absence_type_minutes)) {
       amount = absence.getAbsenceType().getJustifiedTime();
-    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+    } else {
       amount = -1;
     }
     
