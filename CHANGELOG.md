@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    alla presenza della configurazione specifica di attestati (la password di accesso)
  - Semplificata l'email inviata agli amministratori del personale per le segnalazioni dei 
    dipendenti: rimosse le info sulla sessione utente
+ - Rimosso campo quarter da MealTicket perché non più usato.
 
 ## [2.4.1] - 2022-04-06 
 ### Added
