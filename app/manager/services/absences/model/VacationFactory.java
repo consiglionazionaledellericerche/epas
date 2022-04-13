@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import com.google.inject.Inject;
+import dao.AbsenceTypeDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.model.YearProgression.YearPortion;
@@ -54,15 +56,20 @@ public class VacationFactory {
   
   private final ConfigurationManager configurationManager;
   private final AbsenceComponentDao absenceComponentDao;
+  private final AbsenceTypeDao absenceTypeDao;
+  private final PersonDayManager personDayManager;
 
   /**
    * Costruttore. 
    */
   @Inject
   public VacationFactory(ConfigurationManager configurationManager, 
-      AbsenceComponentDao absenceComponentDao) {
+      AbsenceComponentDao absenceComponentDao, AbsenceTypeDao absenceTypeDao,
+      PersonDayManager personDayManager) {
     this.configurationManager = configurationManager;
     this.absenceComponentDao = absenceComponentDao;
+    this.absenceTypeDao = absenceTypeDao;
+    this.personDayManager = personDayManager;
   }
   
   /**
@@ -426,7 +433,8 @@ public class VacationFactory {
           new DateInterval(period.from, period.to))) {
         
         // creo il period aggiuntivo con amount 0 (default)
-        AbsencePeriod splitted = new AbsencePeriod(contract.person, group);
+        AbsencePeriod splitted = new AbsencePeriod(contract.person, group, 
+            personDayManager, absenceTypeDao);
         splitted.from = secondYearStart;
         splitted.to = period.to;
 
@@ -592,7 +600,8 @@ public class VacationFactory {
       end = endYear;
     }
     
-    AbsencePeriod absencePeriod = new AbsencePeriod(person, group);
+    AbsencePeriod absencePeriod = new AbsencePeriod(person, group, 
+        personDayManager, absenceTypeDao);
     absencePeriod.takeAmountType = AmountType.units;
     absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
     absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
