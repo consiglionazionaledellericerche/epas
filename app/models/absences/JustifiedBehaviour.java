@@ -50,7 +50,8 @@ public class JustifiedBehaviour extends BaseModel {
     maximumTime,
     takenPercentageTime,
     no_overtime,
-    reduce_overtime;
+    reduce_overtime,
+    monthlyWorkdays;
   }
 
   @Getter

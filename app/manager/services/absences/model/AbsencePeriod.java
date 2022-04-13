@@ -197,7 +197,7 @@ public class AbsencePeriod {
    * @return int
    */
   public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
-    
+    //TODO: forse qui ha senso mettere la verifica sul codice o al limite sul chiamante di questa funzione
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
       return this.fixedPeriodTakableAmount;
     }
@@ -283,6 +283,7 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
+    //TODO: è qui che si costruisce il limite prendibile, forse va inserito qui il controllo sull'assenza L-AGILE
     int periodTakableAmount = this.getPeriodTakableAmount();
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
