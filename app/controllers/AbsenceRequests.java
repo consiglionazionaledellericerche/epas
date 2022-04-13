@@ -35,6 +35,7 @@ import dao.wrapper.IWrapperPerson;
 import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -351,7 +352,7 @@ public class AbsenceRequests extends Controller {
    *
    * @param absenceRequest richiesta di assenza da modificare.
    */
-  public static void edit(AbsenceRequest absenceRequest, boolean retroactiveAbsence,
+  public static void edit(final AbsenceRequest absenceRequest, boolean retroactiveAbsence,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
       JustifiedType justifiedType, Integer hours, Integer minutes) {
 
@@ -403,13 +404,28 @@ public class AbsenceRequests extends Controller {
       render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
     }
 
+    boolean insideContracts = 
+        !absenceRequest.person.getContracts().stream()
+          .filter(c -> 
+            c.getRange().contains(absenceRequest.startAtAsDate()) && 
+            c.getRange().contains(absenceRequest.endToAsDate()))
+          .collect(Collectors.toList()).isEmpty();
+
+    if (!insideContracts) {
+      val message = "Non è possibile fare una richiesta in una data non coperta da nessun contratto del dipendente";
+      Validation.addError("absenceRequest.startAt", message);
+      Validation.addError("absenceRequest.endTo", message);
+      response.status = 400;
+      insertable = false;
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+    }
+
     if (Validation.hasErrors()) {
       response.status = 400;
       insertable = false;
       flash.error(Web.msgHasErrors());
 
       render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
-      //return;
     }
 
     if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
@@ -437,7 +453,7 @@ public class AbsenceRequests extends Controller {
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             absenceForm.hours, absenceForm.minutes, false, absenceManager);
     
-    absenceRequest = absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
+    absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST)

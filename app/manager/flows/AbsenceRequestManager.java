@@ -910,13 +910,13 @@ public class AbsenceRequestManager {
 
   /**
    * Metodo di utilità che corregge le date nella richiesta di assenza.
+   * L'absenceRequest viene corretta se la richiesta contiene una data di fine che è
+   * successiva alla data massima inseribile nella richiesta per via delle assenze disponibili.
    *
    * @param absenceRequest la richiesta di assenza 
    * @param insertReport il report derivante dai parametri di richiesta di assenza
-   * @return l'absenceRequest con le date corrette se la richiesta contiene una data di fine che è
-   *     successiva alla data massima inseribile nella richiesta per via delle assenze disponibili.
    */
-  public AbsenceRequest checkAbsenceRequestDates(AbsenceRequest absenceRequest, 
+  public void checkAbsenceRequestDates(AbsenceRequest absenceRequest, 
       InsertReport insertReport) {
     LocalDate checkDate = null;
     for (TemplateRow row : insertReport.insertTemplateRows) {
@@ -925,7 +925,6 @@ public class AbsenceRequestManager {
     if (checkDate != null && absenceRequest.endTo.toLocalDate().isAfter(checkDate)) {
       absenceRequest.endTo = checkDate.toLocalDateTime(new LocalTime(0, 0, 0));
     }
-    return absenceRequest;
   }
 
 }
