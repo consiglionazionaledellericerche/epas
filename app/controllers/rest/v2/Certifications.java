@@ -77,7 +77,7 @@ public class Certifications extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static CertificationManager certificationManager;
-  
+
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
    * di gestione degli attestati mensili (attestati per il CNR).
@@ -155,7 +155,7 @@ public class Certifications extends Controller {
     }
 
     rules.checkIfPermitted(person.get().office);
-    
+
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
     val gson = gsonBuilder.create();
@@ -309,27 +309,33 @@ public class Certifications extends Controller {
             .from(new LocalDate(year, month, dayBegin))
             .to(new LocalDate(year, month, dayEnd))
             .build();
-        absences.add(absence);        
+        absences.add(absence);
         previousDate = null;
       }
 
-      // 3) Nuova Assenza  
+      // 3) Nuova Assenza
       dayBegin = abs.personDay.date.getDayOfMonth();
       dayEnd = abs.personDay.date.getDayOfMonth();
       previousDate = abs.personDay.date;
       previousAbsenceCode = absenceCodeToSend;
       timeToJustify = abs.justifiedMinutes;
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
-          || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
-        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
-            .getWorkingTimeTypeDay(abs.personDay.date, person);
-        timeToJustify = workingTimeTypeDay.get().workingTime;
+
+      Optional<WorkingTimeTypeDay> workingTimeTypeDay = 
+          workingTimeTypeDao.getWorkingTimeTypeDay(abs.personDay.date, person);
+
+      if (workingTimeTypeDay.isPresent()) {
+        if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
+            || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
+          timeToJustify = workingTimeTypeDay.get().workingTime;
+        }
+        if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+            timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+        }
+      } else {
+        log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è presente l'assenza {}", 
+            abs.personDay.date, abs, person.getFullname());
       }
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
-            .getWorkingTimeTypeDay(abs.personDay.date, person);
-        timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
-      }
+
       if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {
         timeToJustify = abs.absenceType.justifiedTime;
       }

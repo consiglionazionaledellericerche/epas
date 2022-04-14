@@ -122,7 +122,10 @@ else
   sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+# impostazioni relative al servizio Attestati (solo per il CNR)
+
 URL_ATTESTATI=${URL_ATTESTATI:-https://attestativ2.rm.cnr.it}
+ATTESTATI_ACTIVE=${ATTESTATI_ACTIVE:-false}
 
 if [ -z "${URL_ATTESTATI}" ]; then
   sed -n '/URL_ATTESTATI/!p' -i ${APP_HOME}/conf/prod.conf
@@ -140,7 +143,12 @@ if [ -z "${URL_PASS}" ]; then
   sed -n '/URL_PASS/!p' -i ${APP_HOME}/conf/prod.conf
 else
   sed "s/{{URL_PASS}}/${URL_PASS}/g" -i ${APP_HOME}/conf/prod.conf
+  ATTESTATI_ACTIVE="true"
 fi
+
+sed "s/{{ATTESTATI_ACTIVE}}/${ATTESTATI_ACTIVE}/g" -i ${APP_HOME}/conf/prod.conf
+
+# Abilitazione dei job (tipo cron)
 
 if [ -z "${JOBS_ACTIVE}" ]; then
   sed -n '/JOBS_ACTIVE/!p' -i ${APP_HOME}/conf/prod.conf
@@ -148,6 +156,7 @@ else
   sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+# Abilitazione e configurazione dell'integrazione con OIL (solo per il CNR)
 if [ -z "${OIL_ENABLED}" ]; then
   sed -n '/OIL_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
 else

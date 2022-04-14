@@ -89,6 +89,12 @@ public class StampingTemplate {
       stampModificationTypes.add(stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_EMPLOYEE));
     }
+    
+    //timbratura modificata dal dipendente
+    if (stamping.markedByTelework) {
+      stampModificationTypes.add(stampTypeManager.getStampMofificationType(
+          StampModificationTypeCode.MARKED_BY_TELEWORK));
+    }
 
     //timbratura di mezzanotte
     if (stamping.stampModificationType != null) {

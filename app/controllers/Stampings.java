@@ -360,7 +360,7 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(stamping);
     final User currentUser = Security.getUser().get();
     String result = stampingManager
-        .persistStamping(stamping, person, currentUser, newInsert);
+        .persistStamping(stamping, person, currentUser, newInsert, false);
     if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {
@@ -395,7 +395,7 @@ public class Stampings extends Controller {
     stamping.date = LocalDateTime.now();
     validation.valid(stamping);
 
-    if (validation.hasErrors()) {
+    if (Validation.hasErrors()) {
       response.status = 400;     
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
@@ -429,7 +429,7 @@ public class Stampings extends Controller {
     final User currentUser = Security.getUser().get();
     
     String result = stampingManager
-        .persistStamping(stamping, person, currentUser, newInsert);
+        .persistStamping(stamping, person, currentUser, newInsert, false);
     if (!Strings.isNullOrEmpty(result)) {
       flash.error(result);
     } else {

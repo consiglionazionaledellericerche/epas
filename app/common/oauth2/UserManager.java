@@ -1,24 +1,19 @@
 package common.oauth2;
 
-import com.google.common.base.Verify;
-import it.cnr.iit.keycloak.api.RealmsAdminApi;
 import it.cnr.iit.keycloak.api.UsersApi;
 import it.cnr.iit.keycloak.model.CredentialRepresentation;
 import it.cnr.iit.keycloak.model.UserRepresentation;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
-import models.Person;
 import models.User;
 
 @Singleton

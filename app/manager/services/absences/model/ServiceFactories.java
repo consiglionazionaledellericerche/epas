@@ -19,6 +19,7 @@ package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import dao.AbsenceTypeDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.absences.AbsenceComponentDao;
@@ -64,6 +65,7 @@ public class ServiceFactories {
   private final PersonReperibilityDayDao personReperibilityDayDao;
   private final PersonShiftDayDao personShiftDayDao;
   private final VacationFactory vacationFactory;
+  private final AbsenceTypeDao absenceTypeDao;
 
   /**
    * Constructor.
@@ -76,13 +78,15 @@ public class ServiceFactories {
   public ServiceFactories(AbsenceEngineUtility absenceEngineUtility, 
       AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager, 
       PersonReperibilityDayDao personReperibilityDayDao, 
-      PersonShiftDayDao personShiftDayDao, VacationFactory vacationFactory) {
+      PersonShiftDayDao personShiftDayDao, VacationFactory vacationFactory, 
+      AbsenceTypeDao absenceTypeDao) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
     this.vacationFactory = vacationFactory;
+    this.absenceTypeDao = absenceTypeDao;
     
   }
   
@@ -321,7 +325,8 @@ public class ServiceFactories {
       List<PersonChildren> orderedChildren, 
       List<InitializationGroup> initializationGroup) {
     
-    AbsencePeriod absencePeriod = new AbsencePeriod(person, groupAbsenceType);
+    AbsencePeriod absencePeriod = new AbsencePeriod(person, groupAbsenceType, 
+        personDayManager, absenceTypeDao);
     
     if (absencePeriod.groupAbsenceType.getPeriodType().equals(PeriodType.year)) {
       absencePeriod.from = new LocalDate(date.getYear(), 1, 1);

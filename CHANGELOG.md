@@ -4,7 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - UNRELEASED
+## [2.5.0] - 2022-04-14
+### Added
+ - Aggiunta possiblità di trattare gli orari in telelavoro inseriti dai livelli I-III
+   come timbrature da conteggiare nel monte orario del dipendente
+ - Aggiunto controllo della presenza della configurazione dell'orario di lavoro nei giorni
+   calcolati dal metodo REST /rest/v2/certifications/getMonthSituationByOffice
+ - Inviata email al responsabile per richieste di cambio turno/reperibilità
+ - Inviata notifica al collega in caso di revoca di una richiesta di cambio turno/reperibilità
+ - Aggiunta verifica nella richiesta di ferie/permesso che il giorno ricada in un contratto
+   del dipendente
+ - Aggiunta documentazione su parametri di sede e del dipendente
+### Changed
+ - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
+   alla presenza della configurazione specifica di attestati (la password di accesso)
+ - Semplificata l'email inviata agli amministratori del personale per le segnalazioni dei 
+   dipendenti: rimosse le info sulla sessione utente
+ - Rimosso campo quarter da MealTicket perché non più usato.
+ - Modificato il calcolo della quantità di giorni di lavoro agile che possono essere usati nel mese.
+
+## [2.4.1] - 2022-04-06 
 ### Added
  - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
  - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto

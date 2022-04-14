@@ -1253,6 +1253,31 @@ public class PersonDayManager {
     }
     return totalDays;
   }
+  
+  /**
+   * Metodo che controlla i giorni lavorabili in un mese per la persona passata come parametro.
+
+   * @param person la persona di cui si cercano i giorni di lavoro nel mese
+   * @param beginMonth l'inizio del mese
+   * @param endMonth la fine del mese
+   * @return la lista dei giorni di lavoro che il dipendente deve fare nel mese.
+   */
+  public List<PersonDay> workingDaysInMonth(Person person, 
+      LocalDate beginMonth, LocalDate endMonth) {
+    List<PersonDay> monthlyWorkDays = Lists.newArrayList();
+    LocalDate currentDate = beginMonth;
+    while (!currentDate.isAfter(endMonth)) {
+      if (!isHoliday(person, currentDate)) {
+        Optional<PersonDay> pd = personDayDao.getPersonDay(person, currentDate);
+        if (!pd.isPresent()) {
+          pd = Optional.fromNullable(new PersonDay(person, currentDate));
+        }
+        monthlyWorkDays.add(pd.get());
+      }
+      currentDate = currentDate.plusDays(1);
+    }
+    return monthlyWorkDays;
+  }
 
   /**
    * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro.

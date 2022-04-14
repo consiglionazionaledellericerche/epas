@@ -38,6 +38,8 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final BooleanPath markedByEmployee = createBoolean("markedByEmployee");
 
+    public final BooleanPath markedByTelework = createBoolean("markedByTelework");
+
     public final StringPath note = createString("note");
 
     public final QPerson owner;

@@ -23,6 +23,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -36,13 +37,12 @@ import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
-import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.service.ICertificationService;
@@ -62,13 +62,11 @@ import models.WorkingTimeType;
 import models.absences.Absence;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
-import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import common.security.SecurityRules;
 
 /**
  * Controller per la gestione dei contratti.

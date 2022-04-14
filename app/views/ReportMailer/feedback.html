@@ -9,22 +9,24 @@ ${data.note}
 <p>URL: <a href="${data.url}">${data.url}</a></p>
 
 #{if user.present}
-<p>Utente: ${user.get()}</p>
+<p>Utente: ${user.get().username}</p>
 <p>Sede: ${user.get().person?.office}</p>
 #{/if}
 
+#{if !toPersonnelAdmin}
 <p>User Agent:
-${data.browser.userAgent}
+  ${data.browser.userAgent}
 </p>
 
 <div>
 Session:
 <dl>
 #{list items:session.all(), as:'item'}
- <dt>${item.key}</dt><dd>${item.value}</dd>
+<dt>${item.key}</dt><dd>${item.value}</dd>
 #{/list}
 </dl>
 </div>
+#{/if}
 
 <p>
 Cordiali saluti, <br>

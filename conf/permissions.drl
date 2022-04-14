@@ -579,9 +579,9 @@ when
   $p: Person() from currentOperator.person
   $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
   $c: PermissionCheck( action in (
-			"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"
-  			), target == $cr, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval"),
+        target == $cr, granted == false)
 then
   $c.grant();
 end
@@ -591,8 +591,10 @@ rule approveDisapproveChangeForSupervisor
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $c: PermissionCheck(action in (
-  		"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == null, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == null)
 then
 $c.grant();
 end
@@ -603,9 +605,12 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
-  		&& reperibilityManagerApproved == null, flowEnded == false)
-  $c: PermissionCheck(action in ("CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+         && reperibilityManagerApproved == null, flowEnded == false)
+  $c: PermissionCheck(action in (
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == $cr, granted == false)
 then
 $c.grant();
 end
@@ -1005,7 +1010,7 @@ end
 rule AdminCanEditStamping
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $target: Stamping()
+ $target: Stamping(markedByTelework == false)
  Office(persons.contains($target.getOwner())) from $uro.office
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.delete"),
   target == $target, granted == false )
@@ -2748,6 +2753,7 @@ when
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
  				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
  				|| epasParam == EpasParam.TELEWORK
+ 				|| epasParam == EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME
  				|| epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE
  				|| epasParam == EpasParam.SMARTWORKING && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
@@ -2908,6 +2914,7 @@ when
 then
  $c.grant();
 end
+
 
 /*******************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per legge 104 se:
