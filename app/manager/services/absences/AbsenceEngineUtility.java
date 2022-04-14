@@ -27,12 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import manager.PersonDayManager;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceTypeJustifiedBehaviour;
@@ -55,12 +57,15 @@ import org.testng.collections.Lists;
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
+  
+  private final PersonDayManager personDayManager;
 
   /**
    * Constructor for injection.
    */
   @Inject
-  public AbsenceEngineUtility() {
+  public AbsenceEngineUtility(PersonDayManager personDayManager) {
+    this.personDayManager = personDayManager;
   }
  
   /**
@@ -238,9 +243,9 @@ public class AbsenceEngineUtility {
           
         }
       }
-      //return amount * percentageTaken.get().getData() / 1000;
-      
+
     }
+    
     return amount;
   }
   
