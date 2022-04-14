@@ -109,7 +109,7 @@ relative al dipendente stesso:
   * Elimina
 
 Dati Anagrafici
-----------------
+---------------
 
 In ogni pannello (titolato) sono contenute informazioni referenti ad esso, rendendo così più
 intuitivo dove andare a cercare l'informazione specifica che si richiede o che si intende 
@@ -209,6 +209,28 @@ accessorie ad esso collegate ed elencate in precedenza.
    
    Schermata di eliminazione contratto
 
+Configurazione personale
+------------------------
+
+In questa sezione è possibile specificare quali possano essere le azioni che il dipendente selezionato può compiere in
+autonomia poichè preventivamente autorizzato.
+
+.. figure:: _static/images/parametriPersonali.png
+   :scale: 40
+   :align: center
+   
+   Schermata contenente la lista di parametri di configurazione personale
+   
+Come si può notare nella figura qui sopra, sono presenti vari parametri che consentono al dipendente di poter inserire
+in autonomia determinati tipi di codici di assenza o di effettuare in autonomia azioni relative al proprio orario di lavoro.
+
+Di particolare interesse sono i parametri relativi al telelavoro che, ad esempio grazie ad una delle ultime modifiche rilasciate,
+possono consentire al personale di I-III livello di vedere riconosciuti i propri orari inseriti in telelavoro.
+
+Il parametro in questione è *Timbrature in telelavoro abilitate anche per orario di lavoro*. Cliccando su quel parametro
+sarà possibile consentire al dipendente di far sì che gli orari inseriti nella form di telelavoro (per cui si rimanda
+alla apposita sezione in questa documentazione) vengano anche inseriti sul proprio cartellino mensile, andando così a determinare
+per ogni giorno il proprio residuo orario giornaliero.
 
 Badge
 -----
