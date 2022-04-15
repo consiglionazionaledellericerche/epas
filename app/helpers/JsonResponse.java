@@ -78,5 +78,10 @@ public final class JsonResponse {
     Http.Response.current().status = Http.StatusCode.UNAUTHORIZED;
     throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.UNAUTHORIZED, message));    
   }
+  
+  public static void internalError(String message) {
+    Http.Response.current().status = Http.StatusCode.INTERNAL_ERROR;
+    throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.INTERNAL_ERROR, message));    
+  }
 }
 
