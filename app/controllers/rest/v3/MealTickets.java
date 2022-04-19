@@ -20,6 +20,7 @@ import cnr.sync.dto.v3.BlockMealTicketCreateDto;
 import cnr.sync.dto.v3.BlockMealTicketShowTerseDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.inject.Inject;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -219,6 +221,13 @@ public class MealTickets extends Controller {
           JsonResponse.badRequest(validation.errorsMap().toString());
       }
 
+      List<MealTicket> matchingAlreadyExisting = matchingAlreadyExisting(blockMealTicketCreateDto, person);
+
+      if (!matchingAlreadyExisting.isEmpty()) {
+        JsonResponse.badRequest("Meal ticket(s) already exists: ".concat( 
+            Joiner.on(", ").join(matchingAlreadyExisting.stream().map(ml -> ml.code).collect(Collectors.toList()))));
+      }
+
       val admin = extractAdmin(blockMealTicketCreateDto);
 
       if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
@@ -268,6 +277,27 @@ public class MealTickets extends Controller {
       JsonResponse.ok();
     }
 
+    /**
+     * @param blockMealTicketCreateDto i buoni pasto da verificare se già presenti
+     * @param person la persona di cui controllare i buoni pasto
+     * @return la lista dei Meal Ticket già presenti che corrispondono a quelli indicati nel blockMealTicketCreateDto
+     */
+    @Util
+    static List<MealTicket> matchingAlreadyExisting(BlockMealTicketCreateDto blockMealTicketCreateDto, Person person) {
+      val alreadyPresentMealTickets = 
+          mealTicketDao.getMealTicketsMatchCodeBlock(
+              blockMealTicketCreateDto.getCodeBlock(), Optional.of(person.office));
+
+      List<MealTicket> matchingAlreadyExisting = Lists.newArrayList();
+      IntStream.range(blockMealTicketCreateDto.getFirst(), blockMealTicketCreateDto.getLast() + 1).forEachOrdered(n -> {
+        matchingAlreadyExisting.addAll(alreadyPresentMealTickets.stream()
+           .filter(ml -> ml.code.equals(String.format("%s%02d", blockMealTicketCreateDto.getCodeBlock(), n)))
+           .collect(Collectors.toList()));
+      });
+      return matchingAlreadyExisting;
+    }
+
+    
     /**
      * Decide quale utente impostare come chi ha consegnato il buono.
      * Se è passato il parametro adminId cerca l'utente con quel parametro,
@@ -420,6 +450,5 @@ public class MealTickets extends Controller {
 
         JsonResponse.ok();
     }
-
 
 }
