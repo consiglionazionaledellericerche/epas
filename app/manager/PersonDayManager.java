@@ -1813,7 +1813,8 @@ public class PersonDayManager {
         }
 
         if (!shortPermission.isPresent() && previousShortPermission.isPresent()) {
-          previousShortPermission.get().delete();
+          //Viene fatta prima la merge perché l'assenza è detached
+          previousShortPermission.get().merge()._delete();
           log.info("Rimosso permesso breve di {} minuti nel giorno {} per {}",
               previousShortPermission.get().justifiedMinutes, personDay.date, 
               personDay.person.getFullname());          
