@@ -721,7 +721,7 @@ public class ConfigurationManager {
           log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
           List<Person> people = personDao.byOffice(office);
           for (Person person : people) {
-            log.info("Fix parametri di configurazione della persona {}", person.fullName());
+            log.debug("Fix parametri di configurazione della persona {}", person.fullName());
             updateConfigurations(person);           
           }
         }        
