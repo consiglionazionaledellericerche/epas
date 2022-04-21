@@ -25,6 +25,8 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dao.OfficeDao;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -47,6 +49,7 @@ import models.base.IPropertyInPeriod;
 import models.enumerate.BlockType;
 import models.query.QConfiguration;
 import models.query.QPersonConfiguration;
+import play.db.jpa.JPAPlugin;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -59,15 +62,19 @@ public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
   private final PeriodManager periodManager;
+  private final OfficeDao officeDao;
+  private final PersonDao personDao;
 
   /**
    * Default constructor per l'injection.
    */
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager) {
+      PeriodManager periodManager, OfficeDao officeDao, PersonDao personDao) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
+    this.officeDao = officeDao;
+    this.personDao = personDao;
   }
 
   /**
@@ -94,13 +101,13 @@ public class ConfigurationManager {
   public List<PersonConfiguration> configurationWithTypeAndValue(
       EpasParam epasParam, String value) {
     final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
-    
+
     final JPQLQuery query = queryFactory.selectFrom(configuration)
         .where(configuration.epasParam.eq(epasParam)
             .and(configuration.fieldValue.eq(value)));
     return query.fetch();
   }
-  
+
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
@@ -264,7 +271,7 @@ public class ConfigurationManager {
     return build(epasParam, target,
         EpasParamValueType.formatValue(value), begin, end, false, persist);
   }
-  
+
   /**
    * Aggiunge una nuova configurazione di tipo enumerato.
    * 
@@ -441,7 +448,7 @@ public class ConfigurationManager {
   public List<Configuration> getOfficeConfigurationsByDate(Office office, LocalDate date) {
 
     return office.configurations.stream().filter(conf ->
-        DateUtility.isDateIntoInterval(date, conf.periodInterval())).distinct()
+    DateUtility.isDateIntoInterval(date, conf.periodInterval())).distinct()
         .sorted(Comparator.comparing(c -> c.epasParam))
         .collect(Collectors.toList());
   }
@@ -699,16 +706,32 @@ public class ConfigurationManager {
       updateConfigurations(office);
     }
   }
-  
+
   /**
    * Aggiorna la configurazione di tutte le persone.
    */
+  @SuppressWarnings("deprecation")
   public void updatePeopleConfigurations() {
-    List<Person> people = Person.findAll();
-    for (Person person : people) {
-      log.debug("Fix parametri di configurazione della persona {}", person.fullName());
-      updateConfigurations(person);
+    List<Office> officeList = officeDao.allEnabledOffices();
+    List<Person> people = Lists.newArrayList();
+    for (Office office : officeList) {       
+      log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
+      people = personDao.byOffice(office);
+      for (Person person : people) {
+        JPAPlugin.closeTx(false);
+        JPAPlugin.startTx(false);
+        person = personDao.getPersonById(person.id);
+        log.debug("Fix parametri di configurazione della persona {}", person.fullName());
+        updateConfigurations(person);
+      }
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);
+      office = officeDao.getOfficeById(office.id);
+      log.info("Fine aggiornamento parametri per {} dipendenti di {}", 
+          office.persons.size(), office.name);
     }
+
+
   }
 
   /**
