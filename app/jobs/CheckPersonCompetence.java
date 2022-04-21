@@ -34,6 +34,12 @@ import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
+/**
+ * Job per le associazioni tra persone e competenze.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @OnApplicationStart(async = true)
 public class CheckPersonCompetence extends Job<Void> {

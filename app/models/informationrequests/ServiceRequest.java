@@ -29,6 +29,12 @@ import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
+/**
+ * Classe di richiesta di uscite di servizio.
+ *
+ * @author dario
+ *
+ */
 @Audited
 @Entity
 @Table(name = "service_requests")

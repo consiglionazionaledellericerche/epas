@@ -18,6 +18,12 @@
 
 package models.enumerate;
 
+/**
+ * enumerato contenente le tipologie di blocchetto di buoni pasto per attestati.
+ *
+ * @author dario
+ *
+ */
 public enum BlockType {
 
   electronic("Elettronico"),

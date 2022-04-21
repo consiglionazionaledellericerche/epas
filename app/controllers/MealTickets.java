@@ -522,7 +522,7 @@ public class MealTickets extends Controller {
 
   /**
    * Ritorna il blocchetto di cui aggiornare la tipologia di blocchetto.
-   * 
+   *
    * @param contractId l'identificativo del contratto
    * @param codeBlock il codice del blocchetto
    * @param first il primo buono del blocchetto
@@ -550,7 +550,7 @@ public class MealTickets extends Controller {
   /**
    * Modifica la tipologia del blocchetto di buoni pasto da cartaceo a elettronico
    * o viceversa.
-   * 
+   *
    * @param contractId l'identificativo del contratto
    * @param codeBlock il codice del blocchetto da modificare
    */
@@ -629,7 +629,7 @@ public class MealTickets extends Controller {
 
   /**
    * Quale tipologia di blocchetto viene associata alla maturazione dei buoni pasto nel mese.
-   * 
+   *
    * @param contractId l'identificativo del contratto
    * @param year l'anno di riferimento
    * @param month il mese di riferimento

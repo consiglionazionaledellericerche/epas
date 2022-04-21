@@ -33,6 +33,12 @@ import java.net.URLStreamHandler;
  */
 public class InlineStreamHandler extends URLStreamHandler {
 
+  /**
+   * classe per le connesioni.
+   *
+   * @author dario
+   *
+   */
   public static class InlineUrlConnection extends URLConnection {
 
     private final byte[] data;

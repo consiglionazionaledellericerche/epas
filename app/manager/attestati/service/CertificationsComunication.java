@@ -586,6 +586,7 @@ public class CertificationsComunication {
   
   /**
    * Metodo rest per chiedere il tipo di blocchetti di buono pasto usati nella sede.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param office la sede di riferimento

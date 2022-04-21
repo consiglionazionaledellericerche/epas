@@ -545,7 +545,7 @@ public class NotificationManager {
    *
    * @param currentUser l'utente che fa la richiesta
    * @param absenceRequest la richiesta di assenza via flusso
-   * @param insert se si tratta di inserimento (per ora unico caso contemplato)
+   * @param operation se si tratta di inserimento (per ora unico caso contemplato)
    */
   public void notificationAbsenceRequestPolicy(User currentUser, AbsenceRequest absenceRequest,
       Crud operation) {
@@ -1350,7 +1350,7 @@ public class NotificationManager {
 
   /**
    * Notifica che una richiesta informativa è stata respinta da uno degli approvatori del flusso.
-   * 
+   *
    * @param serviceRequest l'opzionale richiesta di uscita di servizio
    * @param illnessRequest l'opzionale richiesta di malattia
    * @param teleworkRequest l'opzionale richiesta di telelavoro

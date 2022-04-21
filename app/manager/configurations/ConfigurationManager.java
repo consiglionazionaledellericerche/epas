@@ -49,11 +49,12 @@ import models.base.IPropertyInPeriod;
 import models.enumerate.BlockType;
 import models.query.QConfiguration;
 import models.query.QPersonConfiguration;
-import play.db.jpa.JPAPlugin;
-import play.jobs.Job;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
+import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
+
 
 /**
  * Manager della configurazione.
@@ -275,7 +276,7 @@ public class ConfigurationManager {
 
   /**
    * Aggiunge una nuova configurazione di tipo enumerato.
-   * 
+   *
    * @param epasParam parametro
    * @param target il target
    * @param value valore

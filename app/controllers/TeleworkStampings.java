@@ -37,8 +37,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
 import manager.StampingManager;
@@ -53,8 +53,8 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.absences.definitions.DefaultGroup;
 import models.TeleworkValidation;
+import models.absences.definitions.DefaultGroup;
 import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
@@ -71,6 +71,7 @@ import play.mvc.With;
 
 /**
  * Controller per la gestione delle timbrature in telelavoro.
+ *
  * @author dario
  *
  */
@@ -180,7 +181,7 @@ public class TeleworkStampings extends Controller {
     Person person = personDao.getPersonById(personId);
     PersonLite p = null;
     if (person.personConfigurations.stream().noneMatch(pc -> 
-    pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
       @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
@@ -349,8 +350,8 @@ public class TeleworkStampings extends Controller {
     stamping.setPersonDayId(pd.getId());
     int result = manager.save(stamping);
     if (result == Http.StatusCode.CREATED) {
-      if (person.isTopQualification() &&
-          person.checkConf(EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME, "true")) {
+      if (person.isTopQualification() 
+          && person.checkConf(EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME, "true")) {
         log.info("Inserisco la stessa timbratura anche nel cartellino di {}", person.fullName());
         Stamping ordinaryStamping = stampingManager
             .generateStampingFromTelework(stamping, pd, time);
@@ -360,8 +361,8 @@ public class TeleworkStampings extends Controller {
         //è abilitato all'inserimento di questo codice e se non già presente
         if (absenceService.groupsPermitted(person, false)
               .contains(absenceComponentDao
-                .groupAbsenceTypeByName(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get()) &&
-            absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
+                .groupAbsenceTypeByName(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get())
+              && absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
           manager.insertTeleworkAbsenceCode(person, date);
         }
         if (!Strings.isNullOrEmpty(ordinaryStampingResult)) {
@@ -401,7 +402,7 @@ public class TeleworkStampings extends Controller {
 
   /**
    * Genera il report mensile di telelavoro.
-   * 
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @throws NoSuchFieldException eccezione di mancanza di parametro

@@ -86,11 +86,12 @@ public class Groups extends Controller {
       Set<Person> people) {
 
     boolean hasErrors = Validation.hasErrors();
-    if (!Strings.isNullOrEmpty(group.externalId) && 
-          groupDao.byOfficeAndExternalId(office, group.externalId).isPresent()) {
+    if (!Strings.isNullOrEmpty(group.externalId) 
+        && groupDao.byOfficeAndExternalId(office, group.externalId).isPresent()) {
       hasErrors = true;
       Validation.addError("group.externalId", "deve essere univoco");
-    };
+    }
+    ;
 
     if (hasErrors) {
       response.status = 400;

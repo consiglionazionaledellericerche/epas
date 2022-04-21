@@ -32,6 +32,12 @@ import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
 
+/**
+ * Job notturno per l'allineamento delle situazioni dei dipendenti.
+ *
+ * @author dario
+ *
+ */
 @SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 1 5 * * ?") // Ore 5:01

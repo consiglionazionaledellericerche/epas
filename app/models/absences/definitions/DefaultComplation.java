@@ -228,7 +228,7 @@ public enum DefaultComplation {
   
   /**
    * Ricerca i completamenti modellati e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultComplation> missing(List<ComplationAbsenceBehaviour> allComplations) {

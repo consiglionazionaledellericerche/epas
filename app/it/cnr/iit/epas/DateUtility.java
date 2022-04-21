@@ -33,7 +33,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 /**
- * 
  * Classe di utilità per la gestione delle date.
  *
  */

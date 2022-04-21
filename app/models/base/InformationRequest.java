@@ -40,6 +40,12 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 
+/**
+ * Classe di base delle richieste di informazione.
+ *
+ * @author dario
+ *
+ */
 @ToString(of = {"informationType", "person", "startAt", "endTo", 
     "officeHeadApproved", "officeHeadApprovalRequired"})
 @Audited

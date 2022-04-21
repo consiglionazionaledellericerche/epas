@@ -24,6 +24,7 @@ import manager.configurations.EpasParam;
 
 /**
  * Enumerato che gestisce la tipologia di richiesta informativa.
+ *
  * @author dario
  *
  */

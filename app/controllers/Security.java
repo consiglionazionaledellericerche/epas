@@ -27,14 +27,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.OfficeManager;
 import models.User;
 import play.mvc.Http;
 import play.mvc.Util;
 import play.utils.Java;
 
+/**
+ * Classe di gestione della security.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 public class Security extends Secure.Security {
 
@@ -143,7 +149,7 @@ public class Security extends Secure.Security {
       flash.success("secure.logout");
       Resecure.oauthLogout(sessionCopy);
     } else {
-    //Caso autenticazione locale o shibboleth
+      //Caso autenticazione locale o shibboleth
       try {
         invoke("onDisconnect");
         session.clear();

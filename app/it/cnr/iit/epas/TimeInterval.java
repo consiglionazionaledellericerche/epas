@@ -19,10 +19,10 @@ package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import lombok.NoArgsConstructor;
 import org.joda.time.Hours;
 import org.joda.time.LocalTime;
 import org.joda.time.Minutes;
-import lombok.NoArgsConstructor;
 
 /**
  * Classe di utilità per la gestione dei tempi e orari.

@@ -10,6 +10,12 @@ import play.Play;
 import play.jobs.Job;
 import play.jobs.On;
 
+/**
+ * Job per il controllo del green pass.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @On("0 0 14 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 10.15
 public class CheckGreenPassJob2 extends Job<Void> {

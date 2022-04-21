@@ -1784,7 +1784,8 @@ public class PersonDayManager {
             //Viene fatta prima la merge perché l'assenza è detached
             previousShortPermission.get().merge()._delete();
             log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti"
-                + " assenze giornaliere oppure il dipendente è in turno, oppure è un giorno festivo.",
+                + " assenze giornaliere oppure il dipendente è in turno, "
+                + "oppure è un giorno festivo.",
                 previousShortPermission.get().justifiedMinutes, personDay.date, 
                 personDay.person.getFullname());
             return;

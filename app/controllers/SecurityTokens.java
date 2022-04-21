@@ -51,7 +51,8 @@ public class SecurityTokens extends Controller {
       return key;
     } else {
       val decodedKey = Base64.getDecoder().decode(encodedKey);
-      return new SecretKeySpec(decodedKey, 0, decodedKey.length, SignatureAlgorithm.HS512.getJcaName());
+      return new SecretKeySpec(decodedKey, 0, decodedKey.length, 
+          SignatureAlgorithm.HS512.getJcaName());
     }
   }
 
@@ -67,6 +68,11 @@ public class SecurityTokens extends Controller {
     renderText(token);
   }
 
+  /**
+   * Check del token.
+   *
+   * @param token il token da verificare
+   */
   @NoCheck
   public static void check(String token) {
     try {
@@ -78,6 +84,12 @@ public class SecurityTokens extends Controller {
     }
   }
 
+  /**
+   * Classe di controllo della validità dell'username.
+   *
+   * @author dario
+   *
+   */
   public static class InvalidUsername extends Exception {
     private static final long serialVersionUID = 681032973379857729L;
 
@@ -86,6 +98,12 @@ public class SecurityTokens extends Controller {
     }
   }
 
+  /**
+   * Ritorna e valida l'username.
+   *
+   * @return l'username se valido.
+   * @throws InvalidUsername eccezione di username non valido
+   */
   @Util
   public static java.util.Optional<String> retrieveAndValidateJwtUsername() throws InvalidUsername {
     Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
@@ -131,6 +149,11 @@ public class SecurityTokens extends Controller {
     return Session.current().getId() + CACHE_ACCESS_TOKEN_POSTFIX;
   }
 
+  /**
+   * Setta la sessione jwt.
+   *
+   * @param oauthResponse la risposta oauth
+   */
   @Util
   public static void setJwtSession(OAuth2.Response oauthResponse) {
     //XXX l'accesso token viene impostato in Cache e non in sessione perché la sessione
@@ -143,7 +166,8 @@ public class SecurityTokens extends Controller {
     String refreshToken = body.get(REFRESH_TOKEN).getAsString();
     String idToken = body.get(ID_TOKEN).getAsString();
     Session.current().put(Resecure.REFRESH_TOKEN, refreshToken);
-    log.trace("put REFRESH_TOKEN in sessione. Length = {}, value = {}", refreshToken.length(), refreshToken); 
+    log.trace("put REFRESH_TOKEN in sessione. Length = {}, value = {}", 
+        refreshToken.length(), refreshToken); 
     Session.current().put(Resecure.ID_TOKEN, idToken);
     log.trace("put ID_TOKEN in sessione. Length = {}, value = {}", idToken.length(), idToken);
   }
@@ -166,7 +190,8 @@ public class SecurityTokens extends Controller {
     if (issuer.equals(Router.getBaseUrl())) {
       jwtBody = Jwts.parserBuilder().setSigningKey(key()).build().parse(jwt).getBody();
     } else {
-      jwtBody = Jwts.parserBuilder().setSigningKeyResolver(openIdConnectClient.getJwksResolver()).build()
+      jwtBody = Jwts.parserBuilder()
+          .setSigningKeyResolver(openIdConnectClient.getJwksResolver()).build()
           .parse(jwt).getBody();
     }
     return ((Claims) jwtBody).get(openIdConnectClient.getJwtField(), String.class);

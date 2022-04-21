@@ -31,6 +31,7 @@ public class CompetenceDto {
 
   /**
    * Applica la conversione da dto a oggetto.
+   *
    * @author dario
    *
    */

@@ -25,6 +25,12 @@ import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
 
+/**
+ * Classe che permette lo switch dei vari menu (persone, sedi, giorni...)
+ *
+ * @author dario
+ *
+ */
 @With(Resecure.class)
 public class SwitchTemplate extends Controller {
 

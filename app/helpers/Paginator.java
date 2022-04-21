@@ -115,6 +115,12 @@ public class Paginator {
     return Router.reverse(action).url;
   }
 
+  /**
+   * Aggiorna i params col numero di pagina attuale.
+   *
+   * @param page il numero di pagina
+   * @return l'oggetto params aggiunto delle info sul numero di pagina.
+   */
   public Object dataFor(int page) {
     Preconditions.checkArgument(page >= 0);
     params.put("page", Integer.toString(page));

@@ -79,7 +79,7 @@ public class ContractHistoryDao {
   
   /**
    * Metodo di storico sull'ultima modifica al contratto.
-   * 
+   *
    * @param contractId l'id del contratto di cui recuperare lo storico
    * @return la lista contenente un solo elemento relativo alle modifiche al contratto
    *     in oggetto.
