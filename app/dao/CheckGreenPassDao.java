@@ -34,6 +34,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Dao per le query sul green pass.
+ *
  * @author dario
  *
  */
@@ -47,7 +48,7 @@ public class CheckGreenPassDao extends DaoBase {
   
   /**
    * Ritorna la lista dei sorteggiati per la data passata come parametro.
-   * 
+   *
    * @param date la data per cui cercare i check ai green pass
    * @return la lista dei sorteggiati per la data in oggetto.
    */
@@ -65,7 +66,7 @@ public class CheckGreenPassDao extends DaoBase {
   
   /**
    * Ritorna, se esiste, il checkGreenPass identificato dall'id passato come parametro.
-   * 
+   *
    * @param checkGreenPassId l'identificativo del checkGreenPass
    * @return l'optional contenenente o meno l'oggetto identificato dall'id passato come parametro.
    */
@@ -78,7 +79,7 @@ public class CheckGreenPassDao extends DaoBase {
   
   /**
    * Verifica se esiste già una entry in tabella per la persona e la data passati.
-   * 
+   *
    * @param person la persona da controllare
    * @param date la data in cui controllare
    * @return se esiste il check green pass per i parametri passati.
@@ -93,7 +94,7 @@ public class CheckGreenPassDao extends DaoBase {
 
   /**
    * Conta le volte in cui una persona è stata controllata.
-   * 
+   *
    * @param person la persona di cui controllare il numero di volte in cui è stata
    *     controllata
    * @return quante volte la persona passata come parametro è stata controllata.

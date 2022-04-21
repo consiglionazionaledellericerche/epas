@@ -248,7 +248,7 @@ public class StampingManager {
   
   /**
    * Crea l'oggetto stamping da persistere sul db di ePAS.
-   * 
+   *
    * @param stamping il dto da cui creare la timbratura
    * @param pd il personday cui associare la timbratura
    * @param time l'orario della timbratura
@@ -287,7 +287,7 @@ public class StampingManager {
 
   /**
    * Ritorna il verso della timbratura corrispondente a quella del dto.
-   * 
+   *
    * @param dto il dto contenente le informazioni della timbratura in telelavoro
    * @return il verso della timbratura corrispondente.
    */
@@ -295,7 +295,7 @@ public class StampingManager {
     if (dto.getStampType().equals(TeleworkStampTypes.INIZIO_TELELAVORO)
         || dto.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)
         || dto.getStampType().equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {      
-        return WayType.in;
+      return WayType.in;
     } else {
       return WayType.out;
     }

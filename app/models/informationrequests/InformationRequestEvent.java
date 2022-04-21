@@ -37,7 +37,7 @@ import play.data.validation.Required;
 
 /**
  * Evento del flusso di approvazione di una richiesta informativa.
- * 
+ *
  * @author dario
  *
  */

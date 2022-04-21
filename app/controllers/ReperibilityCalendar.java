@@ -66,7 +66,12 @@ import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
 
-
+/**
+ * Controller per la generazione e gestione dei calendari di reperibilità.
+ *
+ * @author dario
+ *
+ */
 @With(Resecure.class)
 @Slf4j
 public class ReperibilityCalendar extends Controller {

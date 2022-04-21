@@ -27,6 +27,7 @@ import play.data.validation.Required;
 
 /**
  * classe relativa alla richiesta di telelavoro.
+ *
  * @author dario
  *
  */

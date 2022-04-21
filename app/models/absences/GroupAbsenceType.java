@@ -146,6 +146,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Enumerato che gestisce il tipo di periodo temporale.
+   *
    * @author dario
    *
    */
@@ -202,6 +203,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Enumerato che determina la tipologia di gruppo (se gestito da un pattern).
+   *
    * @author dario
    *
    */

@@ -40,6 +40,12 @@ import play.mvc.Http;
 @AutoRegister
 public class SecurityModule implements Module {
 
+  /**
+   * Interfaccia di security login.
+   *
+   * @author Cristian
+   *
+   */
   @FunctionalInterface
   public interface SecurityLogin {
     boolean isLegacy();
@@ -78,7 +84,8 @@ public class SecurityModule implements Module {
         : NO_REQUEST_ADDRESS;
   }
 
-  @Provides @Named(SECURITY_LEGACY)
+  @Provides 
+  @Named(SECURITY_LEGACY)
   public Boolean isSecurityLegacy() {
     return LEGACY.equalsIgnoreCase(Play.configuration.getProperty(SECURITY_LOGIN, LEGACY));
   }

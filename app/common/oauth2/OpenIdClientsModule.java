@@ -29,6 +29,12 @@ import lombok.val;
 import play.Play;
 import play.mvc.Router;
 
+/**
+ * Modulo OpenIdClient.
+ *
+ * @author Cristian
+ *
+ */
 @Slf4j
 @AutoRegister
 public class OpenIdClientsModule extends AbstractModule {
@@ -52,9 +58,9 @@ public class OpenIdClientsModule extends AbstractModule {
    */
   @Provides
   public OpenIdConnectClient openIdConnectClient(@Named(KEYCLOAK_CLIENT_ID) String clientId,
-                                                 @Named(KEYCLOAK_CLIENT_SECRET) String clientSecret,
-                                                 @Named(KEYCLOAK_CLIENT_CONFIG_URI) String configUrl,
-                                                 @Named(KEYCLOAK_JWT_FIELD) Optional<String> jwtField) {
+      @Named(KEYCLOAK_CLIENT_SECRET) String clientSecret,
+      @Named(KEYCLOAK_CLIENT_CONFIG_URI) String configUrl,
+      @Named(KEYCLOAK_JWT_FIELD) Optional<String> jwtField) {
     try {
       return new OpenIdConnectClient(configUrl,
           () -> Router.getFullUrl("Resecure.oauthCallback"),
@@ -89,6 +95,11 @@ public class OpenIdClientsModule extends AbstractModule {
     return Play.configuration.getProperty(KEYCLOAK_REALM);
   }
 
+  /**
+   * Ritorna l'uri di configurazione del keycloack.
+   *
+   * @return l'uri di configurazione del keycloack
+   */
   @Provides
   @Named(KEYCLOAK_CLIENT_CONFIG_URI)
   public String keycloakConfigUri() {
@@ -103,6 +114,12 @@ public class OpenIdClientsModule extends AbstractModule {
     return Optional.ofNullable(Play.configuration.getProperty(KEYCLOAK_JWT_FIELD));
   }
 
+  /**
+   * Costruisce l'oggetto TokenData.
+   *
+   * @author Cristian
+   *
+   */
   @Data
   public static class TokenData {
     @JsonProperty("access_token")
@@ -123,6 +140,12 @@ public class OpenIdClientsModule extends AbstractModule {
     private String tokenType;
   }
 
+  /**
+   * Api auth.
+   *
+   * @author Cristian
+   *
+   */
   public interface AuthApi {
 
     @RequestLine("POST /protocol/openid-connect/token")
@@ -133,12 +156,24 @@ public class OpenIdClientsModule extends AbstractModule {
                             @Param("client_secret") String clientSecret);
   }
 
+  /**
+   * Costruisce il configData.
+   *
+   * @author Cristian
+   *
+   */
   @Data
   public static class ConfigData {
     private final OkHttpClient client;
     private final Slf4jLogger logger;
   }
 
+  /**
+   * ClientFactory.
+   *
+   * @author Cristian
+   *
+   */
   @FunctionalInterface
   public interface ClientFactory {
     ApiClient builder(Function<Exception, ?> fallback);
@@ -151,6 +186,15 @@ public class OpenIdClientsModule extends AbstractModule {
         new Slf4jLogger("keycloak"));
   }
 
+  /**
+   * Ritorna l'api di autenticazione.
+   *
+   * @param openIdConnectClient il client openidconnect
+   * @param config la configurazione
+   * @param encoder l'encoder
+   * @param decoder il decoder
+   * @return l'api auth.
+   */
   @Singleton
   @Provides
   public AuthApi authApi(OpenIdConnectClient openIdConnectClient,
@@ -162,6 +206,17 @@ public class OpenIdClientsModule extends AbstractModule {
         .target(AuthApi.class, openIdConnectClient.getConfig().getIssuer());
   }
 
+  /**
+   * Il clientFactory.
+   *
+   * @param adminUri l'uri admin del keycloack
+   * @param realm il realm keycloack
+   * @param clientId l'id client del keycloack
+   * @param clientSecret il secret del keycloack
+   * @param config la configurazione
+   * @param authApi l'api di autenticazione
+   * @return il clientFactory.
+   */
   @Singleton
   @Provides
   public ClientFactory clientFactory(@Named(KEYCLOAK_ADMIN_URI) String adminUri,
@@ -171,7 +226,8 @@ public class OpenIdClientsModule extends AbstractModule {
                                      ConfigData config,
                                      AuthApi authApi) {
 
-    // Attenzione: occorre un feignbuilder separato per evitare interazioni con il request-interceptor
+    // Attenzione: occorre un feignbuilder separato per evitare interazioni con il 
+    //request-interceptor
     return fallback -> {
       val api = new ApiClient().setBasePath(adminUri);
       val decorator = FeignDecorators.builder()
@@ -198,8 +254,8 @@ public class OpenIdClientsModule extends AbstractModule {
     return factory.builder(RealmsAdminApiFallback::new).buildClient(RealmsAdminApi.class);
   }
 
-//  @Override
-//  public void configure() {
-//    bind(UserManagerEvents.class).asEagerSingleton();
-//  }
+  //  @Override
+  //  public void configure() {
+  //    bind(UserManagerEvents.class).asEagerSingleton();
+  //  }
 }

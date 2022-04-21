@@ -19,8 +19,8 @@ package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.joda.time.LocalDate;
 import lombok.NoArgsConstructor;
+import org.joda.time.LocalDate;
 
 /**
  * Rappresenta un intervallo di date.

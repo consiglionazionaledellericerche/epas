@@ -20,6 +20,12 @@ package models.dto;
 
 import models.enumerate.BlockType;
 
+/**
+ * Dto per ritornare la conformazione di blocchetti di buoni pasto per attestati.
+ *
+ * @author dario
+ *
+ */
 public class MealTicketComposition {
 
   public Integer paperyMealTicket;

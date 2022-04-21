@@ -636,6 +636,7 @@ public class WorkingTimes extends Controller {
   /**
    * Genera la form per il cambio della capacità di riproporzionare la quantità
    * dei codici di assenza.
+   *
    * @param wttId identificativo dell'orario di lavoro
    * @param officeId identificativo della sede di lavoro
    */
@@ -652,6 +653,7 @@ public class WorkingTimes extends Controller {
   
   /**
    * Salva le modifiche effettuate sull'orario di lavoro.
+   *
    * @param wtt l'orario di lavoro
    * @param officeId l'identificativo della sede
    */

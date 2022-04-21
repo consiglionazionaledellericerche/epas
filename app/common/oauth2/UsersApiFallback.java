@@ -10,6 +10,12 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Classe fallback implementa usersApi.
+ *
+ * @author Cristian
+ *
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class UsersApiFallback implements UsersApi {
@@ -79,7 +85,8 @@ public class UsersApiFallback implements UsersApi {
   }
 
   @Override
-  public ApiResponse<List<Map<String, Object>>> realmUsersIdConfiguredUserStorageCredentialTypesGetWithHttpInfo(
+  public ApiResponse<List<Map<String, Object>>> 
+      realmUsersIdConfiguredUserStorageCredentialTypesGetWithHttpInfo(
       String arg0, String arg1) {
     // TODO Auto-generated method stub
     return null;
@@ -132,7 +139,8 @@ public class UsersApiFallback implements UsersApi {
   }
 
   @Override
-  public ApiResponse<Void> realmUsersIdCredentialsCredentialIdMoveAfterNewPreviousCredentialIdPostWithHttpInfo(
+  public ApiResponse<Void> 
+      realmUsersIdCredentialsCredentialIdMoveAfterNewPreviousCredentialIdPostWithHttpInfo(
       String arg0, String arg1, String arg2, String arg3) {
     // TODO Auto-generated method stub
     return null;

@@ -41,6 +41,7 @@ public class PersonDto {
 
   /**
    * Sotto classe definizione dell'indirizzo.
+   *
    * @author dario
    *
    */

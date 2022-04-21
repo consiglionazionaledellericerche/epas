@@ -237,7 +237,7 @@ public class MonthRecaps extends Controller {
 
   /**
    *  Raccoglitore per il CustomRecap.
-   * 
+   *
    *  @author Alessandro Martelli
    */
   @Data

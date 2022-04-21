@@ -63,8 +63,8 @@ public class ContractShowTerseDto {
       if (contract.getPreviousContract().id.equals(contract.id)) {
         throw new IllegalStateException(
             String.format(
-                "The previous contract is equal to the current contract (id=%s), please correct this error",
-                contract.id));
+                "The previous contract is equal to the current contract (id=%s), "
+                + "please correct this error", contract.id));
       }
       contractDto.setPreviousContract(ContractShowTerseDto.build(contract.getPreviousContract()));
     }

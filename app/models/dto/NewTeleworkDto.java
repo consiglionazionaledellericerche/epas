@@ -5,6 +5,12 @@ import java.time.format.TextStyle;
 import java.util.Locale;
 import javax.persistence.Transient;
 
+/**
+ * Dto per l'oggetto telework da mandare al teleworkstampings.
+ *
+ * @author dario
+ *
+ */
 public class NewTeleworkDto {
 
   public LocalDate date;

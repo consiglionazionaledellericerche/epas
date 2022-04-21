@@ -138,7 +138,7 @@ public class MissionManager {
    * @param recompute se deve essere avviato il ricalcolo
    * @return true se riesce a inserire la missione con i parametri esplicitati nel body, 
    *     false altrimenti.
-   * @throws InterruptedException 
+   * @throws InterruptedException eccezione
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
 
@@ -148,7 +148,8 @@ public class MissionManager {
       log.debug(LOG_PREFIX + "Imposto la cache {} con valore true", missionCacheKey);
       Cache.set(missionCacheKey, true, "1mn");
     } else {
-      log.warn(LOG_PREFIX + "Creazione missione annullata, è già in corso un inserimento per la missione {}", body);
+      log.warn(LOG_PREFIX + "Creazione missione annullata, "
+          + "è già in corso un inserimento per la missione {}", body);
       return false;
     }
 

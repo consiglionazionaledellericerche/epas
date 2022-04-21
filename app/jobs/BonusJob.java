@@ -33,6 +33,7 @@ import play.jobs.On;
 
 /**
  * Job che assegna le quantità per le competenze a presenza mensile.
+ *
  * @author dario
  *
  */

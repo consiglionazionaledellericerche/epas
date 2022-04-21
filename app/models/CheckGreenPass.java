@@ -26,6 +26,12 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
+/**
+ * Entità di check green pass.
+ *
+ * @author dario
+ *
+ */
 @Entity
 @Audited
 public class CheckGreenPass extends BaseModel {

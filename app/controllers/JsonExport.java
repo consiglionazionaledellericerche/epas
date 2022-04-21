@@ -33,7 +33,10 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
 
-
+/**
+ * Classe che permette l'esportazione di persone e sedi.
+ * 
+ */
 @Slf4j
 @With(Resecure.class)
 public class JsonExport extends Controller {

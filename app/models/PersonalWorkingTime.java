@@ -35,6 +35,12 @@ import org.joda.time.format.DateTimeFormatter;
 import org.testng.util.Strings;
 import play.data.validation.Required;
 
+/**
+ * Entità di associazione tra persona e orario di lavoro particolare.
+ *
+ * @author dario
+ *
+ */
 @ToString
 @Entity
 @Table(name = "personal_working_times")

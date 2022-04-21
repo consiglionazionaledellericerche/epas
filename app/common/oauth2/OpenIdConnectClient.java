@@ -29,6 +29,12 @@ import play.libs.OAuth2;
 import play.libs.WS;
 import play.mvc.results.Redirect;
 
+/**
+ * Classe openIdConnect.
+ *
+ * @author Cristian
+ *
+ */
 @Slf4j
 @Getter
 public final class OpenIdConnectClient {
@@ -54,9 +60,21 @@ public final class OpenIdConnectClient {
   // Il campo da considerare per il match dell'utente (default: email)
   private final String jwtField;
 
-
+  /**
+   * Costruttore.
+   *
+   * @param configUrl url di configurazione
+   * @param callBackUrl url di callback
+   * @param clientId id del client
+   * @param secret il secret
+   * @param jwtField campo da analizzare
+   * @param jwksCacheSize dimensione della cache
+   * @param jwksCacheDuration durata della cache 
+   * @throws IOException eccezione IO
+   */
   public OpenIdConnectClient(String configUrl, Supplier<String> callBackUrl, String clientId,
-                             String secret, String jwtField, long jwksCacheSize, long jwksCacheDuration) throws IOException {
+      String secret, String jwtField, long jwksCacheSize, long jwksCacheDuration) 
+        throws IOException {
 
     this.callBackUrl = callBackUrl;
     this.jwtField = Objects.requireNonNullElse(jwtField, DEFAULT_FIELD);
@@ -69,8 +87,8 @@ public final class OpenIdConnectClient {
         .encodeToString((clientId + ":" + secret).getBytes(StandardCharsets.UTF_8));
     instance = new OAuth2(config.getAuthorizationEndpoint(), config.getTokenEndpoint(),
         clientId, secret);
-    JwkProvider provider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(config.getJwksUri())),
-        jwksCacheSize, jwksCacheDuration, TimeUnit.MINUTES);
+    JwkProvider provider = new GuavaCachedJwkProvider(new UrlJwkProvider(
+        new URL(config.getJwksUri())), jwksCacheSize, jwksCacheDuration, TimeUnit.MINUTES);
     jwksResolver = new JwksResolver(provider);
     log.info("Correctly configured new identity provider {}", config.getIssuer());
   }
@@ -92,6 +110,8 @@ public final class OpenIdConnectClient {
   }
 
   /**
+   * Ritorna la risposta OAuth2.
+   *
    * @param accessCode il codice prelevato dai parametri della richiesta
    * @param state      lo stato prelevato dai parametri della richiesta
    * @param savedState lo stato prelevato dalla sessione
@@ -123,6 +143,12 @@ public final class OpenIdConnectClient {
     return null;
   }
 
+  /**
+   * Ritorna la risposta OAuth2 generata dal token.
+   *
+   * @param refreshToken il token aggiornato
+   * @return la risposta OAuth2
+   */
   public OAuth2.Response retrieveRefreshToken(String refreshToken) {
 
     Map<String, Object> params = new HashMap<>();
@@ -145,21 +171,36 @@ public final class OpenIdConnectClient {
     }
   }
 
+  /**
+   * Funzione di logout.
+   *
+   * @param idToken identificativo del token
+   * @param redirectUri uri di reindirizzamento
+   */
   public void logout(String idToken, String redirectUri) {
-    // TODO: 06/05/20 c'è da ripulire la sessione, ma forse conviene farlo prima di chiamare questo metodo
+    // TODO: 06/05/20 c'è da ripulire la sessione, ma forse conviene farlo prima di chiamare
+    // questo metodo
     throw new Redirect(config.getEndSessionEndpoint(), Map.of(LOGOUT_IDTOKEN_PARAM, idToken,
         REDIRECT_URI, redirectUri));
   }
 
+  /**
+   * Verifica la validità dell'accessToken.
+   *
+   * @param response l'oggetto json di risposta
+   * @return se è valido l'access token
+   */
   public boolean validateAccessToken(JsonObject response) {
-//    https://openid.net/specs/openid-connect-core-1_0.html#ImplicitTokenValidation
-//    3.2.2.9.  Access Token Validation
-//    To validate an Access Token issued from the Authorization Endpoint with an ID Token, the Client SHOULD do the following:
-//
-//    Hash the octets of the ASCII representation of the access_token with the hash algorithm specified in JWA [JWA] for the alg Header Parameter of the ID Token's JOSE Header. For instance, if the alg is RS256, the hash algorithm used is SHA-256.
-//    Take the left-most half of the hash and base64url encode it.
-//    The value of at_hash in the ID Token MUST match the value produced in the previous step.
-    // TODO: 27/04/20 prevedere altri tipi di codifica oltre lo SHA-256
+    //    https://openid.net/specs/openid-connect-core-1_0.html#ImplicitTokenValidation
+    //    3.2.2.9.  Access Token Validation
+    //    To validate an Access Token issued from the Authorization Endpoint with an ID Token, 
+    //    the Client SHOULD do the following:
+    //    Hash the octets of the ASCII representation of the access_token with the hash algorithm 
+    //    specified in JWA [JWA] for the alg Header Parameter of the ID Token's JOSE Header. 
+    //    For instance, if the alg is RS256, the hash algorithm used is SHA-256.
+    //    Take the left-most half of the hash and base64url encode it.
+    //    The value of at_hash in the ID Token MUST match the value produced in the previous step.
+    //TODO: 27/04/20 prevedere altri tipi di codifica oltre lo SHA-256
     String accessToken;
     try {
       accessToken = response.get("access_token").getAsString();
@@ -189,6 +230,12 @@ public final class OpenIdConnectClient {
     return true;
   }
 
+  /**
+   * Classe Resolver.
+   *
+   * @author Cristian
+   *
+   */
   public static class JwksResolver implements SigningKeyResolver {
 
     private final JwkProvider keyStore;

@@ -43,6 +43,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Manager per il check giornaliero del green pass.
+ *
  * @author cristian
  *
  */
@@ -55,10 +56,11 @@ public class CheckGreenPassManager {
   private final OfficeDao officeDao;
   private final EmailManager emailManager;
 
-  private final double PEOPLE_TO_DRAW_EACH_ATTEMPT = 0.15;
+  private final double peopleToDrawEachAttempt = 0.15;
   
   /**
    * Costruttore manager.
+   *
    * @param personDao il dao sulle persone
    * @param stampingManager il manager per le timbrature
    * @param passDao il dao per il check green pass
@@ -76,13 +78,13 @@ public class CheckGreenPassManager {
   /**
    * Il numero delle persone da conteggiare è una percentuale del numero di persone
    * presenti in sede.
-   * 
+   *
    * @param numberOfActivePeople numero di persone attive in sede 
    * @return il numero di persone da conteggiare.
    */
   private Integer peopleToDrawn(Integer numberOfActivePeople) {
 
-    BigDecimal percentageToDrawn = BigDecimal.valueOf(PEOPLE_TO_DRAW_EACH_ATTEMPT);
+    BigDecimal percentageToDrawn = BigDecimal.valueOf(peopleToDrawEachAttempt);
 
     // conteggio quante persone sorteggiare
     BigDecimal numberOfPeopletoDraw = 
@@ -126,7 +128,7 @@ public class CheckGreenPassManager {
   
   /**
    * Ritorna la lista delle persone attive sulla sede office in data date.
-   * 
+   *
    * @param date la data in cui cercare le persone
    * @param office la sede su cui cercare le persone
    * @return la lista di persone attive nella sede office in data date.

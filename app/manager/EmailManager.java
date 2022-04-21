@@ -149,7 +149,7 @@ public class EmailManager {
   
   /**
    * Metodo che informa via mail la persona del controllo del green pass.
-   * 
+   *
    * @param person la persona a cui inviare la mail informativa
    */
   public void infoDrawnPersonForCheckingGreenPass(Person person) {
@@ -187,7 +187,7 @@ public class EmailManager {
   /**
    * Informa via mail l'amministrazione e l'ufficio tecnico di chi devono contattare
    * per il check del green pass.
-   * 
+   *
    * @param peopleSelected la lista di persone selezionate
    * @param date la data in cui sono selezionate
    */
@@ -218,7 +218,7 @@ public class EmailManager {
             }
           });
 
-      for (CheckGreenPass gp: peopleSelected) {
+      for (CheckGreenPass gp : peopleSelected) {
         sb.append(gp.person.getFullname() + "\r\n");
       }      
     }

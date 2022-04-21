@@ -533,7 +533,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_401, DefaultAbsenceType.A_412,
-          DefaultAbsenceType.A_402,DefaultAbsenceType.A_62,
+          DefaultAbsenceType.A_402, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),

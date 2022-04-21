@@ -5,6 +5,12 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Classe di configurazione del provider.
+ *
+ * @author Cristian
+ *
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter

@@ -7,6 +7,12 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Costruttore che implementa RealmsAdminApi.
+ *
+ * @author Cristian
+ *
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class RealmsAdminApiFallback implements RealmsAdminApi {

@@ -45,7 +45,12 @@ import play.mvc.Router;
 import play.mvc.With;
 
 
-
+/**
+ * Injector di dati nel menu e nei dropdown.
+ *
+ * @author dario
+ *
+ */
 @With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 

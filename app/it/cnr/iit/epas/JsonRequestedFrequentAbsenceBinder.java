@@ -26,6 +26,12 @@ import models.exports.FrequentAbsenceCode;
 import models.exports.PeriodAbsenceCode;
 import play.data.binding.TypeBinder;
 
+/**
+ * Binder per oggetti json sulle assenze frequenti.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 public class JsonRequestedFrequentAbsenceBinder implements TypeBinder<FrequentAbsenceCode> {
 

@@ -86,7 +86,7 @@ public class Contracts extends Controller {
     rules.checkIfPermitted(person.office);
     List<ContractShowTerseDto> contracts = Lists.newArrayList();
     try {
-       contracts = 
+      contracts = 
         person.contracts.stream().map(c -> ContractShowTerseDto.build(c))
         .collect(Collectors.toList());
     } catch (IllegalStateException e) {

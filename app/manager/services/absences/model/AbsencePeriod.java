@@ -216,9 +216,9 @@ public class AbsencePeriod {
         List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
         int count = (workingDays.size() * 100 / 2);
         if (count % 100 != 0) {
-          return count - count%100;
+          return count - count % 100;
         }
-        return count -(1*100);
+        return count - (1 * 100);
       } 
       return this.fixedPeriodTakableAmount;
     }

@@ -168,9 +168,8 @@ public class Administration extends Controller {
   static OfficeDao officeDao;
  
   /**
-   * metodo che renderizza la pagina di utilities senza parametri passati
+   * metodo che renderizza la pagina di utilities senza parametri passati.
    */
-
   public static void utilities() {
     log.debug("Chiamata utilities senza parametri");
     final List<Person> personList = personDao.list(
@@ -234,8 +233,8 @@ public class Administration extends Controller {
     
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori evidenziati");
-      log.debug("Errori di validazione in fixPersonSituation, person={}, office={}, year={}, month={}",
-          person, office, year, month);
+      log.debug("Errori di validazione in fixPersonSituation, person={}, "
+          + "office={}, year={}, month={}", person, office, year, month);
       Validation.keep();
       utilities(person, office, year, month);
     }

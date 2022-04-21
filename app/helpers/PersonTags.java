@@ -22,6 +22,12 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.templates.JavaExtensions;
 
+/**
+ * Classe di utilità per la gestione di date e orari.
+ *
+ * @author dario
+ *
+ */
 public class PersonTags extends JavaExtensions {
 
 

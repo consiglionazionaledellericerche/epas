@@ -47,6 +47,7 @@ import models.query.QUser;
 
 /**
  * DAO per gli User.
+ *
  * @author Cristian Lucchesi
  */
 public class UserDao extends DaoBase {

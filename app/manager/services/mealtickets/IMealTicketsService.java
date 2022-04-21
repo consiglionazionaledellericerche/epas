@@ -73,7 +73,7 @@ public interface IMealTicketsService {
   /**
    * Genera una composizione che determina con che tipo di buoni pasto si copre la maturazione
    * mensile dei buoni in base ai giorni di presenza.
-   * 
+   *
    * @param recap il recap della situazione dei buoni pasto
    * @param monthRecap il recap sul contratto mensile
    * @param contract il contratto su cui verificare la situazione dei buoni pasto

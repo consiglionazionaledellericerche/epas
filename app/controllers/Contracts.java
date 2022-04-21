@@ -41,8 +41,8 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.service.ICertificationService;
@@ -631,7 +631,7 @@ public class Contracts extends Controller {
   
   /**
    * Salva il nuovo periodo di orario di lavoro personalizzato.
-   * 
+   *
    * @param pwt l'orario di lavoro personalizzato
    * @param confirmed conferma se true
    */
@@ -708,7 +708,7 @@ public class Contracts extends Controller {
 
   /**
    * Cancella un orario di lavoro personalizzato.
-   * 
+   *
    * @param id identificativo dell'orario da cancellare
    * @param confirmed conferma se true
    */

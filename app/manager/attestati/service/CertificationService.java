@@ -79,7 +79,7 @@ public class CertificationService implements ICertificationService {
 
   /**
    * Verifica se il token è abilitato alla sede.
-   * 
+   *
    * @see manager.attestati.service.ICertificationService#authentication(models.Office, boolean)
    */
   @Override
