@@ -50,6 +50,7 @@ import models.enumerate.BlockType;
 import models.query.QConfiguration;
 import models.query.QPersonConfiguration;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -710,29 +711,27 @@ public class ConfigurationManager {
   /**
    * Aggiorna la configurazione di tutte le persone.
    */
-  @SuppressWarnings("deprecation")
   public void updatePeopleConfigurations() {
     List<Office> officeList = officeDao.allEnabledOffices();
-    List<Person> people = Lists.newArrayList();
-    for (Office office : officeList) {       
-      log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
-      people = personDao.byOffice(office);
-      for (Person person : people) {
-        JPAPlugin.closeTx(false);
-        JPAPlugin.startTx(false);
-        person = personDao.getPersonById(person.id);
-        log.debug("Fix parametri di configurazione della persona {}", person.fullName());
-        updateConfigurations(person);
-      }
-      JPAPlugin.closeTx(false);
-      JPAPlugin.startTx(false);
-      office = officeDao.getOfficeById(office.id);
+
+    for (Office office : officeList) {  
+      new Job<Void>() {
+        @Override
+        public void doJob() {
+          log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
+          List<Person> people = personDao.byOffice(office);
+          for (Person person : people) {
+            log.info("Fix parametri di configurazione della persona {}", person.fullName());
+            updateConfigurations(person);           
+          }
+        }        
+      }.now();
       log.info("Fine aggiornamento parametri per {} dipendenti di {}", 
           office.persons.size(), office.name);
     }
-
-
   }
+
+  
 
   /**
    * Converte il formato stringa in formato oggetto per l'epasParam.
