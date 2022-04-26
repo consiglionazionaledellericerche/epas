@@ -480,7 +480,7 @@ public enum DefaultAbsenceType {
   A_31_2020("31", "Ferie anno 2020 prorogate", false, 
       ImmutableSet.of(JustifiedTypeName.all_day), 
       0, false, false, 0, null, Sets.newHashSet(), new LocalDate(2021, 11, 1), 
-      null, false, true, true),
+      new LocalDate(2022, 2, 28), false, true, true),
 
   A_31("31", "Ferie anno precedente", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       false, 0, null, Sets.newHashSet(), null, null, false, true, true), 
