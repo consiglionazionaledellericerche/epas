@@ -80,7 +80,7 @@ public class EnumAllineator {
     for (AbsenceType absenceType : allAbsenceType) {
       Optional<DefaultAbsenceType> defaultAbsenceType = DefaultAbsenceType.byCode(absenceType); 
       if (defaultAbsenceType.isPresent()) {
-        if (defaultAbsenceType.get().toUpdate) {
+        if (absenceType.toUpdate) {
           //gli absenceType che esistono le allineo all'enum
           absenceType.code = defaultAbsenceType.get().getCode();
           absenceType.certificateCode = defaultAbsenceType.get().certificationCode;
