@@ -36,7 +36,7 @@ import org.joda.time.LocalDate;
  *
  */
 public enum DefaultAbsenceType {
-  
+
   A_VAC19("VAC-19",
       "Assenza per la somministrazione del vaccino contro il COVID-19", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
@@ -61,12 +61,12 @@ public enum DefaultAbsenceType {
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
       Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
-  
+
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
-      + "con maturazione buono pasto", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
+          + "con maturazione buono pasto", false,
+          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
+          Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
 
   A_98CV("98CV",
       "Assente ingiustificato no greenpass", false,
@@ -80,9 +80,9 @@ public enum DefaultAbsenceType {
 
   A_39LANOBP("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso "
-      + "senza buono pasto", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+          + "senza buono pasto", false,
+          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
+          Sets.newHashSet(), null, null, true, false, true),
 
   A_40LA("40LA",
       "Lavoro agile per quarantena/isolamento fiduciario", false,
@@ -253,7 +253,7 @@ public enum DefaultAbsenceType {
   A_C16("C16", "Cong. gravi motivi familiari NR", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true), 
-  
+
   A_C17("C17", "Congedo assistenza figlio disabile L. 104/92", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true), 
@@ -472,15 +472,15 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 420,
       false, true, 0, null, Sets.newHashSet(), new LocalDate(2011, 1, 1),
       new LocalDate(2019, 2, 14), false, true, true),
-  
+
   //  A_31_2019("31", "Ferie anno 2019 prorogate", false, 
   //      ImmutableSet.of(JustifiedTypeName.all_day), 
   //      0, false, false, 0, null, Sets.newHashSet(), new LocalDate(2021, 1, 1), 
   //      new LocalDate(2021, 2, 15), false, true, true),
-  //  A_31_2020("31", "Ferie anno 2020 prorogate", false, 
-  //    ImmutableSet.of(JustifiedTypeName.all_day), 
-  //      0, false, false, 0, null, Sets.newHashSet(), new LocalDate(2021, 11, 1), 
-  //      new LocalDate(2022, 2, 20), false, true, true),
+  A_31_2020("31", "Ferie anno 2020 prorogate", false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 
+      0, false, false, 0, null, Sets.newHashSet(), new LocalDate(2021, 11, 1), 
+      null, false, true, true),
 
   A_31("31", "Ferie anno precedente", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       false, 0, null, Sets.newHashSet(), null, null, false, true, true), 
@@ -534,11 +534,11 @@ public enum DefaultAbsenceType {
   A_COVID50("COVID50", "Congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
       Sets.newHashSet(), null, new LocalDate(2021, 9, 30), false, true, true), 
-  
+
   A_COV50("COV50", "congedo parentale straordinario al 50%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
       Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true, true), 
-  
+
   A_COV50M("COV50M", "Congedo parentale straordinario al 50% in ore e minuti.", 
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
@@ -546,11 +546,11 @@ public enum DefaultAbsenceType {
   A_COV50H("COV50H", "Congedo parentale straordinario al 50% completamento giornata", 
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
       JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true),
-  
+
   A_COV00("COV00", "congedo parentale straordinario al 0%.", 
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, 
       Sets.newHashSet(), new LocalDate(2021, 10, 1), null, false, true, true), 
-  
+
   A_COV00M("COV00M", "Congedo parentale straordinario al 0% in ore e minuti.", 
       true, ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
@@ -558,7 +558,7 @@ public enum DefaultAbsenceType {
   A_COV00H("COV00H", "Congedo parentale straordinario al 0% completamento giornata", 
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 0,
       JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true),
-  
+
   A_25("25", "Astensione facoltativa post partum 30% primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true), 
@@ -861,7 +861,7 @@ public enum DefaultAbsenceType {
   A_143("143", "malattia terzo figlio non retribuita", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(),
       new LocalDate(1990, 1, 1), new LocalDate(2008, 12, 31), false, true, true),
-  
+
   A_124("124", "malattia quarto figlio/a <= 3 anni retribuita 100%", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true),
@@ -879,12 +879,12 @@ public enum DefaultAbsenceType {
   A_45("45", "Congedo straordinario permesso per matrimonio", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true),
-  
+
 
   A_46("46", "cong.str./permesso richiamo armi", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
       null, false, true, true),
-  
+
 
   A_46RA("46RA", "cong.str/permesso richiamo armi 1gg", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null, Sets.newHashSet(), null,
@@ -911,7 +911,7 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, true, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
       false, true, true), 
-  
+
   A_71("71", "permesso sindacale 1 ora", false,
       ImmutableSet.of(JustifiedTypeName.nothing), 0, false, false, 60,
       JustifiedTypeName.absence_type_minutes, Sets.newHashSet(), null, null, false, true, true), 
@@ -1223,7 +1223,7 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
       true /* festivo capire */, false, 0, null,
       Sets.newHashSet(), null, null, false, true, true),
-  
+
   A_55("55", "aspett. per funzioni pubbliche", false,
       ImmutableSet.of(JustifiedTypeName.all_day),
       0, true, false, 0,
@@ -1756,7 +1756,7 @@ public enum DefaultAbsenceType {
   A_412("412", "Riposo compensativo missione Antartide", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), 
       new LocalDate(2022, 1, 1), new LocalDate(2022, 12, 31), false, true, true), 
-  
+
 
   A_NC("NC", "Giorno non conteggiato ai fini del tempo a lavoro", true,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null, Sets.newHashSet(), null,
@@ -1793,7 +1793,7 @@ public enum DefaultAbsenceType {
   A_96B("96B", "sospensione dal servizio", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null,
       Sets.newHashSet(), null, null, false, true, true);
-  
+
 
   public String certificationCode;
   public String description;
@@ -1816,7 +1816,7 @@ public enum DefaultAbsenceType {
 
   public Boolean reperibilityCompatible;
   public Boolean isRealAbsenceType;
-  
+
   public boolean toUpdate;
 
   /**
