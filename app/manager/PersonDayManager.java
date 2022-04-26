@@ -402,10 +402,10 @@ public class PersonDayManager {
 
     // Gli invarianti del calcolo.
     //
-    //   1)       Tempo timbrature -> Tempo fra coppie ritenute valide.
+    //   1) Tempo timbrature -> Tempo fra coppie ritenute valide.
     //   2) Tempo dentro la fascia -> N.B nei giorni di festa è zero
-    //   3)     Tempo fuori fascia -> Tempo timbrature - Tempo dentro fascia
-    //   4)         Tempo di festa -> Tempo timbrature giorno di festa
+    //   3) Tempo fuori fascia -> Tempo timbrature - Tempo dentro fascia
+    //   4) Tempo di festa -> Tempo timbrature giorno di festa
 
     List<PairStamping> validPairs = getValidPairStampings(personDay.stampings, exitingNow);
 
@@ -461,7 +461,6 @@ public class PersonDayManager {
       }
 
       personDay.setJustifiedTimeNoMeal(personDay.getJustifiedTimeNoMeal() + justifiedMinutes);
-
     }
 
     /*Qui inizia il pezzo aggiunto che controlla la provenienza delle timbrature*/
@@ -472,7 +471,6 @@ public class PersonDayManager {
 
     if (!link.isEmpty() && validPairs.size() > 1) {      
       justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs, startWork, endWork);
-
     }
     personDay.setJustifiedTimeBetweenZones(justifiedTimeBetweenZones);    
 
@@ -484,8 +482,6 @@ public class PersonDayManager {
         + personDay.getApprovedOutOpening()
         + personDay.getJustifiedTimeBetweenZones();
 
-
-
     //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo
     // così posso sfruttare quel campo nel tabellone timbrature
 
@@ -494,11 +490,14 @@ public class PersonDayManager {
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 
-    //Gestione decurtazione. Si applica solo se non ci sono assenze orarie che maturano il buono.
-    if (personDay.getJustifiedTimeMeal() > 0) {
-      personDay.setDecurtedMeal(0);
-    } else {
+    //Gestione decurtazione.
+    // Si applica solo se non ci sono assenze orarie che maturano il buono
+    // o se il dipendente e' in missione oraria nella giornata da valutare
+    if (isOnHourlyMission(personDay) || personDay.getJustifiedTimeMeal() <= 0) {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
+    }
+    else {
+      personDay.setDecurtedMeal(0);
     }
 
     // Il caso di assenze a giustificazione "quello che manca"
@@ -1303,6 +1302,19 @@ public class PersonDayManager {
         .filter(absence -> absence.absenceType.code.equals(AbsenceTypeMapping.MISSIONE.getCode()))
         .findAny().isPresent();
   }
+
+  /**
+   * Se la persona è in missione oraria nel giorno.
+   *
+   * @param personDay giorno
+   * @return esito
+   */
+  public boolean isOnHourlyMission(PersonDay personDay) {
+    return personDay.absences.stream()
+        .filter(absence -> absence.absenceType.code.equals("92M"))
+        .findAny().isPresent();
+  }
+
 
   /**
    * Il numero di coppie ingresso/uscita da stampare per il personday.
