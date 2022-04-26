@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Migliorato messaggio di errore in caso di inserimento via REST di buoni pasto già esistenti
  - Fix bug del permesso breve che non veniva eliminato quando si completava la giornata
+ - Modificata procedura di allineamento dei codici di assenza con gli enumerati per risolvere 
+   il problema CNR/INAF su alcuni codici.
+ - Reinserito il codice 31_2020 per le esigenze INAF
 
 ## [2.5.0] - 2022-04-14
 ### Added
