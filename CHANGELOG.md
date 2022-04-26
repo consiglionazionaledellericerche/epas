@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    quando si tenta di leggere un contratto con previousContract non coerente
 ### Changed
  - Migliorato messaggio di errore in caso di inserimento via REST di buoni pasto già esistenti
+ - Fix bug del permesso breve che non veniva eliminato quando si completava la giornata
 
 ## [2.5.0] - 2022-04-14
 ### Added
