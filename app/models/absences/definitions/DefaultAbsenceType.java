@@ -26,6 +26,7 @@ import java.util.Set;
 import models.absences.AbsenceType;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 
 
@@ -39,55 +40,64 @@ public enum DefaultAbsenceType {
 
   A_VAC19("VAC-19",
       "Assenza per la somministrazione del vaccino contro il COVID-19", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), new LocalDate(2022, 1, 1), null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, MealTicketBehaviour.notAllowMealTicket, 
+      0, null, Sets.newHashSet(), new LocalDate(2022, 1, 1), null, true, false, true),
 
   A_SMART("SMART",
       "Smartworking a completamento", false,
-      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, false, 0, null,
-      Sets.newHashSet(), null, new LocalDate(2021, 11, 1), true, false, false),
+      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
+      new LocalDate(2021, 11, 1), true, false, false),
 
   A_LAGILE("L-AGILE",
       "Lavoro agile", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), new LocalDate(2022, 3, 29), null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
+      new LocalDate(2022, 3, 29), null, true, false, true),
 
   A_LAGILEBP("L-AGILE",
       "Lavoro agile con maturazione buono pasto", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), new LocalDate(2022, 3, 29), null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), 
+      new LocalDate(2022, 3, 29), null, true, false, true),
 
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-      Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
+      new LocalDate(2022, 4, 15), true, false, true),
 
   A_COVID19BP("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti "
           + "con maturazione buono pasto", false,
-          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-          Sets.newHashSet(), null, new LocalDate(2022, 4, 15), true, false, true),
+          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+          MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), null, 
+          new LocalDate(2022, 4, 15), true, false, true),
 
   A_98CV("98CV",
       "Assente ingiustificato no greenpass", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, false, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
+      null, true, false, true),
 
   A_39LA("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), 
+      null, null, true, false, true),
 
   A_39LANOBP("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso "
           + "senza buono pasto", false,
-          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, false, 0, null,
-          Sets.newHashSet(), null, null, true, false, true),
+          ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+          MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
+          null, true, false, true),
 
   A_40LA("40LA",
       "Lavoro agile per quarantena/isolamento fiduciario", false,
-      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, true, 0, null,
-      Sets.newHashSet(), null, null, true, false, true),
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), null, 
+      null, true, false, true),
 
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, false, 0, null,
@@ -1804,7 +1814,7 @@ public enum DefaultAbsenceType {
 
   public boolean consideredWeekEnd;
 
-  public boolean timeForMealTicket;
+  public MealTicketBehaviour timeForMealTicket;
 
   public Integer replacingTime;
   public JustifiedTypeName replacingType; // nullable
@@ -1824,7 +1834,7 @@ public enum DefaultAbsenceType {
    */
   private DefaultAbsenceType(String certificationCode, String description, boolean internalUse,
       Set<JustifiedTypeName> justifiedTypeNamesPermitted, Integer justifiedTime,
-      boolean consideredWeekEnd, boolean timeForMealTicket, Integer replacingTime,
+      boolean consideredWeekEnd, MealTicketBehaviour timeForMealTicket, Integer replacingTime,
       JustifiedTypeName replacingType, Set<Behaviour> behaviour, LocalDate validFrom,
       LocalDate validTo, Boolean reperibilityCompatible, Boolean isRealAbsenceType,
       boolean toUpdate) {
