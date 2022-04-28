@@ -58,6 +58,7 @@ import models.absences.Absence;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.MealTicketBehaviour;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 import org.assertj.core.util.Strings;
@@ -423,7 +424,7 @@ public class PersonDayManager {
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
     if (assignAllDay.isPresent()) {
       personDay.setTimeAtWork(wttd.workingTime);
-      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.timeForMealTicket);
+      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.mealTicketBehaviour);
       return personDay;
     }
 
@@ -844,9 +845,9 @@ public class PersonDayManager {
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
    *
    * @param pd                personDay
-   * @param isTicketAvailable value.
+   * @param mealTicketBehaviour value.
    */
-  public void setTicketStatusIfNotForced(PersonDay pd, boolean isTicketAvailable) {
+  public void setTicketStatusIfNotForced(PersonDay pd, MealTicketBehaviour mealTicketBehaviour) {
 
     if (!pd.isTicketForcedByAdmin()) {
       pd.setTicketAvailable(isTicketAvailable);

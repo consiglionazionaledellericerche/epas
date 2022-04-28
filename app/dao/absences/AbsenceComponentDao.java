@@ -61,6 +61,7 @@ import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedBehaviour;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+import models.enumerate.MealTicketBehaviour;
 import models.query.QContract;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -411,7 +412,7 @@ public class AbsenceComponentDao extends DaoBase {
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes,
       Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime,
       boolean internalUse, boolean consideredWeekEnd,
-      boolean timeForMealticket, String certificateCode, LocalDate expire) {
+      MealTicketBehaviour mealTicketBehaviour, String certificateCode, LocalDate expire) {
 
     QAbsenceType absenceType = QAbsenceType.absenceType;
     AbsenceType obj = (AbsenceType) getQueryFactory()
@@ -433,7 +434,7 @@ public class AbsenceComponentDao extends DaoBase {
     obj.replacingType = complationType;
     obj.replacingTime = complationTime;
     obj.internalUse = internalUse;
-    obj.timeForMealTicket = timeForMealticket;
+    obj.mealTicketBehaviour = mealTicketBehaviour;
     obj.consideredWeekEnd = consideredWeekEnd;
     obj.certificateCode = code;
     if (expire != null) {
