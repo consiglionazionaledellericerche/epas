@@ -90,7 +90,7 @@ public class EnumAllineator {
               defaultAbsenceType.get().justifiedTypeNamesPermitted);
           absenceType.justifiedTime = defaultAbsenceType.get().justifiedTime;
           absenceType.consideredWeekEnd = defaultAbsenceType.get().consideredWeekEnd;
-          absenceType.timeForMealTicket = defaultAbsenceType.get().timeForMealTicket;
+          absenceType.mealTicketBehaviour = defaultAbsenceType.get().mealTicketBehaviour;
           absenceType.reperibilityCompatible = defaultAbsenceType.get().reperibilityCompatible;
           absenceType.replacingTime = defaultAbsenceType.get().replacingTime;
           if (defaultAbsenceType.get().replacingType != null) {
@@ -538,7 +538,7 @@ public class EnumAllineator {
     }
     absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
     absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
-    absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
+    absenceType.mealTicketBehaviour = defaultAbsenceType.mealTicketBehaviour;
     absenceType.reperibilityCompatible = defaultAbsenceType.reperibilityCompatible;
     absenceType.replacingTime = defaultAbsenceType.replacingTime;
     if (defaultAbsenceType.replacingType != null) {
