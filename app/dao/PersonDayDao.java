@@ -285,7 +285,7 @@ public class PersonDayDao extends DaoBase {
   
   /**
    * Ritorna il personday più futuro della persona.
-   * 
+   *
    * @param person la persona di cui si ricerca l'ultimo personday
    * @return l'ultimo personday della persona sul db.
    */

@@ -64,6 +64,7 @@ import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
+import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -451,7 +452,8 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
+          MealTicketBehaviour.notAllowMealTicket);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;
@@ -466,7 +468,8 @@ public class ConsistencyManager {
       pd.getValue().timeAtWork = 0;
       pd.getValue().progressive = 0;
       pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
+          MealTicketBehaviour.notAllowMealTicket);
       pd.getValue().stampModificationType = null;
       pd.getValue().save();
       return;

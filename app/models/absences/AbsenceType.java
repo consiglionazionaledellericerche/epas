@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -44,6 +46,7 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultAbsenceType.Behaviour;
 import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
+import models.enumerate.MealTicketBehaviour;
 import models.enumerate.QualificationMapping;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -86,9 +89,14 @@ public class AbsenceType extends BaseModel {
   @Column(name = "considered_week_end")
   public boolean consideredWeekEnd = false;
   
+//  @Getter
+//  @Column(name = "time_for_mealticket")
+//  public boolean timeForMealTicket = false;
+  
   @Getter
-  @Column(name = "time_for_mealticket")
-  public boolean timeForMealTicket = false;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "meal_ticket_behaviour")
+  public MealTicketBehaviour mealTicketBehaviour;
   
   @Getter
   @Column(name = "justified_time")
@@ -411,7 +419,7 @@ public class AbsenceType extends BaseModel {
             && defaultType.internalUse == this.internalUse
             && defaultType.justifiedTime.equals(this.justifiedTime)
             && defaultType.consideredWeekEnd == this.consideredWeekEnd
-            && defaultType.timeForMealTicket == this.timeForMealTicket
+            && defaultType.mealTicketBehaviour == this.mealTicketBehaviour
             && defaultType.replacingTime.equals(this.replacingTime)
             ) {
           //Tipi permessi

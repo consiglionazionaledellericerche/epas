@@ -26,6 +26,12 @@ import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
 
+/**
+ * Classe di richieste informative per malattia.
+ *
+ * @author dario
+ *
+ */
 @Audited
 @Entity
 @Table(name = "illness_requests")

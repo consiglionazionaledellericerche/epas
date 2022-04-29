@@ -372,7 +372,8 @@ public class AbsenceRequestDao extends DaoBase {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     final QPerson person = QPerson.person;
     final QOffice office = QOffice.office;
-    List<Office> officeList = uros.stream().filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
+    List<Office> officeList = uros.stream()
+        .filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
         .map(u -> u.office).distinct()
         .collect(Collectors.toList());
     BooleanBuilder conditions = new BooleanBuilder();

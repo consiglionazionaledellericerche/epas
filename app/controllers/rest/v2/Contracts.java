@@ -24,6 +24,7 @@ import cnr.sync.dto.v2.ContractUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
@@ -83,9 +84,14 @@ public class Contracts extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
-    List<ContractShowTerseDto> contracts = 
+    List<ContractShowTerseDto> contracts = Lists.newArrayList();
+    try {
+      contracts = 
         person.contracts.stream().map(c -> ContractShowTerseDto.build(c))
         .collect(Collectors.toList());
+    } catch (IllegalStateException e) {
+      JsonResponse.internalError(e.getMessage());
+    }
     renderJSON(gsonBuilder.create().toJson(contracts));
   }
 

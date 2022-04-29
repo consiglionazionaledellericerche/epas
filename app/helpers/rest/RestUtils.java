@@ -52,6 +52,7 @@ public class RestUtils {
           String.format("This method supports only the %s method", httpMethod));
     }
   }
+  
   /**
    * Verifica che l'oggetto passato sia presente (non Null) ed restituisce
    * un not found (404) se non presente.

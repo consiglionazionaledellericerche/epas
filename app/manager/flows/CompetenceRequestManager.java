@@ -294,7 +294,8 @@ public class CompetenceRequestManager {
         competenceRequest.flowStarted = true;
         //invio la notifica al primo che deve validare la mia richiesta 
         notificationManager
-          .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
+            .notificationCompetenceRequestPolicy(competenceRequest.person.user, 
+              competenceRequest, true);
         // invio anche la mail
         notificationManager
           .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
@@ -520,7 +521,8 @@ public class CompetenceRequestManager {
       reperibilityManagerApproval(competenceRequest.id, user);
       approved = true;
     }
-    if (competenceRequest.reperibilityManagerApprovalRequired && !competenceRequest.isManagerApproved()) {
+    if (competenceRequest.reperibilityManagerApprovalRequired 
+        && !competenceRequest.isManagerApproved()) {
       log.debug("Necessaria l'approvazione da parte del manager della reperibilità per {}",
           competenceRequest);
       notificationManager.sendEmailCompetenceRequestPolicy(user, competenceRequest, true);

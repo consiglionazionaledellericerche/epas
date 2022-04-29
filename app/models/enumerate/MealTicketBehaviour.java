@@ -15,36 +15,29 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package models.informationrequests;
-
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import models.base.InformationRequest;
-import org.hibernate.envers.Audited;
-import play.data.validation.Required;
+package models.enumerate;
 
 /**
- * classe relativa alla richiesta di telelavoro.
- *
+ * enumerato contenente le tipologie di comportamento dei codici d'assenza 
+ * per la maturazione del buono pasto.
+ * 
  * @author dario
  *
  */
-@Audited
-@Entity
-@Table(name = "telework_requests")
-@PrimaryKeyJoinColumn(name = "informationRequestId")
-public class TeleworkRequest extends InformationRequest {
+public enum MealTicketBehaviour {
+  
+  preventMealTicket("Impedisce buono pasto"),
+  allowMealTicket("Consente maturazione"),
+  notAllowMealTicket("Non consente maturazione");
+  
+  public String description;
+  
+  MealTicketBehaviour(String description) {
+    this.description = description;
+  }
+  
+  public String getDescription() {
+    return description;
+  }
 
-  private static final long serialVersionUID = -2647537080585976423L;
-
-  @Required
-  @NotNull
-  public int month;
-  @Required
-  @NotNull
-  public int year;
-
-  public String context;
 }

@@ -17,12 +17,12 @@
 
 package dao;
 
-import static com.querydsl.core.group.GroupBy.groupBy;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import static com.querydsl.core.group.GroupBy.groupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
@@ -35,6 +35,8 @@ import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import org.joda.time.LocalDate;
+
+
 
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.
@@ -59,7 +61,8 @@ public class AbsenceTypeDao extends DaoBase {
     BooleanBuilder condition = new BooleanBuilder();
     JPQLQuery<AbsenceType> query = getQueryFactory().selectFrom(absenceType);
     if (validFrom.isPresent()) {
-      condition.and(absenceType.validFrom.before(validFrom.get()).or(absenceType.validFrom.isNull()));
+      condition.and(absenceType.validFrom.before(validFrom.get())
+          .or(absenceType.validFrom.isNull()));
     }
     if (validTo.isPresent()) {
       condition.and(absenceType.validTo.after(validTo.get()).or(absenceType.validTo.isNull()));

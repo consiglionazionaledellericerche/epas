@@ -143,6 +143,12 @@ public class DayInPeriod {
   }
 
 
+  /**
+   * Classe per la riga da ritornare in fase di inserimento assenza nell'interfaccia.
+   *
+   * @author Alessandro
+   *
+   */
   public static class TemplateRow {
 
     public LocalDate date;

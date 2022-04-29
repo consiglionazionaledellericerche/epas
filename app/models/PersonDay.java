@@ -35,6 +35,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import models.absences.Absence;
 import models.base.BaseModel;
+import models.enumerate.MealTicketBehaviour;
 import models.enumerate.Troubles;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
@@ -248,6 +249,27 @@ public class PersonDay extends BaseModel {
   @Transient
   public int getAssignableTime() {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
+  }
+  
+  /**
+   * 
+   * @param mealTicketBehaviour
+   */
+  @Transient
+  public void setTicketAvailable(MealTicketBehaviour mealTicketBehaviour) {
+    switch (mealTicketBehaviour) {
+      case allowMealTicket:
+        this.isTicketAvailable = true;
+        break;
+      case notAllowMealTicket:
+        this.isTicketAvailable = false;
+        break;
+      case preventMealTicket:
+        this.isTicketAvailable = false;
+        break;
+        default:
+          break;        
+    }
   }
 
 

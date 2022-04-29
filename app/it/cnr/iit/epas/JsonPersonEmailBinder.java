@@ -37,6 +37,7 @@ import play.data.binding.TypeBinder;
 
 /**
  * binder per il recupero della person a partire dalla email.
+ *
  * @author dario
  *
  */

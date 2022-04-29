@@ -6,6 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+/**
+ * classe di autorizzazione oauth2.
+ *
+ * @author cristian
+ *
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class Oauth2Authorization implements RequestInterceptor {

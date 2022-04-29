@@ -26,7 +26,12 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-
+/**
+ * deserializzatore del localdate.
+ *
+ * @author dario
+ *
+ */
 public class LocalDateDeserializer implements JsonDeserializer<LocalDate> {
 
   static final DateTimeFormatter dtf = DateTimeFormat.forPattern("YYYY-MM-dd");

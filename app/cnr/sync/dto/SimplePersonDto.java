@@ -34,6 +34,7 @@ public class SimplePersonDto {
 
   /**
    * Applica la conversione da dto a oggetto.
+   *
    * @author dario
    *
    */

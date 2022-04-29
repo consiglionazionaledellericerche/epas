@@ -17,8 +17,8 @@
 
 package manager.telework.service;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.util.List;
@@ -147,8 +147,8 @@ public class TeleworkComunication {
       log.error("Utente non autorizzato: {}", wsRequest.username);
     }
 
-    if (httpResponse.getJson().isJsonArray() &&
-        httpResponse.getJson().getAsJsonArray().size() == 0) {
+    if (httpResponse.getJson().isJsonArray() 
+        && httpResponse.getJson().getAsJsonArray().size() == 0) {
       log.trace("httpResponse.json = {}", httpResponse.getJson());
     } else {
       log.debug("httpResponse.json = {}", httpResponse.getJson());

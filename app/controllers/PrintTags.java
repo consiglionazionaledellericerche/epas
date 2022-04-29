@@ -47,6 +47,12 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione della stampa dei cartellini.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class PrintTags extends Controller {
@@ -167,6 +173,7 @@ public class PrintTags extends Controller {
   /**
    * Genera la pagina di timbrature autocertificate per lavoro fuori sede
    * nell'anno/mese passati come parametro.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */

@@ -19,9 +19,9 @@ package it.cnr.iit.epas;
 
 import com.google.gson.GsonBuilder;
 import common.injection.StaticInject;
+import helpers.deserializers.AbsenceFromClientDeserializer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import helpers.deserializers.AbsenceFromClientDeserializer;
 import models.exports.AbsenceFromClient;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;

@@ -21,6 +21,12 @@ import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
 
+/**
+ * Job per la gestione dei blocchetti e dei buoni pasto.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 //@On("0 0 6 * * ?") //tutte le mattine alle 6.00
 //@OnApplicationStart

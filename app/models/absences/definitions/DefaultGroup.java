@@ -77,8 +77,8 @@ public enum DefaultGroup {
       PeriodType.always, DefaultTakable.T_26, null, null, false, false),
 
   G_C161718("C16/C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C161718, null, null,
-      false, false),
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_C161718, null, null, false, false),
 
   G_661("661 - Permesso orario per motivi personali 18 ore anno", "",
       DefaultCategoryType.PERMESSI_PERSONALI, 0, GroupAbsenceTypePattern.programmed,
@@ -167,6 +167,9 @@ public enum DefaultGroup {
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
 
+  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -325,8 +328,8 @@ public enum DefaultGroup {
   
   TELELAVORO_RICERCATORI_TECNOLOGI("Telelavoro Ricercatori Tecnologi", "", 
       DefaultCategoryType.TELELAVORO_RICERCATORI_TECNOLOGI, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_TELELAVORO_RT, null,
-      null, false, false),
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_TELELAVORO_RT, null, null, false, false),
 
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_PUBBLICA_FUNZIONE,
@@ -466,9 +469,9 @@ public enum DefaultGroup {
     return getCodes(DefaultGroup.TELELAVORO);
   }
   
-//  public static List<String> employeeTeleworkWithResidualCodes() {
-//    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
-//  }
+  //  public static List<String> employeeTeleworkWithResidualCodes() {
+  //    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
+  //  }
 
   public static List<String> employeeDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);

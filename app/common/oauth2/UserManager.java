@@ -12,10 +12,16 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import lombok.NonNull;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.User;
 
+/**
+ * Classe UserManager.
+ *
+ * @author Cristian
+ *
+ */
 @Singleton
 @Slf4j
 public class UserManager {
@@ -31,8 +37,9 @@ public class UserManager {
   }
 
   /**
+   * Ritorna l'utente se esiste.
    *
-   * @param person l'utente da cercare (via keycloak id)
+   * @param user l'utente da cercare (via keycloak id)
    * @return l'id dello user se c'è
    */
   public Optional<UserRepresentation> find(User user) {
@@ -44,6 +51,12 @@ public class UserManager {
         .stream().findFirst().orElseThrow();
   }
 
+  /**
+   * Aggiorna la password dell'utente.
+   *
+   * @param user l'utente di cui aggiornare la password
+   * @param password la password da aggiornare
+   */
   public void updatePassword(User user, String password) {
     log.info("update keycloak credentials with legacy password for {}", user);
     val data = new CredentialRepresentation();
@@ -59,7 +72,9 @@ public class UserManager {
   }
 
   /**
-   * @param date
+   * Ritorna la localdatetime convertita.
+   *
+   * @param date l'instant da convertire
    * @return la localdatetime convertita
    */
   public static LocalDateTime toLocalDateTime(Instant date) {

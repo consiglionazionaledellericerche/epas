@@ -22,7 +22,7 @@ import org.joda.time.LocalDateTime;
 
 /**
  * DTO con le informazioni di token OAuth.
- * 
+ *
  * @author Dario Tagliaferri
  */
 public class OauthToken implements Serializable {

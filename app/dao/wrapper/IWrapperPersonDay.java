@@ -50,7 +50,7 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
   
   /**
    * L'orario giornaliero personalizzato se esiste.
-   * 
+   *
    * @return Optional.absent() in caso di mancanza di contratto o di tipo orario personale.
    */
   Optional<PersonalWorkingTime> getPersonalWorkingTime();

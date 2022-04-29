@@ -63,6 +63,12 @@ public class InjectionPlugin extends PlayPlugin implements BeanSource {
     play.inject.Injector.inject(this);
   }
 
+  /**
+   * Classe staticInject estende abstractModule.
+   *
+   * @author Marco
+   *
+   */
   @AutoRegister
   public static class StaticInjectModule extends AbstractModule {
 

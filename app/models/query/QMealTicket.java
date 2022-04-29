@@ -53,8 +53,6 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final NumberPath<Integer> quarter = createNumber("quarter", Integer.class);
-
     public final BooleanPath returned = createBoolean("returned");
 
     //inherited

@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.services.absences.AbsenceForm;
@@ -69,6 +69,7 @@ public class TeleworkStampingManager {
 
   /**
    * Injector.
+   *
    * @param comunication il service per la comunicazione con la piattaforma telework-stampings
    * @param absenceDao il dao delle assenze
    * @param absenceManager il manager delle assenze
@@ -258,6 +259,7 @@ public class TeleworkStampingManager {
   
   /**
    * Ritorna la lista degli oggetti contenenti le info sulle giornate di telelavoro.
+   *
    * @param psDto il recap delle timbrature
    * @return la lista di oggetti NewTeleworkDto contenenti le info per il telelavoro.
    * @throws NoSuchFieldException eccezione di oggetto non trovato
@@ -373,7 +375,7 @@ public class TeleworkStampingManager {
   /**
    * Metodo che consente l'inserimento del codice 103RT per i ricercatori e tecnologi che
    * inseriscono timbrature in telelavoro che concorrono alla formazione di residuo sul cartellino.
-   * 
+   *
    * @param person la persona per cui inserire l'assenza
    * @param date la data in cui inserire l'assenza
    */
@@ -402,10 +404,12 @@ public class TeleworkStampingManager {
         personDay.save();
       }
     }
+    
   }
   
   /**
    * Cancella l'assenza 103RT dal cartellino del dipendente.
+   *
    * @param pd il personDay relativo al giorno in cui rimuovere l'assenza
    */
   public void deleteTeleworkAbsenceCode(PersonDay pd) {

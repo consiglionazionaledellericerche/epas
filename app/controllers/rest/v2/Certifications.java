@@ -178,7 +178,7 @@ public class Certifications extends Controller {
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
       JsonResponse.notFound(
-        String.format("Ufficio con sedeId = %s non trovato", sedeId));
+          String.format("Ufficio con sedeId = %s non trovato", sedeId));
     }
     rules.checkIfPermitted(office.get()); 
     Set<Office> offices = Sets.newHashSet();
@@ -329,11 +329,11 @@ public class Certifications extends Controller {
           timeToJustify = workingTimeTypeDay.get().workingTime;
         }
         if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-            timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+          timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
         }
       } else {
-        log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è presente l'assenza {}", 
-            abs.personDay.date, abs, person.getFullname());
+        log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è "
+            + "presente l'assenza {}", abs.personDay.date, abs, person.getFullname());
       }
 
       if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {

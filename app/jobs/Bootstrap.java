@@ -101,6 +101,12 @@ public class Bootstrap extends Job<Void> {
 
   }
 
+  /**
+   * Classe di utilità.
+   *
+   * @author dario
+   *
+   */
   public static class DatasetImport implements Work {
 
     private final URL url;

@@ -407,12 +407,13 @@ public class AbsenceRequests extends Controller {
     boolean insideContracts = 
         !absenceRequest.person.getContracts().stream()
           .filter(c -> 
-            c.getRange().contains(absenceRequest.startAtAsDate()) && 
-            c.getRange().contains(absenceRequest.endToAsDate()))
+            c.getRange().contains(absenceRequest.startAtAsDate()) 
+            && c.getRange().contains(absenceRequest.endToAsDate()))
           .collect(Collectors.toList()).isEmpty();
 
     if (!insideContracts) {
-      val message = "Non è possibile fare una richiesta in una data non coperta da nessun contratto del dipendente";
+      val message = "Non è possibile fare una richiesta in una data non "
+          + "coperta da nessun contratto del dipendente";
       Validation.addError("absenceRequest.startAt", message);
       Validation.addError("absenceRequest.endTo", message);
       response.status = 400;

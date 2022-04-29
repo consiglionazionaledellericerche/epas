@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.User;
 import play.Play;
 import play.libs.OAuth2;
@@ -74,7 +74,8 @@ public class Resecure extends Controller {
   @Inject
   static PersonDao personDao;
 
-  @Before(priority = 1, unless = {"login", "authenticate", "logout", "oauthLogin", "oauthLogout", "oauthCallback"})
+  @Before(priority = 1, unless = {"login", "authenticate", "logout", "oauthLogin", 
+      "oauthLogout", "oauthCallback"})
   static void checkAccess() throws Throwable {
     //Se è annotato con NoCheck non si fanno controlli
     if (getActionAnnotation(NoCheck.class) != null
@@ -141,16 +142,14 @@ public class Resecure extends Controller {
     //Empty
   }
 
-  /**
-   * This method returns the current connected username
-   * @return
-   */
+
   static String connected() {
     return session.get(USERNAME);
   }
 
   /**
-   * Indicate if a user is currently connected
+   * Indicate if a user is currently connected.
+   *
    * @return  true if the user is connected
    */
   static boolean isConnected() {
@@ -161,13 +160,17 @@ public class Resecure extends Controller {
   @Util
   static void redirectToOriginalURL() {
     String url = flash.get(URL);
-    if(url == null) {
+    if (url == null) {
       url = Play.ctxPath + "/";
     }
     redirect(url);
   }
 
-  //Utilizzata come callback dell'eventuale autenticazione OAuth
+  /**
+   * Utilizzata come callback dell'eventuale autenticazione OAuth.
+   *
+   * @throws Throwable eccezione.
+   */
   public static void logout() throws Throwable {
     session.clear();
     flash.success("secure.logout");
@@ -175,6 +178,12 @@ public class Resecure extends Controller {
   }
 
 
+  
+  /**
+   * Logout oauth.
+   *
+   * @param data map with logout info 
+   */
   @Util
   public static void oauthLogout(Map<String, String> data) {
     val idToken = data.get(ID_TOKEN);
@@ -224,10 +233,18 @@ public class Resecure extends Controller {
     }
   }
 
+  /**
+   * Callback function on oauth connection.
+   *
+   * @param code the code 
+   * @param state the state
+   * @throws Throwable exception
+   */
   @NoCheck
   public static void oauthCallback(String code, String state) throws Throwable {
     log.debug("Callback received code = {}, state = {}", code, state);
-    OAuth2.Response oauthResponse = openIdConnectClient.retrieveAccessToken(code, state, session.get(STATE));
+    OAuth2.Response oauthResponse = openIdConnectClient
+        .retrieveAccessToken(code, state, session.get(STATE));
     if (oauthResponse == null) {
       error("Could not retrieve jwt");
     } else {
@@ -250,8 +267,10 @@ public class Resecure extends Controller {
   }
   
   /**
+   * Verifica se l'autenticazione oauth è abilitata.
+   *
    * @return true se l'autenticazione oauth è abilitata in configurazione,
-   *   false altrimenti.
+   *     false altrimenti.
    */
   public static boolean oauthLoginEnabled() {
     return "true".equalsIgnoreCase(

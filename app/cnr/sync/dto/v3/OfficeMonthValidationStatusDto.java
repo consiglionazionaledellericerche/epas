@@ -35,6 +35,8 @@ public class OfficeMonthValidationStatusDto {
   private List<PersonShowTerseDto> notValidatedPersons = Lists.newArrayList();
 
   /**
+   * Controlla se tutti gli attestati sono stati validati.
+   *
    * @return true se tutti gli attestati sono stati validati, false altrimenti.
    */
   public boolean isAllCertificationsValidated() {

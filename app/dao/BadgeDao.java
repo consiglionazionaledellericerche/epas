@@ -84,6 +84,12 @@ public class BadgeDao extends DaoBase {
         .fetch();
   }
 
+  /**
+   * La lista dei badge per ufficio.
+   *
+   * @param office la sede per cui ricercare i badge
+   * @return la lista dei badge appartenenti alla sede.
+   */
   public List<Badge> byOffice(Office office) {
     final QBadge badge = QBadge.badge;
     
@@ -92,6 +98,12 @@ public class BadgeDao extends DaoBase {
         .fetch();
   }
 
+  /**
+   * La lista dei badge per gruppo badge.
+   *
+   * @param badgeSystem il gruppo badge di cui ritornare i badge associati
+   * @return la lista di badge associata al gruppo badge.
+   */
   public List<Badge> byBadgeSystem(BadgeSystem badgeSystem) {
     final QBadge badge = QBadge.badge;
     

@@ -274,7 +274,8 @@ public class PersonMonthlySituationData {
             month, year, person.getFullname(), person.id);
       } else {
         MealTicketRecap recap = mealTicketService.create(contract).orNull();
-        MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
+        MealTicketComposition composition = mealTicketService
+            .whichBlock(recap, monthRecap, contract);
         buoniCartacei = buoniCartacei + composition.paperyMealTicket;
         buoniElettronici = buoniElettronici + composition.electronicMealTicket;
       }

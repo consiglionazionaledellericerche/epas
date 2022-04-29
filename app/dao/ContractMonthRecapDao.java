@@ -81,6 +81,7 @@ public class ContractMonthRecapDao extends DaoBase {
   
   /**
    * Ritorna il riepilogo del contratto contract nell'anno/mese yearMonth.
+   *
    * @param contract il contratto da riepilogare
    * @param yearMonth l'anno mese di riferimento
    * @return Il riepilogo del contratto nell'anno mese
