@@ -58,6 +58,7 @@ import models.absences.Absence;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
+import models.enumerate.MealTicketBehaviour;
 import models.enumerate.StampTypes;
 import models.enumerate.Troubles;
 import org.assertj.core.util.Strings;
@@ -105,6 +106,18 @@ public class PersonDayManager {
     this.zoneDao = zoneDao;
     this.absenceComponentDao = absenceComponentDao;
     this.contractDao = contractDao;
+  }
+  
+  /**
+   * Assenza che impedisce la maturazione del buono pasto.
+   */
+  public Optional<Absence> getPreventMealTicket(PersonDay personDay) {
+    for (Absence absence : personDay.absences) {
+      if (absence.absenceType.mealTicketBehaviour.equals(MealTicketBehaviour.preventMealTicket)) { 
+        return Optional.of(absence);
+      }
+    }
+    return Optional.absent();
   }
 
   /**
@@ -386,7 +399,7 @@ public class PersonDayManager {
     }
 
     // Pulizia stato personDay.
-    setTicketStatusIfNotForced(personDay, false);
+    setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
     personDay.setStampModificationType(null);     //Target personDay: p(-30), e(<30), f(now), d(fix)
     personDay.setOnHoliday(0);
     personDay.setOutOpening(0);
@@ -423,7 +436,7 @@ public class PersonDayManager {
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
     if (assignAllDay.isPresent()) {
       personDay.setTimeAtWork(wttd.workingTime);
-      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.timeForMealTicket);
+      setTicketStatusIfNotForced(personDay, assignAllDay.get().absenceType.mealTicketBehaviour);
       return personDay;
     }
 
@@ -431,9 +444,15 @@ public class PersonDayManager {
     if (getAllDay(personDay).isPresent()) {
       personDay.setTimeAtWork(0);
       setTicketStatusIfNotForced(personDay, getAllDay(personDay).get()
-          .absenceType.timeForMealTicket);
+          .absenceType.mealTicketBehaviour);
       return personDay;
     }
+    
+    if (getPreventMealTicket(personDay).isPresent()) {
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.preventMealTicket);
+      return personDay;
+    }
+    
 
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
@@ -455,7 +474,7 @@ public class PersonDayManager {
       } 
 
       //Assegnamento se contribuisce al buono pasto
-      if (abs.absenceType.timeForMealTicket) {
+      if (abs.absenceType.mealTicketBehaviour.equals(MealTicketBehaviour.allowMealTicket)) {
         personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
         continue;
       }
@@ -495,8 +514,7 @@ public class PersonDayManager {
     // o se il dipendente e' in missione oraria nella giornata da valutare
     if (isOnHourlyMission(personDay) || personDay.getJustifiedTimeMeal() <= 0) {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
-    }
-    else {
+    } else {
       personDay.setDecurtedMeal(0);
     }
 
@@ -519,9 +537,9 @@ public class PersonDayManager {
           personDay.setTimeAtWork(personDay.getTimeAtWork() + missingTime);
         }
         if (!personDay.isTicketAvailable && getCompleteDayAndAddOvertime(personDay)
-            .get().getAbsenceType().timeForMealTicket) {
-          personDay.isTicketAvailable = getCompleteDayAndAddOvertime(personDay)
-              .get().getAbsenceType().timeForMealTicket;
+            .get().getAbsenceType().mealTicketBehaviour
+            .equals(MealTicketBehaviour.allowMealTicket)) {
+          personDay.isTicketAvailable = true;
         } 
       }
 
@@ -554,13 +572,13 @@ public class PersonDayManager {
 
     // Giorno festivo: default false
     if (personDay.isHoliday()) {
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       return personDay;
     }
 
     // Il tipo orario non prevede il buono: default false
     if (!wttd.mealTicketEnabled()) {
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       return personDay;
     }
 
@@ -604,19 +622,19 @@ public class PersonDayManager {
 
     // Non ho eseguito il tempo minimo per buono pasto.
     if (mealTicketsMinutes - toCut < mealTicketTime) {
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       return personDay;
     }
 
     // Controllo pausa pomeridiana (solo se la soglia è definita)
     if (!isAfternoonThresholdConditionSatisfied(
         computeValidPairStampings(personDay.stampings), wttd)) {
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       return personDay;
     }
 
     // Il buono pasto è stato maturato
-    setTicketStatusIfNotForced(personDay, true);
+    setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
 
     // Assegnamento tempo decurtato per pausa troppo breve.
     if (toCut > 0) {
@@ -635,19 +653,22 @@ public class PersonDayManager {
     //In caso di giorno festivo niente tempo a lavoro ne festivo.
     if (personDay.isHoliday()) {
       personDay.setTimeAtWork(0);
-      setTicketStatusIfNotForced(personDay, false);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       return personDay;
     }
 
     if (getAllDay(personDay).isPresent() 
-        && !getAllDay(personDay).get().absenceType.timeForMealTicket
+        && getAllDay(personDay).get().absenceType.mealTicketBehaviour
+        .equals(MealTicketBehaviour.notAllowMealTicket)
         || (getAssignAllDay(personDay).isPresent() 
-            && !getAssignAllDay(personDay).get().absenceType.timeForMealTicket)
+            && getAssignAllDay(personDay).get().absenceType.mealTicketBehaviour
+            .equals(MealTicketBehaviour.notAllowMealTicket))
         || (getCompleteDayAndAddOvertime(personDay).isPresent() 
-            && !getCompleteDayAndAddOvertime(personDay).get().absenceType.timeForMealTicket)) {
-      setTicketStatusIfNotForced(personDay, false);
+            && getCompleteDayAndAddOvertime(personDay).get().absenceType.mealTicketBehaviour
+            .equals(MealTicketBehaviour.notAllowMealTicket))) {
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
     } else {
-      setTicketStatusIfNotForced(personDay, true);
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
     }
 
     if (getAllDay(personDay).isPresent()
@@ -844,12 +865,12 @@ public class PersonDayManager {
    * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false.
    *
    * @param pd                personDay
-   * @param isTicketAvailable value.
+   * @param mealTicketBehaviour value.
    */
-  public void setTicketStatusIfNotForced(PersonDay pd, boolean isTicketAvailable) {
+  public void setTicketStatusIfNotForced(PersonDay pd, MealTicketBehaviour mealTicketBehaviour) {
 
     if (!pd.isTicketForcedByAdmin()) {
-      pd.setTicketAvailable(isTicketAvailable);
+      pd.setTicketAvailable(mealTicketBehaviour);
     }
   }
 
@@ -1252,7 +1273,7 @@ public class PersonDayManager {
     }
     return totalDays;
   }
-  
+
   /**
    * Metodo che controlla i giorni lavorabili in un mese per la persona passata come parametro.
 

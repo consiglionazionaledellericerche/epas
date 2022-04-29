@@ -369,6 +369,7 @@ public class TeleworkStampings extends Controller {
           flash.error(ordinaryStampingResult);
         } else {
           flash.success(Web.msgSaved(Stampings.class));
+          consistencyManager.updatePersonSituation(person.id, date);
         }
       }
 
