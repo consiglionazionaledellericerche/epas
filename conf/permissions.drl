@@ -133,6 +133,20 @@ then
   $c.grant();
 end
 
+/* L'amministratore del personale può vederi i flussi informativi di tutte le sedi dove è abilitato il flusso 
+ * e lui è amministratore.
+ */
+rule isInformationFlowsVisibleForPersonnelAdmin
+when
+ $uro: UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
+ $o: Office() from $uro.office
+ Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
+then
+ $c.grant();
+end
+
+
 /*
  * Permesso per la visualizzazione dei flussi di richiesta competenze
  */

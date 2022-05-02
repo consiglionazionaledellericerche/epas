@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - UNRELEASED
+
+### Added
+ - Aggiunta possibilità di vedere il menu con i flussi informativi al personale che è 
+   amministratori deel personale o responsabile di sede, anche sulle sedi diversa dalla propria
+   di assegnazione
+
 ## [2.5.1] - 2022-04-29
 ### Added
  - Aggiunto controllo su API rest contracts/byPerson per fornire un messaggio di errore
