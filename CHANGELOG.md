@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di vedere il menu con i flussi informativi al personale che è 
    amministratori deel personale o responsabile di sede, anche sulle sedi diversa dalla propria
    di assegnazione
+ - Aggiunto il campo markedByTelework nella response delle api REST rest/v3/stampings/create e 
+   /rest/v3/stampings/show
 
 ## [2.5.1] - 2022-04-29
 ### Added
