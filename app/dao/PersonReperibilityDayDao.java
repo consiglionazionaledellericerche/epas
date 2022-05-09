@@ -55,9 +55,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    * Metodo che ritorna, se esiste, il personreperibilityday che risponde ai parametri passati.
    *
    * @param person la persona
-   * @param date la data
+   * @param date   la data
    * @return un personReperibilityDay nel caso in cui la persona person in data date fosse
-   *     reperibile. Null altrimenti.
+   * reperibile. Null altrimenti.
    */
   public Optional<PersonReperibilityDay> getPersonReperibilityDay(Person person, LocalDate date) {
     QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
@@ -69,6 +69,24 @@ public class PersonReperibilityDayDao extends DaoBase {
 
   }
 
+  /**
+   * Metodo che ritorna, una lista di personreperibilityday che rispondono ai parametri passati.
+   *
+   * @param person la persona
+   * @param date   la data
+   * @return una lista di personReperibilityDay nel caso in cui la persona person in data date fosse
+   * reperibile. Null altrimenti.
+   */
+  public List<PersonReperibilityDay> getPersonReperibilityDayByPerson(Person person,
+      LocalDate date) {
+    QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
+    return getQueryFactory().selectFrom(prd)
+        .where(prd.personReperibility.person.eq(person)
+            .and(prd.personReperibility.startDate.loe(date)
+                .andAnyOf(prd.personReperibility.endDate.isNull(),
+                    prd.personReperibility.endDate.goe(date))))
+        .fetch();
+  }
 
   /**
    * Metodo che ritorna il giorno di reperibilità associato al tipo e alla data passati.
@@ -89,9 +107,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    * La lista di giorni di reperibilità per la persona nell'intervallo begin-to.
    *
    * @param begin la data di inizio
-   * @param to la data di fine
-   * @param type il tipo di reperibilità
-   * @param pr (opzionale) la reperibilità
+   * @param to    la data di fine
+   * @param type  il tipo di reperibilità
+   * @param pr    (opzionale) la reperibilità
    * @return la lista dei personReperibilityDay nel periodo compreso tra begin e to e con tipo type.
    */
   public List<PersonReperibilityDay> getPersonReperibilityDayFromPeriodAndType(
@@ -102,7 +120,7 @@ public class PersonReperibilityDayDao extends DaoBase {
       condition.and(prd.personReperibility.eq(pr.get()));
     }
     return getQueryFactory().selectFrom(prd).where(condition.and(prd.date.between(begin, to)
-        .and(prd.reperibilityType.eq(type)))).orderBy(prd.date.asc())
+            .and(prd.reperibilityType.eq(type)))).orderBy(prd.date.asc())
         .fetch();
   }
 
@@ -111,9 +129,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    * Cancella i giorni di reperibilità sulla reperibilità nel giorno.
    *
    * @param type tipo di reperibilità
-   * @param day il giorno da considerare
+   * @param day  il giorno da considerare
    * @return il numero di personReperibilityDay cancellati che hanno come parametri il tipo type e
-   *     il giorno day.
+   * il giorno day.
    */
   public long deletePersonReperibilityDay(PersonReperibilityType type, LocalDate day) {
     QPersonReperibilityDay prd = QPersonReperibilityDay.personReperibilityDay;
@@ -125,12 +143,12 @@ public class PersonReperibilityDayDao extends DaoBase {
   /**
    * La lista dei giorni di reperibilità della persona nell'attività type tra begin e to.
    *
-   * @param begin la data di inizio
-   * @param to la data di fine
-   * @param type il tipo di reperibilità
+   * @param begin  la data di inizio
+   * @param to     la data di fine
+   * @param type   il tipo di reperibilità
    * @param person la persona
    * @return la lista dei 'personReperibilityDay' della persona 'person' di tipo 'type' presenti nel
-   *     periodo tra 'begin' e 'to'.
+   * periodo tra 'begin' e 'to'.
    */
   public List<PersonReperibilityDay> getPersonReperibilityDaysByPeriodAndType(
       LocalDate begin, LocalDate to, PersonReperibilityType type, Person person) {
@@ -186,8 +204,8 @@ public class PersonReperibilityDayDao extends DaoBase {
   /**
    * La lista dei servizi di reperibilità della sede.
    *
-   * @param office l'ufficio per cui ritornare la lista dei servizi per cui si richiede la
-   *     reperibilità.
+   * @param office   l'ufficio per cui ritornare la lista dei servizi per cui si richiede la
+   *                 reperibilità.
    * @param isActive se è attiva
    * @return la lista dei servizi per cui si vuole la reperibilità
    */
@@ -205,9 +223,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    * Il tipo di reperibilità, se esiste, appartenente alla sede con la descrizione passata.
    *
    * @param description il nome del servizio
-   * @param office la sede su cui cercare
+   * @param office      la sede su cui cercare
    * @return il tipo di reperibilità, se esiste, con descrizione uguale a quella passata come
-   *     parametro.
+   * parametro.
    */
   public Optional<PersonReperibilityType> getReperibilityTypeByDescription(String description,
       Office office) {
@@ -225,9 +243,9 @@ public class PersonReperibilityDayDao extends DaoBase {
    * L'associazione persona/reperibilità relativa ai parametri passati.
    *
    * @param person la persona da cercare
-   * @param type il tipo di reperibilità
+   * @param type   il tipo di reperibilità
    * @return il PersonReperibility relativo alla persona person e al tipo type passati come
-   *     parametro.
+   * parametro.
    */
   public PersonReperibility getPersonReperibilityByPersonAndType(
       Person person, PersonReperibilityType type) {
@@ -242,7 +260,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    *
    * @param type il tipo di reperibilità
    * @return la lista dei personReperibility che hanno come personReperibilityType il tipo passato
-   *     come parametro.
+   * come parametro.
    */
   public List<PersonReperibility> getPersonReperibilityByType(PersonReperibilityType type) {
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
@@ -268,7 +286,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    *
    * @param type il tipo di reperibilità
    * @param from la data da cui cercare
-   * @param to la data entro cui cercare
+   * @param to   la data entro cui cercare
    * @return la lista di personReperibility associati ai parametri passati.
    */
   public List<PersonReperibility> byTypeAndPeriod(PersonReperibilityType type,
@@ -283,7 +301,7 @@ public class PersonReperibilityDayDao extends DaoBase {
    * Metodo che ritorna la lista delle persone reperibili per la sede alla data.
    *
    * @param office la sede per cui si stanno cercando i reperibili
-   * @param date la data in cui stiamo stiamo facendo la richiesta
+   * @param date   la data in cui stiamo stiamo facendo la richiesta
    * @return la lista di PersonReperibility per i parametri passati.
    */
   public List<PersonReperibility> byOffice(Office office, LocalDate date) {
@@ -298,8 +316,8 @@ public class PersonReperibilityDayDao extends DaoBase {
    * Metodo di ricerca che ritorna, se esiste, l'attività associata ai parametri specificati.
    *
    * @param person la persona di cui si vuole l'attività associata
-   * @param date la data da verificare se è presente nel periodo per cui è associato all'attività
-   * @param type il tipo di attività
+   * @param date   la data da verificare se è presente nel periodo per cui è associato all'attività
+   * @param type   il tipo di attività
    * @return l'attività associata alla persona nella data specificata.
    */
   public Optional<PersonReperibility> byPersonDateAndType(Person person,
@@ -313,8 +331,8 @@ public class PersonReperibilityDayDao extends DaoBase {
   }
 
   /**
-   * Ricerca, se esiste, l'attività di reperibilità che praticano la lista di persone 
-   * passata come parametro.
+   * Ricerca, se esiste, l'attività di reperibilità che praticano la lista di persone passata come
+   * parametro.
    *
    * @param list la lista di persone di cui cercare l'attività di reperibilità
    * @return l'attività, se esiste, di cui fanno parte le persone della lista passata.
