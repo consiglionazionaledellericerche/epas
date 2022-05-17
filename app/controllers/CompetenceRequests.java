@@ -293,14 +293,14 @@ public class CompetenceRequests extends Controller {
       Validation.addError("beginDayToGive", "Le date devono essere congruenti");
     }
 
-    val dayToAskBegin = beginDayToAsk.isPresent() ? beginDayToAsk.get() : null;
-    val dayToAskEnd = endDayToAsk.isPresent() ? endDayToAsk.get() : null;
+    val beginDateToAsk = beginDayToAsk.isPresent() ? beginDayToAsk.get().date : null;
+    val endDateToAsk = endDayToAsk.isPresent() ? endDayToAsk.get().date : null;
 
-    if (dayToAskBegin != null && dayToAskEnd != null) {
-      if (dayToAskBegin.date.isAfter(dayToAskEnd.date)) {
+    if (beginDateToAsk != null && endDateToAsk != null) {
+      if (beginDateToAsk.isAfter(endDateToAsk)) {
         Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
       }
-      if (Days.daysBetween(dayToAskBegin.date, dayToAskEnd.date).getDays()
+      if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
           != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
         Validation.addError("beginDayToAsk",
             "La quantità di giorni da chiedere e da dare deve coincidere");
@@ -337,8 +337,8 @@ public class CompetenceRequests extends Controller {
           teamMates, types, reperibilityDates, myReperibilityDates);
     }
 
-    competenceRequest.beginDateToAsk = beginDayToAsk.isPresent() ? dayToAskBegin.date : null;
-    competenceRequest.endDateToAsk = endDayToAsk.isPresent() ? dayToAskEnd.date : null;
+    competenceRequest.beginDateToAsk = beginDateToAsk;
+    competenceRequest.endDateToAsk = endDateToAsk;
     competenceRequest.beginDateToGive = beginDayToGive.date;
     competenceRequest.endDateToGive = endDayToGive.date;
 
