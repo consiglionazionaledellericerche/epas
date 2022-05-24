@@ -448,12 +448,7 @@ public class PersonDayManager {
       return personDay;
     }
     
-    if (getPreventMealTicket(personDay).isPresent()) {
-      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.preventMealTicket);
-      return personDay;
-    }
     
-
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
@@ -505,7 +500,7 @@ public class PersonDayManager {
     // così posso sfruttare quel campo nel tabellone timbrature
 
     personDay.setTimeAtWork(computedTimeAtWork);
-
+    
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 
@@ -516,6 +511,11 @@ public class PersonDayManager {
       personDay.setTimeAtWork(personDay.getTimeAtWork() - personDay.getDecurtedMeal());
     } else {
       personDay.setDecurtedMeal(0);
+    }
+    
+    if (getPreventMealTicket(personDay).isPresent()) {
+      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.preventMealTicket);
+      return personDay;
     }
 
     // Il caso di assenze a giustificazione "quello che manca"
