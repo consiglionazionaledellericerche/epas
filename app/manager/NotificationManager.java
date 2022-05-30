@@ -1139,7 +1139,9 @@ public class NotificationManager {
     message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
         competenceRequest.person.fullName()));
     message.append(String.format(" di tipo %s\r\n", requestType));
-    if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
+
+    if (competenceRequest.beginDateToAsk != null &&
+        competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
       message.append(String.format("per il giorno %s",
           competenceRequest.beginDateToAsk.toString(dateFormatter)));
       message.append(String.format(" in cambio del giorno %s",
