@@ -266,9 +266,9 @@ public class CompetenceRequests extends Controller {
    * @param type              il servizio su cui chiedere il cambio
    */
   public static void save(@Required CompetenceRequest competenceRequest, int year,
-      int month, Person teamMate, Optional<PersonReperibilityDay> beginDayToAsk,
+      int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
       PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
-      Optional<PersonReperibilityDay> endDayToAsk, PersonReperibilityType type) {
+      PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
     //rules.checkIfPermitted(type);
 
@@ -293,8 +293,8 @@ public class CompetenceRequests extends Controller {
       Validation.addError("beginDayToGive", "Le date devono essere congruenti");
     }
 
-    val beginDateToAsk = beginDayToAsk.isPresent() ? beginDayToAsk.get().date : null;
-    val endDateToAsk = endDayToAsk.isPresent() ? endDayToAsk.get().date : null;
+    val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.date : null;
+    val endDateToAsk = endDayToAsk != null ? endDayToAsk.date : null;
 
     if (beginDateToAsk != null && endDateToAsk != null) {
       if (beginDateToAsk.isAfter(endDateToAsk)) {
