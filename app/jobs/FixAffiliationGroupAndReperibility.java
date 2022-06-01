@@ -53,7 +53,7 @@ import play.jobs.OnApplicationStart;
  * @author loredana
  */
 @Slf4j
-@OnApplicationStart(async = true)
+//@OnApplicationStart(async = true)
 public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
   @Inject
@@ -77,11 +77,11 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
   @Override
   public void doJob() {
 
-//    //in modo da inibire l'esecuzione dei job in base alla configurazione
-//    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
-//      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
-//      return;
-//    }
+    //in modo da inibire l'esecuzione dei job in base alla configurazione
+    if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
+      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
+      return;
+    }
 
     LocalDate today = LocalDate.now();
 
