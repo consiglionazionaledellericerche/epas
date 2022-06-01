@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    /rest/v3/stampings/show
  - Aggiunta possibilità di cedere un giorno di reperibilità
 
+### Changed
+ - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
+   le sue timbrature finiscono anche sul proprio cartellino mensile.
+
 ## [2.5.1] - 2022-04-29
 ### Added
  - Aggiunto controllo su API rest contracts/byPerson per fornire un messaggio di errore
