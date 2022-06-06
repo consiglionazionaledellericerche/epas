@@ -18,7 +18,6 @@
 package jobs;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.ContractDao;
 import dao.GroupDao;
@@ -36,6 +35,7 @@ import lombok.val;
 import lombok.var;
 import manager.NotificationManager;
 import models.Contract;
+import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonShiftShiftType;
@@ -45,15 +45,16 @@ import models.PersonShift;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
-import play.jobs.OnApplicationStart;
+import play.jobs.On;
 
 /**
  * Job per il fix delle affiliazioni ai gruppi e dei turni di reperibilità per i contratti chiusi.
  *
  * @author loredana
  */
+@SuppressWarnings("rawtypes")
 @Slf4j
-//@OnApplicationStart(async = true)
+@On("0 1 21 * * ?") // Ore 21:01
 public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
   @Inject
@@ -83,76 +84,81 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
       return;
     }
 
-    LocalDate today = LocalDate.now();
+    log.info("Start job FixAffiliationGroupAndReperibility");
 
-    List<Person> people = Person.findAll();
+    LocalDate begin = LocalDate.now().minusDays(7);
+    LocalDate end = LocalDate.now();
 
-    Map<Group, Set<Contract>> groups_managers = new HashMap<>();
-    Map<PersonShiftShiftType, Set<Contract>> shift_supervisors = new HashMap<>();
-    Map<PersonReperibilityType, Set<Contract>> reperibility_supervisors = new HashMap<>();
+    List<Contract> expriredContracts = contractDao.getExpiredContractsInPeriod(begin, end,
+        Optional.absent());
 
-    for (Person person : people) {
+    Map<Group, Set<Contract>> groupsManagers = new HashMap<>();
+    Map<PersonShiftShiftType, Set<Contract>> shiftSupervisors = new HashMap<>();
+    Map<PersonReperibilityType, Set<Contract>> reperibilitySupervisors = new HashMap<>();
 
-      var contracts = contractDao.getPersonContractList(person);
-      Contract last_contract = contracts.size() == 0 ? null : contracts.get(contracts.size() - 1);
+    for (Contract expiredContract : expriredContracts) {
+      LocalDate endContractDate = expiredContract.calculatedEnd();
+      Person person = expiredContract.person;
+      log.info("Persona {} endDate contratto scaduto {}", person.fullName(), endContractDate);
 
-      if (last_contract == null) {
-        continue;
-      }
-      val endContractDate = last_contract.calculatedEnd();
-      // check se il contratto è scaduto
-      if (endContractDate != null && endContractDate.isBefore(today)) {
-        //log.info("Persona {} endDate ultimo contratto {}", person.fullName(), endContractDate);
-
-        val groups_to_notify = disableGroupAffiliation(person, endContractDate);
-        groups_to_notify.forEach(group -> {
-              Set<Contract> contracts_end = groups_managers.get(group);
-              if (contracts_end == null) {
-                contracts_end = new HashSet<>();
-                contracts_end.add(last_contract);
-                groups_managers.put(group, contracts_end);
-              } else {
-                contracts_end.add(last_contract);
-              }
+      val groupsToNotify = disableGroupAffiliation(person, endContractDate);
+      groupsToNotify.forEach(group -> {
+            Set<Contract> contractsEnd = groupsManagers.get(group);
+            if (contractsEnd == null) {
+              contractsEnd = new HashSet<>();
+              contractsEnd.add(expiredContract);
+              groupsManagers.put(group, contractsEnd);
+            } else {
+              contractsEnd.add(expiredContract);
             }
-        );
-        val supervisor_shift_to_notify = disableShift(person, endContractDate);
-        supervisor_shift_to_notify.forEach(supervisor -> {
-              Set<Contract> contracts_end = shift_supervisors.get(supervisor);
-              if (contracts_end == null) {
-                contracts_end = new HashSet<>();
-                contracts_end.add(last_contract);
-                shift_supervisors.put(supervisor, contracts_end);
-              } else {
-                contracts_end.add(last_contract);
-              }
+          }
+      );
+      val supervisorshiftToNotify = disableShift(person, endContractDate);
+      supervisorshiftToNotify.forEach(supervisor -> {
+            Set<Contract> contractsEnd = shiftSupervisors.get(supervisor);
+            if (contractsEnd == null) {
+              contractsEnd = new HashSet<>();
+              contractsEnd.add(expiredContract);
+              shiftSupervisors.put(supervisor, contractsEnd);
+            } else {
+              contractsEnd.add(expiredContract);
             }
-        );
+          }
+      );
 
-        val supervisor_reperibility_to_notify = disableReperibility(person, endContractDate);
-        supervisor_reperibility_to_notify.forEach(supervisor -> {
-              Set<Contract> contracts_end = reperibility_supervisors.get(supervisor);
-              if (contracts_end == null) {
-                contracts_end = new HashSet<>();
-                contracts_end.add(last_contract);
-                reperibility_supervisors.put(supervisor, contracts_end);
-              } else {
-                contracts_end.add(last_contract);
-              }
+      val supervisorReperibilityToNotify = disableReperibility(person, endContractDate);
+      supervisorReperibilityToNotify.forEach(supervisor -> {
+            Set<Contract> contractsEnd = reperibilitySupervisors.get(supervisor);
+            if (contractsEnd == null) {
+              contractsEnd = new HashSet<>();
+              contractsEnd.add(expiredContract);
+              reperibilitySupervisors.put(supervisor, contractsEnd);
+            } else {
+              contractsEnd.add(expiredContract);
             }
-        );
-      }
+          }
+      );
+
     }
 
-    sendNotification(groups_managers, shift_supervisors, reperibility_supervisors);
+    sendNotification(groupsManagers, shiftSupervisors, reperibilitySupervisors);
 
     log.info("End job FixAffiliationGroupAndReperibility");
   }
 
+  /**
+   * Disabilita la reperibilità di una data persona con contratto scaduto impostando come data di
+   * termine turno la data di fine contratto.
+   *
+   * @param person          persona con contratto scaduto da rimuovere dai turni.
+   * @param endContractDate data di fine contratto.
+   * @return la lista dei supervisori delle reperibilità che sono state disabilitate.
+   */
   private Set<PersonReperibilityType> disableReperibility(Person person,
       LocalDate endContractDate) {
 
-    Set<PersonReperibilityType> supervisors = Sets.newHashSet();
+    Set<PersonReperibilityType> reperibilityTypes = Sets.newHashSet();
+    Set<PersonReperibility> reperibilitiesToUpdate = Sets.newHashSet();
 
     List<PersonReperibilityDay> reperibilities = personReperibilityDayDao.getPersonReperibilityDayByPerson(
         person, endContractDate);
@@ -161,10 +167,10 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
       val pr = prd.personReperibility;
 
-      if (pr.endDate == null || pr.endDate.isAfter(endContractDate)) {
-        supervisors.add(prd.reperibilityType);
-        pr.endDate = endContractDate;
-        pr.save();
+      if (prd.date.isAfter(
+          endContractDate)) {
+        reperibilityTypes.add(prd.reperibilityType);
+        reperibilitiesToUpdate.add(pr);
 
         long cancelled =
             personReperibilityDayDao.deletePersonReperibilityDay(prd.reperibilityType, prd.date);
@@ -175,26 +181,43 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
       }
     }
 
-    return supervisors;
+    for (PersonReperibility pr : reperibilitiesToUpdate) {
+      if (pr.endDate == null || pr.endDate.isAfter(endContractDate)) {
+        pr.endDate = endContractDate;
+        pr.save();
+        log.info(
+            "Aggiornata situazione date di reperibilità {}  start date {} end date {}",
+            person.fullName(), pr.startDate, pr.endDate);
+      }
+    }
+
+    return reperibilityTypes;
   }
 
-
+  /**
+   * Disabilita il turno per una data persona con contratto scaduto impostando come data di termine
+   * turno la data di fine contratto.
+   *
+   * @param person          persona con contratto scaduto da rimuovere dai turni.
+   * @param endContractDate data di fine contratto.
+   * @return la lista dei turni che sono stati disattivati.
+   */
   private Set<PersonShiftShiftType> disableShift(Person person, LocalDate endContractDate) {
 
-    Set<PersonShiftShiftType> shift_to_deactivated = Sets.newHashSet();
+    Set<PersonShiftShiftType> shiftToDeactivated = Sets.newHashSet();
     PersonShift personShift = personShiftDayDao.getPersonShiftByPerson(person, endContractDate);
 
     if (personShift == null) {
-      return shift_to_deactivated;
+      return shiftToDeactivated;
     }
     val personShiftShiftType = shiftDao.getByPersonShiftAndDate(personShift, endContractDate);
 
-    var remove_shift = false;
+    var removeShift = false;
 
     for (PersonShiftShiftType psst : personShiftShiftType) {
       if (psst.endDate == null || psst.endDate.isAfter(endContractDate)) {
-        remove_shift = true;
-        shift_to_deactivated.add(psst);
+        removeShift = true;
+        shiftToDeactivated.add(psst);
         psst.endDate = endContractDate;
         psst.save();
         log.info(
@@ -203,29 +226,36 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
       }
     }
 
-    if (remove_shift) {
+    if (removeShift) {
       personShift.disabled = true;
       personShift.save();
     }
 
-    return shift_to_deactivated;
+    return shiftToDeactivated;
   }
 
-
+  /**
+   * Rimuove una data persona con contratto scaduto da un gruppo impostando come data di uscita dal
+   * gruppo la data di fine contratto.
+   *
+   * @param person          persona con contratto scaduto da rimuovere dai turni.
+   * @param endContractDate data di fine contratto.
+   * @return la lista dei gruppi da cui è stata rimossa la persona con contratto scaduto.
+   */
   private Set<Group> disableGroupAffiliation(Person person, LocalDate endContractDate) {
 
-    Set<Group> groups_to_deactivated = Sets.newHashSet();
+    Set<Group> groupsToDeactivated = Sets.newHashSet();
 
-    val fromdate = java.time.LocalDate.of(endContractDate.getYear(),
+    val fromDate = java.time.LocalDate.of(endContractDate.getYear(),
         endContractDate.getMonthOfYear(),
         endContractDate.getDayOfMonth());
-    val groups = groupDao.myGroups(person, fromdate);
+    val groups = groupDao.myGroups(person, fromDate);
 
     groups.forEach(group ->
         {
           group.affiliations.stream()
               .filter(a -> a.isActive()).forEach(a -> {
-                groups_to_deactivated.add(a.getGroup());
+                groupsToDeactivated.add(a.getGroup());
                 java.time.LocalDate endDate = java.time.LocalDate.of(endContractDate.getYear(),
                     endContractDate.getMonthOfYear(), endContractDate.getDayOfMonth());
                 a.setEndDate(endDate);
@@ -236,42 +266,42 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
         }
     );
 
-    return groups_to_deactivated;
+    return groupsToDeactivated;
   }
 
 
   /**
-   * Approvazione di una richiesta di assenza.
+   * Invia la notifica dell'eliminazione delle persone con contratto scaduto dai gruppi di turno,
+   * reperibilità e affiliazione.
    *
-   * @param groups_managers          manager dei gruppi con le persone con i contratti scaduti da
-   *                                 notificare.
-   * @param shift_supervisors        supervisor dei turni con le persone con i contratti scaduti da
-   *                                 notificare.
-   * @param reperibility_supervisors supervisor delle reperibilità con le persone con i contratti
-   *                                 scaduti da notificar.
+   * @param groupsManagers          manager dei gruppi con le persone con i contratti scaduti da
+   *                                notificare.
+   * @param shiftSupervisors        supervisor dei turni con le persone con i contratti scaduti da
+   *                                notificare.
+   * @param reperibilitySupervisors supervisor delle reperibilità con le persone con i contratti
+   *                                scaduti da notificar.
    * @return l'eventuale problema riscontrati durante l'approvazione.
    */
-  public void sendNotification(Map<Group, Set<Contract>> groups_managers,
-      Map<PersonShiftShiftType, Set<Contract>> shift_supervisors,
-      Map<PersonReperibilityType, Set<Contract>> reperibility_supervisors) {
+  public void sendNotification(Map<Group, Set<Contract>> groupsManagers,
+      Map<PersonShiftShiftType, Set<Contract>> shiftSupervisors,
+      Map<PersonReperibilityType, Set<Contract>> reperibilitySupervisors) {
 
-    if (!groups_managers.isEmpty()) {
-      groups_managers.forEach(
+    if (!groupsManagers.isEmpty()) {
+      groupsManagers.forEach(
           (group, contracts) -> notificationManager.notificationAffiliationRemoved(contracts,
               group));
     }
 
-    if (!shift_supervisors.isEmpty()) {
-      shift_supervisors.forEach(
+    if (!shiftSupervisors.isEmpty()) {
+      shiftSupervisors.forEach(
           (supervisor, contracts) -> notificationManager.notificationShiftRemoved(contracts,
               supervisor));
     }
-    if (!reperibility_supervisors.isEmpty()) {
-      reperibility_supervisors.forEach(
+    if (!reperibilitySupervisors.isEmpty()) {
+      reperibilitySupervisors.forEach(
           (supervisor, contracts) -> notificationManager.notificationReperibilityRemoved(contracts,
               supervisor));
     }
-
   }
 
 }
