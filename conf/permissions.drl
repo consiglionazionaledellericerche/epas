@@ -1115,8 +1115,6 @@ when
     || action.startsWith("MonthRecaps.")
     || action.startsWith("PrintTags.")
     || action.startsWith("PersonMonths.")
-    //|| action.startsWith("Stampings.")
-    //|| action.startsWith("Vacations.")
     || action in (
     	"Administration.emergency", "HealthCheck.shutdown"))
 then
