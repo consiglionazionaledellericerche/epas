@@ -56,8 +56,7 @@ public class ContractDao extends DaoBase {
   }
 
   /**
-   * Il contratto relativo all'id passato come parametro e facendo la 
-   * joinFetch con la persona.
+   * Il contratto relativo all'id passato come parametro e facendo la joinFetch con la persona.
    *
    * @return il contratto corrispondente all'id passato come parametro.
    */
@@ -67,7 +66,7 @@ public class ContractDao extends DaoBase {
         .join(contract.person).fetchJoin()
         .where(contract.id.eq(id)).fetchOne();
   }
-  
+
   /**
    * Il contratto relativo all'id passato come parametro.
    *
@@ -83,8 +82,8 @@ public class ContractDao extends DaoBase {
    * La lista di contratti che sono attivi nel periodo compreso tra begin e end.
    *
    * @param people la lista di persone (opzionale)
-   * @param begin la data di inizio
-   * @param end la data di fine (opzionale)
+   * @param begin  la data di inizio
+   * @param end    la data di fine (opzionale)
    * @param office la sede (opzionale)
    * @return la lista di contratti che sono attivi nel periodo compreso tra begin e end.
    */
@@ -126,10 +125,50 @@ public class ContractDao extends DaoBase {
   }
 
   /**
+   * La lista di contratti che sono scaduti nel periodo compreso tra begin e end.
+   *
+   * @param people la lista di persone (opzionale)
+   * @param begin  la data di inizio
+   * @param end    la data di fine
+   * @param office la sede (opzionale)
+   * @return la lista di contratti che sono scaduti nel periodo compreso tra begin e end.
+   */
+  private List<Contract> getExpiredContractsInPeriod(Optional<List<Person>> people,
+      LocalDate begin, LocalDate end, Optional<Office> office) {
+
+    final QContract contract = QContract.contract;
+
+    final BooleanBuilder condition = new BooleanBuilder().andAnyOf(
+        contract.endDate.goe(begin).and(contract.endDate.loe(end)),
+        contract.endContract.goe(begin).and(contract.endContract.loe(end)));
+
+    if (people.isPresent()) {
+      condition.and(contract.person.in(people.get()));
+    }
+
+    if (office.isPresent()) {
+      condition.and(contract.person.office.eq(office.get()));
+    }
+
+    return getQueryFactory().selectFrom(contract).where(condition).fetch();
+  }
+
+  public List<Contract> getExpiredContractsInPeriod(LocalDate begin, LocalDate end,
+      Optional<Office> office) {
+    return getExpiredContractsInPeriod(Optional.absent(), begin, end, office);
+  }
+
+  public List<Contract> getExpiredContractsInPeriod(Person person, LocalDate begin,
+      LocalDate end) {
+    return getExpiredContractsInPeriod(
+        Optional.of(ImmutableList.of(person)), begin, end, Optional.absent());
+  }
+
+  /**
    * La lista di contratti della persona.
    *
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   *     data inizio contratto.
+   * data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
@@ -156,47 +195,46 @@ public class ContractDao extends DaoBase {
   }
 
   /**
-   * Se presente preleva l'eventuale fascia di presenza obbligatoria di una persona 
-   * in una data indicata.
+   * Se presente preleva l'eventuale fascia di presenza obbligatoria di una persona in una data
+   * indicata.
    *
-   * @param date la data in cui cercare la fascia obbligatoria
+   * @param date     la data in cui cercare la fascia obbligatoria
    * @param personId l'id della persona di cui cercare la fascia obbligatoria
    * @return la fascia oraria obbligatoria se presente, Optional.absent() altrimenti.
    */
   public Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlot(
       LocalDate date, Long personId) {
     QContract contract = QContract.contract;
-    QContractMandatoryTimeSlot contractMandatoryTimeSlot = 
+    QContractMandatoryTimeSlot contractMandatoryTimeSlot =
         QContractMandatoryTimeSlot.contractMandatoryTimeSlot;
     Person person = Person.findById(personId);
     val cmts = getQueryFactory().selectFrom(contractMandatoryTimeSlot)
         .join(contractMandatoryTimeSlot.contract, contract)
         .where(
             contract.person.eq(person), contract.beginDate.before(date)
-            .or(contract.beginDate.eq(date)),
+                .or(contract.beginDate.eq(date)),
             contract.endContract.isNull().or(contract.endContract.after(date)
                 .or(contract.endContract.eq(date))),
             contract.endDate.isNull().or(contract.endDate.after(date)
                 .or(contract.endDate.eq(date))),
             contractMandatoryTimeSlot.beginDate.before(date)
-            .or(contractMandatoryTimeSlot.beginDate.eq(date)),
+                .or(contractMandatoryTimeSlot.beginDate.eq(date)),
             contractMandatoryTimeSlot.endDate.isNull()
-              .or(contractMandatoryTimeSlot.endDate.after(date))
-              .or(contractMandatoryTimeSlot.endDate.eq(date)))
+                .or(contractMandatoryTimeSlot.endDate.after(date))
+                .or(contractMandatoryTimeSlot.endDate.eq(date)))
         .fetchOne();
     return Optional.fromNullable(cmts);
   }
-  
+
   /**
    * La lista di contractStampProfile di una persona o di un contratto.
    *
-   * @param person la persona (opzionale)
+   * @param person   la persona (opzionale)
    * @param contract il contratto (opzionale)
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   *     passati come parametro e ordinati per data inizio del contractStampProfile.
-   *     La funzione permette di scegliere quale dei due parametri indicare per effettuare 
-   *     la ricerca.
-   *     Sono mutuamente esclusivi.
+   * passati come parametro e ordinati per data inizio del contractStampProfile. La funzione
+   * permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
+   * mutuamente esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
       Optional<Contract> contract) {
@@ -223,7 +261,7 @@ public class ContractDao extends DaoBase {
     return getQueryFactory().selectFrom(csp)
         .where(csp.id.eq(id)).fetchOne();
   }
-  
+
   /**
    * Ritorna il contratto precedente.
    *
@@ -235,10 +273,10 @@ public class ContractDao extends DaoBase {
     Contract previousContract = null;
     List<Contract> contractList = getPersonContractList(actualContract.person);
     for (Contract contract : contractList) {
-      if (previousContract == null 
+      if (previousContract == null
           || (contract.calculatedEnd() != null && contract.calculatedEnd()
-          .isBefore(actualContract.beginDate) 
-              && contract.beginDate.isAfter(previousContract.endDate))) {
+          .isBefore(actualContract.beginDate)
+          && contract.beginDate.isAfter(previousContract.endDate))) {
         previousContract = contract;
       }
     }
