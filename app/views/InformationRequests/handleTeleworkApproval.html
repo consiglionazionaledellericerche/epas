@@ -12,7 +12,7 @@
 			<th>Mese</th>
 			<th>Richiesta</th>
 			<th>Validazione</th>
-			#{secure.check 'InformationRequests.teleworksToApprove'}
+			#{secure.check 'InformationRequests.revokeValidation'}
 			<th>Revoca</th>
 			#{/secure.check}
 		</tr>
@@ -41,14 +41,14 @@
 					<span class="label label-danger label-badge">Richiesta di validazione non ancora inviata</span>
 				#{/else}
 			</td>
-			#{secure.check 'InformationRequests.teleworksToApprove'}
-			<td>
-			#{if item.teleworkValidation != null}
-			<a class="btn btn-danger btn-xs" href="@{InformationRequests.revokeValidation(item.teleworkValidation.id)}">
-        		Revoca validazione
-      		</a>
-      		#{/if}
-			</td>
+			#{secure.check 'InformationRequests.revokeValidation'}
+				<td>
+					#{if item.teleworkValidation != null}
+						<a class="btn btn-danger btn-xs" href="@{InformationRequests.revokeValidation(item.teleworkValidation.id)}">
+								Revoca validazione
+						</a>
+					#{/if}
+				</td>
 			#{/secure.check}
 		</tr>
 		#{/list}	
