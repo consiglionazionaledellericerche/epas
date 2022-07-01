@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
    le sue timbrature finiscono anche sul proprio cartellino mensile.
+ - Modificato il permesso da controllare da InformationRequests.teleworksToApprove a
+   InformationRequests.revokeValidation per visualizzare la colonna per revocare le approvazioni di
+   telework
 
 ## [2.5.1] - 2022-04-29
 ### Added
