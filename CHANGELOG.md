@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificato il permesso da controllare da InformationRequests.teleworksToApprove a
    InformationRequests.revokeValidation per visualizzare la colonna per revocare le approvazioni di
    telework
+ - Fix del recap del calendario delle reperibilità che non mostrava i reperibili che avevano iniziato
+   la loro presenza nel servizio durante il mese
 
 ## [2.5.1] - 2022-04-29
 ### Added

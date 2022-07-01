@@ -292,9 +292,13 @@ public class PersonReperibilityDayDao extends DaoBase {
   public List<PersonReperibility> byTypeAndPeriod(PersonReperibilityType type,
       LocalDate from, LocalDate to) {
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
+
+    final BooleanBuilder condition = new BooleanBuilder().and(pr.personReperibilityType.eq(type));
+    condition.andAnyOf(pr.startDate.loe(from).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(to)),
+        pr.startDate.goe(from).and(pr.startDate.loe(to))
+            .andAnyOf(pr.endDate.isNull(), pr.endDate.goe(to)));
     return getQueryFactory().selectFrom(pr)
-        .where(pr.personReperibilityType.eq(type)
-            .and(pr.startDate.loe(from).andAnyOf(pr.endDate.isNull(), pr.endDate.goe(to)))).fetch();
+        .where(condition).fetch();
   }
 
   /**
