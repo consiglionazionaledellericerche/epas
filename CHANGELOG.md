@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.2] - UNRELEASED
+## [2.5.3] - UNRELEASED
+
+## [2.5.2] - 2022-07-01
 
 ### Added
  - Aggiunta possibilità di vedere il menu con i flussi informativi al personale che è 
@@ -13,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto il campo markedByTelework nella response delle api REST rest/v3/stampings/create e 
    /rest/v3/stampings/show
  - Aggiunta possibilità di cedere un giorno di reperibilità
+ - Aggiunto controllo sulla visibilità della presenza giornaliera dei dipendenti appartenenti ad un 
+   gruppo da parte del responsabile di gruppo
 
 ### Changed
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
