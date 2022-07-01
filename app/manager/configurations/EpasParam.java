@@ -76,6 +76,7 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
 
   //#######################################
   // PERSON PARAMS
