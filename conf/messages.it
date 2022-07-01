@@ -447,6 +447,7 @@ generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno 
 generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passato per cui è possibile inserire timbrature via REST
 generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
+generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite

@@ -68,6 +68,8 @@ public class GeneralSetting extends BaseModel {
   
   public boolean handleGroupsByInstitute = true;
   
+  public boolean enableDailyPresenceForManager = true;
+  
   // Fine parametri gestione gruppi
   
   // Parametri gestione giorni di turno

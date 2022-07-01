@@ -220,6 +220,14 @@ public class TemplateUtility {
   }
   
   /**
+   * 
+   * @return se è attiva la presenza giornaliera per il responsabile di gruppo.
+   */
+  public boolean enableDailyPresenceForManager() {
+    return generalSettingDao.generalSetting().enableDailyPresenceForManager;
+  }
+  
+  /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
    * compensativi da approvare nel template.
    *
