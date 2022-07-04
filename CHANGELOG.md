@@ -13,12 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto il campo markedByTelework nella response delle api REST rest/v3/stampings/create e 
    /rest/v3/stampings/show
  - Aggiunta possibilità di cedere un giorno di reperibilità
+ - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
+   l'utente
 
 ### Changed
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
    le sue timbrature finiscono anche sul proprio cartellino mensile.
  - Fix del recap del calendario delle reperibilità che non mostrava i reperibili che avevano iniziato
    la loro presenza nel servizio durante il mese
+ - Inibito l'invio multiplo di un telelavoro già trasmesso
 
 ## [2.5.1] - 2022-04-29
 ### Added
