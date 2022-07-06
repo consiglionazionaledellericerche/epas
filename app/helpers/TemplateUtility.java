@@ -88,9 +88,6 @@ import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
-import models.informationrequests.IllnessRequest;
-import models.informationrequests.ServiceRequest;
-import models.informationrequests.TeleworkRequest;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
@@ -220,6 +217,14 @@ public class TemplateUtility {
    */
   public boolean enableIllnessFlow() {
     return generalSettingDao.generalSetting().enableIllnessFlow;
+  }
+  
+  /**
+   * 
+   * @return se è attiva la presenza giornaliera per il responsabile di gruppo.
+   */
+  public boolean enableDailyPresenceForManager() {
+    return generalSettingDao.generalSetting().enableDailyPresenceForManager;
   }
   
   /**

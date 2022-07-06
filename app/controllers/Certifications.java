@@ -273,7 +273,7 @@ public class Certifications extends Controller {
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
           + "{}", person, cleanMessage(ex).getMessage());
-      render();
+      render(person);
     }
 
     // La percentuale di completamento della progress bar rispetto al totale da elaborare

@@ -48,6 +48,7 @@ public class StampingShowDto {
   private String reason;
   private boolean markedByAdmin;
   private boolean markedByEmployee;
+  private boolean markedByTelework;
   private String note;
   private String stampingZone;
   private PersonShowTerseDto person;
