@@ -104,6 +104,7 @@ della timbratura inserita.
     "id": 398946,
     "markedByAdmin": false,
     "markedByEmployee": false,
+    "markedByTelework": false,
     "note": "Note eccezionali veramente",
     "person": {
         "email": "galileo.galilei@cnr.it",
