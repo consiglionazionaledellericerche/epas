@@ -43,6 +43,7 @@ import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.VacationCode;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
@@ -213,6 +214,9 @@ public class AbsencePeriod {
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
       if (this.takableCodes.contains(absenceTypeDao
           .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
+        if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
+          return this.fixedPeriodTakableAmount - 2 * 100;
+        }
         List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
         int count = (workingDays.size() * 100 / 2);
         if (count % 100 != 0) {
