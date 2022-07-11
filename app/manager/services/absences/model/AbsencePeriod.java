@@ -214,6 +214,12 @@ public class AbsencePeriod {
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
       if (this.takableCodes.contains(absenceTypeDao
           .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
+        /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
+         * non possono essere più di 8. Quindi sottraggo 2 giorni nella modalità 
+         * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
+         * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
+         */
+        
         if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
           return this.fixedPeriodTakableAmount - 2 * 100;
         }
