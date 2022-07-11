@@ -122,8 +122,8 @@ public enum DefaultTakable {
     -1, null),
   
   T_LAGILE(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_LAGILE, DefaultAbsenceType.A_LAGILEBP), 
-      ImmutableSet.of(DefaultAbsenceType.A_LAGILE, DefaultAbsenceType.A_LAGILEBP), 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
       10, null),
   
   T_39LA(AmountType.units, 
