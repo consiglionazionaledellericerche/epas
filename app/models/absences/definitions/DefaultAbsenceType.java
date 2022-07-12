@@ -83,7 +83,7 @@ public enum DefaultAbsenceType {
   A_39LA("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
-      MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       null, null, true, false, true),
 
   A_39LANOBP("39LA",
@@ -91,13 +91,13 @@ public enum DefaultAbsenceType {
           + "senza buono pasto", false,
           ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
           MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
-          null, true, false, true),
+          new LocalDate(2022, 7, 1), true, false, true),
 
   A_40LA("40LA",
       "Lavoro agile per quarantena/isolamento fiduciario", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), null, 
-      null, true, false, true),
+      new LocalDate(2022, 7, 1), true, false, true),
 
   A_18M("18M", "Permesso assistenza parenti/affini disabili L. 104/92 in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
