@@ -144,11 +144,21 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-    #{accordionItem 'enableDailyPresenceForManagerParam', parent:'generalSetting', title:'Abilita visualizzazione presenza giornaliera gruppi', open:false}
+  #{accordionItem 'enableDailyPresenceForManagerParam', parent:'generalSetting', title:'Abilita visualizzazione presenza giornaliera gruppi', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
       #{alert color:'info'}Abilita la visualizzazione della presenza giornaliera dei dipendenti appartenenti a un gruppo#{/alert}
       #{f.booleanRadio 'generalSetting.enableDailyPresenceForManager' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'holidayShiftInNightToo', parent:'generalSetting', title:'Abilita conteggio festivo per tutti gli orari in giorno festivo', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita al conteggio di turno festivo qualsiasi turno svolto nelle 24 ore di un giorno festivo (anche se dovrebbe essere notturno)#{/alert}
+      #{f.booleanRadio 'generalSetting.holidayShiftInNightToo' /}
       #{b.buttons}
         #{b.save /}
       #{/b.buttons}

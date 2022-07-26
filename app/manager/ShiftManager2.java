@@ -767,6 +767,8 @@ public class ShiftManager2 {
 
         break;
       case holiday:
+        //TODO: controllare qui il nuovo parametro del generalSetting per i festivi 
+        // anche in notturno
         timeInterval = Optional.fromNullable(daily);
         timeInterval2 = Optional.<TimeInterval>absent();
         list = shifts.stream().filter(day -> { 
