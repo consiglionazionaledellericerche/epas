@@ -22,6 +22,14 @@
       </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH) }
+      <p>Impostando a sì questo parametro sarà possibile, per i responsabili dei servizi di reperibilità, procedere all'approvazione del calendario dell'intero
+      mese di reperibilità anche se il mese non è ancora terminato. Ad esempio, se il calendario fosse già completamente schedulato per l'intero mese
+      e si tentasse l'approvazione prima della fine del mese (es.: giorno 25 del mese), con questo parametro a <strong>SI</strong> verrebbero conteggiati tutti i giorni del mese
+      nell'approvazione e non solo quelli fino al giorno in cui si sta approvando il calendario del servizio.
+      </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_MISSIONS_INTEGRATION) }
       <p>Abilitando questa funzionalità, ePAS comunicherà con la piattaforma Missioni ricevendo in automatico i giorni di missione dei dipendenti <br>
       e inserendoli automaticamente nel loro cartellino.

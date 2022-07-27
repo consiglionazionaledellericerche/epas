@@ -68,6 +68,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH("enable_reperibility_approval_before_end_month",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   ENABLE_MISSIONS_INTEGRATION("enable_mission_integration",
       EpasParamCategory.GENERAL,
