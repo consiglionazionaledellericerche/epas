@@ -448,6 +448,7 @@ generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passa
 generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
+generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
