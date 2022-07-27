@@ -767,10 +767,14 @@ public class ShiftManager2 {
 
         break;
       case holiday:
-        //TODO: controllare qui il nuovo parametro del generalSetting per i festivi 
-        // anche in notturno
-        timeInterval = Optional.fromNullable(daily);
-        timeInterval2 = Optional.<TimeInterval>absent();
+        if (setting.holidayShiftInNightToo) {
+          timeInterval = Optional.of(new TimeInterval(new LocalTime(0, 0), new LocalTime(23, 59)));
+          timeInterval2 = Optional.<TimeInterval>absent();
+        } else {
+          timeInterval = Optional.fromNullable(daily);
+          timeInterval2 = Optional.<TimeInterval>absent();
+        }
+        
         list = shifts.stream().filter(day -> { 
           return personDayManager.isHoliday(day.personShift.person, day.date, 
               setting.saturdayHolidayShift);
