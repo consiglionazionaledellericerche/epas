@@ -35,6 +35,7 @@ import dao.wrapper.IWrapperPerson;
 import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -248,17 +249,18 @@ public class AbsenceRequests extends Controller {
         fromDate);
     List<Group> groups = 
         groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<UsersRolesOffices> roleList = 
+        uroDao.getAdministrativeUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results =
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
-    List<AbsenceRequest> myResults = absenceRequestDao.toApproveResults(roleList, Optional.absent(),
+    Set<AbsenceRequest> myResults = absenceRequestDao.toApproveResults(roleList, Optional.absent(),
         Optional.absent(), type, groups, person);
     List<AbsenceRequest> approvedResults = absenceRequestDao.totallyApproved(roleList, fromDate,
         Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-    log.debug("Preparate richieste da approvare per {} in {} ms. Da approvare = {}", 
-        person.getFullname(), System.currentTimeMillis() - start, myResults.size());
+    log.debug("Preparate richieste da approvare per {} in {} ms. Da approvare = {}. Flussi attivi = {}", 
+        person.getFullname(), System.currentTimeMillis() - start, myResults.size(), results.size());
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
