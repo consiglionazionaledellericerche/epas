@@ -887,16 +887,7 @@ end
 
 rule showAbsenceRequest
 when 
-  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
-  $ar: AbsenceRequest(person != currentOperator.person, person.getInstitute() == currentOperator.person.getInstitute())
-  $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
-then
-  $c.grant();
-end
-
-rule showAbsenceRequestToSeatSuperVisor
-when
-  $ar: AbsenceRequest(person != currentOperator.person) 
+  $ar: AbsenceRequest(person != currentOperator.person)
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ar.person.office)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
@@ -904,9 +895,9 @@ then
 end
 
 rule showInformationRequest
-when 
-  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
-  $ir: InformationRequest(person != currentOperator.person)
+when
+  $ir: InformationRequest(person != currentOperator.person) 
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ir.person.office)
   $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
 then
   $c.grant();
