@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.2] - UNRELEASED
+## [2.5.3] - UNRELEASED
+
+### Added 
+ - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
+   l'utente
+
+### Changed
+ - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
+ - Rimosso codice 40LA dalla lista dei codici prendibili
+
+## [2.5.2] - 2022-07-06
 
 ### Added
  - Aggiunta possibilità di vedere il menu con i flussi informativi al personale che è 
@@ -13,15 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto il campo markedByTelework nella response delle api REST rest/v3/stampings/create e 
    /rest/v3/stampings/show
  - Aggiunta possibilità di cedere un giorno di reperibilità
- - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
-   l'utente
+ - Aggiunto controllo sulla visibilità della presenza giornaliera dei dipendenti appartenenti ad un 
+   gruppo da parte del responsabile di gruppo
 
 ### Changed
+ - Corretto messaggio di errore in caso di attestato di fine mese non calcolato correttamente
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
    le sue timbrature finiscono anche sul proprio cartellino mensile.
+ - Modificato il permesso da controllare da InformationRequests.teleworksToApprove a
+   InformationRequests.revokeValidation per visualizzare la colonna per revocare le approvazioni di
+   telework
  - Fix del recap del calendario delle reperibilità che non mostrava i reperibili che avevano iniziato
    la loro presenza nel servizio durante il mese
- - Inibito l'invio multiplo di un telelavoro già trasmesso
 
 ## [2.5.1] - 2022-04-29
 ### Added
