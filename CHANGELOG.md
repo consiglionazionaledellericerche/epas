@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.3] - UNRELEASED
 
+### Added 
+ - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
+   l'utente
+
 ### Changed
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
  - Rimosso codice 40LA dalla lista dei codici prendibili
