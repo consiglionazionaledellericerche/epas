@@ -20,6 +20,7 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -27,6 +28,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -120,7 +122,7 @@ public class AbsenceRequestDao extends DaoBase {
    * @param absenceRequestType il tipo di richiesta da cercare
    * @return la lista di tutti i flussi attivi da approvare.
    */
-  public List<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
+  public Set<AbsenceRequest> toApproveResults(List<UsersRolesOffices> uros,
       Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       AbsenceRequestType absenceRequestType, List<Group> groups, Person signer) {
     Preconditions.checkNotNull(fromDate);
@@ -134,7 +136,7 @@ public class AbsenceRequestDao extends DaoBase {
     if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER)
         || uro.role.name.equals(Role.PERSONNEL_ADMIN)
         || uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
-      return Lists.newArrayList();
+      return Sets.newHashSet();
     }
     if (fromDate.isPresent()) {
       conditions.and(absenceRequest.startAt.after(fromDate.get()));
@@ -146,7 +148,7 @@ public class AbsenceRequestDao extends DaoBase {
             .and(absenceRequest.flowStarted.isTrue())
             .and(absenceRequest.flowEnded.isFalse()));
 
-    List<AbsenceRequest> results = new ArrayList<>();
+    Set<AbsenceRequest> results = Sets.newHashSet();
     if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
       results.addAll(
           toApproveResultsAsSeatSuperVisor(
@@ -253,7 +255,7 @@ public class AbsenceRequestDao extends DaoBase {
       conditions.and(absenceRequest.managerApprovalRequired.isTrue())
           .and(absenceRequest.managerApproved.isNotNull())
           .and(person.office.eq(signer.office));
-      final QAffiliation affiliation = QAffiliation.affiliation;      
+      final QAffiliation affiliation = QAffiliation.affiliation;
       query = getQueryFactory().selectFrom(absenceRequest)
           .join(absenceRequest.person, person).fetchJoin()
           .join(person.affiliations, affiliation)

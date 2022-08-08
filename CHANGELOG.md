@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
  - Rimosso codice 40LA dalla lista dei codici prendibili
+ - Modificata lista dei flussi attivi evitando di mostrare quelli relativi alla propria sede se non
+   si hanno gli opportuni permessi
 
 ## [2.5.2] - 2022-07-06
 
