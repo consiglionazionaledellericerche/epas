@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunta possibilità per il responsabile di sede di vedere i flussi di richiesta ferie anche
    di personale non del proprio istituto ma di cui si è responsabile di sede (utile per le Aree di Ricerca)
+ - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
+   l'utente
+
 ### Changed
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
  - Rimosso codice 40LA dalla lista dei codici prendibili
