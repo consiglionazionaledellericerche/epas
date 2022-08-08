@@ -894,6 +894,15 @@ then
   $c.grant();
 end
 
+rule showAbsenceRequestToSeatSuperVisor
+when
+  $ar: AbsenceRequest(person != currentOperator.person) 
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ar.person.office)
+  $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
 rule showInformationRequest
 when 
   UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
