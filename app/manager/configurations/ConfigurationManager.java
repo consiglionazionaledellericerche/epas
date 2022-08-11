@@ -48,11 +48,9 @@ import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.enumerate.BlockType;
 import models.query.QConfiguration;
-import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
-import play.db.jpa.JPAPlugin;
 import play.jobs.Job;
 
 
@@ -88,25 +86,8 @@ public class ConfigurationManager {
   public List<Configuration> configurationWithType(EpasParam epasParam) {
     final QConfiguration configuration = QConfiguration.configuration;
 
-    final JPQLQuery<?> query = queryFactory.from(configuration)
+    final JPQLQuery<Configuration> query = queryFactory.selectFrom(configuration)
         .where(configuration.epasParam.eq(epasParam));
-    return (List<Configuration>) query.fetch();
-  }
-
-  /**
-   * La lista delle configurazioni delle persone con parametro epasParam e valore value.
-   *
-   * @param epasParam il parametro da cercare
-   * @param value il valore da cercare
-   * @return la lista di configurazioni della persona.
-   */
-  public List<PersonConfiguration> configurationWithTypeAndValue(
-      EpasParam epasParam, String value) {
-    final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
-
-    final JPQLQuery query = queryFactory.selectFrom(configuration)
-        .where(configuration.epasParam.eq(epasParam)
-            .and(configuration.fieldValue.eq(value)));
     return query.fetch();
   }
 
