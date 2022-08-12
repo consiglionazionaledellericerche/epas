@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.3] - UNRELEASED
 
-### Added 
+### Added
+ - Aggiunte alcune label per gli screenreader per migliorare l'accessibilità
  - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
    l'utente
  - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
