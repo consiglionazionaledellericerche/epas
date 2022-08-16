@@ -50,6 +50,7 @@ public class SeatCertification {
     public String matricola;
     public boolean validato;
     public int numBuoniPasto;
+    public int numBuoniPastoElettronici;
     public List<RigaAssenza> righeAssenza = Lists.newArrayList();
     public List<RigaCompetenza> righeCompetenza = Lists.newArrayList(); //??
     public List<RigaFormazione> righeFormazione = Lists.newArrayList();
@@ -60,6 +61,7 @@ public class SeatCertification {
           .add("matricola", matricola)
           .add("validato", validato)
           .add("numBuoniPasto", numBuoniPasto)
+          .add("numBuoniPastoElettronici", numBuoniPastoElettronici)
           .add("righeAssenza", righeAssenza)
           .toString();
     }

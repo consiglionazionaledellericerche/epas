@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
    sede, anche sulle sedi diversa dalla propria di assegnazione
 ### Changed
+ - Corretto controllo dei buoni pasto inviati ad Attestati (funzionalità solo per CNR)
  - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
    ha associato delle persone ma non ha nessun giorno di reperibilità assegnato
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
