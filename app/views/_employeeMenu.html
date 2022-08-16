@@ -58,6 +58,11 @@
         #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
           <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
         #{/secure.li}
+
+        #{secure.li @InformationRequests.teleworks()}
+        <i class="fa fa-laptop" aria-hidden="true"></i>
+        #{/secure.li}
+
       #{/if}
       
       #{navbar.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }

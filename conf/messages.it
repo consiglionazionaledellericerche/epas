@@ -448,6 +448,7 @@ generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passa
 generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
+generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -1179,6 +1180,7 @@ TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni
 ENABLE_CALENDAR_REPERIBILITY= Abilitazione gestione calendario reperibilità
+ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH=Abilta approvazione reperibilità prima della fine del mese
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
 SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo

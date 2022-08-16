@@ -21,12 +21,13 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
 
 	#{f.date 'absenceRequest.startAt', required:true, class:'auto-submit-parent',
 		value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
 	#{f.date 'absenceRequest.endTo', class:'auto-submit-parent',
 		value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
-
+	
 	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
 	
 		#{if absenceForm != null}

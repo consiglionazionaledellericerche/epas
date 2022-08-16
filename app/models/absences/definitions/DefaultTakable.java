@@ -122,13 +122,13 @@ public enum DefaultTakable {
     -1, null),
   
   T_LAGILE(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_LAGILE, DefaultAbsenceType.A_LAGILEBP), 
-      ImmutableSet.of(DefaultAbsenceType.A_LAGILE, DefaultAbsenceType.A_LAGILEBP), 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
+      ImmutableSet.of(DefaultAbsenceType.A_LAGILE), 
       10, null),
   
   T_39LA(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_39LANOBP), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
       -1, null),
   
   T_SMART(AmountType.units, 
@@ -494,7 +494,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_401, DefaultAbsenceType.A_412,
           DefaultAbsenceType.A_402, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
           ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
@@ -539,7 +539,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_401, DefaultAbsenceType.A_412,
           DefaultAbsenceType.A_402, DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_40LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
       -1, null),
 

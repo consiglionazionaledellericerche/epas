@@ -31,8 +31,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
@@ -55,6 +55,7 @@ import models.base.InformationRequest;
 import models.enumerate.AccountRole;
 import models.enumerate.InformationType;
 import models.enumerate.NotificationSubject;
+import models.exports.MissionFromClient;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
@@ -1761,5 +1762,52 @@ public class NotificationManager {
             + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
         informationRequest, person.email, simpleEmail.getSubject(), mailBody);
 
+  }
+  
+  /**
+   * Nel caso ci siano stati problemi nella gestione dei giorni 
+   * @param mission
+   */
+  public void sendEmailMissionFromClientProblems(MissionFromClient mission) {
+    Verify.verifyNotNull(mission.person);
+    final Person person = mission.person;
+    SimpleEmail simpleEmail = new SimpleEmail();
+    String replayTo = (String) configurationManager
+        .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+    try {
+      simpleEmail.addTo(person.email);
+      simpleEmail.addReplyTo(replayTo);
+      simpleEmail.addCc(replayTo);
+    } catch (EmailException e) {
+      log.error("Errore nell'invio dell'email per missione con problemi", e);
+      e.printStackTrace();
+    }
+    
+    simpleEmail.setSubject(
+        String.format("ePas: verificare missione n. %s del %s di %s", 
+            mission.numero, mission.anno, mission.person.getFullname()));
+
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Gentile %s,\r\n", person.getName()));
+    message.append("ePAS ha ricevuto un messaggio dall'applicativo Missioni di tipo ")
+      .append(mission.tipoMissione).append(" missione.\r\n");
+    message.append( String.format("La missione è la numero %s del %s dal %s al %s.\r\n\r\n",
+        mission.numero, mission.anno, TemplateExtensions.format(mission.dataInizio), 
+        TemplateExtensions.format(mission.dataFine)));
+    message.append("Non è stato possibile inserire, modificare o cancellare tutti ")
+      .append("i giorni di missione previsti.\r\n\r\n");
+    message.append("Si prega di verificare i dati della missione su ePAS con il proprio")
+      .append(" ufficio del personale.");
+    val mailBody = message.toString();
+    try {
+      simpleEmail.setMsg(mailBody);
+    } catch (EmailException e) {
+      e.printStackTrace();
+    }
+    Mail.send(simpleEmail);
+    log.info("Inviata email per problemi sulla missione n. {} del {} di {} dal {} al {}",
+        mission.numero, mission.anno, mission.person.getFullname(), 
+        TemplateExtensions.format(mission.dataInizio), 
+        TemplateExtensions.format(mission.dataFine));
   }
 }

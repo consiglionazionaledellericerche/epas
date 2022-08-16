@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - 2022-08-16
+
+### Added
+ - Aggiunta email di warning per assenze per missione non inserite a causa di assenze preesistenti
+ - Aggiunta possibilità per il responsabile di sede di vedere i flussi di richiesta ferie anche
+   di personale non del proprio istituto ma di cui si è responsabile di sede (utile per le Aree di Ricerca)
+ - Aggiunte alcune label per gli screenreader per migliorare l'accessibilità
+ - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
+   l'utente
+ - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
+   sede, anche sulle sedi diversa dalla propria di assegnazione
+### Changed 
+ - Corretto controllo dei buoni pasto inviati ad Attestati (funzionalità solo per CNR)
+ - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
+   ha associato delle persone ma non ha nessun giorno di reperibilità assegnato
+ - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
+ - Rimosso codice 40LA dalla lista dei codici prendibili
+ - Modificata lista dei flussi attivi evitando di mostrare quelli relativi alla propria sede se non
+   si hanno gli opportuni permessi
+ - Rimossa scritta SSO nella form di login tramite OAuth
+ - Modificato messaggio di errore in caso di richiesta riposo compensativo senza ore sufficienti
+
 ## [2.5.2] - 2022-07-06
 
 ### Added
@@ -15,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di cedere un giorno di reperibilità
  - Aggiunto controllo sulla visibilità della presenza giornaliera dei dipendenti appartenenti ad un 
    gruppo da parte del responsabile di gruppo
-
 ### Changed
  - Corretto messaggio di errore in caso di attestato di fine mese non calcolato correttamente
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 

@@ -102,6 +102,22 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti gli userRoleOffice legati all'utente passato.
+   *
+   * @param user l'utente
+   * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
+   */
+  public List<UsersRolesOffices> getAdministrativeUsersRolesOfficesByUser(User user) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    return getQueryFactory().selectFrom(uro).where(uro.user.eq(user), uro.role.name.eq(Role.ABSENCE_MANAGER)
+        .or(uro.role.name.eq(Role.GROUP_MANAGER))
+        .or(uro.role.name.eq(Role.PERSONNEL_ADMIN))
+        .or(uro.role.name.eq(Role.PERSONNEL_ADMIN_MINI))
+        .or(uro.role.name.eq(Role.SEAT_SUPERVISOR))).fetch();
+  }
+
+  
+  /**
    * Metodo per effettuare check dello stato ruoli epas <-> perseo.
    */
   public Map<Long, Set<String>> getEpasRoles(Optional<Office> office) {
