@@ -772,7 +772,13 @@ public class AbsenceService {
         templateRow.absenceErrors
             .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
                 .absenceProblem(AbsenceProblem.NotOnHoliday).build());
-      } else {
+      } 
+      if (!absenceResponse.getWarning().isEmpty()) {
+        templateRow.absenceErrors.add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.MinimumTimeViolated).build());
+      }
+      
+      else {
         templateRow.absenceErrors
             .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
                 .absenceProblem(AbsenceProblem.LimitExceeded).build());
