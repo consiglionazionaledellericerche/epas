@@ -986,14 +986,24 @@ public class Competences extends Controller {
       flash.success("Riabilitato servizio %s", type.description);
       activateServices(type.office.id);
     }
-    if (!type.personReperibilities.isEmpty()) {
+
+    log.debug("Reperibility type = {}, personReperibilities.size = {}, "
+        + "personReperibilitiesDays.size = {}", 
+        type, type.personReperibilities.size(), 
+        type.personReperibilities.stream().flatMap(pr -> pr.personReperibilityDays.stream()).collect(Collectors.toList()).size());
+    
+    if (!type.personReperibilities.isEmpty() &&
+        !type.personReperibilities.stream().flatMap(pr -> pr.personReperibilityDays.stream()).collect(Collectors.toList()).isEmpty()) {
       type.disabled = true;
       type.save();
+      log.info("Disabilitato servizio {}", type);
       flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
           + "importanti presenti in altre tabelle");
 
     } else {
+      type.personReperibilities.stream().forEach(pr -> pr.delete());
       type.delete();
+      log.info("Rimosso servizio {}", type);
       flash.success("Servizio rimosso con successo");
     }
     activateServices(type.office.id);

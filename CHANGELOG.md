@@ -8,12 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Aggiunta email di warning per assenze per missione non inserite a causa di assenze preesistenti
+ - Aggiunta possibilità per il responsabile di sede di vedere i flussi di richiesta ferie anche
+   di personale non del proprio istituto ma di cui si è responsabile di sede (utile per le Aree di Ricerca)
  - Aggiunte alcune label per gli screenreader per migliorare l'accessibilità
  - Aggiunta possibilità di vedere nel menù la gestione dei telework se questi sono abilitati per
    l'utente
  - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
    sede, anche sulle sedi diversa dalla propria di assegnazione
 ### Changed
+ - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
+   ha associato delle persone ma non ha nessun giorno di reperibilità assegnato
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
  - Rimosso codice 40LA dalla lista dei codici prendibili
  - Modificata lista dei flussi attivi evitando di mostrare quelli relativi alla propria sede se non
