@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.5.3] - UNRELEASED
 
 ### Added
+ - Aggiunta email di warning per assenze per missione non inserite a causa di assenze preesistenti
  - Aggiunta possibilità per il responsabile di sede di vedere i flussi di richiesta ferie anche
    di personale non del proprio istituto ma di cui si è responsabile di sede (utile per le Aree di Ricerca)
  - Aggiunte alcune label per gli screenreader per migliorare l'accessibilità
