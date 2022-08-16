@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Rimosso codice 40LA dalla lista dei codici prendibili
  - Modificata lista dei flussi attivi evitando di mostrare quelli relativi alla propria sede se non
    si hanno gli opportuni permessi
+ - Modificato messaggio di errore in caso di richiesta riposo compensativo senza ore sufficienti
 
 ## [2.5.2] - 2022-07-06
 
