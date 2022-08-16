@@ -71,6 +71,8 @@ public class MonthsRecapManager {
 
   private final String covid19 = "COVID19";
   private final String covid19bp = "COVID19BP";
+  private final String lagile = "LAGILE";
+  private final String lagilebp = "LAGILEBP";
   
   /**
    * Genera il file da esportare contenente la situazione riepilogativa sulla sede nell'anno/mese
@@ -181,7 +183,10 @@ public class MonthsRecapManager {
         }
         if (!day.personDay.absences.isEmpty() 
             && (day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19) 
-            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19bp))) {
+            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19bp)
+            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(lagile)
+            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(lagilebp)
+            )) {
           cell.setCellValue("SW");
         } else if (!day.personDay.stampings.isEmpty()) {
           cell.setCellValue("In sede");
