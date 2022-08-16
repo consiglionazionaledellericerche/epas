@@ -241,7 +241,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
     return results.size();
@@ -261,7 +261,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
@@ -282,7 +282,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
 
@@ -303,7 +303,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
 

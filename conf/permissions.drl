@@ -3668,6 +3668,20 @@ then
 end
 
 /*
+ * Permesso per l'abilitazione alla visualizzazione dei flussi delle assenze per
+ * i responsabili di sede
+ */
+rule isFlowsVisibleForSeatSupervisor
+when
+  $uro: UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR)
+  $o: Office() from $uro.office
+  Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
  * Permesso per l'abilitazione alla visualizzazione delle richieste di ferie anno passato dopo il 31/8
  */
 rule isVacationPastYearFlowsVisible

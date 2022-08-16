@@ -13,16 +13,16 @@ data-content="&{'mealTicket.forcedAquired'}"><i class="fa fa-cutlery forced"></i
     #{if dayRecap.mealTicket}
     webui-popover-hover
     #{if dayRecap.mealTicket.equals("NO")}
-data-content="&{'mealTicket.notAquired'}"><i class="fa fa-ban"></i>
+data-content="&{'mealTicket.notAquired'}"><i class="fa fa-ban"></i><span class="sr-only sr-only-focusable">no</span>
       #{/if}
 #{if dayRecap.mealTicket.equals("NOT_YET")}
-data-content="&{'mealTicket.notYetAquired'}"><i class="fa fa-cutlery notyet"></i>
+data-content="&{'mealTicket.notYetAquired'}"><i class="fa fa-cutlery notyet"></i><span class="sr-only sr-only-focusable">da maturare</span>
 #{/if}
 #{if dayRecap.mealTicket.equals("YES")}
-data-content="&{'mealTicket.aquired'}"><i class="fa fa-cutlery"></i>
+data-content="&{'mealTicket.aquired'}"><i class="fa fa-cutlery"></i><span class="sr-only sr-only-focusable">si</span>
 #{/if}
 #{if dayRecap.mealTicket.equals("YES_IF_EXIT_NOW")}
-data-content="&{'mealTicket.aquiredExitingNow'}"><i class="fa fa-cutlery exitingnow"></i>
+data-content="&{'mealTicket.aquiredExitingNow'}"><i class="fa fa-cutlery exitingnow"></i><span class="sr-only sr-only-focusable">si uscendo adesso</span>
 #{/if}
 #{/if}
 #{else}
