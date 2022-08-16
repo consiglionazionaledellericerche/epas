@@ -60,6 +60,7 @@ import models.User;
 import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
@@ -304,8 +305,13 @@ public class AbsenceRequests extends Controller {
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
+    
+    PeriodChain periodChain = null;
+    GroupAbsenceType groupAbsenceType = null;
 
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
           LocalDate.now().getMonthOfYear(), true);
       int maxDays = (Integer) configurationManager.configValue(person.office,
@@ -314,26 +320,32 @@ public class AbsenceRequests extends Controller {
       handleCompensatoryRestSituation = true;
     }
     if (type.equals(AbsenceRequestType.VACATION_REQUEST)) {
-      GroupAbsenceType vacationGroup =
+      groupAbsenceType =
           absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
       IWrapperPerson wperson = wrapperFactory.create(person);
 
       for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
         VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
-            LocalDate.now().getYear(), vacationGroup, Optional.absent(), false);
+            LocalDate.now().getYear(), groupAbsenceType, Optional.absent(), false);
         vacationSituations.add(vacationSituation);
       }
+      periodChain = absenceService
+          .residual(person, groupAbsenceType, LocalDate.now());
     }
-    GroupAbsenceType permissionGroup = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
-    PeriodChain periodChain = absenceService
-        .residual(person, permissionGroup, LocalDate.now());
+    if (type.equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get(); 
+      periodChain = absenceService
+          .residual(person, groupAbsenceType, LocalDate.now());
+    }
+    
 
     boolean showVacationPeriods = false;
     boolean retroactiveAbsence = false;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
-    GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    
     AbsenceType absenceType = null;
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
@@ -342,6 +354,7 @@ public class AbsenceRequests extends Controller {
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             null, null, false, absenceManager);
+
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
@@ -360,10 +373,12 @@ public class AbsenceRequests extends Controller {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
-    GroupAbsenceType permissionGroup = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
-    PeriodChain periodChain = absenceService
-        .residual(absenceRequest.person, permissionGroup, LocalDate.now());
+    GroupAbsenceType permissionGroup = groupAbsenceType;
+    PeriodChain periodChain = null;
+    if (!groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR.name())) {
+      periodChain = absenceService
+          .residual(absenceRequest.person, permissionGroup, LocalDate.now());
+    }    
 
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt",

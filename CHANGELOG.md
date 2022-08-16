@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificata lista dei flussi attivi evitando di mostrare quelli relativi alla propria sede se non
    si hanno gli opportuni permessi
  - Rimossa scritta SSO nella form di login tramite OAuth
+ - Modificato messaggio di errore in caso di richiesta riposo compensativo senza ore sufficienti
 
 ## [2.5.2] - 2022-07-06
 
