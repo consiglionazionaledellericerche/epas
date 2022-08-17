@@ -174,6 +174,68 @@ data il dipendente utilizza un certo orario di lavoro (normale, maternità, 50%.
    :align: center
    
    Schermata di modifica tipo orario
+   
+Orario di lavoro personale
+--------------------------
+
+In questa tab è possibile specificare per il dipendente un proprio orario di lavoro che non tenga
+conto, anzi letteralmente sovrascriva, l'orario di lavoro stabilito per la propria sede di lavoro 
+(v.: :menuselection:`Configurazione --> Configurazione sedi --> Parametri periodici`).
+E' una funzionalità da utilizzare, ad esempio, per casi di unità di personale che devono entrare a lavoro
+in orari precedenti l'apertura della struttura (es.: orario della struttura 7.00-20.00 e il dipendente deve entrare alle 6.30).
+
+.. figure:: _static/images/lavoroPersonale.png
+   :scale: 40
+   :align: center
+   
+   Schermata di specifica orario di lavoro personale
+   
+Per poter utilizzarla occorre prima definire le fasce orarie (v. :doc:`Fasce orarie di lavoro <timeSlot>`)
+e successivamente selezionarla dal menu a tendina alla voce *Fascia oraria* insieme alle date di inizio e fine di 
+utilizzo di quella specifica fascia oraria.
+Cliccando su **Applica** verrà proposto un riepilogo di quanto accadrà con la modifica e infine cliccando 
+su **Conferma** verrà applicato l'orario specifico per il dipendente.
+
+Fascia oraria obbligatoria
+--------------------------
+
+Questa sezione è dedicata a quelle situazioni in cui un dipendente deve stare forzatamente in istituto in specifiche
+fasce orarie (probabilmente dovute a specifiche situazioni contrattuali).
+E' una funzionalità da utilizzare, ad esempio, per casi di unità di personale che devono stare a lavoro in particolari
+fasce orarie (es.: 10.00 - 12.00 di presenza obbligatoria) e che può essere "derogata" grazie ai Permessi Personali
+(per info relative a questa parte è sempre consigliata la consultazione dell'ufficio UGRU).
+
+.. figure:: _static/images/fasciaObbligatoria.png
+   :scale: 40
+   :align: center
+   
+   Schermata di specifica fascia di presenza obbligatoria
+
+Per poter utilizzarla occorre prima definire le fasce orarie (v. :doc:`Fasce orarie di lavoro <timeSlot>`)
+e successivamente selezionarla dal menu a tendina alla voce *Fascia oraria* insieme alle date di inizio e fine di 
+utilizzo di quella specifica fascia oraria.
+Cliccando su **Applica** verrà proposto un riepilogo di quanto accadrà con la modifica e infine cliccando 
+su **Conferma** verrà applicato l'orario specifico per il dipendente.
+   
+Piani Ferie
+-----------
+
+La tab Piani ferie permette all'amministratore del personale di modificare il piano ferie associato al dipendente.
+E' il caso, ad esempio, dell'attribuzione di un piano ferie specifico in presenza di un orario di lavoro di tipo
+part time verticale.
+Per poter procedere alla modifica del piano ferie occorre semplicemente specificare da quale data a quale data
+(campi Data inizio e Data fine) occorre che il piano ferie venga applicato, quale piano ferie si intende applicare 
+(selezionandolo da menu a tendina presente nel campo Piano ferie) e cliccare sul bottone Applica.
+Il sistema proporrà quindi un riepilogo con il risultato dell'applicazione del piano ferie per il periodo specificato
+relazionandolo ai periodi con piani ferie già esistenti.
+Premendo quindi sul tasto Conferma, il piano verrà applicato e i calcoli sulle ferie maturate e godibili automaticamente
+fatti dal sistema.
+
+.. figure:: _static/images/pianiFerie.png
+   :scale: 40
+   :align: center
+   
+   Schermata di modifica del piano ferie
 
 
 Presenza automatica
