@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed  
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
+ - Corretta generazione form richiesta ferie quando richieste nel passato
 
 ## [2.5.3] - 2022-08-16
 ### Added
