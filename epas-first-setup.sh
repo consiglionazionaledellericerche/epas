@@ -27,6 +27,11 @@ cd $INSTALL_DIR
 curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/docker-compose.yml -o docker-compose.yml
 curl https://raw.githubusercontent.com/consiglionazionaledellericerche/epas/main/.env -o .env
 
+# Creazione e impostazione dell'application secret 
+APPLICATION_SECRET=`tr -dc A-Za-z0-9 < /dev/urandom | head -c 64 ; echo`
+sed "s|#- APPLICATION_SECRET=|- APPLICATION_SECRET=|g" -i docker-compose.yml
+sed "s|#APPLICATION_SECRET=|APPLICATION_SECRET=${APPLICATION_SECRET}|g" -i .env
+
 # Avvio del postgres e creazione del DB vuoto epas
 docker-compose up -d postgres
 # Attesa che il container docker sia pronto

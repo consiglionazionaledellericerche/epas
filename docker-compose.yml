@@ -34,6 +34,9 @@ services:
       #- PROTOCOL=https                         # default: http  -- (http,https)
       ##- EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
       - JOBS_ACTIVE=true                        # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
+      #- APPLICATION_SECRET=${APPLICATION_SECRET}  # Opzionale ma fortemente consigliato, utilizzato per le funzioni criptografiche.
+                                                   # E' una stringa random, per esempio y2RS8pYk7g8NFttsRbjmhpEUm00tAQILvOfI1LMQ2wIiVV20J2S0VfQOdTjys9yh
+                                                   # Su Linux l'application secret può essere creato con il comando $ tr -dc A-Za-z0-9 </dev/urandom | head -c 64 ; echo
       #- SKIP_IP_CHECK=                         # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
       - FLOWS_ACTIVE=true
       #- URL_ATTESTATI=                         # default: https://attestativ2.rm.cnr.it
