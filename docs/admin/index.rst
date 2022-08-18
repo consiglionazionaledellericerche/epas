@@ -37,6 +37,7 @@ Sistemi Informativi del CNR.
    inizialization
    managePerson
    workingTimeType
+   timeSlot
    stampings
    seat
    parameters
