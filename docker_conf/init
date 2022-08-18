@@ -88,6 +88,14 @@ sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
+### Creazione e configurazione dell'application secret
+APPLICATION_SECRET=${APPLICATION_SECRET}
+if [ -z "${APPLICATION_SECRET}" ]; then
+  sed -n '/APPLICATION_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{APPLICATION_SECRET}}#'"${APPLICATION_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 ### Impostazione server smtp
 
 SMTP_FROM=${SMTP_FROM:-epas@cnr.it}
