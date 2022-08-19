@@ -1,0 +1,86 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ 
+    wtts = _wtts;
+ }%
+
+  <table class="table table-hover">
+    <tr>
+      <th>Descrizione</th>
+      <th>Orizzontale</th>
+      <th>Contratti attivi<br>con periodi attivi<br>attualmente associati<br>(alla data di oggi)</th>
+      <th>Periodi associati<br>a contratti attivi</th>
+      #{secure.check 'WorkingTimeType.getAllAssociatedActiveContracts'}
+        <th>Tutti i contratti attivi<br>con periodi attivi<br>attualmente associati<br>(alla data di oggi)</th>
+        <th class="center">Tutti i contratti<br>associati<br>(storico)</th>
+      #{/secure.check}
+      <th>Cambia orario<br>a tutti</th>
+    </tr>
+    #{list items:wtts, as:'wtt'}
+    <tr>
+      <td>
+        <a
+        #{if wtt.value.horizontal}
+          href="@{WorkingTimes.showHorizontal(wtt.value.id)}"
+        #{/if}
+        #{else}
+          href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}"
+        #{/else}
+          data-async-modal="#defaultModal">${wtt.value.description}
+        </a>
+
+        #{secure.check 'WorkingTime.editDescriptionDefaultWorkingTime'}
+          <a href="@{WorkingTimes.editDescription(wtt.value.id)}" data-async-modal="#defaultModal" title="Modifica descrizione">
+            <i class="fa fa-edit"></i>
+          </a>
+        #{/secure.check}
+      </td>
+      <td>
+        #{if wtt.value.horizontal} Si #{/if}
+        #{else} No#{/else}
+      </td>
+      <td>
+        <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${wtt.getAssociatedActiveContract(office).size()}
+        </a>
+      </td>
+      <td>
+        <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+          ${wtt.getAssociatedPeriodInActiveContract(office).size()}
+        </a>
+      </td>
+      #{secure.check 'WorkingTimeType.getAllAssociatedActiveContracts'}
+        <td class="center">
+          ${wtt.getAllAssociatedActiveContract().size()}
+          #{if wtt.getAllAssociatedActiveContract().size() == 0 }
+            #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
+              <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
+                <i data-toggle="tooltip" data-placement="bottom" 
+                  #{if wtt.value.disabled}title="Riattiva tipo orario"#{/if}
+                  #{else}title="Disattiva tipo orario non associato ad alcun contratto attivo"#{/else} class="fa fa-power-off"></i>
+              </a>
+            #{/secure.check}
+          #{/if }
+        </td>
+      <!-- contratti associati con wtt (storico) -->
+      <td class="center">
+        ${wtt.getAssociatedContract().size()}
+        #{if wtt.getAssociatedContract().size() == 0 }
+          #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
+            <a href="@{WorkingTimes.delete(wtt.value.id)}">
+              <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+            </a>
+          #{/secure.check}
+        #{/if}
+      </td>
+      #{/secure.check}
+      <td class="center">
+        <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal" class="btn btn-primary">
+          Cambia
+        </a>
+      </td>
+    </tr>
+    #{/list}
+  </table>

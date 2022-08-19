@@ -1,0 +1,20 @@
+#{modalAsync id:'defaultModal', 
+title:('Modifica descrizione tipologia orario di lavoro')}
+
+<h4>Descrizione attuale: ${wtt.description}</h4>
+
+<div id="workingTimeData">
+  #{form action:@WorkingTimes.updateDescription(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#page_content',
+  'data-async-error':'#workingTimeData'}
+  
+  #{f.hidden 'wttId', value:wtt.id /}
+  #{f.input 'description', value:wtt.description, label:'Nuova descrizione' /}
+
+  #{b.buttons center:true}
+    #{b.submit 'Aggiorna'/}
+  #{/b.buttons}
+
+  #{/form}
+</div>
+#{/modalAsync}

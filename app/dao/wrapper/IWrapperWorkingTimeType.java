@@ -29,6 +29,12 @@ import models.WorkingTimeType;
 public interface IWrapperWorkingTimeType extends IWrapperModel<WorkingTimeType> {
 
   /**
+   * La lista dei contratti attivi che hanno un periodo attivo con hanno associato
+   * il tipo di orario di lavoro indicato.
+   */
+  public List<Contract> getAllAssociatedActiveContract();
+  
+  /**
    * I contratti attivi che attualmente hanno impostato il WorkingTimeType.
    */
   List<Contract> getAssociatedActiveContract(Office office);
