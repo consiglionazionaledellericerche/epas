@@ -70,7 +70,7 @@ public enum DefaultGroup {
       PeriodType.month, DefaultTakable.T_19P, DefaultComplation.C_19P, null, false, false),
 
   G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", "",
-      DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.simpleGrouping, PeriodType.always,
+      DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.always,
       DefaultTakable.T_26, null, null, false, false), 
   G_26_DIPENDENTI("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere",
       "", DefaultCategoryType.ALTRI_104_DIPENDENTI, 0, GroupAbsenceTypePattern.simpleGrouping,
