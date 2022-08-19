@@ -18,9 +18,10 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import common.injection.StaticInject;
 import helpers.JodaConverters;
-import injection.StaticInject;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
@@ -45,6 +46,8 @@ public class AbsenceShowTerseDto {
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
+  private String externalId;
+  private LocalDateTime updatedAt;
   
   @JsonIgnore
   @Inject

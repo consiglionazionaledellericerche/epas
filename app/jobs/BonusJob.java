@@ -31,7 +31,12 @@ import play.jobs.Job;
 import play.jobs.On;
 
 
-
+/**
+ * Job che assegna le quantità per le competenze a presenza mensile.
+ *
+ * @author dario
+ *
+ */
 @SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 0 7 1-3 * ?") //il primi 5 giorni di ogni mese alle 7.00

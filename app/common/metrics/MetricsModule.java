@@ -24,7 +24,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
@@ -66,9 +66,9 @@ public class MetricsModule extends AbstractModule {
   public static final String LOG_MIN_DURATION_REQUEST = "log_min_duration_request";
 
   /**
-   * Durata minima predefinta: 0.5 secondi
+   * Durata minima predefinta: 0.7 secondi
    */
-  public static final long DEFAULT_MIN_DURATION_REQUEST = 500_000_000L;
+  public static final long DEFAULT_MIN_DURATION_REQUEST = 700_000_000L;
 
   /**
    * Fornisce il PrometheusMeterRegistry per l'injection.

@@ -43,6 +43,7 @@ import manager.attestati.dto.insert.InserimentoRigaFormazione;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
 import manager.attestati.dto.internal.StatoAttestatoMese;
+import manager.attestati.dto.internal.TipoBlocchettoSede;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
@@ -80,7 +81,7 @@ public class CertificationsComunication {
   private static final String API_INT_STATO_ATTESTATO_MESE = "/sede/listaDipendenti";
   private static final String API_INT_PERIODO_DIPENDENTE = "/dipendente/periodo";  // /145872
   private static final String API_INT_CRUSCOTTO = "/dipendente/stato/cruscotto";   // /11028/2017"
-
+  
   private static final String JSON_CONTENT_TYPE = "application/json";
 
   //OAuth
@@ -581,6 +582,39 @@ public class CertificationsComunication {
     log.info("Recuperato il CruscottoDipendente con id  {} e anno {}", dipendenteId, year);
 
     return cruscottoDipendente;
+  }
+  
+  /**
+   * Metodo rest per chiedere il tipo di blocchetti di buono pasto usati nella sede.
+   *
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param office la sede di riferimento
+   * @return un oggetto contenente il tipo di blocchetto usato nella sede.
+   */
+  public TipoBlocchettoSede getTipoBlocchetto(int year, int month, Office office) 
+      throws ExecutionException, NoSuchFieldException {
+    
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    
+    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.codeId
+        + "/" + year + "/" + month;
+    
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+    
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");      
+    }
+    TipoBlocchettoSede tipoBlocchetto = new Gson()
+        .fromJson(httpResponse.getJson(), TipoBlocchettoSede.class);
+    
+    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.name);
+    
+    return tipoBlocchetto;
   }
 
 }

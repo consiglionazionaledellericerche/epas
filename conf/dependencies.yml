@@ -2,37 +2,37 @@
 
 require:
     - play
-    - play -> secure    
+    - play -> secure
     - play -> shibboleth 1.2
     - play-codeborne -> fastergt 1.10
     - org.hibernate -> hibernate-envers 5.4.1.Final:
        transitive: false
     - org.jadira.usertype -> usertype.core 6.0.1.GA
-    - com.google.guava -> guava 28.2-jre
-    - com.google.inject -> guice 4.2.3:
+    - com.google.guava -> guava 30.1.1-jre
+    - com.google.inject -> guice 5.0.1:
        exclude:
         - org.ow2.asm -> asm *
-    - com.google.inject.extensions -> guice-assistedinject 4.2.3:
+    - com.google.inject.extensions -> guice-assistedinject 5.0.1:
        exclude:
         - org.ow2.asm -> asm *
     - org.eclipse.jdt.core.compiler -> ecj 4.6.1
     - play -> pdf 0.9:
        exclude:
         - jaxen -> jaxen *
-    - org.mnode.ical4j -> ical4j 1.0.6
-    - org.jsoup -> jsoup 1.8.3
+    - org.mnode.ical4j -> ical4j 3.0.25
+    - org.jsoup -> jsoup 1.13.1
     - org.dbunit -> dbunit 2.5.1
-    - org.mockito -> mockito-core 2.0.52-beta
-    - org.assertj -> assertj-core 3.4.1:
+    - org.mockito -> mockito-core 3.11.0
+    - org.assertj -> assertj-core 3.19.0:
        exclude:
         - org.ow2.asm -> asm *
-    - org.assertj -> assertj-guava 2.0.0:
+    - org.assertj -> assertj-guava 3.4.0:
        exclude:
         - org.ow2.asm -> asm *
-    - org.drools -> drools-core 5.5.0.Final
-    - org.drools -> drools-compiler 5.5.0.Final
-    - net.lingala.zip4j -> zip4j 1.3.2
-    - com.querydsl -> querydsl-codegen 4.2.1:
+    - org.drools -> drools-core 5.6.0.Final
+    - org.drools -> drools-compiler 5.6.0.Final
+    - net.lingala.zip4j -> zip4j 2.8.0
+    - com.querydsl -> querydsl-codegen 4.2.2:
         exclude:
           - asm -> asm *
           - cglib -> cglib *
@@ -42,7 +42,7 @@ require:
           - org.springframework.roo -> org.springframework.roo.annotations *
           - org.eclipse.persistence -> eclipselink *
           - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
-    - com.querydsl -> querydsl-jpa 4.2.1:
+    - com.querydsl -> querydsl-jpa 4.2.2:
        exclude:
         - asm -> asm *
         - cglib -> cglib *
@@ -51,8 +51,8 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
-        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *        
-    - com.querydsl -> querydsl-apt 4.2.1:
+        - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
+    - com.querydsl -> querydsl-apt 4.2.2:
        exclude:
         - asm -> asm *
         - cglib -> cglib *
@@ -63,32 +63,45 @@ require:
         - org.eclipse.persistence -> eclipselink *
         - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api *
     - play-codeborne -> lombok 1.2.5
-    - org.projectlombok -> lombok 1.18.4
+    - org.projectlombok -> lombok 1.18.20
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.8.0
     - com.fatboyindustrial.gson-javatime-serialisers -> gson-javatime-serialisers 1.1.1
-    - com.fasterxml.jackson.core -> jackson-core 2.9.8
-    - com.fasterxml.jackson.core -> jackson-annotations 2.9.8
-    - com.fasterxml.jackson.core -> jackson-databind 2.9.8
-    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.9.8
-    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.9.8
-    - com.fasterxml.jackson.datatype -> jackson-datatype-jsr310 2.9.8 
-    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.9.8
+    - com.fasterxml.jackson.core -> jackson-core 2.12.3
+    - com.fasterxml.jackson.core -> jackson-annotations 2.12.3
+    - com.fasterxml.jackson.core -> jackson-databind 2.12.3
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.12.3
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.12.3
+    - com.fasterxml.jackson.datatype -> jackson-datatype-jsr310 2.12.3 
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.12.3
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.14
-    - org.graylog2 -> gelfj 1.1.15
-    - org.apache.commons -> commons-csv 1.4
-    - org.apache.commons -> commons-compress 1.13
-    - io.micrometer -> micrometer-registry-prometheus 1.2.1
-    - org.postgresql ->  postgresql 42.2.12:
+    - org.graylog2 -> gelfj 1.1.16
+    - org.apache.commons -> commons-csv 1.8
+    - org.apache.commons -> commons-compress 1.20
+    - io.micrometer -> micrometer-registry-prometheus 1.7.3
+    - org.postgresql ->  postgresql 42.2.20:
        force: true
        exclude:
         - org.osgi -> org.osgi.core
         - org.osgi -> org.osgi.enterprise
-    - xerces -> xercesImpl 2.12.0
+    - xerces -> xercesImpl 2.12.1
     - it.cnr.iit -> play-qmodel 1.5.3
-    - org.modelmapper -> modelmapper 2.3.0
-    - org.apache.tika -> tika-langdetect 1.25
+    - org.modelmapper -> modelmapper 2.4.4
+    - org.apache.tika -> tika-langdetect 1.26
+    - io.jsonwebtoken -> jjwt-impl 0.11.2
+    - io.jsonwebtoken -> jjwt-jackson 0.11.2
+    - io.github.openfeign -> feign-core 11.6
+    - io.github.openfeign -> feign-jackson 11.6
+    - io.github.openfeign -> feign-okhttp 11.6
+    - io.github.openfeign -> feign-slf4j 11.6
+    - io.github.openfeign -> feign-micrometer 11.6
+    - io.github.openfeign.form -> feign-form 3.8.0
+    # Attenzione: deve essere allineato alla versione del okhttp3
+    - com.squareup.okhttp3 -> logging-interceptor 4.6.0
+    - io.github.resilience4j -> resilience4j-feign 1.7.1
+    - com.auth0 -> jwks-rsa 0.19.0
+    - it.cnr.iit -> keycloak-client 16.1
 
 # My custom repository
 
@@ -103,13 +116,9 @@ repositories:
          artifact:  "https://github.com/jackmoore/colorbox"
          contains:
             - com.github -> *
-    - bsbo_play_modules:
-        type: http
-        artifact: https://dl.bintray.com/besmartbeopen/play-modules/[module]-[revision].zip
-        contains:
-            - play-modules -> *
     - compatibility:
         type: local
-        artifact: ${application.path}/[module]-[revision].jar
+        artifact: ${application.path}/jars/[module]-[revision].jar
         contains:
           - it.cnr.iit -> play-qmodel 1.5.3
+          - it.cnr.iit -> keycloak-client 16.1

@@ -18,6 +18,7 @@
 package controllers.rest.v2;
 
 import com.google.common.base.Optional;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.OfficeDao;
 import helpers.JsonResponse;
@@ -27,7 +28,6 @@ import models.Office;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller con utilità per la ricerca degli uffici.

@@ -50,6 +50,7 @@ public class Role extends BaseModel {
   public static final String REGISTRY_MANAGER = "registryManager";
   public static final String PERSON_DAY_READER = "personDayReader";
   public static final String ABSENCE_MANAGER = "absenceManager";
+  public static final String BADGE_MANAGER = "badgeManager";  
 
   public String name;
 
@@ -100,6 +101,9 @@ public class Role extends BaseModel {
     }
     if (name.equals(ABSENCE_MANAGER)) {
       return "Gestore assenze";
+    }
+    if (name.equals(BADGE_MANAGER)) {
+      return "Gestore badge";
     }
     return name;
   }

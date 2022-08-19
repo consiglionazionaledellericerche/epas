@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.querydsl.core.QueryResults;
+import common.security.SecurityRules;
 import dao.NotificationDao;
 import dao.NotificationDao.NotificationFilter;
 import java.util.List;
@@ -26,7 +27,6 @@ import javax.inject.Inject;
 import models.Notification;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller to manage notifications.

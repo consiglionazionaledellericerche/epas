@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.rest.v2.Persons;
@@ -37,13 +38,13 @@ import helpers.ImageUtils;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
+import helpers.validators.LocalDateNotTooFar;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 import manager.AbsenceManager;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -54,18 +55,15 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypeException;
-import org.apache.tika.mime.MimeTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione/consultazione della assenze via REST.
@@ -104,10 +102,10 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void absencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, LocalDate begin, LocalDate end) {
+      String fiscalCode, String number, LocalDate begin, LocalDate end) {
     Person person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode).orNull();
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -147,24 +145,27 @@ public class Absences extends Controller {
    */
   @BasicAuth
   public static void insertAbsence(
-      Long id, String eppn, String email, Long personPerseoId, String fiscalCode,
-      String absenceCode, LocalDate begin, 
-      LocalDate end, Integer hours, Integer minutes) {
+      Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
+      String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes) {
     Person person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(id, 
-            eppn, email, personPerseoId, fiscalCode).orNull();
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
+            eppn, email, personPerseoId, fiscalCode, number).orNull();
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
     }
 
     rules.checkIfPermitted(person.office);
-    log.debug("Richiesto inserimento assenza via REST -> eppn = {}, email = {}, absenceCode = {}, "
+    log.info("Richiesto inserimento assenza via REST -> eppn = {}, email = {}, absenceCode = {}, "
         + "begin = {}, end = {}, hours = {}, minutes = {}", 
         eppn, email, absenceCode, begin, end, hours, minutes);
 
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
+    }
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
     }
     try {
       val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
@@ -209,13 +210,15 @@ public class Absences extends Controller {
   @BasicAuth
   public static void checkAbsence(
       Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, String absenceCode, LocalDate begin, LocalDate end, 
-      Integer hours, Integer minutes) 
+      String fiscalCode, String number, String absenceCode, 
+      @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end, 
+      Integer hours, Integer minutes)
           throws JsonProcessingException {
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number);
     if (!person.isPresent()) {
       JsonResponse.notFound("Indirizzo email incorretto. Non è presente la "
           + "mail cnr che serve per la ricerca.");
@@ -226,6 +229,10 @@ public class Absences extends Controller {
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
+    if (Validation.hasErrors()) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+
     Optional<Contract> contract = wrapperFactory
         .create(person.get()).getCurrentContract();
     Optional<ContractMonthRecap> recap = wrapperFactory.create(contract.get())
@@ -266,9 +273,7 @@ public class Absences extends Controller {
     //i diritti di gestione delle assenze sull'office della persona passata.
     rules.checkIfPermitted(absence.personDay.person.office);
 
-    absenceManager.removeAbsencesInPeriod(
-        absence.personDay.person, absence.personDay.date, 
-        absence.personDay.date, absence.absenceType);
+    absenceManager.removeAbsence(absence);
 
     log.info("Deleted absence {} via REST", absence);
     JsonResponse.ok();
@@ -280,16 +285,20 @@ public class Absences extends Controller {
    * Questo metodo può essere chiamato solo via HTTP DELETE.
    */
   public static void deleteAbsencesInPeriod(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, @Required String absenceCode,
-      @Required LocalDate begin, @Required LocalDate end) {
+      String fiscalCode, String number, @Required String absenceCode,
+      @CheckWith(LocalDateNotTooFar.class) @Required LocalDate begin, 
+      @CheckWith(LocalDateNotTooFar.class) @Required LocalDate end) {
 
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
-
+    
     if (Validation.hasErrors()) {
-      JsonResponse.badRequest("Mandatory parameters missing (absenceCode, begin, end)");
+      JsonResponse.badRequest(validation.errorsMap().toString());
     }
-
+    if (begin == null || end == null || begin.isAfter(end)) {
+      JsonResponse.badRequest("Date non valide");
+    }
+    val person = Persons.getPersonFromRequest(id, email, eppn, 
+        personPerseoId, fiscalCode, number);
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
     rules.checkIfPermitted(person.office);
@@ -313,9 +322,9 @@ public class Absences extends Controller {
    * Inserimento di giorni di ferie con seleziona automatica dei codici da parte di ePAS.
    */
   public static void insertVacation(Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, @Required LocalDate begin, @Required LocalDate end) {
+      String fiscalCode, String number, @Required LocalDate begin, @Required LocalDate end) {
 
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
     if (Validation.hasErrors()) {
       JsonResponse.badRequest("Mandatory parameters missing (begin, end)");
@@ -360,7 +369,6 @@ public class Absences extends Controller {
    * parametri HTTP passati.
    * Questo metodo può essere chiamato solo via HTTP GET.
    */
-  @SuppressWarnings("resource")
   public static void attachment(Long id) throws IOException {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val absence = getAbsenceFromRequest(id);
@@ -378,10 +386,11 @@ public class Absences extends Controller {
     log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
         absence.absenceFile.type(), absence.id, absence.absenceFile.getFile());
 
-    var filename = String.format("assenza-%s-%s",
+    String filename = String.format("assenza-%s-%s",
         absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
-      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+      filename = 
+          String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
     }
 
     renderBinary(absence.absenceFile.get(), filename, absence.absenceFile.length());

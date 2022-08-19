@@ -4,6 +4,7 @@
   'Persons.list',
   'Stampings.personStamping',
   'Absences.showGeneralMonthlyAbsences',
+  'InformationRequests.handleTeleworkApproval',
   'Vacations.list',
   'Competences.showCompetences',
   'MealTickets.recapMealTickets',
@@ -51,6 +52,9 @@
       #{if teleworkStampingsActive}
 	      #{secure.li @TeleworkStampings.personTeleworkStampings(currentData.personId, currentData.year, currentData.month) }
 	      	<i class="fa fa-clock-o" aria-hidden="true"></i>
+	      #{/secure.li}
+	      #{secure.li @InformationRequests.handleTeleworkApproval(currentData.personId) }
+	      	<i class="fa fa-laptop" aria-hidden="true"></i>
 	      #{/secure.li}
       #{/if}
 

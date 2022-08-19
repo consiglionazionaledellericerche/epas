@@ -21,8 +21,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import common.injection.StaticInject;
 import dao.PersonDao;
-import injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -35,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+/**
+ * binder per il recupero della person a partire dalla email.
+ *
+ * @author dario
+ *
+ */
 @Global
 @StaticInject
 public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson> {

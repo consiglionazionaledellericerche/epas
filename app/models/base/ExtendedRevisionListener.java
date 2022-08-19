@@ -22,12 +22,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
-import injection.StaticInject;
+import common.injection.StaticInject;
+import common.security.SecurityModule;
 import models.User;
 import org.hibernate.envers.RevisionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import security.SecurityModule;
 
 /**
  * Revision listener che aggiunge le informazioni su owner e ipaddress che hanno modificato

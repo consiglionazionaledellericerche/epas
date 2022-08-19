@@ -23,12 +23,15 @@ import cnr.sync.dto.v3.StampingUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
+import dao.GeneralSettingDao;
 import dao.StampingDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -37,7 +40,6 @@ import manager.StampingManager;
 import models.exports.StampingFromClient;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione delle timbrature.
@@ -59,6 +61,8 @@ public class Stampings extends Controller {
   static GsonBuilder gsonBuilder;
   @Inject 
   static SecurityRules rules;
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   /**
    * Restituisce il JSON con la timbratura cercata per id. 
@@ -96,6 +100,14 @@ public class Stampings extends Controller {
     val validationResult = validation.valid(stampingCreateDto); 
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+
+    // Controlla che la timbratura da inserire non sia troppo nel passato.
+    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting()
+        .maxDaysInPastForRestStampings;
+    if (stampingCreateDto.getDateTime()
+        .compareTo(LocalDateTime.now().minusDays(maxDaysInPastForRestStampings)) < 0) {
+      JsonResponse.badRequest("Timbratura con data troppo nel passato");
     }
 
     // Badge number not present or invalid (404)

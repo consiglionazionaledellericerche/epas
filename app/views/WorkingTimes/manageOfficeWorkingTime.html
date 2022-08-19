@@ -41,6 +41,7 @@
 			    <table class="table table-condensed table-hover">
 			        <tr class="warning">
 			          <th>Descrizione</th>
+			          <th>Riproporziona quantità<br>codici assenza</th>
 			          <th class="center">Contratti attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
@@ -61,7 +62,16 @@
 	                         <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-async-modal="#defaultModal">${wtt.value.description}</a>
 	                      #{/else}
 				        </td>
-				        
+				        <td class="center">
+				        <a href="@{WorkingTimes.changeEnableAdjustment(wtt.value.id, office.id)}"data-async-modal="#defaultModal">
+				        #{if wtt.value.enableAdjustmentForQuantity == true}
+				        SI
+				        #{/if}
+				        #{else}
+				        NO
+				        #{/else}
+				        </a>
+				        </td>
 				        <!-- contratti attualmente attivi con wtt -->
 				        <td  class="center">
 				          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">

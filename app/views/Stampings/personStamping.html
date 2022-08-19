@@ -11,7 +11,7 @@
 <div class="col-xs-12 col-lg-8">
 
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
-
+	<caption class="sr-only">Riepilogo mensile &{'Month.'+ psDto.month} ${psDto.year}</caption>
     <tr>
       <th class="group-single">Giorno</th>
       <th class="group-single">Buono<br>pasto</th>
@@ -40,26 +40,29 @@
 
     #{list items:psDto.daysRecap, as:'dayRecap'}
 
-    <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
+      <tr#{if dayRecap.ignoreDay} class="ignore_day"#{/if}>
 
-    <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
-      #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" webui-popover-hover data-content="&{'firstDay'}"></i>#{/if}
-      #{secure.link @PersonDays.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
-      ${dayRecap.personDay.date.shortDayName()}
-      #{/secure.link}
-    </td>
+        <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
+          #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" webui-popover-hover data-content="&{'firstDay'}"></i>#{/if}
+          #{secure.link @PersonDays.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+            ${dayRecap.personDay.date.shortDayName()}
+          #{/secure.link}
+        </td>
 
-    #{include './personStampingComponents/_mealTicketsTemplate.html' /}
+        #{include './personStampingComponents/_mealTicketsTemplate.html' /}
 
-    <td class="invisible"></td>
+        <td class="invisible"></td>
 
-    #{include './personStampingComponents/_absencesTemplate.html' /}
+        #{include './personStampingComponents/_absencesTemplate.html' /}
 
-    #{include './personStampingComponents/_stampingsTemplate.html' /}
-    <td class="invisible"></td>
-    #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
-    #{include './personStampingComponents/_workingTimeTypePopover.html' /}
-    </tr>
+        #{include './personStampingComponents/_stampingsTemplate.html' /}
+
+        <td class="invisible"></td>
+
+        #{include './personStampingComponents/_workTimeDifferenceProgressive.html' /}
+        #{include './personStampingComponents/_workingTimeTypePopover.html' /}
+      </tr>
+
     #{/list}
   </table>
 </div>

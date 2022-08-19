@@ -18,14 +18,14 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.ToString;
+import lombok.val;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
 
 /**
@@ -44,7 +44,7 @@ public class StampingShowTerseDto {
   private Long id;
   private LocalDateTime date;
   private WayType way;
-  private StampTypes stampType;
+  private String stampType;
   private String place;
   private String reason;
   private boolean markedByAdmin;
@@ -60,6 +60,8 @@ public class StampingShowTerseDto {
    * dell'oggetto stamping passato.
    */
   public static StampingShowTerseDto build(Stamping stamping) {
-    return modelMapper.map(stamping, StampingShowTerseDto.class);    
+    val dto = modelMapper.map(stamping, StampingShowTerseDto.class);
+    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
+    return dto;
   }
 }

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 
 
 /**

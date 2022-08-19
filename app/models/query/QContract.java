@@ -45,6 +45,8 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -60,6 +62,8 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
+
+    public final SetPath<models.PersonalWorkingTime, QPersonalWorkingTime> personalWorkingTimes = this.<models.PersonalWorkingTime, QPersonalWorkingTime>createSet("personalWorkingTimes", models.PersonalWorkingTime.class, QPersonalWorkingTime.class, PathInits.DIRECT2);
 
     public final QContract previousContract;
 
@@ -88,6 +92,8 @@ public class QContract extends EntityPathBase<Contract> {
     public final NumberPath<Integer> sourceVacationCurrentYearUsed = createNumber("sourceVacationCurrentYearUsed", Integer.class);
 
     public final NumberPath<Integer> sourceVacationLastYearUsed = createNumber("sourceVacationLastYearUsed", Integer.class);
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 

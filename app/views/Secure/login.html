@@ -1,9 +1,11 @@
 #{extends 'main.html' /} 
 #{set header:'banner' /} 
 #{set title:'ePAS - electronic Personnel Attendance System' /}
-#{set idpAuthEnabled: play.Play.configuration.getProperty("shib.login").equals("true") || play.Play.configuration.getProperty("ldap.login").equals("true") /}
 #{set shibAuthEnabled: play.Play.configuration.getProperty("shib.login").equals("true") /}
 #{set ldapAuthEnabled: play.Play.configuration.getProperty("ldap.login").equals("true") /}
+#{set oauthEnabled: play.Play.configuration.getProperty("oauth.login").equals("true") /}
+#{set idpAuthEnabled: shibAuthEnabled || ldapAuthEnabled || oauthEnabled /}
+
 #{set companyCode: play.Play.configuration.getProperty("company.code") /}
 
 <div class="container">
@@ -55,7 +57,7 @@
 	  </div>	   	  
 	</div>
   </div>
-  
+
   <div class="row col-md-4 col-md-offset-4 center margin-top-5">
   	  #{if controllers.Security.checkForWebstamping()}
   	   <div class="center">

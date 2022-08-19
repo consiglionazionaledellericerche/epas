@@ -5,10 +5,9 @@
  }*
  %{ fa = _fa ? _fa : 'check' }%
 <button 
-      class="btn 
-        btn-#{if _color}${_color}#{/if}#{else}primary#{/else}
-        #{if _class} ${_class}#{/if}"
-        #{if _disabled} disabled #{/if}
+      class="btn btn-#{if _color}${_color}#{/if}#{else}primary#{/else}#{if _class} ${_class}#{/if}"
+      #{if _id}id=${_id}#{/if}
+      #{if _disabled} disabled #{/if}
       type="submit">
      <i class="fa fa-${fa}"></i><span class="hidden-xs"> &{_arg}</span>
 </button>

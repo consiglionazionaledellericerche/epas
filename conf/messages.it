@@ -1,9 +1,9 @@
 absenceRequest =richiesta di assenza
 
-absenceRequest.endTo =Fine
+absenceRequest.endTo =Data di fine
 absenceRequest.note =Note
 absenceRequest.person =Dipendente
-absenceRequest.startAt =Inizio
+absenceRequest.startAt =Data di inizio
 absenceRequest.type =Tipologia
 absenceRequest.officeHeadApproved =Approvazione responsabile di sede
 absenceRequest.managerApproved =Approvazione responsabile di gruppo
@@ -88,6 +88,43 @@ CompetenceRequests.changeReperibility =Mie richieste di cambio di reperibilità
 CompetenceRequests.changeReperibilityToApprove = Richieste di cambio reperibilità
 
 CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibilita'
+
+InformationType.TELEWORK_INFORMATIONS =Flussi per Telelavoro
+InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
+InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
+InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
+InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
+InformationType.ILLNESS_INFORMATION =Informazione di malattia
+InformationType.TELEWORK_INFORMATION =Richiesta presa visione di telelavoro
+InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
+InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
+InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
+
+InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
+InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT=Richiesta validata dal responsabile di sede
+InformationRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT=Richiesta validata dall'amministratore del personale
+InformationRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+InformationRequestEventType.COMPLETE=Richiesta completata
+InformationRequestEventType.DELETE=Richiesta cancellata
+InformationRequestEventType.EXPIRING=Richiesta scaduta
+
+informationRequest.endTo =Fine
+informationRequest.note =Note
+informationRequest.person =Dipendente
+informationRequest.startAt =Inizio
+informationRequest.type =Tipologia
+
+serviceRequest.day =Giorno
+serviceRequest.beginAt =Ora inizio
+serviceRequest.finishTo =Ora fine
+begin =Ora inizio
+finish = Ora fine
+serviceRequest.reason =Motivazione
+illnessRequest.beginDate =Giorno iniziale
+illnessRequest.endDate =Giorno finale
+illnessRequest.name =Note sull'assenza
 
 
 type =Servizio di reperibilità
@@ -186,6 +223,7 @@ child.surname= Cognome
 child.taxCode= Codice fiscale
 personChildren=Figlio Dipendente
 
+blockType =Tipologia blocco
 codeBlock=Codice Blocco
 
 code=Codice
@@ -319,6 +357,11 @@ cmts.beginDate= Data Inizio
 cmts.endDate= Data Fine
 cmts.timeSlot= Fascia oraria
 
+
+pwt.beginDate= Data Inizio
+pwt.endDate= Data fine
+pwt.timeSlot=Fascia oraria
+
 vp.beginDate= Data Inizio
 vp.endDate= Data Fine
 vp.vacationCode=Piano Ferie
@@ -340,11 +383,13 @@ VacationCode.CODE_11_2= 11+2
 VacationCode.CODE_10_2= 10+2
 VacationCode.CODE_22_3= 22+3
 VacationCode.CODE_21_3= 21+3
+VacationCode.CODE_20_3= 20+3
 VacationCode.CODE_30_4= 30+4
 VacationCode.CODE_32_4= 32+4
 VacationCode.CODE_9_1= 9+1
 VacationCode.CODE_13_2= 13+2
 VacationCode.CODE_14_2= 14+2
+VacationCode.CODE_23_3= 23+3
 
 date= Data
 
@@ -383,6 +428,9 @@ firstDay= Giorno inizio contratto
 forceInsert= Forza Inserimento
 
 generalSetting =Impostazioni generali di sistema
+generalSetting.cookiePolicyEnabled=Visualizzazione del banner per la cookie policy abilitato
+generalSetting.cookiePolicyContent=Pagina (HTML) con la cookie policy
+generalSetting.regulationsEnabled=Menu Normativa attivo per i dipendenti 
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
@@ -394,6 +442,13 @@ generalSetting.endNightlyShift =Fine fascia per turno notturno
 generalSetting.handleGroupsByInstitute =Gestisci i gruppi per istituto
 generalSetting.saturdayHolidayShift =Sabato da considerare festivo
 generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
+generalSetting.enableIllnessFlow =Abilita flusso richiesta informativa per malattia
+generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno per un turnista
+generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passato per cui è possibile inserire timbrature via REST
+generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione
+generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
+generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
+generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -406,6 +461,7 @@ group.description =Descrizione
 group.manager =Responsabile
 group.people =Afferenti al gruppo
 group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
+group.externalId =External id
 groups =Gruppi di lavoro
 
 history.back= Indietro
@@ -667,6 +723,8 @@ sourceDateResidual=Data inizializzazione
 sourceDateVacation=Data inizializzazione
 
 stamping= Timbratura
+stamping.date =Data
+stamping.hour =Orario
 stamping.in= Timbratura di ingresso
 stamping.note= Note
 stamping.place= Luogo
@@ -800,7 +858,9 @@ complationUsed=Completato
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
+wtt.enableAdjustmentForQuantity=Riproporziona quantità codici
 wtt= Tipo Orario
+reproportionEnabled= Riproporziona quantità codici
 
 WorkingTimeTypePattern.HORIZONTAL = Orario Orizzontale
 WorkingTimeTypePattern.VERTICAL = Orario Verticale
@@ -927,6 +987,7 @@ Contracts.personContracts= Dati Contrattuali
 Contracts.updateContractStampProfile= Presenza Automatica
 Contracts.updateContractVacationPeriod= Piani Ferie
 Contracts.updateContractWorkingTimeType= Tipo Orario
+Contracts.updatePersonalWorkingTime= Orario di lavoro personale
 Contracts.updateContractMandatoryTimeSlot= Fascia oraria obbligatoria
 Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
@@ -942,6 +1003,12 @@ AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 AbsenceRequests.permissionsToApprove =Flussi di permessi personali
 AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno passato dopo deadline
 
+InformationRequests.illness =Mie richieste per malattia
+InformationRequests.teleworks =Mie richieste per telelavoro
+InformationRequests.serviceExit =Mie richieste uscite di servizio
+InformationRequests.illnessToApprove =Flussi di richieste per malattia
+InformationRequests.teleworksToApprove =Flussi di richieste per telelavoro
+InformationRequests.serviceExitToApprove =Flussi di richieste uscite di servizio
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
@@ -989,6 +1056,7 @@ Persons.list= Lista Persone
 Persons.workGroup= Gruppo Di Lavoro
 PrintTags.listPersonForPrintTags= Stampa Cartellino
 PrintTags.showTag= Stampa Cartellino Presenze
+PrintTags.autocertOffsite =Stampa timbrature fuori sede
 Stampings.dailyPresence= Presenza Giornaliera
 Stampings.dailyPresenceForPersonInCharge= Presenza giornaliera gruppo
 Stampings.missingStamping= Riepilogo problemi sui giorni
@@ -997,6 +1065,8 @@ Stampings.personStamping= Timbrature
 Stampings.stampings= Situazione Mensile
 TeleworkStampings.teleworkStampings= Inserimento orario in telelavoro
 TeleworkStampings.personTeleworkStampings= Orari dipendenti in telelavoro
+InformationRequests.handleTeleworkApproval =Gestione approvazioni telelavoro
+CheckGreenPasses.dailySituation =Check giornaliero green pass
 
 Stats.general =Statistiche utilizzatori
 
@@ -1030,6 +1100,9 @@ AccountRole.MISSIONS_MANAGER= Gestore missioni
 AccountRole.CONTRACTUAL_MANAGER =Gestore normativa
 AccountRole.PERSON_DAYS_READER= Consultatore riepiloghi orari e assenze
 AccountRole.REGISTRY_MANAGER= Gestore anagrafica
+
+BlockType.papery =Cartaceo
+BlockType.electronic = Elettronico
 
 CalculationType.standard_CNR=Calcolo standard CNR
 CalculationType.percentage=Calcolo percentuale (es.:INAF)
@@ -1124,6 +1197,7 @@ NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare
 DATE_START_MEAL_TICKET=Data inizio gestione Ticket Restaurant
 SEND_EMAIL=Invio email di avviso ai dipendenti
 SEND_ADMIN_NOTIFICATION=Invio di notifiche agli amministratori del personale  
+MEAL_TICKET_BLOCK_TYPE=Tipologia blocchetti buoni pasto
 EMAIL_TO_CONTACT=Indirizzo email segreteria
 WORKING_OFF_SITE=Lavoro fuori sede
 ABSENCES_FOR_EMPLOYEE=Assenze visibili ai dipendenti
@@ -1133,6 +1207,7 @@ TR_VACATIONS= Inserimento ferie e permessi per Tecnologi e Ricercatori
 TR_COMPENSATORY= Inserimento riposi compensativi per Tecnologi e Ricercatori
 ENABLE_CALENDARSHIFT= Abilitazione gestione calendario turni
 ENABLE_CALENDAR_REPERIBILITY= Abilitazione gestione calendario reperibilità
+ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH=Abilta approvazione reperibilità prima della fine del mese
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
 SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo
@@ -1154,6 +1229,7 @@ OFF_SITE_ABSENCE_WITH_CONVENTION=Inserimento assenza per lavoro fuori sede con c
 MATERNITY_PERIOD=Periodo Maternità
 TELEWORK=Auto inserimento codice di assenza per Telelavoro
 TELEWORK_STAMPINGS=Orario in telelavoro
+ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME =Timbrature in telelavoro abilitate anche per orario di lavoro
 DISABLED_PERSON_PERMISSION=Auto inserimento assenze 104 dipendente disabile
 DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 parente disabile
 RIGHT_TO_STUDY=Permessi per diritto allo studio
@@ -1162,7 +1238,9 @@ ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
 PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
 SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
-
+AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
+SMARTWORKING =Auto inserimento codice di assenza per smartworking
+AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
@@ -1194,6 +1272,23 @@ CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta ap
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 
 CHANGE_REPERIBILITY_REQUEST =Richiesta cambio reperibilità
+
+ENABLE_INFORMATION_FLOWS =Abilitazione flussi informativi
+
+ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte del responsabile di sede
+ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte del responsabile di sede
+ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED =Richiesta presa visione comunicazione malattia per i livelli I-III da parte dell'amministratore del personale
+ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED = Richiesta presa visione comunicazione malattia per i livelli IV-VIII da parte dell'amministratore del personale
+ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED=Richiesta presa visione comunicazione malattia per i ilvelli I-III da parte del responsabile di gruppo
+ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta presa visione comunicazione malattia per i ilvelli IV-VIII da parte del responsabile di gruppo
+
+TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli I-III da parte del responsabile di sede
+TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visione programma mensile di telelavoro per i livelli IV-VIII da parte del responsabile di sede
+
+SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
+SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
+SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di gruppo
+
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
 configurationDto.validityBegin=Validità Inizio
@@ -1203,6 +1298,7 @@ configurationDto.booleanNewValue=Nuovo Valore
 configurationDto.stringNewValue=Nuovo Valore
 configurationDto.integerNewValue=Nuovo Valore
 configurationDto.localdateNewValue=Nuovo Valore
+configurationDto.blockTypeNewValue=Nuovo Valore
 
 whichTolerance =Quando applicare la tolleranza
 
@@ -1232,9 +1328,14 @@ office.joiningDate.popover= Data di affiliazione della sede
 onlyMission.popover= Se sì, ogni giorno di missione viene segnato con tempo a lavoro = tempo di lavoro assegnato al dipendente. Se no, con tempo a lavoro = 0
 
 time.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+begin.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+finish.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+
+beginTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
+endTime.popover= Formato richiesto HHMM o HH:MM (HH ore, MM minuti)
 
 person.eppn.popover= Inserire la propria email istituzionale Es:mario.rossi@cnr.it
-person.perseoId.popover= L'id dell'anagrafica esterna è utilizzato per il collegamento tra utente ePAS e l'anagrafica esterna Es:4200
+person.perseoId.popover= Utilizzato per il collegamento tra utente ePAS e la anagrafica esterna Es:4200
 
 domain.popover= Specificare il dominio sprovvisto del carattere @ (Es. iit.cnr.it)
 
@@ -1286,6 +1387,7 @@ absenceType.active= Attivo
 absenceType.justifiedTypesPermitted=Tempo giustificato  
 absenceType.timeForMealTicket=Considerato per buono pasto
 absenceType.justifiedTime=Minuti specificati nel tipo assenza
+absenceType.toUpdate=Aggiornamento stato assenza
 
 absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato
@@ -1432,6 +1534,7 @@ absenceType.validTo.popover= Data fine validità di questo codice (se vuoto vali
 modifierType.popover= Scegliere "Giustifica" se si desidera che il codice giustifichi un certo numero di ore;Al contrario si selezioni "Assegna" se si vuole che il codice aggiunga le ore al tempo di lavoro della persona (es. cod 105BP)
 absenceType.justifiedTimeAtWork.popover= Il valore scelto influenzerà il calcolo nel tempo del lavoro della giornata nel quale verrà utilizzato questo codice di assenza
 absenceType.consideredWeekEnd.popover= Seleziona Si se il codice può essere inserito anche nel week end e nei festivi
+absenceType.toUpdate.popover= Seleziona Sì se il codice deve poter essere aggiornato dalla procedura automatica, No altrimenti
 
 ###########################################################################
 #	FINE COMPONENTE ASSENZE

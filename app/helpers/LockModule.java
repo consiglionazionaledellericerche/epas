@@ -22,7 +22,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 
 /**
  * Fornisce l'accesso singleton ai lock dell'applicazione.

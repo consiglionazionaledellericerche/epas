@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.AbsenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -31,13 +32,17 @@ import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.NotificationManager;
+import manager.NotificationManager.Crud;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.flows.AbsenceRequestManager;
@@ -70,7 +75,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**
@@ -238,22 +242,25 @@ public class AbsenceRequests extends Controller {
   public static void listToApprove(AbsenceRequestType type) {
     Verify.verifyNotNull(type);
 
+    long start = System.currentTimeMillis();
     val person = Security.getUser().get().person;
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
     List<Group> groups = 
         groupDao.groupsByOffice(person.office, Optional.absent(), Optional.of(false));
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<UsersRolesOffices> roleList = 
+        uroDao.getAdministrativeUsersRolesOfficesByUser(person.user);
     List<AbsenceRequest> results =
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
-    List<AbsenceRequest> myResults = absenceRequestDao.toApproveResults(roleList, Optional.absent(),
+    Set<AbsenceRequest> myResults = absenceRequestDao.toApproveResults(roleList, Optional.absent(),
         Optional.absent(), type, groups, person);
     List<AbsenceRequest> approvedResults = absenceRequestDao.totallyApproved(roleList, fromDate,
         Optional.absent(), type, groups, person);
     val config = absenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
-
+    log.debug("Preparate richieste da approvare per {} in {} ms. Da approvare = {}. Flussi attivi = {}", 
+        person.getFullname(), System.currentTimeMillis() - start, myResults.size(), results.size());
     render(config, results, type, onlyOwn, approvedResults, myResults);
   }
 
@@ -297,8 +304,13 @@ public class AbsenceRequests extends Controller {
     val absenceRequest = new AbsenceRequest();
     absenceRequest.type = type;
     absenceRequest.person = person;
+    
+    PeriodChain periodChain = null;
+    GroupAbsenceType groupAbsenceType = null;
 
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
           LocalDate.now().getMonthOfYear(), true);
       int maxDays = (Integer) configurationManager.configValue(person.office,
@@ -307,26 +319,32 @@ public class AbsenceRequests extends Controller {
       handleCompensatoryRestSituation = true;
     }
     if (type.equals(AbsenceRequestType.VACATION_REQUEST)) {
-      GroupAbsenceType vacationGroup =
+      groupAbsenceType =
           absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
       IWrapperPerson wperson = wrapperFactory.create(person);
 
       for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
         VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
-            LocalDate.now().getYear(), vacationGroup, Optional.absent(), false);
+            LocalDate.now().getYear(), groupAbsenceType, Optional.absent(), false);
         vacationSituations.add(vacationSituation);
       }
+      periodChain = absenceService
+          .residual(person, groupAbsenceType, LocalDate.now());
     }
-    GroupAbsenceType permissionGroup = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
-    PeriodChain periodChain = absenceService
-        .residual(person, permissionGroup, LocalDate.now());
+    if (type.equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get(); 
+      periodChain = absenceService
+          .residual(person, groupAbsenceType, LocalDate.now());
+    }
+    
 
     boolean showVacationPeriods = false;
     boolean retroactiveAbsence = false;
     absenceRequest.startAt = absenceRequest.endTo = LocalDateTime.now().plusDays(1);
     boolean insertable = true;
-    GroupAbsenceType groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
+    
     AbsenceType absenceType = null;
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
@@ -335,6 +353,7 @@ public class AbsenceRequests extends Controller {
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             null, null, false, absenceManager);
+
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
@@ -347,16 +366,18 @@ public class AbsenceRequests extends Controller {
    *
    * @param absenceRequest richiesta di assenza da modificare.
    */
-  public static void edit(AbsenceRequest absenceRequest, boolean retroactiveAbsence,
+  public static void edit(final AbsenceRequest absenceRequest, boolean retroactiveAbsence,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType, 
       JustifiedType justifiedType, Integer hours, Integer minutes) {
 
     rules.checkIfPermitted(absenceRequest);
     boolean insertable = true;
-    GroupAbsenceType permissionGroup = absenceComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
-    PeriodChain periodChain = absenceService
-        .residual(absenceRequest.person, permissionGroup, LocalDate.now());
+    GroupAbsenceType permissionGroup = groupAbsenceType;
+    PeriodChain periodChain = null;
+    if (!groupAbsenceType.name.equals(DefaultGroup.RIPOSI_CNR.name())) {
+      periodChain = absenceService
+          .residual(absenceRequest.person, permissionGroup, LocalDate.now());
+    }    
 
     if (absenceRequest.startAt == null || absenceRequest.endTo == null) {
       Validation.addError("absenceRequest.startAt",
@@ -369,9 +390,19 @@ public class AbsenceRequests extends Controller {
           groupAbsenceType, absenceType, justifiedType, hours, minutes, periodChain);
     }
     if (absenceRequest.startAt.isAfter(absenceRequest.endTo)) {
-      Validation.addError("absenceRequest.startAt",
-          "La data di inizio non può essere successiva alla data di fine");
+      absenceRequest.endTo = absenceRequest.startAt;
+      flash.success("Aggiornata la data di fine della richiesta a %s", 
+          TemplateExtensions.format(absenceRequest.endTo.toDate()));
     }
+    if (absenceRequest.endTo.compareTo(absenceRequest.startAt.plusMonths(6)) > 0) {
+      Validation.addError("absenceRequest.endTo",
+          "Le richieste di assenza non possono essere per periodi maggiori di sei mesi. "
+          + "Eventualmente effettuare più richieste di assenza.");
+    }
+
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
+        false, absenceType, justifiedType, hours, minutes, false, true);
 
     // verifico che non esista già una richiesta (non rifiutata)
     // di assenza che interessa i giorni richiesti
@@ -381,7 +412,8 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain,
+          absenceForm);
     }
     if (!absenceRequest.person
         .checkLastCertificationDate(new YearMonth(absenceRequest.startAtAsDate().getYear(),
@@ -390,7 +422,26 @@ public class AbsenceRequests extends Controller {
           "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
+          absenceForm);
+    }
+
+    boolean insideContracts = 
+        !absenceRequest.person.getContracts().stream()
+          .filter(c -> 
+            c.getRange().contains(absenceRequest.startAtAsDate()) 
+            && c.getRange().contains(absenceRequest.endToAsDate()))
+          .collect(Collectors.toList()).isEmpty();
+
+    if (!insideContracts) {
+      val message = "Non è possibile fare una richiesta in una data non "
+          + "coperta da nessun contratto del dipendente";
+      Validation.addError("absenceRequest.startAt", message);
+      Validation.addError("absenceRequest.endTo", message);
+      response.status = 400;
+      insertable = false;
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
+          absenceForm);
     }
 
     if (Validation.hasErrors()) {
@@ -398,8 +449,7 @@ public class AbsenceRequests extends Controller {
       insertable = false;
       flash.error(Web.msgHasErrors());
 
-      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
-      //return;
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm);
     }
 
     if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
@@ -409,7 +459,7 @@ public class AbsenceRequests extends Controller {
             "Inserire una motivazione per l'assenza nel passato");
         response.status = 400;
         insertable = false;
-        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm);
       }
     }
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -419,15 +469,12 @@ public class AbsenceRequests extends Controller {
     if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())) {
       absenceType = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
     }
-    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
-        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, justifiedType, hours, minutes, false, true);
     InsertReport insertReport =
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             absenceForm.hours, absenceForm.minutes, false, absenceManager);
     
-    absenceRequest = absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
+    absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
     int compensatoryRestAvailable = 0;
     if (absenceRequest.type.equals(AbsenceRequestType.COMPENSATORY_REST)
@@ -451,17 +498,20 @@ public class AbsenceRequests extends Controller {
         vacationSituations.add(vacationSituation);
       }
     }
-
-
+    boolean allDay = true;
+    if (absenceForm.absenceTypeSelected != null 
+        && absenceForm.absenceTypeSelected.code.equals("661M")) {
+      allDay = false;
+    }
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
-        compensatoryRestAvailable, retroactiveAbsence, periodChain);
+        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay);
   }
 
   /**
    * Salvataggio di una richiesta di assenza.
    */
   public static void save(@Required @Valid AbsenceRequest absenceRequest, 
-      Integer hours, Integer minutes, boolean persist) {
+      Integer hours, Integer minutes, boolean allDay) {
 
     log.debug("AbsenceRequest.startAt = {}", absenceRequest.startAt);
 
@@ -478,10 +528,15 @@ public class AbsenceRequests extends Controller {
       absenceRequest.endTo = absenceRequest.startAt;
     }
     
-    if (hours != null && minutes != null) {
+    if (!allDay) {
       absenceRequest.hours = hours;
-      absenceRequest.minutes = minutes;
+      if (minutes != null) {
+        absenceRequest.minutes = minutes;
+      } else {
+        absenceRequest.minutes = 0;
+      }      
     }
+    
 
     boolean isNewRequest = !absenceRequest.isPersistent();
     List<LocalDate> troubleDays = absenceRequestManager.getTroubleDays(absenceRequest);
@@ -501,7 +556,7 @@ public class AbsenceRequests extends Controller {
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
-            absenceRequest, true);
+            absenceRequest, Crud.CREATE);
         // invio anche la mail
         notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.person.user,
             absenceRequest, true);
@@ -545,7 +600,8 @@ public class AbsenceRequests extends Controller {
     boolean approved = absenceRequestManager.approval(absenceRequest, user);
 
     if (approved) {
-      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), Optional.absent());
+      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
+          Optional.absent(), Optional.absent(), true);
 
       flash.success("Operazione conclusa correttamente");
     } else {
@@ -572,23 +628,20 @@ public class AbsenceRequests extends Controller {
         && user.hasRoles(Role.GROUP_MANAGER)) {
       // caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
     if (absenceRequest.administrativeApprovalRequired
         && absenceRequest.administrativeApproved == null && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
     if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", absenceRequest, user);
     }
+    notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
+        Optional.absent(), Optional.absent(), false);
+    flash.error("Richiesta respinta");
     render("@show", absenceRequest, user);
   }
 
@@ -605,6 +658,9 @@ public class AbsenceRequests extends Controller {
     absenceRequestManager.executeEvent(absenceRequest, Security.getUser().get().person,
         AbsenceRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(AbsenceRequest.class));
+    // invio la notifica a chi doveva validare la mia richiesta
+    notificationManager.notificationAbsenceRequestPolicy(absenceRequest.person.user,
+        absenceRequest, Crud.DELETE);
     list(absenceRequest.type);
   }
 

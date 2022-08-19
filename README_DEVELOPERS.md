@@ -1,11 +1,12 @@
 ePAS - Electronic Personnel Attendance System
 ==============================================
 
-ePAS è un'applicazione java basata su Play Framework versione 1.5.x e 
+ePAS è un'applicazione java basata su Play Framework versione 1.5.x e
 database postgresql.
 Per il setup dell'ambiente di sviluppo è necessario aver installato sul 
 proprio PC java 11, il [play framework 1.5.x](https://www.playframework.com/documentation/1.5.x/install)
-ed avere accesso ad un dabatase postgresql.
+ed avere accesso ad un dabatase postgresql (dalla versione 9.5 in poi).
+
 Di seguito alcune istruzioni per poter eseguire il debug o aggiungere nuove
 funzionalità avviando un'istanza di ePAS in locale sulla proprio workstation.
 
@@ -29,7 +30,7 @@ all'interno della quale è necessario rimuovere dagli _arguments_ questa opzione
 ```
  -Djava.endorsed.dirs="/home/cristian/java/play-1.5.3/framework/endorsed"
 ```
-visto che non più compatibile con Java 11.
+visto che non più compatibile con Java 11 (naturalmente verificate il path corretto della vostra home).
 
 La configurazione per l'accesso al db e per sovrascriscrivere i paremetri tipici
 dello sviluppo è nel file _conf/dev.conf_.
@@ -125,3 +126,23 @@ produzione di Pisa, eliminare la copia locale e sostituirla con quella prelevata
 Ad esempio:
 
  $ fab -H epas.tools.iit.cnr.it copybackup epas-devel
+ 
+Generazione del Jar con le classi per l'interazione con KeyCloak
+----------------------------------------------------------------
+
+La definizione OpenAPI delle interfacce REST del keycloak può essere presa da un progetto come 
+questo:
+ - https://github.com/ccouzens/keycloak-openapi
+
+Per generare le classi JAVA relative a api, client e modello è possibile utilizzare un generatore
+come questo:
+ - https://openapi-generator.tech/
+
+Nel caso di ePAS le classi sono state generate in questo modo:
+
+    $ java -jar openapi-generator-cli.jar generate -i 16.1.json -g java -o ./keycloak-client \
+      --additional-properties=groupId=it.iit.cnr,apiPackage=it.cnr.iit.keycloak.api,modelPackage=it.cnr.iit.keycloak.model,invokerPackage=it.cnr.iit.keycloak.invoker,library=feign
+
+Una volta generate le classi è possibile generare il jar da includere tra le dipendenze del progetto:
+
+    $ cd keycloak-client/src/main/ && jar cvf keycloak-client.jar -C java/ .

@@ -112,7 +112,7 @@
      #{if absencePeriod.groupAbsenceType.initializable }
      #{if absencePeriod.initialization}
        %{ initializationGroup = absencePeriod.initialization; }%
-       #{include './_initializationStatus.html' /}       
+       #{include '/AbsenceGroups/_initializationStatus.html' /}       
        <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, initializationGroup.date.format(), true)}" data-async-modal="#defaultModal">Modifica Inizializzazione</a>       
      #{/if}
      #{else}

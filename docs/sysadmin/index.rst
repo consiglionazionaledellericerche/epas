@@ -5,4 +5,9 @@ Configurazioni per l'amministratore di sistema
    :maxdepth: 2
    :caption: Indice dei contenuti
 
+   startup
+   autenticazione
+   autenticazioneLdap
+   autenticazioneSaml
+   autenticazioneOidc
    configurazioneLog

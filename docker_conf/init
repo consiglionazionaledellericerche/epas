@@ -88,6 +88,14 @@ sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
+### Creazione e configurazione dell'application secret
+APPLICATION_SECRET=${APPLICATION_SECRET}
+if [ -z "${APPLICATION_SECRET}" ]; then
+  sed -n '/APPLICATION_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{APPLICATION_SECRET}}#'"${APPLICATION_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 ### Impostazione server smtp
 
 SMTP_FROM=${SMTP_FROM:-epas@cnr.it}
@@ -122,7 +130,10 @@ else
   sed 's#{{SMTP_PROTOCOL}}#'"${SMTP_PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+# impostazioni relative al servizio Attestati (solo per il CNR)
+
 URL_ATTESTATI=${URL_ATTESTATI:-https://attestativ2.rm.cnr.it}
+ATTESTATI_ACTIVE=${ATTESTATI_ACTIVE:-false}
 
 if [ -z "${URL_ATTESTATI}" ]; then
   sed -n '/URL_ATTESTATI/!p' -i ${APP_HOME}/conf/prod.conf
@@ -139,8 +150,13 @@ fi
 if [ -z "${URL_PASS}" ]; then
   sed -n '/URL_PASS/!p' -i ${APP_HOME}/conf/prod.conf
 else
-  sed 's#{{URL_PASS}}#'"${URL_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+  sed "s/{{URL_PASS}}/${URL_PASS}/g" -i ${APP_HOME}/conf/prod.conf
+  ATTESTATI_ACTIVE="true"
 fi
+
+sed "s/{{ATTESTATI_ACTIVE}}/${ATTESTATI_ACTIVE}/g" -i ${APP_HOME}/conf/prod.conf
+
+# Abilitazione dei job (tipo cron)
 
 if [ -z "${JOBS_ACTIVE}" ]; then
   sed -n '/JOBS_ACTIVE/!p' -i ${APP_HOME}/conf/prod.conf
@@ -148,6 +164,7 @@ else
   sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+# Abilitazione e configurazione dell'integrazione con OIL (solo per il CNR)
 if [ -z "${OIL_ENABLED}" ]; then
   sed -n '/OIL_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf
 else
@@ -359,8 +376,50 @@ else
   sed -n '/LDAP_AUTHENTICATE_USER_SEARCH_DN/!p' -i ${APP_HOME}/conf/prod.conf
 fi
 
-
 ### Fine impostazione autenticazione LDAP
+
+OAUTH_LOGIN=${OAUTH_LOGIN:-false}
+KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}
+KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-epas}
+KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+KEYCLOAK_JWT_FIELD=${KEYCLOAK_JWT_FIELD}
+JWT_KEY=${JWT_KEY}
+
+sed 's#{{OAUTH_LOGIN}}#'"${OAUTH_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
+
+if [ ${OAUTH_LOGIN} = "true" ]; then
+  if [ -z "${KEYCLOAK_CONFIG_URI}" ]; then
+    sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{KEYCLOAK_CONFIG_URI}}#'"${KEYCLOAK_CONFIG_URI}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+  sed 's#{{KEYCLOAK_CLIENT_ID}}#'"${KEYCLOAK_CLIENT_ID}"'#' -i ${APP_HOME}/conf/prod.conf
+  if [ -z "${KEYCLOAK_CLIENT_SECRET}" ]; then
+    sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{KEYCLOAK_CLIENT_SECRET}}#'"${KEYCLOAK_CLIENT_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+  if [ -z "${KEYCLOAK_JWT_FIELD}" ]; then
+    sed -n '/KEYCLOAK_JWT_FIELD/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{KEYCLOAK_JWT_FIELD}}#'"${KEYCLOAK_JWT_FIELD}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi 
+  if [ -z "${JWT_KEY}" ]; then
+    sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{JWT_KEY}}#'"${JWT_KEY}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
+else
+  sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/KEYCLOAK_CLIENT_ID/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+  sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
+fi
+
+### Impostazione Login OAuth
+
+
+### Fine impostazione Login OAuth
 
 ### Impostazione dati dell'ente/azienda che utilzza ePAS
 
@@ -398,6 +457,13 @@ sed 's#{{TELEWORK_PASS}}#'"${TELEWORK_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Fine configurazione parametri telework-stampings
 
+### Configurazione dell'attivazione del controllo del Green Pass
+
+GREENPASS_ACTIVE=${GREENPASS_ACTIVE:-false}
+
+sed 's#{{GREENPASS_ACTIVE}}#'"${GREENPASS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
+
+### Fine configurazione parametri relativi al Green PAss
 
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then

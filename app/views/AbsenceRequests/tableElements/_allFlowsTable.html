@@ -1,6 +1,6 @@
   #{title title:'Attivi', administration:true /}
-  
-  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable-absencerequest width="100%">
 	<thead>
 		<tr>
 			#{if !onlyOwn}
@@ -36,10 +36,10 @@
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
-								
+
 				<td>#{f.value 'item.startAt', value:config.allDay ? item.startAtAsDate().format() : item.startAt.format() /}</td>	    
 				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
-								
+
 				#{if config.managerApprovalRequired}
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>
 				#{/if}
@@ -52,11 +52,9 @@
 				<td>${item.note}</td>
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
-				#{secure.check 'AbsenceRequests.show', target: item }
-				#{secure.link @AbsenceRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	#{/secure.check}
+				#{secure.link @AbsenceRequests.show(item.id, type)}
+                  <i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+                #{/secure.link}
 				</td>
 			</tr>
 		#{/list}

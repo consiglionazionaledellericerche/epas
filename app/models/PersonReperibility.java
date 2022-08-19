@@ -32,6 +32,7 @@ import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.data.validation.Required;
 
 
@@ -94,15 +95,37 @@ public class PersonReperibility extends BaseModel {
   public static Comparator<PersonReperibility> PersonReperibilityComparator = 
       new Comparator<PersonReperibility>() {
 
-        public int compare(PersonReperibility pr1, PersonReperibility pr2) {
-
-          String prName1 = pr1.personReperibilityType.description.toUpperCase();
-          String prName2 = pr2.personReperibilityType.description.toUpperCase();
-
-
-          return prName1.compareTo(prName2);
-        }
-
+          public int compare(PersonReperibility pr1, PersonReperibility pr2) {
+            String prName1 = pr1.personReperibilityType.description.toUpperCase();
+            String prName2 = pr2.personReperibilityType.description.toUpperCase();
+            return prName1.compareTo(prName2);
+          }
       };
 
+  /**
+   * Verifica se il dipendente è attivo in reperibilità in una certa data.
+   *
+   * @param date la data in cui verificare se la reperibilità era attiva
+   *     per questa persona.
+   * @return true se la reperibilità era attiva nella data passata, false altrimenti. 
+   */
+  @Transient
+  public boolean isActive(LocalDate date) {
+    return (startDate == null || !startDate.isAfter(date)) 
+        && endDate == null || !endDate.isBefore(date);
+  }
+
+  /**
+   * Verifica se il dipendente è attivo in reperibilità nell'anno/mese.
+   *
+   * @param yearMonth l'anno/mese in cui verificare se la reperibilità era attiva
+   *     per questa persona almeno un giorno.
+   * @return true se la reperibilità era attiva nella data passata, false altrimenti. 
+   */
+  @Transient
+  public boolean isActive(YearMonth yearMonth) {
+    return (startDate == null 
+        || !startDate.isAfter(yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue())) 
+        && endDate == null || !endDate.isBefore(yearMonth.toLocalDate(1));
+  }
 }

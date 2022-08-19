@@ -62,7 +62,6 @@ import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.ValidationException;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import play.data.binding.As;
@@ -563,8 +562,6 @@ public class Shift extends Controller {
       is.close();
     } catch (IOException ex) {
       log.error("Io exception building ical", ex);
-    } catch (ValidationException ex) {
-      log.error("Validation exception generating ical", ex);
     }
   }
 

@@ -20,7 +20,7 @@ package it.cnr.iit.epas;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
@@ -115,8 +115,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.place = jsonObject.get("luogo").getAsString();
       }
       
-      if (jsonObject.get("luogo") != null) {
-        stamping.place = jsonObject.get("luogo").getAsString();
+      if (jsonObject.get("motivazione") != null) {
+        stamping.reason = jsonObject.get("motivazione").getAsString();
       }
       
       if (jsonObject.has("matricolaFirma") && !jsonObject.get("matricolaFirma").isJsonNull()) {

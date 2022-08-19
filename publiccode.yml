@@ -4,10 +4,10 @@
 
 publiccodeYmlVersion: '0.2'
 name: epas
-releaseDate: '2021-02-08'
+releaseDate: '2022-08-16'
 url: 'https://github.com/consiglionazionaledellericerche/epas'
 applicationSuite: epas
-softwareVersion: 2.0.0
+softwareVersion: 2.5.3
 developmentStatus: stable
 softwareType: standalone/web
 platforms:
@@ -74,14 +74,14 @@ description:
     genericName: ePAS
     shortDescription: >-
       ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale pensato
-      per le specifiche esigenze degli Enti Pubblic di Ricerca.
+      per le specifiche esigenze degli Enti Pubblici di Ricerca.
     documentation: >-
       https://consiglionazionaledellericerche.github.io/epas
     apiDocumentation: 'https://github.com/consiglionazionaledellericerche/epas'
     screenshots:
       - docs/user/_static/images/assenzeAnnuali.png
       - docs/user/_static/images/assenzeMensili.png
-      - docs/user/_static/images/cambioPassword.png
+      - docs/user/_static/images/cambiaPassword.png
       - docs/user/_static/images/competenze.png
       - docs/user/_static/images/ferie.png
       - docs/user/_static/images/inserisciOreFormazione.png

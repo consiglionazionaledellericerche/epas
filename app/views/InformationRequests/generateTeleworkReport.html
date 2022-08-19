@@ -1,0 +1,27 @@
+#{modalAsync id:'defaultModal', title:('Prospetto mensile di telelavoro per ' + person.fullname)}
+<table class="table table-striped table-hover table-condensed center">
+
+    <tr>
+      <th>Giorno</th>
+      <th>Inizio Giornata</th>
+      <th>Fine giornata</th>
+      <th>Inizio pausa pranzo</th>
+      <th>Fine pausa pranzo</th>      
+      <th>Interruzione dalle</th>
+      <th>Interruzione alle</th>
+    </tr>
+
+#{list items:list, as:'day'}
+<tr>
+	<td>${day.displayDay()}</td>
+	<td>${day.beginDay != null ? day.beginDay.formattedHour() : ' '}</td>
+	<td>${day.endDay != null ? day.endDay.formattedHour() : ' '}</td>
+	<td>${day.beginMeal != null ? day.beginMeal.formattedHour() : ' '}</td>
+	<td>${day.endMeal != null ? day.endMeal.formattedHour() : ' '}</td>
+	<td>${day.beginInterruption != null ? day.beginInterruption.formattedHour() : ' '}</td>
+	<td>${day.endInterruption != null ? day.endInterruption.formattedHour() : ' '}</td>
+</tr>
+#{/list}
+
+</table>
+#{/modalAsync}

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -38,6 +39,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.validators.LocalDateNotTooFar;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -47,6 +49,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
@@ -84,6 +87,7 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.QualificationMapping;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -91,7 +95,6 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei gruppi di assenze.
@@ -569,8 +572,9 @@ public class AbsenceGroups extends Controller {
    * @param minutes minuti
    */
   public static void insert(
-      Long personId, LocalDate from, CategoryTab categoryTab,                      //tab
-      LocalDate to, LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
+      Long personId, @CheckWith(LocalDateNotTooFar.class) LocalDate from, 
+      CategoryTab categoryTab, @CheckWith(LocalDateNotTooFar.class) LocalDate to, 
+      LocalDate recoveryDate, GroupAbsenceType groupAbsenceType,
       boolean switchGroup, AbsenceType absenceType, JustifiedType justifiedType,   //confGroup 
       Integer hours, Integer minutes, boolean forceInsert) {
 
@@ -584,6 +588,11 @@ public class AbsenceGroups extends Controller {
         absenceService.buildAbsenceForm(person, from, categoryTab,
             to, recoveryDate, groupAbsenceType, switchGroup, absenceType,
             justifiedType, hours, minutes, false, false);
+    
+    if (Validation.hasErrors()) {
+      render(absenceForm, personId, from, categoryTab, to, forceInsert, recoveryDate,
+          groupAbsenceType, switchGroup, absenceType, justifiedType, hours, minutes, forceInsert);
+    }
 
     InsertReport insertReport = absenceService.insert(person,
         absenceForm.groupSelected,
@@ -595,6 +604,19 @@ public class AbsenceGroups extends Controller {
     }
     render(absenceForm, insertReport, forceInsert, recoveryDate);
 
+  }
+
+
+  /**
+   * Metodo di test.
+   */
+  public static void orderedAbsences(Long personId, LocalDate start, LocalDate end) {    
+    log.info("orderedAbsences: personId = {}, start = {}, end = {}", personId, start, end);
+    long startTime = System.currentTimeMillis();
+    Person person = Person.findById(personId);
+    val absences = absenceComponentDao.orderedAbsences(person, start, end, Sets.newHashSet());
+    renderText("absences.size = %s. Prelevate in %d millisecondi.", 
+        absences.size(), System.currentTimeMillis() - startTime);
   }
 
   /**

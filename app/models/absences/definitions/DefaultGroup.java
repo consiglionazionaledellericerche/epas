@@ -70,15 +70,15 @@ public enum DefaultGroup {
       PeriodType.month, DefaultTakable.T_19P, DefaultComplation.C_19P, null, false, false),
 
   G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", "",
-      DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.simpleGrouping, PeriodType.always,
+      DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.always,
       DefaultTakable.T_26, null, null, false, false), 
   G_26_DIPENDENTI("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere",
       "", DefaultCategoryType.ALTRI_104_DIPENDENTI, 0, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_26, null, null, false, false),
 
-  G_C1718("C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_C1718, null, null,
-      false, false),
+  G_C161718("C16/C17/C18 - Altri congedi L. 104/92", "", DefaultCategoryType.ALTRI_104, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_C161718, null, null, false, false),
 
   G_661("661 - Permesso orario per motivi personali 18 ore anno", "",
       DefaultCategoryType.PERMESSI_PERSONALI, 0, GroupAbsenceTypePattern.programmed,
@@ -106,6 +106,23 @@ public enum DefaultGroup {
   G_COVID19("COVID19 - Codice emergenza Covid-19", "", DefaultCategoryType.COVID_19, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_COVID19, null,
       null, false, true),
+  
+  G_LAGILE("L-AGILE - Codice per lavoro agile", "", DefaultCategoryType.L_AGILE, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_LAGILE, null,
+      null, false, false),
+  
+  G_SMART("SMART - Smartworking", "", DefaultCategoryType.SMART, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
+      null, false, true),
+  
+  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", 
+      DefaultCategoryType.COD39_LA, 1,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
+      null, false, true),
+  
+  G_7("7 - Permessi sindacali", "", DefaultCategoryType.ALTRI_CODICI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_PERMESSI_SINDACALI, 
+      DefaultComplation.C_7, null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
@@ -143,12 +160,16 @@ public enum DefaultGroup {
 
   FERIE_CNR("31/94/32 - Ferie e permessi legge", "", DefaultCategoryType.FERIE_CNR, 0,
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
-      null, false, false), 
+      null, false, false),
+  
 
   //  ESENZ_19("ESENZ19 - Esenzione per COVID19", "", DefaultCategoryType.ESENZIONE_COVID19, 0,
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
 
+  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -206,10 +227,20 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_6, DefaultTakable.T_25, DefaultComplation.C_25, DefaultGroup.G_24,
       false, true), 
-  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+  //  G_COVID50("COVID50 - Congedo parentale straordinario al 50%.",
+  //      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+  //      PeriodType.always, DefaultTakable.T_COVID50, null, null,
+  //      false, true),   
+  
+  G_COV50("COV50 - Congedo parentale straordinario al 50%.",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
-      PeriodType.always, DefaultTakable.T_COVID50, null, null,
-      false, true),   
+      PeriodType.always, DefaultTakable.T_COV50, DefaultComplation.C_COV50, null,
+      false, true),
+  
+  G_COV00("COV00 - Congedo parentale straordinario al 0%.",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_COV00, DefaultComplation.C_COV00, null,
+      false, true),
 
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
       "23/25/24 - Astensione facoltativa post partum primo figlio",
@@ -294,6 +325,11 @@ public enum DefaultGroup {
   TELELAVORO("Telelavoro", "", DefaultCategoryType.TELELAVORO, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_TELELAVORO, null,
       null, false, false),
+  
+  TELELAVORO_RICERCATORI_TECNOLOGI("Telelavoro Ricercatori Tecnologi", "", 
+      DefaultCategoryType.TELELAVORO_RICERCATORI_TECNOLOGI, 0,
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_TELELAVORO_RT, null, null, false, false),
 
   G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_PUBBLICA_FUNZIONE,
@@ -432,6 +468,10 @@ public enum DefaultGroup {
   public static List<String> employeeTeleworkCodes() {
     return getCodes(DefaultGroup.TELELAVORO);
   }
+  
+  //  public static List<String> employeeTeleworkWithResidualCodes() {
+  //    return getCodes(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI);
+  //  }
 
   public static List<String> employeeDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
@@ -439,6 +479,14 @@ public enum DefaultGroup {
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeAgileWorkOrDisabledPeopleAssistanceCodes() {
+    return getCodes(DefaultGroup.G_39LA);
+  }
+  
+  public static List<String> employeeSmartworking() {
+    return getCodes(DefaultGroup.G_SMART);
   }
   
   /**
@@ -488,6 +536,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeCovid19Codes() {
     return getCodes(DefaultGroup.G_COVID19);
+  }
+  
+  public static List<String> employeeAgileCodes() {
+    return getCodes(DefaultGroup.G_LAGILE);
   }
 
   public static List<String> employeeAdditionalHoursCodes() {

@@ -22,6 +22,14 @@
       </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH) }
+      <p>Impostando a sì questo parametro sarà possibile, per i responsabili dei servizi di reperibilità, procedere all'approvazione del calendario dell'intero
+      mese di reperibilità anche se il mese non è ancora terminato. Ad esempio, se il calendario fosse già completamente schedulato per l'intero mese
+      e si tentasse l'approvazione prima della fine del mese (es.: giorno 25 del mese), con questo parametro a <strong>SI</strong> verrebbero conteggiati tutti i giorni del mese
+      nell'approvazione e non solo quelli fino al giorno in cui si sta approvando il calendario del servizio.
+      </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_MISSIONS_INTEGRATION) }
       <p>Abilitando questa funzionalità, ePAS comunicherà con la piattaforma Missioni ricevendo in automatico i giorni di missione dei dipendenti <br>
       e inserendoli automaticamente nel loro cartellino.
@@ -48,6 +56,13 @@
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.NUMBER_OF_VIEWING_COUPLE) }
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.MEAL_TICKET_BLOCK_TYPE) }
+      <p>In questa sezione è possibile specificare quale sia la tipologia di default dei blocchetti di
+      buoni pasto che la sede <strong>${configuration.office.name}</strong> utilizza.<br>
+      Il sistema comunica giornalmente con Attestati dove questa informazione risiede e si aggiorna, tuttavia
+      è possibile modificare manualmente qui la tipologia di blocchetto selezionando quella corretta.</p> 
     #{/if}
     
     #{secure.check 'Configurations.disableDateStartMealTicket'}
@@ -187,6 +202,17 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME) }
+      <p><strong>ATTENZIONE! QUESTA FUNZIONALITA' E' VALIDA SOLO PER IL PERSONALE
+      RICERCATORE-TECNOLOGO</strong><br>
+      Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente gli orari di lavoro relativi al Telelavoro e questi verranno contestualmente inseriti
+      nel cartellino del dipendente concorrendo alla formazione del residuo orario del giorno.<br>
+      <strong>NOTA BENE:</strong> utilizzando questa funzionalità è necessario che il dipendente, nei giorni in cui inserisce
+      gli orari in telelavoro, inserisca il codice <strong>103RT</strong> al posto del codice 103.
+	  </p> 
+    #{/if}
+    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.RIGHT_TO_STUDY) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi ai permessi per diritto allo studio.
@@ -196,6 +222,12 @@
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.COVID_19) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
       autonomamente i codici di assenza relativi all'emergenza COVID-19.
+	  </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente i codici di assenza relativi al lavoro agile di cui alla nota del DG 22278 del 22 marzo 2022.
 	  </p> 
     #{/if}
     
@@ -237,6 +269,17 @@
 	  </p> 
     #{/if}
    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza 39LA per poter assistere un parente disabile od immunodepresso in lavoro agile.
+	  </p> 
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SMARTWORKING) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza SMART per poter gestire il proprio smartworking.
+	  </p> 
+    #{/if}
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
@@ -335,8 +378,75 @@
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED) }
       <p>Abilitando questo paramentro si fa in modo che la richiesta di cambio di reperibilità vada innanzitutto al
-      reperibile con cui si richiede il cambio.
-      
+      reperibile con cui si richiede il cambio.      
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_INFORMATION_FLOWS) }
+      <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
+      integrato di approvazione/presa visione dei flussi informativi. <br>
+      Esso permette di far richiedere al dipendente tecnico/amministrativo un'uscita per servizio al proprio responsabile di sede, 
+      o a qualsiasi qualifica, se preventivamente abilitata, la possibilità di farsi approvare le informazioni per il telelavoro. 
+     
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un ricercatore/tecnologo
+      richieda l'approvazione del responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      richieda l'approvazione del responsabile di sede.      
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un ricercatore/tecnologo
+      richieda l'approvazione dell'amministratore del personale.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      richieda l'approvazione dell'amministratore del personale.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnologo/ricercatore
+      richieda l'approvazione del responsabile del gruppo di lavoro di cui il dipendente fa parte.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione di un'assenza per malattia per un tecnico/amministrativo
+      richieda l'approvazione del responsabile del gruppo di lavoro di cui il dipendente fa parte.      
+      </p>
+    #{/if}
+    
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione del mese in telelavoro per i tecnologi/ricercatori
+      venga inviata al responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di presa visione del mese in telelavoro per i tecnici/amministrativi
+      venga inviata al responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnologi/ricercatori venga inviata
+       al responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnici/amministrativi venga inviata
+       al responsabile di sede.      
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnici/amministrativi venga inviata
+       al responsabile del gruppo di lavoro di cui fanno parte.      
       </p>
     #{/if}
     

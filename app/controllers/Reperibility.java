@@ -61,7 +61,6 @@ import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.ValidationException;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import play.data.binding.As;
@@ -397,7 +396,15 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
-  public static void exportYearAsPDF(int year, Long type) {
+  public static void exportYearAsPDF(Integer year, Long type) {
+
+    if (type == null) {
+      log.info("Chiamato metodo exportYearAsPDF con parametro obbligatorio type = null");
+      badRequest("Parametro obbligatorio 'type' non presente");
+    }
+    if (year == null) {
+      year = LocalDate.now().getYear();
+    }
 
     log.debug("Chiamata alla exportYearAsPDF con year=%s e type=%s", year, type);
     PersonReperibilityType reperibilityType =
@@ -435,7 +442,7 @@ public class Reperibility extends Controller {
     }
 
     renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays, 
-        description, supervisor, seatSupervisor);
+        description, supervisor, seatSupervisor, office);
   }
 
 
@@ -647,9 +654,6 @@ public class Reperibility extends Controller {
     } catch (IOException ex) {
       log.error("Io exception building ical", ex);
       error("Io exception building ical");
-    } catch (ValidationException ex) {
-      log.error("Validation exception generating ical", ex);
-      error("Validation exception generating ical");
     }
   }
 

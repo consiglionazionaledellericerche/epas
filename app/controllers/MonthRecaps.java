@@ -22,6 +22,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -53,7 +54,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei MonthRecap.
@@ -237,7 +237,7 @@ public class MonthRecaps extends Controller {
 
   /**
    *  Raccoglitore per il CustomRecap.
-   * 
+   *
    *  @author Alessandro Martelli
    */
   @Data

@@ -18,7 +18,7 @@
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
@@ -81,7 +81,7 @@ public class StampingUpdateDto {
     val stamping = modelMapper.map(stampingDto, Stamping.class);
 
     if (stampingDto.reasonType != null) {
-      stamping.stampType = StampTypes.byIdentifier(stampingDto.reasonType.name());
+      stamping.stampType = StampTypes.byCode(stampingDto.reasonType.name());
     }
 
     return stamping;

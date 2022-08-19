@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
@@ -35,7 +36,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Contiene i metodi necessari per estrarre i dati per la generazione delle buste paga.

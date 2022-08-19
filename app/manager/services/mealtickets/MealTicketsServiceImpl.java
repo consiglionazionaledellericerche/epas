@@ -31,11 +31,14 @@ import javax.inject.Inject;
 import manager.ConsistencyManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Office;
 import models.PersonDay;
+import models.dto.MealTicketComposition;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -155,8 +158,8 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
    * @return la lista dei buoni
    */
   @Override
-  public List<MealTicket> buildBlockMealTicket(String codeBlock, Integer first, Integer last,
-      LocalDate expireDate, Office office) {
+  public List<MealTicket> buildBlockMealTicket(String codeBlock, BlockType blockType,
+      Integer first, Integer last, LocalDate expireDate, Office office) {
 
     List<MealTicket> mealTicketList = Lists.newArrayList();
 
@@ -165,6 +168,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       MealTicket mealTicket = new MealTicket();
       mealTicket.expireDate = expireDate;
       mealTicket.block = codeBlock;
+      mealTicket.blockType = blockType;
       mealTicket.office = office;
       mealTicket.number = i;
 
@@ -239,6 +243,69 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
   public static enum MealTicketOrder {
     ORDER_BY_EXPIRE_DATE_ASC,
     ORDER_BY_DELIVERY_DATE_DESC
+  }
+
+
+  @Override
+  public MealTicketComposition whichBlock(MealTicketRecap recap, 
+      ContractMonthRecap monthRecap, Contract contract) {
+    BlockType blockType = null;
+    int buoniCartacei = 0;
+    int buoniElettronici = 0;
+    int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
+    int buoniDaConteggiare = 0;
+    MealTicketComposition composition = new MealTicketComposition();
+    List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
+    if (monthRecap.remainingMealTickets < 0) {
+      //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
+      buoniDaConteggiare = buoniUsati;
+      composition.isBlockMealTicketTypeKnown = false;
+      final java.util.Optional<Configuration> conf = 
+          contract.person.office.configurations.stream()
+          .filter(configuration -> 
+          configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+      if (conf.isPresent()) {        
+        blockType = BlockType.valueOf(conf.get().fieldValue);
+        switch (blockType) {
+          case electronic:
+            buoniElettronici = buoniDaConteggiare;
+            break;
+          case papery:
+            buoniCartacei = buoniDaConteggiare;
+            break;
+          default:
+            //log.warn("Errore nel parsing dell'enumerato per il tipo di blocchetto. Verificare.");
+            break;
+        }
+        composition.blockType = blockType;
+      }
+
+    } else {
+      int dimBlocchetto = 0;
+      composition.isBlockMealTicketTypeKnown = true;
+      buoniDaConteggiare = buoniUsati;
+      for (BlockMealTicket block : list) {
+        dimBlocchetto = block.getDimBlock();
+        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {          
+          switch (block.getBlockType()) {
+            case papery:
+              buoniCartacei++;
+              break;
+            case electronic:
+              buoniElettronici++;
+              break;
+            default:
+              break;
+          }
+          dimBlocchetto--;
+          buoniDaConteggiare--;
+        }
+      }
+    }
+    composition.electronicMealTicket = buoniElettronici;
+    composition.paperyMealTicket = buoniCartacei;
+
+    return composition;
   }
 
 }

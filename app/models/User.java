@@ -101,6 +101,8 @@ public class User extends BaseModel {
   @JoinColumn(name = "office_owner_id")
   public Office owner;
 
+  public String keycloakId;
+  
   /**
    * Ritorna il badgeReader associato all'utente se ne ha almeno uno associato.
    *

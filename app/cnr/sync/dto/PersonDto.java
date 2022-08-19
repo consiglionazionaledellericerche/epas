@@ -39,6 +39,12 @@ public class PersonDto {
   public int number;
   public String department;
 
+  /**
+   * Sotto classe definizione dell'indirizzo.
+   *
+   * @author dario
+   *
+   */
   protected class Address {
     public String street;
     public String city;

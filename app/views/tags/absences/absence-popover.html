@@ -26,6 +26,7 @@
 	 #{else}
 	   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
 	 #{/else}
+	 <span class="sr-only"> ${_absence.absenceType.description}</span>
  #{/if}
  
  <div class="webui-popover-content" id="${id}">

@@ -80,6 +80,17 @@ public enum DefaultComplation {
   C_19P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19PM), 
       ImmutableSet.of(DefaultAbsenceType.A_19PH7)),
+  
+  C_7(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7M), 
+      ImmutableSet.of(DefaultAbsenceType.A_71, 
+          DefaultAbsenceType.A_72, 
+          DefaultAbsenceType.A_73, 
+          DefaultAbsenceType.A_74, 
+          DefaultAbsenceType.A_75, 
+          DefaultAbsenceType.A_76, 
+          DefaultAbsenceType.A_77, 
+          DefaultAbsenceType.A_78)),
 
   C_661(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M), 
@@ -151,6 +162,14 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       ImmutableSet.of(DefaultAbsenceType.A_43)),
   
+  C_COV50(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_COV50M), 
+      ImmutableSet.of(DefaultAbsenceType.A_COV50H)),
+  
+  C_COV00(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_COV00M), 
+      ImmutableSet.of(DefaultAbsenceType.A_COV00H)),
+  
   C_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23M), 
       ImmutableSet.of(DefaultAbsenceType.A_23H7)),
@@ -209,7 +228,7 @@ public enum DefaultComplation {
   
   /**
    * Ricerca i completamenti modellati e non presenti fra quelle passate in arg (db).
-   * 
+   *
    * @return list
    */
   public static List<DefaultComplation> missing(List<ComplationAbsenceBehaviour> allComplations) {

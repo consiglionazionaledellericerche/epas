@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.SecurityRules;
 import dao.BadgeReaderDao;
 import dao.ZoneDao;
 import java.util.List;
@@ -30,7 +31,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle zone di timbratura.

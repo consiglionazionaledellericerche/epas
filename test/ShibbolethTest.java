@@ -15,15 +15,16 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import common.injection.StaticInject;
 import controllers.shib.MockShibboleth;
 import dao.PersonDao;
-import injection.StaticInject;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.Test;
+import play.Play;
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.Router;
@@ -52,6 +53,7 @@ public class ShibbolethTest extends FunctionalTest {
     // logins in.
     MockShibboleth.removeAll();
     MockShibboleth.set("eppn", DEFAULT_USER_EMAIL);
+    Play.configuration.setProperty("shib.login", "true");
 
     final String loginUrl = Router.reverse("shib.Shibboleth.login").url;
     Response response = httpGet(loginUrl, true);

@@ -29,6 +29,12 @@ public class CompetenceDto {
   public String code;
   public int valueApproved;
 
+  /**
+   * Applica la conversione da dto a oggetto.
+   *
+   * @author dario
+   *
+   */
   public enum FromCompetence implements Function<Competence, CompetenceDto> {
     ISTANCE;
 

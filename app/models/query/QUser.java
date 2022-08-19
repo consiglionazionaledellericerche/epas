@@ -40,6 +40,8 @@ public class QUser extends EntityPathBase<User> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final StringPath keycloakId = createString("keycloakId");
+
     public final StringPath label = createString("label");
 
     public final QOffice owner;

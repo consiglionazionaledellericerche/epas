@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
@@ -51,7 +52,6 @@ import org.joda.time.YearMonth;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Il controller per l'invio dei dati certificati al nuovo attestati.
@@ -264,7 +264,6 @@ public class Certifications extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
-
     PersonCertData personCertData = null;
     try {
       // Costruisco lo status generale
@@ -274,7 +273,7 @@ public class Certifications extends Controller {
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
           + "{}", person, cleanMessage(ex).getMessage());
-      render();
+      render(person);
     }
 
     // La percentuale di completamento della progress bar rispetto al totale da elaborare

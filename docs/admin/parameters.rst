@@ -60,3 +60,91 @@ Tra gli altri troviamo:
    :align: center
    
    Schermata parametri annuali
+   
+Parametri periodici
+-------------------
+
+In questa sezione è possibile trovare tutti i parametri a cadenza periodica che possono essere configurati per la propria
+sede di lavoro.
+
+.. figure:: _static/images/parametriPeriodici.png
+   :scale: 40
+   :align: center
+   
+   Schermata parametri periodici
+   
+Di particolare interesse sono i tre intervalli orari presenti che riguardano:
+
+   * apertura-chiusura della sede, 
+   * pausa pranzo
+   * attività lavorativa durante i giorni di missione. 
+
+Tramite la corretta configurazione di questi intervalli, a seconda delle esigenze
+della propria sede di lavoro, verranno effettuati dal sistema i calcoli relativi a:
+
+   * entrate e uscite dal luogo di lavoro omettendo eventuale tempo trascorso in sede prima dell'apertura o dopo la chiusura
+   * ricerca di uscite e entrate per pausa pranzo nell'intervallo definito per il pranzo
+   * comparazione degli orari delle missioni (orarie e giornaliere) di modo da poter inserire il miglior codice d'assenza per ciascun giorno di missione che la piattaforma Missioni invia ad ePAS. 
+   
+N.B.: per questa parte si rimanda alla documentazione presente su questa pagina relativa all'integrazione ePAS-Missioni 
+
+Autocertificazioni
+------------------
+
+Flussi di lavoro
+----------------
+
+In questa sezione è possibile definire la configurazione per consentire la gestione interna ad ePAS delle richieste da 
+parte dei dipendenti di:
+
+   * ferie
+   * riposi compensativi
+   * permessi personali
+   * ferie dopo il 31/8
+   
+In particolare è possibile specificare quale ruolo abbia il diritto di approvare le richieste effettuate dai dipendenti.
+Per una spiegazione più dettagliata relativa al significato di questi parametri, consultare la sezione presente in questa
+documentazione *Documentazione utilizzo flussi*.
+
+.. figure:: _static/images/flussiAssenza.png
+   :scale: 40
+   :align: center
+   
+   Schermata parametri per i flussi di richiesta assenza
+
+Flussi di richiesta competenze
+------------------------------
+
+In questa sezione è possibile definire la configurazione per consentire la gestione interna ad ePAS delle richieste da 
+parte dei dipendenti di:
+
+   * cambio giorno di reperibilità
+   
+In particolare è possibile specificare quale ruolo abbia il diritto di approvare le richieste effettuate dai dipendenti.
+Per una spiegazione più dettagliata relativa al significato di questi parametri, consultare la sezione presente in questa
+documentazione *Documentazione utilizzo flussi*.
+
+.. figure:: _static/images/flussiCompetenza.png
+   :scale: 40
+   :align: center
+   
+   Schermata parametri per i flussi di richiesta competenza
+
+Flussi informativi
+------------------
+
+In questa sezione è possibile definire la configurazione per consentire la gestione interna ad ePAS delle richieste da 
+parte dei dipendenti di:
+
+   * richiesta uscita di servizio
+   * richiesta validazione orario svolto in telelavoro
+   
+In particolare è possibile specificare quale ruolo abbia il diritto di approvare le richieste effettuate dai dipendenti.
+Per una spiegazione più dettagliata relativa al significato di questi parametri, consultare la sezione presente in questa
+documentazione *Documentazione utilizzo flussi*.
+
+.. figure:: _static/images/flussiInformativi.png
+   :scale: 40
+   :align: center
+   
+   Schermata parametri per i flussi informativi

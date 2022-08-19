@@ -23,6 +23,7 @@ import cnr.sync.dto.v3.AbsenceShowTerseDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -39,7 +40,6 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per l'esportazione delle informazioni sulle aspettative.
@@ -65,9 +65,9 @@ public class Leaves extends Controller {
    * @param year anno in cui cercare le aspettative
    */
   public static void byPersonAndYear(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode, Integer year, boolean includeDetails) {
+      String fiscalCode, String number, Integer year, boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
 
     LocalDate start = new LocalDate(LocalDate.now().getYear(), 1, 1);
@@ -116,7 +116,7 @@ public class Leaves extends Controller {
   @Util
   private static List<AbsencePeriodDto> toAbsencesPeriods(List<Absence> absences,
       boolean includeDetails) {
-    List<AbsencePeriodDto> aps = Lists.newArrayList();
+    List<AbsencePeriodDto> abs = Lists.newArrayList();
     LocalDate previousDate = null;
     String previousCode = null;
     Person previousPerson = null;
@@ -134,7 +134,7 @@ public class Leaves extends Controller {
                 absence.absenceType.code, 
                 JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
         currentAbsencePeriod.setEnd(currentAbsencePeriod.getStart());
-        aps.add(currentAbsencePeriod);
+        abs.add(currentAbsencePeriod);
       } else {
         currentAbsencePeriod.setEnd(JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
       }
@@ -146,6 +146,6 @@ public class Leaves extends Controller {
       previousDate = absence.personDay.date;
     }
     
-    return aps;
+    return abs;
   }
 }

@@ -25,6 +25,8 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dao.OfficeDao;
+import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
@@ -44,11 +46,13 @@ import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
+import models.enumerate.BlockType;
 import models.query.QConfiguration;
-import models.query.QPersonConfiguration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
+import play.jobs.Job;
+
 
 /**
  * Manager della configurazione.
@@ -58,15 +62,19 @@ public class ConfigurationManager {
 
   protected final JPQLQueryFactory queryFactory;
   private final PeriodManager periodManager;
+  private final OfficeDao officeDao;
+  private final PersonDao personDao;
 
   /**
    * Default constructor per l'injection.
    */
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager) {
+      PeriodManager periodManager, OfficeDao officeDao, PersonDao personDao) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
+    this.officeDao = officeDao;
+    this.personDao = personDao;
   }
 
   /**
@@ -78,28 +86,11 @@ public class ConfigurationManager {
   public List<Configuration> configurationWithType(EpasParam epasParam) {
     final QConfiguration configuration = QConfiguration.configuration;
 
-    final JPQLQuery<?> query = queryFactory.from(configuration)
+    final JPQLQuery<Configuration> query = queryFactory.selectFrom(configuration)
         .where(configuration.epasParam.eq(epasParam));
-    return (List<Configuration>) query.fetch();
-  }
-
-  /**
-   * La lista delle configurazioni delle persone con parametro epasParam e valore value.
-   *
-   * @param epasParam il parametro da cercare
-   * @param value il valore da cercare
-   * @return la lista di configurazioni della persona.
-   */
-  public List<PersonConfiguration> configurationWithTypeAndValue(
-      EpasParam epasParam, String value) {
-    final QPersonConfiguration configuration = QPersonConfiguration.personConfiguration;
-    
-    final JPQLQuery query = queryFactory.selectFrom(configuration)
-        .where(configuration.epasParam.eq(epasParam)
-            .and(configuration.fieldValue.eq(value)));
     return query.fetch();
   }
-  
+
   /**
    * Aggiunge una nuova configurazione di tipo LocalTime.
    *
@@ -265,6 +256,24 @@ public class ConfigurationManager {
   }
 
   /**
+   * Aggiunge una nuova configurazione di tipo enumerato.
+   *
+   * @param epasParam parametro
+   * @param target il target
+   * @param value valore
+   * @param begin inizio
+   * @param end fine
+   * @param persist se persistito
+   * @return configurazione
+   */
+  public IPropertyInPeriod updateEnum(EpasParam epasParam, IPropertiesInPeriodOwner target,
+      BlockType value, Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
+    Preconditions.checkState(epasParam.epasParamValueType == EpasParamValueType.ENUM);
+    return build(epasParam, target,
+        EpasParamValueType.formatValue(value), begin, end, false, persist);
+  }
+
+  /**
    * Aggiunge una nuova configurazione di tipo Integer con cadenza annuale.
    *
    * @param epasParam parametro
@@ -422,7 +431,7 @@ public class ConfigurationManager {
   public List<Configuration> getOfficeConfigurationsByDate(Office office, LocalDate date) {
 
     return office.configurations.stream().filter(conf ->
-        DateUtility.isDateIntoInterval(date, conf.periodInterval())).distinct()
+    DateUtility.isDateIntoInterval(date, conf.periodInterval())).distinct()
         .sorted(Comparator.comparing(c -> c.epasParam))
         .collect(Collectors.toList());
   }
@@ -680,17 +689,31 @@ public class ConfigurationManager {
       updateConfigurations(office);
     }
   }
-  
+
   /**
    * Aggiorna la configurazione di tutte le persone.
    */
   public void updatePeopleConfigurations() {
-    List<Person> people = Person.findAll();
-    for (Person person : people) {
-      log.debug("Fix parametri di configurazione della persona {}", person.fullName());
-      updateConfigurations(person);
+    List<Office> officeList = officeDao.allEnabledOffices();
+
+    for (Office office : officeList) {  
+      new Job<Void>() {
+        @Override
+        public void doJob() {
+          log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
+          List<Person> people = personDao.byOffice(office);
+          for (Person person : people) {
+            log.debug("Fix parametri di configurazione della persona {}", person.fullName());
+            updateConfigurations(person);           
+          }
+        }        
+      }.now();
+      log.info("Fine aggiornamento parametri per {} dipendenti di {}", 
+          office.persons.size(), office.name);
     }
   }
+
+  
 
   /**
    * Converte il formato stringa in formato oggetto per l'epasParam.

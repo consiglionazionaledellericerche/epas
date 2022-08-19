@@ -24,8 +24,8 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import common.injection.StaticInject;
 import dao.PersonDao;
-import injection.StaticInject;
 import java.lang.reflect.Type;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +33,10 @@ import models.Person;
 import models.exports.AbsenceFromClient;
 import org.joda.time.LocalDate;
 
+/**
+ * Deserializza le assenze provenienti da client.
+ *
+ */
 @Slf4j
 @StaticInject
 public class AbsenceFromClientDeserializer implements JsonDeserializer<AbsenceFromClient> {

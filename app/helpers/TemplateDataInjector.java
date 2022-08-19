@@ -19,7 +19,7 @@ package helpers;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Scope.RenderArgs;

@@ -77,8 +77,8 @@ formazione del residuo mensile orario per il dipendente.
 In particolare nella colonna "*Tempo lavoro*" troviamo quante ore effettive di lavoro sono state
 effettuate dal dipendente in un certo giorno, calcolate sulla base di quanto tempo è trascorso tra
 le timbrature di ingresso e uscita effettuate.
-Nel caso ci trovassimo di fronte a un tempo di lavoro calcolato su giorno festivo
-(v. :doc:`Presenza festiva <holidayPresence>`), così come da figura:
+Nel caso ci trovassimo di fronte a un tempo di lavoro calcolato su giorno festivo, così come da
+figura:
 
 .. figure:: _static/images/giornoFestivo.png
    :scale: 40
@@ -86,7 +86,7 @@ Nel caso ci trovassimo di fronte a un tempo di lavoro calcolato su giorno festiv
    
    Schermata di abilitazione orario nel festivo
    
-sarà sufficiente per l'amministratore cliccare sulla scritta "*Abilita*" così da abilitare il tempo
+Sarà sufficiente per l'amministratore cliccare sulla scritta "*Abilita*" così da abilitare il tempo
 di lavoro per quel giorno.
 
 Nella colonna "*Differenza*" troviamo invece la quantità oraria di differenza (positiva o negativa)

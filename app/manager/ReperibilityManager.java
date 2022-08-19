@@ -29,6 +29,7 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import helpers.BadRequest;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,7 +50,6 @@ import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
@@ -231,7 +231,7 @@ public class ReperibilityManager {
             .size() > 0) {
           String msg =
               String.format("La reperibilità di %s %s e' incompatibile con la sua assenza nel "
-                      + "giorno %s",
+                  + "giorno %s",
                   reperibilityPeriod.person.name, reperibilityPeriod.person.surname, day);
           BadRequest.badRequest(msg);
         }
@@ -241,12 +241,12 @@ public class ReperibilityManager {
         //un PersonReperibilityDay nuovo
         PersonReperibilityDay personReperibilityDay =
             personReperibilityDayDao
-                .getPersonReperibilityDayByTypeAndDate(reperibilityPeriod.reperibilityType, day);
+            .getPersonReperibilityDayByTypeAndDate(reperibilityPeriod.reperibilityType, day);
 
         if (personReperibilityDay == null) {
           personReperibilityDay = new PersonReperibilityDay();
           log.trace("Creo un nuovo personReperibilityDay per person = {}, day = {}, "
-                  + "reperibilityDay = {}",
+              + "reperibilityDay = {}",
               reperibilityPeriod.person, day, reperibilityPeriod.reperibilityType);
         } else {
           log.trace("Aggiorno il personReperibilityDay = {}", personReperibilityDay);
@@ -412,7 +412,7 @@ public class ReperibilityManager {
             String.format(
                 "ReperibilityPeriod substitute.id %s is not compatible with a Absence in the same "
                     + "day %s",
-                substitute, start));
+                    substitute, start));
       }
 
       // cambia le reperibilità mettendo quelle del sostituto al posto di quelle del richiedente
@@ -432,11 +432,11 @@ public class ReperibilityManager {
         log.debug("Aggiorno il personReperibilityDay = {}", personReperibilityDay);
         PersonReperibility substituteRep =
             personReperibilityDayDao
-                .getPersonReperibilityByPersonAndType(substitute, reperibilityType);
+            .getPersonReperibilityByPersonAndType(substitute, reperibilityType);
         personReperibilityDay.personReperibility = substituteRep;
 
         log.info("scambio reperibilità del richiedente con "
-                + "personReperibilityDay.personReperibility.person={} e reqstart={}",
+            + "personReperibilityDay.personReperibility.person={} e reqstart={}",
             personReperibilityDay.personReperibility.person, personReperibilityDay.date);
       }
 
@@ -544,7 +544,7 @@ public class ReperibilityManager {
 
             int n =
                 reperibilitySumDays.contains(person, col)
-                    ? reperibilitySumDays.get(person, col) + 1 : 1;
+                ? reperibilitySumDays.get(person, col) + 1 : 1;
             reperibilitySumDays.put(person, col, Integer.valueOf(n));
           } else {
             //TODO qualcosa.....
@@ -617,7 +617,7 @@ public class ReperibilityManager {
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
     String shortMonth = firstOfMonth.monthOfYear().getAsShortText();
 
-    
+
     // for each person contains the reperibility days (fs/fr) in the month
     ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder();
     Table<Person, Integer, String> reperibilityMonth = null;
@@ -635,7 +635,7 @@ public class ReperibilityManager {
     reperibilityMonth = builder.build();
 
     int numSavedCompetences = 0;
-    
+
     // for each person in the reperibilitymonth conunts the reperibility day
     // divided by fs and fr and build a string description of the rep periods
     for (Person person : reperibilityMonth.rowKeySet()) {
@@ -667,7 +667,7 @@ public class ReperibilityManager {
         if (reperibilityMonth.contains(person, dayOfMonth)) {
           if ((previousPersonReperibilityDay == null)
               || (!reperibilityMonth.get(person, dayOfMonth)
-              .equals(previousPersonReperibilityDay.tipo))
+                  .equals(previousPersonReperibilityDay.tipo))
               || ((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) {
             currentPersonReperibilityPeriod =
                 new Prp(
@@ -774,43 +774,31 @@ public class ReperibilityManager {
       Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personReperibilityDay.date);
 
       // if there are no events and it is not an holiday -> error
-      if (!personDay.isPresent() && LocalDate.now().isAfter(personReperibilityDay.date)) {
+      if (!personDay.isPresent() || (!personDay.get().isHoliday 
+          && personDay.get().stampings.isEmpty()
+          && personDay.get().absences.isEmpty())) {
         if (!personDayManager.isHoliday(person, personReperibilityDay.date)) {
           log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
               + "giorno {}", person.name, person.surname, personReperibilityDay.date);
 
           noStampingDays =
               (inconsistentAbsenceTable.contains(person, thNoStampings))
-                  ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<>();
+              ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<>();
           noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
           inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
         }
-      } else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
-        // check for the stampings in working days
-        if (!personDay.get().isHoliday && personDay.get().stampings.isEmpty()) {
-          log.info("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
-              + "giorno {}", person.name, person.surname, personDay.get().date);
-
-          noStampingDays =
-              (inconsistentAbsenceTable.contains(person, thNoStampings))
-                  ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<>();
-          noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
-          inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);
-        }
-
+      } else if (!personDay.get().isHoliday && !personDay.get().absences.isEmpty()) {
         // check for absences
-        if (!personDay.get().absences.isEmpty()) {
-          for (Absence absence : personDay.get().absences) {
-            if (absence.justifiedType.name == JustifiedTypeName.all_day) {
-              log.info("La reperibilità di {} {} è incompatibile con la sua assenza nel "
-                  + "giorno {}", person.name, person.surname, personReperibilityDay.date);
+        for (Absence absence : personDay.get().absences) {
+          if (!absence.absenceType.reperibilityCompatible) {
+            log.info("La reperibilità di {} è incompatibile con la sua assenza nel "
+                + "giorno {}", person.getFullname(), personReperibilityDay.date);
 
-              absenceDays =
-                  (inconsistentAbsenceTable.contains(person, thAbsences))
-                      ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<>();
-              absenceDays.add(personReperibilityDay.date.toString("dd MMM"));
-              inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
-            }
+            absenceDays =
+                (inconsistentAbsenceTable.contains(person, thAbsences))
+                ? inconsistentAbsenceTable.get(person, thAbsences) : new ArrayList<>();
+            absenceDays.add(personReperibilityDay.date.toString("dd MMM"));
+            inconsistentAbsenceTable.put(person, thAbsences, absenceDays);
           }
         }
       }
@@ -949,9 +937,8 @@ public class ReperibilityManager {
 
 
   private VEvent createIcalEvent(Date startDate, int sequence, String eventLabel) {
-    VEvent reperibilityPeriod = new VEvent(startDate, new Dur(sequence, 0, 0, 0), eventLabel);
+    VEvent reperibilityPeriod = new VEvent(startDate, Duration.ofDays(sequence), eventLabel);
     reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
-
     return reperibilityPeriod;
   }
 

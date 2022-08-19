@@ -1,158 +1,136 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    jcenter()
-  }
-  dependencies {
-  }
-}
-
 plugins {
-  id "de.undercouch.download" version "3.1.2"
+  id "de.undercouch.download" version "4.0.4"
+  id "com.github.node-gradle.node" version "2.2.0"
 }
 
 apply plugin: 'java'
-apply plugin: 'application'
 apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 repositories {
-  mavenLocal()
   jcenter()
   flatDir {
     dirs 'lib'
   }
 }
 
-configurations {
-  compile.exclude group: "org.hibernate", module: "hibernate-core"
+ext {
+  playVersion = '1.5.3'
+  fastergtVersion = '1.9.2'
+  lombokVersion = '1.18.10'
+  def homePath = System.properties['user.home']
+  playHome = findProperty('playHome') ?: "${homePath}/java/play-${playVersion}"
+  playId = ''
+  versionFile = "${buildDir}/VERSION.txt"
+}
 
+configurations {
   playModule {
     description = "Zipped play modules"
     visible = false
   }
 }
 
-configurations.playModule.incoming.beforeResolve {
-  logger.info("Check if download of play-modules is required.")
-  def repoDir = file("${projectDir}/lib")
-  def fastergtFile = file("$repoDir/fastergt-1.8.zip")
-  if (!fastergtFile.exists()) {
-    logger.warn("download fastergt modules...")
-    download {
-      src 'http://mbknor.github.com/play-modules/fastergt-1.8.zip'
-      dest repoDir
-    }
-  } else {
-    logger.info("Play-modules was already downloaded.")
-  } 
+task linkedModules() {
+  description 'list linked modules'
+
+  outputs.files file('modules').listFiles().collect {
+    if (it.directory) it else file(it.text)
+  }
 }
+
+dependencies {
+//  compile "org.projectlombok:lombok:${lombokVersion}"
+//  compile "com.google.code.maven-play-plugin.org.playframework:play:${playVersion}"
+//  playModule "com.google.code.maven-play-plugin.org.playframework:play:${playVersion}:framework-min@zip"
+//  playModule "com.google.code.maven-play-plugin.org.playframework.modules.secure:play-secure:${playVersion}:module@zip"
+//  playModule "kjetland:fastergt:1.9.2@zip"
+
+//  compile ("org.hibernate:hibernate-entitymanager:4.2.19.Final") {
+//    force = true
+//  }
+  implementation fileTree(dir: "${playHome}/framework/lib", include: ['*.jar'])
+  implementation fileTree(dir: "${playHome}/framework", include: ['play-*.jar'])
+  implementation fileTree(dir: 'lib', include: ['*.jar'])
+
+  annotationProcessor fileTree(dir: 'lib', include: [
+    'querydsl*.jar', 'lombok*.jar', 'codegen*.jar', 'guava*.jar', 'javax.annotation-api*.jar', 'pdf*.jar'
+  ])
+  annotationProcessor fileTree(dir: "${playHome}/framework/lib", include: [
+    'javax.persistence-api*.jar', 'javax.inject*.jar'
+  ])
+  
+  linkedModules.outputs.files.collect {
+    implementation fileTree(dir: it, include: ['lib/*.jar'])
+  }
+}
+
+// compileJava.doFirst { tasks.codeGeneratorTaks.execute() }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 sourceSets {
   main {
-    java.srcDirs = ["app"]
+    java.srcDirs = linkedModules.outputs.files.collect { it.toString() + '/app' } + ['app']
     resources.srcDirs = ["conf"]
+  }
+  framework {
+    java.srcDirs = ["${playHome}/framework/src"]
   }
   test {
     java.srcDirs = ["test"]
   }
 }
 
-ext {
-  localRepoDir = "${projectDir}/repo"
-  playVersion = '1.4.2'
-  lombokVersion = '1.16.10'
-  playHome = "${projectDir}/modules/play-${playVersion}"
-  playId = ''
-  versionFile = "${buildDir}/VERSION.txt"
+eclipse {
+  classpath {
+     containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+     containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+  }
 }
 
-dependencies {
-  compile "com.google.code.maven-play-plugin.org.playframework:play:${playVersion}"
-  playModule "com.google.code.maven-play-plugin.org.playframework:play:${playVersion}:framework-min@zip"
-  playModule "com.google.code.maven-play-plugin.org.playframework.modules.secure:play-secure:${playVersion}:module@zip"
-  playModule "com.google.code.maven-play-plugin.org.playframework.modules.shibboleth:play-shibboleth:1.2:module@zip"
-  
-  //Pdf-0.9 modules and its dependencies
-  playModule "com.google.code.maven-play-plugin.org.playframework.modules.pdf:play-pdf:0.9:module@zip"
-  compile "com.google.code.maven-play-plugin.org.xhtmlrenderer:core-renderer:2011.04.16-patched-play-pdf-0.8"
-  compile "com.google.code.maven-play-plugin.org.allcolor.yahp:yahp:1.3"  
-  compile "com.google.code.maven-play-plugin.org.allcolor.yahp:yahp-internal:1.3-patched-play-pdf-0.8"
-  compile "com.lowagie:itext:2.1.7"
-  compile "jaxen:jaxen:1.1.1"
-  compile "net.sf.jtidy:jtidy:r938"
-  compile "com.google.code.maven-play-plugin.org.allcolor.shanidom:shani-parser:1.4.17"
-  // End of Pdf-0.9 module dependencies
-  
-  playModule "kjetland:fastergt:1.8@zip"
-  compile fileTree(dir: 'modules/', include: ['*.jar'])
-  
-  compile ("org.hibernate:hibernate-entitymanager:4.2.19.Final") {
-    force = true
+task printClasspath() {
+  doLast {
+    configurations.compileClasspath.each { println it }
   }
-  compile "org.hibernate:hibernate-envers:4.2.19.Final"
-  compile "org.jadira.usertype:usertype.core:4.0.0.GA"
-  compile "com.google.guava:guava:20.0"
-  compile "com.google.inject:guice:4.1.0"
-  compile "com.google.inject.extensions:guice-assistedinject:4.1.0"
-  compile "org.eclipse.jdt.core.compiler:ecj:4.5.1"
-  compile "org.mnode.ical4j:ical4j:1.0.6"
-  compile "org.jsoup:jsoup:1.8.3"
-  compile "org.dbunit:dbunit:2.5.1"
-  compile "org.mockito:mockito-core:2.0.32-beta"
-  compile "net.lingala.zip4j:zip4j:1.3.2"
-  
-  compile "org.projectlombok:lombok:${lombokVersion}"
-  compile "com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.2.0"
-  compile "com.fasterxml.jackson.core:jackson-core:2.7.3"
-  compile "com.fasterxml.jackson.core:jackson-annotations:2.7.3"
-  compile "com.fasterxml.jackson.core:jackson-databind:2.7.3"
-  compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:2.7.3"
-  compile "com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:2.7.3"
-  compile "com.fasterxml.jackson.module:jackson-module-afterburner:2.7.3"
-  compile "com.github.fge:jackson-coreutils:1.8"
-  compile "org.jsondoc:jsondoc-core:1.2.13"
-  compile "org.jsondoc:jsondoc-ui:1.2.13"
-  compile "com.mysema.querydsl:querydsl-jpa:3.7.2"
-  /* exclude
-      compile "asm:asm *
-      compile "cglib:cglib *
-      compile "org.apache.geronimo.specs:geronimo-jpa_3.0_spec *
-      compile "org.mongodb.morphia:morphia *
-      compile "org.springframework.roo:org.springframework.roo.annotations *
-      compile "org.eclipse.persistence:eclipselink
-  */
-  compile "com.mysema.querydsl:querydsl-apt:3.7.2"
-  /* exclude
-      compile "asm:asm *
-      compile "cglib:cglib *
-      compile "org.apache.geronimo.specs:geronimo-jpa_3.0_spec *
-      compile "org.mongodb.morphia:morphia *
-      compile "org.springframework.roo:org.springframework.roo.annotations *
-      compile "org.eclipse.persistence:eclipselink *
-  */
-  compile "org.drools:drools-core:5.5.0.Final"
-  compile "org.drools:drools-compiler:5.5.0.Final"
-  compile "org.codehaus.janino:janino:2.5.16"
-  compile "org.mockito:mockito-core:2.0.52-beta"
-  compile "org.assertj:assertj-core:3.4.1"
-  compile "org.assertj:assertj-guava:2.0.0"
-  compile "org.testng:testng:6.9.10"
-  compile "org.apache.poi:poi:3.14"
-  compile "org.graylog2:gelfj:1.1.15"
-  
-  compile "com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.2.0"
-  compile "com.github.fge:jackson-coreutils:1.8"
-  compile "org.jsondoc:jsondoc-core:1.2.13"
-  compile "org.jsondoc:jsondoc-ui:1.2.13"
-  compile "com.hazelcast:hazelcast:3.6.5"
+}
+
+task deleteQueryDSL(type: Delete, group: 'querydsl') {
+  description 'Delete QueryDSL generated file'
+
+  delete fileTree(dir:'app/models', include:'**/query/*.java')
+  delete fileTree(dir:'app/play/', include:'**/query/*.java')
+}
+
+task generateQueryDSL(type: JavaCompile, group: 'querydsl') {
+  description 'Generates the QueryDSL query types'
+
+  // i Q<model> stanno insieme al codice, ma in un package separato:
+  def generated = sourceSets.main.java.srcDirs.find { it.path == "$projectDir/app" }
+  source = sourceSets.main.java + sourceSets.framework.java
+  // salta i Q<model> generati
+  exclude { it.path.endsWith('query') }
+  classpath = configurations.compileClasspath
+  destinationDir = file("build/classes")
+  options.annotationProcessorPath = configurations.annotationProcessor
+  options.compilerArgs = [
+    "-proc:only",
+    "-Aquerydsl.packageSuffix=.query",
+    "-processor",
+    "com.querydsl.apt.jpa.JPAAnnotationProcessor",
+    "-s",
+    "${generated}"
+  ]
+  outputs.upToDateWhen { false }
+}
+
+generateQueryDSL.dependsOn {
+  deleteQueryDSL
+  playDependencies
 }
 
 task installPlayModules  {
-  logger.info("Installing play modules")
+
   configurations.playModule.resolvedConfiguration.resolvedArtifacts.each { artifact ->
 
     inputs.file artifact.file
@@ -164,7 +142,6 @@ task installPlayModules  {
         from zipTree(artifact.file)
         into output
     }
-    
     def moduleApp = file("${output}/app")
     if (moduleApp.exists()) {
       logger.info("Add $moduleApp to sources.")
@@ -173,14 +150,6 @@ task installPlayModules  {
       sourceSets.main.java.srcDirs += moduleApp
     }
 
-    def moduleSrc = file("${output}/src")
-    if (moduleSrc.exists() && moduleName != 'fastergt-1.8') {
-      logger.info("Add $moduleSrc to sources.")
-
-      // add module/src to sources
-      sourceSets.main.java.srcDirs += moduleSrc
-    }
-        
     def moduleConf = file("${output}/conf")
     if (moduleConf.exists()) {
       logger.info("Add $moduleConf to resources.")
@@ -188,14 +157,12 @@ task installPlayModules  {
       // add module/conf to resources
       sourceSets.main.resources.srcDirs += moduleConf
     }
-    
   }
 }
 
 task afterEclipseImport {
   dependsOn installPlayModules
 }
-
 build {
   dependsOn installPlayModules
 }
@@ -209,120 +176,47 @@ clean.doLast {
   file("${projectDir}/modules").mkdirs()
 }
 
-test {
-  def playJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "play" }
-  def lombokJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "lombok" }
-
-  jvmArgs = [
-    '-noverify',
-    "-javaagent:${playJar.file}",
-    "-javaagent:${lombokJar.file}"
-  ]
-}
-
-task playRun(dependsOn: 'classes', type: JavaExec) {
-
-  def playJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "play" }
-  def lombokJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "lombok" }
-  
-  classpath = sourceSets.main.runtimeClasspath
-  main = 'FrameworkStarter'
-  systemProperty "playFramework", playHome
-  systemProperty "writepid", false
-  systemProperty "play.debug", "yes"
-  systemProperty "application.path", projectDir
-  systemProperty "play.id", playId
-  // systemProperty 'precompiled', true
-  // '-Dfile.encoding=utf-8',
-  jvmArgs = ['-noverify', '-Xdebug',
-    '-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n',
-    "-javaagent:${playJar.file}",
-    "-javaagent:${lombokJar.file}"
-  ]
-  
-}
-
-task computeVersionData << {
-  new ByteArrayOutputStream().withStream { os ->
-    exec {
-      commandLine 'git', 'describe', '--all', '--long'
-      standardOutput = os
-    }
-    new File(versionFile).text = os.toString()
+task playClasspath(type: Exec) {
+  commandLine 'play', 'classpath'
+  standardOutput = new ByteArrayOutputStream()
+  doLast {
+    def output = standardOutput.toString() =~ /(?m)^\[.*$/
+    println output[0]
   }
 }
 
-task precompile(dependsOn: 'classes', type: JavaExec) {
-
-  dependsOn computeVersionData
-
-  def playJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "play" }
-  def lombokJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "lombok" }
-
-  classpath = sourceSets.main.runtimeClasspath
-  main = 'FrameworkStarter'
-  systemProperty "playFramework", playHome
-  systemProperty "precompile", true
-  systemProperty "writepid", false
-  systemProperty "play.debug", "yes"
-  systemProperty "application.path", projectDir
-  systemProperty "play.id", playId
-  jvmArgs = ['-noverify', '-Xdebug',
-    "-javaagent:${playJar.file}",
-    "-javaagent:${lombokJar.file}"
-  ]
+task playDependencies(type: Exec, group:'build') {
+  description 'Compute dependencies via play'
+  commandLine 'play', 'deps', '--sync'
 }
 
-task evolutions(type: JavaExec) {
-  systemProperty "playFramework", playHome
-  systemProperty "playMainClass", 'play.db.Evolutions'
-  // modes = {'', 'apply', 'markApplied', 'resolve'}
-  systemProperty "mode", ""
-  systemProperty "writepid", false
-  systemProperty "play.debug", "yes"
-  systemProperty "application.path", projectDir
-  systemProperty "play.id", playId
-
-  def playJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "play" }
-  def lombokJar = configurations.runtime.resolvedConfiguration.resolvedArtifacts.find { it.name == "lombok" }
-
-  classpath = sourceSets.main.runtimeClasspath
-  main = 'FrameworkStarter'
-  jvmArgs = ['-noverify']
+task playClean(type: Exec) {
+  dependsOn playDependencies
+  commandLine 'play', 'clean'
 }
 
-distributions {
-  main {
-    contents {
-      from 'build/VERSION.txt'
-      into ('public') {
-        from 'public'
-      }
-      into ('conf') {
-        from 'conf'
-      }
-      into ('precompiled') {
-        from 'precompiled'
-      }
-      into ('play') {
-        from "modules/play-${playVersion}/"
-      }
-      into ('public') {
-      }
-    }
+task playPrecompile(type: Exec, group:'build') {
+  description 'Precompile via play'
+  dependsOn playDependencies, playClean
+  commandLine 'play', 'precompile'
+}
+
+task precompile(group:'build') {
+  description 'Generate webpack and precompile via play'
+  dependsOn playPrecompile
+}
+
+task dist(type: Zip) {
+  description 'Crea un archivio di distribuzione'
+  dependsOn playPrecompile
+  into('public/dist') {
+    from 'public/dist'
   }
-}
-
-mainClassName = 'FrameworkStarter'
-
-startScripts {
-  defaultJvmOpts = ['-noverify',
-    '-DplayFramework=./play',
-    "-Dplay.id=prod",
-    '-Dplay.debug=no',
-    "-Dapplication.path=./",
-    '-Dprecompiled=true',
-    "-javaagent:lib/play-${playVersion}.jar",
-    "-javaagent:lib/lombok-${lombokVersion}.jar"
-  ]
+  into('precompiled') {
+    from 'precompiled'
+  }
+// per ora si usa il play deps
+//  into('lib') {
+//    from 'lib'
+//  }
 }

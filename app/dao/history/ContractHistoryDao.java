@@ -76,5 +76,24 @@ public class ContractHistoryDao {
         .transform(HistoryValue.fromTuple(Contract.class))
         .toList();
   }
+  
+  /**
+   * Metodo di storico sull'ultima modifica al contratto.
+   *
+   * @param contractId l'id del contratto di cui recuperare lo storico
+   * @return la lista contenente un solo elemento relativo alle modifiche al contratto
+   *     in oggetto.
+   */
+  public List<HistoryValue<Contract>> lastRevision(long contractId) {
+    
+    final AuditQuery query = auditReader.get().createQuery()
+        .forRevisionsOfEntity(Contract.class, false, true)
+        .add(AuditEntity.id().eq(contractId))
+        .addOrder(AuditEntity.revisionNumber().desc())
+        .setMaxResults(1);
+    
+    return FluentIterable.from(query.getResultList())
+        .transform(HistoryValue.fromTuple(Contract.class)).toList();
+  }
 
 }

@@ -37,6 +37,7 @@ import models.query.QConfiguration;
 import models.query.QInstitute;
 import models.query.QOffice;
 import models.query.QUsersRolesOffices;
+import org.joda.time.LocalDate;
 import org.testng.util.Strings;
 
 /**
@@ -303,6 +304,16 @@ public class OfficeDao extends DaoBase {
   public List<Office> byInstitute(Institute institute) {
     final QOffice office = QOffice.office;
     return queryFactory.selectFrom(office).where(office.institute.eq(institute)).fetch();
+  }
+  
+  /**
+   * Lista di tutte le sedi attualmente abilitate e non chiuse.
+   */
+  public List<Office> allEnabledOffices() {
+    final QOffice office = QOffice.office;
+    return queryFactory.selectFrom(office)
+        .where(office.endDate.isNull()
+            .or(office.endDate.after(LocalDate.now()))).fetch();
   }
 
 }

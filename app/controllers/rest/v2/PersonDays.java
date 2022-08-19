@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
@@ -46,7 +47,6 @@ import models.absences.Absence;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la visualizzazione via REST di dati relativi alla situazione giornaliera.
@@ -74,12 +74,12 @@ public class PersonDays extends Controller {
    */
   @BasicAuth
   public static void getDaySituation(
-      Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, LocalDate date) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+      String number, LocalDate date) {
     log.debug(
         "getDaySituation -> id={}, email={}, eppn={}, personPerseoId={}, fiscalCode={}, date={}", 
         id, email, eppn, personPerseoId, fiscalCode, date);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }

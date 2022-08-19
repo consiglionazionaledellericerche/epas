@@ -54,6 +54,7 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.testng.collections.Lists;
+import play.cache.Cache;
 import play.db.jpa.JPA;
 
 /**
@@ -137,13 +138,27 @@ public class MissionManager {
    * @param recompute se deve essere avviato il ricalcolo
    * @return true se riesce a inserire la missione con i parametri esplicitati nel body, 
    *     false altrimenti.
+   * @throws InterruptedException eccezione
    */
   public boolean createMissionFromClient(MissionFromClient body, boolean recompute) {
+
+    String missionCacheKey = "createMission." + body.id;
+    boolean managedMissionOk = true;
+    
+    if (Cache.get(missionCacheKey) == null) {
+      log.debug(LOG_PREFIX + "Imposto la cache {} con valore true", missionCacheKey);
+      Cache.set(missionCacheKey, true, "1mn");
+    } else {
+      log.warn(LOG_PREFIX + "Creazione missione annullata, "
+          + "è già in corso un inserimento per la missione {}", body);
+      return false;
+    }
 
     //AbsenceForm absenceForm = buildAbsenceForm(body);
     if (body.dataInizio.isAfter(body.dataFine)) {
       log.warn(LOG_PREFIX + "Le date di inizio e fine sono invertite!! La missione {} di {} "
           + "non può essere processata!! Verificare!", body.id, body.person.fullName());
+      Cache.delete(missionCacheKey);
       return false;
     }
     
@@ -155,6 +170,7 @@ public class MissionManager {
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", office.name);
+      Cache.delete(missionCacheKey);
       return false;
     }
     List<Absence> existingMission = absenceDao.absencesPersistedByMissions(body.id);
@@ -162,9 +178,10 @@ public class MissionManager {
       //Se esiste già una missione con quell'identificativo, la scarto.
       log.warn(LOG_PREFIX +  "E' stata riscontrata una missione con lo stesso identificativo di "
           + "quella passata come parametro: {}. Questa missione non viene processata.", body.id);
-      return false;      
+      Cache.delete(missionCacheKey);
+      return false;
     }
-    
+
     //controllo se sono già stati inseriti a mano i giorni di missione
     final List<JustifiedTypeName> types = ImmutableList
         .of(JustifiedTypeName.complete_day_and_add_overtime, JustifiedTypeName.specified_minutes);
@@ -176,13 +193,14 @@ public class MissionManager {
         && existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
             || abs.absenceType.code.equals("92M"))) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
-          + " nei giorni {}-{}. Questa missione non viene processata.", 
+          + " nei giorni {}-{}. Questa missione non viene processata.",
           body.dataInizio.toLocalDate(), body.dataFine.toLocalDate());
+      Cache.delete(missionCacheKey);
       return false;
     }
 
     Situation situation;
-    
+
     if (body.dataInizio.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
       //caso di giorno unico di missione
       situation = getSituation(body.dataInizio, body, workInterval);
@@ -191,8 +209,10 @@ public class MissionManager {
           Integer.valueOf(situation.difference % DateTimeConstants.MINUTES_PER_HOUR),
           body.dataInizio, body.dataFine, body.id, body.idOrdine, body.anno, body.numero)) {
         recalculate(body, Optional.<List<Absence>>absent());
+        Cache.delete(missionCacheKey);
         return true;
       } else {
+        Cache.delete(missionCacheKey);
         return false;
       }
     }
@@ -201,14 +221,17 @@ public class MissionManager {
     while (!actualDate.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
       situation = getSituation(actualDate, body, workInterval);      
 
-      atomicInsert(situation, body, actualDate);
+      if (!atomicInsert(situation, body, actualDate)) {
+        managedMissionOk = false;
+      };
       actualDate = actualDate.plusDays(1);
-      
-    }    
+
+    }
     recalculate(body, Optional.<List<Absence>>absent());
-    return true;
+    Cache.delete(missionCacheKey);
+    return managedMissionOk;
   }
-  
+
   /**
    * Metodo di utilità per calcolare la situazione delle ore da giustificare per la missione.
    *
@@ -298,6 +321,7 @@ public class MissionManager {
    * @return true se la gestione della missione è andata a buon fine, false altrimenti.
    */
   public boolean manageMissionFromClient(MissionFromClient body, boolean recompute) {
+    boolean managedMissionOk = true;
     if (body.idOrdine == null) {
       return false;
     }
@@ -349,7 +373,9 @@ public class MissionManager {
         return false;
       }
       situation = getSituation(dateToConsider, body, workInterval);
-      atomicInsert(situation, body, dateToConsider);
+      if (!atomicInsert(situation, body, dateToConsider)) {
+        managedMissionOk = false;
+      };
       
     }
     /*
@@ -382,8 +408,8 @@ public class MissionManager {
     
     //consistencyManager.updatePersonSituation(body.person.id, body.dataInizio.toLocalDate());
     recalculate(body, Optional.fromNullable(missions));
-    log.debug("Lanciati i ricalcoli");
-    return true;
+    log.debug("Lanciati i ricalcoli per {} dal {}", body.person, body.dataInizio);
+    return managedMissionOk;
   }
 
   /**
@@ -492,10 +518,10 @@ public class MissionManager {
           person.getFullname(), numero, from, to, hours, minutes);
       return false;
     }
-    
+
     log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
         + "tempo {}:{}", person, mission.code, from, to, hours, minutes);
-    
+
     Integer localHours = hours;
     Integer localMinutes = minutes;
 
@@ -503,7 +529,9 @@ public class MissionManager {
         absenceService.insert(person, group, from.toLocalDate(), 
             to.toLocalDate(), mission, type, 
             localHours, localMinutes, false, absenceManager);
-    if (insertReport.criticalErrors.isEmpty() || insertReport.warningsPreviousVersion.isEmpty()) {
+    log.debug("Insert Report = {}", insertReport);
+    if (insertReport.criticalErrors.isEmpty() && insertReport.warningsPreviousVersion.isEmpty()
+        && !insertReport.absencesToPersist.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
@@ -517,9 +545,9 @@ public class MissionManager {
         absence.note = "Missione: " + numero + '\n' 
             + "Anno: " + anno + '\n' 
             + "(Identificativo: " + absence.externalIdentifier + ")";
-                
+
         absence.save();
-        
+
         final Optional<User> currentUser = Security.getUser();
         if (currentUser.isPresent()) {
           notificationManager.notificationAbsencePolicy(currentUser.get(), 
@@ -539,6 +567,10 @@ public class MissionManager {
       }
       JPA.em().flush();
       return true;
+    } else {
+      log.info("Missione id={} di {}, insert Report con problemi di inserimento o "
+          + "nessuna assenza da inserire = {}",
+          id, person.getFullname(), insertReport);
     }
 
     return false;
@@ -642,7 +674,7 @@ public class MissionManager {
    * @param body l'oggetto dto proveniente dal mission manager
    * @param actualDate la data attuale su cui lavorare
    */
-  private void atomicInsert(Situation situation, MissionFromClient body, LocalDateTime actualDate) {
+  private boolean atomicInsert(Situation situation, MissionFromClient body, LocalDateTime actualDate) {
     boolean missionInserted = false;
     
     if (situation.isFirstOrLastDay) {
@@ -681,6 +713,7 @@ public class MissionManager {
           + "idOrdine = {}, anno = {}, numero = {}", body.destinazioneMissione, 
           actualDate, body.id, body.idOrdine, body.anno, body.numero);      
     }
+    return missionInserted;
   }
   
   /**

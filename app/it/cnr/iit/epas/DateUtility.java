@@ -32,6 +32,10 @@ import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+/**
+ * Classe di utilità per la gestione delle date.
+ *
+ */
 public class DateUtility {
 
   public static final int DECEMBER = 12;

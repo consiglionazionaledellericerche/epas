@@ -185,6 +185,7 @@ public class WrapperContract implements IWrapperContract {
    * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento.
    * 
    * @param yearMonth mese
+   * 
    * @return esito
    */
   @Override

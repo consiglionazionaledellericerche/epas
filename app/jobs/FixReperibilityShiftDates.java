@@ -32,6 +32,12 @@ import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
+/**
+ * Job per il fix delle date di reperibilità.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @OnApplicationStart(async = true)
 public class FixReperibilityShiftDates extends Job<Void> {

@@ -28,6 +28,7 @@ import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.Office;
 import models.Person;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -67,6 +68,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+  ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH("enable_reperibility_approval_before_end_month",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   ENABLE_MISSIONS_INTEGRATION("enable_mission_integration",
       EpasParamCategory.GENERAL,
@@ -75,6 +84,10 @@ public enum EpasParam {
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
+  
+
+  //#######################################
+  // PERSON PARAMS
 
   OFF_SITE_STAMPING("off_site_stamping",
       EpasParamCategory.GENERAL,
@@ -95,6 +108,15 @@ public enum EpasParam {
       Person.class),
 
   TELEWORK_STAMPINGS("telework_stampings",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME("enable_telework_stampings_for_worktime",
 
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
@@ -156,9 +178,17 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  AGILE_WORK("agile_work",
+
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
 
   ADDITIONAL_HOURS("additional_hours",
-
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
@@ -167,7 +197,6 @@ public enum EpasParam {
       Person.class),
   
   PARENTAL_LEAVE_AND_CHILD_ILLNESS("parental_leave_and_child_illness",
-
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
@@ -175,11 +204,39 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Person.class),
   
+  AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE("agile_work_or_disabled_people_assistance",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+  
+  SMARTWORKING("smartworking",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),
+
+  
+  //#######################################################################################
+  // GENERAL PARAMS
+  
 
   PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM("people_allowed_insert_medical_exam",
       EpasParamCategory.GENERAL,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  MEAL_TICKET_BLOCK_TYPE("meal_ticket_block_type",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.ENUM,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
@@ -664,6 +721,166 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  //#####################################################################
+  //INFORMATION FLOWS PARAMS
+  
+  
+  /**
+   * Attivazione o meno delle richieste di straordinario.
+   */
+  ENABLE_INFORMATION_FLOWS(
+      "enable_information_flows",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * del responsabile di sede.
+   */
+  ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "illness_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte del 
+   * responsabile di sede.
+   */
+  ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale.
+   */
+  ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "illness_information_i_iii_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale. 
+   */
+  ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale.
+   */
+  ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED(
+      "illness_information_i_iii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle info di malattia da parte 
+   * dell'amministratore del personale. 
+   */
+  ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "illness_information_iv_viii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione del telelavoro da parte 
+   * del responsabile di sede.
+   */
+  TELEWORK_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "telework_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione del telelavoro da parte del 
+   * responsabile di sede.
+   */
+  TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "telework_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria la presa visione delle uscite di servizio da parte 
+   * del responsabile di sede.
+   */
+  SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "service_information_i_iii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle uscite di servizio da parte del 
+   * responsabile di sede.
+   */
+  SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "service_information_iv_viii_office_head_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli IV-VIII è necessaria la presa visione delle uscite di servizio da parte 
+   * del responsabile di gruppo.
+   */
+  SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "service_information_iv_viii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
       Office.class);
 
   public final String name;
@@ -715,7 +932,7 @@ public enum EpasParam {
    * Categorizzazione dei parametri di ePAS.
    */
   public enum EpasParamCategory {
-    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS
+    GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS, INFORMATION_FLOWS
   }
 
   /**
@@ -747,7 +964,7 @@ public enum EpasParam {
   public enum EpasParamValueType {
 
     LOCALTIME, LOCALTIME_INTERVAL, LOCALDATE, DAY_MONTH, MONTH,
-    EMAIL, IP_LIST, INTEGER, BOOLEAN;
+    EMAIL, IP_LIST, INTEGER, BOOLEAN, ENUM;
 
     /**
      * Rappresenta un intervallo di LocalTime.
@@ -837,6 +1054,10 @@ public enum EpasParam {
       if (value instanceof IpList) {
         return Joiner.on(IP_LIST_SEPARATOR + "\n").join(((IpList) value).ipList);
       }
+      
+      if (value instanceof BlockType) {
+        return value.toString();
+      }
 
       return null;
     }
@@ -878,6 +1099,8 @@ public enum EpasParam {
             return Integer.parseInt(value);
           case BOOLEAN:
             return Boolean.parseBoolean(value);
+          case ENUM:
+            return BlockType.valueOf(value);
           default:
             log.warn("Tipo non riconosciuto: {}", type);
         }

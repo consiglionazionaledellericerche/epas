@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.history.AbsenceHistoryDao;
@@ -39,7 +40,6 @@ import models.absences.Absence;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la visualizzazione dello storico dei PersonDay.

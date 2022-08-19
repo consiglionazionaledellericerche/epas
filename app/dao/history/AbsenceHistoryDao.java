@@ -29,7 +29,7 @@ import org.hibernate.envers.query.AuditQuery;
 
 /**
  * Dao sulle tabelle di storico.
- * 
+ *
  * @author Marco Andreini
  */
 public class AbsenceHistoryDao {

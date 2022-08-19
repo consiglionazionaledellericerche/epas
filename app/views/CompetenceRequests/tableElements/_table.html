@@ -24,8 +24,8 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Note</th>
-				
-		</tr>			
+
+		</tr>
 		#{if approvalRequired}
 
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal </th>
@@ -33,13 +33,13 @@
 
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al </th>
-			
+
 				#{if config.reperibilityManagerApprovalRequired}
 					<th width="20%">Supervisore del servizio</th>
-				#{/if}						
+				#{/if}
 				#{if config.employeeApprovalRequired}
 					<th width="20%">Reperibile</th>
-				#{/if}			
+				#{/if}
 		#{/if}
 	</thead>
 
@@ -50,7 +50,7 @@
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
-								
+
 				<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    
 				<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
 				<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>

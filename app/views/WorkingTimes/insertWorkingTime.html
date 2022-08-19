@@ -18,6 +18,7 @@
       <input type="hidden" name="horizontalPattern.externalId" value="${externalId}"/>
 
 	  #{f.simpleView 'horizontalPattern.name', label:'Nome Orario', hidden:true /}  
+	  #{f.simpleView 'horizontalPattern.reproportionAbsenceCodesEnabled', label:'Riproporziona quantità codici di assenza', hidden:true /}  
 
 	  <div class="alert alert-success">
 	   Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
@@ -105,6 +106,8 @@
 		</div>	
 		
 	   </div> 	
+	   
+	   
 	  *{		
 	  <div class="col-sm-12">
 	    #{include './_wttRecap.html' /}

@@ -282,6 +282,19 @@ public class PersonDayDao extends DaoBase {
     return getQueryFactory().selectFrom(personDay).orderBy(personDay.date.asc()).limit(1)
         .fetchOne();
   }
+  
+  /**
+   * Ritorna il personday più futuro della persona.
+   *
+   * @param person la persona di cui si ricerca l'ultimo personday
+   * @return l'ultimo personday della persona sul db.
+   */
+  public PersonDay getMoreFuturePersonDay(Person person) {
+    final QPersonDay personDay = QPersonDay.personDay;
+    return getQueryFactory().selectFrom(personDay)
+        .where(personDay.person.eq(person)).orderBy(personDay.date.desc()).limit(1)
+        .fetchOne();
+  }
 
   /**
    * Il personday, se esiste, che contiene l'assenza passata come parametro.

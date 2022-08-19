@@ -19,7 +19,7 @@ package cnr.sync.dto.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

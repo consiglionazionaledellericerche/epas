@@ -1,0 +1,110 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set informationTypeLabel: messages.get('InformationType.' + type.toString() + 'S') /}
+#{set title:('ePAS - ' + informationTypeLabel) /}
+
+#{set breadcrumbs:[(informationTypeLabel):null] /}
+
+%{
+	approvalsRequired = 0;
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	approvalRequired = approvalsRequired > 0
+}%
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+
+  #{title title:informationTypeLabel.capitalize(), administration:true /} 
+  
+  #{tabList}
+    #{tabItem id:'attivo', title:'Flussi attivi', active:true /}
+    #{tabItem id:'nonAttivo', title:'Flussi conclusi' /}
+  #{/tabList}
+ <br>
+  	#{tabContent}	
+  
+  	#{tabContentItem id:'attivo', active:true}
+  	#{b.buttons center:true}
+  	#{secure.check 'InformationRequests.blank', target:type}
+  		<a class="btn btn-success" href="@{InformationRequests.blank('person':person, 'type':type)}">
+    		<i class="fa fa-plus"></i> &{'InformationType.' + type + '.blank'}
+  		</a>
+  	#{/secure.check}
+  	#{/b.buttons}
+ 	#{if type.equals(models.enumerate.InformationType.TELEWORK_INFORMATION)}
+ 		#{alert color:'info'}
+ 		<p>Se visualizzi questa pagina, significa che puoi sottomettere le tue richieste di flusso informativo per telelavoro
+ 		direttamente dalla pagina ad esso dedicata (Menu personale -> Inserimento orario in telelavoro).<br>
+ 		Troverai il mese da compilare con gli orari fatti in telelavoro e la possibilità di iniziare un flusso di approvazione.</p>
+ 		#{/alert}
+ 		#{if teleworks.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di richiesta in esecuzione.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_teleworkTable.html' /}
+	 	#{/else}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
+ 		#{if illness.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di richiesta in esecuzione.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_illnessTable.html' /}
+	 	#{/else}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
+ 		#{if services.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di richiesta in esecuzione.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_serviceTable.html' /}
+	 	#{/else}
+ 		
+ 	#{/if}
+  	
+  #{/tabContentItem}
+
+  #{tabContentItem id:'nonAttivo'}
+    #{if type.equals(models.enumerate.InformationType.TELEWORK_INFORMATION)}
+    	#{if teleworksClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi informativi per telelavoro conclusi.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_closedTeleworkTable.html' /}
+	 	#{/else}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.ILLNESS_INFORMATION)}
+ 	    #{if illnessClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di informazione per malattia conclusi.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_closedIllnessTable.html' /}
+	 	#{/else}
+ 	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
+ 		#{if servicesClosed.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi conclusi di richiesta uscita di servizio.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_closedServiceTable.html' /}
+	 	#{/else}
+ 	#{/if}
+  	
+  #{/tabContentItem}
+ 
+  #{/tabContent}
+</div>

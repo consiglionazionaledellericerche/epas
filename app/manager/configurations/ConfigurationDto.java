@@ -21,6 +21,7 @@ import lombok.Data;
 import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MonthDay;
@@ -41,6 +42,7 @@ public class ConfigurationDto {
   public String stringNewValue;
   public Integer integerNewValue;
   public LocalDate localdateNewValue;
+  public BlockType blockTypeNewValue;
   
   /**
    * Default constructor.
@@ -65,6 +67,10 @@ public class ConfigurationDto {
     if (epasParam.isPeriodic()) {
       this.validityBegin = beginDate;
       this.validityEnd = calculatedEnd;
+    }
+    
+    if (epasParam.epasParamValueType.equals(EpasParamValueType.ENUM)) {
+      this.blockTypeNewValue = (BlockType) value;
     }
 
     if (epasParam.epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {

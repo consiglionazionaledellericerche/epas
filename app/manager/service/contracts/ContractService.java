@@ -26,6 +26,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
 import manager.PersonDayManager;
@@ -48,6 +49,7 @@ import play.db.jpa.JPA;
 /**
  * Service per i Contratti.
  */
+@Slf4j
 public class ContractService {
 
   private final AbsenceDao absenceDao;
@@ -178,9 +180,17 @@ public class ContractService {
           abs.absenceType.defaultTakableGroup(), 
           abs.personDay.date, abs.personDay.date,
           absenceType, justifiedType, hours, minutes, false, absenceManager);
+      if (insertReport.absencesToPersist.isEmpty()) {
+        insertReport = absenceService.insert(abs.personDay.person, 
+            abs.absenceType.defaultTakableGroup(), 
+            abs.personDay.date, abs.personDay.date,
+            abs.absenceType, justifiedType, hours, minutes, true, absenceManager);
+      }
 
       absenceManager.saveAbsences(insertReport, abs.personDay.person, abs.personDay.date, null, 
           justifiedType, groupAbsenceType);
+      log.info("Salvata assenza {} nel giorno {} per {}", abs.absenceType.code, 
+          abs.personDay.date, abs.personDay.person);
     }
 
   }

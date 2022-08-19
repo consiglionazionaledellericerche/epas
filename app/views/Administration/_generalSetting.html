@@ -1,77 +1,167 @@
 <h2>&{actionSelected+'.table'}</h2>
 
 #{accordionGroup 'generalSetting'}
-  #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Abilita la sincronizzazione dei badge di tutti gli uffici con l'anagrafica centrale#{/alert}
-		#{f.booleanRadio 'generalSetting.syncBadgesEnabled' /}
-		#{alert color:'info'}Abilita la sincronizzazione delle persone con l'anagrafica centrale verificando la
-		presenza della persona in ePAS e la sua attuale apppartenza all'ufficio corretto.#{/alert}
-  		#{f.booleanRadio 'generalSetting.syncOfficesEnabled' /}
-  		<!--  #{f.booleanRadio 'generalSetting.syncPersonsEnabled' /}  -->
-  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+
+  #{accordionItem 'privacyPolicySettings', parent:'generalSetting', title:'Impostazioni Privacy Policy', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}
+        Abilita la visualizzazione del Banner con la richiesta di approvazione della Privacy Policy.
+      #{/alert}
+      #{f.booleanRadio 'generalSetting.cookiePolicyEnabled' /}
+      #{f.textArea 'generalSetting.cookiePolicyContent', wysiwyg:true}#{/f.textArea}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-  #{accordionItem 'registryToSendData', parent:'generalSetting', title:'Tipologia invio dati di fine mese', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Abilita l'invio solo dei buoni pasto in fase di invio dati a fine mese #{/alert}
-		#{f.booleanRadio 'generalSetting.onlyMealTicket' /}
-  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+  #{accordionItem 'regulationsSettings', parent:'generalSetting', title:'Impostazioni Menu normativa', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}
+        Abilita la visualizzazione del menu <em>Normativa</em> a tutti i dipendenti.
+      #{/alert}
+      #{f.booleanRadio 'generalSetting.regulationsEnabled' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-    #{accordionItem 'shiftTimeTable', parent:'generalSetting', title:'Orari per attribuzione codici di turno', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Specifica gli orari di inizio e fine delle fasce per i codici di turno #{/alert}
-		#{f.input 'generalSetting.startDailyShift', type:text /}
-		#{f.input 'generalSetting.endDailyShift', type:text /}
-		#{f.input 'generalSetting.startNightlyShift', type:text /}
-		#{f.input 'generalSetting.endNightlyShift', type:text /}
-  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+  #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la sincronizzazione dei badge di tutti gli uffici con l'anagrafica centrale#{/alert}
+      #{f.booleanRadio 'generalSetting.syncBadgesEnabled' /}
+      #{alert color:'info'}Abilita la sincronizzazione delle persone con l'anagrafica centrale verificando la
+         presenza della persona in ePAS e la sua attuale apppartenza all'ufficio corretto.#{/alert}
+      #{f.booleanRadio 'generalSetting.syncOfficesEnabled' /}
+      <!--  #{f.booleanRadio 'generalSetting.syncPersonsEnabled' /}  -->
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-    #{accordionItem 'handleGroupsByInstitute', parent:'generalSetting', title:'Gestione gruppi per istituto', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Permette la gestione dei gruppi su base di istituto. Se messo a "no", la gestione dei gruppi è in base alla sede. #{/alert}
-		#{f.booleanRadio 'generalSetting.handleGroupsByInstitute' /}
-  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+  #{accordionItem 'registryToSendData', parent:'generalSetting', title:'Tipologia invio dati di fine mese', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita l'invio solo dei buoni pasto in fase di invio dati a fine mese #{/alert}
+      #{f.booleanRadio 'generalSetting.onlyMealTicket' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-  #{accordionItem 'saturdayHolidayShift', parent:'generalSetting', title:'Gestione sabato per i turni', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Specifica se considerare il sabato come festivo . #{/alert}
-		#{f.booleanRadio 'generalSetting.saturdayHolidayShift' /}
-  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+  #{accordionItem 'shiftTimeTable', parent:'generalSetting', title:'Orari per attribuzione codici di turno', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica gli orari di inizio e fine delle fasce per i codici di turno #{/alert}
+      #{f.input 'generalSetting.startDailyShift', type:text /}
+      #{f.input 'generalSetting.endDailyShift', type:text /}
+      #{f.input 'generalSetting.startNightlyShift', type:text /}
+      #{f.input 'generalSetting.endNightlyShift', type:text /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-  #{accordionItem 'roundingShiftQuantity', parent:'generalSetting', title:'Tipo di calcolo delle ore di turno', open:true}
-  	#{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
-  		#{f.hidden 'generalSetting.id' /}
-  		#{alert color:'info'}Specifica se permettere l'arrotondamento per il calcolo delle ore di turno da salvare via approvazione del calendario. #{/alert}
-		#{f.booleanRadio 'generalSetting.roundingShiftQuantity' /}  		
-        #{b.buttons}
-        	#{b.save /}
-        #{/b.buttons}
-  	#{/form}
+  #{accordionItem 'handleGroupsByInstitute', parent:'generalSetting', title:'Gestione gruppi per istituto', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Permette la gestione dei gruppi su base di istituto. Se messo a "no", la gestione dei gruppi è in base alla sede. #{/alert}
+      #{f.booleanRadio 'generalSetting.handleGroupsByInstitute' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
   #{/accordionItem}
-    
+  #{accordionItem 'saturdayHolidayShift', parent:'generalSetting', title:'Gestione sabato per i turni', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica se considerare il sabato come festivo . #{/alert}
+      #{f.booleanRadio 'generalSetting.saturdayHolidayShift' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'roundingShiftQuantity', parent:'generalSetting', title:'Tipo di calcolo delle ore di turno', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica se permettere l'arrotondamento per il calcolo delle ore di turno da salvare via approvazione del calendario. #{/alert}
+      #{f.booleanRadio 'generalSetting.roundingShiftQuantity' /}  		
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'enableUniqueDailyShift', parent:'generalSetting', title:'Permette un unico slot di turno per la stessa persona nel giorno', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita ad un solo slot di turno per la stessa persona in un giorno. #{/alert}
+      #{f.booleanRadio 'generalSetting.enableUniqueDailyShift' /}  		
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'enableIllnessFlow', parent:'generalSetting', title:'Abilita flusso richiesta malattia', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica se abilitare il flusso per la richiesta informativa per malattia. #{/alert}
+      #{f.booleanRadio 'generalSetting.enableIllnessFlow' /}  		
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'maxDaysInPastForRestStampings', parent:'generalSetting', title:'Giorni nel passato per timbrature via REST', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica il numero massimo di giorni nel passato per timbrature via REST#{/alert}
+      #{f.input 'generalSetting.maxDaysInPastForRestStampings' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'enableCovid19Param', parent:'generalSetting', title:'Abilita parametri auto inserimento Covid19', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione dei parametri per autoinserimento assenza covid19/covid19bp#{/alert}
+      #{f.booleanRadio 'generalSetting.enableAutoconfigCovid19' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'enableSmartworkingParam', parent:'generalSetting', title:'Abilita parametri auto inserimento smartworking', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione dei parametri per autoinserimento assenza smartworking#{/alert}
+      #{f.booleanRadio 'generalSetting.enableAutoconfigSmartworking' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'enableDailyPresenceForManagerParam', parent:'generalSetting', title:'Abilita visualizzazione presenza giornaliera gruppi', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione della presenza giornaliera dei dipendenti appartenenti a un gruppo#{/alert}
+      #{f.booleanRadio 'generalSetting.enableDailyPresenceForManager' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  #{accordionItem 'holidayShiftInNightToo', parent:'generalSetting', title:'Abilita conteggio festivo per tutti gli orari in giorno festivo', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita al conteggio di turno festivo qualsiasi turno svolto nelle 24 ore di un giorno festivo (anche se dovrebbe essere notturno)#{/alert}
+      #{f.booleanRadio 'generalSetting.holidayShiftInNightToo' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 #{/accordionGroup}

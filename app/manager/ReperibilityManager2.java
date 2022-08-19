@@ -35,6 +35,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -66,6 +68,7 @@ public class ReperibilityManager2 {
   private final PersonDayManager personDayManager;
   private final CompetenceDao competenceDao;
   private final PersonReperibilityDayDao reperibilityDao;
+  private final ConfigurationManager configurationManager;
 
   /**
    * Injection.
@@ -80,12 +83,13 @@ public class ReperibilityManager2 {
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
       CompetenceDao competenceDao, 
-      PersonReperibilityDayDao reperibilityDao) {
+      PersonReperibilityDayDao reperibilityDao, ConfigurationManager configurationManager) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;   
     this.competenceDao = competenceDao;
     this.reperibilityDao = reperibilityDao;
+    this.configurationManager = configurationManager;
   }
 
   /**
@@ -310,10 +314,15 @@ public class ReperibilityManager2 {
 
     final LocalDate lastDay;
 
-    if (to.isAfter(today)) {
-      lastDay = today;
-    } else {
+    if ((Boolean) configurationManager.configValue(reperibility.office, 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = to;
+    } else {
+      if (to.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = to;
+      }
     }
     CompetenceCode code = reperibility.monthlyCompetenceType.workdaysCode;        
     involvedReperibilityWorkers(reperibility, from, to).forEach(person -> {
@@ -390,10 +399,15 @@ public class ReperibilityManager2 {
 
     final LocalDate lastDay;
 
-    if (end.isAfter(today)) {
-      lastDay = today;
-    } else {
+    if ((Boolean) configurationManager.configValue(reperibility.office, 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = end;
+    } else {
+      if (end.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = end;
+      }
     }
     CompetenceCode code = reperibility.monthlyCompetenceType.holidaysCode;        
     involvedReperibilityWorkers(reperibility, start, end).forEach(person -> {
@@ -426,12 +440,19 @@ public class ReperibilityManager2 {
     final LocalDate today = LocalDate.now();
 
     final LocalDate lastDay;
-
-    if (monthEnd.isAfter(today)) {
-      lastDay = today;
-    } else {
+    
+    if ((Boolean) configurationManager.configValue(reperibilityTypeMonth
+        .personReperibilityType.office, 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = monthEnd;
+    } else {
+      if (monthEnd.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = monthEnd;
+      }
     }
+    
     //cerco le persone reperibili nel periodo di interesse
     final List<Person> involvedReperibilityPeople = involvedReperibilityWorkers(
         reperibilityTypeMonth.personReperibilityType, monthBegin, monthEnd);

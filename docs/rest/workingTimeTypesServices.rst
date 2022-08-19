@@ -78,7 +78,7 @@ Per individuare la tipologia di orario di lavoro è necessario passare il campo 
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager
-      GET https://epas-demo.devel.iit.cnr.it//rest/v2/workingtimetypes/show
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/workingtimetypes/show
       id==1
 
 Il risultato sarà del tipo:

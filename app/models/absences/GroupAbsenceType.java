@@ -144,6 +144,12 @@ public class GroupAbsenceType extends BaseModel {
     return this;
   }
   
+  /**
+   * Enumerato che gestisce il tipo di periodo temporale.
+   *
+   * @author dario
+   *
+   */
   public enum PeriodType {
     
     always(0, null, null), year(0, null, null), month(0, null, null),
@@ -195,6 +201,12 @@ public class GroupAbsenceType extends BaseModel {
     }
   }
   
+  /**
+   * Enumerato che determina la tipologia di gruppo (se gestito da un pattern).
+   *
+   * @author dario
+   *
+   */
   public enum GroupAbsenceTypePattern {
     simpleGrouping,              // semplice raggruppamento senza controlli o automatismi
     programmed,                  

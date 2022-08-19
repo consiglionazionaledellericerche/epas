@@ -20,6 +20,7 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import dao.absences.AbsenceComponentDao;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,14 +32,27 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingRecap;
+import manager.services.absences.AbsenceForm;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.telework.errors.Errors;
 import manager.services.telework.errors.TeleworkStampingError;
 import manager.telework.service.TeleworkComunication;
+import models.Person;
 import models.PersonDay;
+import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
 import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
+
+
 
 /**
  * Classe per l'interfacciamento con il servizio REST di Timbrature per telelavoro.
@@ -48,10 +62,29 @@ import org.joda.time.LocalDate;
 public class TeleworkStampingManager {
 
   private TeleworkComunication comunication;
+  private AbsenceComponentDao absenceDao;
+  private AbsenceManager absenceManager;
+  private AbsenceService absenceService;
+  private PersonDayManager personDayManager;
 
+  /**
+   * Injector.
+   *
+   * @param comunication il service per la comunicazione con la piattaforma telework-stampings
+   * @param absenceDao il dao delle assenze
+   * @param absenceManager il manager delle assenze
+   * @param absenceService il service delle assenze
+   * @param personDayManager il manager del person day
+   */
   @Inject
-  public TeleworkStampingManager(TeleworkComunication comunication) {
+  public TeleworkStampingManager(TeleworkComunication comunication, AbsenceComponentDao absenceDao,
+      AbsenceManager absenceManager, AbsenceService absenceService, 
+      PersonDayManager personDayManager) {
     this.comunication = comunication;
+    this.absenceDao = absenceDao;
+    this.absenceManager = absenceManager;
+    this.absenceService = absenceService;
+    this.personDayManager = personDayManager;
   }
 
   /**
@@ -65,9 +98,12 @@ public class TeleworkStampingManager {
    */
   public List<TeleworkDto> getSpecificTeleworkStampings(PersonDay pd, 
       List<TeleworkStampTypes> stampTypes) {
+    if (pd.id == null) {
+      return Lists.newArrayList();
+    }
     @val
     java.util.List<models.dto.TeleworkDto> teleworkStampings;
-    try {
+    try {      
       teleworkStampings = comunication.getList(pd.id);
     } catch (NoSuchFieldException | ExecutionException e) {
       throw new RuntimeException(e);
@@ -220,6 +256,71 @@ public class TeleworkStampingManager {
 
     return dtoList;
   }
+  
+  /**
+   * Ritorna la lista degli oggetti contenenti le info sulle giornate di telelavoro.
+   *
+   * @param psDto il recap delle timbrature
+   * @return la lista di oggetti NewTeleworkDto contenenti le info per il telelavoro.
+   * @throws NoSuchFieldException eccezione di oggetto non trovato
+   * @throws ExecutionException eccezione in esecuzione
+   */
+  public List<NewTeleworkDto> stampingsForReport(PersonStampingRecap psDto) 
+      throws NoSuchFieldException, ExecutionException {
+    List<PersonStampingDayRecap> pastDaysRecap = 
+        psDto.daysRecap.stream().filter(d -> {
+          return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+        }).collect(Collectors.toList());
+    List<NewTeleworkDto> dtoList = Lists.newArrayList();
+    for (PersonStampingDayRecap day : pastDaysRecap) {
+     
+      List<TeleworkDto> list = Lists.newArrayList();
+      if (day.personDay.id == null) {
+        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+      } else {
+        list = comunication.getList(day.personDay.id);        
+      }
+            
+      if (list.isEmpty()) {
+        //TODO: aggiungere il pezzo in cui si creano i teleworkDto vuoti nel caso non esistano 
+        log.trace("Non ci sono timbrature associate al giorno in applicazione telework-stampings!");
+
+      } else {  
+        java.time.LocalDate date = null;
+        NewTeleworkDto dto = null;
+        for (TeleworkDto stamping : list) {
+          if (date == null || !stamping.getDate().toLocalDate().isEqual(date)) {
+            dto = new NewTeleworkDto();
+            date = stamping.getDate().toLocalDate();
+            dto.date = stamping.getDate().toLocalDate();
+          }
+          
+          TeleworkStampTypes stampType = stamping.getStampType();
+          if (stampType.equals(TeleworkStampTypes.INIZIO_TELELAVORO)) {
+            dto.beginDay = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_TELELAVORO)) {
+            dto.endDay = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.INIZIO_PRANZO_TELELAVORO)) {
+            dto.beginMeal = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)) {
+            dto.endMeal = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.INIZIO_INTERRUZIONE)) {
+            dto.beginInterruption = stamping;
+          }
+          if (stampType.equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {
+            dto.endInterruption = stamping;
+          }       
+        }
+        dtoList.add(dto);
+      }      
+    }
+    return dtoList;
+  }
+  
 
   /**
    * Verifica se l'inserimento di una timbratura in un giorno può dare origine ad un errore di 
@@ -271,6 +372,59 @@ public class TeleworkStampingManager {
     }
   }
 
+  /**
+   * Metodo che consente l'inserimento del codice 103RT per i ricercatori e tecnologi che
+   * inseriscono timbrature in telelavoro che concorrono alla formazione di residuo sul cartellino.
+   *
+   * @param person la persona per cui inserire l'assenza
+   * @param date la data in cui inserire l'assenza
+   */
+  public void insertTeleworkAbsenceCode(Person person, LocalDate date) {
+    
+    GroupAbsenceType groupAbsenceType = absenceDao
+        .groupAbsenceTypeByName(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get();
+    JustifiedType type = absenceDao
+        .getOrBuildJustifiedType(JustifiedTypeName.nothing);
+    AbsenceType absenceType = absenceDao.absenceTypeByCode("103RT").get();
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(person,
+        date, null, date, null, groupAbsenceType,
+        false, absenceType, type, null, null, false, false);
+    InsertReport insertReport =
+        absenceService.insert(person, absenceForm.groupSelected, absenceForm.from,
+            absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
+            null, null, false, absenceManager);
+    if (insertReport.criticalErrors.isEmpty()) {
+      for (Absence absence : insertReport.absencesToPersist) {
+        PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person,
+            absence.getAbsenceDate());
+        absence.personDay = personDay;
+        
+        personDay.absences.add(absence);
+        absence.save();
+        personDay.save();
+      }
+    }
+    
+  }
+  
+  /**
+   * Cancella l'assenza 103RT dal cartellino del dipendente.
+   *
+   * @param pd il personDay relativo al giorno in cui rimuovere l'assenza
+   */
+  public void deleteTeleworkAbsenceCode(PersonDay pd) {
+    AbsenceType absenceType = absenceDao.absenceTypeByCode("103RT").get();
+    int deleted = absenceManager
+        .removeAbsencesInPeriod(pd.person, pd.date, pd.date, absenceType);
+
+    if (deleted > 0) {
+      log.info("Rimossi {} codici assenza di tipo {}", deleted, absenceType.code);
+    } else {
+      log.info("Nessun codice d'assenza eliminato");
+    }
+  }
+  
+  
   /**
    * Il localDateTime dell'inizio della giornata.
    *

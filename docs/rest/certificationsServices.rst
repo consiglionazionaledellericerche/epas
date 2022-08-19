@@ -1,5 +1,5 @@
-Consultazione situazione riepilogi/attestati mensili via REST
-=============================================================
+Consultazione situazione riepiloghi/attestati mensili via REST
+==============================================================
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione della rendicontazione 
 mensile delle *assenze / competenze / buoni pasto / ore di formazione* dei dipendenti di una sede. 
@@ -7,7 +7,7 @@ mensile delle *assenze / competenze / buoni pasto / ore di formazione* dei dipen
 Permessi
 --------
 
-Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo 
+Per poter accedere a queste interfacce REST è necessario utilizzare un utente che abbia il ruolo 
 di *Lettore Informazioni* per la sede su cui si vuole effettuare le operazioni. 
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di *amministratore tecnico*. 
 
@@ -26,7 +26,7 @@ di un singolo dipendente in uno spefico anno sono disponibili tramite una HTTP G
 **/rest/v2/certifications/getMonthSituation**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*, l'anno tramite il campo *year*, il mese con il
+*id, email, eppn, perseoPersonId, fiscalCode, number*, l'anno tramite il campo *year*, il mese con il
 campo *month*.
 Negli esempi successivi viene utilizzato il parametro email=galileo.galilei@cnr.it,
 cambiatelo con un utente appropriato per la vostra sede.

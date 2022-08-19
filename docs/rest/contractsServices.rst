@@ -33,7 +33,7 @@ La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indir
 **/rest/v2/contracts/byPerson**.
 
 La persona può essere individuata passando i soliti parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*.
+*id, email, eppn, perseoPersonId, fiscalCode, number*.
 
 .. code-block:: bash
 
@@ -60,20 +60,6 @@ La persona può essere individuata passando i soliti parametri identificativi de
            "number": "9802"
         },
         "previousContract": null,
-        "workingTimeTypes": [
-           {
-              "beginDate": "2018-12-27",
-              "endDate": null,
-              "workingTimeType": {
-                 "description": "Normale",
-                 "disabled": false,
-                 "externalId": null,
-                 "horizontal": true,
-                 "id": 1,
-                 "office": null
-              }
-           }
-        ],
         "updatedAt": "2021-01-15T17:55:05.966788"
      }
   ]
@@ -111,7 +97,22 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
          "number": "9802"
      },
      "previousContract": null,
-     "updatedAt": "2021-01-15T17:55:05.966788"
+     "updatedAt": "2021-01-15T17:55:05.966788",
+     "workingTimeTypes": [
+           {
+              "beginDate": "2018-12-27",
+              "endDate": null,
+              "id": 680,
+              "workingTimeType": {
+                 "description": "Normale",
+                 "disabled": false,
+                 "externalId": null,
+                 "horizontal": true,
+                 "id": 1,
+                 "office": null
+              }
+           }
+        ],
   }
 
 
@@ -160,6 +161,7 @@ La risposta sarà del tipo:
         {
             "beginDate": "2018-12-27",
             "endDate": null,
+            "id": 680,
             "workingTimeType": {
                 "description": "Normale",
                 "disabled": false,
@@ -210,6 +212,7 @@ La risposta sarà del tipo:
         {
             "beginDate": "2020-10-21",
             "endDate": null,
+            "id": 681,
             "workingTimeType": {
                 "description": "Normale",
                 "disabled": false,
@@ -234,6 +237,7 @@ lavoro "*Normale*", quello con 7:12 giornalieri.
 Sia nella creazione che nell'aggiornamento sono presenti i controlli che le date del contratto non
 si intersechino con quelle di altri contratti già esistenti.
 
+
 Continuazione di due contratti consecutivi
 ------------------------------------------
 
@@ -257,6 +261,7 @@ utilizzare con un HTTP PUT i metodi:
   $ http -a istituto_xxx_registry_manager
       PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contract/unsetPreviousContract?id=4678
 
+
 Contract Delete
 ---------------
 
@@ -269,3 +274,57 @@ Per individuare il contratto da eliminare si utilizza il parametro *id* del cont
 
   $ http -a istituto_xxx_registry_manager
       DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/contract/delete?id=4678
+
+
+ContractWorkingTimeType Show
+----------------------------
+
+La visualizzazione dell'associazione tra un contratto ed una tipologia di orario di lavoro è
+possibile tramite una *HTTP GET* all'indirizzo
+**/rest/v2/contractworkingtimetypes/show**.
+
+Per individuare il l'associazione tra contratto e orario di lavoro è possibile utilizzare solo il
+campo *id*.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/contractworkingtimetypes/show 
+      id==680
+
+
+La risposta sarà del tipo:
+
+.. code-block:: json
+
+  {
+    "beginDate": "2021-04-02",
+    "endDate": null,
+    "externalId": null,
+    "id": 681,
+    "updatedAt": "2021-03-08T11:49:00.100485",
+    "workingTimeType": {
+        "description": "Normale",
+        "disabled": false,
+        "externalId": null,
+        "horizontal": true,
+        "id": 1,
+        "office": null,
+        "updatedAt": "2021-01-15T17:55:05.972315"
+    }
+  }
+
+
+ContractWorkingTimeType updateExternalId
+----------------------------------------
+
+Riguardo all'associazione tra contratto e tipologia di orario di lavoro via REST è possibile
+cambiare solo il campo externalId di questa assocazione.
+Per cambiare il campo externalId è possibile utilizzare una *HTTP PUT* all'endpoint
+**/rest/v2/contractworkingtimetypes/updateExternalId**.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contractworkingtimetypes/updateExternalId 
+      id==680 externalId==myExternalId

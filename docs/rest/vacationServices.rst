@@ -33,7 +33,7 @@ anno sono disponibili tramite una HTTP GET all'indirizzo
 **/rest/v3/vacations/byPersonAndYear**.
 
 La persona può essere individuata passando i parametri identificativi delle persone:
-*id, email, eppn, perseoPersonId, fiscalCode*. 
+*id, email, eppn, perseoPersonId, fiscalCode, number*.
 Il periodo può essere specificato tramite il parametro *year*. Il parametro *year* è opzionale,
 nel caso non venga specificato viene mostrata la situazione dell'anno corrente.
 

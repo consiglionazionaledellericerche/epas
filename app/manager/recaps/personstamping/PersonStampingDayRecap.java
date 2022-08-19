@@ -32,12 +32,15 @@ import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.Contract;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -
@@ -58,8 +61,10 @@ public class PersonStampingDayRecap {
   public PersonDay personDay;
   public IWrapperPersonDay wrPersonDay;
   public Optional<WorkingTimeTypeDay> wttd;
+  public Optional<PersonalWorkingTime> pwttd;
   public LocalTimeInterval lunchInterval;
   public LocalTimeInterval workInterval;
+  public Optional<LocalTimeInterval> personalWorkInterval;
   public boolean ignoreDay = false;
   public boolean firstDay = false;
   public List<StampingTemplate> stampingsTemplate = Lists.newArrayList();
@@ -107,11 +112,17 @@ public class PersonStampingDayRecap {
     wrPersonDay = wrapperFactory.create(personDay);
     
     wttd = this.wrPersonDay.getWorkingTimeTypeDay();
-
+    
     lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
     workInterval = (LocalTimeInterval) configurationManager.configValue(
         personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
+    
+    /*Inizio nuovi campi per la gestione dell'orario personalizzato*/
+    pwttd = this.wrPersonDay.getPersonalWorkingTime();
+    
+    personalWorkInterval = personalWorkingTimeInterval(pwttd);
+    /*Fine nuovi campi per la gestione dell'orario personalizzato*/
     
     // 1) computazioni: valid/pair timbrature e uscita in questo momento nel caso di oggi
     if (personDayManager.toComputeExitingNow(personDay) 
@@ -366,4 +377,23 @@ public class PersonStampingDayRecap {
     return note;
   }
 
+  /**
+   * Metodo privato per la restituzione dell'intervallo orario.
+   * 
+   * @param pwt il personal working time del dipendente.
+   * @return l'intervallo orario di lavoro.
+   */
+  private Optional<LocalTimeInterval> personalWorkingTimeInterval(
+      Optional<PersonalWorkingTime> pwt) {
+    if (!pwt.isPresent()) {
+      return Optional.absent();
+    }
+    LocalTimeInterval interval = 
+        new LocalTimeInterval(pwt.get().timeSlot.beginSlot, pwt.get().timeSlot.endSlot);
+    if (interval.to.isBefore(interval.from)) {
+      return Optional.absent();
+    } else {
+      return Optional.fromNullable(interval);
+    }    
+  }
 }

@@ -32,6 +32,12 @@ public class SimplePersonDto {
   public String email;
   public String uidCnr;
 
+  /**
+   * Applica la conversione da dto a oggetto.
+   *
+   * @author dario
+   *
+   */
   public enum FromPerson implements Function<Person, SimplePersonDto> {
     ISTANCE;
     

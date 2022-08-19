@@ -31,6 +31,12 @@ import lombok.Getter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
+/**
+ * Classe dei tipi di giustificazione delle assenze.
+ *
+ * @author dario
+ *
+ */
 @Audited
 @Entity
 @Table(name = "justified_types")
@@ -38,6 +44,11 @@ public class JustifiedType extends BaseModel {
 
   private static final long serialVersionUID = -3532986170397408935L;
 
+  /**
+   * Enumerato che gestisce i nomi dei tipi di giustificazione dell'assenza.
+   *
+   * @author dario
+   */
   public enum JustifiedTypeName {
 
     nothing,

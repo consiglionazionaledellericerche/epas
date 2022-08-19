@@ -56,6 +56,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final SetPath<models.absences.JustifiedType, QJustifiedType> justifiedTypesPermitted = this.<models.absences.JustifiedType, QJustifiedType>createSet("justifiedTypesPermitted", models.absences.JustifiedType.class, QJustifiedType.class, PathInits.DIRECT2);
 
+    public final EnumPath<models.enumerate.MealTicketBehaviour> mealTicketBehaviour = createEnum("mealTicketBehaviour", models.enumerate.MealTicketBehaviour.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -73,7 +75,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final SetPath<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour> takenGroup = this.<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour>createSet("takenGroup", models.absences.TakableAbsenceBehaviour.class, QTakableAbsenceBehaviour.class, PathInits.DIRECT2);
 
-    public final BooleanPath timeForMealTicket = createBoolean("timeForMealTicket");
+    public final BooleanPath toUpdate = createBoolean("toUpdate");
 
     public final DatePath<org.joda.time.LocalDate> validFrom = createDate("validFrom", org.joda.time.LocalDate.class);
 

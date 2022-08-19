@@ -24,13 +24,16 @@
 	      <th>Valore</th>
 	    </tr>
 	  #{list items:currentConfiguration, as:'conf'}
-
+	    #{if conf.epasParam.general}
+	     #{if (!conf.epasParam.name.equals('covid_19') || templateUtility.enableCovid()) 
+	     	&& (!conf.epasParam.name.equals('smartworking') || templateUtility.enableSmartworking())}
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
 	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  	</tr>
-	  
+	  	 #{/if}
+	  	#{/if}
 	  #{/list}
 	  </table>
 	</div>

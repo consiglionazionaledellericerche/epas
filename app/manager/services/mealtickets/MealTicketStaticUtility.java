@@ -61,7 +61,7 @@ public class MealTicketStaticUtility {
       //Primo buono pasto
       if (currentBlock == null) {
         previousMealTicket = mealTicket;
-        currentBlock = new BlockMealTicket(mealTicket.block);
+        currentBlock = new BlockMealTicket(mealTicket.block, mealTicket.blockType);
         currentBlock.getMealTickets().add(mealTicket);
         currentBlock.setContract(mealTicket.contract);
         continue;
@@ -83,7 +83,7 @@ public class MealTicketStaticUtility {
       } else {
         //Nuovo blocco
         blockList.add(currentBlock);
-        currentBlock = new BlockMealTicket(mealTicket.block);
+        currentBlock = new BlockMealTicket(mealTicket.block, mealTicket.blockType);
         currentBlock.getMealTickets().add(mealTicket);
         currentBlock.setContract(mealTicket.contract);
       }

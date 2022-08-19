@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import common.security.SecurityRules;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
 import helpers.JsonResponse;
@@ -33,7 +34,6 @@ import models.exports.StampingFromClient;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**
@@ -67,6 +67,11 @@ public class StampingsFromClient extends Controller {
     // Badge number not present (404)
     if (!stampingManager.linkToPerson(body).isPresent()) {
       JsonResponse.notFound();
+    }
+
+    // Controllo timbratura con data troppo vecchia
+    if (stampingManager.isTooFarInPast(body.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data troppo nel passato");
     }
 
     // Stamping already present (409)

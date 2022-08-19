@@ -1,0 +1,55 @@
+  #{title title:'Terminati', administration:true /}
+  
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+	<thead>
+		<tr>
+			#{if !onlyOwn}
+				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'informationRequest.person'}</th>
+			#{/if}
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Nome</th>	
+			#{if approvalRequired}
+				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
+			#{/if}		
+			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
+		</tr>			
+		#{if approvalRequired}
+			<tr>
+				#{if config.officeHeadApprovalRequired}
+					<th width="20%">Responsabile di sede</th>
+				#{/if}	
+				#{if config.administrativeApprovalRequired}
+					<th width="20%">Amministratore del personale</th>
+				#{/if}		
+		#{/if}
+	</thead>
+
+	<tbody>
+		#{list items:illnessApprovedResult, as:'item'}
+			<tr>
+				#{if !onlyOwn}
+					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
+				#{/if}
+								
+				<td>#{f.value 'item.beginDate', value:item.beginDate.format() /}</td>	    
+				<td>#{f.value 'item.endDate', value:item.endDate.format() /}</td>
+				<td>${item.name}</td>
+				#{if config.officeHeadApprovalRequired}
+					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
+				#{/if}
+				#{if config.administrativeApprovalRequired}
+					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
+				#{/if}
+	
+				<td>
+				#{secure.check 'InformationRequests.show', target: item }
+				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
+	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+	        	#{/secure.link}
+	        	#{/secure.check}
+				</td>
+			</tr>
+		#{/list}
+	</tbody>
+  </table>

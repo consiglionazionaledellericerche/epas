@@ -256,16 +256,17 @@ public class ShiftManager2 {
     }
 
     // Verifica che la persona non abbia altri turni nello stesso giorno (anche su altre attività)
-    // TODO: 06/06/17 Verificare se questo vincolo va bene o deve esistere solo per 2
-    // turni
-    // sulla stessa attività
-    final Optional<PersonShiftDay> personShift = personShiftDayDao
-        .byPersonAndDate(personShiftDay.personShift.person, personShiftDay.date);
+    // Condizionato per INAF con parametro generalSetting
+    GeneralSetting setting = generalSettingDao.generalSetting();
+    if (setting != null && setting.enableUniqueDailyShift) {
+      final Optional<PersonShiftDay> personShift = personShiftDayDao
+          .byPersonAndDate(personShiftDay.personShift.person, personShiftDay.date);
 
-    if (personShift.isPresent()) {
-      return Optional.of(Messages.get("shift.alreadyInShift", personShift.get().shiftType));
+      if (personShift.isPresent()) {
+        return Optional.of(Messages.get("shift.alreadyInShift", personShift.get().shiftType));
+      }
     }
-
+    
     // Controllo se sono assente il giorno di turno
     final Optional<PersonDay> personDay = personDayDao
         .getPersonDay(personShiftDay.personShift.person, personShiftDay.date);
@@ -282,7 +283,7 @@ public class ShiftManager2 {
         .stream().anyMatch(pcc -> pcc.competenceCode.equals(holidayCode) 
             && !pcc.beginDate.isAfter(personShiftDay.date));
 
-    GeneralSetting setting = generalSettingDao.generalSetting();
+    
     if (setting != null) {
       if (personDayManager.isHoliday(personShiftDay.personShift.person, personShiftDay.date, 
           setting.saturdayHolidayShift) && !isHolidayShiftEnabled) {          
@@ -766,8 +767,14 @@ public class ShiftManager2 {
 
         break;
       case holiday:
-        timeInterval = Optional.fromNullable(daily);
-        timeInterval2 = Optional.<TimeInterval>absent();
+        if (setting.holidayShiftInNightToo) {
+          timeInterval = Optional.of(new TimeInterval(new LocalTime(0, 0), new LocalTime(23, 59)));
+          timeInterval2 = Optional.<TimeInterval>absent();
+        } else {
+          timeInterval = Optional.fromNullable(daily);
+          timeInterval2 = Optional.<TimeInterval>absent();
+        }
+        
         list = shifts.stream().filter(day -> { 
           return personDayManager.isHoliday(day.personShift.person, day.date, 
               setting.saturdayHolidayShift);

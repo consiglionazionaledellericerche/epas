@@ -29,6 +29,12 @@ import play.jobs.Job;
 import play.jobs.On;
 
 //@On("0 34 15 ? * *")
+/**
+ * Job per la verifica dei trouble sui giorni dei dipendenti.
+ *
+ * @author dario
+ *
+ */
 @SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 0 15 ? * MON,WED,FRI")

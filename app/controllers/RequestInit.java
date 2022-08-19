@@ -45,7 +45,12 @@ import play.mvc.Router;
 import play.mvc.With;
 
 
-
+/**
+ * Injector di dati nel menu e nei dropdown.
+ *
+ * @author dario
+ *
+ */
 @With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
 
@@ -58,15 +63,27 @@ public class RequestInit extends Controller {
   @Inject
   static UserDao userDao;
 
-  static final String TELEWORK_CONF = "telework.stampings.active";
+  static final String TELEWORK_ACTIVE = "telework.stampings.active";
+  
+  static final String GREENPASS_ACTIVE = "greenpass.active";
+
+  static final String ATTESTATI_ACTIVE = "attestati.active";
 
   @Before(priority = 1)
   static void injectMenu() {
 
-    if ("true".equals(Play.configuration.getProperty(TELEWORK_CONF, "false"))) {
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_ACTIVE, "false"))) {
       renderArgs.put("teleworkStampingsActive", true);
     }
-    
+
+    if ("true".equals(Play.configuration.getProperty(GREENPASS_ACTIVE, "false"))) {
+      renderArgs.put("greenPassActive", true);
+    }
+
+    if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
+      renderArgs.put("attestatiActive", true);
+    }
+
     Optional<User> user = Security.getUser();
 
     if (!user.isPresent()) {
@@ -79,7 +96,7 @@ public class RequestInit extends Controller {
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
-    if (params.get("year") != null) {
+    if (params.get("year") != null && !params.get("year").isEmpty()) {
       year = Integer.valueOf(params.get("year"));
     } else if (session.get("yearSelected") != null) {
       year = Integer.valueOf(session.get("yearSelected"));
@@ -91,7 +108,7 @@ public class RequestInit extends Controller {
 
     // month init ////////////////////////////////////////////////////////////////
     Integer month;
-    if (params.get("month") != null) {
+    if (params.get("month") != null && !params.get("month").isEmpty()) {
       month = Integer.valueOf(params.get("month"));
     } else if (session.get("monthSelected") != null) {
       month = Integer.valueOf(session.get("monthSelected"));
@@ -103,7 +120,7 @@ public class RequestInit extends Controller {
 
     // day init //////////////////////////////////////////////////////////////////
     Integer day;
-    if (params.get("day") != null) {
+    if (params.get("day") != null && !params.get("day").isEmpty()) {
       day = Integer.valueOf(params.get("day"));
     } else if (session.get("daySelected") != null) {
       day = Integer.valueOf(session.get("daySelected"));
@@ -184,6 +201,10 @@ public class RequestInit extends Controller {
 
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
@@ -200,6 +221,10 @@ public class RequestInit extends Controller {
         "TeleworkStampings.personTeleworkStampings",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Stampings.dailyPresenceForPersonInCharge",
         "Absences.manageAttachmentsPerCode",
         "Absences.showGeneralMonthlyAbsences",
@@ -253,12 +278,17 @@ public class RequestInit extends Controller {
         "AbsenceGroups.certificationsAbsences");
     
     final Collection<String> personTeleworkSwitcher = ImmutableList.of(
-        "TeleworkStampings.personTeleworkStampings"
+        "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval"
         );
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Vacations.list",
         "Absences.showGeneralMonthlyAbsences",
         "Absences.manageAttachmentsPerCode",
@@ -320,6 +350,7 @@ public class RequestInit extends Controller {
         "Stampings.missingStamping",
         "Stampings.holidaySituation",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Vacations.list",
         "Persons.list",
         "Persons.edit",

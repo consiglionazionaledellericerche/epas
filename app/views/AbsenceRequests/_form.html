@@ -15,24 +15,26 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 #{/alert}
 </div>
 #{form action:@edit(), method:'POST', autocomplete:false,
-	class:'form form-horizontal auto-submit', 'data-spinner':'#modalSpinner' }
-                        
+	class:'form form-horizontal', 'data-spinner':'#modalSpinner'}
+
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
+	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
 
-	#{f.date 'absenceRequest.startAt', required:true, value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
-	#{f.date 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.startAt', required:true, class:'auto-submit-parent',
+		value:absenceRequest.startAt?.format("dd/MM/yyyy") /}
+	#{f.date 'absenceRequest.endTo', class:'auto-submit-parent',
+		value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 	
-
 	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
 	
 		#{if absenceForm != null}
 		#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
      
 	    #{if absenceForm.hasAbsenceTypeChoice()} 
-			 #{f.selectModel 'absenceType', personalizeItems:true}
+			 #{f.selectModel 'absenceType', personalizeItems:true, class:'auto-submit-parent'}
 			   #{if absenceForm.automaticChoiceExists}
 			      <optgroup label="Inserimento Automatico">
 			        <option value=""
@@ -53,24 +55,26 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
 		   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
 		 #{/else}
-	   
+
 	     #{if absenceForm.hasJustifiedTypeChoice() }
-	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected /}
+	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected,
+	           class:'auto-submit-parent' /}
 	     #{/if}
-	     
+
 	     *{ seleziona minuti }*    
 	     #{if absenceForm.hasHourMinutesChoice() }
-	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours, byEquals:'true' /}
-	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
+	       #{f.selectEnum 'hours', items:absenceForm.selectableHours(), value:absenceForm.hours != null ? absenceForm.hours : hours, byEquals:'true',
+	           class:'auto-submit-parent' /}
+	       #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes != null ? absenceForm.minutes : 0, byEquals:'true',
+	           class:'auto-submit-parent' /}
 	     #{/if}
 	     #{/if}
-	
+
 	#{/if}
 
-	
-      
 	#{if retroactiveAbsence}
-		#{f.input 'absenceRequest.note', required:true, value:absenceRequest.note /}
+		#{f.input 'absenceRequest.note', required:true, value:absenceRequest.note,
+			class:'absenceRequest_note_input' /}
 	#{/if}
 	#{if handleCompensatoryRestSituation}
 	<div class="container-fluid">
@@ -94,34 +98,35 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 
 #{form action:@save(), method:'POST', autocomplete:false, class:'form form-horizontal',
 	  'data-spinner':'#defaultSpinner'}
-	  
+
 	#{f.hidden 'absenceRequest.id' /}
 	#{f.hidden 'absenceRequest.person.id' /}
 	#{f.hidden 'absenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
 	#{f.hidden 'absenceRequest.startAt', value:absenceRequest.startAt?.format() /}
 	#{f.hidden 'absenceRequest.endTo', value:absenceRequest.endTo?.format() /}
-	#{f.hidden 'absenceRequest.note' /}
+	#{f.hidden 'absenceRequest.note', class:'absenceRequest_note_hidden' /}
 
 	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
 		#{if absenceForm != null} 
       	#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
       	#{f.hidden 'absenceType.id', value:absenceForm.absenceTypeSelected?.id /}
       	#{f.hidden 'justifiedType.id', value:absenceForm.justifiedTypeSelected.id /}
-      
+        #{f.hidden 'allDay', value:allDay /}
       	#{f.hidden 'hours', value:absenceForm.hours /}
+
       	#{f.hidden 'minutes', value:absenceForm.minutes /}
+      	
     	#{/if}
     #{/if}
 
-            
 	#{b.buttons center:true}
 		 #{b.link @list(absenceRequest.type), color:'default', title:'Indietro' /}
 		 #{if insertable && insertReport.howManySuccess() > 0}
-         #{b.submit 'Inserisci'/}
+         #{b.submit 'Inserisci', id:'absenceRequest_insertButton' /}
          #{/if}
          #{else}
-         #{b.submit 'Inserisci', disabled:true /}
+         #{b.submit 'Inserisci', id:'absenceRequest_insertButton', disabled:true /}
          #{/else}
     #{/b.buttons}
 #{/form}	  

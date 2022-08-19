@@ -26,10 +26,12 @@ import it.cnr.iit.epas.JsonMissionBinder;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.MissionManager;
+import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.exports.MissionFromClient;
+import play.cache.Cache;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -48,6 +50,8 @@ public class Missions extends Controller {
   private static ConfigurationManager configurationManager;
   @Inject
   private static OfficeDao officeDao;
+  @Inject
+  private static NotificationManager notificationManager;
   
   private static void logInfo(String description, MissionFromClient body) {
     log.info(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
@@ -55,10 +59,6 @@ public class Missions extends Controller {
   
   private static void logWarn(String description, MissionFromClient body) {
     log.warn(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
-  }
-  
-  private static void logError(String description, MissionFromClient body) {
-    log.error(MissionManager.LOG_PREFIX +  "{}. Messaggio: {}", description, body);
   }
   
   /**
@@ -77,12 +77,12 @@ public class Missions extends Controller {
       JsonResponse.badRequest();
       return;
     }
-    
+
     if (body.dataInizio.isAfter(body.dataFine)) {
       logWarn("Data di inizio successiva alla data di fine, messaggio scartato", body);
       JsonResponse.badRequest();
     }
-    
+
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       logWarn("Dipendente riferito nel messaggio non trovato, messaggio scartato", body);
@@ -93,7 +93,7 @@ public class Missions extends Controller {
     Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
     Office office = body.person.office;
-    
+
     if (!officeByMessage.isPresent()) {
       logWarn(
           String.format("Attenzione il codice sede %s non è presente su ePAS ed il dipendente %s "
@@ -107,7 +107,7 @@ public class Missions extends Controller {
               body.codiceSede, office.name, office.codeId, body.person.getFullname()), 
           body);
     }
-    
+
     // Check if integration ePAS-Missions is enabled
     if (!(Boolean) configurationManager
         .configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
@@ -116,7 +116,7 @@ public class Missions extends Controller {
           office.name, body.person.fullName()), body);
       JsonResponse.ok();
     }
-    
+
     boolean success = false;
     switch (body.tipoMissione) {
       case "ORDINE":
@@ -135,7 +135,17 @@ public class Missions extends Controller {
     if (success) {
       logInfo("Messaggio inserito con successo", body);
     } else {
-      logError("Non è stato possibile inserire il messaggio", body);
+      logWarn("Problemi durante l'inserimento del messaggio", body);
+      String problematicMissionCacheKey = 
+          String.format("mission.problematic.%s.%s.%s.%s", 
+              body.tipoMissione, body.id, body.anno, body.numero);
+      if (Cache.get(problematicMissionCacheKey) == null) {
+        log.debug("Imposto la cache di missione problematica con valore true per {}", body);
+        notificationManager.sendEmailMissionFromClientProblems(body);
+        Cache.set(problematicMissionCacheKey, true, "1d");
+      } else {
+        logInfo("Missione problematica già segnalata all'utente. Email non inviata.", body);
+      }
       JsonResponse.conflict();
     }
 

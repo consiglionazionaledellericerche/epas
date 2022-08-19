@@ -26,6 +26,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.rest.v2.Offices;
 import controllers.rest.v2.Persons;
@@ -43,13 +44,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.PersonManager;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la visualizzazione via REST di dati relativi alla situazione giornaliera.
@@ -68,17 +69,18 @@ public class PersonDays extends Controller {
   private static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
-
+  @Inject
+  static PersonManager personManager;
+  
   /**
    * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
    * personPerseoId o fiscalCode) in un giorno specifico (date).
    */
   public static void getDaySituation(
-      Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, 
-      LocalDate date) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, 
+      String number, LocalDate date) {
     log.debug("Chiamata getDaySituation, email = {}, date = {}", email, date);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
@@ -120,10 +122,10 @@ public class PersonDays extends Controller {
     List<PersonDay> personDays = 
         personDayDao.getPersonDaysByOfficeInPeriod(
             office, date, date.dayOfMonth().withMaximumValue());
-    
+
     val personDayMap = 
         personDays.stream().collect(Collectors.groupingBy(PersonDay::getPerson));
-    
+
     List<PersonMonthRecapDto> monthRecaps = Lists.newArrayList();
     personDayMap.forEach((p, pds) -> {      
       monthRecaps.add(PersonMonthRecapDto.builder()
@@ -168,8 +170,9 @@ public class PersonDays extends Controller {
           personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
       if (pd == null) {
         log.info("Non sono presenti informazioni per {} nel giorno {}", person.getFullname(), date);
+      } else {
+        personDayDtos.add(PersonDayShowDto.build(pd));  
       }
-      personDayDtos.add(PersonDayShowDto.build(pd));
     }
 
     val gson = gsonBuilder.create();
@@ -181,8 +184,8 @@ public class PersonDays extends Controller {
    * nell'anno/mese passati come parametro.
    */
   public static void getMonthSituationByPerson(Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
@@ -190,6 +193,8 @@ public class PersonDays extends Controller {
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     val monthRecap = 
         PersonMonthRecapDto.builder().year(year).month(month)
+        .basedWorkingDays(
+            personManager.basedWorkingDays(personDays, person.contracts, null))
         .person(PersonShowTerseDto.build(person))
         .personDays(personDays.stream().map(pd -> PersonDayShowTerseDto.build(pd))
             .collect(Collectors.toList()))
@@ -204,8 +209,8 @@ public class PersonDays extends Controller {
    * lavoro fuori sede o per motivi di servizio con impostato luogo o motivazione.
    */
   public static void offSiteWorkByPersonAndMonth(Long id, String email, String eppn,
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }

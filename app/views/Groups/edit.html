@@ -20,10 +20,11 @@
   #{f.input 'group.description' /}
   #{f.hidden 'office.id' /}  
   #{f.selectModel 'group.manager', items: peopleForGroups, required:true /}
-  #{f.selectModels 'people', label:'affiliationPeople', value:group?.people, items: peopleForGroups /}
+  #{f.selectModels 'people', label:messages.get('group.people'), value:group?.people, items: peopleForGroups /}
   #{f.booleanRadio 'group.sendFlowsEmail' /}
-  
-  #{f.date 'group.endDate', label:'endDate' /}
+
+  #{f.date 'group.endDate', label:messages.get('endDate') /}
+  #{f.input 'group.externalId' /}
   #{b.buttons center:true}
     
     #{b.save /}

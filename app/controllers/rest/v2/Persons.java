@@ -19,18 +19,23 @@ package controllers.rest.v2;
 
 import cnr.sync.dto.v2.PersonCreateDto;
 import cnr.sync.dto.v2.PersonShowDto;
+import cnr.sync.dto.v2.PersonShowTerseDto;
 import cnr.sync.dto.v2.PersonUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
+import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +46,6 @@ import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione delle persone.
@@ -69,13 +73,25 @@ public class Persons extends Controller {
    * individuata con i parametri passati. 
    */
   @BasicAuth
-  public static void list(Long id, String code, String codeId) {
+  public static void list(Long id, String code, String codeId, LocalDate atDate, Boolean terse) {
     RestUtils.checkMethod(request, HttpMethod.GET);
+    if (atDate == null) {
+      atDate = LocalDate.now();
+    }
+
     val office = Offices.getOfficeFromRequest(id, code, codeId);
-    
-    val list = 
-        office.persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
-    renderJSON(gsonBuilder.create().toJson(list));
+    val persons = personDao.list(Optional.<String>absent(), Sets.newHashSet(office), false, 
+        JodaConverters.javaToJodaLocalDate(atDate), 
+        JodaConverters.javaToJodaLocalDate(atDate), false).list();
+    if (terse != null && terse) {
+      val list = 
+          persons.stream().map(p -> PersonShowTerseDto.build(p)).collect(Collectors.toList());
+      renderJSON(gsonBuilder.create().toJson(list));
+    } else {
+      val list = 
+          persons.stream().map(p -> PersonShowDto.build(p)).collect(Collectors.toList());
+      renderJSON(gsonBuilder.create().toJson(list));  
+    }
   }
 
   /**
@@ -83,9 +99,9 @@ public class Persons extends Controller {
    * passati. 
    */
   public static void show(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
     rules.checkIfPermitted(person.office);
 
@@ -136,12 +152,12 @@ public class Persons extends Controller {
   @BasicAuth
   public static void update(
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
-      String body) throws JsonParseException, JsonMappingException, IOException {
+      String number, String body) throws JsonParseException, JsonMappingException, IOException {
     RestUtils.checkMethod(request, HttpMethod.PUT);
 
     log.debug("Update person -> request.body = {}", body);
 
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
@@ -178,9 +194,9 @@ public class Persons extends Controller {
    */
   @BasicAuth
   public static void delete(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
-    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
     
     if (!person.contracts.isEmpty()) {
@@ -207,20 +223,21 @@ public class Persons extends Controller {
    */
   @Util
   public static Person getPersonFromRequest(
-      Long id, String email, String eppn, Long personPerseoId, String fiscalCode) {
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode,
+      String number) {
     if (id == null && email == null && eppn == null 
-        && personPerseoId == null && fiscalCode == null) {
+        && personPerseoId == null && fiscalCode == null && number == null) {
       JsonResponse.badRequest("I parametri per individuare la persona non sono presenti");
     }
 
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPerseoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPerseoId, fiscalCode, number);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
-          + "email = {}, eppn = {}, personPersoId = {}, fiscalCode = {}", 
-          email, eppn, personPerseoId, fiscalCode);
+          + "email = {}, eppn = {}, personPersoId = {}, fiscalCode = {}, number = {}", 
+          email, eppn, personPerseoId, fiscalCode, number);
       JsonResponse.notFound("Non è stato possibile individuare la persona in ePAS con "
           + "i parametri passati.");
     }

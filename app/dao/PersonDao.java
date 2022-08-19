@@ -85,6 +85,19 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Persona (se esiste) a partire dal id.
+   *
+   * @param id l'id della persona.
+   * @return la persona che ha associato l'id.
+   */
+  public Optional<Person> byId(Long id) {
+    final QPerson person = QPerson.person;
+    final Person result = getQueryFactory().selectFrom(person).where(person.id.eq(id))
+        .fetchOne();
+    return Optional.fromNullable(result);
+  }
+  
+  /**
    * Lista di persone attive per anno/mese su set di sedi.
    *
    * @param offices la lista degli uffici
@@ -458,28 +471,16 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
-   * Matricola per persona ed ufficio.
+   * Persona tramite la matricola.
    *
    * @param number la matricola passata come parametro.
    * @return la persona corrispondente alla matricola passata come parametro.
    */
-  @Deprecated
-  public Person getPersonByNumber(String number, Optional<Set<Office>> officeList) {
-
-    final BooleanBuilder condition = new BooleanBuilder();
-    final QPerson person = QPerson.person;
-    if (officeList.isPresent()) {
-      condition.and(person.office.in(officeList.get()));
-    }
-
-    condition.and(person.number.eq(number));
-
-    return getQueryFactory().selectFrom(person).where(condition).fetchOne();
-  }
-
   public Person getPersonByNumber(String number) {
-    return getPersonByNumber(number, Optional.absent());
+    final QPerson person = QPerson.person;
+    return getQueryFactory().selectFrom(person).where(person.number.eq(number)).fetchOne();
   }
+
 
   /**
    * La lista di persone con matricola valida associata. Se office present le sole persone di quella
@@ -560,10 +561,10 @@ public final class PersonDao extends DaoBase {
    * @param perseoId il campo perseoId associato alla persona.
    * @return la persona se esiste associata al parametro eppn.
    */
-  public Optional<Person> byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-      Long id, String eppn, String email, Long perseoId, String fiscalCode) {
+  public Optional<Person> byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+      Long id, String eppn, String email, Long perseoId, String fiscalCode, String number) {
     if (id == null && eppn == null && email == null && perseoId == null 
-        && fiscalCode == null) {
+        && fiscalCode == null && number == null) {
       return Optional.absent();
     }
     if (id != null) {
@@ -580,6 +581,9 @@ public final class PersonDao extends DaoBase {
     }
     if (!Strings.isNullOrEmpty(fiscalCode)) {
       return byFiscalCode(fiscalCode);
+    }
+    if (!Strings.isNullOrEmpty(number)) {
+      return Optional.fromNullable(getPersonByNumber(number));
     }
     return Optional.absent();
   }

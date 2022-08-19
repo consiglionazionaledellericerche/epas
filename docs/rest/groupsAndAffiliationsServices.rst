@@ -306,7 +306,7 @@ affiliazioni che non sono più attive alla data corrente.
 
 La persona può essere individuata passando i soliti parametri identificativi delle persone: 
 
-  - *id, email, eppn, perseoPersonId, fiscalCode*.
+  - *id, email, eppn, perseoPersonId, fiscalCode, number*.
 
 
 Affiliation Show

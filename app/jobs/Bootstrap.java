@@ -17,7 +17,6 @@
 
 package jobs;
 
-import com.google.common.io.Resources;
 import dao.UserDao;
 import java.io.IOException;
 import java.net.URL;
@@ -28,19 +27,15 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Institute;
 import models.Qualification;
-import models.User;
 import models.WorkingTimeType;
-import models.absences.AbsenceType;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
-import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import play.Play;
-import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -106,6 +101,12 @@ public class Bootstrap extends Job<Void> {
 
   }
 
+  /**
+   * Classe di utilità.
+   *
+   * @author dario
+   *
+   */
   public static class DatasetImport implements Work {
 
     private final URL url;

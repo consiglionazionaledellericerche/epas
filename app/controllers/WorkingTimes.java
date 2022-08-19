@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -55,7 +56,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle tipologie di orario di lavoro.
@@ -190,7 +190,8 @@ public class WorkingTimes extends Controller {
    * @param workingTimeTypePattern tipo di orario di lavoro (orizzontale/verticale).
    */
   public static void insertWorkingTimeBaseInformation(Long officeId, boolean compute,
-      String name, String externalId, WorkingTimeTypePattern workingTimeTypePattern) {
+      String name, String externalId, boolean reproportionEnabled,
+      WorkingTimeTypePattern workingTimeTypePattern) {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -213,12 +214,13 @@ public class WorkingTimes extends Controller {
     }
 
     if (Validation.hasErrors()) {
-      render(office, name, externalId, workingTimeTypePattern);
+      render(office, name, reproportionEnabled, externalId, workingTimeTypePattern);
     }
 
     if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
+      horizontalPattern.reproportionAbsenceCodesEnabled = reproportionEnabled;
       render("@insertWorkingTime", horizontalPattern, office, name, externalId);
     } else {
       final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
@@ -227,7 +229,8 @@ public class WorkingTimes extends Controller {
       int step = 1;
       VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
 
-      render("@insertVerticalWorkingTime", office, vwt, name, externalId, step, daysProcessed);
+      render("@insertVerticalWorkingTime", office, vwt, name, reproportionEnabled, 
+          externalId, step, daysProcessed);
     }
   }
 
@@ -264,6 +267,7 @@ public class WorkingTimes extends Controller {
   }
 
   private static List<VerticalWorkingTime> processed(String key) {
+    @SuppressWarnings("unchecked")
     List<VerticalWorkingTime> vwtProcessedList = Cache.get(key, List.class);
     if (vwtProcessedList == null) {
       vwtProcessedList = Lists.newArrayList();
@@ -285,12 +289,13 @@ public class WorkingTimes extends Controller {
    * @param officeId id Ufficio proprietario
    * @param name nome dell'orario di lavoro
    * @param step numero dello step di creazione dell'orario verticale
+   * @param reproportionEnabled se l'orario di lavoro riproporziona la quantità di codici di assenza
    * @param switchDay passaggio da un giorno all'altro in fase di creazione
    * @param submit  booleano per completare la procedura
    * @param vwt Orario di lavoro verticale.
    */
   public static void insertVerticalWorkingTime(Long officeId, @Required String name, 
-      String externalId, int step,
+      String externalId, int step, boolean reproportionEnabled,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
 
     flash.clear();
@@ -307,14 +312,14 @@ public class WorkingTimes extends Controller {
     if (switchDay) {
       Validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
-      render(office, vwt, name, step, daysProcessed);
+      render(office, vwt, name, reproportionEnabled, step, daysProcessed);
     }
 
     //Persistenza ...
     if (submit) {
       // TODO: validatore
       workingTimeTypeManager.saveVerticalWorkingTimeType(
-          vwtProcessedList, office, name, externalId);
+          vwtProcessedList, office, name, reproportionEnabled, externalId);
       flash.success("Il nuovo tipo orario è stato inserito correttamente.");
       manageOfficeWorkingTime(office.id);
     }
@@ -323,7 +328,7 @@ public class WorkingTimes extends Controller {
     // Validazione dto
     if (Validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
-      render(office, vwt, name, externalId, step, daysProcessed);
+      render(office, vwt, name, externalId, reproportionEnabled, step, daysProcessed);
     }
 
     // Next step
@@ -335,7 +340,7 @@ public class WorkingTimes extends Controller {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     }
-    render(vwt, step, name, externalId, office, daysProcessed);
+    render(vwt, step, reproportionEnabled, name, externalId, office, daysProcessed);
 
 
   }
@@ -628,5 +633,37 @@ public class WorkingTimes extends Controller {
     }
   }
 
+  /**
+   * Genera la form per il cambio della capacità di riproporzionare la quantità
+   * dei codici di assenza.
+   *
+   * @param wttId identificativo dell'orario di lavoro
+   * @param officeId identificativo della sede di lavoro
+   */
+  public static void changeEnableAdjustment(Long wttId, Long officeId) {
+    WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
+    notFoundIfNull(wtt);
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    
+    render(wtt, office);
+  }
+  
+  /**
+   * Salva le modifiche effettuate sull'orario di lavoro.
+   *
+   * @param wtt l'orario di lavoro
+   * @param officeId l'identificativo della sede
+   */
+  public static void executeChangeEnableAdjustment(WorkingTimeType wtt, Long officeId) {
+    notFoundIfNull(wtt);
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    wtt.save();
+    manageOfficeWorkingTime(office.id);
+  }
 
 }

@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import controllers.Security;
+import dao.GeneralSettingDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
@@ -42,7 +43,9 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.dto.TeleworkDto;
 import models.enumerate.StampTypes;
+import models.enumerate.TeleworkStampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -51,6 +54,9 @@ import play.i18n.Messages;
 
 /**
  * Manager per la gestione delle timbrature.
+ *
+ * @author Cristian Lucchesi
+ *
  */
 @Slf4j
 public class StampingManager {
@@ -63,6 +69,7 @@ public class StampingManager {
   private final StampingDao stampingDao;
   private final NotificationManager notificationManager;
   private final IWrapperFactory wrapperFactory;
+  private final GeneralSettingDao generalSettingDao;
 
   /**
    * Injection.
@@ -79,7 +86,8 @@ public class StampingManager {
       PersonDayManager personDayManager,
       PersonStampingDayRecapFactory stampingDayRecapFactory,
       ConsistencyManager consistencyManager, StampingDao stampingDao,
-      NotificationManager notificationManager, IWrapperFactory wrapperFactory) {
+      NotificationManager notificationManager, IWrapperFactory wrapperFactory,
+      GeneralSettingDao generalSettingDao) {
 
     this.personDayDao = personDayDao;
     this.personDao = personDao;
@@ -89,6 +97,7 @@ public class StampingManager {
     this.stampingDao = stampingDao;
     this.notificationManager = notificationManager;
     this.wrapperFactory = wrapperFactory;
+    this.generalSettingDao = generalSettingDao;
   }
 
 
@@ -175,6 +184,15 @@ public class StampingManager {
   }
 
   /**
+   * Controlla che la timbratura da inserire non sia troppo nel passato.
+   */
+  public boolean isTooFarInPast(LocalDateTime dateTime) {
+    return dateTime.compareTo(
+      LocalDateTime.now().minusDays(
+        generalSettingDao.generalSetting().maxDaysInPastForRestStampings)) < 0;
+  }
+
+  /**
    * Metodo che salva la timbratura.
    *
    * @param stamping la timbratura da persistere
@@ -183,7 +201,7 @@ public class StampingManager {
    *     buon fine, stringa vuota altrimenti.
    */
   public String persistStamping(Stamping stamping, 
-      Person person, User currentUser, boolean newInsert) {
+      Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
     val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
@@ -197,8 +215,14 @@ public class StampingManager {
           stamping.markedByEmployee = false;
           stamping.markedByAdmin = true;
         } else {
-          stamping.markedByEmployee = true;
           stamping.markedByAdmin = false;
+          if (isTeleworkStamping) {
+            stamping.markedByTelework = true;
+            stamping.markedByEmployee = false;
+          } else {
+            stamping.markedByTelework = false;
+            stamping.markedByEmployee = true;
+          }
         }
       }
       stamping.save();
@@ -221,7 +245,61 @@ public class StampingManager {
 
     return result;
   }
+  
+  /**
+   * Crea l'oggetto stamping da persistere sul db di ePAS.
+   *
+   * @param stamping il dto da cui creare la timbratura
+   * @param pd il personday cui associare la timbratura
+   * @param time l'orario della timbratura
+   * @return l'oggetto stamping correttamente formato.
+   */
+  public Stamping generateStampingFromTelework(TeleworkDto stamping, PersonDay pd, String time) {
+    Stamping persistStamping = new Stamping(pd, 
+        deparseStampingDateTime(pd.date, time));
+    switch (stamping.getStampType()) {
+      case INIZIO_TELELAVORO:
+        persistStamping.way = WayType.in;
+        break;
+      case FINE_TELELAVORO:
+        persistStamping.way = WayType.out;
+        break;
+      case INIZIO_PRANZO_TELELAVORO:
+        persistStamping.way = WayType.out;
+        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        break;
+      case FINE_PRANZO_TELELAVORO:
+        persistStamping.way = WayType.in;
+        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        break;
+      case INIZIO_INTERRUZIONE:
+        persistStamping.way = WayType.out;
+        break;
+      case FINE_INTERRUZIONE:
+        persistStamping.way = WayType.in;
+        break;
+      default:
+        break;
+    }
+    
+    return persistStamping;
+  }
 
+  /**
+   * Ritorna il verso della timbratura corrispondente a quella del dto.
+   *
+   * @param dto il dto contenente le informazioni della timbratura in telelavoro
+   * @return il verso della timbratura corrispondente.
+   */
+  public WayType retrieveWayFromTeleworkStamping(TeleworkDto dto) {
+    if (dto.getStampType().equals(TeleworkStampTypes.INIZIO_TELELAVORO)
+        || dto.getStampType().equals(TeleworkStampTypes.FINE_PRANZO_TELELAVORO)
+        || dto.getStampType().equals(TeleworkStampTypes.FINE_INTERRUZIONE)) {      
+      return WayType.in;
+    } else {
+      return WayType.out;
+    }
+  }
 
   /**
    * Stamping dal formato del client al formato ePAS.
@@ -231,6 +309,7 @@ public class StampingManager {
 
     // Check della richiesta
     Verify.verifyNotNull(stampingFromClient);
+    Verify.verifyNotNull(stampingFromClient.dateTime);
 
     final Person person = stampingFromClient.person;
     // Recuperare il personDay
@@ -269,7 +348,8 @@ public class StampingManager {
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
         ? stampingFromClient.zona : null;
     stamping.note = stampingFromClient.note;
-
+    stamping.reason = stampingFromClient.reason;
+    stamping.place = stampingFromClient.place;
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",

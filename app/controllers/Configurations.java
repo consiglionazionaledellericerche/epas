@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import java.io.File;
@@ -54,7 +55,6 @@ import play.db.jpa.Blob;
 import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle configurazioni.
@@ -207,6 +207,16 @@ public class Configurations extends Controller {
             "valore non valido. Formato accettato HH:mm-HH:mm");
       }
     }
+    if (epasParam.epasParamValueType.equals(EpasParamValueType.ENUM)) {
+      if (configurationDto.blockTypeNewValue == null) {
+        Validation.addError("configurationDto.blockTypeNewValue", "valore non valido.");
+      } else {
+        newConfiguration = configurationManager.updateEnum(epasParam,
+            configuration.getOwner(), configurationDto.blockTypeNewValue,
+            Optional.fromNullable(configurationDto.validityBegin),
+            Optional.fromNullable(configurationDto.validityEnd), false);
+      }
+    }
 
     return newConfiguration;
   }
@@ -254,13 +264,17 @@ public class Configurations extends Controller {
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
         .collect(Collectors.toList());
     
+    final List<Configuration> informationFlows = configurations.stream()
+        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.INFORMATION_FLOWS)
+        .collect(Collectors.toList());
+    
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     final Attachment autocert = office.attachments.stream()
         .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
     render(office, paramCategory, generals, yearlies, periodics, 
-        autocertifications, autocert, flows, competenceFlows);
+        autocertifications, autocert, flows, competenceFlows, informationFlows);
   }
 
   /**

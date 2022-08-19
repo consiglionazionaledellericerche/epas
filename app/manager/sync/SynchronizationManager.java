@@ -30,11 +30,11 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.RegistryNotificationManager;
 import manager.UserManager;
+import manager.configurations.ConfigurationManager;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -60,6 +60,7 @@ public class SynchronizationManager {
   private RoleDao roleDao;
   private OfficeManager officeManager;
   private RegistryNotificationManager registryNotificationManager;
+  private ConfigurationManager configurationManager;
 
   /**
    * Default constructor, useful for injection.  
@@ -142,7 +143,7 @@ public class SynchronizationManager {
 
     val syncResult = new SyncResult();
 
-    var epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    Person epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
     if (epasPerson == null) {
       epasPerson = personDao.getPersonByNumber(perseoPerson.number);
     }
@@ -224,6 +225,7 @@ public class SynchronizationManager {
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
       officeManager.setUro(person.user, person.office, employee);
       person.save();
+      configurationManager.updateConfigurations(person);
     } catch (Exception ex) {
       return Optional.absent();
     }

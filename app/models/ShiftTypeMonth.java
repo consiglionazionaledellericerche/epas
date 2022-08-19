@@ -30,8 +30,9 @@ import play.data.validation.Required;
 
 /**
  * Oggetto che contiene l'approvazione delle ore di turno.
- * 
+ *
  * @author Daniele Murgia
+ * 
  * @since 09/06/17
  */
 @Entity

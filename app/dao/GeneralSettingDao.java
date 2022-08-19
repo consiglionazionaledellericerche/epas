@@ -17,25 +17,43 @@
 
 package dao;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.Optional;
 import javax.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import models.GeneralSetting;
 import models.query.QGeneralSetting;
 
 /**
  * DAO per le impostazioni generali di ePAS.
- * 
+ *
  * @author Cristian Lucchesi
  *
  */
+@Singleton
+@Slf4j
 public class GeneralSettingDao extends DaoBase {
 
+  LoadingCache<String, GeneralSetting> generalSettingCache;
+  private static final String cacheKey = "gs";
+  
   @Inject
   GeneralSettingDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
+    this.generalSettingCache = CacheBuilder.newBuilder().build(
+        new CacheLoader<String, GeneralSetting>() {
+          public GeneralSetting load(String key) {
+          return Optional.ofNullable(queryFactory
+              .selectFrom(QGeneralSetting.generalSetting).fetchOne())
+              .orElseGet(GeneralSetting::new);
+          }
+        });
   }
 
   /**
@@ -43,9 +61,15 @@ public class GeneralSettingDao extends DaoBase {
    *
    * @return le impostazioni generali.
    */
-  public GeneralSetting generalSetting() {
-    return Optional.ofNullable(queryFactory
-        .selectFrom(QGeneralSetting.generalSetting).fetchOne())
-        .orElseGet(GeneralSetting::new);
+  public GeneralSetting generalSetting()  {
+    return generalSettingCache.getUnchecked(cacheKey);
+  }
+  
+  /**
+   * Invalida la cache sui GeneralSetting.
+   */
+  public void generalSettingInvalidate() {
+    log.info("Cache invalidata");
+    generalSettingCache.invalidate(cacheKey);
   }
 }

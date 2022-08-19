@@ -19,7 +19,7 @@ package cnr.sync.dto.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
@@ -43,11 +43,12 @@ public class StampingShowDto {
   private Long id;
   private LocalDateTime date;
   private WayType way;
-  private StampTypeDto stampType;
+  private String stampType;
   private String place;
   private String reason;
   private boolean markedByAdmin;
   private boolean markedByEmployee;
+  private boolean markedByTelework;
   private String note;
   private String stampingZone;
   private PersonShowTerseDto person;
@@ -63,6 +64,7 @@ public class StampingShowDto {
   public static StampingShowDto build(Stamping stamping) {
     val dto = modelMapper.map(stamping, StampingShowDto.class);
     dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
+    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
     return dto;
   }
 }

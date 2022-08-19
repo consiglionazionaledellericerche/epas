@@ -1,0 +1,17 @@
+#{modalAsync id:'defaultModal', title:('Rifiuto richiesta di assenza per ' + informationRequest.person.fullname)}
+
+<div class="container-fluid">
+
+#{alert color:'warning'}
+<p class=center>Specifica una motivazione per cui la richiesta inoltrata deve essere respinta.</p> 
+#{/alert}
+#{form action:@disapproval(informationRequest.id, disapproval), method:'POST', class:'form form-horizontal'}
+#{f.input 'reason'/}
+	    #{b.buttons center:true}   
+	      #{b.submit 'Rifiuta', color:'warning', fa:'cross' /}
+	    #{/b.buttons}
+#{/form}
+</div>
+
+
+#{/modalAsync}

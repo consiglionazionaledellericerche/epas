@@ -6,26 +6,26 @@
 	    <label>Username</label>
 	    <input class="form-control margin-bottom" placeholder="Username"
 	  	  type="text" name="username" value="${flash.username}" />
-		
+
 	    <label>Password</label>
 	    <input class="form-control" placeholder="Password"
 		  type="password" name="password" value="${flash.password}" />
-	
+
 	    <div class="submit-btn">
 	    	<!-- Submit -->
 	    	<input class="btn btn-primary btn-block" type="submit"
 		  		value="&{'secure.signin'}" />    
 	    </div>
-	
+
 	  #{/form}
   #{/if}
-  
+
   #{if shibAuthEnabled}
   <div style="margin-top: 2em; text-align:center">
     #{if ldapAuthEnabled}
       oppure utilizza il bottone sottostante per utilizzare l'<strong webui-popover-hover 
 	     data-content="Utilizzando questo tipo di autenticazione verrà indirizzato verso l'Identity Provider del ${companyCode}. L'utilizzo di questa modalità permette il Single Sign On." 
-	     data-title="Identity Provider ${companyCode}">Indentity Provider ${companyCode}</strong>
+	     data-title="Identity Provider ${companyCode}">Identity Provider ${companyCode}</strong>
 	#{/if}
 	#{else}
 	  <h3 style="text-align:center; margin-bottom: 1em">Utilizza il bottone sottostante per accedere con le credenziali ${companyCode}</h3>	
@@ -36,8 +36,21 @@
 				src="@{'/public/images/logo-cnr-big.png'}" />
 		</a>
 	</div>
-	    
   </div>
   #{/if}
-
+  #{if oauthEnabled}
+    <h3 style="text-align:center; margin-bottom: 1em">
+      <span webui-popover-hover 
+         data-content="Utilizzando questo tipo di autenticazione verrà indirizzato verso l'Identity Provider di tipo OAuth del ${companyCode}. L'utilizzo di questa modalità permette il Single Sign On." 
+         data-title="Identity Provider OAuth ${companyCode}">
+         Utilizza il bottone sottostante per accedere con le credenziali ${companyCode}
+	  </span>
+    </h3>
+  	<div class="center" id="login-idp-btn">
+		<a class="btn btn-default" href="@{Resecure.oauthLogin()}"> 
+			<img class="col-xs-12" alt="Login tramite OAuth2"
+				src="@{'/public/images/logo-cnr-big.png'}" />
+		</a>
+	</div>
+   #{/if}
 </div>

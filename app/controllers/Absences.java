@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.OfficeDao;
@@ -43,7 +44,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -67,7 +67,6 @@ import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle assenze.
@@ -314,10 +313,11 @@ public class Absences extends Controller {
     }
 
     response.setContentTypeIfNotSet(absence.absenceFile.type());
-    var filename = String.format("assenza-%s-%s",
+    String filename = String.format("assenza-%s-%s",
         absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
-      filename = String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+      filename = String.format("%s%s", filename, 
+          ImageUtils.fileExtension(absence.absenceFile).get());
     }
 
     log.debug("Allegato relativo all'assenza: {}", absence.absenceFile.getFile());
@@ -600,10 +600,16 @@ public class Absences extends Controller {
           + "parametro 'Assenze visibili dai dipendenti'.");
       Stampings.stampings(year, month);
     }
-
+    LocalDate date;
+    if (year == 0 || month == 0 || day == 0) {
+      date = LocalDate.now();
+      flash.error("Non sono stati indicati correttamente anno, mese e giorno per la richiesta. "
+          + "Mostrate le assenze di oggi.");
+    } else {
+      date = new LocalDate(year, month, day);
+    }
     Person person = Security.getUser().get().person;
     List<Person> list = personDao.byOffice(person.office);
-    LocalDate date = new LocalDate(year, month, day);
     List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
     render(pdList, person, date);
   }

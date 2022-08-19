@@ -20,6 +20,10 @@ package helpers;
 import play.mvc.Http;
 import play.mvc.results.RenderJson;
 
+/**
+ * Una risposta Json con i suoi possibili codici
+ * http di risposta.
+ */
 public final class JsonResponse {
 
   private static final String SIMPLE = "HTTP %s";
@@ -70,5 +74,14 @@ public final class JsonResponse {
     throw new RenderJson(String.format(WITH_MSG, CONFLICT, message));
   }
 
+  public static void unauthorized(String message) {
+    Http.Response.current().status = Http.StatusCode.UNAUTHORIZED;
+    throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.UNAUTHORIZED, message));    
+  }
+  
+  public static void internalError(String message) {
+    Http.Response.current().status = Http.StatusCode.INTERNAL_ERROR;
+    throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.INTERNAL_ERROR, message));    
+  }
 }
 

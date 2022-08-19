@@ -82,10 +82,13 @@ public class ReportMailer extends Mailer {
 
     List<String> dests = Lists.newArrayList();
 
+    boolean toPersonnelAdmin = false;
+
     if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
       if (user.get().person != null) {
         dests = userDao.getUsersWithRoles(user.get().person.office, Role.PERSONNEL_ADMIN).stream()
             .filter(u -> u.person != null).map(u -> u.person.email).collect(Collectors.toList());
+        toPersonnelAdmin = true;
       }
     } else {
       dests = COMMAS.splitToList(Play.configuration
@@ -134,7 +137,7 @@ public class ReportMailer extends Mailer {
       img.setURL(imgUrl);
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
-      send(user, data, session);
+      send(user, data, session, toPersonnelAdmin);
     } catch (MalformedURLException ex) {
       log.error("malformed url", ex);
     } catch (IOException ex) {

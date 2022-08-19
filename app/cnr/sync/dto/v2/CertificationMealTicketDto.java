@@ -29,4 +29,6 @@ import lombok.Data;
 public class CertificationMealTicketDto {
 
   public Integer quantity;
+  public Integer paperyTickets;
+  public Integer electronicTickets;
 }

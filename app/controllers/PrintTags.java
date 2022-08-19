@@ -22,6 +22,7 @@ import static play.modules.pdf.PDF.renderPDF;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.history.HistoryValue;
@@ -45,8 +46,13 @@ import models.dto.PrintTagsInfo;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
+/**
+ * Controller per la gestione della stampa dei cartellini.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class PrintTags extends Controller {
@@ -162,5 +168,21 @@ public class PrintTags extends Controller {
     boolean forAll = true;
 
     render(personList, date, year, month, forAll, office);
+  }
+  
+  /**
+   * Genera la pagina di timbrature autocertificate per lavoro fuori sede
+   * nell'anno/mese passati come parametro.
+   *
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void autocertOffsite(int year, int month) {
+    Person person = Security.getUser().get().person;
+    List<PrintTagsInfo> dtoList = Lists.newArrayList();
+    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+    log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
+    List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
+    renderPDF(dtoList, offSiteWorkingTemp, person);
   }
 }

@@ -20,6 +20,7 @@ package manager.services.absences.model;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import dao.AbsenceTypeDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collections;
@@ -27,9 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import javax.inject.Inject;
+import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
 import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
@@ -37,9 +41,12 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.VacationCode;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+
 
 /**
  * Rappresenta un insieme di assenza all'interno di un periodo temporale.
@@ -95,13 +102,20 @@ public class AbsencePeriod {
   public VacationCode vacationCode;
   // Se il period è stato splittato perchè a cavallo del primo anno contratto
   public AbsencePeriod splittedWith;
+  
+  public AbsenceTypeDao absenceTypeDao;
+  public PersonDayManager personDayManager;  
 
+  
   /**
    * Costruttore.
    */
-  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
+  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, PersonDayManager personDayManager,
+      AbsenceTypeDao absenceTypeDao) {
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;
+    this.absenceTypeDao = absenceTypeDao;
+    this.personDayManager = personDayManager;
   }
 
 
@@ -197,8 +211,25 @@ public class AbsencePeriod {
    * @return int
    */
   public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
-    
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      if (this.takableCodes.contains(absenceTypeDao
+          .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
+        /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
+         * non possono essere più di 8. Quindi sottraggo 2 giorni nella modalità 
+         * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
+         * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
+         */
+        
+        if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
+          return this.fixedPeriodTakableAmount - 2 * 100;
+        }
+        List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
+        int count = (workingDays.size() * 100 / 2);
+        if (count % 100 != 0) {
+          return count - count % 100;
+        }
+        return count - (1 * 100);
+      } 
       return this.fixedPeriodTakableAmount;
     }
 
@@ -283,6 +314,7 @@ public class AbsencePeriod {
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
+    
     int periodTakableAmount = this.getPeriodTakableAmount();
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()

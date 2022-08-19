@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
@@ -64,9 +65,13 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
-import security.SecurityRules;
 
-
+/**
+ * Controller per la generazione e gestione dei calendari di reperibilità.
+ *
+ * @author dario
+ *
+ */
 @With(Resecure.class)
 @Slf4j
 public class ReperibilityCalendar extends Controller {

@@ -20,6 +20,7 @@ package dao.wrapper;
 import com.google.common.base.Optional;
 import models.Contract;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
 
@@ -46,6 +47,13 @@ public interface IWrapperPersonDay extends IWrapperModel<PersonDay> {
    * @return Optional.absent() in caso di mancanza contratto o di tipo orario.
    */
   Optional<WorkingTimeTypeDay> getWorkingTimeTypeDay();
+  
+  /**
+   * L'orario giornaliero personalizzato se esiste.
+   *
+   * @return Optional.absent() in caso di mancanza di contratto o di tipo orario personale.
+   */
+  Optional<PersonalWorkingTime> getPersonalWorkingTime();
 
   /**
    * Il personDay precedente solo se immediatamente consecutivo.

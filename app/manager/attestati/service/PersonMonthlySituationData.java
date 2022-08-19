@@ -21,18 +21,26 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
+import dao.ContractDao;
+import dao.ContractMonthRecapDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
+import manager.services.mealtickets.IMealTicketsService;
+import manager.services.mealtickets.MealTicketRecap;
 import models.Certification;
 import models.Competence;
 import models.CompetenceCodeGroup;
+import models.Contract;
+import models.ContractMonthRecap;
 import models.Person;
 import models.PersonMonthRecap;
 import models.absences.Absence;
+import models.dto.MealTicketComposition;
 import models.enumerate.CertificationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -40,13 +48,15 @@ import org.joda.time.YearMonth;
 /**
  * Rappresenta i dati della situazione mensile di una persona.
  */
+@Slf4j
 public class PersonMonthlySituationData {
 
-  private final PersonDayManager personDayManager;
   private final PersonMonthRecapDao personMonthRecapDao;
   private final AbsenceDao absenceDao;
   private final CompetenceDao competenceDao;
-  private final PersonDayDao personDayDao;
+  private final IMealTicketsService mealTicketService;
+  private final ContractDao contractDao;
+  private final ContractMonthRecapDao contractMonthRecapDao;
   
   /**
    * Injector.
@@ -56,16 +66,21 @@ public class PersonMonthlySituationData {
    * @param absenceDao il dao delle assenze
    * @param competenceDao il dao delle competenze
    * @param personDayDao il dao sui personDay
+   * @param contractDao il dao sui contratti
+   * @param contractMonthRecapDao il dao sui contract month recap
    */
   @Inject
   public PersonMonthlySituationData(PersonDayManager personDayManager,
       PersonMonthRecapDao personMonthRecapDao, AbsenceDao absenceDao,
-      CompetenceDao competenceDao, PersonDayDao personDayDao) {
-    this.personDayManager = personDayManager;
+      CompetenceDao competenceDao, PersonDayDao personDayDao, 
+      IMealTicketsService mealTicketService, ContractDao contractDao,
+      ContractMonthRecapDao contractMonthRecapDao) {
     this.personMonthRecapDao = personMonthRecapDao;
     this.absenceDao = absenceDao;
     this.competenceDao = competenceDao;
-    this.personDayDao = personDayDao;
+    this.mealTicketService = mealTicketService;
+    this.contractDao = contractDao;
+    this.contractMonthRecapDao = contractMonthRecapDao;
   }
   
   /**
@@ -243,11 +258,30 @@ public class PersonMonthlySituationData {
     certification.year = year;
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
+    //Inserire qui il conteggio dei buoni pasto
+    LocalDate begin = new LocalDate(year, month, 1);
+    LocalDate end = begin.dayOfMonth().withMaximumValue();
+    List<Contract> contractList = contractDao
+        .getActiveContractsInPeriod(person, begin, Optional.of(end));
+    YearMonth yearMonth = new YearMonth(year, month);
+    int buoniCartacei = 0;
+    int buoniElettronici = 0;
+    for (Contract contract : contractList) {
+      ContractMonthRecap monthRecap = contractMonthRecapDao
+          .getContractMonthRecap(contract, yearMonth);
+      if (monthRecap == null) {
+        log.info("ContractMonthRecap non presente nel mese {}/{} per {} ( id = {} )",
+            month, year, person.getFullname(), person.id);
+      } else {
+        MealTicketRecap recap = mealTicketService.create(contract).orNull();
+        MealTicketComposition composition = mealTicketService
+            .whichBlock(recap, monthRecap, contract);
+        buoniCartacei = buoniCartacei + composition.paperyMealTicket;
+        buoniElettronici = buoniElettronici + composition.electronicMealTicket;
+      }
+    }
 
-    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
-        .getPersonDayInMonth(person, new YearMonth(year, month)));
-
-    certification.content = String.valueOf(mealTicket);
+    certification.content = String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici);
 
     certifications.put(certification.aMapKey(), certification);
 

@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.ContractDao;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.response.AbsenceInsertReport;
@@ -63,7 +65,6 @@ import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
-import security.SecurityRules;
 
 
 /**
@@ -443,10 +444,15 @@ public class AbsenceManager {
       ar.setAbsenceInError(absence);
 
     } else {
-      // check sulla reperibilità
+      // check sulla reperibilità e turno
       if (checkIfAbsenceInReperibilityOrInShift(person, date)) {
         ar.setDayInReperibilityOrShift(true);
       }
+      //controllo se la persona è in reperibilità
+      ar.setDayInReperibility(
+          personReperibilityDayDao.getPersonReperibilityDay(person, date).isPresent());
+      //controllo se la persona è in turno
+      ar.setDayInShift(personShiftDayDao.getPersonShiftDay(person, date).isPresent());
 
       final PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
 
@@ -668,6 +674,29 @@ public class AbsenceManager {
       
     }
     return absence;
+  }
+
+  /**
+   * Rimuove una singola assenza.
+   *
+   * @param absence l'assenza da rimuovere
+   */
+  public void removeAbsence(Absence absence) {
+    val pd = absence.personDay;
+        
+    if (absence.absenceFile.exists()) {
+      absence.absenceFile.getFile().delete();
+    }
+    
+    absence.delete();
+    pd.absences.remove(absence);
+    pd.workingTimeInMission = 0;
+    pd.isTicketForcedByAdmin = false;
+    pd.save();
+    val person = pd.person;
+    consistencyManager.updatePersonSituation(person.id, pd.date);
+    log.info("Rimossa assenza del {} per {}", 
+        absence.date, absence.personDay.person.getFullname());
   }
 
   /**

@@ -113,7 +113,7 @@ public class AbsenceDao extends DaoBase {
         .where(condition).orderBy(absence.personDay.date.asc()).fetch();
 
   }
-
+  
   /**
    * // TODO: questo metodo deve essere privato e esportarne le viste.
    */

@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
@@ -44,7 +45,6 @@ import play.data.validation.Validation;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei dati degli utenti.

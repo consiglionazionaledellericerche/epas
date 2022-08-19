@@ -31,6 +31,7 @@ import javax.persistence.EntityManager;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
+import models.Office;
 import models.query.QBadge;
 import models.query.QBadgeReader;
 import models.query.QBadgeSystem;
@@ -133,6 +134,16 @@ public class BadgeSystemDao extends DaoBase {
         .where(badge.badgeSystem.eq(badgeSystem))
         .orderBy(badge.code.asc()).orderBy(badge.person.id.asc()).fetch();
 
+  }
+  
+  /**
+   * Restituisce la lista di tutti i BagdeSystem (gruppi badge) associati ad
+   * una sede.
+   */
+  public List<BadgeSystem> byOffice(Office office) {
+    final QBadgeSystem badgeSystem = QBadgeSystem.badgeSystem;
+    return getQueryFactory().selectFrom(badgeSystem)
+        .where(badgeSystem.office.eq(office)).fetch();
   }
 
 }

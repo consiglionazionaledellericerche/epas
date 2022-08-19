@@ -33,6 +33,12 @@ public class GeneralSetting extends BaseModel {
 
   private static final long serialVersionUID = 881278299637007974L;
 
+  public boolean regulationsEnabled = false;
+  
+  //Cookie policy
+  public boolean cookiePolicyEnabled = false;
+  public String cookiePolicyContent;
+  
   // Parametri gestione anagrafica
   
   public boolean syncBadgesEnabled = false;
@@ -62,6 +68,8 @@ public class GeneralSetting extends BaseModel {
   
   public boolean handleGroupsByInstitute = true;
   
+  public boolean enableDailyPresenceForManager = true;
+  
   // Fine parametri gestione gruppi
   
   // Parametri gestione giorni di turno
@@ -70,5 +78,25 @@ public class GeneralSetting extends BaseModel {
   
   public boolean roundingShiftQuantity = false;
   
+  public boolean enableUniqueDailyShift = true;
+  
+  public boolean holidayShiftInNightToo = false;
+    
   // Fine parametri gestione giorni di turno
+  
+  // Parametri visualizzazione richieste di flusso
+  
+  public boolean enableIllnessFlow = false;
+  
+  // Parametro per abilitazione visualizzazione parametro covid19
+  public boolean enableAutoconfigCovid19 = false;
+  
+  public boolean enableAutoconfigSmartworking = false;
+  
+  /**
+   * Numero massimo di giorni nel passato per cui è possibile
+   * inserire timbrature via REST.
+   */
+  public int maxDaysInPastForRestStampings = 90;
+
 }

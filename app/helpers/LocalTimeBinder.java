@@ -26,6 +26,9 @@ import org.joda.time.format.DateTimeFormatter;
 import play.data.binding.TypeBinder;
 import play.data.binding.types.DateBinder;
 
+/**
+ * Binder per le LocalTime joda.
+ */
 @Slf4j
 public class LocalTimeBinder implements TypeBinder<LocalTime> {
   

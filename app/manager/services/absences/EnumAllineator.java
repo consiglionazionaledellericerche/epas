@@ -66,7 +66,7 @@ public class EnumAllineator {
     //i codici che non esistono li creo
     for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
       if (initialization || !absenceComponentDao
-          .absenceTypeByCode(defaultAbsenceType.getCode()).isPresent()) {
+          .absenceTypeByCode(defaultAbsenceType.getCode()).isPresent())  {
         //creazione entity a partire dall'enumerato
         buildAbsenceType(defaultAbsenceType);
       }
@@ -80,30 +80,33 @@ public class EnumAllineator {
     for (AbsenceType absenceType : allAbsenceType) {
       Optional<DefaultAbsenceType> defaultAbsenceType = DefaultAbsenceType.byCode(absenceType); 
       if (defaultAbsenceType.isPresent()) {
-        //gli absenceType che esistono le allineo all'enum
-        absenceType.code = defaultAbsenceType.get().getCode();
-        absenceType.certificateCode = defaultAbsenceType.get().certificationCode;
-        absenceType.description = defaultAbsenceType.get().description;
-        absenceType.internalUse = defaultAbsenceType.get().internalUse;
-        updateJustifiedSet(absenceType.justifiedTypesPermitted, 
-            defaultAbsenceType.get().justifiedTypeNamesPermitted);
-        absenceType.justifiedTime = defaultAbsenceType.get().justifiedTime;
-        absenceType.consideredWeekEnd = defaultAbsenceType.get().consideredWeekEnd;
-        absenceType.timeForMealTicket = defaultAbsenceType.get().timeForMealTicket;
-        absenceType.reperibilityCompatible = defaultAbsenceType.get().reperibilityCompatible;
-        absenceType.replacingTime = defaultAbsenceType.get().replacingTime;
-        if (defaultAbsenceType.get().replacingType != null) {
-          absenceType.replacingType = absenceComponentDao
-              .getOrBuildJustifiedType(defaultAbsenceType.get().replacingType);
-        } else {
-          absenceType.replacingType = null;
+        if (absenceType.toUpdate) {
+          //gli absenceType che esistono le allineo all'enum
+          absenceType.code = defaultAbsenceType.get().getCode();
+          absenceType.certificateCode = defaultAbsenceType.get().certificationCode;
+          absenceType.description = defaultAbsenceType.get().description;
+          absenceType.internalUse = defaultAbsenceType.get().internalUse;
+          updateJustifiedSet(absenceType.justifiedTypesPermitted, 
+              defaultAbsenceType.get().justifiedTypeNamesPermitted);
+          absenceType.justifiedTime = defaultAbsenceType.get().justifiedTime;
+          absenceType.consideredWeekEnd = defaultAbsenceType.get().consideredWeekEnd;
+          absenceType.mealTicketBehaviour = defaultAbsenceType.get().mealTicketBehaviour;
+          absenceType.reperibilityCompatible = defaultAbsenceType.get().reperibilityCompatible;
+          absenceType.replacingTime = defaultAbsenceType.get().replacingTime;
+          if (defaultAbsenceType.get().replacingType != null) {
+            absenceType.replacingType = absenceComponentDao
+                .getOrBuildJustifiedType(defaultAbsenceType.get().replacingType);
+          } else {
+            absenceType.replacingType = null;
+          }
+          absenceType.validFrom = defaultAbsenceType.get().validFrom;
+          absenceType.validTo = defaultAbsenceType.get().validTo;
+          absenceType.save();
+          updateBehaviourSet(absenceType, absenceType.justifiedBehaviours, 
+              defaultAbsenceType.get().behaviour);
+          absenceType.save();
         }
-        absenceType.validFrom = defaultAbsenceType.get().validFrom;
-        absenceType.validTo = defaultAbsenceType.get().validTo;
-        absenceType.save();
-        updateBehaviourSet(absenceType, absenceType.justifiedBehaviours, 
-            defaultAbsenceType.get().behaviour);
-        absenceType.save();
+
       } else {
         //gli absenceType che non sono enumerati li tolgo dai gruppi.
         for (TakableAbsenceBehaviour takable : absenceType.takableGroup) {
@@ -535,7 +538,7 @@ public class EnumAllineator {
     }
     absenceType.justifiedTime = defaultAbsenceType.justifiedTime;
     absenceType.consideredWeekEnd = defaultAbsenceType.consideredWeekEnd;
-    absenceType.timeForMealTicket = defaultAbsenceType.timeForMealTicket;
+    absenceType.mealTicketBehaviour = defaultAbsenceType.mealTicketBehaviour;
     absenceType.reperibilityCompatible = defaultAbsenceType.reperibilityCompatible;
     absenceType.replacingTime = defaultAbsenceType.replacingTime;
     if (defaultAbsenceType.replacingType != null) {

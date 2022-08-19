@@ -36,7 +36,8 @@ public class InserimentoRigaBuoniPasto extends RichiestaInserimentoAttestati {
     dipendenti.add(dipendente);
 
     dipendente.matricola = certification.person.number;
-    dipendente.numBuoniPasto = Integer.parseInt(certification.content);
+    dipendente.numBuoniPasto = Integer.parseInt(certification.content.split(";")[0]);
+    dipendente.numBuoniPastoElettronici = Integer.parseInt(certification.content.split(";")[1]);
   }
 
 }

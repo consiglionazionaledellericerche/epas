@@ -18,7 +18,7 @@
 package manager.services.mealtickets;
 
 import com.google.inject.AbstractModule;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 
 /**
  * Modulo per la registrazione del MealTicketService per l'injection.

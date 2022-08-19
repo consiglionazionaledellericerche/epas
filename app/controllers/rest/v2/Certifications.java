@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
@@ -52,7 +53,6 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per consultazione via REST dei dati dei riepiloghi mensili.
@@ -77,7 +77,7 @@ public class Certifications extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static CertificationManager certificationManager;
-  
+
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
    * di gestione degli attestati mensili (attestati per il CNR).
@@ -115,8 +115,8 @@ public class Certifications extends Controller {
    * di una dipendente nell'anno/mese passati come parametro.
    */
   public static void getMonthValidationStatusByPerson(Long id, String email, String eppn, 
-      Long personPerseoId, String fiscalCode, Integer year, Integer month) {
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+      Long personPerseoId, String fiscalCode, String number, Integer year, Integer month) {
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
@@ -138,13 +138,13 @@ public class Certifications extends Controller {
    */
   @BasicAuth
   public static void getMonthSituation(
-      Long id, String email, String eppn, 
-      Long personPersoId, String fiscalCode, int year, int month) {
+      Long id, String email, String eppn, Long personPersoId, String fiscalCode,
+      String number, int year, int month) {
 
     log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Person> person = 
-        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCode(
-            id, eppn, email, personPersoId, fiscalCode);
+        personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(
+            id, eppn, email, personPersoId, fiscalCode, number);
 
     if (!person.isPresent()) {
       log.info("Non trovata la persona in base ai parametri passati: "
@@ -155,7 +155,7 @@ public class Certifications extends Controller {
     }
 
     rules.checkIfPermitted(person.get().office);
-    
+
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
     val gson = gsonBuilder.create();
@@ -173,10 +173,12 @@ public class Certifications extends Controller {
    * @param month il mese
    */
   public static void getMonthSituationByOffice(String sedeId, int year, int month) {
-    log.debug("Richieste informazioni mensili da applicazione esterna");
+    log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
+        sedeId, year, month);
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
-      notFound();
+      JsonResponse.notFound(
+          String.format("Ufficio con sedeId = %s non trovato", sedeId));
     }
     rules.checkIfPermitted(office.get()); 
     Set<Office> offices = Sets.newHashSet();
@@ -231,7 +233,10 @@ public class Certifications extends Controller {
           break;
         case MEAL:
           CertificationMealTicketDto meal = CertificationMealTicketDto.builder()
-              .quantity(Integer.parseInt(entry.getValue().content))
+              .quantity(Integer.parseInt(entry.getValue().content.split(";")[0]) 
+                  + Integer.parseInt(entry.getValue().content.split(";")[1]))
+              .paperyTickets(Integer.parseInt(entry.getValue().content.split(";")[0]))
+              .electronicTickets(Integer.parseInt(entry.getValue().content.split(";")[1]))
               .build();
           mealTickets.add(meal);
           break;
@@ -304,27 +309,33 @@ public class Certifications extends Controller {
             .from(new LocalDate(year, month, dayBegin))
             .to(new LocalDate(year, month, dayEnd))
             .build();
-        absences.add(absence);        
+        absences.add(absence);
         previousDate = null;
       }
 
-      // 3) Nuova Assenza  
+      // 3) Nuova Assenza
       dayBegin = abs.personDay.date.getDayOfMonth();
       dayEnd = abs.personDay.date.getDayOfMonth();
       previousDate = abs.personDay.date;
       previousAbsenceCode = absenceCodeToSend;
       timeToJustify = abs.justifiedMinutes;
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
-          || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
-        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
-            .getWorkingTimeTypeDay(abs.personDay.date, person);
-        timeToJustify = workingTimeTypeDay.get().workingTime;
+
+      Optional<WorkingTimeTypeDay> workingTimeTypeDay = 
+          workingTimeTypeDao.getWorkingTimeTypeDay(abs.personDay.date, person);
+
+      if (workingTimeTypeDay.isPresent()) {
+        if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
+            || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
+          timeToJustify = workingTimeTypeDay.get().workingTime;
+        }
+        if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+        }
+      } else {
+        log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è "
+            + "presente l'assenza {}", abs.personDay.date, abs, person.getFullname());
       }
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-        Optional<WorkingTimeTypeDay> workingTimeTypeDay = workingTimeTypeDao
-            .getWorkingTimeTypeDay(abs.personDay.date, person);
-        timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
-      }
+
       if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {
         timeToJustify = abs.absenceType.justifiedTime;
       }

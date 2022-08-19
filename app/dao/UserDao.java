@@ -47,6 +47,8 @@ import models.query.QUser;
 
 /**
  * DAO per gli User.
+ *
+ * @author Cristian Lucchesi
  */
 public class UserDao extends DaoBase {
 
@@ -56,6 +58,14 @@ public class UserDao extends DaoBase {
   }
 
   public static final Splitter TOKEN_SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
+
+  /**
+   * L'user identificato dall'id passato come parametro.
+   */
+  public User byId(Long id) {
+    final QUser user = QUser.user;
+    return getQueryFactory().selectFrom(user).where(user.id.eq(id)).fetchOne();
+  }
 
   /**
    * L'user identificato dall'id passato come parametro.

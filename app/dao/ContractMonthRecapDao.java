@@ -26,6 +26,7 @@ import dao.filter.QFilters;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManager;
+import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.query.QContract;
@@ -76,5 +77,19 @@ public class ContractMonthRecapDao extends DaoBase {
                 .and(person.office.in(offices))
                 .and(condition))).orderBy(recap.contract.person.surname.asc())
         .fetch();
+  }
+  
+  /**
+   * Ritorna il riepilogo del contratto contract nell'anno/mese yearMonth.
+   *
+   * @param contract il contratto da riepilogare
+   * @param yearMonth l'anno mese di riferimento
+   * @return Il riepilogo del contratto nell'anno mese
+   */
+  public ContractMonthRecap getContractMonthRecap(Contract contract, YearMonth yearMonth) {
+    final QContractMonthRecap recap = QContractMonthRecap.contractMonthRecap;
+    return getQueryFactory().selectFrom(recap)
+        .where(recap.contract.eq(contract).and(recap.year.eq(yearMonth.getYear())
+            .and(recap.month.eq(yearMonth.getMonthOfYear())))).fetchFirst();
   }
 }

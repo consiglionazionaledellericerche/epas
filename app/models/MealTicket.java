@@ -20,6 +20,8 @@ package models;
 import com.google.common.base.MoreObjects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -27,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import models.base.BaseModel;
+import models.enumerate.BlockType;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -53,13 +56,14 @@ public class MealTicket extends BaseModel {
 
   public Integer year;
 
-  public Integer quarter;
-
   @Required
   public LocalDate date;
 
   @Required
   public String block; /*esempio 5941 3165 01 */
+  
+  @Enumerated(EnumType.STRING)
+  public BlockType blockType;
 
   public Integer number;
 

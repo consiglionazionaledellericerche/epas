@@ -30,8 +30,10 @@ import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.CompetenceCodeDao;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
@@ -92,6 +94,7 @@ import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.enumerate.LimitType;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -159,19 +162,41 @@ public class Administration extends Controller {
   static AbsenceComponentDao absenceComponentDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
-  
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static OfficeDao officeDao;
+ 
   /**
-   * metodo che renderizza la pagina di utilities.
+   * metodo che renderizza la pagina di utilities senza parametri passati.
    */
   public static void utilities() {
-
+    log.debug("Chiamata utilities senza parametri");
     final List<Person> personList = personDao.list(
         Optional.<String>absent(),
         secureManager.officesWriteAllowed(Security.getUser().get()),
         false, LocalDate.now(), LocalDate.now(), true)
         .list();
+    val officeList = officeDao.allEnabledOffices().stream()
+        .sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+    render(personList, officeList);
+  }
 
-    render(personList);
+  /**
+   * metodo che renderizza la pagina di utilities.
+   */
+  public static void utilities(Person person, Office office, Integer year, Integer month) {
+    log.debug("Chiamata utilities con parametri");
+    final List<Person> personList = personDao.list(
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, LocalDate.now(), LocalDate.now(), true)
+        .list();
+    val officeList = officeDao.allEnabledOffices().stream()
+        .sorted((o, o1) -> o.name.compareTo(o1.name))
+        .collect(Collectors.toList());
+    render(personList, officeList, person, office, year, month);
   }
 
   /**
@@ -198,17 +223,42 @@ public class Administration extends Controller {
    * @param year   l'anno dal quale far partire il fix
    * @param month  il mese dal quale far partire il fix
    */
-  public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
+  public static void fixPersonSituation(Person person, Office office, 
+      @Required Integer year, @Required Integer month, boolean onlyRecap) {
+
+    if (person == null && office == null || (!person.isPersistent() && !office.isPersistent())) {
+      Validation.addError("person", "Obbligatorio specificare un utente o un ufficio");
+      Validation.addError("office", "Obbligatorio specificare un utente o un ufficio");
+    }
+    
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori evidenziati");
+      log.debug("Errori di validazione in fixPersonSituation, person={}, "
+          + "office={}, year={}, month={}", person, office, year, month);
+      Validation.keep();
+      utilities(person, office, year, month);
+    }
+
+    log.info("Richiesto ricalcolo situazione mensile di {}/{} per la persona {} o l'ufficio {}",
+        month, year, person, office);
 
     LocalDate date = new LocalDate(year, month, 1);
 
-    Optional<Person> optPerson = Optional.<Person>absent();
-    if (person.isPersistent()) {
-      optPerson = Optional.fromNullable(person);
-    }
-    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, onlyRecap);
+    // (0) Costruisco la lista di persone su cui voglio operare
+    List<Person> personList = Lists.newArrayList();
 
-    flash.success("Esecuzione terminata");
+    if (person != null && person.isPersistent()) {
+      personList = Lists.newArrayList(person);      
+    }
+    if (office != null && office.isPersistent()) {
+      office = Office.findById(office.id);
+      personList = personDao.getActivePersonInMonth(
+          Sets.newHashSet(office), new YearMonth(date.getYear(), date.getMonthOfYear()));
+    }    
+    
+    consistencyManager.fixPersonSituation(personList, date, onlyRecap);
+
+    flash.success("Esecuzione avviata in background");
 
     utilities();
   }
@@ -370,7 +420,7 @@ public class Administration extends Controller {
    * Mostra i parametri generali dell'applicazione.
    */
   public static void generalSetting() {
-    val generalSetting = generalSettingDao.generalSetting();    
+    val generalSetting = generalSettingDao.generalSetting();
     render("@data", generalSetting);
   }
 
@@ -384,6 +434,7 @@ public class Administration extends Controller {
       render("@data", generalSetting);
     } else {
       generalSetting.save();
+      generalSettingDao.generalSettingInvalidate();
       flash.success(Web.msgSaved(GeneralSetting.class));
       generalSetting();
     }
@@ -656,6 +707,26 @@ public class Administration extends Controller {
     renderText("Ok");
   }
 
+  /**
+   * Metodo che applica le competenze a presenza mensile/giornaliera a tutti gli
+   * uffici (come per il BonusJob).
+   *
+   * @param year l'anno
+   * @param month il mese
+   */
+  public static void applyBonusAllOffices(int year, int month) {
+    YearMonth yearMonth = new YearMonth(year, month);
+    List<CompetenceCode> codeList = competenceCodeDao
+        .getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+    codeList = competenceCodeDao.getCompetenceCodeByLimitType(LimitType.entireMonth);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+  }
+  
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
    *

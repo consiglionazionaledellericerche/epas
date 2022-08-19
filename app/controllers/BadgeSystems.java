@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.SecurityRules;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
@@ -42,7 +43,6 @@ import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
 /**

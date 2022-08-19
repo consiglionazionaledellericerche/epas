@@ -17,8 +17,8 @@
 
 package manager.telework.service;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.util.List;
@@ -52,8 +52,7 @@ public class TeleworkComunication {
 
   @Inject
   GsonBuilder gsonBuilder;
-  
-  
+
   /**
    * L'url base dell'applicazione Telework.
    *
@@ -66,7 +65,7 @@ public class TeleworkComunication {
     }
     return Play.configuration.getProperty(TELEWORK_BASE_URL);
   }
-  
+
   /**
    * L'user che si collega all'applicazione Telework.
    *
@@ -92,7 +91,7 @@ public class TeleworkComunication {
     }
     return Play.configuration.getProperty(TELEWORK_PASS);
   }
-  
+
   /**
    * Preleva la timbratura in telelavoro relativa ad uno specifico id.
    *
@@ -121,7 +120,7 @@ public class TeleworkComunication {
 
     return teleworkStamping;
   }
-  
+
   /**
    * Preleva la lista delle timbrature in telelavoro relative ad uno specifico personDay.
    *
@@ -142,24 +141,30 @@ public class TeleworkComunication {
       log.warn("Applicazione telework-stamping non risponde.");
       return Lists.newArrayList();
     }
-    
+
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
-      log.error("Utente non autorizzato: {}", wsRequest.username);      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Utente non autorizzato: {}", wsRequest.username);
     }
-    
-    log.debug("httpResponse.json = {}", httpResponse.getJson());
+
+    if (httpResponse.getJson().isJsonArray() 
+        && httpResponse.getJson().getAsJsonArray().size() == 0) {
+      log.trace("httpResponse.json = {}", httpResponse.getJson());
+    } else {
+      log.debug("httpResponse.json = {}", httpResponse.getJson());
+    }
+
     val gson = gsonBuilder.create();
     List<TeleworkDto> teleworkStampings = 
         gson.fromJson(
-            httpResponse.getJson(), 
+            httpResponse.getJson(),
             new TypeToken<List<TeleworkDto>>() {}.getType());
 
     log.trace("Recuperata lista delle timbrature in telelavoro ");
 
     return teleworkStampings;
   }
-  
+
   /**
    * Salva l'oggetto sull'applicazione Telework.
    *
@@ -168,7 +173,7 @@ public class TeleworkComunication {
    *     da inviare all'applicazione Telework.
    */
   public int save(TeleworkDto dto) throws NoSuchFieldException {
-    
+
     final String url = TELEWORK_API_URL;
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     val gson = gsonBuilder.create();
@@ -178,20 +183,20 @@ public class TeleworkComunication {
     HttpResponse httpResponse = wsRequest.post();
     
     // Caso di utente non autorizzato
-    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
-      log.error("Utente non autorizzato: {}", wsRequest.username);      
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Utente non autorizzato: {}", wsRequest.username);
     } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
       log.error("Errore nella procedura di inserimento della timbratura su sistema esterno");
-    } else if (httpResponse.getStatus() == Http.StatusCode.BAD_REQUEST 
+    } else if (httpResponse.getStatus() == Http.StatusCode.BAD_REQUEST
         || httpResponse.getStatus() == Http.StatusCode.NOT_FOUND) {
       log.error("Parametri passati non corretti o malformati");
     } else {
       log.info("Timbratura {} in telelavoro inserita correttamente", dto.toString());
     }
-        
+
     return httpResponse.getStatus();
   }
-  
+
   /**
    * Comunica con la applicazione telework-stamping la richiesta di modifica di una 
    * timbratura in telelavoro.
@@ -205,7 +210,7 @@ public class TeleworkComunication {
     WSRequest wsRequest = prepareOAuthRequest(url, JSON_CONTENT_TYPE);
     wsRequest.body = dto;
     HttpResponse httpResponse = wsRequest.put();
-    
+
     // Caso di utente non autorizzato
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {      
       log.error("Utente non autorizzato: {}", wsRequest.username);      
@@ -215,7 +220,7 @@ public class TeleworkComunication {
         
     return httpResponse.getStatus();
   }
-  
+
   /**
    * Metodo che cancella la timbratura su applicazione esterna.
    *

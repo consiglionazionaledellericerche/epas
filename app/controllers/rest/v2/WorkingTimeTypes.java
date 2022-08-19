@@ -20,6 +20,7 @@ package controllers.rest.v2;
 import cnr.sync.dto.v2.WorkingTimeTypeShowDto;
 import cnr.sync.dto.v2.WorkingTimeTypeShowTerseDto;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.WorkingTimeTypeDao;
 import helpers.JsonResponse;
@@ -31,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione delle tipologie di orario di lavoro.
@@ -53,7 +53,7 @@ public class WorkingTimeTypes extends Controller {
   /**
    * Metodo REST che mostra il WorkingTimeType in funzione del id passato,
    * se non trovata ritorna una risposta HTTP 404.
-   * 
+   *
    * @param id identificativo in ePAS della tipologia di orario di lavoro 
    */
   public static void show(Long id) {

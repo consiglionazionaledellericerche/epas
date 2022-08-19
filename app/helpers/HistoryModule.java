@@ -19,7 +19,7 @@ package helpers;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import injection.AutoRegister;
+import common.injection.AutoRegister;
 import javax.persistence.EntityManager;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;

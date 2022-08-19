@@ -18,11 +18,15 @@
 package models;
 
 import helpers.validators.LocalDatePast;
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -55,4 +59,15 @@ public class PersonChildren extends BaseModel {
 
   @ManyToOne(fetch = FetchType.LAZY)
   public Person person;
+  
+  public String externalId;
+
+  @NotAudited
+  public LocalDateTime updatedAt;
+
+  @PrePersist
+  @PreUpdate
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 }

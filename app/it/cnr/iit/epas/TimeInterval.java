@@ -24,7 +24,10 @@ import org.joda.time.Hours;
 import org.joda.time.LocalTime;
 import org.joda.time.Minutes;
 
-
+/**
+ * Classe di utilità per la gestione dei tempi e orari.
+ * 
+ */
 @NoArgsConstructor
 public class TimeInterval {
   

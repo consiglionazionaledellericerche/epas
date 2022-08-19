@@ -105,7 +105,7 @@ public class LdapService {
         addAuthInfo(authAdminContext, adminPrincipal, adminCredentials);
 
       } catch (Exception e) {
-        log.error("LDAP authentication -> connection using admin user {} failed. "
+        log.warn("LDAP authentication -> connection using admin user {} failed. "
             + "Something went wrong during LDAP authentication for username = {}",
             adminPrincipal, username, e);
         return Optional.absent();
@@ -122,7 +122,7 @@ public class LdapService {
             return Optional.absent();
           }
         } catch (NamingException e) {
-          log.error("LDAP authentication -> something went wrong during LDAP "
+          log.warn("LDAP authentication -> something went wrong during LDAP "
               + "admin search for user {}", username);
           return Optional.absent();
         }
@@ -150,7 +150,7 @@ public class LdapService {
         authAdminContext.close();
       }      
     } catch (Exception ex) {
-      log.error("LDAP authentication -> something went wrong during LDAP admin "
+      log.warn("LDAP authentication -> something went wrong during LDAP admin "
           + "connection closing for {}={}", ldapUniqueIdentifier, username, ex);
       return Optional.absent();
     }
@@ -197,7 +197,7 @@ public class LdapService {
       log.info("LDAP authentication -> Authentication failed for dn={}",
           principal, authEx);
     } catch (Exception ex) {
-      log.error("LDAP authentication -> something went wrong during LDAP authentication "
+      log.warn("LDAP authentication -> something went wrong during LDAP authentication "
           + "for dn = {}", principal, ex);
     } finally {
       try {
@@ -208,7 +208,7 @@ public class LdapService {
           authContext.close();
         }
       } catch (Exception e) {
-        log.error("LDAP authentication -> something went wront during LDAP connection closing");
+        log.error("LDAP authentication -> something went wront during LDAP connection closing", e);
       }
     }
     return authenticated;
@@ -252,8 +252,8 @@ public class LdapService {
       log.info("LDAP authentication -> Authentication failed for {}. dn={}",
           username, dn, authEx);
     } catch (Exception ex) {
-      log.error("LDAP authentication -> something went wrong during LDAP authentication "
-          + "for {}={}, dn = {}", ldapUniqueIdentifier, username, dn, ex);
+      log.warn("LDAP authentication -> something went wrong during LDAP authentication "
+          + "for {}={}, dn = {}", ldapUniqueIdentifier, username, dn);
     } finally {
       try {
         if (tls.isPresent()) {
@@ -263,7 +263,7 @@ public class LdapService {
           authContext.close();
         }
       } catch (Exception e) {
-        log.error("LDAP authentication -> something went wront during LDAP connection closing");
+        log.error("LDAP authentication -> something went wront during LDAP connection closing", e);
       }
     }
     return ldapUser;

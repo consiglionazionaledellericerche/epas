@@ -1,0 +1,37 @@
+#{modalAsync title: 'Cambia capacità di riproporzionare la quantità di codici' }
+
+#{alert color:'info'}
+    <p>
+      E' possibile aggiornare la possibilità dell'orario di lavoro di riproporzionare la quantità di codici di assenza
+      per l'orario di lavoro <strong>${wtt.description}</strong>.<br>
+      E' il caso, ad esempio, dei codici per legge 104 (cod. 18/19) che in base all'orario di lavoro possono subire riproporzionamenti nelle modalità che seguono<br>
+      Qui di seguito il vademecum da seguire qualora si intenda procedere:<br>
+      <ul>
+      <li>
+      In caso di part time <strong>ORIZZONTALE</strong>: vale la riduzione in proporzione sulla base della percentuale di part-time
+      (fa eccezione SOLO l'orario di lavoro per maternità/allattamento)</li><br>
+	
+	  <li>In caso di part time <strong>VERTICALE</strong>: si potrà usufruire della modalità ridotta in proporzione sulla base della percentuale 
+	  di part-time:  qualora la percentuale del tempo parziale di tipo verticale superi il <strong>50%</strong> del 
+	  tempo pieno previsto dal contratto collettivo, non ci devono essere decurtazioni 
+	  in ragione del ridotto orario di lavoro</li>
+	  </ul>
+    </p>
+    
+  #{/alert}
+
+#{form @WorkingTimes.executeChangeEnableAdjustment(), class:'form-horizontal',
+	'data-async':'#page_content', 'data-async-error':'#changeAll', 'data-spinner':'#defaultSpinner'}
+	<input type="hidden" name="officeId" value="${office.id}"/>
+	<input type="hidden" name="wtt.id" value="${wtt.id}" />
+	
+	#{f.booleanRadio 'wtt.enableAdjustmentForQuantity' /}
+	
+	#{b.buttons center:true}
+      #{b.submit 'Cambia'/}
+    #{/b.buttons}
+    
+#{/form}
+
+
+#{/modalAsync}

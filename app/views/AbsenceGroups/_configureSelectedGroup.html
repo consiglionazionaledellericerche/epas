@@ -52,7 +52,7 @@
        #{f.selectEnum 'minutes', items:absenceForm.selectableMinutes(), value:absenceForm.minutes, byEquals:'true' /}
      #{/if}
      
-     #{if absenceForm.absenceTypeSelected || !absenceForm.hasAbsenceTypeChoice() }
+     #{if absenceForm.absenceTypeSelected || !absenceForm.hasAbsenceTypeChoice()}
        #{secure.check 'Certifications.certifications'}
        #{f.checkbox 'forceInsert', value:forceInsert /}
        #{if forceInsert}

@@ -34,7 +34,9 @@ La visualizzazione dei dati di una persona è tramite una *HTTP GET* all'indiriz
 Per individuare la persona è possibile utilizzare una delle cinque chiavi candidate presenti sulle
 persone:
 
- - *id*, *email*, *eppn*, *perseoPersonId*, *fiscalCode*. 
+ - *id*, *email*, *eppn*, *perseoPersonId*, *fiscalCode*, *number*.
+
+Il campo *number* corrisponde alla matricola.
 
 .. code-block:: bash
 
@@ -88,7 +90,7 @@ Oppure per esempio per codice fiscale con questa chiamata:
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/show?fiscalCode=GLLGLL74P10G702B
 
 Nel caso vengano passati più parametri nella ricerca della persona l'ordine con cui viene cercata
-la persona è **id, email, eppn, perseoPersonId, fiscalCode**.
+la persona è **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 Person Create
 -------------
@@ -102,22 +104,23 @@ La creazione di una persona è possibile tramite una *HTTP POST* all'indirizzo
       POST https://epas-demo.devel.iit.cnr.it/rest/v2/persons/create
       number=99999 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
-L'unica cosa da notare è che per associare la persona è necessario indicare il campo officeId (201 nel caso di epas-demo.devel.iit.cnr.it per ISTI - Pisa).
+L'unica cosa da notare è che per associare la persona all'ufficio correto è necessario indicare
+il campo officeId.
 
 Person Update
 -------------
 
-La creazione di una persona è possibile tramite una *HTTP PUT* all'indirizzo
+L'aggiornamento di una persona è possibile tramite una *HTTP PUT* all'indirizzo
 **/rest/v2/persons/update**.
 
 Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:
 
-  - **id, email, eppn, perseoPersonId, fiscalCode**.
+  - **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 .. code-block:: bash
 
   $ http -a istituto_xxx_registry_manager
-      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@isti.cnr.it
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/persons/update?email=john.doe@cnr.it
       number=99991 name=John surname=Doe email=john.doe@cnr.it qualification=5 officeId=101
 
 
@@ -129,7 +132,7 @@ La cancellazione di una persona è possibile tramite una *HTTP DELETE* all'indir
 
 Per individuare la persona da eliminare si utilizzano gli stessi parametri previsti per la show:
 
-  - **id, email, eppn, perseoPersonId, fiscalCode**.
+  - **id, email, eppn, perseoPersonId, fiscalCode, number**.
 
 .. code-block:: bash
 
@@ -150,3 +153,9 @@ Per individuare l'ufficio è possibile utilizzare una delle due chiavi candidate
 
   $ http -a istituto_xxx_registry_manager
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/persons/list?id=101
+      
+Dalla versione 2.0.3 il metodo ritorna solo la lista del personale attivo al momento della chiamata.
+Inoltre adesso supporta il parametro *atDate* con cui è possibile passare una data con cui
+verificare i contratti attivi a quella data. Infine  è possibile utilizzare il parametro *terse*
+per avere solo informazioni principali del personale.
+

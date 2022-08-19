@@ -27,12 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import manager.PersonDayManager;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceTypeJustifiedBehaviour;
@@ -55,12 +57,15 @@ import org.testng.collections.Lists;
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
+  
+  private final PersonDayManager personDayManager;
 
   /**
    * Constructor for injection.
    */
   @Inject
-  public AbsenceEngineUtility() {
+  public AbsenceEngineUtility(PersonDayManager personDayManager) {
+    this.personDayManager = personDayManager;
   }
  
   /**
@@ -162,6 +167,7 @@ public class AbsenceEngineUtility {
       amount = 0;
     } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
         || absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day_limit)
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)
         || absence.getJustifiedType().getName()
           .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
       amount = absenceWorkingTime(person, absence);
@@ -180,7 +186,7 @@ public class AbsenceEngineUtility {
     } else if (absence.getJustifiedType().getName()
         .equals(JustifiedTypeName.absence_type_minutes)) {
       amount = absence.getAbsenceType().getJustifiedTime();
-    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+    } else {
       amount = -1;
     }
     
@@ -237,9 +243,9 @@ public class AbsenceEngineUtility {
           
         }
       }
-      //return amount * percentageTaken.get().getData() / 1000;
-      
+
     }
+    
     return amount;
   }
   

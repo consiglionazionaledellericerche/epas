@@ -49,12 +49,20 @@ import models.UsersRolesOffices;
 import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ReperibilityTypeMonth;
+import models.TeleworkValidation;
 
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.CompetenceRequest;
 
-import security.PermissionCheck;
+import models.base.InformationRequest;
+import models.informationrequests.IllnessRequest;
+import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ServiceRequest;
+import models.informationrequests.TeleworkRequest;
+import models.enumerate.InformationType;
+
+import common.security.PermissionCheck;
 
 global models.User currentOperator;
 
@@ -109,6 +117,35 @@ when
 then
   $c.grant();
 end
+
+
+/*
+ * Permesso per la visualizzazione dei flussi informativi
+ */
+rule isInformationFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
+then
+  $c.grant();
+end
+
+/* L'amministratore del personale può vederi i flussi informativi di tutte le sedi dove è abilitato il flusso 
+ * e lui è amministratore.
+ */
+rule isInformationFlowsVisibleForPersonnelAdmin
+when
+ $uro: UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
+ $o: Office() from $uro.office
+ Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+ $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
+then
+ $c.grant();
+end
+
 
 /*
  * Permesso per la visualizzazione dei flussi di richiesta competenze
@@ -556,9 +593,9 @@ when
   $p: Person() from currentOperator.person
   $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
   $c: PermissionCheck( action in (
-			"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"
-  			), target == $cr, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval"),
+        target == $cr, granted == false)
 then
   $c.grant();
 end
@@ -568,8 +605,10 @@ rule approveDisapproveChangeForSupervisor
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $c: PermissionCheck(action in (
-  		"CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == null, granted == false)
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == null)
 then
 $c.grant();
 end
@@ -580,9 +619,12 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
-  		&& reperibilityManagerApproved == null, flowEnded == false)
-  $c: PermissionCheck(action in ("CompetenceRequests.approval",
-			"CompetenceRequests.disapproval"), target == $cr, granted == false)
+         && reperibilityManagerApproved == null, flowEnded == false)
+  $c: PermissionCheck(action in (
+          "CompetenceRequests.approval",
+          "CompetenceRequests.disapproval",
+          "CompetenceRequests.reperibilityManagerDisapproval"),
+        target == $cr, granted == false)
 then
 $c.grant();
 end
@@ -639,9 +681,6 @@ then
   $c.grant();
 end
 
-
-
-
 rule isEmployeeForFlows
 when
   $uro: UsersRolesOffices()
@@ -649,6 +688,38 @@ when
   $ar: AbsenceRequest(person == $uro.user.person)
   $c: PermissionCheck(action in (
        "AbsenceRequests.show"), target == $ar, granted == false)
+then
+$c.grant();
+end
+
+rule isEmployeeForInformationFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $ir: InformationRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+       "InformationRequests.show"), target == $ir, granted == false)
+then
+$c.grant();
+end
+
+rule isEmployeeForServiceExit
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $c: PermissionCheck(action == "InformationRequests.serviceExit", target == null, granted == false)
+then
+$c.grant();
+end
+
+rule autocertOffsite
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "PrintTags.autocertOffsite", target == null, granted == false)
 then
 $c.grant();
 end
@@ -701,13 +772,29 @@ when
 		"CompetenceRequests.disapproval",
 		
 
-		
-     	/* Ferie */
-     	"Vacations.show",
-     	"Vacations.personVacationSummary",
+		/*Richiesta flusso informativo*/
+		"InformationRequests.illness",
+		//"InformationRequests.serviceExit",
+		"InformationRequests.list",
+		"InformationRequests.blank",
+		"InformationRequests.show",
+		"InformationRequests.delete",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveIllnessRequest",
 
-       	/* Competenze */
-     	"Competences.competences",
+		
+		
+        /* Ferie */
+        "Vacations.show",
+        "Vacations.personVacationSummary",
+
+        /* Competenze */
+        "Competences.competences",
+
+        "ContractualReferences.list",
+        "ContractualReferences.getFile",
 
        	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
@@ -770,12 +857,20 @@ when
   $p: Person() from currentOperator.person
   PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
   $c: PermissionCheck(action in ("TeleworkStampings.teleworkStampings","TeleworkStampings.insertStamping", "TeleworkStampings.save", 
-  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping", "TeleworkStampings.report"), 
-  	granted == false, target == null)
+  	"TeleworkStampings.deleteTeleworkStamping", "TeleworkStampings.editTeleworkStamping", 
+  	"TeleworkStampings.generateReport", "InformationRequests.saveTeleworkRequest"), granted == false, target == null)
 then
   $c.grant();
 end
 
+rule EmployeeCanSubmitTeleworkRequest
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck(action == "TeleworkStampings.generateReport", granted == false, target == null)
+then
+  $c.grant();
+end
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
@@ -799,9 +894,37 @@ end
 
 rule showAbsenceRequest
 when 
-  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN)
   $ar: AbsenceRequest(person != currentOperator.person)
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ar.person.office)
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule showInformationRequest
+when
+  $ir: InformationRequest(person != currentOperator.person) 
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ir.person.office)
+  $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanEditOrDeleteInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  InformationRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificInformationRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ir: InformationRequest(person == currentOperator.person, flowEnded == false,
+  		officeHeadApproved == null)
+  $c: PermissionCheck( action in ("InformationRequests.delete" ), target==$ir, granted == false)
 then
   $c.grant();
 end
@@ -908,7 +1031,7 @@ end
 rule AdminCanEditStamping
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
- $target: Stamping()
+ $target: Stamping(markedByTelework == false)
  Office(persons.contains($target.getOwner())) from $uro.office
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.delete"),
   target == $target, granted == false )
@@ -993,13 +1116,12 @@ when
  AccountRole(this == AccountRole.ADMIN)
  $c: PermissionCheck(
     action.startsWith("Absences.")
-    || action.startsWith("Administration.")
+    || (action.startsWith("Administration.") && 
+       action not in ("Administration.generalSetting", "Administration.saveGeneralSetting"))
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
     || action.startsWith("PrintTags.")
     || action.startsWith("PersonMonths.")
-    || action.startsWith("Stampings.")
-    || action.startsWith("Vacations.")
     || action in (
     	"Administration.emergency", "HealthCheck.shutdown"))
 then
@@ -1059,6 +1181,7 @@ when
     "Contracts.personContracts",
     "Contracts.updateContractVacationPeriod",
     "Contracts.updateContractWorkingTimeType",
+    "Contracts.updatePersonalWorkingTime",
     "Contracts.updateContractMandatoryTimeSlot",
     "Contracts.initializationsStatus",
     "Contracts.initializationsVacation",
@@ -1083,6 +1206,7 @@ when
     "Stampings.stampingsByAdmin",
     "Stampings.personStamping",
     "TeleworkStampings.personTeleworkStampings",
+    "InformationRequests.handleTeleworkApproval",
     "Vacations.list",
     "Vacations.vacationSummary",
     "WorkingTimes.manageOfficeWorkingTime",
@@ -1129,6 +1253,20 @@ when
 	    "BadgeSystems.list",
 	    "BadgeSystems.blank",
 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete",
+        
         /* duplicate prima di avere il contesto office */
 		"Institutes.edit",
 		"Institutes.save",
@@ -1251,7 +1389,21 @@ when
 	   "BadgeSystems.joinPersonNumbers",
   	   "BadgeSystems.joinOldBadgeNumbers",
   	   "BadgeSystems.delete",
-  	   
+
+ 	   "rest.v3.BadgeSystems.byOffice",
+       "rest.v3.BadgeSystems.show",
+
+       "rest.v3.BadgeReaders.byOffice",
+       "rest.v3.BadgeReaders.show",
+
+       "rest.v3.Badges.byOffice",
+       "rest.v3.Badges.byBadgeSystem",
+       "rest.v3.Badges.byPerson",
+       "rest.v3.Badges.show",
+       "rest.v3.Badges.create",
+       "rest.v3.Badges.update",
+       "rest.v3.Badges.delete",
+
   	   "Zones.insertZone",
   	   "Zones.linkZones",
   	   "Zones.save",
@@ -1325,6 +1477,30 @@ when
         "AbsenceRequests.show",
         "AbsenceRequests.approval",
         "AbsenceRequests.disapproval",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.revokeValidation",
+        "InformationRequests.handleTeleworkApproval",
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",       
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1364,6 +1540,30 @@ when
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
         "AbsenceRequests.show",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
+        /*Flussi informativi*/
+        "InformationRequests.list",
+        "InformationRequests.listToApprove",
+        "InformationRequests.blank",
+        "InformationRequests.editIllnessRequest",
+        "InformationRequests.editServiceRequest",
+        "InformationRequests.saveIllnessRequest",
+        "InformationRequests.saveServiceRequest",
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.handleTeleworkApproval",
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.revokeValidation",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",  
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1372,18 +1572,6 @@ when
         "Configurations.uploadAttachment"
 
         ), target == $o, granted == false)
-then
- $c.grant();
-end
-
-rule RoleSeatSuperVisor_showForFlows
-when
- $uro: UsersRolesOffices()
- Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ar: AbsenceRequest()
- $c: PermissionCheck(action in (
-		"AbsenceRequests.show"
-		), target == $ar, granted == false)
 then
  $c.grant();
 end
@@ -1399,6 +1587,51 @@ when
 		"AbsenceRequests.approval",
 		"AbsenceRequests.disapproval"		
 		), target == $ar, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_showForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ir: InformationRequest()
+ $c: PermissionCheck(action in (
+		"InformationRequests.show"
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule RoleSeatSuperVisor_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $ir: InformationRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.editServiceRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.saveServiceRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+
+rule PersonnelAdmin_editAndApprovalForInformationFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $ir: IllnessRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $ir, granted == false)
 then
  $c.grant();
 end
@@ -1494,6 +1727,7 @@ when
 
         "Stampings.personStamping",
         "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval",
 
 		"Vacations.list",
         "Vacations.vacationSummary",
@@ -1586,6 +1820,8 @@ when
 		"Stampings.stampingsByAdmin",
 		
 		"TeleworkStampings.personTeleworkStampings",
+		"InformationRequests.handleTeleworkApproval",
+		
 		
         "Vacations.list",
         "Vacations.vacationSummary",
@@ -1759,6 +1995,8 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
+        "WorkingTimes.changeEnableAdjustment",
+        "WorkingTimes.executeChangeEnableAdjustment",
 
         "Configurations.show",
         "Configurations.edit",
@@ -1795,7 +2033,23 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+        "InformationRequests.approval",
+        "InformationRequests.disapproval",
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.serviceExitToApprove"
 
         ), target == null, granted == false)
 then
@@ -1919,6 +2173,8 @@ when
         "WorkingTimes.saveHorizontal",
         "WorkingTimes.insertWorkingTimeBaseInformation",
         "WorkingTimes.insertVerticalWorkingTime",
+        "WorkingTimes.changeEnableAdjustment",
+        "WorkingTimes.executeChangeEnableAdjustment",
 
      	"Configurations.show",
 
@@ -1952,7 +2208,22 @@ when
         "Affiliations.blankByPerson",
         "Affiliations.save",
         "Affiliations.delete",
-        "Affiliations.edit"
+        "Affiliations.edit",
+        
+        /*Gestione green pass*/
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.addPerson",
+        "CheckGreenPasses.save",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.checkPerson",
+        
+        "InformationRequests.illnessToApprove",
+        "InformationRequests.listToApprove",
+//        "InformationRequests.approval",
+//        "InformationRequests.disapproval",
+        "InformationRequests.show",
+        "InformationRequests.teleworksToApprove",
+        "InformationRequests.generateTeleworkReport"
 
        ), target == $o, granted == false)
 then
@@ -1977,7 +2248,19 @@ when
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
-        "MealTickets.mealTicketsLegacy"), target == null, granted == false)
+        "MealTickets.convertPersonCodeBlock",
+        "MealTickets.performConvertPersonCodeBlock",
+        "MealTickets.mealTicketsLegacy",
+
+        "rest.v3.MealTickets.list",
+        "rest.v3.MealTickets.show",
+        "rest.v3.MealTickets.create",
+        "rest.v3.MealTickets.createByPerson",
+        "rest.v3.MealTickets.convert",
+        "rest.v3.MealTickets.delete",
+        "rest.v3.MealTickets.returnBlock"
+
+        ), target == null, granted == false)
 then
  $c.grant();
 end
@@ -1998,7 +2281,18 @@ when
      	"MealTickets.performReturnPersonCodeBlock",
         "MealTickets.deletePersonCodeBlock",
         "MealTickets.performDeletePersonCodeBlock",
-        "MealTickets.mealTicketsLegacy"), target == $o, granted == false)
+        "MealTickets.convertPersonCodeBlock",
+        "MealTickets.performConvertPersonCodeBlock",
+        "MealTickets.mealTicketsLegacy",
+
+        "rest.v3.MealTickets.list",
+        "rest.v3.MealTickets.show",
+        "rest.v3.MealTickets.create",
+        "rest.v3.MealTickets.createByPerson",
+        "rest.v3.MealTickets.convert",
+        "rest.v3.MealTickets.delete",
+        "rest.v3.MealTickets.returnBlock"
+        ), target == $o, granted == false)
 then
  $c.grant();
 end
@@ -2056,9 +2350,11 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
+        "Contracts.updatePersonalWorkingTime",
         "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.savePersonalWorkingTime",
         "Persons.children",
         "Persons.editChild",
         "Persons.saveChild",
@@ -2089,6 +2385,12 @@ when
         "rest.v2.Affiliations.delete",
         "rest.v2.Affiliations.byGroup",
         "rest.v2.Affiliations.byPerson",
+
+        "rest.v2.Child.byPerson",
+        "rest.v2.Child.show",
+        "rest.v2.Child.create",
+        "rest.v2.Child.update",
+        "rest.v2.Child.delete",
 
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
@@ -2162,6 +2464,8 @@ when
         "Contracts.saveContractMandatoryTimeSlot",        
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.updatePersonalWorkingTime",
+        "Contracts.savePersonalWorkingTime",
         "Persons.children",
         "Persons.editChild",
         "Persons.saveChild",
@@ -2193,6 +2497,12 @@ when
         "rest.v2.Affiliations.byGroup",
         "rest.v2.Affiliations.byPerson",
 
+        "rest.v2.Child.byPerson",
+        "rest.v2.Child.show",
+        "rest.v2.Child.create",
+        "rest.v2.Child.update",
+        "rest.v2.Child.delete",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
         "rest.v2.Contracts.create",
@@ -2200,6 +2510,9 @@ when
         "rest.v2.Contracts.setPreviousContract",
         "rest.v2.Contracts.unsetPreviousContract",
         "rest.v2.Contracts.delete",
+
+        "rest.v2.ContractWorkingTimeTypes.show",
+        "rest.v2.ContractWorkingTimeTypes.updateExternalId",
 
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list"
@@ -2261,6 +2574,8 @@ when
         "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
+        "Contracts.updatePersonalWorkingTime",
+        "Contracts.savePersonalWorkingTime",
 		"Persons.children",
      	"Persons.editChild",
      	"Persons.saveChild",
@@ -2282,24 +2597,33 @@ when
      	"rest.v2.Groups.update",
      	"rest.v2.Groups.delete",
      	"rest.v2.Groups.list",
-     	
-     	"rest.v2.Affiliations.show",
-     	"rest.v2.Affiliations.create",
-     	"rest.v2.Affiliations.update",
-     	"rest.v2.Affiliations.delete",
-     	"rest.v2.Affiliations.byGroup",
-     	"rest.v2.Affiliations.byPerson",
 
-     	"rest.v2.Contracts.byPerson",
-     	"rest.v2.Contracts.show",
-     	"rest.v2.Contracts.create",
-     	"rest.v2.Contracts.update",
-     	"rest.v2.Contracts.setPreviousContract",
-     	"rest.v2.Contracts.unsetPreviousContract",
-     	"rest.v2.Contracts.delete",
+        "rest.v2.Affiliations.show",
+        "rest.v2.Affiliations.create",
+        "rest.v2.Affiliations.update",
+        "rest.v2.Affiliations.delete",
+        "rest.v2.Affiliations.byGroup",
+        "rest.v2.Affiliations.byPerson",
 
-     	"rest.v2.WorkingTimeTypes.show",
-        "rest.v2.WorkingTimeTypes.list"     	
+        "rest.v2.Child.byPerson",
+        "rest.v2.Child.show",
+        "rest.v2.Child.create",
+        "rest.v2.Child.update",
+        "rest.v2.Child.delete",
+
+        "rest.v2.Contracts.byPerson",
+        "rest.v2.Contracts.show",
+        "rest.v2.Contracts.create",
+        "rest.v2.Contracts.update",
+        "rest.v2.Contracts.setPreviousContract",
+        "rest.v2.Contracts.unsetPreviousContract",
+        "rest.v2.Contracts.delete",
+
+        "rest.v2.ContractWorkingTimeTypes.show",
+        "rest.v2.ContractWorkingTimeTypes.updateExternalId",
+
+        "rest.v2.WorkingTimeTypes.show",
+        "rest.v2.WorkingTimeTypes.list"
 
      	), target == $o, granted == false)
 then
@@ -2447,7 +2771,10 @@ when
  				|| epasParam == EpasParam.RIGHT_TO_STUDY
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
  				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
- 				|| epasParam == EpasParam.TELEWORK && fieldValue == true) from $p.personConfigurations
+ 				|| epasParam == EpasParam.TELEWORK
+ 				|| epasParam == EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME
+ 				|| epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE
+ 				|| epasParam == EpasParam.SMARTWORKING && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -2547,7 +2874,10 @@ when
  				|| (epasParam == EpasParam.TELEWORK && fieldValue == true)
  				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)
  				|| (epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS && fieldValue == true)
- 				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)) from $p.personConfigurations
+ 				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)
+ 				|| (epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE && fieldValue == true)
+ 				|| (epasParam == EpasParam.SMARTWORKING && fieldValue == true)
+ 				|| (epasParam == EpasParam.AGILE_WORK && fieldValue == true)) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
@@ -2603,6 +2933,7 @@ when
 then
  $c.grant();
 end
+
 
 /*******************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per legge 104 se:
@@ -2668,6 +2999,22 @@ then
  $c.grant();
 end
 
+/****************************************************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per L-AGILE di cui alla nota del DG 22278 del 22 marzo 2022 se:
+ ***************************************************************************************************************************/
+rule EmployeeCanEditAgileWorkAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.AGILE_WORK, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeAgileCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
 /***********************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per ore aggiuntive se:
  ***********************************************************************************/
@@ -2709,6 +3056,38 @@ when
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeSecondDisabledRelativeCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/******************************************************************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso:
+ ******************************************************************************************************************************************/
+rule EmployeeCanEditAgileWorkOrDisabledPeopleAssistanceAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeAgileWorkOrDisabledPeopleAssistanceCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/******************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per lavoro agile 
+ ******************************************************************************/
+rule EmployeeCanEditSmartworkingAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.SMARTWORKING, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeSmartworking().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
@@ -2840,6 +3219,7 @@ when
  $p: Person() from currentOperator.person
  $target: Stamping(this.getOwner() == $p && stampType == StampTypes.MOTIVI_DI_SERVIZIO)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
 then
  $c.grant();
 end
@@ -2958,6 +3338,34 @@ then
  $c.grant();
 end
 
+/************************************************************************************************
+ * Regola per permettere la fruizione del pulsante di inserimento di un nuovo flusso informativo
+ ************************************************************************************************/
+ 
+ rule blankInformationRequest
+ when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION))
+  $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
+ then
+  $c.grant();
+ end
+ 
+/**********************************************************************************
+ * Regola per usufruire del flusso per le richieste di presa visione del telelavoro
+ **********************************************************************************/
+ 
+ rule canUseTeleworkFlow
+ when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.TELEWORK_STAMPINGS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action == "InformationRequests.teleworks", target == null, granted == false)
+ then
+  $c.grant();
+ end
+
 
 /*******************************************************************************
  * Azioni utente con ruolo BADGE_READER
@@ -3067,11 +3475,15 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == null, granted == false)
 then
@@ -3089,18 +3501,19 @@ when
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
         "manager.AbsenceManager.saveAbsences",
-
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
-        
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
+        "rest.v3.Vacations.byPersonAndYear",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == $o, granted == false)
 then
@@ -3126,11 +3539,15 @@ when
         "rest.Absences.insertAbsenceByPerseoId",
         "rest.Absences.delete",
         "rest.Absences.deleteAbsencesInPeriod",
+        "rest.Absences.insertVacation",
         "rest.Absences.attachment",
         "rest.Absences.addAttachment",
         "rest.Absences.deleteAttachment",
 
-        "rest.v3.Vacations.byPersonAndYear"
+        "rest.v3.Vacations.byPersonAndYear",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), granted == false)
 then
@@ -3236,7 +3653,7 @@ when
 
         "ContractualClauses.list", "ContractualClauses.blank",
         "ContractualClauses.edit", "ContractualClauses.save",
-        "ContractualClauses.show",
+        "ContractualClauses.show", "ContractualReferences.getFile",
         "ContractualClauses.delete", "ContractualClauses.manage")
         , granted == false)
 then
@@ -3251,6 +3668,20 @@ when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
   $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per l'abilitazione alla visualizzazione dei flussi delle assenze per
+ * i responsabili di sede
+ */
+rule isFlowsVisibleForSeatSupervisor
+when
+  $uro: UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR)
+  $o: Office() from $uro.office
   Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
 then
@@ -3291,7 +3722,9 @@ when
         "rest.v2.PersonDays.getDaySituationByOffice",
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
-        
+
+        "rest.v2.ContractWorkingTimeTypes.show",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
 
@@ -3302,16 +3735,27 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
+
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
+
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == null, granted == false)
 then
@@ -3337,6 +3781,8 @@ when
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
 
+        "rest.v2.ContractWorkingTimeTypes.show",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
 
@@ -3347,17 +3793,22 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.personCompetenceCodes",
+        
         "rest.v2.Contracts.byPerson",
         "rest.v2.Contracts.show",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
 
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), target == $o, granted == false)
 then
@@ -3381,6 +3832,9 @@ when
         "rest.v2.PersonDays.getMonthSituationByOffice",
         "rest.v2.PersonDays.getDaySituation",
 
+
+        "rest.v2.ContractWorkingTimeTypes.show",
+
         "rest.v2.WorkingTimeTypes.show",
         "rest.v2.WorkingTimeTypes.list",
 
@@ -3395,20 +3849,84 @@ when
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
 
+        "rest.v3.Competences.list",
+        "rest.v3.Competences.show",
+        "rest.v3.Competences.personCompetenceCodes",
+
+        "rest.v3.CompetenceGroups.list",
+        "rest.v3.CompetenceGroups.show",
+
         "rest.Absences.absencesInPeriod",
         "rest.Absences.checkAbsence",
         "rest.Absences.checkAbsenceByPerseoId",
 
         "rest.v2.Leaves.byPersonAndYear",
+        "rest.v2.Leaves.byOfficeAndYear",
         "rest.v2.Leaves.byOfficeAndYear.show",
 
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.Absences.absencesInPeriod",
-        "rest.Absences.attachment"
+        "rest.Absences.attachment",
 
+        "rest.v3.AbsenceTypes.list",
+        "rest.v3.AbsenceTypes.show"
 
        ), granted == false)
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Azioni utente con ruolo BADGE_MANAGER
+ ******************************************************************************/
+rule BadgeManager
+when
+ $uro: UsersRolesOffices()
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule BadgeManager_inOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Role(name == "badgeManager") from $uro.role
+ $c: PermissionCheck(action in (
+ 
+        "rest.v3.BadgeSystems.byOffice",
+        "rest.v3.BadgeSystems.show",
+
+        "rest.v3.BadgeReaders.byOffice",
+        "rest.v3.BadgeReaders.show",
+
+        "rest.v3.Badges.byOffice",
+        "rest.v3.Badges.byBadgeSystem",
+        "rest.v3.Badges.byPerson",
+        "rest.v3.Badges.show",
+        "rest.v3.Badges.create",
+        "rest.v3.Badges.update",
+        "rest.v3.Badges.delete"
+
+       ), target == $o, granted == false)
 then
  $c.grant();
 end

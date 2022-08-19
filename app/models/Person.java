@@ -247,6 +247,15 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   public Set<InitializationGroup> initializationGroups;
+  
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<TeleworkValidation> teleworkValidations;
+  
+  /**
+   * Nuova relazione con la tabella di check giornaliero del green pass.
+   */
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  public Set<CheckGreenPass> checkGreenPass;
 
   @NotAudited
   public LocalDateTime updatedAt;
@@ -278,6 +287,11 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
+  @Transient
+  public Institute getInstitute() {
+    return office == null ? null : office.institute;    
+  }
+  
   /**
    * Lista dei gruppi di una persona alla data odierna.
    *

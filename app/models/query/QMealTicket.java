@@ -30,6 +30,8 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     public final StringPath block = createString("block");
 
+    public final EnumPath<models.enumerate.BlockType> blockType = createEnum("blockType", models.enumerate.BlockType.class);
+
     public final StringPath code = createString("code");
 
     public final QContract contract;
@@ -50,8 +52,6 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
-
-    public final NumberPath<Integer> quarter = createNumber("quarter", Integer.class);
 
     public final BooleanPath returned = createBoolean("returned");
 

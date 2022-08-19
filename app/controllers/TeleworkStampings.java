@@ -19,11 +19,19 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
+import dao.AbsenceDao;
 import dao.PersonDao;
+import dao.PersonDao.PersonLite;
 import dao.PersonDayDao;
+import dao.StampingDao;
+import dao.TeleworkValidationDao;
+import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.Web;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -31,29 +39,42 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.ConsistencyManager;
 import manager.PersonDayManager;
 import manager.StampingManager;
 import manager.TeleworkStampingManager;
-import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.services.absences.AbsenceService;
 import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
+import models.Stamping;
+import models.Stamping.WayType;
+import models.TeleworkValidation;
+import models.absences.definitions.DefaultGroup;
+import models.dto.NewTeleworkDto;
 import models.dto.TeleworkDto;
 import models.dto.TeleworkPersonDayDto;
-import models.enumerate.TeleworkStampTypes;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.With;
-import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle timbrature in telelavoro.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class TeleworkStampings extends Controller {
@@ -76,6 +97,19 @@ public class TeleworkStampings extends Controller {
   static StampingManager stampingManager;
   @Inject
   static TeleworkComunication comunication;
+  @Inject
+  static TeleworkValidationDao validationDao;
+  @Inject
+  static StampingDao stampingDao;
+  @Inject
+  static ConsistencyManager consistencyManager;
+  @Inject
+  static AbsenceDao absenceDao;
+  @Inject
+  static AbsenceService absenceService;
+  @Inject
+  static AbsenceComponentDao absenceComponentDao;
+
 
   /**
    * Renderizza il template per l'inserimento e la visualizzazione delle timbrature
@@ -108,7 +142,7 @@ public class TeleworkStampings extends Controller {
     }
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrperson.getValue(), year, month, true);
-    
+
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
     if (list.isEmpty()) {
@@ -116,8 +150,18 @@ public class TeleworkStampings extends Controller {
           + "L'applicazione potrebbe essere spenta o non raggiungibile."
           + "Riprovare più tardi");
     }
-    
-    render(list, year, month);
+    boolean validated = false;
+    //Recupero la lista dei mesi di telelavoro approvati
+    List<TeleworkValidation> validationList = 
+        validationDao.previousValidations(currentPerson, year, month);
+    Optional<TeleworkValidation> valid = validationDao
+        .byPersonYearAndMonth(currentPerson, year, month);
+    if (valid.isPresent()) {
+      validated = true;
+    }
+
+    render(list, year, month, validationList, validated);
+
   }
 
   /**
@@ -126,13 +170,33 @@ public class TeleworkStampings extends Controller {
    * @param personId l'identificativo della persona
    * @param year l'anno 
    * @param month il mese
+   * @throws ExecutionException eccezione in esecuzione
+   * @throws NoSuchFieldException  eccezione di mancanza di parametro
    */
-  public static void personTeleworkStampings(Long personId, Integer year, Integer month) {
+  public static void personTeleworkStampings(Long personId, Integer year, Integer month) 
+      throws NoSuchFieldException, ExecutionException {
     if (year == null || month == null) {
       Stampings.personStamping(personId, LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear());
     }
     Person person = personDao.getPersonById(personId);
+    PersonLite p = null;
+    if (person.personConfigurations.stream().noneMatch(pc -> 
+        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+      @SuppressWarnings("unchecked")
+      List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
+      if (persons.isEmpty()) {
+        flash.error("Non ci sono persone abilitate al telelavoro!!");
+        Stampings.personStamping(personId, Integer.parseInt(session.get("yearSelected")), 
+            Integer.parseInt(session.get("monthSelected")));
+      }
+      p = persons.get(0);
+
+    }
+    if (p != null) {
+      person = personDao.getPersonById(p.id); 
+    }
+
     Preconditions.checkNotNull(person);
 
     rules.checkIfPermitted(person.office);
@@ -147,23 +211,31 @@ public class TeleworkStampings extends Controller {
       YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
       personTeleworkStampings(personId, last.getYear(), last.getMonthOfYear());
     }
+
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-    List<TeleworkStampTypes> beginEnd = TeleworkStampTypes.beginEndTelework();
-    List<TeleworkStampTypes> meals = TeleworkStampTypes.beginEndMealInTelework();
-    List<TeleworkStampTypes> interruptions = TeleworkStampTypes.beginEndInterruptionInTelework();
+
     PersonStampingRecap psDto = stampingsRecapFactory
         .create(wrPerson.getValue(), year, month, true);
-    for (PersonStampingDayRecap day : psDto.daysRecap) {      
 
-      TeleworkPersonDayDto dto = TeleworkPersonDayDto.builder()
-          .personDay(day.personDay)
-          .beginEnd(manager.getSpecificTeleworkStampings(day.personDay, beginEnd))
-          .meal(manager.getSpecificTeleworkStampings(day.personDay, meals))
-          .interruptions(manager.getSpecificTeleworkStampings(day.personDay, interruptions))
-          .build();
-      list.add(dto);      
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.getMonthlyStampings(psDto);
+    if (list.isEmpty()) {
+      flash.error("Errore di comunicazione con l'applicazione telework-stamping. "
+          + "L'applicazione potrebbe essere spenta o non raggiungibile."
+          + "Riprovare più tardi");
     }
-    render(year, month, list, person);
+    boolean validated = false;
+    //Recupero la lista dei mesi di telelavoro approvati
+    List<TeleworkValidation> validationList = 
+        validationDao.previousValidations(person, year, month);
+    Optional<TeleworkValidation> valid = validationDao
+        .byPersonYearAndMonth(person, year, month);
+    if (valid.isPresent()) {
+      validated = true;
+    }
+
+
+    render(year, month, list, person, validated, validationList);
   }
 
   /**
@@ -206,7 +278,7 @@ public class TeleworkStampings extends Controller {
 
     log.debug("Comunico con il nuovo sistema per la cancellazione della "
         + "timbratura in telelavoro...");     
-
+    stamping = comunication.get(teleworkStampingId);
     int result = 0;
     try {
       result = comunication.delete(teleworkStampingId);
@@ -215,14 +287,29 @@ public class TeleworkStampings extends Controller {
     }
 
     if (result == Http.StatusCode.NO_RESPONSE) {
+      PersonDay pd = personDayDao.getPersonDayById(stamping.getPersonDayId());
+      if (pd.person.isTopQualification()) {
+
+        WayType way = stampingManager.retrieveWayFromTeleworkStamping(stamping);
+        LocalDateTime dateTime = new LocalDateTime(stamping.getDate().getYear(), 
+            stamping.getDate().getMonthValue(), stamping.getDate().getDayOfMonth(), 
+            stamping.getDate().getHour(), stamping.getDate().getMinute(), 
+            stamping.getDate().getSecond());
+        Optional<Stamping> stampingToDelete = stampingDao.getStamping(dateTime, pd.person, way);
+        if (stampingToDelete.isPresent()) {
+          stampingToDelete.get().delete();
+          consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+        }        
+        // Rimuovere il codice 103RT se non ci sono più timbrature nel giorno
+        if (pd.stampings.isEmpty()) {
+          manager.deleteTeleworkAbsenceCode(pd);
+        }
+      }
       flash.success("Orario eliminato correttamente");        
     } else {
       flash.error("Errore nell'eliminazione della timbratura su sistema esterno. Errore %s", 
           result);
     }
-    teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
-        Integer.parseInt(session.get("monthSelected")));
-
     flash.success("Timbratura %s - %s eliminata correttamente", 
         stamping.formattedHour(), stamping.getStampType());
     teleworkStampings(Integer.parseInt(session.get("yearSelected")), 
@@ -240,13 +327,16 @@ public class TeleworkStampings extends Controller {
    * @throws NoSuchFieldException eccezione di mancanza di parametro
    */
   public static void save(Long personId, @Required LocalDate date, 
-      @Required TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
+      @Required @Valid TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
           throws NoSuchFieldException, ExecutionException {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@insertStamping", stamping, person, date, time);
+    }
     PersonDay pd = personDayManager.getOrCreateAndPersistPersonDay(person, date);
     stamping.setDate(stampingManager.deparseStampingDateTimeAsJavaTime(date, time));
     Optional<Errors> check = manager.checkTeleworkStamping(stamping, pd);
@@ -261,6 +351,29 @@ public class TeleworkStampings extends Controller {
     stamping.setPersonDayId(pd.getId());
     int result = manager.save(stamping);
     if (result == Http.StatusCode.CREATED) {
+      if (person.isTopQualification() 
+          && person.checkConf(EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME, "true")) {
+        log.info("Inserisco la stessa timbratura anche nel cartellino di {}", person.fullName());
+        Stamping ordinaryStamping = stampingManager
+            .generateStampingFromTelework(stamping, pd, time);
+        String ordinaryStampingResult = stampingManager
+            .persistStamping(ordinaryStamping, person, person.user, true, true);
+        //Inserisco in automatico il codice 103RT se il dipendente
+        //è abilitato all'inserimento di questo codice e se non già presente
+        if (absenceService.groupsPermitted(person, false)
+              .contains(absenceComponentDao
+                .groupAbsenceTypeByName(DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get())
+              && absenceDao.absenceInPeriod(person, date, date, "103RT").isEmpty()) {
+          manager.insertTeleworkAbsenceCode(person, date);
+        }
+        if (!Strings.isNullOrEmpty(ordinaryStampingResult)) {
+          flash.error(ordinaryStampingResult);
+        } else {
+          flash.success(Web.msgSaved(Stampings.class));
+          consistencyManager.updatePersonSituation(person.id, date);
+        }
+      }
+
       log.info("Creata la timbratura {} nel sistema esterno", stamping.toString());      
       flash.success("Orario inserito correttamente");        
     } else {
@@ -285,7 +398,7 @@ public class TeleworkStampings extends Controller {
       log.error("Problema durante la ricezione della timbratura per telelavoro {}",
           teleworkStampingId, ex);
     }
-    
+
     render(stamping);
   }
   
@@ -326,6 +439,36 @@ public class TeleworkStampings extends Controller {
     String[] info = wrperson.getValue().office.name.split("-");
     String place = info[1];
     render(list, wrperson, date, place);
+  }
+
+  /**
+   * Genera il report mensile di telelavoro.
+   *
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @throws NoSuchFieldException eccezione di mancanza di parametro
+   * @throws ExecutionException eccezione in esecuzione
+   */
+  public static void generateReport(int year, int month) 
+      throws NoSuchFieldException, ExecutionException {
+
+    List<NewTeleworkDto> list = Lists.newArrayList();
+    val currentPerson = Security.getUser().get().person;
+    IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
+
+    if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
+      flash.error("Non esiste situazione mensile per il mese di %s %s",
+          DateUtility.fromIntToStringMonth(month), year);
+
+      YearMonth last = wrperson.getLastActiveMonth();
+      Stampings.stampings(last.getYear(), last.getMonthOfYear());
+    }
+    PersonStampingRecap psDto = stampingsRecapFactory
+        .create(wrperson.getValue(), year, month, true);
+    LocalDate date = LocalDate.now();
+    log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
+    list = manager.stampingsForReport(psDto);
+    render(list, currentPerson, year, month, date);
   }
 
 }

@@ -24,7 +24,9 @@ import cnr.sync.dto.v2.ContractUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.ContractDao;
 import dao.PersonDao;
@@ -49,7 +51,6 @@ import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione dei contratti.
@@ -79,13 +80,18 @@ public class Contracts extends Controller {
    * parametro (uniformemente ai metodi REST sulle persone). 
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode) {
+      String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
-    List<ContractShowTerseDto> contracts = 
+    List<ContractShowTerseDto> contracts = Lists.newArrayList();
+    try {
+      contracts = 
         person.contracts.stream().map(c -> ContractShowTerseDto.build(c))
         .collect(Collectors.toList());
+    } catch (IllegalStateException e) {
+      JsonResponse.internalError(e.getMessage());
+    }
     renderJSON(gsonBuilder.create().toJson(contracts));
   }
 

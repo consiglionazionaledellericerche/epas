@@ -36,7 +36,6 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -188,18 +187,20 @@ public class PersonManager {
       }
       IWrapperPersonDay day = wrapperFactory.create(pd);
       boolean fixed = day.isFixedTimeAtWork();
-
+      
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
       } else if (!fixed && pd.stampings.size() > 0 
+          && !pd.stampings.stream().anyMatch(st -> st.markedByTelework)
           && !personDayManager.isAllDayAbsences(pd) 
           && pd.person.qualification.qualification < 4) {
         basedDays++;
       } else if (!fixed && pd.stampings.size() > 0
+          && !pd.stampings.stream().anyMatch(st -> st.markedByTelework)
           && !personDayManager.isAllDayAbsences(pd) 
           && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
         basedDays++;
-      }
+      } 
 
     }
 
@@ -368,7 +369,7 @@ public class PersonManager {
           + "Email non valida.", username, email);
       return null;
     }
-    var domain = emailParts[1];
+    String domain = emailParts[1];
     if (domain.split("\\.").length > 2) {
       val domainTokens = domain.split("\\.");
       domain = String.format("%s.%s",

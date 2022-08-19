@@ -20,6 +20,7 @@ package controllers.rest;
 import cnr.sync.dto.PersonDayDto;
 import cnr.sync.dto.PersonMonthDto;
 import com.google.common.base.Optional;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.PersonDao;
@@ -39,7 +40,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la visualizzazione via REST dei dati delle giornate lavorative.

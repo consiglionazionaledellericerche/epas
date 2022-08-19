@@ -79,7 +79,7 @@ public class CertificationService implements ICertificationService {
 
   /**
    * Verifica se il token è abilitato alla sede.
-   * 
+   *
    * @see manager.attestati.service.ICertificationService#authentication(models.Office, boolean)
    */
   @Override
@@ -151,8 +151,8 @@ public class CertificationService implements ICertificationService {
     certification.year = year;
     certification.month = month;
     certification.certificationType = CertificationType.MEAL;
-    certification.content = personCertification.numBuoniPasto + "";
-
+    certification.content = String.format("%s;%s", 
+        personCertification.numBuoniPasto, personCertification.numBuoniPastoElettronici);
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;

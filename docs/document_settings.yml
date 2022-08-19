@@ -7,6 +7,6 @@ document:
   github_version: master/docs
   downloads:
     - type: epub
-      url: Manuale-SIGLA.epub
-#    - type: pdf
-#      url: Manuale-SIGLA.pdf
+      url: Manuale-ePAS.epub
+    - type: pdf
+      url: Manuale-ePAS.pdf

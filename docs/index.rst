@@ -1,5 +1,5 @@
 ePAS - Electronic Personnel Attendance System
-===============================================
+=============================================
 
 ePAS è il nuovo sistema di rilevazione e gestione delle presenze del personale 
 `CNR <https://www.cnr.it>`_ sviluppato dall'Istituto `IIT <https://www.iit.cnr.it>`_ in
@@ -29,7 +29,15 @@ rilasciati anche questi come opensource:
 
    overview/index
    admin/index
+   techAdmin/index
    user/index
    missions/index
+   workflows/index   
+   applicationAdmin/index
    rest/index
    sysadmin/index
+
+.. toctree::
+   :hidden:
+
+   appendix

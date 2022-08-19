@@ -1,5 +1,18 @@
-/**
- * I Parametri di ePAS.
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package manager.services.absences;
@@ -13,6 +26,7 @@ import com.google.inject.Inject;
 import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
+import helpers.TemplateUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import lombok.ToString;
@@ -70,6 +84,7 @@ public class AbsenceService {
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
   private final ConfigurationManager configurationManager;
+  private final TemplateUtility templateUtility;
 
   /**
    * Costruttore injection.
@@ -84,7 +99,7 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility, ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager, SecureManager secureManager,
-      EnumAllineator enumAllineator) {
+      EnumAllineator enumAllineator, TemplateUtility templateUtility) {
     this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
@@ -93,6 +108,7 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
+    this.templateUtility = templateUtility;
   }
 
   /**
@@ -225,6 +241,14 @@ public class AbsenceService {
       LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
       Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
 
+    if ((from != null && from.isBefore(from.minusMonths(6)))
+        || (to != null && to.isAfter(from.plusMonths(6)))) {
+      log.warn("ATTENZIONE effettuo la simulazione di inserimento delle assenze di {} "
+          + "a partire da {} fino a {}. Il periodo è molto lungo, potrebbe compromettere "
+          + "le presentazioni del sistema.",
+          person.getFullname(), from, to);
+    }
+
     // Inserimento forzato (nessun controllo)
     if (forceInsert) {
       Preconditions.checkNotNull(absenceType);
@@ -242,6 +266,15 @@ public class AbsenceService {
     List<CriticalError> criticalErrors = Lists.newArrayList();
     LocalDate currentDate = from;
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
+    long start = System.currentTimeMillis();
+    log.trace("inizio creazione catena periodi, person = {}, from = {}, to = {}", 
+        person.getFullname(), from, to);
+    
+    List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
+    List<Contract> fetchedContracts = person.contracts; // TODO: fetch
+    List<InitializationGroup> initializationGroups =
+        absenceComponentDao.personInitializationGroups(person);
+
     while (true) {
 
       // Preparare l'assenza da inserire
@@ -252,11 +285,6 @@ public class AbsenceService {
       if (specifiedMinutes != null) {
         absenceToInsert.justifiedMinutes = specifiedMinutes;
       }
-
-      List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
-      List<Contract> fetchedContracts = person.contracts; // TODO: fetch
-      List<InitializationGroup> initializationGroups =
-          absenceComponentDao.personInitializationGroups(person);
 
       PeriodChain periodChain =
           serviceFactories.buildPeriodChain(person, groupAbsenceType, currentDate, previousInserts,
@@ -274,6 +302,8 @@ public class AbsenceService {
         break;
       }
     }
+    log.trace("fine creazione catena periodi in {} millsecondi. Person = {}, from = {}, to = {}", 
+        person.getFullname(), from, to, System.currentTimeMillis() - start);
 
     return buildInsertReport(chains, criticalErrors);
 
@@ -432,9 +462,8 @@ public class AbsenceService {
 
     // scan dei gruppi
     log.info("Chiamata la scan delle assenze per {} a partire dalla data {}", person, from);
-    absenceScan.scan();
 
-    log.debug("");
+    absenceScan.scan();
 
     return absenceScan;
 
@@ -507,12 +536,17 @@ public class AbsenceService {
     // Fetch special groups
     final GroupAbsenceType employeeVacation =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
+    final GroupAbsenceType employeeVacationExtension =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2020.name()).get();
     final GroupAbsenceType employeeCompensatory =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
     final GroupAbsenceType employeeOffseat =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.LAVORO_FUORI_SEDE.name()).get();
     final GroupAbsenceType telework =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.TELELAVORO.name()).get();
+    final GroupAbsenceType teleworkResearcher =
+        absenceComponentDao.groupAbsenceTypeByName(
+            DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get();
     final GroupAbsenceType disabledPersonAbsence =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledPersonAbsenceTwoHours =
@@ -521,6 +555,8 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_STUDIO_DIPENDENTI.name()).get();
     final GroupAbsenceType covid19 =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_COVID19.name()).get();
+    final GroupAbsenceType lagile =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_LAGILE.name()).get();
     final GroupAbsenceType additionalHours =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
@@ -529,6 +565,10 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
     final GroupAbsenceType medicalExams = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
+    final GroupAbsenceType cod39LA = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_39LA.name()).get();
+    final GroupAbsenceType smart = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_SMART.name()).get();
 
     final User currentUser = Security.getUser().get();
 
@@ -546,11 +586,28 @@ public class AbsenceService {
       groupsPermitted.remove(disabledPersonAbsence);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
-      groupsPermitted.remove(covid19);
+      for (AbsenceType abt : covid19.category.getAbsenceTypes()) {
+        if (abt.isExpired()) {
+          groupsPermitted.remove(covid19);
+        }
+      }
+      for (AbsenceType abt : employeeVacationExtension.category.getAbsenceTypes()) {
+        if (abt.isExpired()) {
+          groupsPermitted.remove(employeeVacationExtension);
+        }
+      }
+      //groupsPermitted.remove(covid19);
+      groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
-
+      //groupsPermitted.remove(lagile);
+      //groupsPermitted.remove(cod39LA);
+      for (AbsenceType abt : smart.category.getAbsenceTypes()) {
+        if (abt.isExpired() || !templateUtility.enableSmartworking()) {
+          groupsPermitted.remove(smart);
+        }
+      }
       return groupsPermitted;
     }
 
@@ -585,6 +642,11 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
       }
+      
+      if ((Boolean) confManager.configValue(person, 
+          EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME)) {
+        groupsPermitted.add(teleworkResearcher);
+      }
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_PERSON_PERMISSION)) {
         groupsPermitted.add(disabledPersonAbsence);
@@ -597,6 +659,10 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
         groupsPermitted.add(covid19);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.AGILE_WORK)) {
+        groupsPermitted.add(lagile);
       }
 
       if ((Boolean) confManager.configValue(person, EpasParam.ADDITIONAL_HOURS)) {
@@ -615,6 +681,15 @@ public class AbsenceService {
         List<GroupAbsenceType> groups = 
             absenceComponentDao.groupsAbsenceTypeByName(namesOfChildGroups());
         groupsPermitted.addAll(groups);
+      }
+      
+      if ((Boolean) confManager.configValue(person, 
+          EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE)) {
+        groupsPermitted.add(cod39LA);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.SMARTWORKING)) {
+        groupsPermitted.add(smart);
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);
@@ -643,7 +718,7 @@ public class AbsenceService {
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
     names.add(DefaultGroup.G_25P.name());
-    names.add(DefaultGroup.G_COVID50.name());
+    names.add(DefaultGroup.G_COV50.name());
     
     return names;
   }
@@ -679,9 +754,14 @@ public class AbsenceService {
         templateRow.groupAbsenceType = groupAbsenceType;
         insertReport.insertTemplateRows.add(templateRow);
         insertReport.absencesToPersist.add(templateRow.absence);
-        if (absenceResponse.isDayInReperibilityOrShift()) {
+        if (!templateRow.absence.absenceType.reperibilityCompatible
+            && absenceResponse.isDayInReperibility()) {
           templateRow.absenceWarnings.add(AbsenceError.builder().absence(templateRow.absence)
-              .absenceProblem(AbsenceProblem.InReperibilityOrShift).build());
+              .absenceProblem(AbsenceProblem.InReperibility).build());
+        }
+        if (absenceResponse.isDayInShift()) {
+          templateRow.absenceWarnings.add(AbsenceError.builder().absence(templateRow.absence)
+              .absenceProblem(AbsenceProblem.InShift).build());
         }
         continue;
       }
@@ -692,7 +772,13 @@ public class AbsenceService {
         templateRow.absenceErrors
             .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
                 .absenceProblem(AbsenceProblem.NotOnHoliday).build());
-      } else {
+      } 
+      if (!absenceResponse.getWarning().isEmpty()) {
+        templateRow.absenceErrors.add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.MinimumTimeViolated).build());
+      }
+      
+      else {
         templateRow.absenceErrors
             .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
                 .absenceProblem(AbsenceProblem.LimitExceeded).build());

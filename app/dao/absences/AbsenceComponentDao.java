@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -51,7 +53,6 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceTrouble;
 import models.absences.query.QAbsenceType;
-import models.absences.query.QAbsenceTypeJustifiedBehaviour;
 import models.absences.query.QCategoryGroupAbsenceType;
 import models.absences.query.QCategoryTab;
 import models.absences.query.QComplationAbsenceBehaviour;
@@ -60,6 +61,7 @@ import models.absences.query.QInitializationGroup;
 import models.absences.query.QJustifiedBehaviour;
 import models.absences.query.QJustifiedType;
 import models.absences.query.QTakableAbsenceBehaviour;
+import models.enumerate.MealTicketBehaviour;
 import models.query.QContract;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -71,6 +73,7 @@ import play.db.jpa.JPA;
  *
  * @author Alessandro Martelli
  */
+@Slf4j
 public class AbsenceComponentDao extends DaoBase {
 
   @Inject
@@ -409,7 +412,7 @@ public class AbsenceComponentDao extends DaoBase {
   public AbsenceType buildOrEditAbsenceType(String code, String description, int minutes,
       Set<JustifiedType> justifiedTypePermitted, JustifiedType complationType, int complationTime,
       boolean internalUse, boolean consideredWeekEnd,
-      boolean timeForMealticket, String certificateCode, LocalDate expire) {
+      MealTicketBehaviour mealTicketBehaviour, String certificateCode, LocalDate expire) {
 
     QAbsenceType absenceType = QAbsenceType.absenceType;
     AbsenceType obj = (AbsenceType) getQueryFactory()
@@ -431,7 +434,7 @@ public class AbsenceComponentDao extends DaoBase {
     obj.replacingType = complationType;
     obj.replacingTime = complationTime;
     obj.internalUse = internalUse;
-    obj.timeForMealTicket = timeForMealticket;
+    obj.mealTicketBehaviour = mealTicketBehaviour;
     obj.consideredWeekEnd = consideredWeekEnd;
     obj.certificateCode = code;
     if (expire != null) {
@@ -490,9 +493,11 @@ public class AbsenceComponentDao extends DaoBase {
 
     final QAbsence absence = QAbsence.absence;
     final QAbsenceType absenceType = QAbsenceType.absenceType;
-    final QAbsenceTypeJustifiedBehaviour behaviour =
-        QAbsenceTypeJustifiedBehaviour.absenceTypeJustifiedBehaviour;
 
+    final long start = System.currentTimeMillis();
+    log.trace("Inizio metodo orderedAbsences, person={}, begin={}, end={}, codeSet={}",
+        person.getFullname(), begin, end, codeSet);
+    
     BooleanBuilder conditions = new BooleanBuilder();
     if (begin != null) {
       conditions.and(absence.personDay.date.goe(begin));
@@ -508,11 +513,6 @@ public class AbsenceComponentDao extends DaoBase {
         .leftJoin(absence.absenceType, absenceType).fetchJoin()
         .leftJoin(absenceType.complationGroup).fetchJoin()
         .leftJoin(absenceType.replacingGroup).fetchJoin()
-        .leftJoin(absenceType.takableGroup).fetchJoin()
-        .leftJoin(absenceType.takenGroup).fetchJoin()
-        .leftJoin(absenceType.justifiedBehaviours, behaviour).fetchJoin()
-        .leftJoin(behaviour.justifiedBehaviour).fetchJoin()
-        .leftJoin(absence.troubles).fetchJoin()
         .leftJoin(absence.personDay).fetchJoin()
         .where(absence.personDay.person.eq(person)
             .and(conditions)).distinct().fetch();
@@ -523,7 +523,10 @@ public class AbsenceComponentDao extends DaoBase {
             Absence::getPersonDay, (s1, s2) -> {
               return s2.date.compareTo(s1.date);
             });
-    return absences.stream().sorted(absenceComparator).collect(Collectors.toList());
+    val result = absences.stream().sorted(absenceComparator).collect(Collectors.toList());
+    log.trace("Terminato metodo orderedAbsences in {} millisecondi", 
+        System.currentTimeMillis() - start);
+    return result;
   }
 
   /**

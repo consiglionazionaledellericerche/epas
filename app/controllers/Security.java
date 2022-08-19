@@ -24,15 +24,23 @@ import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import dao.UserDao;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.OfficeManager;
 import models.User;
 import play.mvc.Http;
 import play.mvc.Util;
 import play.utils.Java;
 
+/**
+ * Classe di gestione della security.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 public class Security extends Secure.Security {
 
@@ -55,6 +63,7 @@ public class Security extends Secure.Security {
   static boolean authenticate(String username, String password) {
     log.debug("Richiesta autenticazione di {}", username);
 
+    @SuppressWarnings("deprecation")
     User user = userDao.getUserByUsernameAndPassword(username, Optional
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
@@ -132,20 +141,34 @@ public class Security extends Secure.Security {
    * ridefinizione di logout per discriminare il messaggio a seconda della tipologia connessione.
    */
   public static void logout() {
-    try {
-      invoke("onDisconnect");
-      session.clear();
-      response.removeCookie("rememberme");
-      invoke("onDisconnected");
-      if (session.contains("shibboleth")) {
-        flash.success("secure.logoutShibboleth");
-      } else {
-        flash.success("secure.logout");
+    //Verifico se siamo nel caso di autenticazione OAuth
+    if (session.contains(Resecure.OAUTH)) {
+      log.info("Logout sessione oauth per {}", connected());
+      // copia della sessione perché nel logout viene svuotata
+      val sessionCopy = new HashMap<>(session.all());
+      flash.success("secure.logout");
+      Resecure.oauthLogout(sessionCopy);
+    } else {
+      //Caso autenticazione locale o shibboleth
+      try {
+        invoke("onDisconnect");
+        session.clear();
+        response.removeCookie("rememberme");
+        invoke("onDisconnected");
+        if (session.contains("shibboleth")) {
+          flash.success("secure.logoutShibboleth");
+        } else {
+          flash.success("secure.logout");
+        }
+      } catch (Throwable ex) {
+        log.error("Eccezione durante il logout", ex);
       }
+    }
+
+    try {
       Secure.login();
-    } catch (Throwable ex) {
-      // TODO Auto-generated catch block
-      ex.printStackTrace();
+    } catch (Throwable e) {
+      log.error("Eccezione durante il redirect alla login", e);
     }
   }
 

@@ -19,7 +19,7 @@ package cnr.sync.dto.v2;
 
 import com.beust.jcommander.internal.Sets;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -50,10 +50,16 @@ public class ContractShowDto extends ContractShowTerseDto {
    * Nuova instanza di un ContractShowDto contenente i valori 
    * dell'oggetto contract passato.
    */
-  public static ContractShowDto build(Contract contract) {
+  public static ContractShowDto build(Contract contract) throws IllegalStateException {
     val contractDto = modelMapper.map(contract, ContractShowDto.class);
     contractDto.setPerson(PersonShowTerseDto.build(contract.person));
     if (contract.getPreviousContract() != null) {
+      if (contract.getPreviousContract().id.equals(contract.id)) {
+        throw new IllegalStateException(
+            String.format(
+                "The previous contract is equal to the current contract (id=%s), "
+                + "please correct this error", contract.id));
+      }
       contractDto.setPreviousContract(ContractShowTerseDto.build(contract.getPreviousContract()));
     }
     contractDto.setWorkingTimeTypes(

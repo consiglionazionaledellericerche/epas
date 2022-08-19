@@ -17,12 +17,12 @@
 
 package dao;
 
-import static com.querydsl.core.group.GroupBy.groupBy;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.querydsl.core.BooleanBuilder;
+import static com.querydsl.core.group.GroupBy.groupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
@@ -36,6 +36,8 @@ import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import org.joda.time.LocalDate;
 
+
+
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.
  *
@@ -46,6 +48,38 @@ public class AbsenceTypeDao extends DaoBase {
   @Inject
   AbsenceTypeDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
     super(queryFactory, emp);
+  }
+
+  /**
+   * Lista dei codici di assenza, filtrabili per date di inizio e fine validità e per
+   * il fatto che siano utilizzati o meno.
+   */
+  public List<AbsenceType> list(
+      java.util.Optional<LocalDate> validFrom,
+      java.util.Optional<LocalDate> validTo, java.util.Optional<Boolean> used) {
+    final QAbsenceType absenceType = QAbsenceType.absenceType;
+    BooleanBuilder condition = new BooleanBuilder();
+    JPQLQuery<AbsenceType> query = getQueryFactory().selectFrom(absenceType);
+    if (validFrom.isPresent()) {
+      condition.and(absenceType.validFrom.before(validFrom.get())
+          .or(absenceType.validFrom.isNull()));
+    }
+    if (validTo.isPresent()) {
+      condition.and(absenceType.validTo.after(validTo.get()).or(absenceType.validTo.isNull()));
+    }
+    if (used.isPresent()) {
+      final QAbsence absence = QAbsence.absence;
+      query = query.leftJoin(absenceType.absences, absence).groupBy(absenceType);
+      if (used.get().equals(Boolean.TRUE)) {
+        query = query.having(absence.count().gt(0L));        
+      } else {
+        query = query.having(absence.count().lt(1L));
+      }
+    }
+    return query
+        .where(condition)
+        .orderBy(absenceType.code.asc())
+        .fetch();
   }
 
   /**

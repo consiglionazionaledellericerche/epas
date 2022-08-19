@@ -60,7 +60,7 @@ public class StampingFromClient {
       .numeroBadge(dto.getBadgeNumber())
       .inOut(dto.getWayType().equals(WayType.in) ? 0 : 1)
       .stampType(
-          dto.getReasonType() != null ? StampTypes.valueOf(dto.getReasonType().name()) : null)
+          dto.getReasonType() != null ? StampTypes.byCode(dto.getReasonType().name()) : null)
       .markedByAdmin(dto.isMarkedByAdmin())
       .markedByEmployee(dto.isMarkedByEmployee())
       .dateTime(JodaConverters.javaToJodaLocalDateTime(dto.getDateTime()))

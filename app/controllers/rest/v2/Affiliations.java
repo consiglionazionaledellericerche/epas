@@ -23,6 +23,7 @@ import cnr.sync.dto.v2.AffiliationUpdateDto;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
+import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.AffiliationDao;
 import dao.GroupDao;
@@ -40,7 +41,6 @@ import org.testng.collections.Lists;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * API Rest per la gestione dei gruppi di persone.
@@ -82,12 +82,12 @@ public class Affiliations extends Controller {
     if (!includeInactive) {
       affiliations = group.affiliations.stream()
           .filter(a -> a.isActive())
-          .map(a -> AffiliationShowDto.build(a))          
+          .map(a -> AffiliationShowDto.build(a))
           .collect(Collectors.toList());
     } else {
       affiliations = group.affiliations.stream()
           .map(a -> AffiliationShowDto.build(a))
-          .collect(Collectors.toList());      
+          .collect(Collectors.toList());
     }
     renderJSON(gsonBuilder.create().toJson(affiliations));
   }
@@ -101,21 +101,21 @@ public class Affiliations extends Controller {
    *     questo momento, se false (il default) le include tutte.
    */
   public static void byPerson(Long id, String email, String eppn, Long personPerseoId, 
-      String fiscalCode, boolean includeInactive) {
+      String fiscalCode, String number, boolean includeInactive) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.office);
 
     List<AffiliationShowDto> affiliations = Lists.newArrayList();
     if (!includeInactive) {
       affiliations = person.affiliations.stream()
           .filter(a -> a.isActive())
-          .map(a -> AffiliationShowDto.build(a))          
+          .map(a -> AffiliationShowDto.build(a))
           .collect(Collectors.toList());
     } else {
       affiliations = person.affiliations.stream()
           .map(a -> AffiliationShowDto.build(a))
-          .collect(Collectors.toList());      
+          .collect(Collectors.toList());
     }
     renderJSON(gsonBuilder.create().toJson(affiliations));
   }

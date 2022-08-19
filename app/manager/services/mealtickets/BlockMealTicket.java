@@ -26,6 +26,7 @@ import lombok.Setter;
 import models.Contract;
 import models.MealTicket;
 import models.Person;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 
 /**
@@ -40,11 +41,13 @@ public class BlockMealTicket {
 
   private Contract contract;
   private String codeBlock;
+  private BlockType blockType;
   private List<MealTicket> mealTickets;
 
-  protected BlockMealTicket(String codeBlock) {
+  protected BlockMealTicket(String codeBlock, BlockType blockType) {
 
     this.codeBlock = codeBlock;
+    this.blockType = blockType;
     this.mealTickets = Lists.newArrayList();
   }
 

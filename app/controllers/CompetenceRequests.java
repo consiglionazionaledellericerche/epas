@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -54,13 +55,11 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di straordinario dei dipendenti.
  *
  * @author Dario Tagliaferri
- *
  */
 @Slf4j
 @With(Resecure.class)
@@ -86,7 +85,7 @@ public class CompetenceRequests extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   private static PersonReperibilityDayDao repDao;
-  
+
 
   public static void changeReperibility() {
     list(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
@@ -147,7 +146,7 @@ public class CompetenceRequests extends Controller {
             type, person);
     List<CompetenceRequest> approvedResults =
         competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
+            .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
     val available = person.user.hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
@@ -157,12 +156,12 @@ public class CompetenceRequests extends Controller {
   /**
    * Ritorna la form di richiesta di nuova competenza.
    *
-   * @param personId l'id della persona che sta richiedendo la competenza
-   * @param year l'anno
-   * @param month il mese
+   * @param personId       l'id della persona che sta richiedendo la competenza
+   * @param year           l'anno
+   * @param month          il mese
    * @param competenceType il tipo di richiesta competenza
    */
-  public static void blank(Optional<Long> personId, int year, int month, 
+  public static void blank(Optional<Long> personId, int year, int month,
       CompetenceRequestType competenceType) {
     Verify.verifyNotNull(competenceType);
     Person person;
@@ -186,28 +185,30 @@ public class CompetenceRequests extends Controller {
       list(competenceType);
       return;
     }
-    
+
     val competenceRequest = new CompetenceRequest();
     competenceRequest.type = competenceType;
     competenceRequest.person = person;
     PersonReperibilityType type = null;
     List<Person> teamMates = Lists.newArrayList();
     List<PersonReperibilityType> types = Lists.newArrayList();
-    boolean insertable = false; 
+    boolean insertable = false;
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-      types = repDao.getReperibilityTypeByOffice(person.office, Optional.of(false))      
+      types = repDao.getReperibilityTypeByOffice(person.office, Optional.of(false))
           .stream().filter(prt -> prt.personReperibilities.stream()
               .anyMatch(pr -> pr.person.equals(person)))
           .collect(Collectors.toList());
       //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
-      
+
       type = types.get(0);
-      teamMates = type.personReperibilities.stream().map(pr -> pr.person)
-          .filter(p -> p.id != person.id).collect(Collectors.toList());      
-      
+      teamMates = type.personReperibilities.stream()
+          .filter(pr -> pr.isActive(new YearMonth(year, month)))
+          .map(pr -> pr.person)
+          .filter(p -> p.id != person.id).collect(Collectors.toList());
+
     }
     competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
-    render("@edit", competenceRequest, insertable, competenceType, 
+    render("@edit", competenceRequest, insertable, competenceType,
         year, month, type, teamMates, types);
   }
 
@@ -215,16 +216,16 @@ public class CompetenceRequests extends Controller {
    * Ritorna la form di richiesta cambio di reperibilità aggiornata coi dati richiesti.
    *
    * @param competenceRequest la richiesta di competenza
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
-   * @param type il servizio di reperibilità
-   * @param teamMate la persona selezionata per il cambio di reperibilità
-   * @param beginDayToAsk la data da chiedere
-   * @param beginDayToGive la data da cedere
+   * @param year              l'anno di riferimento
+   * @param month             il mese di riferimento
+   * @param type              il servizio di reperibilità
+   * @param teamMate          la persona selezionata per il cambio di reperibilità
+   * @param beginDayToAsk     la data da chiedere
+   * @param beginDayToGive    la data da cedere
    */
-  public static void edit(CompetenceRequest competenceRequest, int year, int month, 
+  public static void edit(CompetenceRequest competenceRequest, int year, int month,
       PersonReperibilityType type, Person teamMate, PersonReperibilityDay beginDayToAsk,
-      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive, 
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
       PersonReperibilityDay endDayToAsk) {
 
     rules.checkIfPermitted(type);
@@ -235,73 +236,84 @@ public class CompetenceRequests extends Controller {
         .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
     List<PersonReperibilityDay> myReperibilityDates = repDao
         .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
-        
+
     List<PersonReperibilityType> types = repDao
-        .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+        .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))
         .stream().filter(prt -> prt.personReperibilities.stream()
             .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
         .collect(Collectors.toList());
     List<Person> teamMates = type.personReperibilities.stream().map(pr -> pr.person)
         .filter(p -> p.id != competenceRequest.person.id).collect(Collectors.toList());
     boolean insertable = true;
-    
-    render(competenceRequest, insertable, reperibilityDates, type, teamMate, 
+
+    render(competenceRequest, insertable, reperibilityDates, type, teamMate,
         month, year, teamMates, types, beginDayToAsk, myReperibilityDates, beginDayToGive,
         endDayToGive, endDayToAsk);
-    
+
   }
 
   /**
    * Metodo che permette il salvataggio di una richiesta di competenza.
    *
    * @param competenceRequest la richiesta di competenza da salvare
-   * @param year l'anno di riferimento
-   * @param month il mese di riferimento
-   * @param teamMate la persona destinataria della richiesta
-   * @param beginDayToAsk il giorno iniziale da chiedere
-   * @param beginDayToGive il giorno iniziale da dare
-   * @param endDayToGive il giorno finale da dare
-   * @param endDayToAsk il giorno finale da chiedere
-   * @param type il servizio su cui chiedere il cambio
+   * @param year              l'anno di riferimento
+   * @param month             il mese di riferimento
+   * @param teamMate          la persona destinataria della richiesta
+   * @param beginDayToAsk     il giorno iniziale da chiedere
+   * @param beginDayToGive    il giorno iniziale da dare
+   * @param endDayToGive      il giorno finale da dare
+   * @param endDayToAsk       il giorno finale da chiedere
+   * @param type              il servizio su cui chiedere il cambio
    */
-  public static void save(@Required CompetenceRequest competenceRequest, int year, 
+  public static void save(@Required CompetenceRequest competenceRequest, int year,
       int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
-      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive, 
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
       PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
-    log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
 
     //rules.checkIfPermitted(type);
-        
+
+    Verify.verifyNotNull(beginDayToGive.date);
+    Verify.verifyNotNull(endDayToGive.date);
+
     competenceRequest.year = year;
-    competenceRequest.month = month;    
+    competenceRequest.month = month;
     competenceRequest.startAt = LocalDateTime.now();
     competenceRequest.teamMate = teamMate;
     competenceRequest.person = Security.getUser().get().person;
-    
+
     notFoundIfNull(competenceRequest.person);
-        
+
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("teamMate", 
-          "Esiste già una richiesta di questo tipo");      
+      Validation.addError("teamMate",
+          "Esiste già una richiesta di questo tipo");
     }
-    if (beginDayToAsk.date.isAfter(endDayToAsk.date) 
-        || beginDayToGive.date.isAfter(endDayToGive.date)) {
-      Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
+
+    if (beginDayToGive.date.isAfter(endDayToGive.date)) {
+      Validation.addError("beginDayToGive", "Le date devono essere congruenti");
     }
-    if (Days.daysBetween(beginDayToAsk.date, endDayToAsk.date).getDays() 
-        != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
-      Validation.addError("beginDayToAsk", 
-          "La quantità di giorni da chiedere e da dare deve coincidere");  
-      Validation.addError("beginDayToGive", 
-          "La quantità di giorni da chiedere e da dare deve coincidere"); 
+
+    val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.date : null;
+    val endDateToAsk = endDayToAsk != null ? endDayToAsk.date : null;
+
+    if (beginDateToAsk != null && endDateToAsk != null) {
+      if (beginDateToAsk.isAfter(endDateToAsk)) {
+        Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
+      }
+      if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
+          != Days.daysBetween(beginDayToGive.date, endDayToGive.date).getDays()) {
+        Validation.addError("beginDayToAsk",
+            "La quantità di giorni da chiedere e da dare deve coincidere");
+        Validation.addError("beginDayToGive",
+            "La quantità di giorni da chiedere e da dare deve coincidere");
+      }
     }
     if (!competenceRequest.person.checkLastCertificationDate(
         new YearMonth(competenceRequest.year,
             competenceRequest.month))) {
       Validation.addError("beginDayToAsk",
           "Non è possibile fare una richiesta per una data di un mese già "
-          + "processato in Attestati");      
+              + "processato in Attestati");
     }
     if (Validation.hasErrors()) {
       LocalDate begin = new LocalDate(year, month, 1);
@@ -310,9 +322,9 @@ public class CompetenceRequests extends Controller {
           .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
       List<PersonReperibilityDay> myReperibilityDates = repDao
           .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.person);
-          
+
       List<PersonReperibilityType> types = repDao
-          .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))      
+          .getReperibilityTypeByOffice(competenceRequest.person.office, Optional.of(false))
           .stream().filter(prt -> prt.personReperibilities.stream()
               .anyMatch(pr -> pr.person.equals(competenceRequest.person)))
           .collect(Collectors.toList());
@@ -320,16 +332,16 @@ public class CompetenceRequests extends Controller {
           .filter(p -> p.id != competenceRequest.person.id).collect(Collectors.toList());
       boolean insertable = true;
       response.status = 400;
-      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive, 
-          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable, 
+      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
+          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
           teamMates, types, reperibilityDates, myReperibilityDates);
     }
 
-    competenceRequest.beginDateToAsk = beginDayToAsk.date;
+    competenceRequest.beginDateToAsk = beginDateToAsk;
+    competenceRequest.endDateToAsk = endDateToAsk;
     competenceRequest.beginDateToGive = beginDayToGive.date;
-    competenceRequest.endDateToAsk = endDayToAsk.date;
     competenceRequest.endDateToGive = endDayToGive.date;
-    
+
     competenceRequestManager.configure(competenceRequest);
 
     if (competenceRequest.endTo == null) {
@@ -344,15 +356,6 @@ public class CompetenceRequests extends Controller {
       competenceRequestManager.executeEvent(
           competenceRequest, competenceRequest.person,
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-
-      //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager
-      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-      // invio anche la mail
-      notificationManager
-      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-
-
     }
     flash.success("Operazione effettuata correttamente");
 
@@ -378,7 +381,7 @@ public class CompetenceRequests extends Controller {
   /**
    * Renderizza la form in cui viene mostrata la richiesta.
    *
-   * @param id l'identificativo della richiesta
+   * @param id   l'identificativo della richiesta
    * @param type il tipo di richiesta
    */
   public static void show(long id, CompetenceRequestType type) {
@@ -389,7 +392,7 @@ public class CompetenceRequests extends Controller {
     boolean disapproval = false;
     render(competenceRequest, type, user, disapproval);
   }
-  
+
   /**
    * Permette l'approvazione della richiesta.
    *
@@ -400,12 +403,14 @@ public class CompetenceRequests extends Controller {
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
-    
+
+    log.debug("Approving competence request {}", competenceRequest);
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
-    
+
     if (approved) {
       notificationManager
-      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest));
+          .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+              Optional.absent(), true);
 
       flash.success("Operazione conclusa correttamente");
     } else {
@@ -414,13 +419,13 @@ public class CompetenceRequests extends Controller {
 
     CompetenceRequests.listToApprove(competenceRequest.type);
   }
-  
+
   /**
    * Metodo che permette il rifiuto della richiesta.
    *
-   * @param id identificativo della richiesta di competenza
+   * @param id          identificativo della richiesta di competenza
    * @param disapproval true se si rifiuta, false altrimenti
-   * @param reason la motivazione al rifiuto
+   * @param reason      la motivazione al rifiuto
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
@@ -429,21 +434,24 @@ public class CompetenceRequests extends Controller {
       disapproval = true;
       render(competenceRequest, disapproval);
     }
-    if (competenceRequest.reperibilityManagerApprovalRequired 
+
+    if (competenceRequest.reperibilityManagerApprovalRequired
         && competenceRequest.reperibilityManagerApproved == null
-        && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+        && rules.check("CompetenceRequests.reperibilityManagerDisapproval", competenceRequest)) {
+      log.debug("Disapproval da parte del REPERIBILITY_MANAGER, richiesta {}",
+          competenceRequest);
       //TODO: caso di disapprovazione da parte del supervisore del servizio.
       competenceRequestManager.reperibilityManagerDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
     }
     if (competenceRequest.employeeApprovalRequired && competenceRequest.employeeApproved == null
         && user.hasRoles(Role.EMPLOYEE)) {
       //TODO: caso di disapprovazione da parte del dipendente reperibile
       competenceRequestManager.employeeDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
     }
+    notificationManager
+        .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+            Optional.absent(), false);
+    flash.error("Richiesta respinta");
     render("@show", competenceRequest, user);
   }
 }

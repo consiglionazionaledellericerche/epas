@@ -1,0 +1,57 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Approvazioni di telelavoro mensile'  /}
+
+<div class="container">
+  #{title title:'Richieste e approvazioni di telelavoro' /}
+
+<table  class="table table-striped table-hover table-bordered table-condensed center" datatable>
+	<thead>
+		<tr>
+			<th>Anno</th>
+			<th>Mese</th>
+			<th>Richiesta</th>
+			<th>Validazione</th>
+			#{secure.check 'InformationRequests.revokeValidation'}
+			<th>Revoca</th>
+			#{/secure.check}
+		</tr>
+	</thead>
+	<tbody>
+		#{list items:dtoList, as:'item'}
+		<tr>
+			<td>${item.teleworkRequest.year}</td>
+			<td>${templateUtility.monthName(item.teleworkRequest.month)}</td>
+			<td>#{if item.teleworkRequest.isFullyApproved()}
+					${item.teleworkRequest.officeHeadApproved.format()}
+				#{/if}
+				#{else}
+					<span class="label label-warning label-badge">Richiesta non ancora approvata</span>
+				#{/else} 			 
+			</td>
+			<td>#{if item.teleworkValidation != null}
+					#{if item.teleworkValidation.isValidated()}
+						${item.teleworkValidation.approvationDate.format()}
+					#{/if}
+					#{else}
+						<span class="label label-info label-badge">Richiesta non ancora validata</span>
+					#{/else}
+				#{/if}
+				#{else}
+					<span class="label label-danger label-badge">Richiesta di validazione non ancora inviata</span>
+				#{/else}
+			</td>
+			#{secure.check 'InformationRequests.revokeValidation'}
+				<td>
+					#{if item.teleworkValidation != null}
+						<a class="btn btn-danger btn-xs" href="@{InformationRequests.revokeValidation(item.teleworkValidation.id)}">
+								Revoca validazione
+						</a>
+					#{/if}
+				</td>
+			#{/secure.check}
+		</tr>
+		#{/list}	
+	</tbody>
+</table>
+</div>

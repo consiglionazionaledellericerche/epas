@@ -31,7 +31,9 @@ import dao.CategoryGroupAbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.ContractualReferenceDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
+import dao.InformationRequestDao;
 import dao.MemoizedCollection;
 import dao.MemoizedResults;
 import dao.NotificationDao;
@@ -75,7 +77,9 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
+import models.base.InformationRequest;
 import models.contractual.ContractualReference;
+import models.enumerate.InformationType;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
@@ -123,7 +127,8 @@ public class TemplateUtility {
   private final GroupDao groupDao;
   private final TimeSlotDao timeSlotDao;
   private final CompetenceRequestDao competenceRequestDao;
-   
+  private final InformationRequestDao informationRequestDao;
+  private final GeneralSettingDao generalSettingDao;
   
   /**
    * Costruttotore di default per l'injection dei vari componenti.
@@ -141,7 +146,8 @@ public class TemplateUtility {
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
-      CompetenceRequestDao competenceRequestDao) {
+      CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao,
+      GeneralSettingDao generalSettingDao) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -164,6 +170,8 @@ public class TemplateUtility {
     this.groupDao = groupDao;
     this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
+    this.informationRequestDao = informationRequestDao;
+    this.generalSettingDao = generalSettingDao;
     
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -182,8 +190,41 @@ public class TemplateUtility {
                 Optional.of(NotificationFilter.ARCHIVED), Optional.absent());
           }
         });    
-    
-    
+  }
+
+  /**
+   * Verifica se nella configurazione posso abilitare l'auto inserimento covid19.
+   *
+   * @return se nella configurazione generale ho abilitato il covid19 come parametro per 
+   *        auto inserimento.
+   */
+  public boolean enableCovid() {
+    return generalSettingDao.generalSetting().enableAutoconfigCovid19;
+  }
+  
+  /**
+   * Verifica se nella configurazione posso abilitare l'auto inserimento smartworking.
+   *
+   * @return se nella configurazione generale ho abilitato lo smartworking come parametro per 
+   *        auto inserimento.
+   */
+  public boolean enableSmartworking() {
+    return generalSettingDao.generalSetting().enableAutoconfigSmartworking;
+  }
+  
+  /**
+   * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
+   */
+  public boolean enableIllnessFlow() {
+    return generalSettingDao.generalSetting().enableIllnessFlow;
+  }
+  
+  /**
+   * 
+   * @return se è attiva la presenza giornaliera per il responsabile di gruppo.
+   */
+  public boolean enableDailyPresenceForManager() {
+    return generalSettingDao.generalSetting().enableDailyPresenceForManager;
   }
   
   /**
@@ -200,7 +241,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.person);
     return results.size();
@@ -220,7 +261,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.person);
 
@@ -241,7 +282,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.person);
 
@@ -262,7 +303,7 @@ public class TemplateUtility {
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
         groupDao.groupsByOffice(user.person.office, Optional.absent(), Optional.of(false));
-    List<AbsenceRequest> results = absenceRequestDao
+    Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.person);
 
@@ -287,6 +328,60 @@ public class TemplateUtility {
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
             user.person);
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro. 
+   *
+   * @return la quantità di richieste di telelavoro pendenti.
+   */
+  public final int teleworkRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.TELEWORK_INFORMATION, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione di uscite di servizio.
+   *
+   * @return la quantità di richieste di uscite di servizio pendenti.
+   */
+  public final int serviceRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.SERVICE_INFORMATION, user.person);
+
+    return results.size();
+  }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di informazione malattia. 
+   *
+   * @return la quantità di richieste di informazione di malattia pendenti.
+   */
+  public final int illnessRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.ILLNESS_INFORMATION, user.person);
+
     return results.size();
   }
 
@@ -315,8 +410,8 @@ public class TemplateUtility {
 
   /**
    * Metodo di utilità per aggiornare il mese successivo.
-   * @param month mese di partenza.
    *
+   * @param month mese di partenza.
    * @return mese successivo a mese di partenza.
    */
   public final int computeNextMonth(final int month) {
@@ -792,21 +887,21 @@ public class TemplateUtility {
         LocalDate.now().dayOfMonth().withMaximumValue(), true).list();
     return people;
   }
-  
+
   /**
    * Sigla dell'ente/azienda che utilizza ePAS.
    */
   public String getCompanyCode() {
-    return CompanyConfig.code();    
+    return CompanyConfig.code();
   }
-  
+
   /**
    * Nome dell'ente/azienda che utilizza ePAS.
    */
   public String getCompanyName() {
     return CompanyConfig.name();
   }
-  
+
   /**
    * Indirizzo sito/web dell'ente/azienda che utilizza ePAS.
    */

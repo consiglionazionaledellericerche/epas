@@ -52,6 +52,7 @@ public class Badge extends BaseModel {
   @ManyToOne
   public Person person;
 
+  @NotNull
   @ManyToOne
   @JoinColumn(name = "badge_reader_id")
   public BadgeReader badgeReader;

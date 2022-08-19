@@ -4,22 +4,38 @@
 
 <div class="container">
 
-#{title title:('Orario in telelavoro ' + templateUtility.monthName(month) + ' ' + year) /}
-
-<div class="row">
-<div class="text-center">
-    <a class="btn btn-success" href="@{TeleworkStampings.report(year, month)}"><i class="fa fa-flag"></i>
+  #{tabList}
+    #{tabItem id:'attuale', title:'Telelavoro di questo mese', active:true /}     
+    #{tabItem id:'passati', title:'Mesi approvati' /}
+  #{/tabList}
+  <br>
+  #{tabContent}
+  	#{tabContentItem id:'attuale', active:true}
+  	
+  	#{title title:('Orario in telelavoro ' + templateUtility.monthName(month) + ' ' + year) /}
+	#{if validated}
+	#{alert color:'warning'}
+	<p><strong>ATTENZIONE!</strong> Per questo mese è già stata approvata la richiesta di validazione da parte del responsabile di sede.<br>
+	Se si intende procedere ad alcune modifiche sui giorni, è necessario richiedere la revoca dell'approvazione
+	al proprio responsabile di sede prima di procedere.</p>
+	#{/alert}
+	#{/if}
+	#{secure.check 'TeleworkStampings.generateReport'}
+	<div class="text-center">
+	
+    <a class="btn btn-success" href="@{TeleworkStampings.generateReport(year, month)}"><i class="fa fa-flag-o"></i>
       Genera report mensile </a>
-</div>
-</div>
-#{list items:list, as:'day'}
+   
+	</div>
+	 #{/secure.check}
+	#{list items:list, as:'day'}
       <ul class="list-group">
      	 <li class="list-group-item  list-group-item-grey">
      	 <div class="pull-right btn-group">            
-      		
+      		#{if !validated}
             <a class="btn btn-sm btn-default" href="@{TeleworkStampings.insertStamping(day.personDay.person.id, day.personDay.date.format())}" data-async-modal="#modalInsertStamping">
             <i class="fa fa-plus"></i> Aggiungi orario</a>            
-    		
+    		#{/if}
           </div>
           <h4>
           #{if day.personDay.isHoliday}
@@ -41,7 +57,33 @@
             #{include './_info.html' /}
           </li>
       </ul>
-#{/list}
+	#{/list}
+  	#{/tabContentItem}
+  	#{tabContentItem id:'passati'}
+  	 <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+  	 	<thead>
+  	 		<tr>
+  	 		<th>Anno</th>
+  	 		<th>Mese</th>
+  	 		<th>Approvato</th>
+  	 		<th>Data approvazione</th>
+  	 		</tr>
+  	 	</thead>
+  	 	<tbody>
+  	 		#{list items:validationList, as:'item'}
+  	 		<tr>
+  	 			<td>${item.year}</td>
+  	 			<td>${templateUtility.monthName(item.month)}</td>
+  	 			<td>${item.approved ? 'SI' : 'NO'}</td>
+  	 			<td>${item.approvationDate.format()}</td>
+  	 		</tr>
+  	 		#{/list}
+  	 	</tbody>
+  	 </table>
+  	#{/tabContentItem}
+  #{/tabContent}
+
+
 
 </div>
 

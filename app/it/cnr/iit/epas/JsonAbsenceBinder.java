@@ -18,8 +18,8 @@
 package it.cnr.iit.epas;
 
 import com.google.gson.GsonBuilder;
+import common.injection.StaticInject;
 import helpers.deserializers.AbsenceFromClientDeserializer;
-import injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import models.exports.AbsenceFromClient;

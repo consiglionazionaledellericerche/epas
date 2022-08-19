@@ -99,6 +99,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    */
   @Column(name = "marked_by_employee")
   public boolean markedByEmployee;
+  
+  /**
+   * con la nuova interpretazione del telelavoro per i livelli I-III, quando un dipendente si 
+   * inserisce una timbratura in telelavoro, questa deve essere inserita anche sul suo cartellino, 
+   * diventando a tutti gli effetti una timbratura che concorre alla generazione del residuo 
+   * giornaliero.
+   */
+  @Column(name = "marked_by_telework")
+  public boolean markedByTelework;
 
   /**
    * questo nuovo campo si è reso necessario per la sede centrale per capire da quale lettore 
