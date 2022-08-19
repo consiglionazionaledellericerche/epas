@@ -84,9 +84,9 @@ della propria sede di lavoro, verranno effettuati dal sistema i calcoli relativi
 
    * entrate e uscite dal luogo di lavoro omettendo eventuale tempo trascorso in sede prima dell'apertura o dopo la chiusura
    * ricerca di uscite e entrate per pausa pranzo nell'intervallo definito per il pranzo
-   * comparazione degli orari delle missioni (orarie e giornaliere) di modo da poter inserire il miglior codice d'assenza
-   per ciascun giorno di missione che la piattaforma Missioni invia ad ePAS. 
-   N.B.: per questa parte si rimanda alla documentazione presente su questa pagina relativa all'integrazione ePAS-Missioni 
+   * comparazione degli orari delle missioni (orarie e giornaliere) di modo da poter inserire il miglior codice d'assenza per ciascun giorno di missione che la piattaforma Missioni invia ad ePAS. 
+   
+N.B.: per questa parte si rimanda alla documentazione presente su questa pagina relativa all'integrazione ePAS-Missioni 
 
 Autocertificazioni
 ------------------

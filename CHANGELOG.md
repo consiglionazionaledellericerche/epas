@@ -4,8 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.3] - 2022-08-16
+## [2.5.4] - UNRELEASED
+### Changed  
+ - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
+   lavoro e in smart working
+ - Corretta generazione form richiesta ferie quando richieste nel passato
+ - Cambiato comportamento del codice 26 che non deve far maturare residuo orario
 
+## [2.5.3] - 2022-08-16
 ### Added
  - Aggiunta email di warning per assenze per missione non inserite a causa di assenze preesistenti
  - Aggiunta possibilità per il responsabile di sede di vedere i flussi di richiesta ferie anche

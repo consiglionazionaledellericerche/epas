@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.NotificationManager.Crud;
@@ -60,7 +60,6 @@ import models.User;
 import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import models.absences.JustifiedType;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
@@ -401,6 +400,10 @@ public class AbsenceRequests extends Controller {
           + "Eventualmente effettuare più richieste di assenza.");
     }
 
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
+        false, absenceType, justifiedType, hours, minutes, false, true);
+
     // verifico che non esista già una richiesta (non rifiutata)
     // di assenza che interessa i giorni richiesti
     AbsenceRequest existing = absenceRequestManager.checkAbsenceRequest(absenceRequest);
@@ -409,7 +412,8 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.endTo", "Esiste già una richiesta in questa data");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain,
+          absenceForm);
     }
     if (!absenceRequest.person
         .checkLastCertificationDate(new YearMonth(absenceRequest.startAtAsDate().getYear(),
@@ -418,7 +422,8 @@ public class AbsenceRequests extends Controller {
           "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
+          absenceForm);
     }
 
     boolean insideContracts = 
@@ -435,7 +440,8 @@ public class AbsenceRequests extends Controller {
       Validation.addError("absenceRequest.endTo", message);
       response.status = 400;
       insertable = false;
-      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
+          absenceForm);
     }
 
     if (Validation.hasErrors()) {
@@ -443,7 +449,7 @@ public class AbsenceRequests extends Controller {
       insertable = false;
       flash.error(Web.msgHasErrors());
 
-      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+      render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm);
     }
 
     if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())) {
@@ -453,7 +459,7 @@ public class AbsenceRequests extends Controller {
             "Inserire una motivazione per l'assenza nel passato");
         response.status = 400;
         insertable = false;
-        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain);
+        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm);
       }
     }
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -463,9 +469,6 @@ public class AbsenceRequests extends Controller {
     if (groupAbsenceType.name.equals(DefaultGroup.FERIE_CNR_PROROGA.name())) {
       absenceType = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
     }
-    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
-        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, justifiedType, hours, minutes, false, true);
     InsertReport insertReport =
         absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
