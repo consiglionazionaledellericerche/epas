@@ -22,7 +22,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Personnel Attendance System | 9.3. Configurazione autenticazione SAML</title>
+    <title>Electronic Personnel Attendance System | 9.4. Configurazione autenticazione SAML</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css">
@@ -32,8 +32,8 @@
     <link rel="index" title="Indice" href="../index.html">
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
     <link rel="up" title="9. Configurazioni per l&#39;amministratore di sistema" href="index.html">
-    <link rel="next" title="9.4. Configurazione autenticazione OIDC" href="autenticazioneOidc.html">
-    <link rel="prev" title="9.2. Configurazione autenticazione LDAP" href="autenticazioneLdap.html">
+    <link rel="next" title="9.5. Configurazione autenticazione OIDC" href="autenticazioneOidc.html">
+    <link rel="prev" title="9.3. Configurazione autenticazione LDAP" href="autenticazioneLdap.html">
 
 
     <!-- Favicons -->
@@ -611,16 +611,17 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/stampings.html">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -686,11 +687,12 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">9. Configurazioni per l'amministratore di sistema</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -727,7 +729,7 @@
 <div class="navbar-toggler--wrap navbar-toggler--wrap--bottom p-3">
   <div class="navbar-toggler navbar-toggler--open p-0 border-0 ml-auto">
     <div class="navbar-toggler-bottom__chapter align-middle text-truncate">
-      <span class="it-list mr-2"></span><span class="section-number">9.3. </span>Configurazione autenticazione SAML
+      <span class="it-list mr-2"></span><span class="section-number">9.4. </span>Configurazione autenticazione SAML
     </div>
   </div>
 </div>
@@ -793,16 +795,17 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/stampings.html">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -868,11 +871,12 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">9. Configurazioni per l'amministratore di sistema</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -911,12 +915,12 @@
           </div>-->
           
             <div class="footer-buttons footer-buttons--prev" role="navigation" aria-label="footer navigation">
-                <a href="autenticazioneLdap.html" class="" title="9.2. Configurazione autenticazione LDAP" accesskey="p" rel="prev"> Torna a <span class="section-number">9.2. </span>Configurazione autenticazione LDAP</a>
+                <a href="autenticazioneLdap.html" class="" title="9.3. Configurazione autenticazione LDAP" accesskey="p" rel="prev"> Torna a <span class="section-number">9.3. </span>Configurazione autenticazione LDAP</a>
             </div>
           
           
   <section id="configurazione-autenticazione-saml">
-<h1><span class="section-number">9.3. </span>Configurazione autenticazione SAML<a class="headerlink" href="#configurazione-autenticazione-saml" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">9.4. </span>Configurazione autenticazione SAML<a class="headerlink" href="#configurazione-autenticazione-saml" title="Link a questa intestazione">¶</a></h1>
 <p>In ePAS è stata integrata l'autenticazione di tipo SAML per supportare la possibilità
 di utilizzare un Identity Provider della Federazione <a class="reference external" href="https://idem.garr.it">Idem</a>.</p>
 <p>Al momento l'unico tipo di autenticazione di tipo SAML testata ed utilizzata in produzione
@@ -961,7 +965,7 @@ alcune funzionalità del modulo non sono mappate sulle variabili presenti nel do
 vi sia la necessità, è possibile comunque utilizzarle con poche modifiche al codice di ePAS che
 gestisce l'inizializzazione della configurazione impostata tramite Docker.</p>
 <section id="logout-shibboleth-non-supportata">
-<h2><span class="section-number">9.3.1. </span>Logout Shibboleth non supportata<a class="headerlink" href="#logout-shibboleth-non-supportata" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.4.1. </span>Logout Shibboleth non supportata<a class="headerlink" href="#logout-shibboleth-non-supportata" title="Link a questa intestazione">¶</a></h2>
 <p>Il logout centralizzato tramite Shibboleth al momento non è supportato.
 Una volta effettuato il login tramite l'IDP Shibboleth viene infatti impostata nel browser una
 variabile di sessione, che non è eliminabile se non chiudendo e riaprendo il browser.</p>
@@ -979,7 +983,7 @@ l'utente non corretto.</p>
 
           
             <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
-                  <a href="autenticazioneOidc.html" class="" title="9.4. Configurazione autenticazione OIDC" accesskey="n" rel="next"><span class="section-number">9.4. </span>Configurazione autenticazione OIDC</a>
+                  <a href="autenticazioneOidc.html" class="" title="9.5. Configurazione autenticazione OIDC" accesskey="n" rel="next"><span class="section-number">9.5. </span>Configurazione autenticazione OIDC</a>
               </div>
             
           </div>

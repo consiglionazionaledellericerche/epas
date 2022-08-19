@@ -22,7 +22,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Personnel Attendance System | 2.4. Gestione Timbrature</title>
+    <title>Electronic Personnel Attendance System | 2.5. Gestione Timbrature</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css">
@@ -32,8 +32,8 @@
     <link rel="index" title="Indice" href="../index.html">
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
     <link rel="up" title="2. Documentazione per gli amministratori del personale" href="index.html">
-    <link rel="next" title="2.5. Gestione Sedi e amministratori" href="seat.html">
-    <link rel="prev" title="2.3. Gestione e inserimento orari di lavoro" href="workingTimeType.html">
+    <link rel="next" title="2.6. Gestione Sedi e amministratori" href="seat.html">
+    <link rel="prev" title="2.4. Fasce orarie di lavoro" href="timeSlot.html">
 
 
     <!-- Favicons -->
@@ -611,16 +611,17 @@
 <li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -686,11 +687,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -727,7 +729,7 @@
 <div class="navbar-toggler--wrap navbar-toggler--wrap--bottom p-3">
   <div class="navbar-toggler navbar-toggler--open p-0 border-0 ml-auto">
     <div class="navbar-toggler-bottom__chapter align-middle text-truncate">
-      <span class="it-list mr-2"></span><span class="section-number">2.4. </span>Gestione Timbrature
+      <span class="it-list mr-2"></span><span class="section-number">2.5. </span>Gestione Timbrature
     </div>
   </div>
 </div>
@@ -793,16 +795,17 @@
 <li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -868,11 +871,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -911,12 +915,12 @@
           </div>-->
           
             <div class="footer-buttons footer-buttons--prev" role="navigation" aria-label="footer navigation">
-                <a href="workingTimeType.html" class="" title="2.3. Gestione e inserimento orari di lavoro" accesskey="p" rel="prev"> Torna a <span class="section-number">2.3. </span>Gestione e inserimento orari di lavoro</a>
+                <a href="timeSlot.html" class="" title="2.4. Fasce orarie di lavoro" accesskey="p" rel="prev"> Torna a <span class="section-number">2.4. </span>Fasce orarie di lavoro</a>
             </div>
           
           
   <section id="gestione-timbrature">
-<h1><span class="section-number">2.4. </span>Gestione Timbrature<a class="headerlink" href="#gestione-timbrature" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">2.5. </span>Gestione Timbrature<a class="headerlink" href="#gestione-timbrature" title="Link a questa intestazione">¶</a></h1>
 <p>Per l'amministratore è possibile controllare la situazione giornaliera/mensile di ogni dipendente
 afferente all'istituto.
 Dalla schermata <span class="menuselection">Amministrazione ‣ Timbrature</span>, è possibile verificare la
@@ -925,7 +929,7 @@ mese e anno da consultare anch'essi selzionabili).</p>
 <figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="../_images/timbrature.png"><img alt="../_images/timbrature.png" src="../_images/timbrature.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.24 </span><span class="caption-text">Schermata delle timbrature mensili</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.29 </span><span class="caption-text">Schermata delle timbrature mensili</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Nella pagina compaiono, oltre alle timbrature effettuate dal dipendente, tutta una serie di
@@ -940,7 +944,7 @@ vuol inserire il codice di assenza. Comparirà una schermata di questo tipo:</p>
 <figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/inserimentoAssenza.png"><img alt="../_images/inserimentoAssenza.png" src="../_images/inserimentoAssenza.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.25 </span><span class="caption-text">Schermata di inserimento assenza</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.30 </span><span class="caption-text">Schermata di inserimento assenza</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Nel campo &quot;<em>codice</em>&quot; è possibile scrivere il codice di assenza che si intende assegnare al
@@ -962,7 +966,7 @@ di servizio o no) o eliminarla (<code class="docutils literal notranslate"><span
 <figure class="align-center" id="id3">
 <a class="reference internal image-reference" href="../_images/modificaTimbratura.png"><img alt="../_images/modificaTimbratura.png" src="../_images/modificaTimbratura.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.26 </span><span class="caption-text">Schermata di modifica timbratura</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.31 </span><span class="caption-text">Schermata di modifica timbratura</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>La colonna &quot;<em>inserisci timbratura</em>&quot; permette all'amministratore di inserire una timbratura
@@ -980,7 +984,7 @@ si aprirà una finestra con le informazioni da dover specificare:</p>
 <figure class="align-center" id="id4">
 <a class="reference internal image-reference" href="../_images/inserimentoTimbratura.png"><img alt="../_images/inserimentoTimbratura.png" src="../_images/inserimentoTimbratura.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.27 </span><span class="caption-text">Schermata di inserimento timbratura</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.32 </span><span class="caption-text">Schermata di inserimento timbratura</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Le colonne, &quot;<em>Tempo lavoro</em>&quot;, &quot;<em>Differenza</em>&quot;, &quot;<em>Progressivo</em>&quot;, sono quelle che concorrono alla
@@ -993,7 +997,7 @@ figura:</p>
 <figure class="align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/giornoFestivo.png"><img alt="../_images/giornoFestivo.png" src="../_images/giornoFestivo.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.28 </span><span class="caption-text">Schermata di abilitazione orario nel festivo</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.33 </span><span class="caption-text">Schermata di abilitazione orario nel festivo</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Sarà sufficiente per l'amministratore cliccare sulla scritta &quot;<em>Abilita</em>&quot; così da abilitare il tempo
@@ -1044,7 +1048,7 @@ per quel codice per ogni assenza effettuata.</p>
 
           
             <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
-                  <a href="seat.html" class="" title="2.5. Gestione Sedi e amministratori" accesskey="n" rel="next"><span class="section-number">2.5. </span>Gestione Sedi e amministratori</a>
+                  <a href="seat.html" class="" title="2.6. Gestione Sedi e amministratori" accesskey="n" rel="next"><span class="section-number">2.6. </span>Gestione Sedi e amministratori</a>
               </div>
             
           </div>

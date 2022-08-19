@@ -1,5 +1,5 @@
 Consultazione situazione riepiloghi/attestati mensili via REST
-=============================================================
+==============================================================
 
 Di seguito una breve spiegazione dell'API REST relativa alla consultazione della rendicontazione 
 mensile delle *assenze / competenze / buoni pasto / ore di formazione* dei dipendenti di una sede. 

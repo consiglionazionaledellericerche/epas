@@ -22,7 +22,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Personnel Attendance System | 2.11. Invio attestati di presenza</title>
+    <title>Electronic Personnel Attendance System | 2.12. Invio attestati di presenza</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="../_static/css/theme.css" type="text/css">
@@ -32,8 +32,8 @@
     <link rel="index" title="Indice" href="../index.html">
     <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
     <link rel="up" title="2. Documentazione per gli amministratori del personale" href="index.html">
-    <link rel="next" title="2.12. Schermate di riepilogo" href="variousRecap.html">
-    <link rel="prev" title="2.10. Gestione buoni pasto" href="tickets.html">
+    <link rel="next" title="2.13. Schermate di riepilogo" href="variousRecap.html">
+    <link rel="prev" title="2.11. Gestione buoni pasto" href="tickets.html">
 
 
     <!-- Favicons -->
@@ -611,16 +611,17 @@
 <li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -686,11 +687,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -727,7 +729,7 @@
 <div class="navbar-toggler--wrap navbar-toggler--wrap--bottom p-3">
   <div class="navbar-toggler navbar-toggler--open p-0 border-0 ml-auto">
     <div class="navbar-toggler-bottom__chapter align-middle text-truncate">
-      <span class="it-list mr-2"></span><span class="section-number">2.11. </span>Invio attestati di presenza
+      <span class="it-list mr-2"></span><span class="section-number">2.12. </span>Invio attestati di presenza
     </div>
   </div>
 </div>
@@ -793,16 +795,17 @@
 <li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
-<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.4. Gestione Timbrature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="seat.html">2.5. Gestione Sedi e amministratori</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.6. Gestione parametri</a></li>
-<li class="toctree-l2"><a class="reference internal" href="absences.html">2.7. Assenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.8. Gestione Ferie e Permessi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="competences.html">2.9. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.10. Gestione buoni pasto</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">2.11. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.12. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utility.html">2.13. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.11. Gestione buoni pasto</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.12. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.13. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.14. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -868,11 +871,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">9. Configurazioni per l'amministratore di sistema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.1. Configurazione autenticazione in ePAS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.2. Configurazione autenticazione LDAP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.3. Configurazione autenticazione SAML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.4. Configurazione autenticazione OIDC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.5. Configurazione dei log di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">9.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">9.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">9.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">9.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">9.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">9.6. Configurazione dei log di ePAS</a></li>
 </ul>
 </li>
 </ul>
@@ -911,12 +915,12 @@
           </div>-->
           
             <div class="footer-buttons footer-buttons--prev" role="navigation" aria-label="footer navigation">
-                <a href="tickets.html" class="" title="2.10. Gestione buoni pasto" accesskey="p" rel="prev"> Torna a <span class="section-number">2.10. </span>Gestione buoni pasto</a>
+                <a href="tickets.html" class="" title="2.11. Gestione buoni pasto" accesskey="p" rel="prev"> Torna a <span class="section-number">2.11. </span>Gestione buoni pasto</a>
             </div>
           
           
   <section id="invio-attestati-di-presenza">
-<h1><span class="section-number">2.11. </span>Invio attestati di presenza<a class="headerlink" href="#invio-attestati-di-presenza" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">2.12. </span>Invio attestati di presenza<a class="headerlink" href="#invio-attestati-di-presenza" title="Link a questa intestazione">¶</a></h1>
 <p>Il sistema ePAS consente all'amministratore di interfacciarsi con le funzionalità di sottomissione
 di assenze e competenze presenti sul sito <em>https://attestati.rm.cnr.it/attestati</em>
 Dal menu <span class="menuselection">Amministrazione ‣ Invio attestati</span>, l'amministratore si troverà di
@@ -924,7 +928,7 @@ fronte a questa schermata:</p>
 <figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="../_images/invioAttestati.png"><img alt="../_images/invioAttestati.png" src="../_images/invioAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.51 </span><span class="caption-text">Schermata home invio attestati</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.56 </span><span class="caption-text">Schermata home invio attestati</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>A questo livello è possibile selezionare il mese e l'anno di cui si intende sottomettere, alla sede
@@ -936,7 +940,7 @@ Una volta selezionati i valori che ci interessano è possibile fare la login al 
 <figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/loginAttestati.png"><img alt="../_images/loginAttestati.png" src="../_images/loginAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.52 </span><span class="caption-text">Schermata di login attestati</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.57 </span><span class="caption-text">Schermata di login attestati</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>A questo livello viene posta all'attenzione dell'amministratore tutta la procedura da seguire per
@@ -949,7 +953,7 @@ sistema centrale all'indirizzo <em>https://attestati.rm.cnr.it/attestati</em></p
 <figure class="align-center" id="id3">
 <a class="reference internal image-reference" href="../_images/primaInvioAttestati.png"><img alt="../_images/primaInvioAttestati.png" src="../_images/primaInvioAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.53 </span><span class="caption-text">Schermata prima inizio elaborazione</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.58 </span><span class="caption-text">Schermata prima inizio elaborazione</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Per ogni dipendente registrato nella lista persone
@@ -972,7 +976,7 @@ dipendente e, una volta terminato, apparirà una schermata più o meno come ques
 <figure class="align-center" id="id4">
 <a class="reference internal image-reference" href="../_images/riepilogoAttestati.png"><img alt="../_images/riepilogoAttestati.png" src="../_images/riepilogoAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.54 </span><span class="caption-text">Schermata di esito elaborazione</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.59 </span><span class="caption-text">Schermata di esito elaborazione</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Per ogni dipendente viene riassunta la situazione al termine dell'elaborazione.
@@ -984,7 +988,7 @@ elaborati cliccando in corrispondenza della voce &quot;<em>dati</em>&quot; nella
 <figure class="align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/datiElaborazione.png"><img alt="../_images/datiElaborazione.png" src="../_images/datiElaborazione.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.55 </span><span class="caption-text">Dati di elaborazione</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.60 </span><span class="caption-text">Dati di elaborazione</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -1025,7 +1029,7 @@ questa:</p>
 <figure class="align-center" id="id6">
 <a class="reference internal image-reference" href="../_images/problemiElaborazione.png"><img alt="../_images/problemiElaborazione.png" src="../_images/problemiElaborazione.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.56 </span><span class="caption-text">Problemi durante elaborazione</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.61 </span><span class="caption-text">Problemi durante elaborazione</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 </section>
@@ -1033,7 +1037,7 @@ questa:</p>
 
           
             <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
-                  <a href="variousRecap.html" class="" title="2.12. Schermate di riepilogo" accesskey="n" rel="next"><span class="section-number">2.12. </span>Schermate di riepilogo</a>
+                  <a href="variousRecap.html" class="" title="2.13. Schermate di riepilogo" accesskey="n" rel="next"><span class="section-number">2.13. </span>Schermate di riepilogo</a>
               </div>
             
           </div>
