@@ -161,6 +161,7 @@ public class TeleworkStampings extends Controller {
     }
 
     render(list, year, month, validationList, validated);
+
   }
 
   /**
@@ -400,6 +401,7 @@ public class TeleworkStampings extends Controller {
 
     render(stamping);
   }
+  
 
   /**
    * Genera il report mensile di telelavoro.

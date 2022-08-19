@@ -1,0 +1,119 @@
+
+#{alert color:'info', textcolor:'dark'} 
+
+	#{if role.name.equals('personnelAdmin')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare timbrature nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare codici di assenza nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può vedere le assenze del personale su base mensile e annuale</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare competenze accessorie</li>
+		<li class="list-group-item clearfix">Può vedere la situazione delle ferie e dei permessi dei dipendenti</li>
+		<li class="list-group-item clearfix">Può vedere i calendari di turni e reperibilità, se configurati</li>
+		<li class="list-group-item clearfix">Può definire la configurazione della sede (orari di apertura/chiusura ecc...)</li>
+		<li class="list-group-item clearfix">Può stampare i cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può inviare i dati mensili alla piattaforma <strong>Attestati</strong></li>
+		<li class="list-group-item clearfix">Può definire gli orari di lavoro particolari che devono essere assegnati ai dipendenti della sede (part time orizzontali, verticali).
+		</li>	
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('personnelAdminMini')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può vedere le timbrature nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può vedere i codici di assenza nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può vedere le competenze accessorie</li>	
+		<li class="list-group-item clearfix">Può vedere le assenze del personale su base mensile e annuale</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('seatSupervisor')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può vedere le timbrature nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può vedere i codici di assenza nei cartellini dei dipendenti</li>
+		<li class="list-group-item clearfix">Può approvare/respingere le richieste di assenza dei dipendenti</li>	
+		<li class="list-group-item clearfix">Può vedere la situazione delle ferie e dei permessi dei dipendenti</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('employee')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Accede al sistema con le proprie credenziali</li>
+		<li class="list-group-item clearfix">Può vedere il proprio cartellino mensile</li>
+		<li class="list-group-item clearfix">Può vedere la situazione delle proprie ferie</li>	
+		<li class="list-group-item clearfix">Può vedere la situazione delle proprie assenze su base mensile/annuale</li>
+		<li class="list-group-item clearfix">Può vedere la situazione delle competenze accessorie assegnate</li>
+		<li class="list-group-item clearfix">Può stampare il proprio cartellino mensile</li>
+		<li class="list-group-item clearfix">Può effettuare richieste di ferie/riposi compensativi</li>
+		<li class="list-group-item clearfix">Può inserire le proprie timbrature per lavoro fuori sede (se abilitato dalla configurazione)</li>
+		<li class="list-group-item clearfix">Può inserire alcuni tipi di assenza (se abilitato dalla configurazione)</li>		
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('shiftManager')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può assegnare, rimuovere una persona in turno in un certo giorno (visualizzando le eventuali assenze dei turnisti ma senza poter vedere la tipologia di assenza)</li>
+		<li class="list-group-item clearfix">Può approvare/respingere il calendario dei turni</li>
+		<li class="list-group-item clearfix">Può stampare il prospetto del calendario dei turni</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('reperibilityManager')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può assegnare, rimuovere una persona in reperibilità in un certo giorno (visualizzando le eventuali assenze dei reperibili ma senza poter vedere la tipologia di assenza)</li>
+		<li class="list-group-item clearfix">Può approvare/respingere il calendario della reperibilità</li>
+		<li class="list-group-item clearfix">Può stampare il prospetto del calendario della reperibilità.</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('groupManager')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può vedere le timbrature dei dipendenti appartenenti al proprio gruppo di lavoro (eventualmente modificabile se dovesse creare problemi)</li>
+		<li class="list-group-item clearfix">Può inserire/rimuovere persone dal proprio gruppo di lavoro</li>
+		<li class="list-group-item clearfix">Può approvare/respingere le ferie/riposi compensativi dei dipendenti del proprio gruppo di lavoro</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('registryManager')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può inserire, modificare il personale afferente alla sede</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare i contratti del personale dipendente</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare gli orari di lavoro sul contratto dei dipendenti</li>
+		<li class="list-group-item clearfix">Può inserire, modificare cancellare i piani ferie dei dipendenti</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare le fasce di presenza obbligatoria dei dipendenti</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare le inizializzazioni orarie e dei buoni pasto dei dipendenti in fase di avvio dell’utilizzo del programma</li>
+		<li class="list-group-item clearfix">Può scaricare da “Attestati” le assenze pregresse dei dipendenti in fase di avvio dell’utilizzo del programma.</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('mealTicketManager')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può vedere la situazione dei buoni pasto assegnati ai dipendenti</li>
+		<li class="list-group-item clearfix">Può inserire, modificare, cancellare i blocchetti di buoni pasto per ciascun dipendente</li>
+		<li class="list-group-item clearfix">Può spostare i blocchetti di buoni pasto da un contratto ad un altro dello stesso dipendente.</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('technicalAdmin')}
+	<ul class="list-group">
+		<li class="list-group-item clearfix">Può definire e configurare le sorgenti delle timbrature</li>
+		<li class="list-group-item clearfix">Può definire e configurare il gruppo badge della sede (ovvero il pool di badge assegnato ai dipendenti della propria sede)</li>
+		<li class="list-group-item clearfix">Può configurare degli indirizzi ip per l’autorizzazione alla timbratura via web</li>
+		<li class="list-group-item clearfix">Può configurare dei ruoli operativi nella sede di appartenenza</li>
+	</ul>
+	
+	#{/if}
+	
+	#{if role.name.equals('badgeReader')}
+	<ul class="list-group">
+	<li class="list-group-item clearfix">è il ruolo assegnato all’utente con cui il client che rileva le timbrature localmente sulle singole sedi si autentica sul 
+	sistema ePAS e consente l’inserimento delle timbrature sui cartellini dei singoli dipendenti appartenenti alle stesse sedi.</li>
+	</ul>
+	#{/if}
+	
+	#{if role.name.equals('personDayReader')}
+	
+	#{/if}
+
+
+#{/alert}
+

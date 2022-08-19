@@ -759,6 +759,11 @@ when
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
+
+		/* Visualizzazione organigramma*/
+		"Groups.seatOrganizationChart",
+		"Groups.viewInfoRole",
+
 		/*Richiesta competenza*/
 		"CompetenceRequests.save",
 		"CompetenceRequests.list",
@@ -766,6 +771,7 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		
+
 		/*Richiesta flusso informativo*/
 		"InformationRequests.illness",
 		//"InformationRequests.serviceExit",
@@ -777,6 +783,7 @@ when
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
 		"InformationRequests.saveIllnessRequest",
+
 		
 		
         /* Ferie */

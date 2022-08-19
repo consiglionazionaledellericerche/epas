@@ -1,0 +1,208 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Organigramma di sede' /}
+
+<div class="container">
+	
+	#{title title:('Ruoli in ePAS per la sede ' + currentPerson.office.name) /}
+	
+	<div class="col-sm-offset-1 col-sm-10" id="uroList">
+	#{accordionGroup 'generic'}
+	#{accordionItem 'Ruoli', parent:'codici', title:'Ruoli di '+ currentPerson.fullName() + ' sulla sede', open:false, color:'info'}
+		<ul class="list-group">
+	       #{list items:roles, as:'role'}
+	              <li class="list-group-item clearfix">
+						 <span class="label label-primary"> &{role.name}</span>
+             		<a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(role.id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		            </a>
+	          </li>
+	       #{/list}
+	    </ul>
+	#{/accordionItem}
+	#{accordionItem 'Organigramma', parent:'generic', title:'Altri ruoli in ePAS', open:true, color:'info'}
+  		#{list items:seatSupervisors.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:personnelAdmins.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:technicalAdmins.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:registryManagers.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:mealTicketsManagers.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:personnelAdminsMini.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:shiftManagers.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  		#{list items:reperibilityManagers.entrySet(), as:'entry'}
+  			#{if entry.getValue().empty }  						
+      			<div class="alert alert-warning">
+        		Non è stato ancora impostato alcun &{entry.getKey().name} !
+      			</div>
+    		#{/if}
+    		#{else}
+  				<h4>&{entry.getKey().name}</h4>    		
+			    <ul class="list-group">
+			       #{list items:entry.getValue(), as:'userRole'}
+			         <li class="list-group-item clearfix">
+						<span class="label label-primary"> ${userRole.person.fullname}</span>		             
+		             <a class="label label-badge label-info pull-right" href="@{Groups.viewInfoRole(entry.getKey().id)}" data-async-modal="#modalViewRole"
+		             	webui-popover-hover data-content="Vedi azioni che può compiere" >
+		               <i class="fa fa-exclamation"></i> Cosa può fare
+		             </a>
+			          </li>
+			       #{/list}
+			    </ul>
+    		#{/else}  		
+  		#{/list}
+  		
+  	#{/accordionItem}
+  	#{/accordionGroup}	
+   
+    </div>   
+
+</div>
+
+<div id="modalViewRole" class="modal fade container" tabindex="-1"></div>

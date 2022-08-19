@@ -334,6 +334,7 @@ public class PersonReperibilityDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+
   /**
    * Ricerca, se esiste, l'attività di reperibilità che praticano la lista di persone passata come
    * parametro.
@@ -350,3 +351,4 @@ public class PersonReperibilityDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 }
+
