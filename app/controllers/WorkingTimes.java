@@ -183,24 +183,35 @@ public class WorkingTimes extends Controller {
 
 
   /**
-   * I contratti attivi che per quella sede hanno quel tipo orario.
+   * I contratti attivi che per quella sede hanno quel tipo orario,
+   * oppure per tutte le sedi se si hanno i permessi giusti e si
+   * imposta il parametro allOffices a true.
    *
    * @param wttId    orario
    * @param officeId sede
+   * @param allOffices boolean per mostrare i contratti di tutte le sedi
    */
-  public static void showContract(Long wttId, Long officeId) {
+  public static void showContract(Long wttId, Long officeId, boolean allOffices) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
-
+    
     rules.checkIfPermitted(wtt.office);
-    rules.checkIfPermitted(office);
+    List<Contract> contractList = Lists.newArrayList();
+    Office office = null;
 
-    List<Contract> contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
+    if (allOffices) {
+       contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
+       rules.checkAction("WorkingTimes.showAllContracts");
+    } else {
+      office = officeDao.getOfficeById(officeId);
+      notFoundIfNull(office);
+      rules.checkIfPermitted(office);
+      
+      contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
+    }
 
-    render(wtt, contractList, office);
+    render(wtt, contractList, office, allOffices);
 
   }
 

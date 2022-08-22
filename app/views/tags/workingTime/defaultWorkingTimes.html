@@ -9,14 +9,14 @@
   <table class="table table-hover">
     <tr>
       <th>Descrizione</th>
-      <th>Orizzontale</th>
-      <th>Contratti attivi<br>con periodi attivi<br>attualmente associati<br>(alla data di oggi)</th>
-      <th>Periodi associati<br>a contratti attivi</th>
+      <th class="center">Orizzontale</th>
+      <th class="center">Contratti attivi<br>con periodi attivi<br>attualmente associati<br>(alla data di oggi)</th>
+      <th class="center">Periodi associati<br>a contratti attivi</th>
       #{secure.check 'WorkingTimeType.getAllAssociatedActiveContracts'}
         <th>Tutti i contratti attivi<br>con periodi attivi<br>attualmente associati<br>(alla data di oggi)</th>
         <th class="center">Tutti i contratti<br>associati<br>(storico)</th>
       #{/secure.check}
-      <th>Cambia orario<br>a tutti</th>
+      <th class="center">Cambia orario<br>a tutti</th>
     </tr>
     #{list items:wtts, as:'wtt'}
     <tr>
@@ -37,23 +37,25 @@
           </a>
         #{/secure.check}
       </td>
-      <td>
+      <td class="center">
         #{if wtt.value.horizontal} Si #{/if}
         #{else} No#{/else}
       </td>
-      <td>
+      <td class="center">
         <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
           ${wtt.getAssociatedActiveContract(office).size()}
         </a>
       </td>
-      <td>
+      <td class="center">
         <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
           ${wtt.getAssociatedPeriodInActiveContract(office).size()}
         </a>
       </td>
       #{secure.check 'WorkingTimeType.getAllAssociatedActiveContracts'}
         <td class="center">
-          ${wtt.getAllAssociatedActiveContract().size()}
+          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id, true)}" data-async-modal="#defaultModal">
+            ${wtt.getAllAssociatedActiveContract().size()}
+          </a>
           #{if wtt.getAllAssociatedActiveContract().size() == 0 }
             #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
               <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
