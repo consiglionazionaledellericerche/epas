@@ -23,19 +23,20 @@ import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import manager.ContractManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.WorkingTimeType;
 import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
 
 
 /**
  * WrapperWorkingTimeType con alcune funzionalità aggiuntive.
  *
  * @author Alessandro Martelli
+ * @author Cristian Lucchesi
  */
 public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
@@ -54,6 +55,14 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
   @Override
   public WorkingTimeType getValue() {
     return value;
+  }
+
+  /**
+   * La lista dei contratti attivi che hanno un periodo attivo con associato
+   * il tipo di orario di lavoro indicato.
+   */
+  public List<Contract> getAllAssociatedActiveContract() {
+    return contractDao.getAllAssociatedActiveContracts(getValue());
   }
 
   /**
@@ -102,10 +111,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
   @Override
   public List<Contract> getAssociatedContract() {
-    List<Contract> contracts = Lists.newArrayList();
-    for (ContractWorkingTimeType cwtt : this.value.contractWorkingTimeType) {
-      contracts.add(cwtt.contract);
-    }
-    return contracts;
+    return value.contractWorkingTimeType.stream().map(cwtt -> cwtt.contract)
+        .collect(Collectors.toList());
   }
 }

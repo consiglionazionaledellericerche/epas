@@ -23,11 +23,11 @@
 		 </div>
      #{/secure.check}
 
-        #{tabList}
-  				#{tabItem id:'attivi', title:'Attivi', active:true /}
-  				#{tabItem id:'inattivi', title:'Disattivati' /}
-				#{/tabList}
-		<br>
+     #{tabList}
+       #{tabItem id:'attivi', title:'Attivi', active:true /}
+       #{tabItem id:'inattivi', title:'Disattivati' /}
+     #{/tabList}
+     <br>
 		#{tabContent}
   		  #{tabContentItem id:'attivi', active:true}
 
@@ -42,7 +42,7 @@
 			        <tr class="warning">
 			          <th>Descrizione</th>
 			          <th>Riproporziona quantità<br>codici assenza</th>
-			          <th class="center">Contratti attivi<br>attualmente associati</th>
+			          <th class="center">Contratti attivi <br>con periodi attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
 			          #{secure.check 'WorkingTimeType.externalId'}
@@ -73,7 +73,7 @@
 				        </a>
 				        </td>
 				        <!-- contratti attualmente attivi con wtt -->
-				        <td  class="center">
+				        <td class="center">
 				          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
 				            ${wtt.getAssociatedActiveContract(office).size()}
 				    	  </a>    
@@ -109,7 +109,8 @@
 				    	#{/secure.check}
 				    	#{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
                         <td class="center">
-                          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+                          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal"
+                             class="btn btn-primary">
                             Cambia
                           </a>
                         </td>

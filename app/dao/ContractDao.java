@@ -34,15 +34,18 @@ import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
 import models.Office;
 import models.Person;
+import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractMandatoryTimeSlot;
 import models.query.QContractStampProfile;
+import models.query.QContractWorkingTimeType;
 import org.joda.time.LocalDate;
 
 /**
  * Dao per i contract.
  *
  * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
  */
 public class ContractDao extends DaoBase {
 
@@ -76,6 +79,31 @@ public class ContractDao extends DaoBase {
     QContract contract = QContract.contract;
     return getQueryFactory().selectFrom(contract)
         .where(contract.id.eq(id)).fetchOne();
+  }
+
+  /**
+   * La lista dei contratti attivi che hanno un periodo attivo con associato
+   * il tipo di orario di lavoro indicato.
+   */
+  public List<Contract> getAllAssociatedActiveContracts(WorkingTimeType cwtt) {
+    final QContract contract = QContract.contract;
+    final QContractWorkingTimeType qCwtt = QContractWorkingTimeType.contractWorkingTimeType;
+
+    val now = LocalDate.now();
+    final BooleanBuilder condition = new BooleanBuilder()
+        .andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
+            contract.endContract.isNull().and(contract.endDate.goe(now)),
+            contract.endDate.isNull().and(contract.endContract.goe(now)),
+            contract.endDate.goe(now).and(contract.endContract.goe(now)));
+    
+    val cwttCondition = new BooleanBuilder();
+    cwttCondition.andAnyOf(
+        qCwtt.id.eq(cwtt.id), 
+        qCwtt.beginDate.before(now),
+        qCwtt.endDate.isNull().or(qCwtt.endDate.after(now)));
+    cwttCondition.and(qCwtt.workingTimeType.eq(cwtt));
+    return getQueryFactory().selectFrom(contract)
+        .join(contract.contractWorkingTimeType, qCwtt).on(cwttCondition).where(condition).fetch();
   }
 
   /**

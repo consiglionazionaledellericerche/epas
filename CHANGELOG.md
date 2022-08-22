@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.5.4] - UNRELEASED
+### Added
+ - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
+   non utilizzati.
+ - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
 ### Changed  
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
