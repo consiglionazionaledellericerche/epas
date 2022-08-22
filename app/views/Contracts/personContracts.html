@@ -17,20 +17,27 @@
       Il dipendente attualmente non ha un contratto attivo.
     #{/if}
     #{else}  
-      #{if wrCurrentContract.initializationMissing() || wrCurrentContract.mealTicketInitBeforeGeneralInit() }
+      #{if wrCurrentContract.initializationMissing()}
         #{alert color:'danger', center:true}
 	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale non è correttamente inizializzato.
 	      </p>
 	      #{b.buttons center:true}
-	        #{if wrCurrentContract.initializationMissing()}
-	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
-	        #{/if}
-	        #{else}
-	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
-	        #{/else}
+	        #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}	                
 	      #{/b.buttons}
         #{/alert}
       #{/if}
+      #{if wrCurrentContract.mealTicketInitBeforeGeneralInit()}
+      	#{alert color:'warning', center:true}
+      		<p><i class="fa fa-2x fa-exclamation bg-warning"></i> 
+      			Le date di inizializzazione del residuo orario e dei buoni pasto non coincidono.<br>
+      			Nel caso in cui le inizializzazioni fossero volutamente diverse per motivi gestionali, ignorare 
+      			il presente alert.
+	      	</p>
+	      	#{b.buttons center:true}
+	      		#{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'warning', title:'Inizializza'/}
+      		#{/b.buttons}
+      	#{/alert}
+      #{/if} 
       
       <form class='form-horizontal'>
       <!-- Inizio contratto (beginDate) -->

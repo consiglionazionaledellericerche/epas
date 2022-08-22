@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Corretta generazione form richiesta ferie quando richieste nel passato
  - Cambiato comportamento del codice 26 che non deve far maturare residuo orario
  - Aggiunto organigramma della sede di appartenenza del dipendente
+ - Modificata la visualizzazione sui dati contrattuali del tipo di incongruenza sulle inizializzazioni
 
 ## [2.5.3] - 2022-08-16
 ### Added
