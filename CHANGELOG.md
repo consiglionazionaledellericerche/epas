@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Cambiato comportamento del codice 26 che non deve far maturare residuo orario
  - Aggiunto organigramma della sede di appartenenza del dipendente
  - Modificata la visualizzazione sui dati contrattuali del tipo di incongruenza sulle inizializzazioni
+ - Aggiunto controllo per impedire la visualizzazione del flusso ferie anno passato dopo deadline se il 
+   corrispondente parametro in configurazione è a NO
 
 ## [2.5.3] - 2022-08-16
 ### Added
