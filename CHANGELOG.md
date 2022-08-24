@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificata la visualizzazione sui dati contrattuali del tipo di incongruenza sulle inizializzazioni
  - Aggiunto controllo per impedire la visualizzazione del flusso ferie anno passato dopo deadline se il 
    corrispondente parametro in configurazione è a NO
+ - Aggiunto controllo che visualizza l'username nel caso un utente che ha ruoli su una sede sia un utente 
+   orfano
 
 ## [2.5.3] - 2022-08-16
 ### Added
