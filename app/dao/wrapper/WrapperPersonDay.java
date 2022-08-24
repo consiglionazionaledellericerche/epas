@@ -26,6 +26,7 @@ import dao.PersonDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonManager;
 import models.Contract;
 import models.ContractStampProfile;
@@ -42,6 +43,7 @@ import org.joda.time.YearMonth;
  *
  * @author Alessandro Martelli
  */
+@Slf4j
 public class WrapperPersonDay implements IWrapperPersonDay {
 
   private final PersonDay value;
@@ -261,7 +263,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent()) {
-
+      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}", getValue().date);
       for (ContractWorkingTimeType cwtt :
               this.getPersonDayContract().get().contractWorkingTimeType) {
 
@@ -276,6 +278,10 @@ public class WrapperPersonDay implements IWrapperPersonDay {
         }
 
       }
+    } else {
+      log.info("WrapperPersonDay::getWorkingTimeTypeDay() -> contratto non presente "
+          + "per {} nel giorno {}", 
+          getValue().person.getFullname(), getValue().date);
     }
     return Optional.absent();
   }
