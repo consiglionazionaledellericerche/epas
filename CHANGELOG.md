@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
+ - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
+   nell'inserimento di una richiesta di missione o di rimborso
 ### Changed  
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
