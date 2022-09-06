@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
  - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
    nell'inserimento di una richiesta di missione o di rimborso
+ - Aggiunto codice 35R ai codici che riducono le ferie
 ### Changed  
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
