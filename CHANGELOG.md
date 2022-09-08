@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
    nell'inserimento di una richiesta di missione o di rimborso
  - Aggiunto codice 35R ai codici che riducono le ferie
-### Changed  
+### Changed
+ - Corretto orrdinamento delle datatable con data e ora in italiano
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
  - Corretta generazione form richiesta ferie quando richieste nel passato
