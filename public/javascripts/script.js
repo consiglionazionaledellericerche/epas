@@ -372,6 +372,7 @@ $(function($) {
       $('[data-target="' + target + '"]').webuiPopover('hide');
     });
     $.fn.dataTable.moment( 'DD/MM/YYYY', 'it' );
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss', 'it' );
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
