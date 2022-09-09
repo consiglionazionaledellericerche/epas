@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    corrispondente parametro in configurazione è a NO
  - Aggiunto controllo che visualizza l'username nel caso un utente che ha ruoli su una sede sia un utente 
    orfano
+ - Risolto bug che faceva visualizzare un'erronea lista di attività su cui il turnista aveva diritti 
+   di visualizzazione
 
 ## [2.5.3] - 2022-08-16
 ### Added
