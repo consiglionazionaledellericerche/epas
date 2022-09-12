@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import common.security.SecurityRules;
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import java.io.File;
@@ -75,7 +76,8 @@ public class Configurations extends Controller {
   static PeriodManager periodManager;
   @Inject
   static SecurityRules rules;
-
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   private static IPropertyInPeriod compute(IPropertyInPeriod configuration, EpasParam epasParam,
       ConfigurationDto configurationDto) {
@@ -256,10 +258,23 @@ public class Configurations extends Controller {
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.AUTOCERTIFICATION)
         .collect(Collectors.toList());
 
-    final List<Configuration> flows = configurations.stream()
+    List<Configuration> flows = configurations.stream()
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.FLOWS)
         .collect(Collectors.toList());
     
+    if (!generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization) {
+      flows = flows.stream().filter(conf -> 
+          !conf.epasParam.equals(EpasParam.COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) &&
+          !conf.epasParam.equals(EpasParam.COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) &&
+          !conf.epasParam.equals(EpasParam.VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) &&
+          !conf.epasParam.equals(EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED))
+        .collect(Collectors.toList());
+    } else {
+      flows = flows.stream().filter(conf -> 
+          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_MANAGER_NOTIFICATION) &&
+          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION))
+        .collect(Collectors.toList());
+    }
     final List<Configuration> competenceFlows = configurations.stream()
         .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
         .collect(Collectors.toList());

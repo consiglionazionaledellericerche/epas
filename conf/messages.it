@@ -449,6 +449,7 @@ generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
 generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
+generalSetting.enableAbsenceTopLevelAuthorization=Possibilità di configurare le autorizzazioni per le assenze dei livelli I-III
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -1266,6 +1267,9 @@ PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta app
 PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile gruppo di lavoro		
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
+
+ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III
+ABSENCE_TOP_LEVEL_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
 
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
