@@ -14,8 +14,8 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
-				
-		</tr>			
+
+		</tr>
 		#{if approvalRequired}
 			<tr>
 				#{if config.managerApprovalRequired}
@@ -53,8 +53,8 @@
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
 				#{secure.link @AbsenceRequests.show(item.id, type)}
-                  <i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-                #{/secure.link}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/secure.link}
 				</td>
 			</tr>
 		#{/list}
