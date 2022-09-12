@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    orfano
  - Risolto bug che faceva visualizzare un'erronea lista di attività su cui il turnista aveva diritti 
    di visualizzazione
+ - Corrette tabelle flussi competenze e assenze per init datatable e aggiornate le datatable alla 
+   ultima versione 1.12.1.
 
 ## [2.5.3] - 2022-08-16
 ### Added
