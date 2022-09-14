@@ -24,7 +24,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import controllers.Security;
 import dao.AbsenceDao;
-import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.InformationRequestDao;
 import dao.RoleDao;
@@ -91,8 +90,7 @@ public class NotificationManager {
   private GroupDao groupDao;
   private ConfigurationManager configurationManager;
   private InformationRequestDao requestDao;
-  private GeneralSettingDao generalSettingDao;
-  
+
   final String dateFormatter = "dd/MM/YYYY";
 
   /**
@@ -101,8 +99,7 @@ public class NotificationManager {
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao,
-      ConfigurationManager configurationManager, InformationRequestDao requestDao,
-      GeneralSettingDao generalSettingDao) {
+      ConfigurationManager configurationManager, InformationRequestDao requestDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
@@ -110,7 +107,6 @@ public class NotificationManager {
     this.groupDao = groupDao;
     this.configurationManager = configurationManager;
     this.requestDao = requestDao;
-    this.generalSettingDao = generalSettingDao;
   }
 
   private static final String WORKDAY_REPERIBILITY = "207";
@@ -753,15 +749,6 @@ public class NotificationManager {
     Verify.verifyNotNull(absenceRequest);
     final Person person = absenceRequest.person;
 
-    //Nel caso si tratti di una "comunicazione" di assenza da parte di 
-    //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
-    //si invia solo una notifica al responsabile sede e/o responsabile gruppo
-    //(dipendente dalla configurazione)
-    if (generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization == false &&
-        absenceRequest.person.isTopQualification()) {
-      sendEmailAbsenceNotification(absenceRequest);
-    }
-    
     final Role roleDestination = getProperRole(absenceRequest);
     if (roleDestination == null) {
       log.warn(
@@ -807,7 +794,7 @@ public class NotificationManager {
         });
   }
 
-  private void sendEmailAbsenceNotification(AbsenceRequest absenceRequest) {
+  public void sendEmailAbsenceNotification(AbsenceRequest absenceRequest) {
     Set<Person> recipients = Sets.<Person>newHashSet();
     //si invia solo una notifica al responsabile sede e/o responsabile gruppo
     //(dipendente dalla configurazione)

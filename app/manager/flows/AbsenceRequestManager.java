@@ -723,6 +723,17 @@ public class AbsenceRequestManager {
     log.info("{} auto approvata dal responsabile del gruppo {}.", absenceRequest,
         currentPerson.getFullname());
   }
+  
+  /**
+   * Da configurazione è possibile fare in modo che le richieste di assenza
+   * dei livelli I-III siano automaticamente approvate.
+   */
+  public void topLevelSelfApproval(AbsenceRequest absenceRequest, Person person) {
+    executeEvent(absenceRequest, person, AbsenceRequestEventType.COMPLETE,
+        Optional.absent());
+    log.info("{} auto approvata dal dipendente (livello I-III) ", absenceRequest,
+        person.getFullname());
+  }
 
   /**
    * Metodo che ritorna il gruppo di assenze per inoltrare la richiesta.

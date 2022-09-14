@@ -24,6 +24,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import common.security.SecurityRules;
 import dao.AbsenceRequestDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
@@ -131,6 +132,8 @@ public class AbsenceRequests extends Controller {
   @Inject
   static PersonReperibilityDayDao personReperibilityDayDao;
 
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   /**
    * Lista delle richiesta di assenza di tipo ferie.
@@ -550,7 +553,16 @@ public class AbsenceRequests extends Controller {
     if (isNewRequest || !absenceRequest.flowStarted) {
       absenceRequestManager.executeEvent(absenceRequest, absenceRequest.person,
           AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      if (absenceRequest.person.isSeatSupervisor() || (absenceRequest.person.isGroupManager()
+      
+      //Nel caso si tratti di una "comunicazione" di assenza da parte di 
+      //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
+      //si invia solo una notifica al responsabile sede e/o responsabile gruppo
+      //(dipendente dalla configurazione)
+      if (generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization == false &&
+          absenceRequest.person.isTopQualification()) {
+        absenceRequestManager.topLevelSelfApproval(absenceRequest, Security.getUser().get().person);
+        notificationManager.sendEmailAbsenceNotification(absenceRequest);
+      } else if (absenceRequest.person.isSeatSupervisor() || (absenceRequest.person.isGroupManager()
           && !absenceRequest.officeHeadApprovalForManagerRequired)) {
         approval(absenceRequest.id);
       } else {
