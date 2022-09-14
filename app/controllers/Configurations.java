@@ -271,8 +271,9 @@ public class Configurations extends Controller {
         .collect(Collectors.toList());
     } else {
       flows = flows.stream().filter(conf -> 
-          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_MANAGER_NOTIFICATION) &&
-          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION))
+          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION) &&
+          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION) &&
+          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION))
         .collect(Collectors.toList());
     }
     final List<Configuration> competenceFlows = configurations.stream()

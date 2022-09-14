@@ -694,10 +694,22 @@ public enum EpasParam {
       Office.class),
   
   /**
+   * Il responsabile di sede deve ricevere le notifiche delle comunicazioni di ferie deli livelli I-III.
+   */
+  ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION(
+      "absence_top_level_of_group_manager_office_head_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
    * Il responsabile di gruppo deve ricevere le notifiche delle comunicazioni di ferie deli livelli I-III.
    */
-  ABSENCE_TOP_LEVEL_MANAGER_NOTIFICATION(
-      "absence_top_level_manager_notification",
+  ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION(
+      "absence_top_level_group_manager_notification",
       EpasParamCategory.FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

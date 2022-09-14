@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
 import controllers.Security;
 import dao.AbsenceRequestDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -97,7 +98,8 @@ public class AbsenceRequestManager {
   private GroupDao groupDao;
   private PersonReperibilityDayDao personReperibilityDayDao;
   private PersonShiftDayDao personShiftDayDao;
-
+  private GeneralSettingDao generalSettingDao;
+  
   /**
    * DTO per la configurazione delle AbsenceRequest.
    */
@@ -127,7 +129,8 @@ public class AbsenceRequestManager {
       AbsenceService absenceService, AbsenceManager absenceManager, AbsenceComponentDao absenceDao,
       PersonDayManager personDayManager, ConsistencyManager consistencyManager,
       AbsenceRequestDao absenceRequestDao, GroupDao groupDao,
-      PersonReperibilityDayDao personReperibilityDayDao, PersonShiftDayDao personShiftDayDao) {
+      PersonReperibilityDayDao personReperibilityDayDao, PersonShiftDayDao personShiftDayDao,
+      GeneralSettingDao generalSettingDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -141,6 +144,7 @@ public class AbsenceRequestManager {
     this.groupDao = groupDao;
     this.personReperibilityDayDao = personReperibilityDayDao;
     this.personShiftDayDao = personShiftDayDao;
+    this.generalSettingDao = generalSettingDao;
   }
 
   private static final String FERIE_CNR = "FERIE_CNR";
@@ -205,8 +209,14 @@ public class AbsenceRequestManager {
   public AbsenceRequestConfiguration getConfiguration(AbsenceRequestType requestType,
       Person person) {
     val absenceRequestConfiguration = new AbsenceRequestConfiguration(person, requestType);
+    
+    //Per i livelli I-III in configurazione generale può esserci scritto di
+    //non abilitare la possibilità di chiedere autorizzazioni, in questo caso i flussi 
+    //dei livelli I-III non hanno mai approvazioni richieste.
+    val skipTopLevelAuthorization = 
+        person.isTopQualification() && !generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization;
 
-    if (requestType.alwaysSkipAdministrativeApproval) {
+    if (requestType.alwaysSkipAdministrativeApproval || skipTopLevelAuthorization) {
       absenceRequestConfiguration.administrativeApprovalRequired = false;
     } else {
       if (person.isTopQualification()
@@ -223,7 +233,8 @@ public class AbsenceRequestManager {
       }
     }
 
-    if (requestType.alwaysSkipManagerApproval || person.isGroupManager()) {
+    if (requestType.alwaysSkipManagerApproval || person.isGroupManager() || 
+        skipTopLevelAuthorization) {
       absenceRequestConfiguration.managerApprovalRequired = false;
     } else {
       if (person.isTopQualification() && requestType.managerApprovalRequiredTopLevel.isPresent()) {
@@ -238,7 +249,7 @@ public class AbsenceRequestManager {
                 requestType.managerApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
-    if (requestType.alwaysSkipOfficeHeadApproval) {
+    if (requestType.alwaysSkipOfficeHeadApproval || skipTopLevelAuthorization) {
       absenceRequestConfiguration.officeHeadApprovalRequired = false;
     } else {
       if (person.isTopQualification()
@@ -255,7 +266,7 @@ public class AbsenceRequestManager {
       }
 
     }
-    if (requestType.alwaysSkipOfficeHeadApprovalForManager) {
+    if (requestType.alwaysSkipOfficeHeadApprovalForManager || skipTopLevelAuthorization) {
       absenceRequestConfiguration.officeHeadApprovalForManagerRequired = false;
     } else {
       if (person.isGroupManager()) {
