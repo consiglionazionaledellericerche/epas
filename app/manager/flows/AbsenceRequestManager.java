@@ -214,7 +214,9 @@ public class AbsenceRequestManager {
     //non abilitare la possibilità di chiedere autorizzazioni, in questo caso i flussi 
     //dei livelli I-III non hanno mai approvazioni richieste.
     val skipTopLevelAuthorization = 
-        person.isTopQualification() && !generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization;
+        person.isTopQualification() && requestType.canBeInsertedByTopLevelWithoutApproval
+          && !generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization
+        ;
 
     if (requestType.alwaysSkipAdministrativeApproval || skipTopLevelAuthorization) {
       absenceRequestConfiguration.administrativeApprovalRequired = false;

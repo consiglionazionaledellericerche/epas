@@ -1021,17 +1021,25 @@ AbsenceRequestType.VACATION_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie
 AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL =riposo compensativo
 AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_RESTS_TOP_LEVEL =Miei riposi compensativi
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
 AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL.blank =nuova comunicazione riposo compensativo
 
 AbsenceRequestType.PERSONAL_PERMISSION =permesso personale
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL =permesso personale
 AbsenceRequestType.PERSONAL_PERMISSIONS =Miei permessi personali
 AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
+AbsenceRequestType.PERSONAL_PERMISSIONS_TOP_LEVEL =Miei permessi personali
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL.blank =nuova richiesta permesso personale
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 

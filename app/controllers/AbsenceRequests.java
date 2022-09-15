@@ -558,8 +558,9 @@ public class AbsenceRequests extends Controller {
       //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
       //si invia solo una notifica al responsabile sede e/o responsabile gruppo
       //(dipendente dalla configurazione)
-      if (generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization == false &&
-          absenceRequest.person.isTopQualification()) {
+      if (!generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization &&
+          absenceRequest.person.isTopQualification() &&
+          absenceRequest.type.canBeInsertedByTopLevelWithoutApproval) {
         absenceRequestManager.topLevelSelfApproval(absenceRequest, Security.getUser().get().person);
         notificationManager.sendEmailAbsenceNotification(absenceRequest);
       } else if (absenceRequest.person.isSeatSupervisor() || (absenceRequest.person.isGroupManager()

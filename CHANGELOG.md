@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.4] - UNRELEASED
 ### Added
+ - Aggiunta la possibilità di disabilitare la configurabilità delle approvazioni delle ferie
+   e riposi compensati dei livelli I-III. Con l'apposita configurazione generale abilitata 
+   i livelli I-III hanno dei flussi solo per comunicare le asssenze, senza autorizzazioni e 
+   con le etichette dei flussi modificati da "richiesta" a "comunicazione"
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.

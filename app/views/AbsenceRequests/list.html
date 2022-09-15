@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{if currentUser.person != null && currentUser.person.isTopQualification()}
+#{if currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled()}
   #{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S_TOP_LEVEL') /}
   #{set topLevelNoAuth:true /}
 #{/if}#{else}
