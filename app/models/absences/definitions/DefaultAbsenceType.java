@@ -1010,6 +1010,35 @@ public enum DefaultAbsenceType {
       MealTicketBehaviour.notAllowMealTicket, 0,
       JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true), 
   
+  A_254A("254A", "Astensione facoltativa post partum 30% quarto figlio intera giornata", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, MealTicketBehaviour.notAllowMealTicket, 
+      0, null, Sets.newHashSet(), null, null, false, true, true),
+  
+  A_254AM("254AM",
+      "Astensione facoltativa post partum 30% quarto figlio in ore e minuti", true,
+      ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
+      false, true, true), 
+  A_254AH7("254AH7", "Astensione facoltativa post partum 30% quarto figlio completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true),
+  
+  A_254S("254S", "Da definire...", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null,
+      null, false, true, true),
+  A_254SM("254SM", "Da definire... in ore e minuti", true,
+      ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
+      false, true, true), 
+  A_254SH7("254SH7", "Da definire 30% terzo figlio completamento giornata", 
+      false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0,
+      JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true), 
+  
   A_254OU("254U", "Astensione facoltativa post partum 30% quarto figlio intera giornata "
       + "altro genitore", true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 
@@ -1097,6 +1126,14 @@ public enum DefaultAbsenceType {
       new LocalDate(2020, 1, 1), null, false, true, true),
 
   A_21("21", "Congedo/permesso per maternità", false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
+      true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
+      null, null, false, true, true),
+  
+  A_21P("21P", "Da definire...", false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
+      true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
+      null, null, false, true, true),
+  
+  A_21P2("21P2", "Da definire...", false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
       true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       null, null, false, true, true),
 
