@@ -236,12 +236,12 @@ public enum DefaultGroup {
       false, true), 
 
   G_24("24 - Astensione facoltativa post partum non retrib. primo figlio 0-12 anni 600 giorni", "",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_24, DefaultComplation.C_24, null, false,
       true), 
   
   G_25O("25 - Astensione facoltativa post partum 30% primo figlio 0-6 anni 150 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_6, DefaultTakable.T_25O, DefaultComplation.C_25O, DefaultGroup.G_24,
       false, true), 
   G_25("25 - Astensione facoltativa post partum 30% primo figlio 0-12 anni 150 giorni",
@@ -265,23 +265,23 @@ public enum DefaultGroup {
 
   G_23O("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
       "23/25/24 - Astensione facoltativa post partum primo figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_23, DefaultComplation.C_23,
       DefaultGroup.G_25O, false, true),
   
   G_23("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
-      "23/25/24 - Astensione facoltativa post partum primo figlio",
+      "23/25/25A - Astensione facoltativa post partum primo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_23, DefaultComplation.C_23,
       DefaultGroup.G_25, false, true),
 
   G_242("242 - Astensione facoltativa post partum non retrib. "
       + "secondo figlio 0-12 anni 600 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child2_0_12, DefaultTakable.T_242, DefaultComplation.C_242, null, false,
       true), 
   G_252O("252 - Astensione facoltativa post partum 30% secondo figlio 0-6 anni 150 giorni", "",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child2_0_6, DefaultTakable.T_252O, DefaultComplation.C_252O, DefaultGroup.G_242,
       false, true),
   G_252("252 - Astensione facoltativa post partum 30% secondo figlio 0-12 anni 150 giorni", "",
@@ -291,20 +291,20 @@ public enum DefaultGroup {
   
   G_232O("232O - Astensione facoltativa post partum 100% secondo figlio 0-12 anni 30 giorni",
       "232/252/242 - Astensione facoltativa post partum secondo figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child2_0_12, DefaultTakable.T_232, DefaultComplation.C_232,
       DefaultGroup.G_252O, false, true),
   G_232("232 - Astensione facoltativa post partum 100% secondo figlio 0-12 anni 30 giorni",
-      "232/252/242 - Astensione facoltativa post partum secondo figlio",
+      "232/252/252A - Astensione facoltativa post partum secondo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child2_0_12, DefaultTakable.T_232, DefaultComplation.C_232,
       DefaultGroup.G_252, false, true),
 
   G_243("243 - Astensione facoltativa post partum non retrib. terzo figlio 0-12 anni 600 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child3_0_12, DefaultTakable.T_243, DefaultComplation.C_243, null, false, true), 
   G_253O("253 - Astensione facoltativa post partum 30% terzo figlio 0-6 anni 150 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child3_0_6, DefaultTakable.T_253O, DefaultComplation.C_253O, DefaultGroup.G_243,
       false, true),
   G_253("253 - Astensione facoltativa post partum 30% terzo figlio 0-12 anni 150 giorni",
@@ -313,21 +313,21 @@ public enum DefaultGroup {
       false, true), 
   G_233O("233 - Astensione facoltativa post partum 100% terzo figlio 0-12 anni 30 giorni",
       "233/253/243 - Astensione facoltativa post partum terzo figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child3_0_12, DefaultTakable.T_233, DefaultComplation.C_233,
       DefaultGroup.G_253O, false, true),
   
   G_233("233 - Astensione facoltativa post partum 100% terzo figlio 0-12 anni 30 giorni",
-      "233/253/243 - Astensione facoltativa post partum terzo figlio",
+      "233/253/253A - Astensione facoltativa post partum terzo figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child3_0_12, DefaultTakable.T_233, DefaultComplation.C_233,
       DefaultGroup.G_253, false, true),
 
   G_244("244 - Astensione facoltativa post partum non retrib. quarto figlio 0-12 anni 600 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_12, DefaultTakable.T_244, DefaultComplation.C_244, null, false, true), 
   G_254O("254 - Astensione facoltativa post partum 30% quarto figlio 0-6 anni 150 giorni",
-      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_6, DefaultTakable.T_254O, DefaultComplation.C_254O, DefaultGroup.G_244,
       false, true), 
   G_254("254 - Astensione facoltativa post partum 30% quarto figlio 0-12 anni 150 giorni",
@@ -337,11 +337,11 @@ public enum DefaultGroup {
   
   G_234O("234 - Astensione facoltativa post partum 100% quarto figlio 0-12 anni 30 giorni",
       "234/254/244 - Astensione facoltativa post partum quarto figlio",
-      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      DefaultCategoryType.ALTRI_CODICI, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_12, DefaultTakable.T_234, DefaultComplation.C_234,
       DefaultGroup.G_254O, false, true),
   G_234("234 - Astensione facoltativa post partum 100% quarto figlio 0-12 anni 30 giorni",
-      "234/254/244 - Astensione facoltativa post partum quarto figlio",
+      "234/254/254A - Astensione facoltativa post partum quarto figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_12, DefaultTakable.T_234, DefaultComplation.C_234,
       DefaultGroup.G_254, false, true),
@@ -569,21 +569,27 @@ public enum DefaultGroup {
     List<String> g232 = getCodes(DefaultGroup.G_232);
     List<String> g233 = getCodes(DefaultGroup.G_233);
     List<String> g234 = getCodes(DefaultGroup.G_234);
-    List<String> g24 = getCodes(DefaultGroup.G_24);
-    List<String> g242 = getCodes(DefaultGroup.G_242);
-    List<String> g243 = getCodes(DefaultGroup.G_243);
-    List<String> g244 = getCodes(DefaultGroup.G_244);
+//    List<String> g24 = getCodes(DefaultGroup.G_24);
+//    List<String> g242 = getCodes(DefaultGroup.G_242);
+//    List<String> g243 = getCodes(DefaultGroup.G_243);
+//    List<String> g244 = getCodes(DefaultGroup.G_244);
     List<String> g25 = getCodes(DefaultGroup.G_25);
     List<String> g252 = getCodes(DefaultGroup.G_252);
     List<String> g253 = getCodes(DefaultGroup.G_253);
     List<String> g254 = getCodes(DefaultGroup.G_254);
+    List<String> g25a = getCodes(DefaultGroup.G_25A);
+    List<String> g252a = getCodes(DefaultGroup.G_252A);
+    List<String> g253a = getCodes(DefaultGroup.G_253A);
+    List<String> g254a = getCodes(DefaultGroup.G_254A);
+    
     List<String> g25P = getCodes(DefaultGroup.G_25P);
     List<String> gmal1 = getCodes(DefaultGroup.MALATTIA_FIGLIO_1);
     List<String> gmal2 = getCodes(DefaultGroup.MALATTIA_FIGLIO_2);
     List<String> gmal3 = getCodes(DefaultGroup.MALATTIA_FIGLIO_3);
     List<String> gmal4 = getCodes(DefaultGroup.MALATTIA_FIGLIO_4);    
 
-    return Stream.of(g23, g232, g233, g234, g24, g242, g243, g244, g25, g252, g253, g254,
+    return Stream.of(g23, g232, g233, g234, /*g24, g242, g243, g244,*/ g25, g252, g253, g254,
+        g25a, g252a, g253a, g254a,
         g25P, gmal1, gmal2, gmal3, gmal4).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
 

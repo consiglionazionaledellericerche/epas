@@ -16,7 +16,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 @Slf4j
-@OnApplicationStart
+@OnApplicationStart(async = true)
 public class ParentalCodesFix extends Job {
   
   @Inject
@@ -37,38 +37,52 @@ public class ParentalCodesFix extends Job {
     List<Absence> childrenCodesFiltered = allChildrenCodes.stream()
         .filter(ab -> !ab.personDay.date.isBefore(new LocalDate(2022, 8, 13)))
         .collect(Collectors.toList());
+    log.debug("Ci sono {} assenze da modificare", childrenCodesFiltered.size() );
     for (Absence abs : childrenCodesFiltered) {
       switch (abs.absenceType.code) {
         case "25O":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("25").get();          
           break;
         case "252O":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("252").get();
           break;
         case "253O":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("253").get();
           break;
         case "254O":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("254").get();
           break;
         case "25MO":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("25M").get();
           break;
         case "252MO":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("252M").get();
           break;
         case "253MO":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("253M").get();
           break;
         case "254MO":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("254M").get();
           break;
         case "25OH7":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("25H7").get();
           break;
         case "252OH7":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("252H7").get();
           break;
         case "253OH7":
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("253H7").get();
           break;
         case "254OH7":
-          break;
+          abs.absenceType = absenceComponentDao.absenceTypeByCode("254H7").get();
+          break;          
         default:
-          break;
+          break;          
       }
+      abs.save();
     }
     
-    log.debug("End Job parental codes fix");
+    log.info("End Job parental codes fix");
     
   }
 }

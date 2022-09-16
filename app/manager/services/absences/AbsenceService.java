@@ -702,17 +702,21 @@ public class AbsenceService {
   private List<String> namesOfChildGroups() {
     List<String> names = Lists.newArrayList();
     names.add(DefaultGroup.G_23.name());
-    names.add(DefaultGroup.G_24.name());
+//    names.add(DefaultGroup.G_24.name());
     names.add(DefaultGroup.G_25.name());
+    names.add(DefaultGroup.G_25A.name());
     names.add(DefaultGroup.G_232.name());
     names.add(DefaultGroup.G_233.name());
-    names.add(DefaultGroup.G_242.name());
-    names.add(DefaultGroup.G_243.name());
-    names.add(DefaultGroup.G_244.name());
+//    names.add(DefaultGroup.G_242.name());
+//    names.add(DefaultGroup.G_243.name());
+//    names.add(DefaultGroup.G_244.name());
     names.add(DefaultGroup.G_234.name());
     names.add(DefaultGroup.G_252.name());
     names.add(DefaultGroup.G_253.name());
     names.add(DefaultGroup.G_254.name());
+    names.add(DefaultGroup.G_252A.name());
+    names.add(DefaultGroup.G_253A.name());
+    names.add(DefaultGroup.G_254A.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_1.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_2.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
