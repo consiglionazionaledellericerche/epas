@@ -17,13 +17,18 @@
 
 package manager;
 
+
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
+import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
+import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -32,9 +37,13 @@ import lombok.val;
 import models.Office;
 import models.Person;
 import models.Role;
+import models.User;
 import models.UsersRolesOffices;
+import models.dto.SeatSituationDto;
 import models.flows.Affiliation;
 import models.flows.Group;
+import org.assertj.core.util.Lists;
+
 
 /**
  * Manager per la gestione dei gruppi di persone.
@@ -58,7 +67,8 @@ public class GroupManager {
    * @param groupDao il dao sui gruppi
    */
   @Inject
-  public GroupManager(RoleDao roleDao, UsersRolesOfficesDao uroDao, GroupDao groupDao) {
+  public GroupManager(RoleDao roleDao, UsersRolesOfficesDao uroDao, 
+      GroupDao groupDao) {
     this.roleDao = roleDao;
     this.uroDao = uroDao;
     this.groupDao = groupDao;
@@ -111,7 +121,7 @@ public class GroupManager {
     }
     return false;
   }
-  
+
   /**
    * Inserisce ed elimina le affiliazioni ad un gruppo con data 
    * corrente in funzione della lista delle persone passate.
@@ -125,8 +135,8 @@ public class GroupManager {
     log.info("Person toDisable = {}", toDisable);
     val currentAffiliationsToDisable = 
         group.getAffiliations().stream()
-          .filter(a -> !a.isActive() && toDisable.contains(a.getPerson()))
-          .collect(Collectors.toSet());
+        .filter(a -> !a.isActive() && toDisable.contains(a.getPerson()))
+        .collect(Collectors.toSet());
     currentAffiliationsToDisable.stream().forEach(a ->  {      
       a.setEndDate(LocalDate.now());
       a.save();
@@ -144,4 +154,90 @@ public class GroupManager {
           person.getFullname(), group.getName());
     });
   }
+
+  /**
+   * Genera il dto contenente le liste dei possibili modificatori dello stato delle info
+   * della persona passata come parametro.
+   * @param person la persona di cui conoscere tutti i possibili modificatori delle proprie info
+   * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
+   *     modificare lo stato delle informazioni della persona passata come parametro.
+   */
+  public Map<Role, List<User>> createOrganizationChart(Person person, Role role) {
+
+    Map<Role, List<User>> map = Maps.newHashMap();
+
+    if (role.name.equals(Role.GROUP_MANAGER)) {
+      if (!groupDao.myGroups(person).isEmpty()) {
+        map.put(role, groupDao.myGroups(person).stream()
+            .map(g -> g.manager.user).collect(Collectors.toList()));
+      } else {
+        map.put(role, Lists.emptyList());
+      }
+    }
+    if (role.name.equals(Role.MEAL_TICKET_MANAGER)) {
+      map.put(role, getMealTicketsManager(person.office));
+    }
+
+    if (role.name.equals(Role.PERSONNEL_ADMIN)) {
+      map.put(role, getPersonnelAdminInSeat(person.office));
+    }
+    if (role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+      map.put(role, getPersonnelAdminMiniInSeat(person.office));
+    }
+    if (role.name.equals(Role.REGISTRY_MANAGER)) {
+      map.put(role, getRegistryManager(person.office));
+    }
+    if (role.name.equals(Role.REPERIBILITY_MANAGER)) {
+      if (!person.reperibility.isEmpty()) {
+        map.put(role, person.reperibility.stream()
+            .map(pr -> pr.personReperibilityType.supervisor.user).collect(Collectors.toList()));
+      } 
+    }
+
+    if (role.name.equals(Role.SEAT_SUPERVISOR)) {
+      map.put(role, getSeatSupervisor(person.office));
+    }
+    if (role.name.equals(Role.SHIFT_MANAGER)) {
+      if (!person.personShifts.isEmpty()) {
+        map.put(role, person.personShifts.stream()
+            .flatMap(ps -> ps.personShiftShiftTypes.stream()
+                .map(psst -> psst.shiftType.shiftCategories.supervisor.user))
+            .collect(Collectors.toList()));              
+      } 
+    }
+    if (role.name.equals(Role.TECHNICAL_ADMIN)) {
+      map.put(role, getTechnicalAdminInSeat(person.office));
+    }
+
+
+    return map;
+  }
+
+  private List<User> getTechnicalAdminInSeat(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.TECHNICAL_ADMIN), office);
+  }
+
+  private List<User> getPersonnelAdminInSeat(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), office);
+  }
+
+  private List<User> getSeatSupervisor(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
+  }
+
+  private List<User> getMealTicketsManager(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER), office);
+  }
+
+  private List<User> getRegistryManager(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.REGISTRY_MANAGER), office);
+  }
+
+  private List<User> getPersonnelAdminMiniInSeat(Office office) {
+    return uroDao.getUsersWithRoleOnOffice(roleDao
+        .getRoleByName(Role.PERSONNEL_ADMIN_MINI), office);
+  }
+
+
 }
+

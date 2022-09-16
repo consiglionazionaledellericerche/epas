@@ -881,6 +881,29 @@ ferieAnnoPassato= Ferie anno passato (da fare)
 ferieAnnoPresente= Ferie anno corrente (da fare)
 permessi= Permessi legge (da fare)
 
+#######################################################
+# Ruoli												  #
+#######################################################
+
+seatSupervisor = Responsabile Sede
+personnelAdmin = Amministratore Personale
+personnelAdminMini = Amministratore Personale Sola lettura
+employee = Dipendente
+badgeReader = Lettore di badge
+restClient = Client rest
+technicalAdmin = Amministratore Tecnico
+shiftManager = Gestore turni
+reperibilityManager = Gestore reperibilità
+groupManager = Responsabile gruppo
+mealTicketManager = Gestore buoni pasto
+registryManager = Gestore anagrafica
+personDayReader = Lettore informazioni
+
+#########################################################
+# Azioni eseguibili dai ruoli							#
+#########################################################
+seatSupervisor.action =Può vedere le presenze in sede,\n\r può vedere la situazione ferie dei dipendenti, può approvare le ferie e i rip.comp. dei dipendenti e/o dei responsabili di gruppo
+
 ###########################
 # Messaggi di validazione
 ###########################
@@ -1004,9 +1027,13 @@ AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 
+Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
+
+
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
+
 
 Institutes.list= Sedi e Amministratori
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati

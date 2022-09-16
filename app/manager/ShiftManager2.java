@@ -159,6 +159,7 @@ public class ShiftManager2 {
             .filter(ps -> !ps.beginDate.isAfter(LocalDate.now()) 
                 && (ps.endDate == null || !ps.endDate.isBefore(LocalDate.now())))
             .flatMap(ps -> ps.personShiftShiftTypes.stream())
+            .filter(psst -> psst.endDate == null || psst.endDate.isAfter(LocalDate.now()))
             .map(psst -> psst.shiftType).filter(sc -> !sc.shiftCategories.disabled)
             .sorted(Comparator.comparing(o -> o.type))
             .collect(Collectors.toList()));

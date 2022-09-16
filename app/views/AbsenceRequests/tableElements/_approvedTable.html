@@ -1,6 +1,6 @@
   #{title title:'Terminati', administration:true /}
-  
-  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable-absencerequest width="100%">
+
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		<tr>
 			#{if !onlyOwn}
@@ -16,8 +16,8 @@
 			#{/if}
 			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
-				
-		</tr>			
+
+		</tr>
 		#{if approvalRequired}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
@@ -28,7 +28,8 @@
 				#{/if}			
 				#{if config.administrativeApprovalRequired}
 					<th width="20%">&{'absenceRequest.administrativeApproved'}</th>
-				#{/if}			
+				#{/if}
+			</tr>
 		#{/if}
 	</thead>
 
@@ -60,11 +61,11 @@
 				#{/if}
 				<td>${item.note}</td>
 				<td>
-				
+
 				#{secure.link @AbsenceRequests.show(item.id, type)}
-	        	  <i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/secure.link}
+
 				</td>
 			</tr>
 		#{/list}

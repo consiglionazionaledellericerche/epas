@@ -1,0 +1,61 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Report mensile di telelavoro'  /}
+
+
+<div class="container">
+
+<div class="text-center">    
+      <h3>Articolazione oraria svolta in regime di telelavoro nell'ambito del monte orario d'obbligo</h3>
+</div>
+
+<div class="text-center">    
+      <a class="btn btn-info" href="@{TeleworkStampings.report(year, month)}"><i class="fa fa-envelop"></i>
+      Invia alla presa visione </a>
+</div>
+<br>
+<table class="table table-striped table-hover table-condensed center">
+
+	    <tr>
+	      <th>Giorno</th>
+	      <th>Inizio giornata</th>
+	      <th>Inizio pausa pranzo</th>
+	      <th>Fine pausa pranzo</th>
+	      <th>Fine giornata</th>
+	      <th>Interruzione dalle</th>
+	      <th>Interruzione alle</th>	      	            
+	    </tr>
+
+
+		#{list items:list, as:'day'}
+		<tr>
+			<td><strong>${day.personDay.date.shortDayName()}</strong></td>
+			<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(0) != null ? day.beginEnd.get(0).formattedHour() : ''}</td>
+			<td>${!day.meal.isEmpty() && day.meal.get(0) != null ? day.meal.get(0).formattedHour() : ''}</td>
+			<td>${!day.meal.isEmpty() && day.meal.get(1) != null ? day.meal.get(1).formattedHour() : ''}</td>
+			<td>${!day.beginEnd.isEmpty() && day.beginEnd.get(1) != null ? day.beginEnd.get(1).formattedHour() : ''}</td>
+			<td>${!day.interruptions.isEmpty() && day.interruptions.get(0) != null ? day.interruptions.get(0).formattedHour() : ''}</td>
+			<td>${!day.interruptions.isEmpty() && day.interruptions.get(1) != null ? day.interruptions.get(1).formattedHour() : ''}</td>
+		</tr>
+		#{/list}
+
+</table>
+
+
+Il sottoscritto <strong>${wrperson.value.getFullname()}</strong>, matr. <strong>${wrperson.value.number}</strong>, comunica di avere svolto nel mese in oggetto,
+nei giorni indicati, e secondo gli orari concordati con il Direttore/Dirigente sopra evidenziati, la propria prestazione in 
+regime di Telelavoro: <br>
+<ul>
+<li>presso la propria abitazione,
+<li>nella sede di lavoro prevista coerentemente con quanto localmente ed oggettivamente rilevabile ed in uniformità a quanto previsto
+nel proprio contratto di telelavoro.
+
+</ul>
+<br>
+<em>${place}, ${date}</em>
+
+<div class="text-center">    
+      <a class="btn btn-info" href="@{TeleworkStampings.report(year, month)}"><i class="fa fa-envelop"></i>
+      Invia alla presa visione </a>
+</div>
+</div>

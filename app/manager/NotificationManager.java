@@ -18,6 +18,7 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
 import controllers.Security;
@@ -1774,15 +1775,35 @@ public class NotificationManager {
     SimpleEmail simpleEmail = new SimpleEmail();
     String replayTo = (String) configurationManager
         .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+
+      if (Strings.isNullOrEmpty(replayTo)) {
+        person.office.usersRolesOffices.stream()
+          .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))
+          .map(uro -> uro.user).forEach(u -> {
+          try {
+            simpleEmail.addCc(u.person.email);
+          } catch (EmailException e) {
+            log.error("Impossibile impostare cc nell'email per missione "
+                + "con problemi. {}", mission, e);
+          }
+        });
+      } else {
+        try {
+          simpleEmail.addReplyTo(replayTo);
+          simpleEmail.addCc(replayTo);
+        } catch (EmailException e) {
+          log.error("Impossibile impostare cc o bcc nell'email per missione "
+              + "con problemi. {}", mission, e);
+        }
+      }
+
     try {
       simpleEmail.addTo(person.email);
-      simpleEmail.addReplyTo(replayTo);
-      simpleEmail.addCc(replayTo);
     } catch (EmailException e) {
       log.error("Errore nell'invio dell'email per missione con problemi", e);
       e.printStackTrace();
     }
-    
+
     simpleEmail.setSubject(
         String.format("ePas: verificare missione n. %s del %s di %s", 
             mission.numero, mission.anno, mission.person.getFullname()));
@@ -1802,7 +1823,8 @@ public class NotificationManager {
     try {
       simpleEmail.setMsg(mailBody);
     } catch (EmailException e) {
-      e.printStackTrace();
+      log.error("Errore nell'invio dell'email per missione con problemi. {}", 
+          mission, e);
     }
     Mail.send(simpleEmail);
     log.info("Inviata email per problemi sulla missione n. {} del {} di {} dal {} al {}",

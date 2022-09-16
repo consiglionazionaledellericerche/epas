@@ -27,6 +27,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.val;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -89,7 +90,8 @@ public class WorkingTimeTypeDao extends DaoBase {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
     return getQueryFactory()
         .selectFrom(wtt)
-        .where(wtt.office.isNull().or(wtt.office.eq(office).and(wtt.disabled.eq(false)))).fetch();
+        .where(wtt.office.isNull().and(wtt.disabled.eq(false))
+            .or(wtt.office.eq(office).and(wtt.disabled.eq(false)))).fetch();
   }
 
   /**
@@ -110,10 +112,14 @@ public class WorkingTimeTypeDao extends DaoBase {
    *
    * @return la lista degli orari di lavoro presenti di default sul database.
    */
-  public List<WorkingTimeType> getDefaultWorkingTimeType() {
+  public List<WorkingTimeType> getDefaultWorkingTimeType(Optional<Boolean> disabled) {
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+    val condition = new BooleanBuilder(wtt.office.isNull());
+    if (disabled.isPresent()) {
+      condition.and(wtt.disabled.eq(disabled.get()));
+    }
     return getQueryFactory().selectFrom(wtt)
-        .where(wtt.office.isNull()).orderBy(wtt.description.asc()).fetch();
+        .where(condition).orderBy(wtt.description.asc()).fetch();
   }
 
 

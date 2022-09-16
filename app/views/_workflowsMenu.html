@@ -60,10 +60,11 @@
         
       #{/secure.li}
       
-     
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
       #{/secure.li}
+      #{/secure.check}
       
       
       
@@ -121,7 +122,7 @@
     	#{/if}
       #{/secure.li}
       
-      
+      #{secure.check 'AbsenceRequests.pastYearEnabled'}
       #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
           
@@ -130,6 +131,7 @@
     	#{/if}
     	
       #{/secure.li}
+      #{/secure.check}
       
       
       #{secure.check 'InformationRequests.enabled'}

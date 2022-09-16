@@ -101,9 +101,13 @@
         <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/navbar.li}
 
-      #{navbar.li @MealTickets.mealTickets() }
-        <i class="fa fa-cutlery" aria-hidden="true"></i>
-      #{/navbar.li}
+      #{secure.li @MealTickets.mealTickets() }
+      <i class="fa fa-cutlery" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @Groups.seatOrganizationChart() }
+      <i class="fa fa-users" aria-hidden="true"></i>
+      #{/secure.li}
 
       <li class="divider"></li>
 
@@ -129,6 +133,10 @@
         <li class="divider"></li>
         <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
       #{/secure.li}
+      
+	  
+	  
+	  
 
     </ul>
     *{ end items }*

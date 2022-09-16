@@ -393,4 +393,5 @@ public class ShiftDao extends DaoBase {
         .fetch();
   }
 
+
 }

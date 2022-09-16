@@ -17,6 +17,7 @@
 
 package controllers;
 
+
 import com.google.common.base.Optional;
 import common.security.SecurityRules;
 import dao.GeneralSettingDao;
@@ -29,10 +30,12 @@ import helpers.Web;
 import helpers.jpa.JpaReferenceBinder;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import lombok.val;
 import manager.GroupManager;
 import models.GeneralSetting;
@@ -41,6 +44,7 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.dto.SeatSituationDto;
 import models.flows.Group;
 import org.testng.collections.Lists;
 import org.testng.util.Strings;
@@ -211,5 +215,47 @@ public class Groups extends Controller {
     }
     render("@edit", office, peopleForGroups);
   }
+  
+  /**
+   * Ritorna le informazioni sui ruoli presenti nella sede di appartenenza del dipendente.
+   */
+  public static void seatOrganizationChart() {
+    
+    val currentPerson = Security.getUser().get().person;
+    //Accesso da utente di sistema senza persona associata
+    if (currentPerson == null) {
+      Application.index();
+    }
+    Map<Role, List<User>> seatSupervisors = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.SEAT_SUPERVISOR));
+    Map<Role, List<User>> personnelAdmins = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.PERSONNEL_ADMIN));
+    Map<Role, List<User>> technicalAdmins = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.TECHNICAL_ADMIN));
+    Map<Role, List<User>> registryManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.REGISTRY_MANAGER));
+    Map<Role, List<User>> mealTicketsManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.MEAL_TICKET_MANAGER));
+    Map<Role, List<User>> personnelAdminsMini = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI));
+    Map<Role, List<User>> shiftManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.SHIFT_MANAGER));
+    Map<Role, List<User>> reperibilityManagers = groupManager
+        .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.REPERIBILITY_MANAGER));
+    
+    
+    List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.user)
+        .stream().map(uro -> uro.role).collect(Collectors.toList());
+    render(seatSupervisors, personnelAdmins, technicalAdmins, registryManagers, mealTicketsManagers, 
+        personnelAdminsMini, shiftManagers, reperibilityManagers, currentPerson, roles);
+  }
+  
+  public static void viewInfoRole(Long id) {
+    Role role = roleDao.getRoleById(id);
+    render(role);
+  }
 
 }
+
+
+
