@@ -123,6 +123,7 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_20H6, 
           DefaultAbsenceType.A_20H7)),
   
+ 
   C_92E(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_92E),
       ImmutableSet.of(DefaultAbsenceType.A_92E)),  

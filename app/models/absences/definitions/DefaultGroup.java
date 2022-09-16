@@ -370,6 +370,16 @@ public enum DefaultGroup {
   G_20("20 - Congedo/permesso DPR 1026 Art. 20", "", DefaultCategoryType.ALTRI_CODICI, 0,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_20,
       DefaultComplation.C_20, null, false, false),
+  
+  G_21P("21P - Congedo parentale per il padre da definire....",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_21P, null, null,
+      false, true),
+  
+  G_21P2("21P2 - Congedo parentale per il padre da definire....",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_21P2, null, null,
+      false, true),
 
   G_ALTRI_CODICI("Altri Codici", "", DefaultCategoryType.ALTRI_CODICI, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ALTRI, null, null,
