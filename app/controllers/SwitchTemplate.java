@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.collect.Maps;
+import java.time.LocalDate;
 import java.util.Map;
 import models.Office;
 import models.Person;
@@ -38,9 +39,16 @@ public class SwitchTemplate extends Controller {
 
   private static void executeAction(String action) {
 
-    Integer year = Integer.parseInt(session.get("yearSelected"));
-    Integer month = Integer.parseInt(session.get("monthSelected"));
-    Integer day = Integer.parseInt(session.get("daySelected"));
+    LocalDate now = LocalDate.now();
+    Integer year = 
+        session.get("yearSelected") != null ?
+            Integer.parseInt(session.get("yearSelected")) : now.getYear();
+    Integer month = 
+        session.get("monthSelected") != null ? 
+            Integer.parseInt(session.get("monthSelected")) : now.getMonthValue();
+    Integer day = 
+        session.get("daySelected") != null ? 
+            Integer.parseInt(session.get("daySelected")) : now.getDayOfMonth();
     Long personId = Long.parseLong(session.get("personSelected"));
     Long officeId = Long.parseLong(session.get("officeSelected"));
 

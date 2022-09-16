@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.4] - UNRELEASED
+## [2.5.4] - 2022-09-16
 ### Added
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    nell'inserimento di una richiesta di missione o di rimborso
  - Aggiunto codice 35R ai codici che riducono le ferie
 ### Changed
+ - Reso più robusto il cambio di menu in caso di giorno/mese/anno corrente mancante
  - Corretto orrdinamento delle datatable con data e ora in italiano
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
