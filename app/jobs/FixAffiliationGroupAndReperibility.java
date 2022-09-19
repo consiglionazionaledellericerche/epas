@@ -24,24 +24,26 @@ import dao.GroupDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
+import dao.wrapper.IWrapperFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import models.Contract;
+import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.PersonShift;
 import models.PersonShiftShiftType;
 import models.flows.Group;
-import models.Person;
-import models.PersonShift;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
@@ -52,7 +54,6 @@ import play.jobs.On;
  *
  * @author loredana
  */
-@SuppressWarnings("rawtypes")
 @Slf4j
 @On("0 1 21 * * ?") // Ore 21:01
 public class FixAffiliationGroupAndReperibility extends Job<Void> {
@@ -75,6 +76,9 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
   @Inject
   static NotificationManager notificationManager;
 
+  @Inject
+  static IWrapperFactory wrapperFactory;
+
   @Override
   public void doJob() {
 
@@ -90,7 +94,9 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     LocalDate end = LocalDate.now();
 
     List<Contract> expriredContracts = contractDao.getExpiredContractsInPeriod(begin, end,
-        Optional.absent());
+        Optional.absent()).stream().filter(
+            c -> !wrapperFactory.create(c.person).getCurrentContract().isPresent())
+        .collect(Collectors.toList());
 
     Map<Group, Set<Contract>> groupsManagers = new HashMap<>();
     Map<PersonShiftShiftType, Set<Contract>> shiftSupervisors = new HashMap<>();
@@ -254,7 +260,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     groups.forEach(group ->
         {
           group.affiliations.stream()
-              .filter(a -> a.isActive()).forEach(a -> {
+              .filter(a -> a.isActive() && a.getPerson().id.equals(person.id)).forEach(a -> {
                 groupsToDeactivated.add(a.getGroup());
                 java.time.LocalDate endDate = java.time.LocalDate.of(endContractDate.getYear(),
                     endContractDate.getMonthOfYear(), endContractDate.getDayOfMonth());
