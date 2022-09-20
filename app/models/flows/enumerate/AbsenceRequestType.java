@@ -41,7 +41,8 @@ public enum AbsenceRequestType {
       Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.absent(),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
+      true),
   
   //Riposo compensatvio
   COMPENSATORY_REST(true, false, false, true, false, false,
@@ -51,7 +52,8 @@ public enum AbsenceRequestType {
       Optional.of(EpasParam.COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.absent(),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
+      true),
   
   //Riposo compensatvio
   PERSONAL_PERMISSION(true, false, false, true, false, false,
@@ -61,7 +63,8 @@ public enum AbsenceRequestType {
       Optional.of(EpasParam.PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.absent(),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
+      false),
   
   //Richiesta ferie anno passato dopo scadenza
   VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST(true, false, false, true, false, false,
@@ -71,7 +74,8 @@ public enum AbsenceRequestType {
       Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.absent(),
-      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED)),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
+      true),
   
   //Permessso breve
   SHORT_TERM_PERMIT(false, false, false, false, false, false,
@@ -81,7 +85,8 @@ public enum AbsenceRequestType {
       Optional.absent(),
       Optional.absent(),
       Optional.absent(),
-      Optional.absent());
+      Optional.absent(),
+      false);
   
   public final boolean allDay;
   public final boolean alwaysSkipOfficeHeadApproval;
@@ -97,5 +102,7 @@ public enum AbsenceRequestType {
   public final Optional<EpasParam> administrativeApprovalRequiredTopLevel;
   public final Optional<EpasParam> administrativeApprovalRequiredTechnicianLevel;
   public final Optional<EpasParam> officeHeadApprovalRequiredForManager;
+  
+  public final boolean canBeInsertedByTopLevelWithoutApproval;
   
 }

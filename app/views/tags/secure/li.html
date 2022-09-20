@@ -2,11 +2,12 @@
 target: optional target for security check
 class: optional classes for a element
 hide: optional set true if the link must be hidden
+showDisabled: set true if for link without permission should be shown its label
 }*
 #{if request.action == _arg.action}#{set active='active' /}#{/if}
 #{if controllers.Resecure.check(_arg.action, _target)}
-  <li class="${active} ${_class}" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} &{_arg.action}</a></li>
+  <li class="${active} ${_class}" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} #{if _label}&{_label}#{/if}#{else}&{_arg.action}#{/else}</a></li>
 #{/if}
 #{elseif _showDisabled}
-  <li class="${active} ${_class} disabled" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} &{_arg.action}</a></li>
+  <li class="${active} ${_class} disabled" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} #{if _label}&{_label}#{/if}#{else}&{_arg.action}#{/else}</a></li>
 #{/elseif}

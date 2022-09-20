@@ -1,6 +1,12 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S') /}
+#{if currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled()}
+  #{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S_TOP_LEVEL') /}
+  #{set topLevelNoAuth:true /}
+#{/if}#{else}
+  #{set absenceRequestTypeLabel: messages.get('AbsenceRequestType.' + type.toString() + 'S') /}
+  #{set topLevelNoAuth:false /}
+#{/else}
 #{set title:('ePAS - ' + absenceRequestTypeLabel) /}
 
 #{set breadcrumbs:[(absenceRequestTypeLabel):null] /}
@@ -34,12 +40,14 @@
   	#{tabContentItem id:'attivo', active:true}
   	#{b.buttons center:true}
   		<a class="btn btn-success" href="@{AbsenceRequests.blank('person':person, 'type':type)}">
-    		<i class="fa fa-plus"></i> &{'AbsenceRequestType.' + type + '.blank'}
+    		<i class="fa fa-plus"></i> 
+    		#{if topLevelNoAuth}&{'AbsenceRequestType.' + type + '_TOP_LEVEL.blank'}#{/if}
+    		#{else}&{'AbsenceRequestType.' + type + '.blank'}#{/else}
   		</a>
   	#{/b.buttons}
  	#{if myResults.isEmpty()}
  		#{alert color:'info'}
- 		<p>Al momento non ci sono flussi di richiesta assenza in esecuzione.</p>
+ 		<p>Al momento non ci sono flussi di richiesta/comunicazione assenza in esecuzione.</p>
  		#{/alert}
  	#{/if}
  	#{else}

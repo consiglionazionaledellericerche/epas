@@ -34,7 +34,6 @@ import manager.services.absences.model.AbsencePeriod;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Person;
-import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.AbsenceTypeJustifiedBehaviour;
