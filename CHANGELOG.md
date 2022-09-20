@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    nel caso il parametro generale sia configurato per non permettere approvazioni per i
    livelli I-III 
 
+## [2.5.5] - 2022-09-19
+### Changed
+ - Corretta la rimozione dai gruppi, servizi di reperibità e turno delle persone
+   con contratto scaduto. 
+
 ## [2.5.4] - 2022-09-16
 ### Added
  - Aggiunta la possibilità di disabilitare la configurabilità delle approvazioni delle ferie
