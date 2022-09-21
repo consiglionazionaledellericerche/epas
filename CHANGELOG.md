@@ -4,8 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.4] - UNRELEASED
+## [2.6.0] - UNRELEASED
 ### Added
+ - Completata la gestione delle comunicazioni ferie/riposi compensativi per i livelli I-III
+   nel caso il parametro generale sia configurato per non permettere approvazioni per i
+   livelli I-III 
+ - Aggiunti nuovi codici di assenza per congedo parentale per il padre.
+ - Modificati i codici d congedo parentale al 30% secondo le linee guida dettate dalle modifiche al 
+   regolamento del CNR.
+
+## [2.5.5] - 2022-09-19
+### Changed
+ - Corretta la rimozione dai gruppi, servizi di reperibità e turno delle persone
+   con contratto scaduto. 
+
+## [2.5.4] - 2022-09-16
+### Added
+ - Aggiunta la possibilità di disabilitare la configurabilità delle approvazioni delle ferie
+   e riposi compensati dei livelli I-III. Con l'apposita configurazione generale abilitata 
+   i livelli I-III hanno dei flussi solo per comunicare le asssenze, senza autorizzazioni e 
+   con le etichette dei flussi modificati da "richiesta" a "comunicazione"
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
@@ -13,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    nell'inserimento di una richiesta di missione o di rimborso
  - Aggiunto codice 35R ai codici che riducono le ferie
 ### Changed
+ - Reso più robusto il cambio di menu in caso di giorno/mese/anno corrente mancante
  - Corretto orrdinamento delle datatable con data e ora in italiano
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working

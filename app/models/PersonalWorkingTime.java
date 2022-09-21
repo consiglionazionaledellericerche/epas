@@ -17,22 +17,15 @@
 
 package models;
 
-import com.google.common.base.Optional;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.ToString;
-import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.testng.util.Strings;
 import play.data.validation.Required;
 
 /**

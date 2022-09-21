@@ -909,4 +909,12 @@ public class TemplateUtility {
     return CompanyConfig.url();
   }
 
+  
+  /**
+   * Indica se è permessa la configurabilità delle richieste di assenza 
+   * per i livelli I-III.
+   */
+  public boolean absenceRequestAuthorizationTopLevelEnabled () {
+    return generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization;
+  }
 }
