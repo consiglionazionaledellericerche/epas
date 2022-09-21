@@ -259,21 +259,6 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_23M, 
           DefaultAbsenceType.A_23U), 30, null),
   
-  //  T_COVID50(AmountType.units, 
-  //      ImmutableSet.of(DefaultAbsenceType.A_COVID50), 
-  //      ImmutableSet.of(DefaultAbsenceType.A_COVID50), -1, null),
-  
-//  T_COV50(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_COV50, 
-//          DefaultAbsenceType.A_COV50M), 
-//      ImmutableSet.of(DefaultAbsenceType.A_COV50, 
-//          DefaultAbsenceType.A_COV50M), -1, null),
-//  
-//  T_COV00(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_COV00, 
-//          DefaultAbsenceType.A_COV00M), 
-//      ImmutableSet.of(DefaultAbsenceType.A_COV00, 
-//          DefaultAbsenceType.A_COV00M), -1, null),
   
   T_25O(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25O, 
