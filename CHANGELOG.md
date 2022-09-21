@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Completata la gestione delle comunicazioni ferie/riposi compensativi per i livelli I-III
    nel caso il parametro generale sia configurato per non permettere approvazioni per i
    livelli I-III 
+ - Aggiunti nuovi codici di assenza per congedo parentale per il padre.
+ - Modificati i codici d congedo parentale al 30% secondo le linee guida dettate dalle modifiche al 
+   regolamento del CNR.
 
 ## [2.5.5] - 2022-09-19
 ### Changed
