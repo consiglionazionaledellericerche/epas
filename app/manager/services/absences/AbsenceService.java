@@ -722,7 +722,7 @@ public class AbsenceService {
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
     names.add(DefaultGroup.G_25P.name());
-    names.add(DefaultGroup.G_COV50.name());
+//    names.add(DefaultGroup.G_COV50.name());
     
     return names;
   }
