@@ -7,4 +7,3 @@ ALTER TABLE general_setting_history ADD COLUMN enable_absence_top_level_authoriz
 
 ALTER TABLE general_setting DROP COLUMN enable_absence_top_level_authorization;
 ALTER TABLE general_setting_history DROP enable_absence_top_level_authorization;
-
