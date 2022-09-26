@@ -4,8 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0] - UNRELEASED
+## [2.6.0] - 2022-09-27
 ### Added
+ - Aggiunta possibilità di servire l'applicazione non come root path (per esempio come
+   https://mioentediricerca.it/epas).
  - Completata la gestione delle comunicazioni ferie/riposi compensativi per i livelli I-III
    nel caso il parametro generale sia configurato per non permettere approvazioni per i
    livelli I-III 
