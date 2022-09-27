@@ -20,6 +20,7 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import controllers.Security;
 import dao.AbsenceDao;
@@ -106,7 +107,6 @@ public class NotificationManager {
     this.groupDao = groupDao;
     this.configurationManager = configurationManager;
     this.requestDao = requestDao;
-
   }
 
   private static final String WORKDAY_REPERIBILITY = "207";
@@ -795,6 +795,89 @@ public class NotificationManager {
   }
 
   /**
+   * Invia le email con le notifiche di assenza dei livelli I-III in caso
+   * sia configurazione che non abbiano necesittà di approvazioni.
+   * Le email vengono inviate al responsabile di sede e/o di gruppo i 
+   * funzione della configurazione della sede.
+   * Viene inviata un'email anche il dipendente che inserire la comunicazione
+   * di assenza.
+   */
+  public void sendEmailAbsenceNotification(AbsenceRequest absenceRequest) {
+    Set<Person> recipients = Sets.<Person>newHashSet();
+    //si invia solo una notifica al responsabile sede e/o responsabile gruppo
+    //(dipendente dalla configurazione)
+    
+    //Email al responsabile di sede per i livelli I-III che NON SONO
+    //responsabili di gruppo
+    if (configurationManager.configValue(absenceRequest.person.office,
+        EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION, LocalDate.now()).equals(Boolean.TRUE)
+        && !absenceRequest.person.isGroupManager()) {
+      recipients = 
+          absenceRequest.person.office.usersRolesOffices.stream()
+            .filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).map(uro -> uro.user.person)
+            .collect(Collectors.toSet());
+    }
+    //Email al responsabile di sede per i livelli I-III che SONO
+    //responsabili di gruppo
+    if (configurationManager.configValue(absenceRequest.person.office,
+        EpasParam.ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION, LocalDate.now()).equals(Boolean.TRUE)
+        && absenceRequest.person.isGroupManager()) {
+      recipients = 
+          absenceRequest.person.office.usersRolesOffices.stream()
+            .filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).map(uro -> uro.user.person)
+            .collect(Collectors.toSet());
+    }
+    //Email al responsabile di gruppo per i livelli I-III del suo gruppo (se sono attive
+    //notifiche al responsabile di gruppo nella configurazione del gruppo).
+    if (configurationManager.configValue(absenceRequest.person.office,
+        EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION, LocalDate.now()).equals(Boolean.TRUE)) {
+      recipients.addAll(groupDao.myGroups(absenceRequest.person).stream()
+        .filter(group -> group.sendFlowsEmail)
+        .map(group -> group.manager)
+        .collect(Collectors.toSet()));
+    }
+
+    if (!recipients.isEmpty()) {
+      recipients.forEach(r -> {
+        try {
+          SimpleEmail simpleEmail = new SimpleEmail();
+          simpleEmail.addTo(r.email);
+          simpleEmail.setSubject(
+              String.format("ePas Comunicazione assenza (id=%s)", absenceRequest.id));
+          val mailBody = createAbsenceNotificationEmail(absenceRequest, r.user);
+          simpleEmail.setMsg(mailBody);
+          Mail.send(simpleEmail);
+          log.info(
+              "Inviata email per richiesta di flusso richiesta: {}. "
+                  + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+              absenceRequest, r.user.person.email, simpleEmail.getSubject(), mailBody);
+        } catch (EmailException e) {
+          log.error("Impossibile inviare l'email a {} che è destinatario del email "
+              + "per la comunicazione dell'assenza di {}", 
+              r.getFullname(), absenceRequest.person.getFullname(), e);
+        }
+      });
+    }
+    
+    SimpleEmail email = new SimpleEmail();
+    try {
+      email.setSubject(
+          String.format("ePas Comunicazione assenza (id=%s)", absenceRequest.id));
+      email.addTo(absenceRequest.person.email);
+      val mailBody = createEmployeeAbsenceNotificationEmail(absenceRequest);
+      email.setMsg(mailBody);
+      Mail.send(email);
+      log.info(
+          "Inviata email per completamento flusso di notifica: {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+          absenceRequest, absenceRequest.person.email, email.getSubject(), mailBody);
+    } catch (EmailException e) {
+      log.error("Impossibile inviare l'email a {} relativa alla sua comunicazione di assenza.", 
+          absenceRequest.person.getFullname(), e);
+    }
+  }
+
+  /**
    * Metodo privato che invia la mail al richiedente la ferie/riposo compensativo.
    *
    * @param absenceRequest la richiesta d'assenza
@@ -806,46 +889,35 @@ public class NotificationManager {
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
       simpleEmail.addTo(person.email);
-    } catch (EmailException e) {
-      e.printStackTrace();
-    }
-    String requestType = "";
-    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
-      requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
-    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
-      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
-    } else {
-      requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
-    }
-    simpleEmail.setSubject("ePas Approvazione flusso");
-    final StringBuilder message =
-        new StringBuilder().append(String.format("Gentile %s,\r\n", person.fullName()));
-    String approver = " ";
-    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-      approver = " da " + Security.getUser().get().person.getFullname();
-    }
-    if (approval) {
-      message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s",
-          approver, requestType));
-    } else {
-      message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di : %s",
-          approver, requestType));
-    }
-
-    message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
-        absenceRequest.endTo.toLocalDate()));
-    val mailBody = message.toString();
-    try {
+      String requestType = getRequestTypeLabel(absenceRequest);
+  
+      simpleEmail.setSubject("ePas Approvazione flusso");
+      final StringBuilder message =
+          new StringBuilder().append(String.format("Gentile %s,\r\n", person.fullName()));
+      String approver = " ";
+      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
+        approver = " da " + Security.getUser().get().person.getFullname();
+      }
+      if (approval) {
+        message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di %s",
+            approver, requestType));
+      } else {
+        message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di %s",
+            approver, requestType));
+      }
+      message.append(String.format("\r\n per i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
+          absenceRequest.endTo.toLocalDate()));
+      val mailBody = message.toString();
       simpleEmail.setMsg(mailBody);
+      Mail.send(simpleEmail);
+      log.info(
+          "Inviata email per approvazione di flusso {}. "
+              + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+          absenceRequest, person.email, simpleEmail.getSubject(), mailBody);
     } catch (EmailException e) {
-      e.printStackTrace();
+      log.error("Impossibile inviare l'email con conferma della richiesta di assenza {}.", 
+          absenceRequest, e);
     }
-    Mail.send(simpleEmail);
-    log.info(
-        "Inviata email per approvazione di flusso richiesta: {}. "
-            + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        absenceRequest, person.email, simpleEmail.getSubject(), mailBody);
-
   }
 
   /**
@@ -857,14 +929,8 @@ public class NotificationManager {
    */
   private String createAbsenceRequestEmail(AbsenceRequest absenceRequest, User user) {
 
-    String requestType = "";
-    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
-      requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
-    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
-      requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
-    } else {
-      requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
-    }
+    String requestType = getRequestTypeLabel(absenceRequest);
+
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
@@ -889,6 +955,92 @@ public class NotificationManager {
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
+  }
+
+  private String getRequestTypeLabel(AbsenceRequest absenceRequest) {
+    String requestType = "";
+    switch (absenceRequest.type) {
+      case COMPENSATORY_REST:
+        requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+      case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
+        requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
+      case VACATION_REQUEST:
+        requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
+      case PERSONAL_PERMISSION:
+        requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
+      case SHORT_TERM_PERMIT:
+        requestType = Messages.get("AbsenceRequestType.SHORT_TERM_PERMIT");
+    }
+    return requestType;
+  }
+
+  private String getRequestTypeLabelTopLevel(AbsenceRequest absenceRequest) {
+    String requestType = "";
+    switch (absenceRequest.type) {
+      case COMPENSATORY_REST:
+        requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL");
+      case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
+        requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL");
+      case VACATION_REQUEST:
+        requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL");
+      case PERSONAL_PERMISSION:
+        requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL");
+      case SHORT_TERM_PERMIT:
+        requestType = Messages.get("AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL");
+    }
+    return requestType;
+  } 
+  
+  /**
+   * Metodo che compone il corpo della mail da inviare.
+   *
+   * @param absenceRequest la comunicazione d'assenza
+   * @param user           l'utente a cui inviare la mail
+   * @return il corpo della mail da inviare all'utente che deve ricevere la notifica.
+   */
+  private String createAbsenceNotificationEmail(AbsenceRequest absenceRequest, User user) {
+
+    String requestType = getRequestTypeLabelTopLevel(absenceRequest);
+
+    final StringBuilder message =
+        new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
+    message.append(String.format("\r\nti è stata notificata da %s ",
+        absenceRequest.person.fullName()));
+    message.append(String.format("una assenza di tipo \"%s\" ", requestType));
+    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+      message.append(String.format("per il giorno %s.",
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+    } else {
+      message.append(String.format("dal %s",
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+      message.append(
+          String.format(" al %s.", absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+    }
+    return message.toString();
+  }
+
+  /*/
+   * Contenuto dell'email di avvenuto inserimento assenza senza nessun tipo di approvazione.
+   */
+  private String createEmployeeAbsenceNotificationEmail(AbsenceRequest absenceRequest) {
+
+    String requestType = getRequestTypeLabelTopLevel(absenceRequest);
+
+    final StringBuilder message =
+        new StringBuilder().append(String.format("Gentile %s,\r\n", absenceRequest.person.fullName()));
+    message.append(String.format("\r\nil tuo flusso di assenza di tipo \"%s\" è terminato correttamente, ",
+        requestType));
+    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+      message.append(String.format("assenza per il giorno %s.",
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+    } else {
+      message.append(String.format("assenza dal %s",
+          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+      message.append(
+          String.format(" al %s.", absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+    }
+    return message.toString();
+
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////

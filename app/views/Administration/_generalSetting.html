@@ -64,6 +64,18 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+    #{accordionItem 'enableAbsenceTopLevelRequestAuthorization', parent:'generalSetting',
+                     title:'Abilitazione dei flussi di approvazione per i livelli I-III', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Permette di configurazione l'approvazione delle richieste di assenza per i livelli I-III. Se impostato a "no" per i livelli I-III sarà possibile solo configurare le notifiche per le comunicazioni di assenza. #{/alert}
+      #{f.booleanRadio 'generalSetting.enableAbsenceTopLevelAuthorization' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+
   #{accordionItem 'handleGroupsByInstitute', parent:'generalSetting', title:'Gestione gruppi per istituto', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
