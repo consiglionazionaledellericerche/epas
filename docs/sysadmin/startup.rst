@@ -37,6 +37,9 @@ d'ambiente presenti nel `docker-compose.yml <https://github.com/consiglionaziona
 La configurazione delle possibili modalità di autenticazione e la configurazione dei log
 sono descritte nei paragrafi successivi.
 
+Configurazione Application Secret
+---------------------------------
+
 **N.B.**
 Si raccomanda di modificare la varibile d'ambiente **APPLICATION_SECRET** per impostare
 una propria chiave univoca utilizzata nel funzioni di cifratura.
@@ -45,3 +48,4 @@ L'application secret può per esempio essere creato su Linux con questo comando:
 .. code-block::
 
   tr -dc A-Za-z0-9 < /dev/urandom | head -c 64 ; echo
+

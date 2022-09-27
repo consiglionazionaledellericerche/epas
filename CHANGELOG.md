@@ -4,12 +4,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.4] - UNRELEASED
+## [2.6.0] - 2022-09-27
 ### Added
+ - Aggiunta possibilità di servire l'applicazione non come root path (per esempio come
+   https://mioentediricerca.it/epas).
+ - Completata la gestione delle comunicazioni ferie/riposi compensativi per i livelli I-III
+   nel caso il parametro generale sia configurato per non permettere approvazioni per i
+   livelli I-III 
+ - Aggiunti nuovi codici di assenza per congedo parentale per il padre.
+ - Modificati i codici d congedo parentale al 30% secondo le linee guida dettate dalle modifiche al 
+   regolamento del CNR.
+
+## [2.5.5] - 2022-09-19
+### Changed
+ - Corretta la rimozione dai gruppi, servizi di reperibità e turno delle persone
+   con contratto scaduto. 
+
+## [2.5.4] - 2022-09-16
+### Added
+ - Aggiunta la possibilità di disabilitare la configurabilità delle approvazioni delle ferie
+   e riposi compensati dei livelli I-III. Con l'apposita configurazione generale abilitata 
+   i livelli I-III hanno dei flussi solo per comunicare le asssenze, senza autorizzazioni e 
+   con le etichette dei flussi modificati da "richiesta" a "comunicazione"
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
-### Changed  
+ - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
+   nell'inserimento di una richiesta di missione o di rimborso
+ - Aggiunto codice 35R ai codici che riducono le ferie
+### Changed
+ - Reso più robusto il cambio di menu in caso di giorno/mese/anno corrente mancante
+ - Corretto orrdinamento delle datatable con data e ora in italiano
  - Aggiunti codici LAGILE e LAGILE in esportazione situazione mensile relativo a presenza a
    lavoro e in smart working
  - Corretta generazione form richiesta ferie quando richieste nel passato
@@ -18,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificata la visualizzazione sui dati contrattuali del tipo di incongruenza sulle inizializzazioni
  - Aggiunto controllo per impedire la visualizzazione del flusso ferie anno passato dopo deadline se il 
    corrispondente parametro in configurazione è a NO
+ - Aggiunto controllo che visualizza l'username nel caso un utente che ha ruoli su una sede sia un utente 
+   orfano
+ - Risolto bug che faceva visualizzare un'erronea lista di attività su cui il turnista aveva diritti 
+   di visualizzazione
+ - Corrette tabelle flussi competenze e assenze per init datatable e aggiornate le datatable alla 
+   ultima versione 1.12.1.
 
 ## [2.5.3] - 2022-08-16
 ### Added

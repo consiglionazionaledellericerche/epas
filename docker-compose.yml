@@ -32,7 +32,9 @@ services:
     environment:
       - VIRTUAL_HOST=${HOST_NAME}
       #- PROTOCOL=https                         # default: http  -- (http,https)
-      ##- EPAS_SHIB_LOGIN=                      # default: false  -- (true,false)
+      #- HTTP_PATH=${HTTP_PATH}                 # default: / -- da utilizzare per non servire l'applicazione come root path ( / )
+                                                # se è specificata la variabile HTTP_PATH questa deve cominciare con uno slash ( / ), es.: HTTP_PATH=/epas
+      #- EPAS_SHIB_LOGIN=                       # default: false  -- (true,false)
       - JOBS_ACTIVE=true                        # default: false  -- (true,false) --  Se forzato a true abilita l'esecuzione di tutti i job
       #- APPLICATION_SECRET=${APPLICATION_SECRET}  # Opzionale ma fortemente consigliato, utilizzato per le funzioni criptografiche.
                                                    # E' una stringa random, per esempio y2RS8pYk7g8NFttsRbjmhpEUm00tAQILvOfI1LMQ2wIiVV20J2S0VfQOdTjys9yh

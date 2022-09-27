@@ -449,6 +449,7 @@ generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
 generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
+generalSetting.enableAbsenceTopLevelAuthorization=Possibilità di configurare le autorizzazioni per le assenze dei livelli I-III
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -993,10 +994,12 @@ Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
 
 AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.vacationsTopLevel=Mie comunicazioni ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
 AbsenceRequests.personalPermissions =Miei permessi personali
 AbsenceRequests.vacationsPastYearAfterDeadline =Mie richieste ferie anno passato dopo deadline
+AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel =Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
@@ -1013,19 +1016,30 @@ InformationRequests.serviceExitToApprove =Flussi di richieste uscite di servizio
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
 AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
-
+AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL =comunicazione di ferie
+AbsenceRequestType.VACATION_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie
+AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL =riposo compensativo
 AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_RESTS_TOP_LEVEL =Miei riposi compensativi
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
+AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL.blank =nuova comunicazione riposo compensativo
 
 AbsenceRequestType.PERSONAL_PERMISSION =permesso personale
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL =permesso personale
 AbsenceRequestType.PERSONAL_PERMISSIONS =Miei permessi personali
 AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
+AbsenceRequestType.PERSONAL_PERMISSIONS_TOP_LEVEL =Miei permessi personali
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL.blank =nuova richiesta permesso personale
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 
@@ -1033,6 +1047,9 @@ Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunicazione ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
 
 Institutes.list= Sedi e Amministratori
@@ -1266,6 +1283,10 @@ PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta app
 PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile gruppo di lavoro		
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
+
+ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (non responsabili di gruppo)
+ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (responsabili di gruppo)
+ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
 
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità

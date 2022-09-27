@@ -98,5 +98,12 @@ public class GeneralSetting extends BaseModel {
    * inserire timbrature via REST.
    */
   public int maxDaysInPastForRestStampings = 90;
+  
+  /*
+   * Indica se è possibile o meno configurare per i livelli I-III
+   * la richiesta di approvazione ferie da parte di un responsabile di 
+   * gruppo o del responsabile di sede. 
+   */
+  public boolean enableAbsenceTopLevelAuthorization = true;
 
 }

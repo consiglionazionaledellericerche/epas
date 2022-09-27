@@ -11,7 +11,7 @@
 				<th colspan="2">Date offerte</th>
 			#{/if}
 
-		    <th width="10%" #{if approvalRequired}rowspan="4"#{/if}>Destinatario</th>
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
 
 			<th #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
@@ -19,14 +19,13 @@
 				
 		</tr>			
 		#{if approvalRequired}
-		
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal </th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al  </th>
+		<tr>
+			<th width="10%">Dal </th>
+			<th width="10%">Al  </th>
 
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al </th>
-
-					
+			<th width="10%">Dal</th>
+			<th width="10%">Al </th>
+		</tr>
 		#{/if}
 	</thead>
 
