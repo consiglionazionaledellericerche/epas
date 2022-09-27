@@ -23,6 +23,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.ContractDao;
@@ -40,6 +41,7 @@ import helpers.Web;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -65,6 +67,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -298,15 +301,31 @@ public class Contracts extends Controller {
     }
     log.debug("Lista assenze contiene {} elementi", list.size());
     int count = 0;
-    for (Absence abs : list) {      
-      abs.delete();  
+    for (Absence abs : list) {
+      //abs.delete();
       count++;
     }
     log.debug("Cancellate {} assenze", count);
+    
+    //1-bis) si salvano i tipi orario di lavoro
+    Set<ContractWorkingTimeType> cwtts = Sets.newHashSet(contract.contractWorkingTimeType);
+
+    //2-bis) assegno i precedenti orari di lavoro al contratto che rimarrà
+    cwtts.stream().forEach(cwtt -> {
+      cwtt.contract = previousContract;
+      cwtt.save();
+      previousContract.contractWorkingTimeType.add(cwtt);
+      previousContract.save();
+      previousContract.refresh();
+    });
+
     //2) cancello il contratto più recente
     contract.delete();
+    contract.person.contracts.remove(contract);
     log.debug("Cancellato contratto {}", contract.toString());
 
+
+    JPA.em().flush();
     //3) prorogo la data fine di previousContract a contract.endDate
     IWrapperContract wrappedContract = wrapperFactory.create(previousContract);
     IWrapperPerson wrappedPerson = wrapperFactory.create(previousContract.person);
@@ -328,7 +347,7 @@ public class Contracts extends Controller {
     if (count != 0) {
       if (!attestatiSync) {
         log.info("Si resettano le assenze salvate in precedenza.");
-        contractService.resetAbsences(copy);
+        //contractService.resetAbsences(copy);
         log.info("Procedura completata.");
       } else {
         log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", 

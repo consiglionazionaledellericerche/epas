@@ -483,7 +483,10 @@ public class ConsistencyManager {
     // controllo uscita notturna
     handlerNightStamp(pd);
 
-    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
+    log.trace("populatePersonDay {}", pd.getValue());
+    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent(),
+        String.format("getWorkingTimeTypeDay di %s non presente per il giorno %s",
+            pd.getValue().person.getFullname(), pd.getValue().date));
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
         pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
