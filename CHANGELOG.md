@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.1] - UNRELEASED
 ### Changed
- - Rivista la procedura di merge di contratto con spostamento delle assenze senza effettuare
-   il re-inserimento
+ - Rivista la procedura di merge di contratto con spostamento delle assenze senza effettuare il re-inserimento
+ - Cambiato il tipo a text nelle input per la modifica della matricola del personale
 
 ## [2.6.0] - 2022-09-27
 ### Added
