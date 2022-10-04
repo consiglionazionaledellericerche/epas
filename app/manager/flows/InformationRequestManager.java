@@ -74,6 +74,7 @@ public class InformationRequestManager {
     final InformationType type;
     boolean officeHeadApprovalRequired;
     boolean administrativeApprovalRequired;
+    boolean managerApprovalRequired;
   }
   
   /**
@@ -140,6 +141,22 @@ public class InformationRequestManager {
                 requestType.administrativeApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
+    if (requestType.alwaysSkipManagerApproval) {
+      informationRequestConfiguration.managerApprovalRequired = false;
+    } else {
+      if (person.isTopQualification() 
+          && requestType.managerApprovalRequiredTopLevel.isPresent()) {
+        informationRequestConfiguration.managerApprovalRequired = 
+            (Boolean) configurationManager.configValue(person.office, 
+                requestType.managerApprovalRequiredTopLevel.get(), LocalDate.now());
+      }
+      if (!person.isTopQualification() 
+          && requestType.managerApprovalRequiredTechnicianLevel.isPresent()) {
+        informationRequestConfiguration.managerApprovalRequired = 
+            (Boolean) configurationManager.configValue(person.office, 
+                requestType.managerApprovalRequiredTechnicianLevel.get(), LocalDate.now());
+      }
+    }
     
     return informationRequestConfiguration;
   }
@@ -162,6 +179,7 @@ public class InformationRequestManager {
     val config = getConfiguration(request.informationType, request.person);
 
     request.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
+    request.managerApprovalRequired = config.managerApprovalRequired;
     if (illnessRequest.isPresent()) {
       request.administrativeApprovalRequired = config.administrativeApprovalRequired;
     }    

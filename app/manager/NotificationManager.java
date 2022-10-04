@@ -373,6 +373,10 @@ public class NotificationManager {
         && informationRequest.administrativeApproved == null) {
       role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
     }
+    if (informationRequest.managerApprovalRequired
+        && informationRequest.managerApproved == null) {
+      role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    }
 
     return role;
   }

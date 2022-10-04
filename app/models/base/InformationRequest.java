@@ -88,6 +88,12 @@ public abstract class InformationRequest extends BaseModel {
   public LocalDateTime administrativeApproved;
   
   /**
+   * Data di approvazione del responsabile di gruppo.
+   */
+  public LocalDateTime managerApproved;
+  
+  
+  /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   public boolean officeHeadApprovalRequired = true;
@@ -97,6 +103,12 @@ public abstract class InformationRequest extends BaseModel {
    */
   @Column(name = "administrative_approval_required")
   public boolean administrativeApprovalRequired = false;
+  
+  /**
+   * Indica se è richiesta l'approvazione del responsabile di gruppo.
+   */
+  @Column(name = "manager_approval_required")
+  public boolean managerApprovalRequired = false;
   
   /**
    * Se il flusso è avviato.
@@ -155,6 +167,7 @@ public abstract class InformationRequest extends BaseModel {
 
   @Transient
   public boolean autoApproved() {
-    return !this.officeHeadApprovalRequired && !this.administrativeApprovalRequired;
+    return !this.officeHeadApprovalRequired && !this.managerApprovalRequired 
+        && !this.administrativeApprovalRequired;
   }
 }

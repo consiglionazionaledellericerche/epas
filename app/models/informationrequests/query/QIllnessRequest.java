@@ -60,6 +60,12 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
     //inherited
     public final EnumPath<models.enumerate.InformationType> informationType;
 
+    //inherited
+    public final BooleanPath managerApprovalRequired;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> managerApproved;
+
     public final StringPath name = createString("name");
 
     //inherited
@@ -109,6 +115,8 @@ public class QIllnessRequest extends EntityPathBase<IllnessRequest> {
         this.fullyApproved = _super.fullyApproved;
         this.id = _super.id;
         this.informationType = _super.informationType;
+        this.managerApprovalRequired = _super.managerApprovalRequired;
+        this.managerApproved = _super.managerApproved;
         this.officeHeadApprovalRequired = _super.officeHeadApprovalRequired;
         this.officeHeadApproved = _super.officeHeadApproved;
         this.persistent = _super.persistent;

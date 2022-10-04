@@ -965,7 +965,10 @@ when
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
-			"AbsenceRequests.disapproval"
+			"AbsenceRequests.disapproval",
+			
+			"InformationRequests.serviceExitToApprove",
+			"InformationRequests.listToApprove"
 		), target==null, granted == false)
 then
   $c.grant();
@@ -1005,7 +1008,10 @@ when
 			"AbsenceRequests.personalPermissions",
 			"AbsenceRequests.vacationsPastYearAfterDeadline",
 			"AbsenceRequests.managerApproval",
-			"AbsenceRequests.show"
+			"AbsenceRequests.show",
+			
+			"InformationRequests.serviceExitToApprove",
+			"InformationRequests.listToApprove"
 			
 		), target == $ar, granted == false)
 then

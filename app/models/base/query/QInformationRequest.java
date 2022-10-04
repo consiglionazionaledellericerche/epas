@@ -48,6 +48,10 @@ public class QInformationRequest extends EntityPathBase<InformationRequest> {
 
     public final EnumPath<models.enumerate.InformationType> informationType = createEnum("informationType", models.enumerate.InformationType.class);
 
+    public final BooleanPath managerApprovalRequired = createBoolean("managerApprovalRequired");
+
+    public final DateTimePath<java.time.LocalDateTime> managerApproved = createDateTime("managerApproved", java.time.LocalDateTime.class);
+
     public final BooleanPath officeHeadApprovalRequired = createBoolean("officeHeadApprovalRequired");
 
     public final DateTimePath<java.time.LocalDateTime> officeHeadApproved = createDateTime("officeHeadApproved", java.time.LocalDateTime.class);
