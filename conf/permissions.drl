@@ -968,7 +968,9 @@ when
 			"AbsenceRequests.disapproval",
 			
 			"InformationRequests.serviceExitToApprove",
-			"InformationRequests.listToApprove"
+			"InformationRequests.listToApprove",
+			"InformationRequests.approval",
+			"InformationRequests.disapproval"
 		), target==null, granted == false)
 then
   $c.grant();
@@ -1011,7 +1013,9 @@ when
 			"AbsenceRequests.show",
 			
 			"InformationRequests.serviceExitToApprove",
-			"InformationRequests.listToApprove"
+			"InformationRequests.listToApprove",
+			"InformationRequests.approval",
+			"InformationRequests.disapproval"
 			
 		), target == $ar, granted == false)
 then
