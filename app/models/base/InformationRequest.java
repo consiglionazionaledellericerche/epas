@@ -156,8 +156,8 @@ public abstract class InformationRequest extends BaseModel {
   public boolean isFullyApproved() {
     return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
         && (!this.administrativeApprovalRequired 
-            || this.isAdministrativeApproved()
-            && (!this.managerApprovalRequired || this.isManagerApproved()));
+            || this.isAdministrativeApproved())
+            && (!this.managerApprovalRequired || this.isManagerApproved());
   }
   
   /**

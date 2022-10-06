@@ -962,14 +962,19 @@ public class NotificationManager {
     switch (absenceRequest.type) {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
+        break;
       case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
         requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
+        break;
       case VACATION_REQUEST:
         requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
+        break;
       case PERSONAL_PERMISSION:
         requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
+        break;
       case SHORT_TERM_PERMIT:
         requestType = Messages.get("AbsenceRequestType.SHORT_TERM_PERMIT");
+        break;
       default:
         break;
     }
@@ -981,14 +986,22 @@ public class NotificationManager {
     switch (absenceRequest.type) {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL");
+        break;
       case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
-        requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL");
+        requestType = Messages
+        .get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL");
+        break;
       case VACATION_REQUEST:
         requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL");
+        break;
       case PERSONAL_PERMISSION:
         requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL");
+        break;
       case SHORT_TERM_PERMIT:
         requestType = Messages.get("AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL");
+        break;
+      default:
+        break;
     }
     return requestType;
   } 

@@ -302,6 +302,17 @@ public class InformationRequestManager {
         //TODO: completare
         break;
         
+      case MANAGER_ACKNOWLEDGMENT:
+        //TODO: completare con controllo su IllnessRequest
+        request.managerApproved = java.time.LocalDateTime.now();
+        request.endTo = java.time.LocalDateTime.now();
+        //request.flowEnded = true;
+        break;
+        
+      case MANAGER_REFUSAL:
+        //TODO: completare
+        break;
+        
       case COMPLETE:
         request.officeHeadApproved = java.time.LocalDateTime.now();
         request.endTo = java.time.LocalDateTime.now();
@@ -486,6 +497,10 @@ public class InformationRequestManager {
         officeHeadApproval(serviceRequest.get().id, user);
         return true;
       }
+      if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.GROUP_MANAGER)) {
+        managerApproval(serviceRequest.get().id, user);
+        return true;
+      }
       
     }
     if (illnessRequest.isPresent()) {
@@ -645,6 +660,60 @@ public class InformationRequestManager {
     executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
         Optional.of(teleworkRequest), currentPerson, 
         InformationRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di sede {}.", request,
+        currentPerson.getFullname());
+  }
+  
+  public void managerApproval(long id, User user) {
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id);
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id);
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id);
+        break;
+      default:
+        break;
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
+        currentPerson, InformationRequestEventType.MANAGER_ACKNOWLEDGMENT,
+        Optional.absent());
+    log.info("{} approvata dal responsabile di gruppo {}.", request,
+        currentPerson.getFullname());
+    
+    notificationManager.notificationInformationRequestPolicy(user, request, true);
+  }
+  
+  public void managerDisapproval(long id, String reason) {
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    InformationRequest request = dao.getById(id);
+    switch (request.informationType) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id).get();
+        break;
+      default:
+        break;
+    }
+    val currentPerson = Security.getUser().get().person;
+    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
+        Optional.of(teleworkRequest), currentPerson, 
+        InformationRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
   }
