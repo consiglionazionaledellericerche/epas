@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [2.6.1] - UNRELEASED
+### Added
+ - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio
 ### Changed
  - Rivista la procedura di merge di contratto con spostamento delle assenze senza effettuare il re-inserimento
  - Cambiato il tipo a text nelle input per la modifica della matricola del personale
+ 
 
 ## [2.6.0] - 2022-09-27
 ### Added
