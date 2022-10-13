@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import dao.absences.AbsenceComponentDao;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Set;
 import models.absences.AbsenceType;
@@ -47,6 +48,7 @@ import org.testng.collections.Lists;
  * Allinea gli Enum presenti nel codice e che rappresentato la configurazione
  * delle assenze con quelli presenti nel db.
  */
+@Slf4j
 public class EnumAllineator {
   
   private final AbsenceComponentDao absenceComponentDao;
@@ -65,6 +67,7 @@ public class EnumAllineator {
   public void handleAbsenceTypes(boolean initialization) {
     //i codici che non esistono li creo
     for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
+      log.debug("Analizzo il codice: {}", defaultAbsenceType.getCode());
       if (initialization || !absenceComponentDao
           .absenceTypeByCode(defaultAbsenceType.getCode()).isPresent())  {
         //creazione entity a partire dall'enumerato
