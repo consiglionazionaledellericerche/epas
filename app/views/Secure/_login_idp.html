@@ -1,3 +1,5 @@
+#{set ldapPassworRecoveryUrlEnabled: play.Play.configuration.getProperty("ldap.password.recovery.url") /}
+
 <div id="login-idp">
 
   #{if ldapAuthEnabled}
@@ -16,7 +18,11 @@
 	    	<input class="btn btn-primary btn-block" type="submit"
 		  		value="&{'secure.signin'}" />    
 	    </div>
-
+        <div>
+            #{if ldapPassworRecoveryUrlEnabled != null}
+              <a href="${ldapPassworRecoveryUrlEnabled}" target="_new">Password dimenticata?</a>
+            #{/if}
+        </div>
 	  #{/form}
   #{/if}
 

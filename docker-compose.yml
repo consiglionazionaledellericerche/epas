@@ -82,6 +82,7 @@ services:
       ##- LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}   # Da utilizzare solo è presente un LDAP_BIND_DN. L'utente viene cercato su LDAP con 
                                                                                  # l'utente amministratore e poi verificata l'autenticazione facendo una search LDAP 
                                                                                  # con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it
+      ##- LDAP_PASSWORD_RECOVERY_URL=${LDAP_PASSWORD_RECOVERY_URL}    # Opzionale. default non presente.
 
       #### Autenticazione OAuth ####
       #- OAUTH_LOGIN=${OAUTH_LOGIN}                       #Opzionale. default: false -- (true,false) -- Abilita l'autenticazione keycloak.
