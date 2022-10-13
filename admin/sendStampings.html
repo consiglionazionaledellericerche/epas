@@ -928,7 +928,7 @@ fronte a questa schermata:</p>
 <figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="../_images/invioAttestati.png"><img alt="../_images/invioAttestati.png" src="../_images/invioAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.56 </span><span class="caption-text">Schermata home invio attestati</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.58 </span><span class="caption-text">Schermata home invio attestati</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>A questo livello è possibile selezionare il mese e l'anno di cui si intende sottomettere, alla sede
@@ -940,7 +940,7 @@ Una volta selezionati i valori che ci interessano è possibile fare la login al 
 <figure class="align-center" id="id2">
 <a class="reference internal image-reference" href="../_images/loginAttestati.png"><img alt="../_images/loginAttestati.png" src="../_images/loginAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.57 </span><span class="caption-text">Schermata di login attestati</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.59 </span><span class="caption-text">Schermata di login attestati</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>A questo livello viene posta all'attenzione dell'amministratore tutta la procedura da seguire per
@@ -953,7 +953,7 @@ sistema centrale all'indirizzo <em>https://attestati.rm.cnr.it/attestati</em></p
 <figure class="align-center" id="id3">
 <a class="reference internal image-reference" href="../_images/primaInvioAttestati.png"><img alt="../_images/primaInvioAttestati.png" src="../_images/primaInvioAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.58 </span><span class="caption-text">Schermata prima inizio elaborazione</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.60 </span><span class="caption-text">Schermata prima inizio elaborazione</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Per ogni dipendente registrato nella lista persone
@@ -976,7 +976,7 @@ dipendente e, una volta terminato, apparirà una schermata più o meno come ques
 <figure class="align-center" id="id4">
 <a class="reference internal image-reference" href="../_images/riepilogoAttestati.png"><img alt="../_images/riepilogoAttestati.png" src="../_images/riepilogoAttestati.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.59 </span><span class="caption-text">Schermata di esito elaborazione</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.61 </span><span class="caption-text">Schermata di esito elaborazione</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <p>Per ogni dipendente viene riassunta la situazione al termine dell'elaborazione.
@@ -988,7 +988,7 @@ elaborati cliccando in corrispondenza della voce &quot;<em>dati</em>&quot; nella
 <figure class="align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/datiElaborazione.png"><img alt="../_images/datiElaborazione.png" src="../_images/datiElaborazione.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.60 </span><span class="caption-text">Dati di elaborazione</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.62 </span><span class="caption-text">Dati di elaborazione</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -1012,10 +1012,9 @@ elaborati cliccando in corrispondenza della voce &quot;<em>dati</em>&quot; nella
 </li>
 <li><p>le ore di formazione</p></li>
 <li><dl class="simple">
-<dt>i buoni pasto, rappresentati attraverso una terna di valori che sono:</dt><dd><ul>
-<li><p>l'anno di utilizzo</p></li>
-<li><p>il mese di utilizzo</p></li>
-<li><p>il quantitativo di buoni utilizzati</p></li>
+<dt>i buoni pasto, rappresentati attraverso una coppia di valori che sono:</dt><dd><ul>
+<li><p>il numero di buoni cartacei utilizzati</p></li>
+<li><p>il numero di buoni elettronici utilizzati</p></li>
 </ul>
 </dd>
 </dl>
@@ -1023,13 +1022,20 @@ elaborati cliccando in corrispondenza della voce &quot;<em>dati</em>&quot; nella
 </ul>
 </dd>
 </dl>
+<p><em>N.B.:</em> Attestati non riceve più il numero dei buoni pasto maturati nel mese, bensì il numero di buoni pasto
+cartacei/elettronici necessari a coprire la maturazione dei buoni pasto ed è questa informazione che verrà inviata
+ad Attestati che vedrete nel riepilogo, per ciascun dipendente, nella schermata di &quot;Invio dati ad Attestati&quot;
+nella voce relativa ai buoni pasto.
+Nello specifico, la voce dei buoni pasto sarà modificata nella forma: Buoni pasto x;y
+dove x sta per la quantità di buoni cartacei utilizzati per coprire la maturazione dei buoni pasto del mese
+e y sta per la quantità di buoni elettronici utilizzati per coprire la maturazione dei buoni pasto del mese.</p>
 <p>Nel caso, invece, si fossero verificati dei problemi durante l'elaborazione, sarà possibile andare
 a controllare cosa non è andato a buon fine cliccando su &quot;<em>problemi</em>&quot;. Si aprirà una finestra come
 questa:</p>
 <figure class="align-center" id="id6">
 <a class="reference internal image-reference" href="../_images/problemiElaborazione.png"><img alt="../_images/problemiElaborazione.png" src="../_images/problemiElaborazione.png" style="width: 768.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.61 </span><span class="caption-text">Problemi durante elaborazione</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.63 </span><span class="caption-text">Problemi durante elaborazione</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 </section>

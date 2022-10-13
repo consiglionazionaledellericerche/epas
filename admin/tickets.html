@@ -925,7 +925,7 @@
 dipendente.
 Dal menu <span class="menuselection">Amministrazione ‣ Gestione buoni pasto</span> si arriva in questa schermata:</p>
 <figure class="align-center" id="id1">
-<a class="reference internal image-reference" href="../_images/riepilogoBuoni.png"><img alt="../_images/riepilogoBuoni.png" src="../_images/riepilogoBuoni.png" style="width: 768.0px; height: 432.0px;" /></a>
+<a class="reference internal image-reference" href="../_images/riepilogoBuoni.png"><img alt="../_images/riepilogoBuoni.png" src="../_images/riepilogoBuoni.png" style="width: 1536.0px; height: 432.0px;" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 2.54 </span><span class="caption-text">Schermata di riepilogo buoni pasto</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
 </figcaption>
@@ -939,27 +939,62 @@ E' possibile l'ordinamento degli elementi su ciascuno dei campi della tabella, �
 cliccare sull'intestazione della colonna per ordinare in modo discendente o ascendente su quello
 specifico campo.</p>
 <p>Per ogni persona vengono visualizzati i buoni rimanenti dal mese precedente, quelli consegnati nel
-mese, quelli usati nel mese e i rimanenti.</p>
+mese, quelli usati nel mese e il totale dei rimanenti.</p>
+<p>La colonna interessante di questa tabella è quella relativa ai <em>buoni usati nel mese</em>. In questa colonna vengono riportati
+i buoni pasto che il dipendente ha maturato nel corso dell'anno/mese di riferimento.
+Il calcolo dei buoni maturati viene effettuato sulla base dei giorni di presenza a lavoro in cui il dipendente
+ha raggiunto il tempo di lavoro necessario alla maturazione del buono pasto.</p>
+<p>E' importante ricordare come, da qualche mese, al CNR siano in uso oltre ai vecchi buoni cartacei anche quelli
+elettronici, per prima cosa quindi occorre andare nella configurazione della propria sede e specificare con quale tipologia di
+buoni pasto occorre coprire le maturazioni dei buoni dei propri dipendenti (v. <a class="reference internal" href="parameters.html"><span class="doc">Gestione parametri</span></a> ).</p>
+<p>Questa operazione è importante poichè i buoni pasto adesso servono a &quot;coprire&quot; le maturazioni che mensilmente ciascun dipendente fa
+grazie al tempo a lavoro trascorso ed è proprio questo dato che verrà inviato ad Attestati a fine mese ( v. <a class="reference internal" href="sendStampings.html"><span class="doc">Invio dati ad attestati</span></a>).</p>
+<p>Per fare un esempio:
+se un dipendente nel mese di settembre matura 16 buoni pasto, dal mese precedente (agosto) gli avanzavano 5 buoni cartacei e
+sempre nel mese di settembre gli vengono anche rilasciati 30 buoni elettronici, il sistema calcolerà naturalmente 16 come
+numero di buoni pasto maturati ma, a fine mese nell'invio dei dati ad Attestati, quel quantitativo sarà suddiviso in
+5 buoni cartacei e 11 buoni elettronici con cui verrà &quot;coperto&quot; il numero dei buoni maturati.</p>
 <p>Cliccando sulla persona, si aprirà la form di inserimento dei ticket:</p>
 <figure class="align-center" id="id2">
-<a class="reference internal image-reference" href="../_images/assegnaBuoni.png"><img alt="../_images/assegnaBuoni.png" src="../_images/assegnaBuoni.png" style="width: 768.0px; height: 432.0px;" /></a>
+<a class="reference internal image-reference" href="../_images/assegnaBuoniTop.png"><img alt="../_images/assegnaBuoniTop.png" src="../_images/assegnaBuoniTop.png" style="width: 1536.0px; height: 432.0px;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 2.55 </span><span class="caption-text">Schermata di assegnamento buoni pasto</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+<p><span class="caption-number">Fig. 2.55 </span><span class="caption-text">Schermata di assegnamento buoni pasto (1)</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/assegnaBuoniBottom.png"><img alt="../_images/assegnaBuoniBottom.png" src="../_images/assegnaBuoniBottom.png" style="width: 1536.0px; height: 432.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.56 </span><span class="caption-text">Schermata di assegnamento buoni pasto (2)</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
 <dt>In questa schermata vengono visualizzati:</dt><dd><ul class="simple">
-<li><p>i dati contrattuali con la data da cui si parte a considerare il conteggio per i buoni
-(solitamente l'inizio del mese selezionato) con i riepiloghi dei quantitativi di buoni
-assegnati e consumati</p></li>
-<li><p>la schermata di inserimento dei blocchetti di buoni pasto (tre alla volta, in cui specificare
-il codice del blocco, il numero di buoni, la data di attribuzione che è quella in cui si sta
-usando la form e il nome dell'amministratore che li ha assegnati).</p></li>
-<li><p>il riepilogo dei blocchi assegnati nell'anno in corso, con la possibilità di rimuoverli</p></li>
-<li><p>il riepilogo dei blocchi assegnati nell'anno passato, con la possibilità di rimuoverli</p></li>
+<li><p>il codice blocco (campo obbligatorio): in cui inserire il codice del blocchetto (nel caso di buoni elettronici,
+provvisoriamente, inserire una stringa alfanumerica univoca del tipo &quot;matricola+anno+mese&quot;</p></li>
+<li><p>la tipologia di blocco (campo obbligatorio) da selezionare tra cartaceo e elettronico</p></li>
+<li><p>numero iniziale (obbligatorio): da quale buono iniziare a conteggiare i buoni assegnati (campo che ha naturalmente più valenza nel
+caso dei buoni cartacei e da utilizzare, provvisoriamente, anche nel caso di inserimento di buoni elettronici</p></li>
+<li><p>numero finale (obbligatorio): fino a quale buono conteggiare i buoni assegnati (campo che ha naturalmente più valenza nel caso dei
+buoni cartacei e da utilizzare, provvisoriamente, anche nel caso di inserimento di buoni elettronici</p></li>
+<li><p>la data di consegna (obbligatorio): la data di consegna dei buoni pasto</p></li>
+<li><p>la data di scadenza (obbligatorio): la data di scadenza di quei buoni consegnati</p></li>
 </ul>
 </dd>
 </dl>
+<p>Nella seconda immagine, è invece possibile vedere un riepilogo degli ultimi tre inserimenti di buoni pasto.</p>
+<p>Dalle schede presenti in pagina, è possibile anche andare a modificare i buoni consegnati al dipendente cliccando sulla
+scheda <strong>Modifica buoni consegnati</strong>:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../_images/modificaBuoni.png"><img alt="../_images/modificaBuoni.png" src="../_images/modificaBuoni.png" style="width: 1536.0px; height: 432.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.57 </span><span class="caption-text">Schermata di modifica buoni pasto consegnati</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Nella schermata è possibile convertire da cartaceo ad elettronico i blocchetti consegnati cliccando sull'apposito bottone
+giallo nella colonna &quot;Converti&quot; oppure riconsegnare o eliminare i blocchetti cliccando sui rispettivi bottoni presenti a
+fine tabella.</p>
+<p>Nell'ultima scheda, quella relativa al riepilogo dei buoni consegnati, è ovviamente presente lo storico di tutti i buoni
+consegnati a quel dipendente.</p>
 </section>
 
 
