@@ -974,11 +974,11 @@ aspettativa il campo <em>absences</em> con la lista delle assenze nel periodo.</
 <h2><span class="section-number">8.5.3. </span>Aspettative per ufficio e anno (byOfficeAndYear)<a class="headerlink" href="#aspettative-per-ufficio-e-anno-byofficeandyear" title="Link a questa intestazione">¶</a></h2>
 <p>Analogamente ai metodi precedenti è possibile avere le informazioni annuali di tutte le aspettative
 dei dipendenti di una sede tramite una HTTP GET all'indirizzo <strong>/rest/v2/leaves/byOfficeAndYear</strong>.</p>
-<p>La sede è individuata tramite il parametro <em>sedeId</em>, per esempio per l'IIT corrisponde a <em>223400</em>.
-Negli esempio successivi sostituite <em>223400</em> con il <em>sedeId</em> della vostra sede.</p>
+<p>La sede è individuata tramite il parametro <em>codeId</em>, per esempio per l'IIT corrisponde a <em>223400</em>.
+Negli esempio successivi sostituite <em>223400</em> con il <em>codeId</em> della vostra sede.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
     GET https://epas-demo.devel.iit.cnr.it/rest/v2/leaves/byOfficeAndYear
-    <span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span> <span class="nv">year</span><span class="o">==</span><span class="m">2020</span>
+    <span class="nv">codeId</span><span class="o">==</span><span class="m">223400</span> <span class="nv">year</span><span class="o">==</span><span class="m">2020</span>
 </pre></div>
 </div>
 <p>Il JSON restituto contiene una lista con le eventuali aspettative di tutti i dipendenti della

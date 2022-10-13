@@ -67,14 +67,14 @@ Aspettative per ufficio e anno (byOfficeAndYear)
 Analogamente ai metodi precedenti è possibile avere le informazioni annuali di tutte le aspettative
 dei dipendenti di una sede tramite una HTTP GET all'indirizzo **/rest/v2/leaves/byOfficeAndYear**.
 
-La sede è individuata tramite il parametro *sedeId*, per esempio per l'IIT corrisponde a *223400*.
-Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
+La sede è individuata tramite il parametro *codeId*, per esempio per l'IIT corrisponde a *223400*.
+Negli esempio successivi sostituite *223400* con il *codeId* della vostra sede.
 
 .. code-block:: bash
 
   $ http -a istituto_xxx_person_day_reader
       GET https://epas-demo.devel.iit.cnr.it/rest/v2/leaves/byOfficeAndYear
-      sedeId==223400 year==2020
+      codeId==223400 year==2020
 
 Il JSON restituto contiene una lista con le eventuali aspettative di tutti i dipendenti della
 sede per l'anno selezionato.
