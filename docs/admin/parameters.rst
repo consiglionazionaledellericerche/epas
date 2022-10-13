@@ -32,6 +32,13 @@ passare alla visualizzazione dei parametri relativi alle altre sedi associate al
 Ovviamente, i parametri sono modificabili **se e solo se** si hanno diritti di amministrazione
 totali sulla sede.
 
+In questa sezione è di fondamentale importanza il nuovo parametro *Tipologia blocchetti buoni pasto*.
+Questo parametro serve a specificare quale tipologia di buoni pasto è utilizzata nella sede (Cartacei o Elettronici) 
+che sarà utilizzato in fase di invio dati ad Attestati nel caso il sistema non abbia informazioni sufficienti 
+per determinare se i buoni maturati nel mese sono di tipo elettronico o cartaceo, per esempio nei casi in cui la 
+consegna dei buoni sia posticipata rispetto alla loro maturazione.
+
+
 Parametri annuali
 -----------------
 
