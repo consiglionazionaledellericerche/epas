@@ -487,7 +487,7 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (user.person.isSeatSupervisor()) {
+    if (user.person.isSeatSupervisor() || user.person.isGroupManager()) {
       InformationRequests.listToApprove(request.informationType);
     } else {
       InformationRequests.list(request.informationType);

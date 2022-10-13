@@ -106,6 +106,10 @@ InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT=Richiesta validata dal re
 InformationRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
 InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT=Richiesta validata dall'amministratore del personale
 InformationRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+
+InformationRequestEventType.MANAGER_ACKNOWLEDGMENT=Richiesta validata dal responsabile di gruppo
+InformationRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile di gruppo
+
 InformationRequestEventType.COMPLETE=Richiesta completata
 InformationRequestEventType.DELETE=Richiesta cancellata
 InformationRequestEventType.EXPIRING=Richiesta scaduta

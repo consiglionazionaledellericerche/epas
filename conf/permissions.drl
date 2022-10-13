@@ -965,7 +965,13 @@ when
 			"AbsenceRequests.managerApproval",
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
-			"AbsenceRequests.disapproval"
+			"AbsenceRequests.disapproval",
+			
+			"InformationRequests.serviceExitToApprove",
+			"InformationRequests.listToApprove",
+			"InformationRequests.approval",
+			"InformationRequests.disapproval",
+			"InformationRequests.show"
 		), target==null, granted == false)
 then
   $c.grant();
@@ -1008,6 +1014,21 @@ when
 			"AbsenceRequests.show"
 			
 		), target == $ar, granted == false)
+then
+  $c.grant();
+end
+
+rule personInChargeForInformationFlows
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $ir: InformationRequest(managerApprovalRequired == true && managerApproved == null)
+  $c: PermissionCheck( action in (			
+			"InformationRequests.serviceExitToApprove",
+			"InformationRequests.listToApprove",
+			"InformationRequests.approval",
+			"InformationRequests.disapproval",
+			"InformationRequests.show"
+	), target == $ir, granted == false)
 then
   $c.grant();
 end

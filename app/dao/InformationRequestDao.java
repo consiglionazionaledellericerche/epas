@@ -76,7 +76,8 @@ public class InformationRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
 
     if (uroList.stream().noneMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)
-        || uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
+        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
+        || uro.role.name.equals(Role.GROUP_MANAGER))) {
       return Lists.newArrayList();
     }
     if (fromDate.isPresent()) {
@@ -94,7 +95,12 @@ public class InformationRequestDao extends DaoBase {
         && uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
       results.addAll(toApproveResultsAsPersonnelAdmin(uroList,
           informationType, signer, conditions));
-    } else {
+    } 
+    if (informationType.equals(InformationType.SERVICE_INFORMATION) 
+        && uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      results.addAll(toApproveResultsAsGroupManager(uroList, informationType, signer, conditions));
+    }
+    else {
       results.addAll(toApproveResultsAsSeatSuperVisor(uroList,
           informationType, signer, conditions));
     }
@@ -373,6 +379,21 @@ public class InformationRequestDao extends DaoBase {
       return Lists.newArrayList();
     }
   }
+  
+  /**
+   * Lista delle InformationRequest da approvare come responsabile di gruppo.
+   */
+  private List<InformationRequest> toApproveResultsAsGroupManager(List<UsersRolesOffices> uros,
+      InformationType informationType, Person signer, BooleanBuilder conditions) {
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+      conditions = groupManagerQuery(officeList, conditions, signer);
+      return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
+    } else {
+      return Lists.newArrayList();
+    }
+  }
 
 
   /**
@@ -410,6 +431,23 @@ public class InformationRequestDao extends DaoBase {
         .and(informationRequest.administrativeApprovalRequired.isTrue()
             .and(informationRequest.administrativeApproved.isNull()));
 
+    return condition;
+  }
+  
+  /**
+   * Ritorna le condizioni con l'aggiunta di quelle relative al responsabile di gruppo.
+   *
+   * @param officeList la lista delle sedi
+   * @param condition  le condizioni pregresse
+   * @param signer     colui che deve firmare la richiesta
+   * @return le condizioni per determinare se il responsabile di gruppo è coinvolto nell'approvazione.
+   */
+  private BooleanBuilder groupManagerQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
+    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    condition.and(informationRequest.person.office.in(officeList))
+    .and(informationRequest.managerApprovalRequired.isTrue()
+        .and(informationRequest.managerApproved.isNull()));
     return condition;
   }
 
@@ -476,10 +514,16 @@ public class InformationRequestDao extends DaoBase {
           informationRequest.officeHeadApprovalRequired.isTrue()
               .and(informationRequest.officeHeadApproved.isNotNull())
               .and(person.office.in(officeList)));
-    } else {
+    } 
+    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))){
       conditions.and(
           informationRequest.administrativeApprovalRequired.isTrue()
               .and(informationRequest.administrativeApproved.isNotNull())
+              .and(person.office.in(officeList)));
+    } else {
+      conditions.and(
+          informationRequest.managerApprovalRequired.isTrue()
+              .and(informationRequest.managerApproved.isNotNull())
               .and(person.office.in(officeList)));
     }
     return getQueryFactory().selectFrom(informationRequest)
