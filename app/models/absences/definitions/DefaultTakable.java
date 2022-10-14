@@ -93,6 +93,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_21P2), 
       20, null),
   
+  T_22(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_22), 
+      ImmutableSet.of(DefaultAbsenceType.A_22), 
+      -1, null),
+  
   T_26(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
