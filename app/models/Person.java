@@ -213,6 +213,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne
   @Required
   public Office office;
+  
+  @OneToMany(mappedBy = "person")
+  public Set<MealTicketCard> mealTicketCards = Sets.newHashSet();
 
   /**
    * TODO: da rimuovere quando si userà lo storico per intercettare il cambio di sede per adesso è
