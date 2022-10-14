@@ -68,6 +68,10 @@ public enum DefaultGroup {
   G_19P("19P - Permesso provv. per dipendente disabile L. 104/92 tre giorni mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_19P, DefaultComplation.C_19P, null, false, false),
+  
+  G_22("22 - Permesso 2h per figlio portatore di handicap con età <= 3 anni", "",
+      DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.always,
+      DefaultTakable.T_22, null, null, false, false),
 
   G_26("26 - Permesso per dipendente disabile L. 104/92 due ore giornaliere", "",
       DefaultCategoryType.ALTRI_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.always,
