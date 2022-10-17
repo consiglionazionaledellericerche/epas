@@ -28,6 +28,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -41,6 +43,8 @@ import play.data.validation.Required;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @ToString
 @Audited
 @Entity
@@ -53,24 +57,24 @@ public class PersonReperibility extends BaseModel {
   @ManyToOne
   @Required
   @JoinColumn(name = "person_id")
-  public Person person;
+  private Person person;
 
   @Column(name = "start_date")
-  public LocalDate startDate;
+  private LocalDate startDate;
 
   @Column(name = "end_date")
-  public LocalDate endDate;
+  private LocalDate endDate;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "person_reperibility_type_id")
-  public PersonReperibilityType personReperibilityType;
+  private PersonReperibilityType personReperibilityType;
 
   @OneToMany(mappedBy = "personReperibility", cascade = {CascadeType.REMOVE})
-  public List<PersonReperibilityDay> personReperibilityDays;
+  private List<PersonReperibilityDay> personReperibilityDays;
 
 
-  public String note;
+  private String note;
 
   /**
    * il range di date di validità dell'appartenenza di una persona al servizio di reperibilità.
@@ -96,8 +100,8 @@ public class PersonReperibility extends BaseModel {
       new Comparator<PersonReperibility>() {
 
           public int compare(PersonReperibility pr1, PersonReperibility pr2) {
-            String prName1 = pr1.personReperibilityType.description.toUpperCase();
-            String prName2 = pr2.personReperibilityType.description.toUpperCase();
+            String prName1 = pr1.personReperibilityType.getDescription().toUpperCase();
+            String prName2 = pr2.personReperibilityType.getDescription().toUpperCase();
             return prName1.compareTo(prName2);
           }
       };

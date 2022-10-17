@@ -33,6 +33,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -47,6 +48,8 @@ import play.data.validation.Unique;
  * @author Cristian Lucchesi
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "working_time_types")
@@ -61,44 +64,44 @@ public class WorkingTimeType extends BaseModel {
   @Required
   @Column(nullable = false)
   @Unique("office")
-  public String description;
+  private String description;
 
   @Getter
   @Required
-  public Boolean horizontal;
+  private Boolean horizontal;
 
   /**
    * True se il tipo di orario corrisponde ad un "turno di lavoro" false altrimenti.
    */
-  public boolean shift = false;
+  private boolean shift = false;
 
   @Column(name = "meal_ticket_enabled")
-  public boolean mealTicketEnabled = true;    //inutile
+  private boolean mealTicketEnabled = true;    //inutile
 
   @NotAudited
   @OneToMany(mappedBy = "workingTimeType")
-  public List<ContractWorkingTimeType> contractWorkingTimeType = Lists.newArrayList();
+  private List<ContractWorkingTimeType> contractWorkingTimeType = Lists.newArrayList();
 
   //@Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
-  public Office office;
+  private Office office;
 
   @Column(name = "disabled")
-  public boolean disabled = false;
+  private boolean disabled = false;
 
   @Getter
   @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
   @OrderBy("dayOfWeek")
-  public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
+  private List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
   
-  public boolean enableAdjustmentForQuantity = true;
+  private boolean enableAdjustmentForQuantity = true;
 
   @Unique(value = "office, externalId")
-  public String externalId;
+  private String externalId;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PreUpdate
   @PrePersist
@@ -120,8 +123,8 @@ public class WorkingTimeType extends BaseModel {
     int count = 0;
     int sum = 0;
     for (WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
-      if (wttd.workingTime > 0) {
-        sum += wttd.workingTime;
+      if (wttd.getWorkingTime() > 0) {
+        sum += wttd.getWorkingTime();
         count++;
       }
     }
@@ -146,29 +149,29 @@ public class WorkingTimeType extends BaseModel {
 
     for (WorkingTimeTypeDay wttd : this.workingTimeTypeDays) {
 
-      if (wttd.holiday) {
+      if (wttd.isHoliday()) {
         continue;
       }
 
       if (workingTime == null) {
-        workingTime = wttd.workingTime;
-        mealTicketTime = wttd.mealTicketTime;
-        breakTicketTime = wttd.breakTicketTime;
-        afternoonThreshold = wttd.ticketAfternoonThreshold;
-        afternoonThresholdTime = wttd.ticketAfternoonWorkingTime;
+        workingTime = wttd.getWorkingTime();
+        mealTicketTime = wttd.getMealTicketTime();
+        breakTicketTime = wttd.getBreakTicketTime();
+        afternoonThreshold = wttd.getTicketAfternoonThreshold();
+        afternoonThresholdTime = wttd.getTicketAfternoonWorkingTime();
         continue;
       }
 
-      if (!workingTime.equals(wttd.workingTime)) {
+      if (!workingTime.equals(wttd.getWorkingTime())) {
         equal = false;
       }
-      if (!mealTicketTime.equals(wttd.mealTicketTime)) {
+      if (!mealTicketTime.equals(wttd.getMealTicketTime())) {
         equal = false;
       }
-      if (!breakTicketTime.equals(wttd.breakTicketTime)) {
+      if (!breakTicketTime.equals(wttd.getBreakTicketTime())) {
         equal = false;
       }
-      if (!afternoonThreshold.equals(wttd.ticketAfternoonThreshold)) {
+      if (!afternoonThreshold.equals(wttd.getTicketAfternoonThreshold())) {
         equal = false;
       }
       if (!afternoonThresholdTime.equals(wttd.ticketAfternoonWorkingTime)) {
@@ -204,11 +207,11 @@ public class WorkingTimeType extends BaseModel {
     int totalMinutes = 0;
     int totalDays = 0;
     for (WorkingTimeTypeDay workingTimeTypeDay : this.workingTimeTypeDays) {
-      if (!workingTimeTypeDay.holiday) {
-        totalMinutes += workingTimeTypeDay.workingTime;        
+      if (!workingTimeTypeDay.isHoliday()) {
+        totalMinutes += workingTimeTypeDay.getWorkingTime();        
       }
-      if (workingTimeTypeDay.dayOfWeek != DateTimeConstants.SATURDAY 
-          && workingTimeTypeDay.dayOfWeek != DateTimeConstants.SUNDAY) {
+      if (workingTimeTypeDay.getDayOfWeek() != DateTimeConstants.SATURDAY 
+          && workingTimeTypeDay.getDayOfWeek() != DateTimeConstants.SUNDAY) {
         totalDays++;
       }
       

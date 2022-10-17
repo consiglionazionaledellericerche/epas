@@ -28,6 +28,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.BlockType;
 import org.hibernate.envers.Audited;
@@ -40,6 +42,8 @@ import play.data.validation.Unique;
 /**
  * Buoni pasto.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "meal_ticket", uniqueConstraints = {
@@ -52,39 +56,39 @@ public class MealTicket extends BaseModel {
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "contract_id", nullable = false)
-  public Contract contract;
+  private Contract contract;
 
-  public Integer year;
-
-  @Required
-  public LocalDate date;
+  private Integer year;
 
   @Required
-  public String block; /*esempio 5941 3165 01 */
+  private LocalDate date;
+
+  @Required
+  private String block; /*esempio 5941 3165 01 */
   
   @Enumerated(EnumType.STRING)
-  public BlockType blockType;
+  private BlockType blockType;
 
-  public Integer number;
+  private Integer number;
 
   //@CheckWith(MealTicketInOffice.class)
   @Unique(value = "code, office")
-  public String code; /* concatenzazione block + number */
+  private String code; /* concatenzazione block + number */
 
   @Required
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "admin_id", nullable = false)
-  public Person admin;
+  private Person admin;
 
   @Required
   @Column(name = "expire_date")
-  public LocalDate expireDate;
+  private LocalDate expireDate;
   
-  public boolean returned = false;
+  private boolean returned = false;
   
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id", nullable = false)
-  public Office office;
+  private Office office;
 
   @Transient
   public Boolean used = null;
@@ -96,7 +100,7 @@ public class MealTicket extends BaseModel {
             .add("id", id)
             .add("contract", contract.id)
             .add("code", code)
-            .add("person", contract.person.name + " " + contract.person.surname)
+            .add("person", contract.getPerson().getName() + " " + contract.getPerson().getSurname())
             .add("date", date)
             .add("expire", expireDate).toString();
 

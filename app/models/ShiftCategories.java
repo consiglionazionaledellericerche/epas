@@ -28,6 +28,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -38,6 +40,8 @@ import play.data.validation.Unique;
 /**
  * Categoria di turno.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "shift_categories")
@@ -47,7 +51,7 @@ public class ShiftCategories extends BaseModel {
 
   @Required
   @Unique
-  public String description;
+  private String description;
 
   /**
    * responsabile della categoria turno.
@@ -55,21 +59,21 @@ public class ShiftCategories extends BaseModel {
   @ManyToOne(optional = false)
   @JoinColumn(name = "supervisor")
   @Required
-  public Person supervisor;
+  private Person supervisor;
   
-  public boolean disabled;
+  private boolean disabled;
   
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "office_id")
   @NotNull
-  public Office office; 
+  private Office office; 
   
   @NotAudited
   @OneToMany(mappedBy = "shiftCategories")
-  public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
+  private List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
   
   @ManyToMany
-  public List<Person> managers = Lists.newArrayList();
+  private List<Person> managers = Lists.newArrayList();
   
   @Override
   public String toString() {

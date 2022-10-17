@@ -27,6 +27,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -43,6 +44,8 @@ import play.data.validation.Required;
  * @author Cristian Lucchesi
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @ToString
 @Audited
 @Entity
@@ -53,44 +56,42 @@ public class WorkingTimeTypeDay extends BaseModel {
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "working_time_type_id", nullable = false)
-  public WorkingTimeType workingTimeType;
+  private WorkingTimeType workingTimeType;
 
   @Getter
   @Required
   @Min(1)
   @Max(7)
-  public int dayOfWeek;
+  private int dayOfWeek;
 
   /**
    * tempo di lavoro giornaliero espresso in minuti.
    */
   @Getter
   @Required
-  public Integer workingTime;
+  private Integer workingTime;
 
   /**
    * booleano per controllo se il giorno in questione è festivo o meno.
    */
   @Getter
-  public boolean holiday = false;
+  private boolean holiday = false;
 
   /**
    * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto.
    */
-  @Getter
   @Required
-  public Integer mealTicketTime = 0;
+  private Integer mealTicketTime = 0;
 
-  @Getter
   @Required
-  public Integer breakTicketTime = 0;
+  private Integer breakTicketTime = 0;
 
   /**
    * La soglia pomeridiana dopo la quale è necessario effettuare lavoro per avere diritto al buono
    * pasto.
    */
   @Getter
-  public Integer ticketAfternoonThreshold = 0;
+  private Integer ticketAfternoonThreshold = 0;
 
   /**
    * La quantità di lavoro dopo la soglia pomeridiana necessaria per avere diritto al buono pasto.
@@ -101,23 +102,23 @@ public class WorkingTimeTypeDay extends BaseModel {
 
   // Campi non utilizzati
 
-  public Integer timeSlotEntranceFrom;
-  public Integer timeSlotEntranceTo;
-  public Integer timeSlotExitFrom;
-  public Integer timeSlotExitTo;
+  private Integer timeSlotEntranceFrom;
+  private Integer timeSlotEntranceTo;
+  private Integer timeSlotExitFrom;
+  private Integer timeSlotExitTo;
 
   /**
    * tempo inizio pausa pranzo.
    */
-  public Integer timeMealFrom;
+  private Integer timeMealFrom;
 
   /**
    * tempo fine pausa pranzo.
    */
-  public Integer timeMealTo;
+  private Integer timeMealTo;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PreUpdate
   @PrePersist

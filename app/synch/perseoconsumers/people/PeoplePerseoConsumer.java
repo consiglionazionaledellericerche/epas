@@ -164,19 +164,19 @@ public class PeoplePerseoConsumer {
       Map<Integer, Qualification> qualificationsMap) {
 
     Person person = new Person();
-    person.name = perseoPerson.firstname;
-    person.surname = perseoPerson.surname;
-    person.number = perseoPerson.number;
-    person.email = perseoPerson.email; //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    person.setName(perseoPerson.firstname);
+    person.setSurname(perseoPerson.surname);
+    person.setNumber(perseoPerson.number);
+    person.setEmail(perseoPerson.email); //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
     if (perseoPerson.eppn != null) {
-      person.eppn = perseoPerson.eppn;
+      person.setEppn(perseoPerson.eppn);
     } else {
-      person.eppn = perseoPerson.email;
+      person.setEppn(perseoPerson.email);
     }
-    person.qualification = qualificationsMap.get(perseoPerson.qualification);
-    person.perseoId = perseoPerson.id;
+    person.setQualification(qualificationsMap.get(perseoPerson.qualification));
+    person.setPerseoId(perseoPerson.id);
 
-    person.perseoOfficeId = perseoPerson.departmentId;
+    person.setPerseoOfficeId(perseoPerson.departmentId);
 
     return person;
   }
@@ -192,7 +192,7 @@ public class PeoplePerseoConsumer {
     List<Person> people = Lists.newArrayList();
     for (PerseoPerson perseoPerson : perseoPeople) {
       Person person = epasConverter(perseoPerson, qualificationsMap);
-      if (person.number == null) {
+      if (person.getNumber() == null) {
         //non dovrebbe succedere...
         log.warn("Ricevuta dall'anagrafica una persona senza matricola... {}.", person.toString());
       } else {
@@ -221,7 +221,7 @@ public class PeoplePerseoConsumer {
     }
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : epasConverter(perseoPeople)) {
-      perseoPeopleMap.put(person.perseoId, person);
+      perseoPeopleMap.put(person.getPerseoId(), person);
     }
     return perseoPeopleMap;
   }
@@ -235,7 +235,7 @@ public class PeoplePerseoConsumer {
 
     Map<String, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoPeopleByPerseoId(departmentPerseoId).values()) {
-      perseoPeopleMap.put(person.number, person);
+      perseoPeopleMap.put(person.getNumber(), person);
     }
     return perseoPeopleMap;
   }

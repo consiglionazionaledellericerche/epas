@@ -22,6 +22,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -33,6 +35,8 @@ import play.data.validation.Required;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "certificated_data")
@@ -40,37 +44,37 @@ public class CertificatedData extends BaseModel {
 
   private static final long serialVersionUID = 4909012051833782060L;
 
-  public int year;
-  public int month;
+  private int year;
+  private int month;
 
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
 
   @Column(name = "cognome_nome")
-  public String cognomeNome;
+  private String cognomeNome;
 
   @Column(name = "matricola")
-  public String matricola;
+  private String matricola;
 
   @Column(name = "absences_sent")
-  public String absencesSent = null;
+  private String absencesSent = null;
 
   @Column(name = "competences_sent")
-  public String competencesSent = null;
+  private String competencesSent = null;
 
   @Column(name = "meal_ticket_sent")
-  public String mealTicketSent = null;
+  private String mealTicketSent = null;
 
   @Column(name = "traininghours_sent")
-  public String trainingHoursSent = null;
+  private String trainingHoursSent = null;
 
   @Column(name = "problems")
-  public String problems = null;
+  private String problems = null;
 
   @Column(name = "is_ok")
-  public boolean isOk = false;
+  private boolean isOk = false;
 
   /**
    * Costruttore.

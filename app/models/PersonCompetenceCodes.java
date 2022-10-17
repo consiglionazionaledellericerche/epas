@@ -22,6 +22,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.PeriodModel;
 import play.data.validation.Required;
 
@@ -30,6 +32,8 @@ import play.data.validation.Required;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "persons_competence_codes")
 public class PersonCompetenceCodes extends PeriodModel {
@@ -39,18 +43,18 @@ public class PersonCompetenceCodes extends PeriodModel {
   @Required
   @ManyToOne
   @JoinColumn(name = "person_id")
-  public Person person;
+  private Person person;
   
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "competence_code_id")
-  public CompetenceCode competenceCode;
+  private CompetenceCode competenceCode;
 
   @Override
   public String toString() {
     return String.format(
         "PersonCompetenceCodes[%d] - person.name = %s, competenceCode = %s, "
         + "beginDate = %s, endDate = %s",
-         id, person.fullName(), competenceCode.code, beginDate, endDate);
+         id, person.fullName(), competenceCode.getCode(), getBeginDate(), getEndDate());
   }
 }

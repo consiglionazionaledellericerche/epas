@@ -27,6 +27,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import play.data.validation.Unique;
 
@@ -34,6 +36,8 @@ import play.data.validation.Unique;
 /**
  * Una zona di timbratura. Utilizzate per calcoli particolari tra zone collegate.
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "zones")
 public class Zone extends BaseModel {
@@ -42,20 +46,20 @@ public class Zone extends BaseModel {
 
   @Unique
   @NotNull
-  public String name;
+  private String name;
   
-  public String description;
+  private String description;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "badge_reader_id")
   @Nullable
-  public BadgeReader badgeReader;
+  private BadgeReader badgeReader;
   
   @OneToMany(mappedBy = "zoneBase")
-  public List<ZoneToZones> zoneLinkedAsMaster = Lists.newArrayList();
+  private List<ZoneToZones> zoneLinkedAsMaster = Lists.newArrayList();
   
   @OneToMany(mappedBy = "zoneLinked")
-  public List<ZoneToZones> zoneLinkedAsSlave = Lists.newArrayList();
+  private List<ZoneToZones> zoneLinkedAsSlave = Lists.newArrayList();
   
   /* Utilizzata nelle select html per mostrare questa zona.
    * @see models.base.BaseModel#getLabel()

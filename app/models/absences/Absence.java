@@ -35,6 +35,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.Person;
 import models.PersonDay;
 import models.TimeVariation;
@@ -51,6 +52,8 @@ import play.db.jpa.Blob;
 /**
  * Modello per le assenze.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "absences")
@@ -60,48 +63,47 @@ public class Absence extends BaseModel {
 
   // Vecchia Modellazione (da rimuovere)
 
-  @Getter
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
-  public PersonDay personDay;
+  private PersonDay personDay;
 
   // Nuova Modellazione
 
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  public AbsenceType absenceType;
+  private AbsenceType absenceType;
 
   @Column(name = "absence_file", nullable = true)
-  public Blob absenceFile;
+  private Blob absenceFile;
 
   @Getter
-  public Integer justifiedMinutes;
+  private Integer justifiedMinutes;
 
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
-  public JustifiedType justifiedType;
+  private JustifiedType justifiedType;
 
   @NotAudited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.REMOVE})
-  public Set<AbsenceTrouble> troubles = Sets.newHashSet();
+  private Set<AbsenceTrouble> troubles = Sets.newHashSet();
 
   //Nuovo campo per la gestione delle missioni in caso di modifica delle date
   @Unique(value = "externalIdentifier,personDay")
-  public Long externalIdentifier;
+  private Long externalIdentifier;
 
   //Nuovi campi per la possibilità di inserire le decurtazioni di tempo per i 91s
-  public LocalDate expireRecoverDate;
+  private LocalDate expireRecoverDate;
 
-  public int timeToRecover;
+  private int timeToRecover;
 
   @Audited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.ALL})
-  public Set<TimeVariation> timeVariations = Sets.newHashSet();
+  private Set<TimeVariation> timeVariations = Sets.newHashSet();
 
-  public String note;
+  private String note;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PreUpdate
   @PrePersist
@@ -112,11 +114,11 @@ public class Absence extends BaseModel {
   @Override
   public String toString() {
     if (personDay == null) {
-      return this.getAbsenceDate() + " - " + this.getAbsenceType().code;
+      return this.getAbsenceDate() + " - " + this.getAbsenceType().getCode();
     }
-    return this.getPersonDay().person.fullName()
+    return this.getPersonDay().getPerson().fullName()
         + " - " + this.getAbsenceDate()
-        + " - " + this.getAbsenceType().code;
+        + " - " + this.getAbsenceType().getCode();
   }
 
   // TODO: spostare la relazione dal person day alla person e persistere il campo date.
@@ -152,11 +154,11 @@ public class Absence extends BaseModel {
     if (this.justifiedType == null) {
       throw new IllegalStateException();
     }
-    if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-      return this.absenceType.justifiedTime;
+    if (this.justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
+      return this.absenceType.getJustifiedTime();
     }
-    if (this.justifiedType.name.equals(JustifiedTypeName.specified_minutes)
-        || this.justifiedType.name.equals(JustifiedTypeName.specified_minutes_limit)) {
+    if (this.justifiedType.getName().equals(JustifiedTypeName.specified_minutes)
+        || this.justifiedType.getName().equals(JustifiedTypeName.specified_minutes_limit)) {
       if (this.justifiedMinutes == null) {
         throw new IllegalStateException();
       }
@@ -175,11 +177,11 @@ public class Absence extends BaseModel {
     if (this.justifiedType == null) {
       throw new IllegalStateException();
     }
-    if (this.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)
-        && this.absenceType.justifiedTime == 0) {
+    if (this.justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)
+        && this.absenceType.getJustifiedTime() == 0) {
       return true;
     }
-    if (this.justifiedType.name.equals(JustifiedTypeName.nothing)) {
+    if (this.justifiedType.getName().equals(JustifiedTypeName.nothing)) {
       return true;
     }
     return false;
@@ -197,12 +199,12 @@ public class Absence extends BaseModel {
       return Lists.newArrayList();
     }
     List<Absence> replacings = Lists.newArrayList();
-    for (Absence absence : this.personDay.absences) {
+    for (Absence absence : this.personDay.getAbsences()) {
       if (absence.equals(this)) {
         continue;
       }
-      if (groupAbsenceType.complationAbsenceBehaviour != null
-          && groupAbsenceType.complationAbsenceBehaviour.replacingCodes
+      if (groupAbsenceType.getComplationAbsenceBehaviour() != null
+          && groupAbsenceType.getComplationAbsenceBehaviour().getReplacingCodes()
           .contains(absence.absenceType)) {
         replacings.add(absence);
       }
@@ -217,12 +219,12 @@ public class Absence extends BaseModel {
    */
   @Transient
   public boolean hasReplacing() {
-    for (ComplationAbsenceBehaviour complation : this.absenceType.complationGroup) {
-      for (Absence absence : this.personDay.absences) {
+    for (ComplationAbsenceBehaviour complation : this.absenceType.getComplationGroup()) {
+      for (Absence absence : this.personDay.getAbsences()) {
         if (absence.equals(this)) {
           continue;
         }
-        if (complation.replacingCodes.contains(absence.absenceType)) {
+        if (complation.getReplacingCodes().contains(absence.absenceType)) {
           return true;
         }
       }
@@ -240,11 +242,12 @@ public class Absence extends BaseModel {
   @Transient
   public boolean isOrphanReplacing(Set<GroupAbsenceType> involvedGroups) {
     for (GroupAbsenceType groupAbsenceType : involvedGroups) {
-      if (groupAbsenceType.complationAbsenceBehaviour == null) {
+      if (groupAbsenceType.getComplationAbsenceBehaviour() == null) {
         continue;
       }
-      if (groupAbsenceType.complationAbsenceBehaviour.replacingCodes.contains(this.absenceType)) {
-        for (Absence absence : this.personDay.absences) {
+      if (groupAbsenceType.getComplationAbsenceBehaviour().getReplacingCodes()
+          .contains(this.absenceType)) {
+        for (Absence absence : this.personDay.getAbsences()) {
           if (absence.replacingAbsences(groupAbsenceType).contains(this)) {
             return false;
           }
@@ -263,10 +266,11 @@ public class Absence extends BaseModel {
   @Transient
   public boolean isReplacing(Set<GroupAbsenceType> involvedGroups) {
     for (GroupAbsenceType groupAbsenceType : involvedGroups) {
-      if (groupAbsenceType.complationAbsenceBehaviour == null) {
+      if (groupAbsenceType.getComplationAbsenceBehaviour() == null) {
         continue;
       }
-      if (groupAbsenceType.complationAbsenceBehaviour.replacingCodes.contains(this.absenceType)) {
+      if (groupAbsenceType.getComplationAbsenceBehaviour().getReplacingCodes()
+          .contains(this.absenceType)) {
         return true;
       }
     }
@@ -279,7 +283,7 @@ public class Absence extends BaseModel {
    * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
-    return personDay.person;
+    return personDay.getPerson();
   }
 
   /**
@@ -288,7 +292,7 @@ public class Absence extends BaseModel {
    * @return il mese relativo alla data della timbratura.
    */
   public YearMonth getYearMonth() {
-    return new YearMonth(personDay.date.getYear(), personDay.date.getMonthOfYear());
+    return new YearMonth(personDay.getDate().getYear(), personDay.getDate().getMonthOfYear());
   }
 
   /**
@@ -299,7 +303,7 @@ public class Absence extends BaseModel {
    * @return la stringa del codice di assenza.
    */
   public String getCode() {
-    return absenceType.code;
+    return absenceType.getCode();
   }
 
   /**

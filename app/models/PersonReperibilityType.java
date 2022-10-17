@@ -31,6 +31,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -44,6 +46,8 @@ import play.data.validation.Unique;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "person_reperibility_types")
@@ -53,32 +57,32 @@ public class PersonReperibilityType extends BaseModel {
 
   @Required
   @Unique
-  public String description;
+  private String description;
 
   @OneToMany(mappedBy = "personReperibilityType")
-  public List<PersonReperibility> personReperibilities;
+  private List<PersonReperibility> personReperibilities;
 
   /* responsabile della reperibilità */
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @Required
-  public Person supervisor;
+  private Person supervisor;
   
-  public boolean disabled;
+  private boolean disabled;
   
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @NotNull
-  public Office office; 
+  private Office office; 
  
   @OneToMany(mappedBy = "personReperibilityType", cascade = CascadeType.REMOVE)
-  public Set<ReperibilityTypeMonth> monthsStatus = new HashSet<>();
+  private Set<ReperibilityTypeMonth> monthsStatus = new HashSet<>();
   
   @ManyToMany
-  public List<Person> managers = Lists.newArrayList();
+  private List<Person> managers = Lists.newArrayList();
   
   /*Tipo di competenza mensile*/
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
-  public MonthlyCompetenceType monthlyCompetenceType;
+  private MonthlyCompetenceType monthlyCompetenceType;
 
   @Override
   public String toString() {
@@ -96,7 +100,7 @@ public class PersonReperibilityType extends BaseModel {
     final YearMonth requestedMonth = new YearMonth(date);
     return monthsStatus.stream()
         .filter(reperibilityTypeMonth -> reperibilityTypeMonth
-            .yearMonth.equals(requestedMonth)).findFirst();
+            .getYearMonth().equals(requestedMonth)).findFirst();
   }
 
   /**
@@ -109,7 +113,7 @@ public class PersonReperibilityType extends BaseModel {
   public boolean approvedOn(LocalDate date) {
     Optional<ReperibilityTypeMonth> monthStatus = monthStatusByDate(date);
     if (monthStatus.isPresent()) {
-      return monthStatus.get().approved;
+      return monthStatus.get().isApproved();
     } else {
       return false;
     }

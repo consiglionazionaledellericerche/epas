@@ -35,6 +35,8 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import manager.configurations.EpasParam;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
@@ -51,89 +53,91 @@ import play.data.validation.Unique;
 /**
  * Un ufficio.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -8689432709728656660L;
 
-  public Long perseoId;
+  private Long perseoId;
 
   @Required
   @NotNull
   @Column(nullable = false)
-  public String name;
+  private String name;
 
   //Codice della sede, per esempio per la sede di Pisa è "044000"
   @As(binder = NullStringBinder.class)
-  public String code;
+  private String code;
 
   //sedeId, serve per l'invio degli attestati, per esempio per la sede di Pisa è "223400"
   @Required
   @Unique
   @NotNull
-  public String codeId;
+  private String codeId;
 
-  public String address;
+  private String address;
 
-  public LocalDate joiningDate;
+  private LocalDate joiningDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  public Institute institute;
+  private Institute institute;
 
-  public boolean headQuarter = false;
+  private boolean headQuarter = false;
 
   @OneToMany(mappedBy = "owner", cascade = {CascadeType.REMOVE})
-  public List<User> users = Lists.newArrayList();
+  private List<User> users = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<BadgeSystem> badgeSystems = Lists.newArrayList();
+  private List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<Person> persons = Lists.newArrayList();
+  private List<Person> persons = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<Configuration> configurations = Lists.newArrayList();
+  private List<Configuration> configurations = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<PersonReperibilityType> personReperibilityTypes = Lists.newArrayList();
+  private List<PersonReperibilityType> personReperibilityTypes = Lists.newArrayList();
   
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<ShiftCategories> shiftCategories = Lists.newArrayList();
+  private List<ShiftCategories> shiftCategories = Lists.newArrayList();
 
   
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+  private List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  public List<Group> groups = Lists.newArrayList();
+  private List<Group> groups = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<WorkingTimeType> workingTimeType = Lists.newArrayList();
+  private List<WorkingTimeType> workingTimeType = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<TimeSlot> timeSlots = Lists.newArrayList();
+  private List<TimeSlot> timeSlots = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<ShiftTimeTable> shiftTimeTable = Lists.newArrayList();
+  private List<ShiftTimeTable> shiftTimeTable = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<TotalOvertime> totalOvertimes = Lists.newArrayList();
+  private List<TotalOvertime> totalOvertimes = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<Attachment> attachments = Lists.newArrayList();
+  private List<Attachment> attachments = Lists.newArrayList();
   
   @NotAudited
   @OneToMany(mappedBy = "office")
-  public List<MealTicket> tickets = Lists.newArrayList();
+  private List<MealTicket> tickets = Lists.newArrayList();
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PreUpdate
   @PrePersist
@@ -181,7 +185,7 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   private Set<IPropertyInPeriod> filterConfigurations(EpasParam epasParam) {
     Set<IPropertyInPeriod> configurations = Sets.newHashSet();
     for (Configuration configuration : this.configurations) {
-      if (configuration.epasParam.equals(epasParam)) {
+      if (configuration.getEpasParam().equals(epasParam)) {
         configurations.add(configuration);
       }
     }
@@ -198,8 +202,8 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
    *     indicato.
    */
   public boolean checkConf(EpasParam param, String value) {
-    return configurations.stream().anyMatch(conf -> conf.epasParam == param
-        && conf.fieldValue.equals(value));
+    return configurations.stream().anyMatch(conf -> conf.getEpasParam() == param
+        && conf.getFieldValue().equals(value));
   }
 
 }

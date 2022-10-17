@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
@@ -41,6 +43,8 @@ import play.data.validation.Unique;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "competence_codes")
@@ -50,48 +54,48 @@ public class CompetenceCode extends BaseModel {
   
   @NotAudited
   @OneToMany(mappedBy = "workdaysCode")
-  public List<MonthlyCompetenceType> workdaysCodes = Lists.newArrayList();
+  private List<MonthlyCompetenceType> workdaysCodes = Lists.newArrayList();
   
   @NotAudited
   @OneToMany(mappedBy = "holidaysCode")
-  public List<MonthlyCompetenceType> holidaysCodes = Lists.newArrayList();
+  private List<MonthlyCompetenceType> holidaysCodes = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "competenceCode")
-  public List<Competence> competence = Lists.newArrayList();
+  private List<Competence> competence = Lists.newArrayList();
 
   @NotAudited
   @OneToMany(mappedBy = "competenceCode")
-  public List<PersonCompetenceCodes> personCompetenceCodes = Lists.newArrayList();
+  private List<PersonCompetenceCodes> personCompetenceCodes = Lists.newArrayList();
 
   @ManyToOne
   @JoinColumn(name = "competence_code_group_id")
-  public CompetenceCodeGroup competenceCodeGroup;
+  private CompetenceCodeGroup competenceCodeGroup;
 
   @Required
   @Unique
-  public String code;
+  private String code;
 
   @Column
-  public String codeToPresence;
+  private String codeToPresence;
 
   @Unique
   @Required
-  public String description;
+  private String description;
 
-  public boolean disabled;
+  private boolean disabled;
 
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_type")
-  public LimitType limitType;
+  private LimitType limitType;
 
   @Column(name = "limit_value")
-  public Integer limitValue;
+  private Integer limitValue;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_unit")
-  public LimitUnit limitUnit;
+  private LimitUnit limitUnit;
 
 
   @Override

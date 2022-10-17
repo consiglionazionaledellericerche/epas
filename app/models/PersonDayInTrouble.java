@@ -23,13 +23,18 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.Troubles;
 import org.hibernate.envers.Audited;
 
+
 /**
  * Giornata lavorativa con qualche problema.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 public class PersonDayInTrouble extends BaseModel {
@@ -37,14 +42,14 @@ public class PersonDayInTrouble extends BaseModel {
   private static final long serialVersionUID = 4802468368796902865L;
 
   @Enumerated(EnumType.STRING)
-  public Troubles cause;
+  private Troubles cause;
 
-  public boolean emailSent;
+  private boolean emailSent;
 
   @NotNull
   @ManyToOne
   @JoinColumn(updatable = false)
-  public PersonDay personDay;
+  private PersonDay personDay;
 
   /**
    * Costruttore.

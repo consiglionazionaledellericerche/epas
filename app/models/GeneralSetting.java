@@ -18,6 +18,8 @@
 package models;
 
 import javax.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -26,6 +28,8 @@ import org.hibernate.envers.Audited;
  * Configurazione generale di ePAS.
  *
  */
+@Getter
+@Setter
 @ToString
 @Entity
 @Audited
@@ -33,77 +37,77 @@ public class GeneralSetting extends BaseModel {
 
   private static final long serialVersionUID = 881278299637007974L;
 
-  public boolean regulationsEnabled = false;
+  private boolean regulationsEnabled = false;
   
   //Cookie policy
-  public boolean cookiePolicyEnabled = false;
-  public String cookiePolicyContent;
+  private boolean cookiePolicyEnabled = false;
+  private String cookiePolicyContent;
   
   // Parametri gestione anagrafica
   
-  public boolean syncBadgesEnabled = false;
-  public boolean syncOfficesEnabled = false;
-  public boolean syncPersonsEnabled = false;
+  private boolean syncBadgesEnabled = false;
+  private boolean syncOfficesEnabled = false;
+  private boolean syncPersonsEnabled = false;
   
   // Fine parametri gestione anagrafica
   
   // Parametri gestione invio dati a fine mese
   
-  public boolean onlyMealTicket = false;
+  private boolean onlyMealTicket = false;
 
   // Fine parametri gestione invio dati a fine mese
   
   // Parametri gestione codici di competenza turno
   
-  public String startDailyShift = "6:00";
+  private String startDailyShift = "6:00";
   
-  public String endDailyShift = "19:00";
+  private String endDailyShift = "19:00";
   
-  public String startNightlyShift = "19:00";
+  private String startNightlyShift = "19:00";
   
-  public String endNightlyShift = "6:00";
+  private String endNightlyShift = "6:00";
   // Fine parametri gestione codici di competenza turno
   
   // Parametri gestione gruppi
   
-  public boolean handleGroupsByInstitute = true;
+  private boolean handleGroupsByInstitute = true;
   
-  public boolean enableDailyPresenceForManager = true;
+  private boolean enableDailyPresenceForManager = true;
   
   // Fine parametri gestione gruppi
   
   // Parametri gestione giorni di turno
   
-  public boolean saturdayHolidayShift = true;
+  private boolean saturdayHolidayShift = true;
   
-  public boolean roundingShiftQuantity = false;
+  private boolean roundingShiftQuantity = false;
   
-  public boolean enableUniqueDailyShift = true;
+  private boolean enableUniqueDailyShift = true;
   
-  public boolean holidayShiftInNightToo = false;
+  private boolean holidayShiftInNightToo = false;
     
   // Fine parametri gestione giorni di turno
   
   // Parametri visualizzazione richieste di flusso
   
-  public boolean enableIllnessFlow = false;
+  private boolean enableIllnessFlow = false;
   
   // Parametro per abilitazione visualizzazione parametro covid19
-  public boolean enableAutoconfigCovid19 = false;
+  private boolean enableAutoconfigCovid19 = false;
   
-  public boolean enableAutoconfigSmartworking = false;
+  private boolean enableAutoconfigSmartworking = false;
   
   /**
    * Numero massimo di giorni nel passato per cui è possibile
    * inserire timbrature via REST.
    */
-  public int maxDaysInPastForRestStampings = 90;
+  private int maxDaysInPastForRestStampings = 90;
   
   /*
    * Indica se è possibile o meno configurare per i livelli I-III
    * la richiesta di approvazione ferie da parte di un responsabile di 
    * gruppo o del responsabile di sede. 
    */
-  public boolean enableAbsenceTopLevelAuthorization = true;
+  private boolean enableAbsenceTopLevelAuthorization = true;
 
 }

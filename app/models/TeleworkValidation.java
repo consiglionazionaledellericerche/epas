@@ -6,13 +6,18 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+
 
 /**
  * Informazioni sull'approvazione mensile delle attività in telelavoro.
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "telework_validations")
 @Audited
@@ -21,15 +26,15 @@ public class TeleworkValidation extends BaseModel {
   private static final long serialVersionUID = -4472102414284745470L;
   
   @ManyToOne(fetch = FetchType.LAZY)
-  public Person person;
+  private Person person;
   
-  public int year;
+  private int year;
   
-  public int month;
+  private int month;
   
-  public boolean approved;
+  private boolean approved;
   
-  public LocalDate approvationDate;
+  private LocalDate approvationDate;
   
   /**
    * Verifica che il telelavoro sia stato validato.

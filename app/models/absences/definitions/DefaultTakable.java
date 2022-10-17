@@ -817,7 +817,7 @@ public enum DefaultTakable {
     for (DefaultTakable defaultTakable : DefaultTakable.values()) {
       boolean found = false;
       for (TakableAbsenceBehaviour takable : allTakables) {
-        if (defaultTakable.name().equals(takable.name)) {
+        if (defaultTakable.name().equals(takable.getName())) {
           found = true;
           break;
         }
@@ -836,7 +836,7 @@ public enum DefaultTakable {
    */
   public static Optional<DefaultTakable> byName(TakableAbsenceBehaviour takable) {
     for (DefaultTakable defaultTakable : DefaultTakable.values()) {
-      if (defaultTakable.name().equals(takable.name)) {
+      if (defaultTakable.name().equals(takable.getName())) {
         return Optional.of(defaultTakable);
       }
     }

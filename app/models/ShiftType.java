@@ -31,6 +31,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -42,6 +44,8 @@ import play.data.validation.Min;
 /**
  * Tipologia di turno.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "shift_type")
@@ -50,77 +54,77 @@ public class ShiftType extends BaseModel {
   private static final long serialVersionUID = 3156856871540530483L;
 
   
-  public String type;
+  private String type;
   
-  public String description;
+  private String description;
   
   @Column(name = "allow_unpair_slots")
-  public boolean allowUnpairSlots = false;
+  private boolean allowUnpairSlots = false;
   
   @Min(0)
   @Column(name = "entrance_tolerance")
-  public int entranceTolerance;
+  private int entranceTolerance;
   
   @Min(0)
   @Column(name = "entrance_max_tolerance")
-  public int entranceMaxTolerance;
+  private int entranceMaxTolerance;
 
   @Min(0)
   @Column(name = "exit_tolerance")
-  public int exitTolerance;
+  private int exitTolerance;
   
   @Min(0)
   @Column(name = "exit_max_tolerance")
-  public int exitMaxTolerance;
+  private int exitMaxTolerance;
   
   //quantità massima di tolleranze concesse all'interno dell'attività
   @Max(3)
   @Min(0)
   @Column(name = "max_tolerance_allowed")
-  public int maxToleranceAllowed;
+  private int maxToleranceAllowed;
 
   @Min(0)
   @Column(name = "break_in_shift")
-  public int breakInShift;
+  private int breakInShift;
   
   @Min(0)
   @Column(name = "break_max_in_shift")
-  public int breakMaxInShift;
+  private int breakMaxInShift;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
+  private List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+  private List<PersonShiftDay> personShiftDays = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "type")
-  public List<ShiftCancelled> shiftCancelled = new ArrayList<>();
+  private List<ShiftCancelled> shiftCancelled = new ArrayList<>();
 
   @NotAudited
   @ManyToOne
   @JoinColumn(name = "shift_time_table_id")
-  public ShiftTimeTable shiftTimeTable;
+  private ShiftTimeTable shiftTimeTable;
 
   @NotAudited
   @ManyToOne
   @JoinColumn(name = "organization_shift_time_table_id")
-  public OrganizationShiftTimeTable organizaionShiftTimeTable;
+  private OrganizationShiftTimeTable organizaionShiftTimeTable;
   
   //@Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "shift_categories_id")
-  public ShiftCategories shiftCategories;
+  private ShiftCategories shiftCategories;
 
   @OneToMany(mappedBy = "shiftType", cascade = CascadeType.REMOVE)
   @OrderBy("yearMonth DESC")
-  public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
+  private Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
 
   @Override
   public String toString() {
-    return shiftCategories.description + " - " + type;
+    return shiftCategories.getDescription() + " - " + type;
   }
 
   /**
@@ -152,7 +156,7 @@ public class ShiftType extends BaseModel {
   public Optional<ShiftTypeMonth> monthStatusByDate(LocalDate date) {
     final YearMonth requestedMonth = new YearMonth(date);
     return monthsStatus.stream()
-        .filter(shiftTypeMonth -> shiftTypeMonth.yearMonth.equals(requestedMonth)).findFirst();
+        .filter(shiftTypeMonth -> shiftTypeMonth.getYearMonth().equals(requestedMonth)).findFirst();
   }
 
   /**
@@ -165,7 +169,7 @@ public class ShiftType extends BaseModel {
   public boolean approvedOn(LocalDate date) {
     Optional<ShiftTypeMonth> monthStatus = monthStatusByDate(date);
     if (monthStatus.isPresent()) {
-      return monthStatus.get().approved;
+      return monthStatus.get().isApproved();
     } else {
       return false;
     }

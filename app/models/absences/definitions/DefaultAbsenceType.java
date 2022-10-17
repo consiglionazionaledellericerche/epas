@@ -2511,7 +2511,7 @@ public enum DefaultAbsenceType {
     for (DefaultAbsenceType defaultTypes : DefaultAbsenceType.values()) {
       boolean found = false;
       for (AbsenceType type : allAbsenceTypes) {
-        if (defaultTypes.getCode().equals(type.code)) {
+        if (defaultTypes.getCode().equals(type.getCode())) {
           found = true;
           break;
         }
@@ -2534,7 +2534,7 @@ public enum DefaultAbsenceType {
    */
   public static Optional<DefaultAbsenceType> byCode(AbsenceType absenceType) {
     for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
-      if (absenceType.code.equals(defaultAbsenceType.getCode())) {
+      if (absenceType.getCode().equals(defaultAbsenceType.getCode())) {
         return Optional.of(defaultAbsenceType);
       }
     }

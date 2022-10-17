@@ -29,8 +29,10 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import helpers.rest.ApiRequestException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import models.Institute;
@@ -196,10 +198,10 @@ public class OfficePerseoConsumer {
   private Institute epasConverter(PerseoInstitute perseoInstitute) {
 
     Institute institute = new Institute();
-    institute.perseoId = Long.valueOf(perseoInstitute.id);
-    institute.cds = perseoInstitute.cds;
-    institute.name = perseoInstitute.name;
-    institute.code = perseoInstitute.code;
+    institute.setPerseoId(Long.valueOf(perseoInstitute.id));
+    institute.setCds(perseoInstitute.cds);
+    institute.setName(perseoInstitute.name);
+    institute.setCode(perseoInstitute.code);
     return institute;
   }
 
@@ -218,13 +220,15 @@ public class OfficePerseoConsumer {
       }
 
       Office office = new Office();
-      office.perseoId = Long.valueOf(perseoOffice.id);
-      office.codeId = perseoOffice.codeId;
-      office.code = perseoOffice.code;
-      office.name = perseoOffice.shortName;
-      office.address = perseoOffice.street;
-      office.institute = institute;
-      institute.seats.add(office);
+      office.setPerseoId(Long.valueOf(perseoOffice.id));
+      office.setCodeId(perseoOffice.codeId);
+      office.setCode(perseoOffice.code);
+      office.setName(perseoOffice.shortName);
+      office.setAddress(perseoOffice.street);
+      office.setInstitute(institute);
+      Set<Office> offices = institute.getSeats();
+      offices.add(office);
+      institute.setSeats(offices);
     }
     return institutesMap;
   }
@@ -262,7 +266,7 @@ public class OfficePerseoConsumer {
   public Map<String, Institute> perseoInstitutesByCds() {
     Map<String, Institute> institutesMap = Maps.newHashMap();
     for (Institute institute : perseoInstitutes()) {
-      institutesMap.put(institute.cds, institute);
+      institutesMap.put(institute.getCds(), institute);
     }
     return institutesMap;
   }
@@ -291,7 +295,7 @@ public class OfficePerseoConsumer {
     Optional<Institute> institute = Optional.fromNullable(epasConverter(
         Lists.newArrayList(perseoOffice)).values().iterator().next());
 
-    if (!institute.isPresent() || institute.get().seats.isEmpty()) {
+    if (!institute.isPresent() || institute.get().getSeats().isEmpty()) {
       return Optional.<Institute>absent();
     }
     return institute;
