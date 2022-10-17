@@ -55,9 +55,9 @@ public class AbsenceDto {
         .date(absence.date)
         .code(absence.getCode())
         .justifiedTime(absence.justifiedTime())
-        .justifiedType(absence.justifiedType.name.name())
-        .note(absence.note)
-        .updatedAt(absence.updatedAt)
+        .justifiedType(absence.getJustifiedType().getName().name())
+        .note(absence.getNote())
+        .updatedAt(absence.getUpdatedAt())
         .build();
   }
 }

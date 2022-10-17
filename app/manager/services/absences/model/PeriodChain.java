@@ -152,17 +152,18 @@ public class PeriodChain {
     List<Absence> absences = Lists.newArrayList();
     for (AbsencePeriod period : this.periods) {
       for (DayInPeriod day : period.daysInPeriod.values()) {
-        if (period.initialization != null && !day.getDate().isAfter(period.initialization.date)) {
+        if (period.initialization != null && !day.getDate()
+            .isAfter(period.initialization.getDate())) {
           continue;
         }
         for (TakenAbsence takenAbsence : day.getTakenAbsences()) { //sia complation che non
-          if (onlyOnCertificate && takenAbsence.absence.absenceType.internalUse) {
+          if (onlyOnCertificate && takenAbsence.absence.getAbsenceType().isInternalUse()) {
             continue;
           }
           absences.add(takenAbsence.absence);
         }
         for (Absence absence : day.getExistentReplacings()) {
-          if (onlyOnCertificate && absence.absenceType.internalUse) {
+          if (onlyOnCertificate && absence.getAbsenceType().isInternalUse()) {
             continue;
           }
           absences.add(absence);
@@ -189,7 +190,7 @@ public class PeriodChain {
   }
   
   public boolean childIsMissing() {
-    return periods.isEmpty() && groupAbsenceType.periodType.isChildPeriod();
+    return periods.isEmpty() && groupAbsenceType.getPeriodType().isChildPeriod();
   }
   
   public boolean containsCriticalErrors() {

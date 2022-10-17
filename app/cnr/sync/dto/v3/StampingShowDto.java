@@ -63,8 +63,8 @@ public class StampingShowDto {
    */
   public static StampingShowDto build(Stamping stamping) {
     val dto = modelMapper.map(stamping, StampingShowDto.class);
-    dto.setPerson(PersonShowTerseDto.build(stamping.personDay.person));
-    dto.stampType = stamping.stampType != null ? stamping.stampType.getCode() : null;
+    dto.setPerson(PersonShowTerseDto.build(stamping.getPersonDay().getPerson()));
+    dto.stampType = stamping.getStampType() != null ? stamping.getStampType().getCode() : null;
     return dto;
   }
 }

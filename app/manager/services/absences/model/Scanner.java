@@ -123,13 +123,13 @@ public class Scanner {
     this.configureNextGroupToScan(iterator);
     while (this.nextGroupToScan != null) {
      
-      log.debug("Inizio lo scan del prossimo gruppo {}", this.nextGroupToScan.description);
+      log.debug("Inizio lo scan del prossimo gruppo {}", this.nextGroupToScan.getDescription());
       
       //TODO: FIXME: quando sarà migrata anche la parte dei riposi, togliere questa eccezione.
       // Oppure taggare quelli che non devono partecipare allo scan, per rendere l'algoritmo
       // generico.
-      if (this.nextGroupToScan.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr) 
-          || this.nextGroupToScan.name.equals(DefaultGroup.RIDUCE_FERIE_CNR.name())) {
+      if (this.nextGroupToScan.getPattern().equals(GroupAbsenceTypePattern.compensatoryRestCnr) 
+          || this.nextGroupToScan.getName().equals(DefaultGroup.RIDUCE_FERIE_CNR.name())) {
         //prossimo gruppo
         this.configureNextGroupToScan(iterator);
         continue;
@@ -176,8 +176,8 @@ public class Scanner {
           .allAbsenceProblems(allErrorsScanned, absence);
       //decidere quelli da cancellare
       //   per ogni vecchio absenceTroule verifico se non è presente in remaining
-      for (AbsenceTrouble absenceTrouble : absence.troubles) {
-        if (!remainingProblems.contains(absenceTrouble.trouble)) {
+      for (AbsenceTrouble absenceTrouble : absence.getTroubles()) {
+        if (!remainingProblems.contains(absenceTrouble.getTrouble())) {
           toDeleteTroubles.add(absenceTrouble);
         }
       }
@@ -185,8 +185,8 @@ public class Scanner {
       //   per ogni remaining verifico se non è presente in vecchi absencetrouble
       for (AbsenceProblem remainingProblem : remainingProblems) {
         boolean toAdd = true;
-        for (AbsenceTrouble absenceTrouble : absence.troubles) {
-          if (absenceTrouble.trouble.equals(remainingProblem)) {
+        for (AbsenceTrouble absenceTrouble : absence.getTroubles()) {
+          if (absenceTrouble.getTrouble().equals(remainingProblem)) {
             toAdd = false;
           }
         }
@@ -199,19 +199,19 @@ public class Scanner {
       for (AbsenceTrouble toDelete : toDeleteTroubles) {
         if (toDelete.isPersistent()) { //FIXME Issue #324
           toDelete.refresh();
-          log.info("Rimuovo problem {} {}", absence.toString(), toDelete.trouble);
+          log.info("Rimuovo problem {} {}", absence.toString(), toDelete.getTrouble());
           toDelete.delete();  
         }
         
       }
       for (AbsenceTrouble toAdd : toAddTroubles) {
-        if (Absence.findById(toAdd.absence.getId()) == null) {
+        if (Absence.findById(toAdd.getAbsence().getId()) == null) {
           // FIXME l'assenza di questo trouble è stata cancellata (probabilmente dall'algoritmo
           // che sistema i completamenti) pertanto non risulta più da persistere. 
           // Gestire questo caso all'origine.
           continue;
         }
-        log.info("Aggiungo problem {} {}", absence.toString(), toAdd.trouble);
+        log.info("Aggiungo problem {} {}", absence.toString(), toAdd.getTrouble());
         toAdd.save();
       }
     }
@@ -309,18 +309,19 @@ public class Scanner {
               .getOrCreateAndPersistPersonDay(person, dayInPeriod.getDate());
           
           Absence replacingAbsence = new Absence();
-          replacingAbsence.absenceType = dayInPeriod.getCorrectReplacing();
+          replacingAbsence.setAbsenceType(dayInPeriod.getCorrectReplacing());
           replacingAbsence.date = dayInPeriod.getDate();
-          replacingAbsence.personDay = personDay;
+          replacingAbsence.setPersonDay(personDay);
           //justified type nothin (deve essere permitted per il tipo)
-          for (JustifiedType justifiedType : replacingAbsence.absenceType.justifiedTypesPermitted) {
-            if (justifiedType.name == JustifiedTypeName.nothing) {
-              replacingAbsence.justifiedType = justifiedType;
+          for (JustifiedType justifiedType : replacingAbsence.getAbsenceType()
+              .getJustifiedTypesPermitted()) {
+            if (justifiedType.getName() == JustifiedTypeName.nothing) {
+              replacingAbsence.setJustifiedType(justifiedType);
               break;
             }
           }
-          Verify.verifyNotNull(replacingAbsence.justifiedType);
-          personDay.absences.add(replacingAbsence);
+          Verify.verifyNotNull(replacingAbsence.getJustifiedType());
+          personDay.getAbsences().add(replacingAbsence);
           replacingAbsence.save();
           personDay.refresh();
           personDay.save();

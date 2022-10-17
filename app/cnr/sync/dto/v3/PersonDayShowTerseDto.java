@@ -65,11 +65,11 @@ public class PersonDayShowTerseDto {
     val pdDto = modelMapper.map(pd, PersonDayShowTerseDto.class);
 
     pdDto.setAbsences(
-        pd.absences.stream().map(a -> AbsenceShowTerseDto.build(a))
+        pd.getAbsences().stream().map(a -> AbsenceShowTerseDto.build(a))
           .collect(Collectors.toList())); 
    
     pdDto.setStampings(
-        pd.stampings.stream().map(s -> StampingShowTerseDto.build(s))
+        pd.getStampings().stream().map(s -> StampingShowTerseDto.build(s))
         .collect(Collectors.toList()));
     return pdDto;
   }

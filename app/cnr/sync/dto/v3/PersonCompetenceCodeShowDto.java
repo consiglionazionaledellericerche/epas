@@ -56,7 +56,8 @@ public class PersonCompetenceCodeShowDto {
    */
   public static PersonCompetenceCodeShowDto build(PersonCompetenceCodes personCompetenceCodes) {
     val dto = modelMapper.map(personCompetenceCodes, PersonCompetenceCodeShowDto.class);
-    dto.setCompetenceCode(CompetenceCodeShowTerseDto.build(personCompetenceCodes.competenceCode));
+    dto.setCompetenceCode(CompetenceCodeShowTerseDto
+        .build(personCompetenceCodes.getCompetenceCode()));
     return dto;
   }
 }

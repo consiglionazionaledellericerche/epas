@@ -60,7 +60,7 @@ public class AbsenceShowTerseDto {
   public static AbsenceShowTerseDto build(Absence absence) {
     val absenceDto = modelMapper.map(absence, AbsenceShowTerseDto.class);
     absenceDto.setJustifiedTime(absence.justifiedTime());
-    absenceDto.setJustifiedType(absence.justifiedType.name.name());
+    absenceDto.setJustifiedType(absence.getJustifiedType().getName().name());
     absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
     return absenceDto;
   }

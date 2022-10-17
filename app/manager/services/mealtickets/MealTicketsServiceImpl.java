@@ -96,7 +96,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       return Optional.<MealTicketRecap>absent();
     }
 
-    List<PersonDay> personDays = personDao.getPersonDayIntoInterval(contract.person,
+    List<PersonDay> personDays = personDao.getPersonDayIntoInterval(contract.getPerson(),
         dateInterval.get(), true);
 
     List<MealTicket> expireOrderedAsc = mealTicketDao
@@ -134,7 +134,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
         .getContractDatabaseIntervalForMealTicket();
 
     LocalDate officeStartDate = (LocalDate) configurationManager
-        .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
+        .configValue(contract.getPerson().getOffice(), EpasParam.DATE_START_MEAL_TICKET);
 
     if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
       return Optional.of(intervalForMealTicket);
@@ -166,17 +166,17 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     for (int i = first; i <= last; i++) {
 
       MealTicket mealTicket = new MealTicket();
-      mealTicket.expireDate = expireDate;
-      mealTicket.block = codeBlock;
-      mealTicket.blockType = blockType;
-      mealTicket.office = office;
-      mealTicket.number = i;
+      mealTicket.setExpireDate(expireDate);
+      mealTicket.setBlock(codeBlock);
+      mealTicket.setBlockType(blockType);
+      mealTicket.setOffice(office);
+      mealTicket.setNumber(i);
 
 
       if (i < 10) {
-        mealTicket.code = codeBlock + "0" + i;
+        mealTicket.setCode(codeBlock + "0" + i);
       } else {
-        mealTicket.code = "" + codeBlock + i;
+        mealTicket.setCode("" + codeBlock + i);
       }
       
       mealTicketList.add(mealTicket);
@@ -206,7 +206,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     Optional<ContractMonthRecap> recap = wrContract.getContractMonthRecap(
         new YearMonth(previousContractInterval.getEnd()));
 
-    if (!recap.isPresent() || recap.get().remainingMealTickets == 0) {
+    if (!recap.isPresent() || recap.get().getRemainingMealTickets() == 0) {
       return 0;
     }
 
@@ -217,19 +217,19 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
             MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
       
     LocalDate pastDate = LocalDate.now();
-    for (int i = 0; i < recap.get().remainingMealTickets; i++) {
+    for (int i = 0; i < recap.get().getRemainingMealTickets(); i++) {
 
       MealTicket ticketToChange = contractMealTicketsDesc.get(i);
-      if (ticketToChange.date.isBefore(pastDate)) {
-        pastDate = ticketToChange.date;
+      if (ticketToChange.getDate().isBefore(pastDate)) {
+        pastDate = ticketToChange.getDate();
       }
-      ticketToChange.contract = contract;
-      ticketToChange.date = contract.beginDate;
+      ticketToChange.setContract(contract);
+      ticketToChange.setDate(contract.getBeginDate());
       ticketToChange.save();
       mealTicketsTransfered++;
     }
 
-    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
 
     return mealTicketsTransfered;
   }
@@ -252,20 +252,20 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     BlockType blockType = null;
     int buoniCartacei = 0;
     int buoniElettronici = 0;
-    int buoniUsati = monthRecap.buoniPastoUsatiNelMese;
+    int buoniUsati = monthRecap.getBuoniPastoUsatiNelMese();
     int buoniDaConteggiare = 0;
     MealTicketComposition composition = new MealTicketComposition();
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
-    if (monthRecap.remainingMealTickets < 0) {
+    if (monthRecap.getRemainingMealTickets() < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
       buoniDaConteggiare = buoniUsati;
       composition.isBlockMealTicketTypeKnown = false;
       final java.util.Optional<Configuration> conf = 
-          contract.person.office.configurations.stream()
+          contract.getPerson().getOffice().getConfigurations().stream()
           .filter(configuration -> 
-          configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+          configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
       if (conf.isPresent()) {        
-        blockType = BlockType.valueOf(conf.get().fieldValue);
+        blockType = BlockType.valueOf(conf.get().getFieldValue());
         switch (blockType) {
           case electronic:
             buoniElettronici = buoniDaConteggiare;

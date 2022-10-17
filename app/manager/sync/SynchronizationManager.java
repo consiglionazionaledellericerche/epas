@@ -93,7 +93,7 @@ public class SynchronizationManager {
     val result = new SyncResult();
 
     val perseoPeople = peoplePerseoConsumer
-        .perseoPeopleByPerseoId(Optional.fromNullable(office.perseoId));
+        .perseoPeopleByPerseoId(Optional.fromNullable(office.getPerseoId()));
     log.debug("Trovate {} persone in anagrafica associate all'ufficio {}.",
         perseoPeople.size(), office.getName());
 
@@ -103,24 +103,24 @@ public class SynchronizationManager {
     log.debug("Trovate {} persone in ePAS associate all'ufficio {}.",
         epasPeople.size(), office.getName());
 
-    val epasPeopleByPerseoId = epasPeople.stream().filter(p -> p.perseoId != null)
-        .collect(Collectors.toMap(p -> p.perseoId, p -> p));
+    val epasPeopleByPerseoId = epasPeople.stream().filter(p -> p.getPerseoId() != null)
+        .collect(Collectors.toMap(p -> p.getPerseoId(), p -> p));
 
-    val epasPeopleByNumber = epasPeople.stream().filter(p -> p.number != null)
-        .collect(Collectors.toMap(p -> p.number, p -> p));
+    val epasPeopleByNumber = epasPeople.stream().filter(p -> p.getNumber() != null)
+        .collect(Collectors.toMap(p -> p.getNumber(), p -> p));
     
     for (Person perseoPerson : perseoPeople.values()) {
       //Se il perseoId e la matricola non sono presenti per l'ufficio corrente 
       //allora viene creata o trasferita la persona
-      if (!epasPeopleByPerseoId.containsKey(perseoPerson.perseoId) 
-          && !epasPeopleByNumber.containsKey(perseoPerson.number)) {
+      if (!epasPeopleByPerseoId.containsKey(perseoPerson.getPerseoId()) 
+          && !epasPeopleByNumber.containsKey(perseoPerson.getNumber())) {
         result.add(createOrTransferPerson(perseoPerson, office));
       } else {
         Person personToSync = null;
-        if (epasPeopleByPerseoId.containsKey(perseoPerson.perseoId)) {
-          personToSync = epasPeopleByPerseoId.get(perseoPerson.perseoId);
+        if (epasPeopleByPerseoId.containsKey(perseoPerson.getPerseoId())) {
+          personToSync = epasPeopleByPerseoId.get(perseoPerson.getPerseoId());
         } else {
-          personToSync = epasPeopleByNumber.get(perseoPerson.number);
+          personToSync = epasPeopleByNumber.get(perseoPerson.getNumber());
         }
         result.add(
             syncPersonWithPersonRegistry(personToSync, perseoPerson));
@@ -138,49 +138,48 @@ public class SynchronizationManager {
    */
   public SyncResult createOrTransferPerson(Person perseoPerson, Office office) {
     log.debug("Persona {} (matricola:{} perseoId:{}) non associata in ePAS all'ufficio {}.",
-        perseoPerson.fullName(), perseoPerson.number,
-        perseoPerson.perseoId, office.getName());
+        perseoPerson.fullName(), perseoPerson.getNumber(),
+        perseoPerson.getPerseoId(), office.getName());
 
     val syncResult = new SyncResult();
 
-    Person epasPerson = personDao.getPersonByPerseoId(perseoPerson.perseoId);
+    Person epasPerson = personDao.getPersonByPerseoId(perseoPerson.getPerseoId());
     if (epasPerson == null) {
-      epasPerson = personDao.getPersonByNumber(perseoPerson.number);
+      epasPerson = personDao.getPersonByNumber(perseoPerson.getNumber());
     }
 
     if (epasPerson != null) {
       log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
           + "Effettuo il cambio di sede.",
-          epasPerson.getFullname(), epasPerson.number, epasPerson.office.getName());
+          epasPerson.getFullname(), epasPerson.getNumber(), epasPerson.getOffice().getName());
 
-      Office oldOffice = epasPerson.office; 
-      epasPerson.office = office;
+      Office oldOffice = epasPerson.getOffice(); 
+      epasPerson.setOffice(office);
       epasPerson.save();
 
       registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
       return syncResult.add(
           String.format(
               "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
-              epasPerson.fullName(), oldOffice.name, epasPerson.office.name));
+              epasPerson.fullName(), oldOffice.getName(), epasPerson.getOffice().getName()));
     }
 
     // join dell'office (in automatico ancora non c'è...)
-    perseoPerson.office = office;
-    perseoPerson.beginDate =
-        LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    perseoPerson.setOffice(office);
+    perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
     val validation = Validation.current.get(); 
     validation.valid(perseoPerson);
     if (Validation.hasErrors()) {
       // notifica che perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della persona con perseoId={} ha comportato errori di "
           + "validazione nella persona. errors={}.",
-          perseoPerson.perseoId, validation.errorsMap());
+          perseoPerson.getPerseoId(), validation.errorsMap());
       Validation.clear();
       syncResult.setSuccess(false);
       return syncResult.add(
           String.format("Tentativo di importazione della persona con perseoId = %s fallito per "
               + "errori di validazione dei suoi dati.", 
-              perseoPerson.perseoId));
+              perseoPerson.getPerseoId()));
     }
 
     // Creazione!
@@ -189,26 +188,26 @@ public class SynchronizationManager {
       // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
       log.info("L'importazione della persone con perseoId={} ha comportato errori di "
           + "validazione nella persona. errors={}.",
-          perseoPerson.perseoId, validation.errorsMap());
+          perseoPerson.getPerseoId(), validation.errorsMap());
       Validation.clear();
 
       return syncResult.add(
           String.format("Tentativo di importazione della persona con perseoId = %s fallito per "
               + "errori di validazione dei suoi dati.", 
-              perseoPerson.perseoId));
+              perseoPerson.getPerseoId()));
     } else {
 
       log.info("Creata la nuova persona {}, matricola = {}, ufficio = {}",
-          newPerson.get().getFullname(), newPerson.get().number, 
-          newPerson.get().office.getName());
+          newPerson.get().getFullname(), newPerson.get().getNumber(), 
+          newPerson.get().getOffice().getName());
 
       syncResult.add(importContracts(newPerson.get()));
 
       registryNotificationManager.notifyNewPerson(newPerson.get());
       return syncResult.add(
           String.format("Creata la nuova persona %s, matricola = %s, ufficio = %s",
-              newPerson.get().getFullname(), newPerson.get().number, 
-              newPerson.get().office.getName()));
+              newPerson.get().getFullname(), newPerson.get().getNumber(), 
+              newPerson.get().getOffice().getName()));
     }
 
   }
@@ -219,11 +218,11 @@ public class SynchronizationManager {
   public Optional<Person> personCreator(Person person) {
 
     try {
-      person.user = userManager.createUser(person);
+      person.setUser(userManager.createUser(person));
       person.save();
 
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.user, person.office, employee);
+      officeManager.setUro(person.getUser(), person.getOffice(), employee);
       person.save();
       configurationManager.updateConfigurations(person);
     } catch (Exception ex) {
@@ -244,17 +243,17 @@ public class SynchronizationManager {
   public SyncResult syncPerson(Person person) {
     Verify.verifyNotNull(person);
     val syncResult = new SyncResult();
-    if (person.perseoId == null) {
+    if (person.getPerseoId() == null) {
       return syncResult.setFailed()
           .add(String.format("Impossibile sincronizzare i dati di %s, "
               + "id anagrafica esterna non presente", person.getFullname()));
     }
-    val registryPerson = peoplePerseoConsumer.perseoPersonByPerseoId(person.perseoId);
+    val registryPerson = peoplePerseoConsumer.perseoPersonByPerseoId(person.getPerseoId());
     if (!registryPerson.isPresent()) {
       return syncResult.setFailed()
           .add(String.format("Impossibile sincronizzare i dati di %s, "
               + "persona con id anagrafica = %s non presente in anagrafica", 
-              person.getFullname(), person.perseoId));      
+              person.getFullname(), person.getPerseoId()));      
     }
     syncResult.add(syncPersonWithPersonRegistry(person, registryPerson.get()));
     syncResult.add(syncContracts(person));
@@ -270,34 +269,34 @@ public class SynchronizationManager {
 
     val syncResult = new SyncResult();
 
-    if (!epasPerson.name.equals(registryPerson.name)) {
+    if (!epasPerson.getName().equals(registryPerson.getName())) {
       syncResult.add(
-          String.format("Cambiato nome da %s a %s", epasPerson.name, registryPerson.name));
-      epasPerson.name = registryPerson.name;
+          String.format("Cambiato nome da %s a %s", epasPerson.getName(), registryPerson.getName()));
+      epasPerson.setName(registryPerson.getName());
     }
-    if (!epasPerson.surname.equals(registryPerson.surname)) {
+    if (!epasPerson.getSurname().equals(registryPerson.getSurname())) {
       syncResult.add(String.format("Cambiato cognome da %s a %s", 
-          epasPerson.surname, registryPerson.surname));
-      epasPerson.surname = registryPerson.surname;
+          epasPerson.getSurname(), registryPerson.getSurname()));
+      epasPerson.setSurname(registryPerson.getSurname());
     }
-    if ((epasPerson.number == null && registryPerson.number != null) 
-        || epasPerson.number != null && registryPerson.number != null 
-        && !epasPerson.number.equals(registryPerson.number)) {
-      epasPerson.number = registryPerson.number;
+    if ((epasPerson.getNumber() == null && registryPerson.getNumber() != null) 
+        || epasPerson.getNumber() != null && registryPerson.getNumber() != null 
+        && !epasPerson.getNumber().equals(registryPerson.getNumber())) {
+      epasPerson.setNumber(registryPerson.getNumber());
       syncResult.add(String.format("Assegnato il numero di matricola %s a %s", 
-          epasPerson.number, epasPerson.getFullname()));
+          epasPerson.getNumber(), epasPerson.getFullname()));
     }
-    if (epasPerson.perseoId == null 
-        || !epasPerson.perseoId.equals(registryPerson.perseoId)) {
-      epasPerson.perseoId = registryPerson.perseoId;
+    if (epasPerson.getPerseoId() == null 
+        || !epasPerson.getPerseoId().equals(registryPerson.getPerseoId())) {
+      epasPerson.setPerseoId(registryPerson.getPerseoId());
       syncResult.add(String.format("Assegnato il campo perseoId %s a %s", 
-          epasPerson.perseoId, epasPerson.getFullname()));
+          epasPerson.getPerseoId(), epasPerson.getFullname()));
     }
-    if (epasPerson.qualification == null 
-        || !epasPerson.qualification.equals(registryPerson.qualification)) {
-      epasPerson.qualification = registryPerson.qualification;
+    if (epasPerson.getQualification() == null 
+        || !epasPerson.getQualification().equals(registryPerson.getQualification())) {
+      epasPerson.setQualification(registryPerson.getQualification());
       syncResult.add(String.format("Cambiata qualifica a %s per %s", 
-          epasPerson.qualification, epasPerson.getFullname()));
+          epasPerson.getQualification(), epasPerson.getFullname()));
     }
     if (!syncResult.getMessages().isEmpty()) {
       epasPerson.save();
@@ -315,7 +314,7 @@ public class SynchronizationManager {
   public SyncResult importContract(String perseoContractId, Long epasPersonId) {
     Person person = personDao.getPersonById(epasPersonId);
     Verify.verifyNotNull(person);
-    Verify.verifyNotNull(person.perseoId);
+    Verify.verifyNotNull(person.getPerseoId());
 
     val syncResult = new SyncResult();
     Optional<Contract> contractInPerseo = Optional.absent();
@@ -360,13 +359,13 @@ public class SynchronizationManager {
    */
   public SyncResult importContracts(Person person) {
     Verify.verifyNotNull(person);
-    Verify.verifyNotNull(person.perseoId);
+    Verify.verifyNotNull(person.getPerseoId());
 
     val syncResult = new SyncResult();
     List<Contract> contractsInRegistry = Lists.newArrayList();
     try {
       contractsInRegistry = 
-          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.perseoId, person);
+          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.getPerseoId(), person);
     } catch (ApiRequestException ex) {
       log.warn("Problemi nell'importazione dei contratti di {}", 
           person.getFullname(), ex);
@@ -411,13 +410,13 @@ public class SynchronizationManager {
    */
   public SyncResult syncContracts(Person person) {
     Verify.verifyNotNull(person);
-    Verify.verifyNotNull(person.perseoId);
+    Verify.verifyNotNull(person.getPerseoId());
 
     val syncResult = new SyncResult();
     List<Contract> contractsInRegistry = Lists.newArrayList();
     try {
       contractsInRegistry = 
-          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.perseoId, person);
+          contractPerseoConsumer.fetchRegistryContractsByRegistry(person.getPerseoId(), person);
     } catch (ApiRequestException ex) {
       log.warn("Problemi nell'importazione dei contratti di {}", 
           person.getFullname(), ex);
@@ -427,7 +426,7 @@ public class SynchronizationManager {
               person.getFullname(), ex.toString()));
     }
 
-    if (contractsInRegistry.isEmpty() && person.contracts.isEmpty()) {
+    if (contractsInRegistry.isEmpty() && person.getContracts().isEmpty()) {
       log.debug("Non ci sono contratti presenti per {} ne in anagrafica ne in ePAS."
           + "Niente da sincronizzare.", person.getFullname());
       return syncResult;
@@ -474,13 +473,13 @@ public class SynchronizationManager {
     MatchingContracts matchingContracts = new MatchingContracts();
 
     java.util.Optional<Contract> matchingContract = 
-        person.contracts.stream().filter(
+        person.getContracts().stream().filter(
             c ->
-            c.person.id.equals(contract.person.id) 
+            c.getPerson().id.equals(contract.getPerson().id) 
             && 
-            (c.perseoId != null && c.perseoId.equals(contract.perseoId)) 
+            (c.getPerseoId() != null && c.getPerseoId().equals(contract.getPerseoId())) 
             || 
-            (c.beginDate != null && c.beginDate.equals(contract.beginDate)
+            (c.getBeginDate() != null && c.getBeginDate().equals(contract.getBeginDate())
             ))
         .findAny();
     if (matchingContract.isPresent()) {
@@ -511,41 +510,41 @@ public class SynchronizationManager {
     val syncResult = new SyncResult();
     log.debug("Inizio sincronizzazione contratti. Registry contract = {}. ePAS contract = {}",
         registryContract, epasContract);
-    if (!matching(registryContract.beginDate, epasContract.beginDate)) {
-      epasContract.beginDate = registryContract.beginDate;
+    if (!matching(registryContract.getBeginDate(), epasContract.getBeginDate())) {
+      epasContract.setBeginDate(registryContract.getBeginDate());
       syncResult.add(
           String.format("Aggiornata la data di inizio del contratto di %s a %s",
-              epasContract.person.getFullname(), epasContract.beginDate));
+              epasContract.getPerson().getFullname(), epasContract.getBeginDate()));
     }
-    if (!matching(registryContract.endDate, epasContract.endDate)) {
-      epasContract.endDate = registryContract.endDate;
+    if (!matching(registryContract.getEndDate(), epasContract.getEndDate())) {
+      epasContract.setEndDate(registryContract.getEndDate());
       syncResult.add(
           String.format("Aggiornata la data di fine del contratto di %s a %s",
-              epasContract.person.getFullname(), epasContract.endDate));
+              epasContract.getPerson().getFullname(), epasContract.getEndDate()));
     }
-    if (!matching(registryContract.endContract, epasContract.endContract)) {
-      epasContract.endContract = registryContract.endContract;
+    if (!matching(registryContract.getEndContract(), epasContract.getEndContract())) {
+      epasContract.setEndContract(registryContract.getEndContract());
       syncResult.add(
           String.format("Aggiornata la data di terminazione contratto di %s a %s",
-              epasContract.person.getFullname(), epasContract.endContract));
+              epasContract.getPerson().getFullname(), epasContract.getEndContract()));
     }
-    if (registryContract.perseoId != null 
-        && !registryContract.perseoId.equals(epasContract.perseoId)) {
-      epasContract.perseoId = registryContract.perseoId;
+    if (registryContract.getPerseoId() != null 
+        && !registryContract.getPerseoId().equals(epasContract.getPerseoId())) {
+      epasContract.setPerseoId(registryContract.getPerseoId());
       syncResult.add(
           String.format("Aggiornato l'identificato anagrafico del contratto di %s a %s",
-              epasContract.person.getFullname(), epasContract.perseoId));
+              epasContract.getPerson().getFullname(), epasContract.getPerseoId()));
     }
     
     if (syncResult.getMessages().size() > 0) {
       if (contractManager.properContractUpdate(epasContract, null, false)) {
         log.info("Aggiornato il contratto di {}. {}", 
-            epasContract.person.getFullname(), syncResult);
+            epasContract.getPerson().getFullname(), syncResult);
         epasContract.save();     
       } else {
         syncResult.setFailed()
             .add(String.format("Il contratto di %s non può essere aggiornato a causa di errori.",
-            epasContract.person.getFullname()));        
+            epasContract.getPerson().getFullname()));        
       }      
     }
     
