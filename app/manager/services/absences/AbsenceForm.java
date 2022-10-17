@@ -117,19 +117,19 @@ public class AbsenceForm {
     this.setTabsVisible();
 
     // generazione della lista dei gruppi della richiesta
-    this.categoryTabSelected = groupAbsenceType.category.tab;
+    this.categoryTabSelected = groupAbsenceType.getCategory().getTab();
 
     Set<CategoryGroupAbsenceType> personCategoryGroupsInTab =
-        this.categoryTabSelected.categoryGroupAbsenceTypes;
+        this.categoryTabSelected.getCategoryGroupAbsenceTypes();
 
     for (CategoryGroupAbsenceType categoryInTab : personCategoryGroupsInTab) {
       
       // aggiungo la categoria alla mappa
       Set<CategoryGroupAbsenceType> categoriesSamePriority = 
-          this.categoriesByPriority.get(categoryInTab.priority);
+          this.categoriesByPriority.get(categoryInTab.getPriority());
       if (categoriesSamePriority == null) {
         categoriesSamePriority = Sets.newHashSet();
-        categoriesByPriority.put(categoryInTab.priority, categoriesSamePriority);
+        categoriesByPriority.put(categoryInTab.getPriority(), categoriesSamePriority);
       }
       categoriesSamePriority.add(categoryInTab);
       
@@ -140,14 +140,14 @@ public class AbsenceForm {
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
     while (current != null) {
-      if (current.takableAbsenceBehaviour != null) {
-        for (AbsenceType takable : current.takableAbsenceBehaviour.takableCodes) {
+      if (current.getTakableAbsenceBehaviour() != null) {
+        for (AbsenceType takable : current.getTakableAbsenceBehaviour().getTakableCodes()) {
           if (!takable.isExpired()) { //TODO: deve essere function di from e (to)
-            typeConsidered.put(takable.code, takable);
+            typeConsidered.put(takable.getCode(), takable);
           }
         }
       }
-      current = current.nextGroupToCheck;
+      current = current.getNextGroupToCheck();
     }
     this.absenceTypes = Lists.newArrayList(typeConsidered.values());
     
@@ -168,13 +168,14 @@ public class AbsenceForm {
     } else if (absenceType == null && !this.automaticChoiceExists) {
       // se non ho specificato il tipo e non esiste una gestione automatica utilizzo il primo tipo
       this.absenceTypeSelected = this.absenceTypes.iterator().next();
-      this.justifiedTypes = Lists.newArrayList(this.absenceTypeSelected.justifiedTypesPermitted);
+      this.justifiedTypes = Lists.newArrayList(this.absenceTypeSelected
+          .getJustifiedTypesPermitted());
 
     } else if (absenceType != null) {
       // ho specificato il tipo
       Verify.verify(this.absenceTypes.contains(absenceType));
       this.absenceTypeSelected = absenceType;
-      this.justifiedTypes = Lists.newArrayList(absenceType.justifiedTypesPermitted);
+      this.justifiedTypes = Lists.newArrayList(absenceType.getJustifiedTypesPermitted());
     }
     
     if (justifiedType != null && this.justifiedTypes.contains(justifiedType)) {
@@ -184,7 +185,7 @@ public class AbsenceForm {
     }
 
     
-    if (this.justifiedTypeSelected.name.equals(JustifiedTypeName.recover_time)) {
+    if (this.justifiedTypeSelected.getName().equals(JustifiedTypeName.recover_time)) {
       this.recoveryDate = from.plusDays(1);
     } else {
       this.recoveryDate = null;
@@ -273,15 +274,15 @@ public class AbsenceForm {
    * Verifica se la giustificazione oraria selezionata è con minuti e ore.
    */
   public boolean hasHourMinutesChoice() {
-    return justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes)
-        || justifiedTypeSelected.name.equals(JustifiedTypeName.specified_minutes_limit);
+    return justifiedTypeSelected.getName().equals(JustifiedTypeName.specified_minutes)
+        || justifiedTypeSelected.getName().equals(JustifiedTypeName.specified_minutes_limit);
   }
   
   /**
    * Verifica se la giustificazione selezionata è quella che assegna tutto il giorno.
    */
   public boolean hasToChoice() {
-    return justifiedTypeSelected.name.equals(JustifiedTypeName.all_day);
+    return justifiedTypeSelected.getName().equals(JustifiedTypeName.all_day);
   }
   
   /**
@@ -311,10 +312,11 @@ public class AbsenceForm {
    */
   private void setTabsVisible() {
     for (GroupAbsenceType group : this.groupsPermitted) {
-      if (group.automatic) { 
+      if (group.isAutomatic()) { 
         continue;
       }
-      this.tabsVisibile.put(group.category.tab.priority, group.category.tab);
+      this.tabsVisibile.put(group.getCategory().getTab().getPriority(), 
+          group.getCategory().getTab());
     }
   }
 

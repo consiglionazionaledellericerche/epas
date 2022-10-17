@@ -64,7 +64,7 @@ public class CodeComparation {
    * @return superCode inserito
    */
   public SuperCode putAbsenceType(AbsenceType absenceType) {
-    final String code = absenceType.code.trim().toUpperCase();
+    final String code = absenceType.getCode().trim().toUpperCase();
     SuperCode superCode = superCodes.get(code);
     if (superCode == null) {
       superCode = new SuperCode();
@@ -83,10 +83,10 @@ public class CodeComparation {
    * @param absence assenza epas
    */
   public void putAbsence(Absence absence) {
-    final String code = absence.absenceType.code.trim().toUpperCase();
+    final String code = absence.getAbsenceType().getCode().trim().toUpperCase();
     SuperCode superCode = superCodes.get(code);
     if (superCode == null) {
-      superCode = putAbsenceType(absence.absenceType);
+      superCode = putAbsenceType(absence.getAbsenceType());
     }
     superCode.absences.add(absence);
   }
@@ -146,10 +146,10 @@ public class CodeComparation {
         Set<GroupAbsenceType> groupsInvolved = 
             superCode.absenceType.involvedGroupAbsenceType(false);
         for (GroupAbsenceType group : groupsInvolved) {
-          group.takableAbsenceBehaviour.takableCodes.remove(superCode.absenceType);
-          group.takableAbsenceBehaviour.takenCodes.remove(superCode.absenceType);
-          group.takableAbsenceBehaviour.save();
-          group.takableAbsenceBehaviour.refresh();
+          group.getTakableAbsenceBehaviour().getTakableCodes().remove(superCode.absenceType);
+          group.getTakableAbsenceBehaviour().getTakenCodes().remove(superCode.absenceType);
+          group.getTakableAbsenceBehaviour().save();
+          group.getTakableAbsenceBehaviour().refresh();
         }
         superCode.absenceType.delete();
         superCode.absenceType = null;
