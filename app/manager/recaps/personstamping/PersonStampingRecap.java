@@ -170,42 +170,42 @@ public class PersonStampingRecap {
 
     long startDayRecaps = System.currentTimeMillis();
     for (PersonDay pd : totalPersonDays) {
-      personDayManager.setValidPairStampings(pd.stampings);
+      personDayManager.setValidPairStampings(pd.getStampings());
 
       PersonStampingDayRecap dayRecap = stampingDayRecapFactory.create(pd, this.numberOfInOut,
           considerExitingNow, Optional.fromNullable(monthContracts));
       this.daysRecap.add(dayRecap);
 
-      this.totalWorkingTime += pd.timeAtWork;
+      this.totalWorkingTime += pd.getTimeAtWork();
 
-      if (pd.stampModificationType != null && !pd.date.isAfter(today)) {
+      if (pd.getStampModificationType() != null && !pd.getDate().isAfter(today)) {
 
-        stampModificationTypeSet.add(pd.stampModificationType);
+        stampModificationTypeSet.add(pd.getStampModificationType());
       }
 
-      for (Stamping stamp : pd.stampings) {
-        if (stamp.stampType != null) {
-          stampTypeSet.add(stamp.stampType);
+      for (Stamping stamp : pd.getStampings()) {
+        if (stamp.getStampType() != null) {
+          stampTypeSet.add(stamp.getStampType());
         }
-        if (stamp.markedByAdmin) {
+        if (stamp.isMarkedByAdmin()) {
           StampModificationType smt = stampingDayRecapFactory.stampTypeManager
               .getStampMofificationType(StampModificationTypeCode.MARKED_BY_ADMIN);
           stampModificationTypeSet.add(smt);
         }
-        if (stamp.markedByEmployee) {
+        if (stamp.isMarkedByEmployee()) {
           StampModificationType smt = stampingDayRecapFactory.stampTypeManager
               .getStampMofificationType(StampModificationTypeCode.MARKED_BY_EMPLOYEE);
           stampModificationTypeSet.add(smt);
         }
-        if (stamp.markedByTelework) {
+        if (stamp.isMarkedByTelework()) {
           StampModificationType smt = stampingDayRecapFactory.stampTypeManager
               .getStampMofificationType(StampModificationTypeCode.MARKED_BY_TELEWORK);
           stampModificationTypeSet.add(smt);
         }
-        if (stamp.stampModificationType != null) {
-          if (stamp.stampModificationType.code
+        if (stamp.getStampModificationType() != null) {
+          if (stamp.getStampModificationType().getCode()
               .equals(StampModificationTypeCode.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getCode())) {
-            stampModificationTypeSet.add(stamp.stampModificationType);
+            stampModificationTypeSet.add(stamp.getStampModificationType());
           }
         }
       }
@@ -223,7 +223,7 @@ public class PersonStampingRecap {
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
     this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
-    LocalDate from = person.office.getBeginDate();
+    LocalDate from = person.getOffice().getBeginDate();
     List<Absence> list = personManager.absencesToRecover(person, from, LocalDate.now(),
         JustifiedTypeName.recover_time);
     this.absencesToRecoverList = personManager.dtoList(list);

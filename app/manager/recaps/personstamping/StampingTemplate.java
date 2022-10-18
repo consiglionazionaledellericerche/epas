@@ -66,39 +66,39 @@ public class StampingTemplate {
     this.pairPosition = position;
 
     //stamping nulle o exiting now non sono visualizzate
-    if (stamping.date == null || stamping.exitingNow) {
+    if (stamping.getDate() == null || stamping.exitingNow) {
       this.valid = true;
       setColor(stamping);
       return;
     }
 
-    this.date = stamping.date;
+    this.date = stamping.getDate();
 
-    this.way = stamping.way.getDescription();
+    this.way = stamping.getWay().getDescription();
 
-    this.hour = stamping.date.toString(STAMPING_FORMAT);
+    this.hour = stamping.getDate().toString(STAMPING_FORMAT);
 
     //timbratura modificata dall'amministatore
-    if (stamping.markedByAdmin) {
+    if (stamping.isMarkedByAdmin()) {
       stampModificationTypes.add(stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_ADMIN));
     }
 
     //timbratura modificata dal dipendente
-    if (stamping.markedByEmployee) {
+    if (stamping.isMarkedByEmployee()) {
       stampModificationTypes.add(stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_EMPLOYEE));
     }
     
     //timbratura modificata dal dipendente
-    if (stamping.markedByTelework) {
+    if (stamping.isMarkedByTelework()) {
       stampModificationTypes.add(stampTypeManager.getStampMofificationType(
           StampModificationTypeCode.MARKED_BY_TELEWORK));
     }
 
     //timbratura di mezzanotte
-    if (stamping.stampModificationType != null) {
-      stampModificationTypes.add(stamping.stampModificationType);
+    if (stamping.getStampModificationType() != null) {
+      stampModificationTypes.add(stamping.getStampModificationType());
     }
 
     //timbratura valida (colore cella)
@@ -115,7 +115,7 @@ public class StampingTemplate {
   }
 
   protected void setColor(Stamping stamping) {
-    this.colour = stamping.way.description;
+    this.colour = stamping.getWay().description;
     if (!this.valid) {
       this.colour = "warn";
     }
@@ -125,7 +125,7 @@ public class StampingTemplate {
    * Se stampare il popover sulla stampingTemplate.
    */
   public boolean showPopover() {
-    if (!stampModificationTypes.isEmpty() || stamping.stampType != null) {
+    if (!stampModificationTypes.isEmpty() || stamping.getStampType() != null) {
       return true;
     }
     return false;
