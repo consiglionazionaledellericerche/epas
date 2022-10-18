@@ -93,8 +93,8 @@ public class Bootstrap extends Job<Void> {
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
 
-      if (wtt.horizontal == null) {
-        wtt.horizontal = wtt.horizontalEuristic();
+      if (wtt.getHorizontal() == null) {
+        wtt.setHorizontal(wtt.horizontalEuristic());
         wtt.save();
       }
     }
