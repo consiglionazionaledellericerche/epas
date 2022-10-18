@@ -173,7 +173,7 @@ public final class CacheValues {
           Sets.newHashSet(Lists.newArrayList(key.getKey())), false,
           monthBegin, monthEnd, true).list();
 
-      final Set<String> matricoleEpas = people.stream().map(person -> person.number)
+      final Set<String> matricoleEpas = people.stream().map(person -> person.getNumber())
           .distinct().collect(Collectors.toSet());
 
       final Set<String> matchNumbers = Sets.newHashSet(matricoleEpas);
