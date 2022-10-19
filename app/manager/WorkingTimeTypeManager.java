@@ -42,8 +42,8 @@ public class WorkingTimeTypeManager {
   public void saveWorkingTimeType(
       WorkingTimeTypeDay wttd, WorkingTimeType wtt, int dayOfWeek) {
 
-    wttd.dayOfWeek = dayOfWeek;
-    wttd.workingTimeType = wtt;
+    wttd.setDayOfWeek(dayOfWeek);
+    wttd.setWorkingTimeType(wtt);
     wttd.save();
   }
 
@@ -69,44 +69,44 @@ public class WorkingTimeTypeManager {
     }
 
     WorkingTimeType wtt = new WorkingTimeType();
-    wtt.office = office;
-    wtt.horizontal = false;
-    wtt.description = name;
-    wtt.enableAdjustmentForQuantity = reproportionEnabled;
-    wtt.externalId = externalId;
+    wtt.setOffice(office);
+    wtt.setHorizontal(false);
+    wtt.setDescription(name);
+    wtt.setEnableAdjustmentForQuantity(reproportionEnabled);
+    wtt.setExternalId(externalId);
     wtt.save();
     
     for (VerticalWorkingTime vwt : list) {
       WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
-      wttd.workingTimeType = wtt;
-      wttd.dayOfWeek = vwt.dayOfWeek;
-      wttd.holiday = vwt.holiday;
+      wttd.setWorkingTimeType(wtt);
+      wttd.setDayOfWeek(vwt.dayOfWeek);
+      wttd.setHoliday(vwt.holiday);
       if (vwt.holiday) {
-        wttd.breakTicketTime = 0;
-        wttd.mealTicketTime = 0;
-        wttd.workingTime = 0;
-        wttd.ticketAfternoonThreshold = 0;
+        wttd.setBreakTicketTime(0);
+        wttd.setMealTicketTime(0);
+        wttd.setWorkingTime(0);
+        wttd.setTicketAfternoonThreshold(0);
         wttd.ticketAfternoonWorkingTime = 0;
       } else {
-        wttd.workingTime =
+        wttd.setWorkingTime(
             vwt.workingTimeHour * DateTimeConstants.SECONDS_PER_MINUTE
-                    + vwt.workingTimeMinute;
+                    + vwt.workingTimeMinute);
         if (vwt.mealTicketEnabled) {
-          wttd.mealTicketTime =
+          wttd.setMealTicketTime(
               vwt.mealTicketTimeHour
                           *
                           DateTimeConstants.SECONDS_PER_MINUTE
                           +
-                          vwt.mealTicketTimeMinute;
-          wttd.breakTicketTime = vwt.breakTicketTime;
+                          vwt.mealTicketTimeMinute);
+          wttd.setBreakTicketTime(vwt.breakTicketTime);
 
           if (vwt.afternoonThresholdEnabled) {
-            wttd.ticketAfternoonThreshold =
+            wttd.setTicketAfternoonThreshold(
                 vwt.ticketAfternoonThresholdHour
                             *
                             DateTimeConstants.SECONDS_PER_MINUTE
                             +
-                            vwt.ticketAfternoonThresholdMinute;
+                            vwt.ticketAfternoonThresholdMinute);
             wttd.ticketAfternoonWorkingTime =
                 vwt.ticketAfternoonWorkingTime;
           }

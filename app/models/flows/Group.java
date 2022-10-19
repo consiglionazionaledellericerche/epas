@@ -50,30 +50,30 @@ public class Group extends MutableModel {
   private static final long serialVersionUID = -5169540784395404L;
 
   @Unique(value = "office, name")
-  public String name;
+  private String name;
 
-  public String description;
+  private String description;
 
   @Column(name = "send_flows_email")
-  public boolean sendFlowsEmail;
+  private boolean sendFlowsEmail;
 
   @ManyToOne
   @JoinColumn(name = "office_id", nullable = false)
-  public Office office;
+  private Office office;
 
   @ManyToOne
   @JoinColumn(name = "manager", nullable = false)
   @Required
-  public Person manager;
+  private Person manager;
 
   @OneToMany(mappedBy = "group")
-  public List<Affiliation> affiliations = Lists.newArrayList();
+  private List<Affiliation> affiliations = Lists.newArrayList();
 
   @As(binder = NullStringBinder.class)
   @Unique(value = "office, externalId")
-  public String externalId;
+  private String externalId;
 
-  public LocalDate endDate;
+  private LocalDate endDate;
 
   /**
    * Verificat se un gruppo è sempre attivo alla data attuale.

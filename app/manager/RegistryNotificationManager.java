@@ -47,24 +47,24 @@ public class RegistryNotificationManager {
 
     final String message = String.format(
         "La persona %s ha cambiato sede, la nuova sede è %s (sedeId = %s), "
-            + "la vecchia sede era %s (sedeId = %s)", person.getFullname(), person.office.getName(),
-            person.office.codeId, oldOffice.getName(), oldOffice.codeId);
+            + "la vecchia sede era %s (sedeId = %s)", person.getFullname(), person.getOffice().getName(),
+            person.getOffice().getCodeId(), oldOffice.getName(), oldOffice.getCodeId());
 
     //Notifica ai nuovi amministratori della nuova persona da gestire.
-    person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
+    person.getOffice().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
           Notification.builder().destination(user).message(message)
           .subject(NotificationSubject.PERSON_HAS_CHANGED_OFFICE, person.id)          
           .create();
         });
 
     //Notifica ai vecchi amministratori della persona non più da gestire.
-    oldOffice.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
+    oldOffice.getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
           Notification.builder().destination(user).message(message)
           .subject(NotificationSubject.PERSON_HAS_CHANGED_OFFICE)          
           .create();
@@ -82,13 +82,13 @@ public class RegistryNotificationManager {
     
     final String message = String.format(
         "Una nuova persona è stata associata alla tua sede: %s (matricola = %s)", 
-        person.getFullname(), person.number);
+        person.getFullname(), person.getNumber());
 
     //Notifica ai nuovi amministratori della nuova persona da gestire.
-    person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN) 
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
+    person.getOffice().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
           Notification.builder().destination(user).message(message)
           .subject(NotificationSubject.PERSON_HAS_CHANGED_OFFICE, person.id)          
           .create();
