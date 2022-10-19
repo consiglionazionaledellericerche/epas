@@ -214,7 +214,7 @@ public class ContractDao extends DaoBase {
     // allineati con tutti i record presenti sul db e capita che viene restituito un valore nullo
     // incongruente con i dati presenti
     // TODO da sostituire con una query?
-    for (Contract c : person.contracts) {
+    for (Contract c : person.getContracts()) {
       if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval())) {
         return c;
       }
@@ -299,12 +299,12 @@ public class ContractDao extends DaoBase {
   public Optional<Contract> getPreviousContract(Contract actualContract) {
     Verify.verifyNotNull(actualContract);
     Contract previousContract = null;
-    List<Contract> contractList = getPersonContractList(actualContract.person);
+    List<Contract> contractList = getPersonContractList(actualContract.getPerson());
     for (Contract contract : contractList) {
       if (previousContract == null
           || (contract.calculatedEnd() != null && contract.calculatedEnd()
-          .isBefore(actualContract.beginDate)
-          && contract.beginDate.isAfter(previousContract.endDate))) {
+          .isBefore(actualContract.getBeginDate())
+          && contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
         previousContract = contract;
       }
     }

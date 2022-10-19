@@ -103,15 +103,15 @@ public class CompetenceRequestDao extends DaoBase {
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
-    if (uros.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
-        || !signer.reperibilityTypes.isEmpty())) {
+    if (uros.stream().noneMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE)
+        || !signer.getReperibilityTypes().isEmpty())) {
       return Lists.newArrayList();
     }
 
     BooleanBuilder conditions = new BooleanBuilder();
 
     val results = Lists.<CompetenceRequest>newArrayList();
-    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
         .and(competenceRequest.type.eq(competenceRequestType)
         .and(competenceRequest.flowStarted.isTrue())
@@ -120,16 +120,16 @@ public class CompetenceRequestDao extends DaoBase {
 
 
     JPQLQuery<CompetenceRequest> query;
-    if (!signer.reperibilityTypes.isEmpty()) {
+    if (!signer.getReperibilityTypes().isEmpty()) {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
       .and(competenceRequest.employeeApproved.isNull())
       .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
       .and(competenceRequest.reperibilityManagerApproved.isNull())
-          .and(person.office.eq(signer.office));
+          .and(person.office.eq(signer.getOffice()));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
-          .where(pr.personReperibilityType.in(signer.reperibilityTypes).and(conditions));
+          .where(pr.personReperibilityType.in(signer.getReperibilityTypes()).and(conditions));
           
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
@@ -162,8 +162,8 @@ public class CompetenceRequestDao extends DaoBase {
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    if (roleList.stream().noneMatch(uro -> uro.role.name.equals(Role.EMPLOYEE)
-        || !signer.reperibilityTypes.isEmpty())) {
+    if (roleList.stream().noneMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE)
+        || !signer.getReperibilityTypes().isEmpty())) {
       return Lists.newArrayList();
     }
     conditions.and(competenceRequest.type.eq(type)
@@ -175,8 +175,8 @@ public class CompetenceRequestDao extends DaoBase {
 
     List<CompetenceRequest> results = new ArrayList<>();
 
-    if (!signer.reperibilityTypes.isEmpty()) {
-      List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
+    if (!signer.getReperibilityTypes().isEmpty()) {
+      List<Office> officeList = roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
@@ -213,7 +213,7 @@ public class CompetenceRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     List<CompetenceRequest> results = new ArrayList<>();
     JPQLQuery<CompetenceRequest> query;
-    List<Office> officeList = roleList.stream().map(u -> u.office).collect(Collectors.toList());
+    List<Office> officeList = roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
         .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
             .and(competenceRequest.person.office.in(officeList)));
@@ -222,7 +222,7 @@ public class CompetenceRequestDao extends DaoBase {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
     }
 
-    if (!signer.reperibilityTypes.isEmpty()) {
+    if (!signer.getReperibilityTypes().isEmpty()) {
       conditions.andAnyOf((competenceRequest.reperibilityManagerApprovalRequired.isTrue())
           .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
           competenceRequest.reperibilityManagerApprovalRequired.isFalse());
@@ -230,7 +230,7 @@ public class CompetenceRequestDao extends DaoBase {
       query = getQueryFactory().selectFrom(competenceRequest)
           .leftJoin(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
-          .where(pr.personReperibilityType.in(signer.reperibilityTypes)
+          .where(pr.personReperibilityType.in(signer.getReperibilityTypes())
               .and(conditions));
       results.addAll(query.fetch());
     } else {

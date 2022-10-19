@@ -44,7 +44,7 @@ public class WrapperContractWorkingTimeType implements IWrapperContractWorkingTi
    */
   @Override
   public DateInterval getDateInverval() {
-    return new DateInterval(value.beginDate, value.endDate);
+    return new DateInterval(value.getBeginDate(), value.getEndDate());
   }
 
 }

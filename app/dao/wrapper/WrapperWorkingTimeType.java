@@ -79,7 +79,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
     for (Contract contract : activeContract) {
       ContractWorkingTimeType current = contractManager
               .getContractWorkingTimeTypeFromDate(contract, today);
-      if (current.workingTimeType.equals(this.value)) {
+      if (current.getWorkingTimeType().equals(this.value)) {
         list.add(contract);
       }
     }
@@ -99,8 +99,8 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
     List<ContractWorkingTimeType> list = new ArrayList<ContractWorkingTimeType>();
     for (Contract contract : activeContract) {
-      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-        if (cwtt.workingTimeType.equals(this.value)) {
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
+        if (cwtt.getWorkingTimeType().equals(this.value)) {
           list.add(cwtt);
         }
       }
@@ -111,7 +111,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
   @Override
   public List<Contract> getAssociatedContract() {
-    return value.contractWorkingTimeType.stream().map(cwtt -> cwtt.contract)
+    return value.getContractWorkingTimeType().stream().map(cwtt -> cwtt.getContract())
         .collect(Collectors.toList());
   }
 }

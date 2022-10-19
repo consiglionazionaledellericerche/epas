@@ -135,10 +135,11 @@ public class WorkingTimeTypeDao extends DaoBase {
     Contract contract = contractDao.getContract(date, person);
 
     if (contract != null) {
-      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
 
-        if (DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate))) {
-          return Optional.of(cwtt.workingTimeType);
+        if (DateUtility.isDateIntoInterval(date, 
+            new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
+          return Optional.of(cwtt.getWorkingTimeType());
         }
       }
     }
@@ -158,16 +159,16 @@ public class WorkingTimeTypeDao extends DaoBase {
       return Optional.absent();
     }
     int index = date.getDayOfWeek() - 1;
-    Verify.verify(index < wtt.get().workingTimeTypeDays.size(),
+    Verify.verify(index < wtt.get().getWorkingTimeTypeDays().size(),
         String.format("Definiti %d giorni nel WorkingTimeType %s, "
                 + "richiesto giorno non presente con indice %d",
-            wtt.get().workingTimeTypeDays.size(), wtt.get(), index));
+            wtt.get().getWorkingTimeTypeDays().size(), wtt.get(), index));
 
     Optional<WorkingTimeTypeDay> wttd =
-        Optional.fromNullable(wtt.get().workingTimeTypeDays.get(index));
+        Optional.fromNullable(wtt.get().getWorkingTimeTypeDays().get(index));
 
     Verify.verify(wttd.isPresent());
-    Verify.verify(wttd.get().dayOfWeek == date.getDayOfWeek());
+    Verify.verify(wttd.get().getDayOfWeek() == date.getDayOfWeek());
 
     return wttd;
   }

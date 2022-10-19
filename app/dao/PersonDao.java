@@ -393,7 +393,7 @@ public final class PersonDao extends DaoBase {
     final QContract qcontract = QContract.contract;
 
     final List<Contract> results =
-        getQueryFactory().selectFrom(qcontract).where(qcontract.person.eq(contract.person))
+        getQueryFactory().selectFrom(qcontract).where(qcontract.person.eq(contract.getPerson()))
             .orderBy(qcontract.beginDate.desc()).fetch();
 
     final int indexOf = results.indexOf(contract);
