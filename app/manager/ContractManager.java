@@ -91,7 +91,7 @@ public class ContractManager {
   public final boolean isContractNotOverlapping(final Contract contract) {
 
     DateInterval contractInterval = wrapperFactory.create(contract).getContractDateInterval();
-    for (Contract c : contract.person.contracts) {
+    for (Contract c : contract.getPerson().getContracts()) {
 
       if (contract.id != null && c.id.equals(contract.id)) {
         continue;
@@ -114,17 +114,18 @@ public class ContractManager {
    */
   public final boolean isContractCrossFieldValidationPassed(final Contract contract) {
 
-    if (contract.endDate != null
-        && contract.endDate.isBefore(contract.beginDate)) {
+    if (contract.getEndDate() != null
+        && contract.getEndDate().isBefore(contract.getBeginDate())) {
       return false;
     }
 
-    if (contract.endContract != null && contract.endContract.isBefore(contract.beginDate)) {
+    if (contract.getEndContract() != null 
+        && contract.getEndContract().isBefore(contract.getBeginDate())) {
       return false;
     }
 
-    if (contract.endDate != null && contract.endContract != null
-        && contract.endDate.isBefore(contract.endContract)) {
+    if (contract.getEndDate() != null && contract.getEndContract() != null
+        && contract.getEndDate().isBefore(contract.getEndContract())) {
       return false;
     }
 
@@ -147,7 +148,7 @@ public class ContractManager {
       Optional<WorkingTimeType> wtt, 
       boolean recomputation) {
 
-    if (contract.beginDate == null) {
+    if (contract.getBeginDate() == null) {
       log.debug("Impossibile creare il contratto, beginDate è null");
       return false;
     }
@@ -165,7 +166,7 @@ public class ContractManager {
 
     contract.save();
 
-    contract.vacationPeriods.addAll(contractVacationPeriods(contract));
+    contract.getVacationPeriods().addAll(contractVacationPeriods(contract));
     for (VacationPeriod vacationPeriod : contract.getVacationPeriods()) {
       vacationPeriod.save();
     }
@@ -179,26 +180,26 @@ public class ContractManager {
     }
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-    cwtt.beginDate = contract.getBeginDate();
-    cwtt.endDate = contract.calculatedEnd();
-    cwtt.workingTimeType = wtt.get();
-    cwtt.contract = contract;
+    cwtt.setBeginDate(contract.getBeginDate());
+    cwtt.setEndDate(contract.calculatedEnd());
+    cwtt.setWorkingTimeType(wtt.get());
+    cwtt.setContract(contract);
     cwtt.save();
-    contract.contractWorkingTimeType.add(cwtt);
+    contract.getContractWorkingTimeType().add(cwtt);
 
     ContractStampProfile csp = new ContractStampProfile();
-    csp.contract = contract;
-    csp.beginDate = contract.getBeginDate();
-    csp.endDate = contract.calculatedEnd();
-    csp.fixedworkingtime = false;
+    csp.setContract(contract);
+    csp.setBeginDate(contract.getBeginDate());
+    csp.setEndDate(contract.calculatedEnd());
+    csp.setFixedworkingtime(false);
     csp.save();
-    contract.contractStampProfile.add(csp);
+    contract.getContractStampProfile().add(csp);
 
-    contract.sourceDateResidual = null;
+    contract.setSourceDateResidual(null);
     contract.save();
 
     // FIXME: comando JPA per aggiornare la person
-    contract.person.contracts.add(contract);
+    contract.getPerson().getContracts().add(contract);
 
     if (recomputation) {
       recomputeContract(contract, Optional.<LocalDate>absent(), true, false);
@@ -228,7 +229,7 @@ public class ContractManager {
 
     contract.save();
     periodManager.updatePropertiesInPeriodOwner(contract);
-    personDayInTroubleManager.cleanPersonDayInTrouble(contract.person);
+    personDayInTroubleManager.cleanPersonDayInTrouble(contract.getPerson());
 
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
 
@@ -257,8 +258,8 @@ public class ContractManager {
 
       // Distruggere i riepiloghi esistenti da yearMonthFrom.
       // TODO: anche quelli sulle ferie quando ci saranno
-      for (ContractMonthRecap cmr : contract.contractMonthRecaps) {
-        if (!yearMonthFrom.isAfter(new YearMonth(cmr.year, cmr.month))) {
+      for (ContractMonthRecap cmr : contract.getContractMonthRecaps()) {
+        if (!yearMonthFrom.isAfter(new YearMonth(cmr.getYear(), cmr.getMonth()))) {
           if (cmr.isPersistent()) {
             cmr.delete();
           }          
@@ -286,10 +287,10 @@ public class ContractManager {
       final VacationCode vacationCode, final LocalDate beginFrom, final LocalDate endTo) {
 
     VacationPeriod vacationPeriod = new VacationPeriod();
-    vacationPeriod.contract = contract;
+    vacationPeriod.setContract(contract);
     vacationPeriod.setBeginDate(beginFrom);
     vacationPeriod.setEndDate(endTo);
-    vacationPeriod.vacationCode = vacationCode;
+    vacationPeriod.setVacationCode(vacationCode);
     return vacationPeriod;
   }
 
@@ -343,9 +344,10 @@ public class ContractManager {
   public final ContractWorkingTimeType getContractWorkingTimeTypeFromDate(final Contract contract,
       final LocalDate date) {
 
-    for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+    for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
 
-      if (DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+      if (DateUtility.isDateIntoInterval(date, 
+          new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
         return cwtt;
       }
     }
@@ -361,26 +363,26 @@ public class ContractManager {
    */
   public final void setSourceContractProperly(final Contract contract) {
 
-    if (contract.sourceVacationLastYearUsed == null) {
-      contract.sourceVacationLastYearUsed = 0;
+    if (contract.getSourceVacationLastYearUsed() == null) {
+      contract.setSourceVacationLastYearUsed(0);
     }
-    if (contract.sourceVacationCurrentYearUsed == null) {
-      contract.sourceVacationCurrentYearUsed = 0;
+    if (contract.getSourceVacationCurrentYearUsed() == null) {
+      contract.setSourceVacationCurrentYearUsed(0);
     }
-    if (contract.sourcePermissionUsed == null) {
-      contract.sourcePermissionUsed = 0;
+    if (contract.getSourcePermissionUsed() == null) {
+      contract.setSourcePermissionUsed(0);
     }
-    if (contract.sourceRemainingMinutesCurrentYear == null) {
-      contract.sourceRemainingMinutesCurrentYear = 0;
+    if (contract.getSourceRemainingMinutesCurrentYear() == null) {
+      contract.setSourceRemainingMinutesCurrentYear(0);
     }
-    if (contract.sourceRemainingMinutesLastYear == null) {
-      contract.sourceRemainingMinutesLastYear = 0;
+    if (contract.getSourceRemainingMinutesLastYear() == null) {
+      contract.setSourceRemainingMinutesLastYear(0);
     }
-    if (contract.sourceRecoveryDayUsed == null) {
-      contract.sourceRecoveryDayUsed = 0;
+    if (contract.getSourceRecoveryDayUsed() == null) {
+      contract.setSourceRecoveryDayUsed(0);
     }
-    if (contract.sourceRemainingMealTicket == null) {
-      contract.sourceRemainingMealTicket = 0;
+    if (contract.getSourceRemainingMealTicket() == null) {
+      contract.setSourceRemainingMealTicket(0);
     }
     contract.save();
   }
@@ -391,8 +393,8 @@ public class ContractManager {
    * @param contract contract
    */
   public final void cleanResidualInitialization(final Contract contract) {
-    contract.sourceRemainingMinutesCurrentYear = 0;
-    contract.sourceRemainingMinutesLastYear = 0;
+    contract.setSourceRemainingMinutesCurrentYear(0);
+    contract.setSourceRemainingMinutesLastYear(0);
   }
 
   /**
@@ -401,9 +403,9 @@ public class ContractManager {
    * @param contract contract
    */
   public final void cleanVacationInitialization(final Contract contract) {
-    contract.sourceVacationLastYearUsed = 0;
-    contract.sourceVacationCurrentYearUsed = 0;
-    contract.sourcePermissionUsed = 0;
+    contract.setSourceVacationLastYearUsed(0);
+    contract.setSourceVacationCurrentYearUsed(0);
+    contract.setSourcePermissionUsed(0);
   }
 
   /**
@@ -412,7 +414,7 @@ public class ContractManager {
    * @param contract contract
    */
   public final void cleanMealTicketInitialization(final Contract contract) {
-    contract.sourceDateMealTicket = contract.sourceDateResidual;
+    contract.setSourceDateMealTicket(contract.getSourceDateResidual());
   }
 
   /**
@@ -425,8 +427,9 @@ public class ContractManager {
   public final Optional<ContractMandatoryTimeSlot> getContractMandatoryTimeSlotFromDate(
       final Contract contract, final LocalDate date) {
 
-    for (ContractMandatoryTimeSlot cmts : contract.contractMandatoryTimeSlots) {
-      if (DateUtility.isDateIntoInterval(date, new DateInterval(cmts.beginDate, cmts.endDate))) {
+    for (ContractMandatoryTimeSlot cmts : contract.getContractMandatoryTimeSlots()) {
+      if (DateUtility.isDateIntoInterval(date, 
+          new DateInterval(cmts.getBeginDate(), cmts.getEndDate()))) {
         return Optional.of(cmts);
       }
     }
@@ -449,9 +452,9 @@ public class ContractManager {
     List<VacationPeriod> vpList = previousContract.getVacationPeriods();    
     VacationPeriod vp = null;
     for (VacationPeriod vpPrevious : vpList) {
-      if (vpPrevious.vacationCode.equals(VacationCode.CODE_26_4)) {
+      if (vpPrevious.getVacationCode().equals(VacationCode.CODE_26_4)) {
         twentysixplus4 = vpPrevious;
-      } else if (vpPrevious.vacationCode.equals(VacationCode.CODE_28_4)) {
+      } else if (vpPrevious.getVacationCode().equals(VacationCode.CODE_28_4)) {
         twentyeightplus4 = vpPrevious;
       } else {
         other = vpPrevious;
@@ -463,31 +466,31 @@ public class ContractManager {
     if (twentyeightplus4 != null && twentysixplus4 != null) {
       //in questo caso il nuovo contratto partirà già col piano ferie 28+4 dal primo giorno
       vp = new VacationPeriod();
-      vp.contract = contract;
-      vp.beginDate = contract.beginDate;
-      vp.vacationCode = VacationCode.CODE_28_4;
-      vp.endDate = contract.endDate;
+      vp.setContract(contract);
+      vp.setBeginDate(contract.getBeginDate());
+      vp.setVacationCode(VacationCode.CODE_28_4);
+      vp.setEndDate(contract.getEndDate());
     }
     if (twentysixplus4 != null && twentyeightplus4 == null) {
       // si calcola la durata del piano ferie 26+4 e in base a quello il nuovo contratto parte con
       // 26+4 e 28+4 parte dopo 3 anni dall'inizio di 26+4 nel vecchio contratto
       vp = new VacationPeriod();
-      vp.contract = contract;
-      vp.vacationCode = VacationCode.CODE_28_4;
-      vp.beginDate = twentysixplus4.beginDate.plusYears(3);
-      vp.endDate = contract.endDate;
+      vp.setContract(contract);
+      vp.setVacationCode(VacationCode.CODE_28_4);
+      vp.setBeginDate(twentysixplus4.getBeginDate().plusYears(3));
+      vp.setEndDate(contract.getEndDate());
     }
     if (vp != null) {
       List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(vp, false);
       RecomputeRecap recomputeRecap =
           periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
               Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-              periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+              periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
 
       recomputeRecap.initMissing = wrappedContract.initializationMissing();
       periodManager.updatePeriods(vp, true);
       contract = contractDao.getContractById(contract.id);
-      contract.person.refresh();
+      contract.getPerson().refresh();
       if (recomputeRecap.needRecomputation) {
         recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
@@ -510,7 +513,7 @@ public class ContractManager {
     JPA.em().flush();
     actualContract.refresh(); 
 
-    actualContract.vacationPeriods.addAll(contractVacationPeriods(actualContract));
+    actualContract.getVacationPeriods().addAll(contractVacationPeriods(actualContract));
     for (VacationPeriod vacationPeriod : actualContract.getVacationPeriods()) {
       vacationPeriod.save();
     }
@@ -523,7 +526,7 @@ public class ContractManager {
    * Verifica se è possibile associare un precedente contratto al contratto attuale. 
    */
   public boolean canAppyPreviousContractLink(Contract contract) {
-    IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
+    IWrapperPerson wrapperPerson = wrapperFactory.create(contract.getPerson());
     Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
     return previousContract.isPresent();
   }
@@ -542,11 +545,11 @@ public class ContractManager {
     //Controllo se il contratto deve essere linkato al precedente...
     if (linkedToPreviousContract) {
       if (contract.getPreviousContract() == null) {
-        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.person);
+        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.getPerson());
         Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
         if (previousContract.isPresent()) {
           contract.setPreviousContract(previousContract.get());          
-          if (contract.beginDate.minusDays(1).isEqual(previousContract.get().endDate)) {
+          if (contract.getBeginDate().minusDays(1).isEqual(previousContract.get().getEndDate())) {
             mergeVacationPeriods(contract, previousContract.get());            
           }
         } else {
@@ -558,7 +561,7 @@ public class ContractManager {
       if (temp != null) {        
         contract.setPreviousContract(null);
 
-        if (contract.beginDate.minusDays(1).isEqual(temp.endDate)) {
+        if (contract.getBeginDate().minusDays(1).isEqual(temp.getEndDate())) {
           splitVacationPeriods(contract);
         }         
       }
