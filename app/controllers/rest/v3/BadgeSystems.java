@@ -100,7 +100,7 @@ public class BadgeSystems extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //leato al badgeSystem
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
     return badgeSystem;
   }
 }

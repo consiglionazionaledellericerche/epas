@@ -84,7 +84,7 @@ public class PersonDays extends Controller {
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     PersonDay pd = 
         personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
@@ -189,12 +189,12 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     val monthRecap = 
         PersonMonthRecapDto.builder().year(year).month(month)
         .basedWorkingDays(
-            personManager.basedWorkingDays(personDays, person.contracts, null))
+            personManager.basedWorkingDays(personDays, person.getContracts(), null))
         .person(PersonShowTerseDto.build(person))
         .personDays(personDays.stream().map(pd -> PersonDayShowTerseDto.build(pd))
             .collect(Collectors.toList()))
@@ -214,7 +214,7 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
     val personDays = personDayDao.getOffSitePersonDaysByPersonInPeriod(

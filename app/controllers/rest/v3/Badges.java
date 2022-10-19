@@ -92,7 +92,7 @@ public class Badges extends Controller {
     notFoundIfNull(id);
     val badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
     val badges = badgeSystemDao.badges(badgeSystem);
     renderJSON(gsonBuilder.create().toJson(
@@ -108,9 +108,9 @@ public class Badges extends Controller {
       String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     List<BadgeShowDto> badges = 
-        person.badges.stream().map(c -> BadgeShowDto.build(c))
+        person.getBadges().stream().map(c -> BadgeShowDto.build(c))
         .collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(badges));
   }
@@ -150,7 +150,7 @@ public class Badges extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(badge.person.office);
+    rules.checkIfPermitted(badge.getPerson().getOffice());
 
     badge.save();
 
@@ -181,7 +181,7 @@ public class Badges extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(badge.person.office);
+    rules.checkIfPermitted(badge.getPerson().getOffice());
 
     if (!validation.valid(badge).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -228,7 +228,7 @@ public class Badges extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(badge.person.office);
+    rules.checkIfPermitted(badge.getPerson().getOffice());
     return badge;
   }
 }

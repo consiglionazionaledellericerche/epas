@@ -101,10 +101,10 @@ public class Persons extends Controller {
           DayRecap dayRecap = new DayRecap();
 
           dayRecap.workingMinutes = personday.getAssignableTime();
-          dayRecap.date = personday.date.toString();
+          dayRecap.date = personday.getDate().toString();
           dayRecap.mission = personDayManager.isOnMission(personday);
           dayRecap.workingTime =
-              wrapperFactory.create(personday).getWorkingTimeTypeDay().get().workingTime;
+              wrapperFactory.create(personday).getWorkingTimeTypeDay().get().getWorkingTime();
           return dayRecap;
         }).toList();
 
@@ -135,8 +135,8 @@ public class Persons extends Controller {
           .transform(absence -> {
             DayRecap dayRecap = new DayRecap();
             dayRecap.workingMinutes = 0;
-            dayRecap.date = absence.personDay.date.toString();
-            if (personDayManager.isOnMission(absence.personDay)) {
+            dayRecap.date = absence.getPersonDay().getDate().toString();
+            if (personDayManager.isOnMission(absence.getPersonDay())) {
               dayRecap.mission = true;
             } else {
               dayRecap.mission = false;
@@ -200,7 +200,7 @@ public class Persons extends Controller {
   @BasicAuth
   public static void peopleList(String sedeId, LocalDate date) {
     User user = Security.getUser().get();
-    log.info("Utente {} loggato correttamente", user.username);
+    log.info("Utente {} loggato correttamente", user.getUsername());
     if (Strings.isNullOrEmpty(sedeId)) {
       JsonResponse.badRequest("Identificativo di sede nullo");
     }

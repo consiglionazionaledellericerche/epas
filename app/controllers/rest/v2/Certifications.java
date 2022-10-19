@@ -120,7 +120,7 @@ public class Certifications extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val certData = certificationManager.getPersonCertData(person, year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(certData.validate));
@@ -154,7 +154,7 @@ public class Certifications extends Controller {
           + "mail che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getOffice());
 
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
@@ -220,11 +220,11 @@ public class Certifications extends Controller {
     List<CertificationAbsenceDto> absences = searchAbsences(person, year, month);
 
     for (Map.Entry<String, Certification> entry : map.entrySet()) {
-      switch (entry.getValue().certificationType) {
+      switch (entry.getValue().getCertificationType()) {
         case ABSENCE:
           break;
         case COMPETENCE:
-          places = entry.getValue().content.split(";");
+          places = entry.getValue().getContent().split(";");
           CertificationCompetencesDto competence = CertificationCompetencesDto.builder()
               .code(places[0])
               .quantity(Integer.parseInt(places[1]))
@@ -233,15 +233,15 @@ public class Certifications extends Controller {
           break;
         case MEAL:
           CertificationMealTicketDto meal = CertificationMealTicketDto.builder()
-              .quantity(Integer.parseInt(entry.getValue().content.split(";")[0]) 
-                  + Integer.parseInt(entry.getValue().content.split(";")[1]))
-              .paperyTickets(Integer.parseInt(entry.getValue().content.split(";")[0]))
-              .electronicTickets(Integer.parseInt(entry.getValue().content.split(";")[1]))
+              .quantity(Integer.parseInt(entry.getValue().getContent().split(";")[0]) 
+                  + Integer.parseInt(entry.getValue().getContent().split(";")[1]))
+              .paperyTickets(Integer.parseInt(entry.getValue().getContent().split(";")[0]))
+              .electronicTickets(Integer.parseInt(entry.getValue().getContent().split(";")[1]))
               .build();
           mealTickets.add(meal);
           break;
         case FORMATION:
-          places = entry.getValue().content.split(";");
+          places = entry.getValue().getContent().split(";");
           from = new LocalDate(year, month, Integer.parseInt(places[0]));
           to = new LocalDate(year, month, Integer.parseInt(places[1]));
           CertificationTrainingHoursDto trainingHour = CertificationTrainingHoursDto.builder()
@@ -257,7 +257,7 @@ public class Certifications extends Controller {
     }
     CertificationDto obj = CertificationDto.builder()
         .fullName(person.getFullname())
-        .number(person.number)
+        .number(person.getNumber())
         .year(year)
         .month(month)
         .absences(absences)
@@ -292,11 +292,11 @@ public class Certifications extends Controller {
     String justifiedType = "";
     for (Absence abs : absencesPlus) {
 
-      String absenceCodeToSend = abs.absenceType.code.toUpperCase();      
-      if (previousDate != null && previousDate.plusDays(1).equals(abs.personDay.date)
+      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();      
+      if (previousDate != null && previousDate.plusDays(1).equals(abs.getPersonDay().getDate())
           && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = abs.personDay.date.getDayOfMonth();
-        previousDate = abs.personDay.date;        
+        dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
+        previousDate = abs.getPersonDay().getDate();        
         continue;
       }
       // 2) Fine Assenza più giorni
@@ -314,30 +314,30 @@ public class Certifications extends Controller {
       }
 
       // 3) Nuova Assenza
-      dayBegin = abs.personDay.date.getDayOfMonth();
-      dayEnd = abs.personDay.date.getDayOfMonth();
-      previousDate = abs.personDay.date;
+      dayBegin = abs.getPersonDay().getDate().getDayOfMonth();
+      dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
+      previousDate = abs.getPersonDay().getDate();
       previousAbsenceCode = absenceCodeToSend;
-      timeToJustify = abs.justifiedMinutes;
+      timeToJustify = abs.getJustifiedMinutes();
 
       Optional<WorkingTimeTypeDay> workingTimeTypeDay = 
-          workingTimeTypeDao.getWorkingTimeTypeDay(abs.personDay.date, person);
+          workingTimeTypeDao.getWorkingTimeTypeDay(abs.getPersonDay().getDate(), person);
 
       if (workingTimeTypeDay.isPresent()) {
-        if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
-            || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
-          timeToJustify = workingTimeTypeDay.get().workingTime;
+        if (abs.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
+            || abs.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+          timeToJustify = workingTimeTypeDay.get().getWorkingTime();
         }
-        if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-          timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+        if (abs.getJustifiedType().getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          timeToJustify = workingTimeTypeDay.get().getWorkingTime() - abs.getPersonDay().getStampingsTime();
         }
       } else {
         log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è "
-            + "presente l'assenza {}", abs.personDay.date, abs, person.getFullname());
+            + "presente l'assenza {}", abs.getPersonDay().getDate(), abs, person.getFullname());
       }
 
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {
-        timeToJustify = abs.absenceType.justifiedTime;
+      if (abs.getJustifiedType().getName().equals(JustifiedTypeName.absence_type_minutes)) {
+        timeToJustify = abs.getAbsenceType().getJustifiedTime();
       }
       justifiedType = abs.getJustifiedType().getLabel();
 

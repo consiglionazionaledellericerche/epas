@@ -76,7 +76,7 @@ public class Stampings extends Controller {
     if (stamping == null) {
       JsonResponse.notFound();
     }
-    rules.checkIfPermitted(stamping.personDay.person.office);
+    rules.checkIfPermitted(stamping.getPersonDay().getPerson().getOffice());
     renderJSON(gsonBuilder.create().toJson(StampingShowDto.build(stamping)));
   }
 
@@ -104,7 +104,7 @@ public class Stampings extends Controller {
 
     // Controlla che la timbratura da inserire non sia troppo nel passato.
     val maxDaysInPastForRestStampings = generalSettingDao.generalSetting()
-        .maxDaysInPastForRestStampings;
+        .getMaxDaysInPastForRestStampings();
     if (stampingCreateDto.getDateTime()
         .compareTo(LocalDateTime.now().minusDays(maxDaysInPastForRestStampings)) < 0) {
       JsonResponse.badRequest("Timbratura con data troppo nel passato");
@@ -120,7 +120,7 @@ public class Stampings extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office associato alla persona
     //a cui si riferisce la timbratura
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getOffice());
 
     val stampingFromClient = StampingFromClient.build(stampingCreateDto);
     stampingFromClient.person = person.get();    
@@ -160,7 +160,7 @@ public class Stampings extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office attuale 
     //della persona
-    rules.checkIfPermitted(stamping.getOwner().office);
+    rules.checkIfPermitted(stamping.getOwner().getOffice());
 
     val gson = gsonBuilder.create();
     val stampingDto = gson.fromJson(body, StampingUpdateDto.class); 
@@ -171,12 +171,12 @@ public class Stampings extends Controller {
 
     stampingDto.update(stamping);
 
-    val person = stamping.personDay.person;
+    val person = stamping.getPersonDay().getPerson();
     
     //Controlla anche che l'utente corrente abbia
     //i diritti corretti sull'office della persona associata 
     //alla timbratura
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     if (!validation.valid(stamping).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -184,7 +184,7 @@ public class Stampings extends Controller {
     stamping.save();
     
     consistencyManager
-      .updatePersonSituation(person.id, stamping.personDay.date);
+      .updatePersonSituation(person.id, stamping.getPersonDay().getDate());
 
     log.info("Updated stamping {} via REST. Person {}", stamping, person);
     renderJSON(gson.toJson(StampingShowDto.build(stamping)));
@@ -205,12 +205,12 @@ public class Stampings extends Controller {
       JsonResponse.notFound();
     }
 
-    val person = stamping.personDay.person;
-    rules.checkIfPermitted(person.office);
+    val person = stamping.getPersonDay().getPerson();
+    rules.checkIfPermitted(person.getOffice());
 
     stamping.delete();
     consistencyManager.updatePersonSituation(
-        person.id, stamping.personDay.date);
+        person.id, stamping.getPersonDay().getDate());
 
     log.info("Deleted stamping {} via REST. Person = {}", stamping, person);
     JsonResponse.ok();

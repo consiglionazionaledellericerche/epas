@@ -67,7 +67,7 @@ public class Competences extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = 
         Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val pccs = competenceCodeDao.listByPerson(
         person, Optional.fromNullable(JodaConverters.javaToJodaLocalDate(date)));
 
