@@ -110,7 +110,7 @@ public class Institutes extends Controller {
     final Institute institute = Institute.findById(id);
     notFoundIfNull(institute);
 
-    if (institute.seats.isEmpty()) {
+    if (institute.getSeats().isEmpty()) {
       institute.delete();
       flash.success(Web.msgDeleted(Institute.class));
       index();

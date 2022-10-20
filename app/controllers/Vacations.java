@@ -81,9 +81,9 @@ public class Vacations extends Controller {
 
     Optional<User> currentUser = Security.getUser();
     Preconditions.checkState(currentUser.isPresent());
-    Preconditions.checkNotNull(currentUser.get().person);
+    Preconditions.checkNotNull(currentUser.get().getPerson());
 
-    IWrapperPerson person = wrapperFactory.create(currentUser.get().person);
+    IWrapperPerson person = wrapperFactory.create(currentUser.get().getPerson());
 
     if (year == null) {
       year = LocalDate.now().getYear();
@@ -124,8 +124,8 @@ public class Vacations extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     Optional<User> currentUser = Security.getUser();
     if (contract == null || type == null 
-        || !currentUser.isPresent() || currentUser.get().person == null 
-        || !contract.person.equals(currentUser.get().person)) {
+        || !currentUser.isPresent() || currentUser.get().getPerson() == null 
+        || !contract.getPerson().equals(currentUser.get().getPerson())) {
       forbidden();
     }
     
@@ -169,7 +169,7 @@ public class Vacations extends Controller {
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     
     for (Person person : personList) {
-      for (Contract contract : person.contracts) {
+      for (Contract contract : person.getContracts()) {
 
         IWrapperContract cwrContract = wrapperFactory.create(contract);
         if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
@@ -217,7 +217,7 @@ public class Vacations extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
     notFoundIfNull(type);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();

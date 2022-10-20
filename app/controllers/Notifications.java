@@ -79,7 +79,7 @@ public class Notifications extends Controller {
     notFoundIfNull(notification);
     rules.checkIfPermitted(notification);
 
-    notification.read = true;
+    notification.setRead(true);
     notification.save();
     redirect(notification.getUrl());
   }
@@ -94,7 +94,7 @@ public class Notifications extends Controller {
     notFoundIfNull(notification);
     rules.checkIfPermitted(notification);
 
-    notification.read = true;
+    notification.setRead(true);
     notification.save();
     list(message, filter);
   }
@@ -108,10 +108,10 @@ public class Notifications extends Controller {
     List<Notification> list = notificationDao.listAllFor(Security.getUser().get(),
         Optional.fromNullable(message), Optional.fromNullable(filter), Optional.absent());
     for (Notification notification : list) {
-      if (notification.read) {
+      if (notification.isRead()) {
         continue;
       }
-      notification.read = true;
+      notification.setRead(true);
       notification.save();
     }
 

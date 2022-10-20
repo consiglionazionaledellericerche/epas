@@ -141,7 +141,7 @@ public class Stampings extends Controller {
     if (year == null || month == null) {
       stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-    val currentPerson = Security.getUser().get().person;
+    val currentPerson = Security.getUser().get().getPerson();
     //Accesso da utente di sistema senza persona associata
     if (currentPerson == null) {
       Application.index();
@@ -185,13 +185,13 @@ public class Stampings extends Controller {
       flash.keep();
       log.info(
           "personStamping -> personId è null, re-indirizzati verso le timbrature utente corrente");
-      personStamping(Security.getUser().get().person.id, year, month);
+      personStamping(Security.getUser().get().getPerson().id, year, month);
     }
 
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),
@@ -261,17 +261,17 @@ public class Stampings extends Controller {
       render(person, date, offsite, insertOffsite, insertNormal, autocertification);
     }
     IWrapperPerson wrperson = wrapperFactory
-        .create(Security.getUser().get().person);
-    if (user.person != null && user.person.equals(person)) {
+        .create(Security.getUser().get().getPerson());
+    if (user.getPerson() != null && user.getPerson().equals(person)) {
       if (UserDao.getAllowedStampTypes(user).contains(StampTypes.LAVORO_FUORI_SEDE)) {
         insertOffsite = true;
         insertNormal = false;        
       }
     }
 
-    if (user.person != null && user.person.equals(person) 
+    if (user.getPerson() != null && user.getPerson().equals(person) 
         && !wrperson.isTechnician()) {
-      if (person.office.checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+      if (person.getOffice().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
         autocertification = true;
       }
     }
@@ -300,13 +300,13 @@ public class Stampings extends Controller {
         .stampings(stamping.id);
 
     boolean ownStamping = false;
-    final Person person = stamping.personDay.person;
-    final LocalDate date = stamping.personDay.date;
+    final Person person = stamping.getPersonDay().getPerson();
+    final LocalDate date = stamping.getPersonDay().getDate();
 
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
     }
-    if (Security.getUser().isPresent() && person.equals(Security.getUser().get().person)
+    if (Security.getUser().isPresent() && person.equals(Security.getUser().get().getPerson())
         && !Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
       ownStamping = true;
     }
@@ -330,7 +330,7 @@ public class Stampings extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     
-    if (stamping.way == null) {
+    if (stamping.getWay() == null) {
       Validation.addError("stamping.way", "Obbligatorio");
     }
     if (Validation.hasErrors()) {
@@ -343,7 +343,7 @@ public class Stampings extends Controller {
 
       render("@edit", stamping, person, date, time, historyStamping);
     }
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    stamping.setDate(stampingManager.deparseStampingDateTime(date, time));
 
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
@@ -352,9 +352,9 @@ public class Stampings extends Controller {
     // Se si tratta di un update ha già tutti i riferimenti al personday
     if (newInsert) {
       final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-      stamping.personDay = personDay;
+      stamping.setPersonDay(personDay);
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
-      personDay.stampings.add(stamping);
+      personDay.getStampings().add(stamping);
     }
         
     rules.checkIfPermitted(stamping);
@@ -370,7 +370,7 @@ public class Stampings extends Controller {
     
     //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
-        && currentUser.person.id.equals(person.id)) {
+        && currentUser.getPerson().id.equals(person.id)) {
       stampings(date.getYear(), date.getMonthOfYear());
     }
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
@@ -392,7 +392,7 @@ public class Stampings extends Controller {
     notFoundIfNull(person);  
   
     //Temporaneo per la validazione
-    stamping.date = LocalDateTime.now();
+    stamping.setDate(LocalDateTime.now());
     validation.valid(stamping);
 
     if (Validation.hasErrors()) {
@@ -401,8 +401,8 @@ public class Stampings extends Controller {
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
       boolean disableInsert = false;
       User user = Security.getUser().get();
-      if (user.person != null) {
-        if (person.office.checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+      if (user.getPerson() != null) {
+        if (person.getOffice().checkConf(EpasParam.WORKING_OFF_SITE, "true") 
             && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
           disableInsert = true;
         }
@@ -410,7 +410,7 @@ public class Stampings extends Controller {
       render("@insert", stamping, person, date, time, disableInsert, offsite);
     }
 
-    stamping.date = stampingManager.deparseStampingDateTime(date, time);
+    stamping.setDate(stampingManager.deparseStampingDateTime(date, time));
     // serve per poter discriminare dopo aver fatto la save della timbratura se si
     // trattava di una nuova timbratura o di una modifica
     boolean newInsert = !stamping.isPersistent();
@@ -418,9 +418,9 @@ public class Stampings extends Controller {
     // Se si tratta di un update ha già tutti i riferimenti al personday
     if (newInsert) {
       final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person, date);
-      stamping.personDay = personDay;
+      stamping.setPersonDay(personDay);
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
-      personDay.stampings.add(stamping);
+      personDay.getStampings().add(stamping);
     }
     log.debug("inizio salvataggio della timbratura fuori sede, person = {}", person);
     rules.checkIfPermitted(stamping);
@@ -436,7 +436,7 @@ public class Stampings extends Controller {
       flash.success(Web.msgSaved(Stampings.class));
     }
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
-        && currentUser.person.id.equals(person.id)) {
+        && currentUser.getPerson().id.equals(person.id)) {
       stampings(date.getYear(), date.getMonthOfYear());
     }
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
@@ -459,10 +459,10 @@ public class Stampings extends Controller {
 
     rules.checkIfPermitted(stamping);
 
-    final PersonDay personDay = stamping.personDay;
+    final PersonDay personDay = stamping.getPersonDay();
     stamping.delete();
 
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
 
     flash.success("Timbratura rimossa correttamente.");
 
@@ -470,11 +470,11 @@ public class Stampings extends Controller {
     
     //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
-        && currentUser.person.id.equals(personDay.person.id)) {
-      Stampings.stampings(personDay.date.getYear(), personDay.date.getMonthOfYear());
+        && currentUser.getPerson().id.equals(personDay.getPerson().id)) {
+      Stampings.stampings(personDay.getDate().getYear(), personDay.getDate().getMonthOfYear());
     }
-    personStamping(personDay.person.id, personDay.date.getYear(),
-        personDay.date.getMonthOfYear());
+    personStamping(personDay.getPerson().id, personDay.getDate().getYear(),
+        personDay.getDate().getMonthOfYear());
   }
 
   /**
@@ -491,20 +491,22 @@ public class Stampings extends Controller {
       notFound();
     }
 
-    rules.checkIfPermitted(stamp.personDay.person);
+    rules.checkIfPermitted(stamp.getPersonDay().getPerson());
 
-    stamp.note = note;
+    stamp.setNote(note);
 
-    stamp.markedByEmployee = true;
+    stamp.setMarkedByEmployee(true);
 
     stamp.save();
 
-    consistencyManager.updatePersonSituation(stamp.personDay.person.id, stamp.personDay.date);
+    consistencyManager
+    .updatePersonSituation(stamp.getPersonDay().getPerson().id, stamp.getPersonDay().getDate());
 
-    flash.success("Aggiornata timbratura del %s di %s.", stamp.date.toString("dd/MM/YYYY"),
-        stamp.personDay.person.fullName());
+    flash.success("Aggiornata timbratura del %s di %s.", stamp.getDate().toString("dd/MM/YYYY"),
+        stamp.getPersonDay().getPerson().fullName());
 
-    Stampings.stampings(stamp.personDay.date.getYear(), stamp.personDay.date.getMonthOfYear());
+    Stampings.stampings(stamp.getPersonDay().getDate().getYear(), 
+        stamp.getPersonDay().getDate().getMonthOfYear());
   }
 
   /**
@@ -629,15 +631,16 @@ public class Stampings extends Controller {
 
     final User user = Security.getUser().get();
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
-    Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(user, role, user.person.office);
+    Optional<UsersRolesOffices> uro = uroDao
+        .getUsersRolesOffices(user, role, user.getPerson().getOffice());
     List<Person> people = Lists.newArrayList();
     if (uro.isPresent()) {
       
-      people = groupDao.groupsByManager(Optional.fromNullable(user.person))
+      people = groupDao.groupsByManager(Optional.fromNullable(user.getPerson()))
           .stream().flatMap(g -> g.getPeople().stream().distinct()).collect(Collectors.toList()); 
     } else {
       flash.error("{} non sono presenti gruppi associati alla tua persona. "
-          + "Rivolgiti all'amministratore del personale", user.person.fullName());
+          + "Rivolgiti all'amministratore del personale", user.getPerson().fullName());
       stampings(year, month);
     }
     
@@ -646,7 +649,7 @@ public class Stampings extends Controller {
     List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
-    Office office = user.person.office;
+    Office office = user.getPerson().getOffice();
     Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;

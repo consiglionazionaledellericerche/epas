@@ -85,9 +85,11 @@ public class ReportMailer extends Mailer {
     boolean toPersonnelAdmin = false;
 
     if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
-      if (user.get().person != null) {
-        dests = userDao.getUsersWithRoles(user.get().person.office, Role.PERSONNEL_ADMIN).stream()
-            .filter(u -> u.person != null).map(u -> u.person.email).collect(Collectors.toList());
+      if (user.get().getPerson() != null) {
+        dests = userDao.getUsersWithRoles(user.get().getPerson().getOffice(), 
+            Role.PERSONNEL_ADMIN).stream()
+            .filter(u -> u.getPerson() != null).map(u -> u.getPerson().getEmail())
+            .collect(Collectors.toList());
         toPersonnelAdmin = true;
       }
     } else {
@@ -102,14 +104,14 @@ public class ReportMailer extends Mailer {
     for (String to : dests) {
       addRecipient(to);
     }
-    if (user.isPresent() && user.get().person != null
-        && !Strings.isNullOrEmpty(user.get().person.email)) {
-      setReplyTo(user.get().person.email);
+    if (user.isPresent() && user.get().getPerson() != null
+        && !Strings.isNullOrEmpty(user.get().getPerson().getEmail())) {
+      setReplyTo(user.get().getPerson().getEmail());
     }
     setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL_FROM));
     val username = user.isPresent() 
-        ? user.get().person != null 
-          ? user.get().person.getFullname() : user.get().username : "utente anonimo"; 
+        ? user.get().getPerson() != null 
+          ? user.get().getPerson().getFullname() : user.get().getUsername() : "utente anonimo"; 
     setSubject(
         String.format("%s: %s", 
             Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT),

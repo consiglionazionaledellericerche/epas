@@ -79,9 +79,10 @@ public class TimeVariations extends Controller {
   public static void addVariation(long absenceId) {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
-    rules.checkIfPermitted(absence.personDay.person);
-    int totalTimeRecovered = absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum();
-    int difference = absence.timeToRecover - totalTimeRecovered;
+    rules.checkIfPermitted(absence.getPersonDay().getPerson());
+    int totalTimeRecovered = absence.getTimeVariations().stream()
+        .mapToInt(i -> i.getTimeVariation()).sum();
+    int difference = absence.getTimeToRecover() - totalTimeRecovered;
     int hours = difference / 60;
     int minutes = difference % 60;
     LocalDate dateVariation = LocalDate.now();
@@ -100,11 +101,11 @@ public class TimeVariations extends Controller {
       Optional<LocalDate> dateVariation) {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
     notFoundIfNull(absence);
-    rules.checkIfPermitted(absence.personDay.person);
-    if (absence.personDay.date.isAfter(LocalDate.now())) {
+    rules.checkIfPermitted(absence.getPersonDay().getPerson());
+    if (absence.getPersonDay().getDate().isAfter(LocalDate.now())) {
       flash.error("Non si può recuperare un'assenza %s - %s prima che questa sia sopraggiunta", 
-          absence.absenceType.code, absence.absenceType.description);
-      Stampings.personStamping(absence.personDay.person.id, 
+          absence.getAbsenceType().getCode(), absence.getAbsenceType().getDescription());
+      Stampings.personStamping(absence.getPersonDay().getPerson().id, 
           LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
     TimeVariation timeVariation = timeVariationManager
@@ -112,10 +113,10 @@ public class TimeVariations extends Controller {
     
     timeVariation.save();
     consistencyManager
-    .updatePersonSituation(absence.personDay.person.id, dateVariation.or(LocalDate.now()));
+    .updatePersonSituation(absence.getPersonDay().getPerson().id, dateVariation.or(LocalDate.now()));
     flash.success("Aggiornato recupero ore per assenza %s in data %s", 
-        absence.absenceType.code, absence.personDay.date);
-    Stampings.personStamping(absence.personDay.person.id, 
+        absence.getAbsenceType().getCode(), absence.getPersonDay().getDate());
+    Stampings.personStamping(absence.getPersonDay().getPerson().id, 
         LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
   }
 
@@ -127,15 +128,15 @@ public class TimeVariations extends Controller {
   public static void removeVariation(long timeVariationId) {
     final TimeVariation timeVariation = timeVariationDao.getById(timeVariationId);
     notFoundIfNull(timeVariation);
-    rules.checkIfPermitted(timeVariation.absence.personDay.person);
+    rules.checkIfPermitted(timeVariation.getAbsence().getPersonDay().getPerson());
 
-    Absence absence = timeVariation.absence;
+    Absence absence = timeVariation.getAbsence();
     timeVariation.delete();
     consistencyManager
-    .updatePersonSituation(absence.personDay.person.id, timeVariation.dateVariation);
+    .updatePersonSituation(absence.getPersonDay().getPerson().id, timeVariation.getDateVariation());
     flash.success("Rimossa variazione oraria per il %s del giorno %s", 
-        absence.absenceType.code, absence.personDay.date);
-    Stampings.personStamping(absence.personDay.person.id, 
+        absence.getAbsenceType().getCode(), absence.getPersonDay().getDate());
+    Stampings.personStamping(absence.getPersonDay().getPerson().id, 
         LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
 
   }
@@ -165,11 +166,11 @@ public class TimeVariations extends Controller {
     
     Optional<User> user = Security.getUser();
     Verify.verify(user.isPresent());
-    Verify.verifyNotNull(user.get().person);
+    Verify.verifyNotNull(user.get().getPerson());
 
-    Person person = user.get().person;
+    Person person = user.get().getPerson();
     
-    LocalDate date = person.office.beginDate;
+    LocalDate date = person.getOffice().getBeginDate();
     List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(
         Optional.fromNullable(person), Optional.absent(), date, LocalDate.now(), 
         Optional.fromNullable(JustifiedTypeName.recover_time), false, true);

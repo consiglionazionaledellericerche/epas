@@ -70,11 +70,11 @@ public class OilMailer extends Mailer {
       User user) {
 
     Verify.verifyNotNull(user);
-    Verify.verifyNotNull(user.person);
-    Verify.verifyNotNull(user.person.email);
+    Verify.verifyNotNull(user.getPerson());
+    Verify.verifyNotNull(user.getPerson().getEmail());
     
     addRecipient(OilConfig.emailTo());
-    setFrom(user.person.email);
+    setFrom(user.getPerson().getEmail());
     
     //[adp]~~X~~YYYYYYYYYYYYYYY~~oggetto~~nome~~cognome~~email
     String subject = 
@@ -83,7 +83,7 @@ public class OilMailer extends Mailer {
             data.getCategory(),
             OilConfig.categoryMap().get(data.getCategory()),
             OilConfig.emailSubject(),
-            user.person.name, user.person.surname, user.person.email);
+            user.getPerson().getName(), user.getPerson().getSurname(), user.getPerson().getEmail());
     setSubject(subject);
 
     try {
@@ -165,9 +165,9 @@ public class OilMailer extends Mailer {
     Verify.verifyNotNull(description);
     String email;
     if (user.isPresent()) {
-      Verify.verifyNotNull(user.get().person);
-      Verify.verifyNotNull(user.get().person.email);
-      email = user.get().person.email;
+      Verify.verifyNotNull(user.get().getPerson());
+      Verify.verifyNotNull(user.get().getPerson().getEmail());
+      email = user.get().getPerson().getEmail();
     } else {
       email =  OilConfig.defaultEmailFromForUserReply();
     }
