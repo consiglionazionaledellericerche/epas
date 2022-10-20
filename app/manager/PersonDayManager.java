@@ -112,7 +112,7 @@ public class PersonDayManager {
    * Assenza che impedisce la maturazione del buono pasto.
    */
   public Optional<Absence> getPreventMealTicket(PersonDay personDay) {
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (absence.absenceType.mealTicketBehaviour.equals(MealTicketBehaviour.preventMealTicket)) { 
         return Optional.of(absence);
       }
@@ -124,7 +124,7 @@ public class PersonDayManager {
    * Assenza che assegna l'intera giornata.
    */
   public Optional<Absence> getAssignAllDay(PersonDay personDay) {
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (absence.justifiedType.name.equals(JustifiedTypeName.assign_all_day)) { 
         return Optional.of(absence);
       }
@@ -136,7 +136,7 @@ public class PersonDayManager {
    * Assenza che giustifica l'intera giornata.
    */
   public Optional<Absence> getAllDay(PersonDay personDay) {
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (absence.justifiedType.name.equals(JustifiedTypeName.all_day)
           || absence.justifiedType.name.equals(JustifiedTypeName.recover_time)) { 
         return Optional.of(absence);
@@ -153,7 +153,7 @@ public class PersonDayManager {
    * @return Assenza che giustifica il tempo che manca al raggiungimento dell'orario di lavoro.
    */
   public Optional<Absence> getCompleteDayAndAddOvertime(PersonDay personDay) {
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (absence.justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
         return Optional.of(absence);
       }
@@ -178,7 +178,7 @@ public class PersonDayManager {
    */
   public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
 
-    return personDay.absences.stream()
+    return personDay.getAbsences().stream()
         .noneMatch(abs -> !abs.absenceType.reperibilityCompatible);
 
   }
@@ -205,7 +205,7 @@ public class PersonDayManager {
 
     // Calcolo i minuti giustificati dalle assenze.
     int justifiedTime = 0;
-    for (Absence abs : pd.getValue().absences) {
+    for (Absence abs : pd.getValue().getAbsences()) {
 
       if (abs.justifiedType != null) {
         if (abs.justifiedType.name == JustifiedTypeName.specified_minutes) {
@@ -222,11 +222,11 @@ public class PersonDayManager {
     }
 
     // Livelli VI - VIII
-    if (pd.getValue().person.qualification.qualification > 3) {
+    if (pd.getValue().getPerson().qualification.qualification > 3) {
       return pd.getWorkingTimeTypeDay().get().workingTime / 2 < justifiedTime;
     } else {
       // Livelli I - III (decidere meglio)
-      return pd.getValue().absences.size() >= 1;
+      return pd.getValue().getAbsences().size() >= 1;
     }
   }
 
@@ -245,8 +245,8 @@ public class PersonDayManager {
 
     for (PairStamping pair : validPairs) {
 
-      int inMinute = DateUtility.toMinute(pair.first.date);
-      int outMinute = DateUtility.toMinute(pair.second.date);
+      int inMinute = DateUtility.toMinute(pair.first.getDate());
+      int outMinute = DateUtility.toMinute(pair.second.getDate());
 
       if (inMinute <= threshold && outMinute >= threshold) {
         workingTimeInThreshold += outMinute - threshold;
@@ -311,8 +311,8 @@ public class PersonDayManager {
     // nel calcolo del tempo limare gli estremi a tale fascia se necessario
     List<PairStamping> gapPairs = Lists.newArrayList();
     for (PairStamping gapPair : allGapPairs) {
-      LocalTime first = gapPair.first.date.toLocalTime();
-      LocalTime second = gapPair.second.date.toLocalTime();
+      LocalTime first = gapPair.first.getDate().toLocalTime();
+      LocalTime second = gapPair.second.getDate().toLocalTime();
 
       boolean isInIntoMealTime = !first.isBefore(startLunch) && !first.isAfter(endLunch);
       boolean isOutIntoMealTime = !second.isBefore(startLunch) && !second.isAfter(endLunch);
@@ -323,8 +323,8 @@ public class PersonDayManager {
         }
       }
 
-      LocalTime inForCompute = gapPair.first.date.toLocalTime();
-      LocalTime outForCompute = gapPair.second.date.toLocalTime();
+      LocalTime inForCompute = gapPair.first.getDate().toLocalTime();
+      LocalTime outForCompute = gapPair.second.getDate().toLocalTime();
       if (!isInIntoMealTime) {
         inForCompute = startLunch;
       }
@@ -481,7 +481,7 @@ public class PersonDayManager {
 
     int justifiedTimeBetweenZones = 0;
 
-    List<ZoneToZones> link = personDay.person.getZones();
+    List<ZoneToZones> link = personDay.getPerson().getZones();
 
     if (!link.isEmpty() && validPairs.size() > 1) {      
       justifiedTimeBetweenZones = justifiedTimeBetweenZones(validPairs, startWork, endWork);
@@ -703,11 +703,11 @@ public class PersonDayManager {
             zoneDao.getByLinkNames(temp.second.stampingZone, validPair.first.stampingZone);
         if (zoneToZones.isPresent()) {
 
-          Range<LocalTime> range = Range.closed(temp.second.date.toLocalTime(), 
-              validPair.first.date.toLocalTime());
+          Range<LocalTime> range = Range.closed(temp.second.getDate().toLocalTime(), 
+              validPair.first.getDate().toLocalTime());
           if (range.lowerEndpoint().isBefore(startWork) 
               && !range.upperEndpoint().isBefore(startWork)) {
-            range.span(Range.closed(startWork, validPair.first.date.toLocalTime()));
+            range.span(Range.closed(startWork, validPair.first.getDate().toLocalTime()));
           }
           if (isTimeInDelay(temp, validPair, zoneToZones)) {
             timeToJustify = timeToJustify 
@@ -756,7 +756,7 @@ public class PersonDayManager {
     if (!zoneToZones.isPresent()) {
       return false;
     }
-    if (DateUtility.toMinute(second.first.date) - DateUtility.toMinute(first.second.date) 
+    if (DateUtility.toMinute(second.first.getDate()) - DateUtility.toMinute(first.second.getDate()) 
         < zoneToZones.get().delay) {
       return true;
     }
@@ -798,7 +798,7 @@ public class PersonDayManager {
     // Decurtazione straordinari
 
     // in ogni caso nessun straordinario 
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (absence.absenceType.getBehaviour(JustifiedBehaviourName.no_overtime).isPresent()) {
         personDay.setDifference(Math.min(personDay.getDifference(), 0));
         personDay.setTimeAtWork(Math.min(personDay.getTimeAtWork(), plannedWorkingTime));
@@ -808,7 +808,7 @@ public class PersonDayManager {
 
     // riduce l'assenza per impedire lo straordinario
     boolean recompute = false;
-    for (Absence absence : personDay.absences) {
+    for (Absence absence : personDay.getAbsences()) {
       if (personDay.difference <= 0) {
         continue;
       }
@@ -949,13 +949,13 @@ public class PersonDayManager {
 
     final LocalDate sourceDateResidual = pd.getPersonDayContract().get().sourceDateResidual;
     //se prima o uguale a source contract il problema è fixato
-    if (sourceDateResidual != null && !personDay.date.isAfter(sourceDateResidual)) {
+    if (sourceDateResidual != null && !personDay.getDate().isAfter(sourceDateResidual)) {
       personDay.troubles.forEach(PersonDayInTrouble::delete);
       personDay.troubles.clear();
 
       log.info("Eliminati tutti i PersonDaysinTrouble relativi al giorno {} della persona {}"
           + " perchè precedente a sourceContract({})",
-          personDay.date, personDay.person.fullName(),
+          personDay.getDate(), personDay.getPerson().fullName(),
           pd.getPersonDayContract().get().sourceDateResidual);
       return;
     }
@@ -1006,7 +1006,7 @@ public class PersonDayManager {
 
     // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
     // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-    if (personDay.person.qualification.qualification > 3
+    if (personDay.getPerson().qualification.qualification > 3
         && isAllDayAbsences == false && personDay.isHoliday == false
         && personDay.timeAtWork < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
@@ -1149,9 +1149,9 @@ public class PersonDayManager {
       boolean belongToValidPairNotOutsite = false;
       boolean belongToValidPairOutsite = false;
       for (PairStamping validPair : validPairs) {
-        LocalDateTime outTime = validPair.second.date;
-        LocalDateTime inTime = validPair.first.date;
-        if (stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime)) {
+        LocalDateTime outTime = validPair.second.getDate();
+        LocalDateTime inTime = validPair.first.getDate();
+        if (stamping.getDate().isAfter(inTime) && stamping.getDate().isBefore(outTime)) {
           if (validPair.second.stampType == StampTypes.LAVORO_FUORI_SEDE
               || validPair.first.stampType == StampTypes.LAVORO_FUORI_SEDE) {
             belongToValidPairOutsite = true;
@@ -1172,10 +1172,10 @@ public class PersonDayManager {
 
     //(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
     for (PairStamping validPair : validPairs) {
-      LocalDateTime outTime = validPair.second.date;
-      LocalDateTime inTime = validPair.first.date;
+      LocalDateTime outTime = validPair.second.getDate();
+      LocalDateTime inTime = validPair.first.getDate();
       List<Stamping> serviceStampingsInSinglePair = serviceStampingsToCheck.stream()
-          .filter(stamping -> stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+          .filter(stamping -> stamping.getDate().isAfter(inTime) && stamping.getDate().isBefore(outTime))
           .collect(Collectors.toList());
       //check
       Stamping serviceExit = null;
@@ -1243,7 +1243,7 @@ public class PersonDayManager {
     LocalDate currentDate = beginMonth;
     while (!currentDate.isAfter(endMonth)) {
       if (currentWorkingDays < personDays.size()
-          && personDays.get(currentWorkingDays).date.isEqual(currentDate)) {
+          && personDays.get(currentWorkingDays).getDate().isEqual(currentDate)) {
         totalDays.add(personDays.get(currentWorkingDays));
         currentWorkingDays++;
       } else {
@@ -1395,7 +1395,7 @@ public class PersonDayManager {
    * @return la quantità in eccesso, se c'è, nei giorni in cui una persona è in turno.
    */
   public int getExceedInShift(PersonDay pd) {
-    Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(pd.person, pd.date);
+    Optional<PersonShiftDay> psd = personShiftDayDao.getPersonShiftDay(pd.getPerson(), pd.getDate());
     if (psd.isPresent()) {
       return pd.difference;
     }
@@ -1439,8 +1439,8 @@ public class PersonDayManager {
     //Per ogni coppia valida butto via il tempo oltre la fascia.
     for (PairStamping validPair : validPairs) {
 
-      LocalTime consideredStart = new LocalTime(validPair.first.date);
-      LocalTime consideredEnd = new LocalTime(validPair.second.date);
+      LocalTime consideredStart = new LocalTime(validPair.first.getDate());
+      LocalTime consideredEnd = new LocalTime(validPair.second.getDate());
       if (consideredEnd.isBefore(start)) {
         continue;
       }
@@ -1649,10 +1649,10 @@ public class PersonDayManager {
       Range<LocalTime> mandatoryTimeSlotRange) {
     val workingTimeRangeSet = TreeRangeSet.<LocalTime>create();
 
-    val pairs = getValidPairStampings(personDay.stampings).stream().collect(Collectors.toList());
+    val pairs = getValidPairStampings(personDay.getStampings()).stream().collect(Collectors.toList());
 
     for (PairStamping ps : pairs) {
-      val vpr = Range.closed(ps.first.date.toLocalTime(), ps.second.date.toLocalTime());
+      val vpr = Range.closed(ps.first.getDate().toLocalTime(), ps.second.getDate().toLocalTime());
       if (mandatoryTimeSlotRange.isConnected(vpr)) {
         workingTimeRangeSet.add(mandatoryTimeSlotRange.intersection(vpr));
       }
@@ -1699,7 +1699,7 @@ public class PersonDayManager {
     int lunchTime = 0;
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.person.office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
+        personDay.getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, personDay.getDate());
 
     val gapLunchPairs = getGapLunchPairs(personDay, lunchInterval.from, 
         lunchInterval.to, Optional.absent());
@@ -1707,7 +1707,7 @@ public class PersonDayManager {
     val lunchTimeRangeSet = TreeRangeSet.<LocalTime>create();
 
     for (PairStamping ps : gapLunchPairs) {
-      val vpr = Range.closed(ps.first.date.toLocalTime(), ps.second.date.toLocalTime());
+      val vpr = Range.closed(ps.first.getDate().toLocalTime(), ps.second.getDate().toLocalTime());
       if (mandatoryTimeSlotRange.isConnected(vpr)) {
         lunchTimeRangeSet.add(mandatoryTimeSlotRange.intersection(vpr));
       }
@@ -1736,8 +1736,8 @@ public class PersonDayManager {
    */
   private Optional<Absence> buildShortPermissionAbsence(PersonDay personDay, 
       TimeSlot mandatoryTimeSlot) {   
-    val mandatoryTimeSlotRange = Range.closed(mandatoryTimeSlot.beginSlot, 
-        mandatoryTimeSlot.endSlot);
+    val mandatoryTimeSlotRange = Range.closed(mandatoryTimeSlot.getBeginSlot(), 
+        mandatoryTimeSlot.getEndSlot());
 
     int missingTime = missingTime(personDay, mandatoryTimeSlotRange);
     int lunchTime = lunchTime(personDay, mandatoryTimeSlotRange);
@@ -1746,7 +1746,7 @@ public class PersonDayManager {
     missingTime -= lunchTime;
     if (missingTime > 0) {
       log.debug("Calcolato permesso breve di {} minuti per {} nel giorno {}", 
-          missingTime, personDay.person.getFullname(), personDay.date);  
+          missingTime, personDay.getPerson().getFullname(), personDay.getDate());  
     }
 
     if (lunchTime > 0) {
@@ -1784,26 +1784,26 @@ public class PersonDayManager {
    */
   public void checkAndManageMandatoryTimeSlot(PersonDay personDay) {
     Verify.verifyNotNull(personDay);
-    Verify.verifyNotNull(personDay.person);
+    Verify.verifyNotNull(personDay.getPerson());
 
     new Job<Void>() {
       @Override
       public void doJob() {
         val mandatoryTimeSlot = contractDao
-            .getContractMandatoryTimeSlot(personDay.date, personDay.person.id);
+            .getContractMandatoryTimeSlot(personDay.getDate(), personDay.getPerson().id);
         if (!mandatoryTimeSlot.isPresent()) {
           log.trace("Le timbrature di {} del giorno {} NON necessitano di controlli "
               + "sulla fascia obbligatoria",
-              personDay.person, personDay.date);
+              personDay.getPerson(), personDay.getDate());
           return;
         }
         log.trace("Le timbrature di {} del giorno {} necessitano di controlli "
             + "sulla fascia obbligatoria", 
-            personDay.person, personDay.date);
+            personDay.getPerson(), personDay.getDate());
 
         //I turni non hanno vincoli di fascia obbligatoria nei giorni in cui sono in turno
         boolean inShift = personShiftDayDao
-            .getPersonShiftDay(personDay.person, personDay.date).isPresent();
+            .getPersonShiftDay(personDay.getPerson(), personDay.getDate()).isPresent();
 
         //Se sono presenti assenze giornalieri la fascia obbigatoria non deve essere 
         //rispettata anche in presenta di timbrature
@@ -1819,14 +1819,14 @@ public class PersonDayManager {
             log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti"
                 + " assenze giornaliere oppure il dipendente è in turno, "
                 + "oppure è un giorno festivo.",
-                previousShortPermission.get().justifiedMinutes, personDay.date, 
-                personDay.person.getFullname());
+                previousShortPermission.get().justifiedMinutes, personDay.getDate(), 
+                personDay.getPerson().getFullname());
             return;
           } else {
             log.debug("Le timbrature di {} del giorno {} NON necessitano di controlli sulla fascia "
                 + "obbligatoria poichè sono presenti assenze giornaliere oppure il dipendente "
                 + "è in turno, oppure è un giorno festivo.",
-                personDay.person, personDay.date);
+                personDay.getPerson(), personDay.getDate());
             return;
           }
         }
@@ -1840,8 +1840,8 @@ public class PersonDayManager {
 
         if (shortPermission.isPresent() && !previousShortPermission.isPresent()) {
           log.info("Inserito permesso breve di {} minuti nel giorno {} per {}",
-              shortPermission.get().justifiedMinutes, personDay.date, 
-              personDay.person.getFullname());
+              shortPermission.get().justifiedMinutes, personDay.getDate(), 
+              personDay.getPerson().getFullname());
           shortPermission.get().save();
           return;
         }
@@ -1850,8 +1850,8 @@ public class PersonDayManager {
           //Viene fatta prima la merge perché l'assenza è detached
           previousShortPermission.get().merge()._delete();
           log.info("Rimosso permesso breve di {} minuti nel giorno {} per {}",
-              previousShortPermission.get().justifiedMinutes, personDay.date, 
-              personDay.person.getFullname());          
+              previousShortPermission.get().justifiedMinutes, personDay.getDate(), 
+              personDay.getPerson().getFullname());          
           return;
         }
 
@@ -1863,7 +1863,7 @@ public class PersonDayManager {
           newShortPermission.justifiedMinutes = shortPermission.get().justifiedMinutes;
           newShortPermission.save();
           log.debug("Permesso breve esistente nel giorno {} per {}, aggiornato da {} a {} minuti", 
-              personDay.date, personDay.person.getFullname(),
+              personDay.getDate(), personDay.getPerson().getFullname(),
               previousShortPermission.get().justifiedMinutes, 
               shortPermission.get().justifiedMinutes);
         }

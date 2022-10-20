@@ -549,7 +549,8 @@ public class ContractMonthRecapManager {
                   .get(date.getDayOfWeek() - 1);
 
               Preconditions.checkState(wttd.getDayOfWeek() == date.getDayOfWeek());
-              cmr.setRiposiCompensativiMinuti(cmr.getRiposiCompensativiMinuti() + wttd.getWorkingTime());
+              cmr.setRiposiCompensativiMinuti(cmr.getRiposiCompensativiMinuti() 
+                  + wttd.getWorkingTime());
               cmr.setRecoveryDayUsed(cmr.getRecoveryDayUsed() + 1);
             }
           }
@@ -587,92 +588,92 @@ public class ContractMonthRecapManager {
   private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap) {
 
     //quello che assegno al monte ore passato
-    if (monthRecap.progressivoFinaleNegativoMese < monthRecap.remainingMinutesLastYear) {
-      monthRecap.remainingMinutesLastYear =
-          monthRecap.remainingMinutesLastYear - monthRecap.progressivoFinaleNegativoMese;
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato =
-          monthRecap.progressivoFinaleNegativoMese;
+    if (monthRecap.getProgressivoFinaleNegativoMese() < monthRecap.getRemainingMinutesLastYear()) {
+      monthRecap.setRemainingMinutesLastYear(
+          monthRecap.getRemainingMinutesLastYear() - monthRecap.getProgressivoFinaleNegativoMese());
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoPassato(
+          monthRecap.getProgressivoFinaleNegativoMese());
       return;
     } else {
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato =
-          monthRecap.remainingMinutesLastYear;
-      monthRecap.remainingMinutesLastYear = 0;
-      monthRecap.progressivoFinaleNegativoMese =
-          monthRecap.progressivoFinaleNegativoMese
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoPassato(
+          monthRecap.getRemainingMinutesLastYear());
+      monthRecap.setRemainingMinutesLastYear(0);
+      monthRecap.setProgressivoFinaleNegativoMese(
+          monthRecap.getProgressivoFinaleNegativoMese()
               -
-              monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato;
+              monthRecap.getProgressivoFinaleNegativoMeseImputatoAnnoPassato());
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.progressivoFinaleNegativoMese < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.progressivoFinaleNegativoMese;
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente =
-          monthRecap.progressivoFinaleNegativoMese;
+    if (monthRecap.getProgressivoFinaleNegativoMese() < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getProgressivoFinaleNegativoMese());
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(
+          monthRecap.getProgressivoFinaleNegativoMese());
       return;
     } else {
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.progressivoFinaleNegativoMese =
-          monthRecap.progressivoFinaleNegativoMese
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setProgressivoFinaleNegativoMese(
+          monthRecap.getProgressivoFinaleNegativoMese()
               -
-              monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente;
+              monthRecap.getProgressivoFinaleNegativoMeseImputatoAnnoCorrente());
     }
 
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
-        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.progressivoFinaleNegativoMese;
-    monthRecap.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese =
-        monthRecap.progressivoFinaleNegativoMese;
+        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.getProgressivoFinaleNegativoMese();
+    monthRecap.setProgressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese(
+        monthRecap.getProgressivoFinaleNegativoMese());
     return;
 
   }
 
   private void assegnaStraordinari(ContractMonthRecap monthRecap) {
     monthRecap.progressivoFinalePositivoMeseAux =
-        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.straordinariMinuti;
+        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.getStraordinariMinuti();
   }
 
   private void assegnaRiposiCompensativi(ContractMonthRecap monthRecap) {
     //quello che assegno al monte ore passato
-    if (monthRecap.riposiCompensativiMinuti < monthRecap.remainingMinutesLastYear) {
-      monthRecap.remainingMinutesLastYear =
-          monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiMinuti;
-      monthRecap.riposiCompensativiMinutiImputatoAnnoPassato = monthRecap.riposiCompensativiMinuti;
+    if (monthRecap.getRiposiCompensativiMinuti() < monthRecap.getRemainingMinutesLastYear()) {
+      monthRecap.setRemainingMinutesLastYear(
+          monthRecap.getRemainingMinutesLastYear() - monthRecap.getRiposiCompensativiMinuti());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(monthRecap.getRiposiCompensativiMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiMinutiImputatoAnnoPassato = monthRecap.remainingMinutesLastYear;
-      monthRecap.remainingMinutesLastYear = 0;
-      monthRecap.riposiCompensativiMinuti =
-          monthRecap.riposiCompensativiMinuti
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(monthRecap.getRemainingMinutesLastYear());
+      monthRecap.setRemainingMinutesLastYear(0);
+      monthRecap.setRiposiCompensativiMinuti(
+          monthRecap.getRiposiCompensativiMinuti()
               -
-              monthRecap.riposiCompensativiMinutiImputatoAnnoPassato;
+              monthRecap.getRiposiCompensativiMinutiImputatoAnnoPassato());
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.riposiCompensativiMinuti < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.riposiCompensativiMinuti;
-      monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente =
-          monthRecap.riposiCompensativiMinuti;
+    if (monthRecap.getRiposiCompensativiMinuti() < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getRiposiCompensativiMinuti());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoCorrente(
+          monthRecap.getRiposiCompensativiMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.riposiCompensativiMinuti =
-          monthRecap.riposiCompensativiMinuti
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setRiposiCompensativiMinuti(
+          monthRecap.getRiposiCompensativiMinuti()
               -
-              monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente;
+              monthRecap.getRiposiCompensativiMinutiImputatoAnnoCorrente());
     }
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
         monthRecap.progressivoFinalePositivoMeseAux
             -
-            monthRecap.riposiCompensativiMinuti;
-    monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese =
-        monthRecap.riposiCompensativiMinuti;
+            monthRecap.getRiposiCompensativiMinuti();
+    monthRecap.setRiposiCompensativiMinutiImputatoProgressivoFinalePositivoMese(
+        monthRecap.getRiposiCompensativiMinuti());
 
   }
   
@@ -696,27 +697,27 @@ public class ContractMonthRecapManager {
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
-          monthRecap.riposiCompensativiChiusuraEnteMinuti;
+    if (monthRecap.getRiposiCompensativiChiusuraEnteMinuti() < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente(
+          monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.riposiCompensativiChiusuraEnteMinuti =
-          monthRecap.riposiCompensativiChiusuraEnteMinuti
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setRiposiCompensativiChiusuraEnteMinuti(
+          monthRecap.getRiposiCompensativiChiusuraEnteMinuti()
               -
-              monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente;
+              monthRecap.getRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente());
     }
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
         monthRecap.progressivoFinalePositivoMeseAux
             -
-            monthRecap.riposiCompensativiChiusuraEnteMinuti;
-    monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese =
-        monthRecap.riposiCompensativiChiusuraEnteMinuti;
+            monthRecap.getRiposiCompensativiChiusuraEnteMinuti();
+    monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese(
+        monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
   }
 }
