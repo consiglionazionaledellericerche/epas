@@ -49,7 +49,7 @@ import org.hibernate.envers.Audited;
 public class ComplationAbsenceBehaviour extends BaseModel {
 
   private static final long serialVersionUID = 3990946316183363917L;
-  private static final String NAME_PREFIX = "C_";
+  public static final String NAME_PREFIX = "C_";
 
   @Column(name = "name")
   private String name;

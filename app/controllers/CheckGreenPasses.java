@@ -87,7 +87,7 @@ public class CheckGreenPasses extends Controller {
     List<Person> list = manager.peopleActiveInDate(date, office);
     List<CheckGreenPass> greenPassList = manager.peopleDrawn(office, list, date);
     List<Person> filtered = list.stream().filter(p -> greenPassList.stream()
-        .noneMatch(gp -> gp.person.equals(p))).collect(Collectors.toList());    
+        .noneMatch(gp -> gp.getPerson().equals(p))).collect(Collectors.toList());    
 
     render(filtered);
   }
@@ -99,14 +99,14 @@ public class CheckGreenPasses extends Controller {
    */
   public static void save(Person person) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     CheckGreenPass greenPass = new CheckGreenPass();
     LocalDate date = LocalDate.now();
-    greenPass.person = person;
-    greenPass.checkDate = date;
-    greenPass.checked = false;
+    greenPass.setPerson(person);
+    greenPass.setCheckDate(date);
+    greenPass.setChecked(false);
     greenPass.save();
-    Office office = person.office;
+    Office office = person.getOffice();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     render("@dailySituation", list, office, date);
   }
@@ -119,12 +119,12 @@ public class CheckGreenPasses extends Controller {
   public static void deletePerson(long checkGreenPassId) {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.person.office);
-    Office office = greenPass.person.office;
-    LocalDate date = greenPass.checkDate;
+    rules.checkIfPermitted(greenPass.getPerson().getOffice());
+    Office office = greenPass.getPerson().getOffice();
+    LocalDate date = greenPass.getCheckDate();
     greenPass.delete();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
-    flash.error("Eliminato controllo per %s", greenPass.person.fullName());
+    flash.error("Eliminato controllo per %s", greenPass.getPerson().fullName());
     render("@dailySituation", list, office, date);
   }
   
@@ -137,17 +137,17 @@ public class CheckGreenPasses extends Controller {
     
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.person.office);
-    if (greenPass.checked) {
-      greenPass.checked = false;
+    rules.checkIfPermitted(greenPass.getPerson().getOffice());
+    if (greenPass.isChecked()) {
+      greenPass.setChecked(false);
     } else {
-      greenPass.checked = true;
+      greenPass.setChecked(true);
     }
     greenPass.save();
-    Office office = greenPass.person.office;
-    LocalDate date = greenPass.checkDate;
+    Office office = greenPass.getPerson().getOffice();
+    LocalDate date = greenPass.getCheckDate();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
-    flash.success("Aggiornato il controllo per %s", greenPass.person.fullName());
+    flash.success("Aggiornato il controllo per %s", greenPass.getPerson().fullName());
     render("@dailySituation", list, office, date);
   }
   

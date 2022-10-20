@@ -243,50 +243,59 @@ public class Configurations extends Controller {
         .getOfficeConfigurationsByDate(office, LocalDate.now());
 
     final List<Configuration> generals = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.GENERAL)
+        .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.GENERAL)
         .collect(Collectors.toList());
 
     final List<Configuration> yearlies = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.YEARLY)
+        .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.YEARLY)
         .collect(Collectors.toList());
 
     final List<Configuration> periodics = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.PERIODIC)
+        .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.PERIODIC)
         .collect(Collectors.toList());
 
     final List<Configuration> autocertifications = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.AUTOCERTIFICATION)
+        .filter(conf -> conf.getEpasParam().category 
+            == EpasParam.EpasParamCategory.AUTOCERTIFICATION)
         .collect(Collectors.toList());
 
     List<Configuration> flows = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.FLOWS)
+        .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.FLOWS)
         .collect(Collectors.toList());
     
-    if (!generalSettingDao.generalSetting().enableAbsenceTopLevelAuthorization) {
+    if (!generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization()) {
       flows = flows.stream().filter(conf -> 
-          !conf.epasParam.equals(EpasParam.COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) &&
-          !conf.epasParam.equals(EpasParam.COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) &&
-          !conf.epasParam.equals(EpasParam.VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) &&
-          !conf.epasParam.equals(EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED))
+          !conf.getEpasParam().equals(EpasParam
+              .COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) 
+          && !conf.getEpasParam().equals(EpasParam
+              .COMPENSATORY_REST_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) 
+          && !conf.getEpasParam().equals(EpasParam
+              .VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED) 
+          && !conf.getEpasParam().equals(EpasParam
+              .VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED))
         .collect(Collectors.toList());
     } else {
       flows = flows.stream().filter(conf -> 
-          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION) &&
-          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION) &&
-          !conf.epasParam.equals(EpasParam.ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION))
+          !conf.getEpasParam().equals(EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION) 
+          && !conf.getEpasParam().equals(EpasParam
+              .ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION) 
+          && !conf.getEpasParam().equals(EpasParam
+              .ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION))
         .collect(Collectors.toList());
     }
     final List<Configuration> competenceFlows = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
+        .filter(conf -> conf.getEpasParam().category 
+            == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
         .collect(Collectors.toList());
     
     final List<Configuration> informationFlows = configurations.stream()
-        .filter(conf -> conf.epasParam.category == EpasParam.EpasParamCategory.INFORMATION_FLOWS)
+        .filter(conf -> conf.getEpasParam().category 
+            == EpasParam.EpasParamCategory.INFORMATION_FLOWS)
         .collect(Collectors.toList());
     
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
-    final Attachment autocert = office.attachments.stream()
-        .filter(attachment -> attachment.type == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
+    final Attachment autocert = office.getAttachments().stream()
+        .filter(attachment -> attachment.getType() == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
     render(office, paramCategory, generals, yearlies, periodics, 
@@ -304,9 +313,9 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration);
     rules.checkIfPermitted(configuration);
 
-    ConfigurationDto configurationDto = new ConfigurationDto(configuration.epasParam,
-        configuration.beginDate, configuration.calculatedEnd(),
-        configurationManager.parseValue(configuration.epasParam, configuration.fieldValue));
+    ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
+        configuration.getBeginDate(), configuration.calculatedEnd(),
+        configurationManager.parseValue(configuration.getEpasParam(), configuration.getFieldValue()));
 
     render(configuration, configurationDto);
   }
@@ -322,12 +331,12 @@ public class Configurations extends Controller {
       ConfigurationDto configurationDto, boolean confirmed) {
 
     notFoundIfNull(configuration);
-    notFoundIfNull(configuration.office);
+    notFoundIfNull(configuration.getOffice());
 
     rules.checkIfPermitted(configuration);
 
     Configuration newConfiguration = (Configuration) compute(configuration,
-        configuration.epasParam, configurationDto);
+        configuration.getEpasParam(), configurationDto);
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -339,10 +348,10 @@ public class Configurations extends Controller {
 
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
     RecomputeRecap recomputeRecap =
-        periodManager.buildRecap(configuration.office.getBeginDate(),
+        periodManager.buildRecap(configuration.getOffice().getBeginDate(),
             Optional.fromNullable(LocalDate.now()),
             periodRecaps, Optional.<LocalDate>absent());
-    recomputeRecap.epasParam = configuration.epasParam;
+    recomputeRecap.epasParam = configuration.getEpasParam();
 
     if (!confirmed) {
 
@@ -353,12 +362,12 @@ public class Configurations extends Controller {
 
     periodManager.updatePeriods(newConfiguration, true);
 
-    consistencyManager.performRecomputation(configuration.office,
-        configuration.epasParam.recomputationTypes, recomputeRecap.recomputeFrom);
+    consistencyManager.performRecomputation(configuration.getOffice(),
+        configuration.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
 
     flash.success("Parametro aggiornato correttamente.");
     
-    show(configuration.office.id, configuration.epasParam.category);
+    show(configuration.getOffice().id, configuration.getEpasParam().category);
   }
 
   /**
@@ -371,7 +380,7 @@ public class Configurations extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     List<PersonConfiguration> currentConfiguration = configurationManager
         .getPersonConfigurationsByDate(person, LocalDate.now());
@@ -388,11 +397,11 @@ public class Configurations extends Controller {
 
     PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
-    rules.checkIfPermitted(configuration.person.office);
+    rules.checkIfPermitted(configuration.getPerson().getOffice());
 
-    ConfigurationDto configurationDto = new ConfigurationDto(configuration.epasParam,
-        configuration.beginDate, configuration.calculatedEnd(),
-        configurationManager.parseValue(configuration.epasParam, configuration.fieldValue));
+    ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
+        configuration.getBeginDate(), configuration.calculatedEnd(),
+        configurationManager.parseValue(configuration.getEpasParam(), configuration.getFieldValue()));
 
     render(configuration, configurationDto);
   }
@@ -408,13 +417,13 @@ public class Configurations extends Controller {
       ConfigurationDto configurationDto, boolean confirmed) {
 
     notFoundIfNull(configuration);
-    notFoundIfNull(configuration.person);
-    notFoundIfNull(configuration.person.office);
+    notFoundIfNull(configuration.getPerson());
+    notFoundIfNull(configuration.getPerson().getOffice());
 
-    rules.checkIfPermitted(configuration.person.office);
+    rules.checkIfPermitted(configuration.getPerson().getOffice());
 
     PersonConfiguration newConfiguration = (PersonConfiguration) compute(configuration,
-        configuration.epasParam, configurationDto);
+        configuration.getEpasParam(), configurationDto);
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -427,10 +436,10 @@ public class Configurations extends Controller {
 
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
     RecomputeRecap recomputeRecap =
-        periodManager.buildRecap(configuration.person.getBeginDate(),
+        periodManager.buildRecap(configuration.getPerson().getBeginDate(),
             Optional.fromNullable(LocalDate.now()),
             periodRecaps, Optional.<LocalDate>absent());
-    recomputeRecap.epasParam = configuration.epasParam;
+    recomputeRecap.epasParam = configuration.getEpasParam();
 
     if (!confirmed) {
 
@@ -439,23 +448,23 @@ public class Configurations extends Controller {
       render("@personEdit", confirmed, recomputeRecap, configuration, configurationDto);
     }
 
-    if (configuration.epasParam.equals(EpasParam.OFF_SITE_STAMPING)
-        && !(Boolean) configurationManager.configValue(configuration.person.office,
+    if (configuration.getEpasParam().equals(EpasParam.OFF_SITE_STAMPING)
+        && !(Boolean) configurationManager.configValue(configuration.getPerson().getOffice(),
         EpasParam.WORKING_OFF_SITE)) {
       response.status = 400;
       flash.error("Prima abilitare la timbratura per lavoro fuori sede per i dipendenti "
           + "tra i parametri della sede.");
-      personShow(configuration.person.id);
+      personShow(configuration.getPerson().id);
     }
 
     periodManager.updatePeriods(newConfiguration, true);
 
-    consistencyManager.performRecomputation(configuration.person,
-        configuration.epasParam.recomputationTypes, recomputeRecap.recomputeFrom);
+    consistencyManager.performRecomputation(configuration.getPerson(),
+        configuration.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
 
     flash.success("Parametro aggiornato correttamente.");
 
-    personShow(configuration.person.id);
+    personShow(configuration.getPerson().id);
   }
 
   /**
@@ -476,12 +485,12 @@ public class Configurations extends Controller {
 
     final Attachment attachment = new Attachment();
 
-    attachment.filename = file.getName();
-    attachment.type = AttachmentType.TR_AUTOCERTIFICATION;
+    attachment.setFilename(file.getName());
+    attachment.setType(AttachmentType.TR_AUTOCERTIFICATION);
     Blob blob = new Blob();
     blob.set(new FileInputStream(file), MimeTypes.getContentType(file.getName()));
-    attachment.file = blob;
-    attachment.office = office;
+    attachment.setFile(blob);
+    attachment.setOffice(office);
     attachment.save();
 
     show(officeId, EpasParam.EpasParamCategory.AUTOCERTIFICATION);
@@ -500,7 +509,7 @@ public class Configurations extends Controller {
 
     rules.checkIfPermitted(attachment);
 
-    final Long officeId = attachment.office.id;
+    final Long officeId = attachment.getOffice().id;
 
     attachment.delete();
 
@@ -520,7 +529,7 @@ public class Configurations extends Controller {
 
     rules.checkIfPermitted(attachment);
 
-    renderBinary(attachment.file.get(), attachment.filename, false);
+    renderBinary(attachment.getFile().get(), attachment.getFilename(), false);
   }
 
 }

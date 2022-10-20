@@ -64,7 +64,7 @@ public class Administrators extends Controller {
     rules.checkIfPermitted(office);
 
     UsersRolesOffices uro = new UsersRolesOffices();
-    uro.office = office;
+    uro.setOffice(office);
 
     render(uro);
   }
@@ -85,11 +85,11 @@ public class Administrators extends Controller {
       render("@blank", uro);
     } else {
 
-      rules.checkIfPermitted(uro.office);
+      rules.checkIfPermitted(uro.getOffice());
 
       uro.save();
       flash.success(Web.msgSaved(Institute.class));
-      Offices.edit(uro.office.id);
+      Offices.edit(uro.getOffice().id);
     }
   }
 
@@ -104,11 +104,11 @@ public class Administrators extends Controller {
     final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
     notFoundIfNull(uro);
 
-    rules.checkIfPermitted(uro.office);
+    rules.checkIfPermitted(uro.getOffice());
 
     uro.delete();
     flash.success(Web.msgDeleted(UsersRolesOffices.class));
-    Offices.edit(uro.office.id);
+    Offices.edit(uro.getOffice().id);
 
   }
 

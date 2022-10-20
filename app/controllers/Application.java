@@ -52,7 +52,7 @@ public class Application extends Controller {
   public static void index() {
 
     //Utenti di sistema (developer,admin)
-    if (Security.getUser().get().person == null) {
+    if (Security.getUser().get().getPerson() == null) {
       if (officeDao.getAllOffices().isEmpty()) {
         //Db vuoto è necessario creare prima gli istituti.
         Institutes.list(null, null, null);
@@ -65,7 +65,7 @@ public class Application extends Controller {
     //inizializzazione functional menu dopo login
     session.put("monthSelected", new LocalDate().getMonthOfYear());
     session.put("yearSelected", new LocalDate().getYear());
-    session.put("personSelected", Security.getUser().get().person.id);
+    session.put("personSelected", Security.getUser().get().getPerson().id);
 
     session.put("methodSelected", "stampingsAdmin");
     session.put("actionSelected", "Stampings.stampings");
