@@ -72,7 +72,7 @@ public class AbsenceRequestDao extends DaoBase {
   public List<AbsenceRequest> existingAbsenceRequests(AbsenceRequest request) {
     final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
     return getQueryFactory().selectFrom(absenceRequest)
-        .where(absenceRequest.person.eq(request.person)
+        .where(absenceRequest.person.eq(request.getPerson())
             .and(absenceRequest.flowEnded.eq(false)))
         .fetch();
   }

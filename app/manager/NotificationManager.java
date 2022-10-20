@@ -153,7 +153,8 @@ public class NotificationManager {
     } else {
       verso = "uscita";
     }
-    final String message = String.format(template, person.fullName(), stamping.getDate().toString(DTF),
+    final String message = String.format(template, person.fullName(), 
+        stamping.getDate().toString(DTF),
         verso, stamping.getPlace(), stamping.getReason());
 
     person.getOffice().getUsersRolesOffices().stream()
@@ -245,7 +246,7 @@ public class NotificationManager {
    */
   private void notifyAbsenceRequest(AbsenceRequest absenceRequest, Crud operation) {
     Verify.verifyNotNull(absenceRequest);
-    final Person person = absenceRequest.person;
+    final Person person = absenceRequest.getPerson();
     final String template;
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova richiesta di assenza (%s): %s";
@@ -258,7 +259,7 @@ public class NotificationManager {
     }
     final String message =
         String.format(template, person.fullName(), absenceRequest.id,
-            absenceRequest.startAt.toString(DF));
+            absenceRequest.getStartAt().toString(DF));
 
     // se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (absenceRequest.isFullyApproved()) {
@@ -266,13 +267,13 @@ public class NotificationManager {
       .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
       // ...e all'amministratore del personale
       List<Absence> absence =
-          absenceDao.findByPersonAndDate(absenceRequest.person, absenceRequest.startAtAsDate(),
+          absenceDao.findByPersonAndDate(absenceRequest.getPerson(), absenceRequest.startAtAsDate(),
               Optional.of(absenceRequest.endToAsDate()), Optional.absent()).list();
       GroupAbsenceType groupAbsenceType = null;
-      if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+      if (absenceRequest.getType() == AbsenceRequestType.COMPENSATORY_REST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
-      } else if (absenceRequest.type == AbsenceRequestType.VACATION_REQUEST) {
+      } else if (absenceRequest.getType() == AbsenceRequestType.VACATION_REQUEST) {
         groupAbsenceType =
             componentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
       } else {
@@ -294,8 +295,8 @@ public class NotificationManager {
       log.info(
           "Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
               + "{} di tipo {} con date {}, {}",
-              absenceRequest.person, absenceRequest.type, absenceRequest.startAt,
-              absenceRequest.endTo);
+              absenceRequest.getPerson(), absenceRequest.getType(), absenceRequest.getStartAt(),
+              absenceRequest.getEndTo());
       return;
     }
     List<User> users =
@@ -334,27 +335,30 @@ public class NotificationManager {
   private Role getProperRole(AbsenceRequest absenceRequest) {
     Role role = null;
 
-    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
+    if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null) {
       role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     }
-    if (absenceRequest.administrativeApprovalRequired
-        && absenceRequest.administrativeApproved == null
-        && (absenceRequest.managerApproved != null || !absenceRequest.managerApprovalRequired)) {
+    if (absenceRequest.isAdministrativeApprovalRequired()
+        && absenceRequest.getAdministrativeApproved() == null
+        && (absenceRequest.getManagerApproved() != null 
+        || !absenceRequest.isManagerApprovalRequired())) {
       role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
     }
-    if (absenceRequest.officeHeadApprovalRequired && absenceRequest.officeHeadApproved == null
-        && ((!absenceRequest.managerApprovalRequired
-            && !absenceRequest.administrativeApprovalRequired)
-            || (absenceRequest.managerApproved != null
-            && !absenceRequest.administrativeApprovalRequired)
-            || (absenceRequest.managerApproved != null
-            && absenceRequest.administrativeApproved != null)
-            || (!absenceRequest.managerApprovalRequired
-                && absenceRequest.administrativeApproved != null))) {
+    if (absenceRequest.isOfficeHeadApprovalRequired() 
+        && absenceRequest.getOfficeHeadApproved() == null
+        && ((!absenceRequest.isManagerApprovalRequired()
+            && !absenceRequest.isAdministrativeApprovalRequired())
+            || (absenceRequest.getManagerApproved() != null
+            && !absenceRequest.isAdministrativeApprovalRequired())
+            || (absenceRequest.getManagerApproved() != null
+            && absenceRequest.getAdministrativeApproved() != null)
+            || (!absenceRequest.isManagerApprovalRequired()
+                && absenceRequest.getAdministrativeApproved() != null))) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
-    if (absenceRequest.officeHeadApprovalForManagerRequired
-        && absenceRequest.officeHeadApproved == null && absenceRequest.person.isGroupManager()) {
+    if (absenceRequest.isOfficeHeadApprovalForManagerRequired()
+        && absenceRequest.getOfficeHeadApproved() == null 
+        && absenceRequest.getPerson().isGroupManager()) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
     return role;
@@ -368,16 +372,16 @@ public class NotificationManager {
    */
   private Role getProperRole(InformationRequest informationRequest) {
     Role role = null;
-    if (informationRequest.officeHeadApprovalRequired
-        && informationRequest.officeHeadApproved == null) {
+    if (informationRequest.isOfficeHeadApprovalRequired()
+        && informationRequest.getOfficeHeadApproved() == null) {
       role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
     }
-    if (informationRequest.administrativeApprovalRequired
-        && informationRequest.administrativeApproved == null) {
+    if (informationRequest.isAdministrativeApprovalRequired()
+        && informationRequest.getAdministrativeApproved() == null) {
       role = roleDao.getRoleByName(Role.PERSONNEL_ADMIN);
     }
-    if (informationRequest.managerApprovalRequired
-        && informationRequest.managerApproved == null) {
+    if (informationRequest.isManagerApprovalRequired()
+        && informationRequest.getManagerApproved() == null) {
       role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     }
 
@@ -491,14 +495,16 @@ public class NotificationManager {
 
     final String message = String.format(
         "La richiesta di assenza di tipo \"%s\" dal %s al %s " + "è stata rifiutata da %s",
-        TemplateExtensions.label(absenceRequest.type),
-        absenceRequest.type.isAllDay() ? TemplateExtensions.format(absenceRequest.startAtAsDate())
-            : TemplateExtensions.format(absenceRequest.startAt),
-            absenceRequest.type.isAllDay() ? TemplateExtensions.format(absenceRequest.endToAsDate())
-                : TemplateExtensions.format(absenceRequest.endTo),
+        TemplateExtensions.label(absenceRequest.getType()),
+        absenceRequest.getType().isAllDay() 
+        ? TemplateExtensions.format(absenceRequest.startAtAsDate())
+            : TemplateExtensions.format(absenceRequest.getStartAt()),
+            absenceRequest.getType().isAllDay() 
+            ? TemplateExtensions.format(absenceRequest.endToAsDate())
+                : TemplateExtensions.format(absenceRequest.getEndTo()),
                 refuser.getFullname());
 
-    Notification.builder().destination(absenceRequest.person.getUser()).message(message)
+    Notification.builder().destination(absenceRequest.getPerson().getUser()).message(message)
     .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
 
   }
@@ -516,14 +522,16 @@ public class NotificationManager {
 
     final String message = String.format(
         "La richiesta di assenza di tipo \"%s\" dal %s al %s " + "è stata accettata da %s",
-        TemplateExtensions.label(absenceRequest.type),
-        absenceRequest.type.isAllDay() ? TemplateExtensions.format(absenceRequest.startAtAsDate())
-            : TemplateExtensions.format(absenceRequest.startAt),
-            absenceRequest.type.isAllDay() ? TemplateExtensions.format(absenceRequest.endToAsDate())
-                : TemplateExtensions.format(absenceRequest.endTo),
+        TemplateExtensions.label(absenceRequest.getType()),
+        absenceRequest.getType().isAllDay() 
+        ? TemplateExtensions.format(absenceRequest.startAtAsDate())
+            : TemplateExtensions.format(absenceRequest.getStartAt()),
+            absenceRequest.getType().isAllDay() 
+            ? TemplateExtensions.format(absenceRequest.endToAsDate())
+                : TemplateExtensions.format(absenceRequest.getEndTo()),
                 approver.getFullname());
 
-    Notification.builder().destination(absenceRequest.person.getUser()).message(message)
+    Notification.builder().destination(absenceRequest.getPerson().getUser()).message(message)
     .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
 
   }
@@ -618,23 +626,25 @@ public class NotificationManager {
     Verify.verify(!contracts.isEmpty());
     Verify.verifyNotNull(personShiftType);
 
-    val shiftType = personShiftType.shiftType.type;
-    val supervisor = personShiftType.shiftType.shiftCategories.supervisor;
+    val shiftType = personShiftType.getShiftType().getType();
+    val supervisor = personShiftType.getShiftType().getShiftCategories().getSupervisor();
 
-    log.info("turno tipo {} descrizione {}", shiftType, personShiftType.shiftType.description);
+    log.info("turno tipo {} descrizione {}", shiftType, 
+        personShiftType.getShiftType().getDescription());
 
     final StringBuffer message = new StringBuffer(
         String.format("Le seguenti persone sono state eliminate dal turno %s perchè il "
             + "loro contratto è scaduto:", shiftType));
 
     contracts.forEach(c -> {
-      log.info("Utente {}  scadenza getEndContact {}", c.person.getFullname(), c.calculatedEnd());
+      log.info("Utente {}  scadenza getEndContact {}", 
+          c.getPerson().getFullname(), c.calculatedEnd());
       message.append(String.format("\r\n- Utente: %s\tData scadenza contratto: %s",
-          c.person.fullName(), c.calculatedEnd()));
+          c.getPerson().fullName(), c.calculatedEnd()));
     });
 
     SimpleEmail simpleEmail = new SimpleEmail();
-    final User userDestination = supervisor.user;
+    final User userDestination = supervisor.getUser();
     log.info("Destination = {}", userDestination);
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per il supervisor {}", supervisor);
@@ -642,7 +652,7 @@ public class NotificationManager {
     }
 
     try {
-      simpleEmail.addTo(userDestination.person.email);
+      simpleEmail.addTo(userDestination.getPerson().getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
@@ -656,7 +666,7 @@ public class NotificationManager {
     Mail.send(simpleEmail);
     log.info("Inviata email per rimozione utenti dal turno {} perchè contratto scaduto:"
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        shiftType, userDestination.person.email, simpleEmail.getSubject(), mailBody);
+        shiftType, userDestination.getPerson().getEmail(), simpleEmail.getSubject(), mailBody);
   }
 
   /**
@@ -670,8 +680,8 @@ public class NotificationManager {
     Verify.verify(!contracts.isEmpty());
     Verify.verifyNotNull(personReperibilityType);
 
-    val description = personReperibilityType.description;
-    val supervisor = personReperibilityType.supervisor;
+    val description = personReperibilityType.getDescription();
+    val supervisor = personReperibilityType.getSupervisor();
 
     log.info("reperibilità descrizione {}", description);
 
@@ -680,13 +690,14 @@ public class NotificationManager {
             + "perchè il loro contratto è scaduto:", description));
 
     contracts.forEach(c -> {
-      log.info("Utente {}  scadenza getEndContact {}", c.person.getFullname(), c.calculatedEnd());
+      log.info("Utente {}  scadenza getEndContact {}", 
+          c.getPerson().getFullname(), c.calculatedEnd());
       message.append(String.format("\r\n- Utente: %s\tData scadenza contratto: %s",
-          c.person.fullName(), c.calculatedEnd()));
+          c.getPerson().fullName(), c.calculatedEnd()));
     });
 
     SimpleEmail simpleEmail = new SimpleEmail();
-    final User userDestination = supervisor.user;
+    final User userDestination = supervisor.getUser();
     log.info("Destination = {}", userDestination);
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per il supervisor {}", supervisor);
@@ -694,7 +705,7 @@ public class NotificationManager {
     }
 
     try {
-      simpleEmail.addTo(userDestination.person.email);
+      simpleEmail.addTo(userDestination.getPerson().getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
@@ -708,7 +719,7 @@ public class NotificationManager {
     Mail.send(simpleEmail);
     log.info("Inviata email per rimozione utenti dalla reperibilità {} perchè contratto scaduto:"
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        description, userDestination.person.email, simpleEmail.getSubject(), mailBody);
+        description, userDestination.getPerson().getEmail(), simpleEmail.getSubject(), mailBody);
   }
 
   /**
@@ -752,34 +763,35 @@ public class NotificationManager {
   private void sendEmailAbsenceRequest(AbsenceRequest absenceRequest) {
 
     Verify.verifyNotNull(absenceRequest);
-    final Person person = absenceRequest.person;
+    final Person person = absenceRequest.getPerson();
 
     final Role roleDestination = getProperRole(absenceRequest);
     if (roleDestination == null) {
       log.warn(
           "Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
               + "{} di tipo {} con date {}, {}",
-              absenceRequest.person, absenceRequest.type, absenceRequest.startAt,
-              absenceRequest.endTo);
+              absenceRequest.getPerson(), absenceRequest.getType(), absenceRequest.getStartAt(),
+              absenceRequest.getEndTo());
       return;
     }
-    person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
-        .map(uro -> uro.user).forEach(user -> {
+    person.getOffice().getUsersRolesOffices().stream().filter(uro -> 
+        uro.getRole().equals(roleDestination))
+        .map(uro -> uro.getUser()).forEach(user -> {
           SimpleEmail simpleEmail = new SimpleEmail();
           // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
-          if (roleDestination.name.equals(Role.GROUP_MANAGER)) {
-            Optional<Group> group = groupDao.checkManagerPerson(user.person, person);
+          if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
+            Optional<Group> group = groupDao.checkManagerPerson(user.getPerson(), person);
             if (!group.isPresent()) {
               return;
             }
-            if (!group.get().sendFlowsEmail) {
+            if (!group.get().isSendFlowsEmail()) {
               log.info("Non verrà inviata la mail al responsabile del gruppo {} "
-                  + "poichè l'invio è stato disattivato.", user.person.fullName());
+                  + "poichè l'invio è stato disattivato.", user.getPerson().fullName());
               return;
             }
           }
           try {
-            simpleEmail.addTo(user.person.email);
+            simpleEmail.addTo(user.getPerson().getEmail());
           } catch (EmailException e) {
             e.printStackTrace();
           }
@@ -794,7 +806,7 @@ public class NotificationManager {
           log.info(
               "Inviata email per richiesta di flusso richiesta: {}. "
                   + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-                  absenceRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+                  absenceRequest, user.getPerson().getEmail(), simpleEmail.getSubject(), mailBody);
         });
   }
 
@@ -813,33 +825,35 @@ public class NotificationManager {
 
     //Email al responsabile di sede per i livelli I-III che NON SONO
     //responsabili di gruppo
-    if (configurationManager.configValue(absenceRequest.person.office,
+    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
         EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION, LocalDate.now()).equals(Boolean.TRUE)
-        && !absenceRequest.person.isGroupManager()) {
+        && !absenceRequest.getPerson().isGroupManager()) {
       recipients = 
-          absenceRequest.person.office.usersRolesOffices.stream()
-          .filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).map(uro -> uro.user.person)
+          absenceRequest.getPerson().getOffice().getUsersRolesOffices().stream()
+          .filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+          .map(uro -> uro.getUser().getPerson())
           .collect(Collectors.toSet());
     }
     //Email al responsabile di sede per i livelli I-III che SONO
     //responsabili di gruppo
-    if (configurationManager.configValue(absenceRequest.person.office,
+    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
         EpasParam.ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION, 
         LocalDate.now()).equals(Boolean.TRUE)
-        && absenceRequest.person.isGroupManager()) {
+        && absenceRequest.getPerson().isGroupManager()) {
       recipients = 
-          absenceRequest.person.office.usersRolesOffices.stream()
-          .filter(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)).map(uro -> uro.user.person)
+          absenceRequest.getPerson().getOffice().getUsersRolesOffices().stream()
+          .filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+          .map(uro -> uro.getUser().getPerson())
           .collect(Collectors.toSet());
     }
     //Email al responsabile di gruppo per i livelli I-III del suo gruppo (se sono attive
     //notifiche al responsabile di gruppo nella configurazione del gruppo).
-    if (configurationManager.configValue(absenceRequest.person.office,
+    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
         EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION, 
         LocalDate.now()).equals(Boolean.TRUE)) {
-      recipients.addAll(groupDao.myGroups(absenceRequest.person).stream()
-          .filter(group -> group.sendFlowsEmail)
-          .map(group -> group.manager)
+      recipients.addAll(groupDao.myGroups(absenceRequest.getPerson()).stream()
+          .filter(group -> group.isSendFlowsEmail())
+          .map(group -> group.getManager())
           .collect(Collectors.toSet()));
     }
 
@@ -847,20 +861,21 @@ public class NotificationManager {
       recipients.forEach(r -> {
         try {
           SimpleEmail simpleEmail = new SimpleEmail();
-          simpleEmail.addTo(r.email);
+          simpleEmail.addTo(r.getEmail());
           simpleEmail.setSubject(
               String.format("ePas Comunicazione assenza (id=%s)", absenceRequest.id));
-          val mailBody = createAbsenceNotificationEmail(absenceRequest, r.user);
+          val mailBody = createAbsenceNotificationEmail(absenceRequest, r.getUser());
           simpleEmail.setMsg(mailBody);
           Mail.send(simpleEmail);
           log.info(
               "Inviata email per richiesta di flusso richiesta: {}. "
                   + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-                  absenceRequest, r.user.person.email, simpleEmail.getSubject(), mailBody);
+                  absenceRequest, r.getUser().getPerson().getEmail(), 
+                  simpleEmail.getSubject(), mailBody);
         } catch (EmailException e) {
           log.error("Impossibile inviare l'email a {} che è destinatario del email "
               + "per la comunicazione dell'assenza di {}", 
-              r.getFullname(), absenceRequest.person.getFullname(), e);
+              r.getFullname(), absenceRequest.getPerson().getFullname(), e);
         }
       });
     }
@@ -869,17 +884,17 @@ public class NotificationManager {
     try {
       email.setSubject(
           String.format("ePas Comunicazione assenza (id=%s)", absenceRequest.id));
-      email.addTo(absenceRequest.person.email);
+      email.addTo(absenceRequest.getPerson().getEmail());
       val mailBody = createEmployeeAbsenceNotificationEmail(absenceRequest);
       email.setMsg(mailBody);
       Mail.send(email);
       log.info(
           "Inviata email per completamento flusso di notifica: {}. "
               + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-              absenceRequest, absenceRequest.person.email, email.getSubject(), mailBody);
+              absenceRequest, absenceRequest.getPerson().getEmail(), email.getSubject(), mailBody);
     } catch (EmailException e) {
       log.error("Impossibile inviare l'email a {} relativa alla sua comunicazione di assenza.", 
-          absenceRequest.person.getFullname(), e);
+          absenceRequest.getPerson().getFullname(), e);
     }
   }
 
@@ -891,18 +906,18 @@ public class NotificationManager {
   private void sendEmailAbsenceRequestConfirmation(AbsenceRequest absenceRequest,
       boolean approval) {
     Verify.verifyNotNull(absenceRequest);
-    final Person person = absenceRequest.person;
+    final Person person = absenceRequest.getPerson();
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addTo(person.email);
+      simpleEmail.addTo(person.getEmail());
       String requestType = getRequestTypeLabel(absenceRequest);
 
       simpleEmail.setSubject("ePas Approvazione flusso");
       final StringBuilder message =
           new StringBuilder().append(String.format("Gentile %s,\r\n", person.fullName()));
       String approver = " ";
-      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-        approver = " da " + Security.getUser().get().person.getFullname();
+      if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
+        approver = " da " + Security.getUser().get().getPerson().getFullname();
       }
       if (approval) {
         message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di %s",
@@ -912,15 +927,15 @@ public class NotificationManager {
             approver, requestType));
       }
       message.append(String.format("\r\n per i giorni %s - %s", 
-          absenceRequest.startAt.toLocalDate(),
-          absenceRequest.endTo.toLocalDate()));
+          absenceRequest.getStartAt().toLocalDate(),
+          absenceRequest.getEndTo().toLocalDate()));
       val mailBody = message.toString();
       simpleEmail.setMsg(mailBody);
       Mail.send(simpleEmail);
       log.info(
           "Inviata email per approvazione di flusso {}. "
               + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-              absenceRequest, person.email, simpleEmail.getSubject(), mailBody);
+              absenceRequest, person.getEmail(), simpleEmail.getSubject(), mailBody);
     } catch (EmailException e) {
       log.error("Impossibile inviare l'email con conferma della richiesta di assenza {}.", 
           absenceRequest, e);
@@ -939,25 +954,26 @@ public class NotificationManager {
     String requestType = getRequestTypeLabel(absenceRequest);
 
     final StringBuilder message =
-        new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
+        new StringBuilder().append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di : %s",
-        absenceRequest.person.fullName()));
+        absenceRequest.getPerson().fullName()));
     message.append(String.format("\r\n per una assenza di tipo: %s", requestType));
-    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+    if (absenceRequest.getStartAt().isEqual(absenceRequest.getEndTo())) {
       message.append(String.format("\r\n per il giorno: %s",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
     } else {
       message.append(String.format("\r\n dal: %s",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
       message.append(
-          String.format("  al: %s", absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+          String.format("  al: %s", 
+              absenceRequest.getEndTo().toLocalDate().toString(dateFormatter)));
     }
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
     }
 
-    baseUrl = baseUrl + PATH + "?id=" + absenceRequest.id + "&type=" + absenceRequest.type;
+    baseUrl = baseUrl + PATH + "?id=" + absenceRequest.id + "&type=" + absenceRequest.getType();
 
     message.append(String.format("\r\n Verifica cliccando sul link seguente: %s", baseUrl));
 
@@ -966,7 +982,7 @@ public class NotificationManager {
 
   private String getRequestTypeLabel(AbsenceRequest absenceRequest) {
     String requestType = "";
-    switch (absenceRequest.type) {
+    switch (absenceRequest.getType()) {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
         break;
@@ -990,7 +1006,7 @@ public class NotificationManager {
 
   private String getRequestTypeLabelTopLevel(AbsenceRequest absenceRequest) {
     String requestType = "";
-    switch (absenceRequest.type) {
+    switch (absenceRequest.getType()) {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL");
         break;
@@ -1025,18 +1041,19 @@ public class NotificationManager {
     String requestType = getRequestTypeLabelTopLevel(absenceRequest);
 
     final StringBuilder message =
-        new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
+        new StringBuilder().append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
     message.append(String.format("\r\nti è stata notificata da %s ",
-        absenceRequest.person.fullName()));
+        absenceRequest.getPerson().fullName()));
     message.append(String.format("una assenza di tipo \"%s\" ", requestType));
-    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+    if (absenceRequest.getStartAt().isEqual(absenceRequest.getEndTo())) {
       message.append(String.format("per il giorno %s.",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
     } else {
       message.append(String.format("dal %s",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
       message.append(
-          String.format(" al %s.", absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+          String.format(" al %s.", 
+              absenceRequest.getEndTo().toLocalDate().toString(dateFormatter)));
     }
     return message.toString();
   }
@@ -1050,18 +1067,19 @@ public class NotificationManager {
 
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", 
-            absenceRequest.person.fullName()));
+            absenceRequest.getPerson().fullName()));
     message.append(String.format("\r\nil tuo flusso di assenza di tipo \"%s\" "
         + "è terminato correttamente, ",
         requestType));
-    if (absenceRequest.startAt.isEqual(absenceRequest.endTo)) {
+    if (absenceRequest.getStartAt().isEqual(absenceRequest.getEndTo())) {
       message.append(String.format("assenza per il giorno %s.",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
     } else {
       message.append(String.format("assenza dal %s",
-          absenceRequest.startAt.toLocalDate().toString(dateFormatter)));
+          absenceRequest.getStartAt().toLocalDate().toString(dateFormatter)));
       message.append(
-          String.format(" al %s.", absenceRequest.endTo.toLocalDate().toString(dateFormatter)));
+          String.format(" al %s.", absenceRequest.getEndTo().toLocalDate()
+              .toString(dateFormatter)));
     }
     return message.toString();
 
@@ -1087,11 +1105,11 @@ public class NotificationManager {
     final String message =
         String.format("La richiesta di tipo \"%s\" per il %s "
             + "è stata rifiutata da %s",
-            TemplateExtensions.label(competenceRequest.type),
-            TemplateExtensions.format(competenceRequest.startAt),
+            TemplateExtensions.label(competenceRequest.getType()),
+            TemplateExtensions.format(competenceRequest.getStartAt()),
             refuser.getFullname());
 
-    Notification.builder().destination(competenceRequest.person.user).message(message)
+    Notification.builder().destination(competenceRequest.getPerson().getUser()).message(message)
     .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
 
   }
@@ -1111,11 +1129,11 @@ public class NotificationManager {
     final String message =
         String.format("La richiesta di tipo \"%s\" per il %s "
             + "è stata revocata da %s",
-            TemplateExtensions.label(competenceRequest.type),
-            TemplateExtensions.format(competenceRequest.startAt),
+            TemplateExtensions.label(competenceRequest.getType()),
+            TemplateExtensions.format(competenceRequest.getStartAt()),
             revoker.getFullname());
 
-    Notification.builder().destination(competenceRequest.teamMate.user).message(message)
+    Notification.builder().destination(competenceRequest.getTeamMate().getUser()).message(message)
     .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
 
   }
@@ -1125,7 +1143,7 @@ public class NotificationManager {
    */
   private void notifyCompetence(Competence competence, User currentUser, Crud operation) {
     Verify.verifyNotNull(competence);
-    final Person person = competence.person;
+    final Person person = competence.getPerson();
     String template;
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova competenza: %s - %s";
@@ -1137,19 +1155,19 @@ public class NotificationManager {
       template = null;
     }
     String modifier = person.fullName();
-    YearMonth yearMonth = new YearMonth(competence.year, competence.month);
+    YearMonth yearMonth = new YearMonth(competence.getYear(), competence.getMonth());
     final String message = String.format(template, modifier,
-        yearMonth.toString(DF), competence.competenceCode.code);
+        yearMonth.toString(DF), competence.getCompetenceCode().getCode());
     //controllare se dalla configurazione è possibile notificare le competenze da flusso 
     val config = configurationManager
-        .configValue(person.office, EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+        .configValue(person.getOffice(), EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
     }
-    person.office.usersRolesOffices.stream()
-        .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN)
-            || uro.role.name.equals(Role.SEAT_SUPERVISOR))
-        .map(uro -> uro.user).forEach(user -> {
+    person.getOffice().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
           Notification.builder().destination(user).message(message)
           .subject(NotificationSubject.COMPETENCE, competence.id).create();
         });
@@ -1186,23 +1204,23 @@ public class NotificationManager {
   private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest,
       boolean approval) {
     Verify.verifyNotNull(competenceRequest);
-    final Person person = competenceRequest.person;
+    final Person person = competenceRequest.getPerson();
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addTo(person.email);
+      simpleEmail.addTo(person.getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
     String requestType = "";
-    if (competenceRequest.type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
+    if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
       requestType = Messages.get("CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST");
     }
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
     String approver = " ";
-    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-      approver = " da " + Security.getUser().get().person.getFullname();
+    if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
+      approver = " da " + Security.getUser().get().getPerson().getFullname();
     }
     if (approval) {
       message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di : %s",
@@ -1212,16 +1230,16 @@ public class NotificationManager {
           approver, requestType));
     }
 
-    if (competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
+    if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
       message.append(String.format("\r\n per il giorno %s con il giorno %s.",
-          competenceRequest.beginDateToGive.toString(dateFormatter),
-          competenceRequest.beginDateToAsk.toString(dateFormatter)));
+          competenceRequest.getBeginDateToGive().toString(dateFormatter),
+          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
     } else {
       message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
-          competenceRequest.beginDateToGive.toString(dateFormatter),
-          competenceRequest.endDateToGive.toString(dateFormatter),
-          competenceRequest.beginDateToAsk.toString(dateFormatter),
-          competenceRequest.endDateToAsk.toString(dateFormatter)));
+          competenceRequest.getBeginDateToGive().toString(dateFormatter),
+          competenceRequest.getEndDateToGive().toString(dateFormatter),
+          competenceRequest.getBeginDateToAsk().toString(dateFormatter),
+          competenceRequest.getEndDateToAsk().toString(dateFormatter)));
     }
 
     val mailBody = message.toString();
@@ -1233,7 +1251,7 @@ public class NotificationManager {
     Mail.send(simpleEmail);
     log.info("Inviata email per approvazione di flusso richiesta: {}. "
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        competenceRequest, person.email, simpleEmail.getSubject(), mailBody);
+        competenceRequest, person.getEmail(), simpleEmail.getSubject(), mailBody);
 
   }
 
@@ -1282,13 +1300,14 @@ public class NotificationManager {
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
           + "{} di tipo {} con date {}, {}",
-          competenceRequest.person, competenceRequest.type, competenceRequest.startAt,
-          competenceRequest.endTo);
+          competenceRequest.getPerson(), competenceRequest.getType(), 
+          competenceRequest.getStartAt(),
+          competenceRequest.getEndTo());
       return;
     }
 
     try {
-      simpleEmail.addTo(userDestination.person.email);
+      simpleEmail.addTo(userDestination.getPerson().getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
@@ -1302,47 +1321,48 @@ public class NotificationManager {
     Mail.send(simpleEmail);
     log.info("Inviata email per richiesta di flusso richiesta: {}. "
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        competenceRequest, userDestination.person.email, simpleEmail.getSubject(), mailBody);
+        competenceRequest, userDestination.getPerson().getEmail(), 
+        simpleEmail.getSubject(), mailBody);
 
   }
 
   private String createCompetenceRequestEmail(CompetenceRequest competenceRequest, User user) {
     final String dateFormatter = "dd/MM/YYYY";
     String requestType = "";
-    if (competenceRequest.type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
+    if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
       requestType = Messages.get("CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST");
     }
     final StringBuilder message = new StringBuilder()
-        .append(String.format("Gentile %s,\r\n", user.person.fullName()));
+        .append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
-        competenceRequest.person.fullName()));
+        competenceRequest.getPerson().fullName()));
     message.append(String.format(" di tipo %s\r\n", requestType));
 
-    if (competenceRequest.beginDateToAsk != null 
-        && competenceRequest.beginDateToAsk.isEqual(competenceRequest.endDateToAsk)) {
+    if (competenceRequest.getBeginDateToAsk() != null 
+        && competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
       message.append(String.format("per il giorno %s",
-          competenceRequest.beginDateToAsk.toString(dateFormatter)));
+          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
       message.append(String.format(" in cambio del giorno %s",
-          competenceRequest.beginDateToGive.toString(dateFormatter)));
+          competenceRequest.getBeginDateToGive().toString(dateFormatter)));
     } else {
       message.append(String.format("dal %s",
-          competenceRequest.beginDateToAsk.toString(dateFormatter)));
+          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
       message.append(String.format(" al %s",
-          competenceRequest.endDateToAsk.toString(dateFormatter)));
+          competenceRequest.getEndDateToAsk().toString(dateFormatter)));
       message.append(String.format(" in cambio dei giorni dal %s",
-          competenceRequest.beginDateToGive.toString(dateFormatter)));
+          competenceRequest.getBeginDateToGive().toString(dateFormatter)));
       message.append(String.format(" al %s",
-          competenceRequest.endDateToGive.toString(dateFormatter)));
+          competenceRequest.getEndDateToGive().toString(dateFormatter)));
     }
     message.append(String.format(", con destinatario %s.\r\n",
-        competenceRequest.teamMate.fullName()));
+        competenceRequest.getTeamMate().fullName()));
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
     }
 
     baseUrl = baseUrl + COMPETENCE_PATH + "?id=" + competenceRequest.id
-        + "&type=" + competenceRequest.type;
+        + "&type=" + competenceRequest.getType();
 
     message.append(String.format("\r\nVerifica cliccando sul link seguente: %s", baseUrl));
 
@@ -1358,21 +1378,21 @@ public class NotificationManager {
   private User getProperUser(CompetenceRequest competenceRequest) {
 
     User user = null;
-    if (competenceRequest.reperibilityManagerApprovalRequired
-        && competenceRequest.reperibilityManagerApproved == null) {
-      for (PersonReperibility pr : competenceRequest.person.reperibility) {
-        for (PersonReperibility tmPr : competenceRequest.teamMate.reperibility) {
-          if (pr.personReperibilityType.equals(tmPr.personReperibilityType)) {
-            user = pr.personReperibilityType.supervisor.user;
+    if (competenceRequest.isReperibilityManagerApprovalRequired()
+        && competenceRequest.getReperibilityManagerApproved() == null) {
+      for (PersonReperibility pr : competenceRequest.getPerson().getReperibility()) {
+        for (PersonReperibility tmPr : competenceRequest.getTeamMate().getReperibility()) {
+          if (pr.getPersonReperibilityType().equals(tmPr.getPersonReperibilityType())) {
+            user = pr.getPersonReperibilityType().getSupervisor().getUser();
           }
         }
       }
 
     }
 
-    if (competenceRequest.employeeApprovalRequired
-        && competenceRequest.employeeApproved == null) {
-      user = competenceRequest.teamMate.user;
+    if (competenceRequest.isEmployeeApprovalRequired()
+        && competenceRequest.getEmployeeApproved() == null) {
+      user = competenceRequest.getTeamMate().getUser();
 
     }
     return user;
@@ -1386,7 +1406,7 @@ public class NotificationManager {
    */
   private void notifyCompetenceRequest(CompetenceRequest competenceRequest, Crud operation) {
     Verify.verifyNotNull(competenceRequest);
-    final Person person = competenceRequest.person;
+    final Person person = competenceRequest.getPerson();
     final String template;
     String typeOfRequest = "";
     if (Crud.CREATE == operation) {
@@ -1398,7 +1418,7 @@ public class NotificationManager {
     } else {
       template = null;
     }
-    if (competenceRequest.type.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       typeOfRequest = "cambio reperibilità";
     }
     final String message =
@@ -1406,10 +1426,10 @@ public class NotificationManager {
 
     //se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (competenceRequest.isFullyApproved()) {
-      Notification.builder().destination(person.user).message(message)
+      Notification.builder().destination(person.getUser()).message(message)
       .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
 
-      if (competenceRequest.type.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
         //TODO: verificare se abbia senso informare qualche altro ruolo del cambio di reperibilità
       }
     }
@@ -1417,8 +1437,9 @@ public class NotificationManager {
     if (userDestination == null) {
       log.info("Non si è trovato l'utente a cui inviare la notifica per la richiesta di "
           + "{} di tipo {} con date {}, {}",
-          competenceRequest.person, competenceRequest.type, competenceRequest.beginDateToAsk,
-          competenceRequest.endDateToAsk);
+          competenceRequest.getPerson(), competenceRequest.getType(), 
+          competenceRequest.getBeginDateToAsk(),
+          competenceRequest.getEndDateToAsk());
       return;
     }
 
@@ -1439,18 +1460,20 @@ public class NotificationManager {
       boolean insert, boolean update, boolean delete) {
 
     //Se l'user che ha fatto l'inserimento è utente di sistema esco
-    if (currentUser.isSystemUser() && !currentUser.roles.contains(AccountRole.MISSIONS_MANAGER)) {
+    if (currentUser.isSystemUser() && !currentUser.getRoles()
+        .contains(AccountRole.MISSIONS_MANAGER)) {
       return;
     }
 
     //Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
-    if (currentUser.person != null
-        && secureManager.officesWriteAllowed(currentUser).contains(currentUser.person.office)) {
+    if (currentUser.getPerson() != null
+        && secureManager.officesWriteAllowed(currentUser)
+        .contains(currentUser.getPerson().getOffice())) {
       return;
     }
 
-    if (competence.competenceCode.code.equals(WORKDAY_REPERIBILITY)
-        || competence.competenceCode.code.equals(HOLIDAY_REPERIBILITY)) {
+    if (competence.getCompetenceCode().getCode().equals(WORKDAY_REPERIBILITY)
+        || competence.getCompetenceCode().getCode().equals(HOLIDAY_REPERIBILITY)) {
       if (insert) {
         notifyCompetence(competence, currentUser, NotificationManager.Crud.CREATE);
         return;
@@ -1500,7 +1523,7 @@ public class NotificationManager {
 
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addTo(receiver.email);
+      simpleEmail.addTo(receiver.getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
@@ -1508,20 +1531,20 @@ public class NotificationManager {
     String type = "";
     if (shift.isPresent()) {
 
-      service = shift.get().description;
+      service = shift.get().getDescription();
       type = "turno";
     }
     if (rep.isPresent()) {
 
-      service = rep.get().description;
+      service = rep.get().getDescription();
       type = "reperibilità";
     }
     String requestType = "";
-    if (absenceRequest.type == AbsenceRequestType.COMPENSATORY_REST) {
+    if (absenceRequest.getType() == AbsenceRequestType.COMPENSATORY_REST) {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
-    } else if (absenceRequest.type == AbsenceRequestType.PERSONAL_PERMISSION) {
+    } else if (absenceRequest.getType() == AbsenceRequestType.PERSONAL_PERMISSION) {
       requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
-    } else if (absenceRequest.type
+    } else if (absenceRequest.getType()
         == AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST) {
       requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
     } else {
@@ -1531,9 +1554,11 @@ public class NotificationManager {
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", receiver.getFullname()));
     message.append(String.format("\r\nè stata approvata la richiesta di : %s", requestType));
-    message.append(String.format("\r\nper i giorni %s - %s", absenceRequest.startAt.toLocalDate(),
-        absenceRequest.endTo.toLocalDate()));
-    message.append(String.format("\r\nper il dipendente %s", absenceRequest.person.getFullname()));
+    message.append(String.format("\r\nper i giorni %s - %s", 
+        absenceRequest.getStartAt().toLocalDate(),
+        absenceRequest.getEndTo().toLocalDate()));
+    message.append(String.format("\r\nper il dipendente %s", 
+        absenceRequest.getPerson().getFullname()));
     if (dates.size() == 1) {
       message.append(String.format("\r\nNel giorno %s il dipendente risulta però in %s",
           dates.get(0), type));
@@ -1559,7 +1584,7 @@ public class NotificationManager {
     log.info("Inviata email al responsabile/gestore per informazione giorni di reperibilità/turno "
         + "concomitanti coi giorni di richiesta: {}. "
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        absenceRequest, receiver.email, simpleEmail.getSubject(), mailBody);
+        absenceRequest, receiver.getEmail(), simpleEmail.getSubject(), mailBody);
   }
 
   /**
@@ -1572,13 +1597,13 @@ public class NotificationManager {
   private void sendEmailToManagerFor661(Person manager, Absence absence) {
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addTo(manager.email);
+      simpleEmail.addTo(manager.getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
     String requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
     String justifiedTime = "";
-    if (absence.justifiedType.name.equals(JustifiedType.JustifiedTypeName.all_day)) {
+    if (absence.getJustifiedType().getName().equals(JustifiedType.JustifiedTypeName.all_day)) {
       justifiedTime = "tutto il giorno";
     } else {
       int hours = absence.getJustifiedMinutes() / 60;
@@ -1592,7 +1617,7 @@ public class NotificationManager {
     message.append(String.format(" per il giorno %s", absence.date));
     message.append(String.format(" che giustifica %s", justifiedTime));
     message.append(String.format(" per il dipendente %s.",
-        absence.getPersonDay().person.getFullname()));
+        absence.getPersonDay().getPerson().getFullname()));
     val mailBody = message.toString();
     try {
       simpleEmail.setMsg(mailBody);
@@ -1635,7 +1660,7 @@ public class NotificationManager {
    */
   private void notifyInformationRequest(InformationRequest informationRequest, Crud operation) {
     Verify.verifyNotNull(informationRequest);
-    final Person person = informationRequest.person;
+    final Person person = informationRequest.getPerson();
     final String template;
     if (Crud.CREATE == operation) {
       template = "%s ha inserito una nuova richiesta di flusso informativo: %s";
@@ -1647,9 +1672,9 @@ public class NotificationManager {
       template = null;
     }
     final String message =
-        String.format(template, person.fullName(), informationRequest.startAt.toString());
+        String.format(template, person.fullName(), informationRequest.getStartAt().toString());
     NotificationSubject subject = null;
-    switch (informationRequest.informationType) {
+    switch (informationRequest.getInformationType()) {
       case ILLNESS_INFORMATION:
         subject = NotificationSubject.ILLNESS_INFORMATION;
         break;
@@ -1665,7 +1690,7 @@ public class NotificationManager {
     final NotificationSubject notificationSubject = subject;
     // se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (informationRequest.isFullyApproved()) {
-      Notification.builder().destination(person.user).message(message)
+      Notification.builder().destination(person.getUser()).message(message)
       .subject(subject, informationRequest.id).create();
       // ...e all'amministratore del personale
     }
@@ -1674,18 +1699,19 @@ public class NotificationManager {
       log.info(
           "Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
               + "{} di tipo {} con date {}, {}",
-              informationRequest.person, informationRequest.informationType,
-              informationRequest.startAt, informationRequest.endTo);
+              informationRequest.getPerson(), informationRequest.getInformationType(),
+              informationRequest.getStartAt(), informationRequest.getEndTo());
       return;
     }
     List<User> users = Lists.newArrayList();
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      users = person.affiliations.stream().map(gp -> gp.getGroup().manager.user)
+      users = person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
           .collect(Collectors.toList());
     } else {
       users =
-          person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).collect(Collectors.toList());
+          person.getOffice().getUsersRolesOffices().stream()
+          .filter(uro -> uro.getRole().equals(roleDestination))
+          .map(uro -> uro.getUser()).collect(Collectors.toList());
     }
 
     users.forEach(user -> {
@@ -1713,23 +1739,24 @@ public class NotificationManager {
     Verify.verifyNotNull(refuser);
     NotificationSubject subject = null;
     StringBuilder message = new StringBuilder()
-        .append(String.format("La richiesta di tipo %s", request.informationType));
-    switch (request.informationType) {
+        .append(String.format("La richiesta di tipo %s", request.getInformationType()));
+    switch (request.getInformationType()) {
       case ILLNESS_INFORMATION:
         subject = NotificationSubject.ILLNESS_INFORMATION;
-        message.append(String.format(" dal giorno %s", illnessRequest.get().beginDate.toString()));
+        message.append(String.format(" dal giorno %s", 
+            illnessRequest.get().getBeginDate().toString()));
         message.append(String.format(" al giorno %s",
-            illnessRequest.get().endDate.toString()));
+            illnessRequest.get().getEndDate().toString()));
         break;
       case SERVICE_INFORMATION:
         subject = NotificationSubject.SERVICE_INFORMATION;
-        message.append(String.format(" per il giorno %s", serviceRequest.get().day));
+        message.append(String.format(" per il giorno %s", serviceRequest.get().getDay()));
         break;
       case TELEWORK_INFORMATION:
         subject = NotificationSubject.TELEWORK_INFORMATION;
         message.append(String.format(" per il mese %s",
-            DateUtility.fromIntToStringMonth(teleworkRequest.get().month)));
-        message.append(String.format(" dell'anno %s", teleworkRequest.get().year));
+            DateUtility.fromIntToStringMonth(teleworkRequest.get().getMonth())));
+        message.append(String.format(" dell'anno %s", teleworkRequest.get().getYear()));
         break;
       default:
         break;
@@ -1737,7 +1764,7 @@ public class NotificationManager {
     message.append(String.format("è stata rifiutata da %s", refuser.getFullname()));
     final NotificationSubject notificationSubject = subject;
 
-    Notification.builder().destination(request.person.user).message(message.toString())
+    Notification.builder().destination(request.getPerson().getUser()).message(message.toString())
     .subject(notificationSubject, request.id).create();
 
   }
@@ -1771,46 +1798,49 @@ public class NotificationManager {
   private void sendEmailInformationRequest(InformationRequest informationRequest) {
 
     Verify.verifyNotNull(informationRequest);
-    final Person person = informationRequest.person;
+    final Person person = informationRequest.getPerson();
 
     final Role roleDestination = getProperRole(informationRequest);
     if (roleDestination == null) {
       log.warn(
           "Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
               + "{} di tipo {} con date {}, {}",
-              informationRequest.person, informationRequest.informationType,
-              informationRequest.startAt, informationRequest.endTo);
+              informationRequest.getPerson(), informationRequest.getInformationType(),
+              informationRequest.getStartAt(), informationRequest.getEndTo());
       return;
     }
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      person.affiliations.stream().map(gp -> gp.getGroup().manager.user).forEach(user -> {
-        SimpleEmail simpleEmail = new SimpleEmail();
-        // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
-        try {
-          simpleEmail.addTo(user.person.email);
-        } catch (EmailException e) {
-          e.printStackTrace();
-        }
-        simpleEmail.setSubject("ePas Approvazione flusso");
-        val mailBody = createInformationRequestEmail(informationRequest, user);
-        try {
-          simpleEmail.setMsg(mailBody);
-        } catch (EmailException e) {
-          e.printStackTrace();
-        }
-        Mail.send(simpleEmail);
-        log.info(
-            "Inviata email per richiesta di flusso richiesta: {}. "
-                + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-                informationRequest, user.person.email, simpleEmail.getSubject(), mailBody);
-      });
-    } else {
-      person.office.usersRolesOffices.stream().filter(uro -> uro.role.equals(roleDestination))
-          .map(uro -> uro.user).forEach(user -> {
+      person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
+          .forEach(user -> {
             SimpleEmail simpleEmail = new SimpleEmail();
             // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
             try {
-              simpleEmail.addTo(user.person.email);
+              simpleEmail.addTo(user.getPerson().getEmail());
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            simpleEmail.setSubject("ePas Approvazione flusso");
+            val mailBody = createInformationRequestEmail(informationRequest, user);
+            try {
+              simpleEmail.setMsg(mailBody);
+            } catch (EmailException e) {
+              e.printStackTrace();
+            }
+            Mail.send(simpleEmail);
+            log.info(
+                "Inviata email per richiesta di flusso richiesta: {}. "
+                    + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
+                    informationRequest, user.getPerson().getEmail(), 
+                    simpleEmail.getSubject(), mailBody);
+          });
+    } else {
+      person.getOffice().getUsersRolesOffices().stream()
+          .filter(uro -> uro.getRole().equals(roleDestination))
+          .map(uro -> uro.getUser()).forEach(user -> {
+            SimpleEmail simpleEmail = new SimpleEmail();
+            // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
+            try {
+              simpleEmail.addTo(user.getPerson().getEmail());
             } catch (EmailException e) {
               e.printStackTrace();
             }
@@ -1824,7 +1854,8 @@ public class NotificationManager {
             Mail.send(simpleEmail);
             log.info("Inviata email per richiesta di flusso richiesta: {}. "
                   + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-                  informationRequest, user.person.email, simpleEmail.getSubject(), mailBody);
+                  informationRequest, user.getPerson().getEmail(), 
+                  simpleEmail.getSubject(), mailBody);
           });
     }
 
@@ -1840,45 +1871,45 @@ public class NotificationManager {
   private String createInformationRequestEmail(InformationRequest informationRequest, User user) {
 
     String requestType = "";
-    if (informationRequest.informationType == InformationType.SERVICE_INFORMATION) {
+    if (informationRequest.getInformationType() == InformationType.SERVICE_INFORMATION) {
       requestType = Messages.get("InformationType.SERVICE_INFORMATION");
-    } else if (informationRequest.informationType == InformationType.TELEWORK_INFORMATION) {
+    } else if (informationRequest.getInformationType() == InformationType.TELEWORK_INFORMATION) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
     } else {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
     }
     final StringBuilder message =
-        new StringBuilder().append(String.format("Gentile %s,\r\n", user.person.fullName()));
+        new StringBuilder().append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
     message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
-        informationRequest.person.fullName()));
+        informationRequest.getPerson().fullName()));
     message.append(String.format("\r\nper una assenza di tipo: %s", requestType));
 
-    switch (informationRequest.informationType) {
+    switch (informationRequest.getInformationType()) {
       case ILLNESS_INFORMATION:
         IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
-        if (illnessRequest.beginDate.isEqual(illnessRequest.endDate)) {
+        if (illnessRequest.getBeginDate().isEqual(illnessRequest.getEndDate())) {
           message.append(String.format(" per il giorno: %s",
-              informationRequest.startAt.toLocalDate().toString()));
+              informationRequest.getStartAt().toLocalDate().toString()));
         } else {
           message.append(String.format(" dal: %s",
-              informationRequest.startAt.toLocalDate().toString()));
-          if (informationRequest.endTo != null) {
+              informationRequest.getStartAt().toLocalDate().toString()));
+          if (informationRequest.getEndTo() != null) {
             message.append(String.format(" al: %s",
-                informationRequest.endTo.toLocalDate().toString()));
+                informationRequest.getEndTo().toLocalDate().toString()));
           }
         }
         break;
       case SERVICE_INFORMATION:
         ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
-        message.append(String.format("\r\nper il giorno: %s", serviceRequest.day.toString()));
-        message.append(String.format(" dalle %s", serviceRequest.beginAt.toString()));
-        message.append(String.format(" alle %s", serviceRequest.finishTo.toString()));
+        message.append(String.format("\r\nper il giorno: %s", serviceRequest.getDay().toString()));
+        message.append(String.format(" dalle %s", serviceRequest.getBeginAt().toString()));
+        message.append(String.format(" alle %s", serviceRequest.getFinishTo().toString()));
         break;
       case TELEWORK_INFORMATION:
         TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
         message.append(String.format("\r\n per il mese di %s",
-            DateUtility.fromIntToStringMonth(teleworkRequest.month)));
-        message.append(String.format(" dell'anno %s", teleworkRequest.year));
+            DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
+        message.append(String.format(" dell'anno %s", teleworkRequest.getYear()));
         break;
       default:
         break;
@@ -1889,7 +1920,7 @@ public class NotificationManager {
     }
 
     baseUrl = baseUrl + INFORMATION_PATH + "?id=" + informationRequest.id + "&type="
-        + informationRequest.informationType;
+        + informationRequest.getInformationType();
 
     message.append(String.format("\r\nVerifica cliccando sul link seguente: %s", baseUrl));
 
@@ -1899,17 +1930,18 @@ public class NotificationManager {
   private void sendEmailInformationRequestConfirmation(InformationRequest informationRequest,
       boolean approval) {
     Verify.verifyNotNull(informationRequest);
-    final Person person = informationRequest.person;
+    final Person person = informationRequest.getPerson();
     SimpleEmail simpleEmail = new SimpleEmail();
     try {
-      simpleEmail.addTo(person.email);
+      simpleEmail.addTo(person.getEmail());
     } catch (EmailException e) {
       e.printStackTrace();
     }
     String requestType = "";
-    if (informationRequest.informationType.equals(InformationType.SERVICE_INFORMATION)) {
+    if (informationRequest.getInformationType().equals(InformationType.SERVICE_INFORMATION)) {
       requestType = Messages.get("InformationType.SERVICE_INFORMATION");
-    } else if (informationRequest.informationType.equals(InformationType.TELEWORK_INFORMATION)) {
+    } else if (informationRequest.getInformationType()
+        .equals(InformationType.TELEWORK_INFORMATION)) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
     } else {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
@@ -1918,8 +1950,8 @@ public class NotificationManager {
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.fullName()));
     String approver = " ";
-    if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-      approver = " da " + Security.getUser().get().person.getFullname();
+    if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
+      approver = " da " + Security.getUser().get().getPerson().getFullname();
     }
     if (approval) {
       message.append(String.format("\r\nè stata APPROVATA%s la sua richiesta di %s",
@@ -1929,30 +1961,30 @@ public class NotificationManager {
           approver, requestType));
     }
 
-    switch (informationRequest.informationType) {
+    switch (informationRequest.getInformationType()) {
       case ILLNESS_INFORMATION:
         IllnessRequest illnessRequest = requestDao.getIllnessById(informationRequest.id).get();
-        if (illnessRequest.beginDate.isEqual(illnessRequest.endDate)) {
+        if (illnessRequest.getBeginDate().isEqual(illnessRequest.getEndDate())) {
           message.append(String.format("\r\n per il giorno: %s",
-              informationRequest.startAt.toLocalDate().toString()));
+              informationRequest.getStartAt().toLocalDate().toString()));
         } else {
           message.append(String.format(" dal: %s",
-              informationRequest.startAt.toLocalDate().toString()));
+              informationRequest.getStartAt().toLocalDate().toString()));
           message.append(String.format(" al: %s",
-              informationRequest.endTo.toLocalDate().toString()));
+              informationRequest.getEndTo().toLocalDate().toString()));
         }
         break;
       case SERVICE_INFORMATION:
         ServiceRequest serviceRequest = requestDao.getServiceById(informationRequest.id).get();
-        message.append(String.format("\r\nper il giorno %s", serviceRequest.day.toString()));
-        message.append(String.format(" dalle %s", serviceRequest.beginAt.toString()));
-        message.append(String.format(" alle %s", serviceRequest.finishTo.toString()));
+        message.append(String.format("\r\nper il giorno %s", serviceRequest.getDay().toString()));
+        message.append(String.format(" dalle %s", serviceRequest.getBeginAt().toString()));
+        message.append(String.format(" alle %s", serviceRequest.getFinishTo().toString()));
         break;
       case TELEWORK_INFORMATION:
         TeleworkRequest teleworkRequest = requestDao.getTeleworkById(informationRequest.id).get();
         message.append(String.format("\r\nper il mese di %s",
-            DateUtility.fromIntToStringMonth(teleworkRequest.month)));
-        message.append(String.format("\r\ndell'anno %s", teleworkRequest.year));
+            DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
+        message.append(String.format("\r\ndell'anno %s", teleworkRequest.getYear()));
         break;
       default:
         break;
@@ -1966,7 +1998,7 @@ public class NotificationManager {
     Mail.send(simpleEmail);
     log.info("Inviata email per approvazione di flusso richiesta: {}. "
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
-        informationRequest, person.email, simpleEmail.getSubject(), mailBody);
+        informationRequest, person.getEmail(), simpleEmail.getSubject(), mailBody);
 
   }
 
@@ -1980,14 +2012,14 @@ public class NotificationManager {
     final Person person = mission.person;
     SimpleEmail simpleEmail = new SimpleEmail();
     String replayTo = (String) configurationManager
-        .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+        .configValue(person.getOffice(), EpasParam.EMAIL_TO_CONTACT);
 
     if (Strings.isNullOrEmpty(replayTo)) {
-      person.office.usersRolesOffices.stream()
-          .filter(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))
-          .map(uro -> uro.user).forEach(u -> {
+      person.getOffice().getUsersRolesOffices().stream()
+          .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))
+          .map(uro -> uro.getUser()).forEach(u -> {
             try {
-              simpleEmail.addCc(u.person.email);
+              simpleEmail.addCc(u.getPerson().getEmail());
             } catch (EmailException e) {
               log.error("Impossibile impostare cc nell'email per missione "
                   + "con problemi. {}", mission, e);
@@ -2004,7 +2036,7 @@ public class NotificationManager {
     }
 
     try {
-      simpleEmail.addTo(person.email);
+      simpleEmail.addTo(person.getEmail());
     } catch (EmailException e) {
       log.error("Errore nell'invio dell'email per missione con problemi", e);
       e.printStackTrace();

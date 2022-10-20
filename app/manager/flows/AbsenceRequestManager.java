@@ -287,16 +287,16 @@ public class AbsenceRequestManager {
    * @param absenceRequest la richiesta di assenza.
    */
   public void configure(AbsenceRequest absenceRequest) {
-    Verify.verifyNotNull(absenceRequest.type);
-    Verify.verifyNotNull(absenceRequest.person);
+    Verify.verifyNotNull(absenceRequest.getType());
+    Verify.verifyNotNull(absenceRequest.getPerson());
 
-    val config = getConfiguration(absenceRequest.type, absenceRequest.person);
+    val config = getConfiguration(absenceRequest.getType(), absenceRequest.getPerson());
 
-    absenceRequest.officeHeadApprovalRequired = config.officeHeadApprovalRequired;
-    absenceRequest.managerApprovalRequired = config.managerApprovalRequired;
-    absenceRequest.administrativeApprovalRequired = config.administrativeApprovalRequired;
-    absenceRequest.officeHeadApprovalForManagerRequired =
-        config.officeHeadApprovalForManagerRequired;
+    absenceRequest.setOfficeHeadApprovalRequired(config.officeHeadApprovalRequired);
+    absenceRequest.setManagerApprovalRequired(config.managerApprovalRequired);
+    absenceRequest.setAdministrativeApprovalRequired(config.administrativeApprovalRequired);
+    absenceRequest.setOfficeHeadApprovalForManagerRequired(config
+        .officeHeadApprovalForManagerRequired);
   }
 
   /**
@@ -305,10 +305,10 @@ public class AbsenceRequestManager {
    * @param absenceRequest la richiesta di assenza
    */
   public void resetFlow(AbsenceRequest absenceRequest) {
-    absenceRequest.flowStarted = false;
-    absenceRequest.managerApproved = null;
-    absenceRequest.administrativeApproved = null;
-    absenceRequest.officeHeadApproved = null;
+    absenceRequest.setFlowStarted(false);
+    absenceRequest.setManagerApproved(null);
+    absenceRequest.setAdministrativeApproved(null);
+    absenceRequest.setOfficeHeadApproved(null);
   }
 
   /**
@@ -323,17 +323,17 @@ public class AbsenceRequestManager {
       AbsenceRequestEventType eventType) {
 
     if (eventType == AbsenceRequestEventType.STARTING_APPROVAL_FLOW) {
-      if (!absenceRequest.person.equals(approver)) {
+      if (!absenceRequest.getPerson().equals(approver)) {
         return Optional.of("Il flusso può essere avviato solamente dal diretto interessato.");
       }
-      if (absenceRequest.flowStarted) {
+      if (absenceRequest.isFlowStarted()) {
         return Optional.of("Flusso già avviato, impossibile avviarlo di nuovo.");
       }
     }
 
     if (eventType == AbsenceRequestEventType.MANAGER_APPROVAL
         || eventType == AbsenceRequestEventType.MANAGER_REFUSAL) {
-      if (!absenceRequest.managerApprovalRequired) {
+      if (!absenceRequest.isManagerApprovalRequired()) {
         return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
             + "da parte del responsabile di gruppo.");
       }
@@ -346,7 +346,7 @@ public class AbsenceRequestManager {
 
     if (eventType == AbsenceRequestEventType.ADMINISTRATIVE_APPROVAL
         || eventType == AbsenceRequestEventType.ADMINISTRATIVE_REFUSAL) {
-      if (!absenceRequest.administrativeApprovalRequired) {
+      if (!absenceRequest.isAdministrativeApprovalRequired()) {
         return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
             + "da parte dell'amministrazione del personale.");
       }
@@ -355,8 +355,8 @@ public class AbsenceRequestManager {
             + "da parte dell'amministrazione del personale.");
       }
       if (!uroDao
-          .getUsersRolesOffices(absenceRequest.person.getUser(),
-              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), absenceRequest.person.getOffice())
+          .getUsersRolesOffices(absenceRequest.getPerson().getUser(),
+              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), absenceRequest.getPerson().getOffice())
           .isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
@@ -365,8 +365,8 @@ public class AbsenceRequestManager {
 
     if (eventType == AbsenceRequestEventType.OFFICE_HEAD_APPROVAL
         || eventType == AbsenceRequestEventType.OFFICE_HEAD_REFUSAL) {
-      if (!absenceRequest.officeHeadApprovalRequired
-          && !absenceRequest.officeHeadApprovalForManagerRequired) {
+      if (!absenceRequest.isOfficeHeadApprovalRequired()
+          && !absenceRequest.isOfficeHeadApprovalForManagerRequired()) {
         return Optional.of("Questa richiesta di assenza non prevede approvazione/rifiuto "
             + "da parte del responsabile di sede.");
       }
@@ -375,7 +375,7 @@ public class AbsenceRequestManager {
             + "da parte del responsabile di sede.");
       }
       if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
-          absenceRequest.person.getOffice()).isPresent()) {
+          absenceRequest.getPerson().getOffice()).isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
@@ -406,52 +406,52 @@ public class AbsenceRequestManager {
 
     switch (eventType) {
       case STARTING_APPROVAL_FLOW:
-        absenceRequest.flowStarted = true;
+        absenceRequest.setFlowStarted(true);
         break;
 
       case MANAGER_APPROVAL:
-        absenceRequest.managerApproved = LocalDateTime.now();
+        absenceRequest.setManagerApproved(LocalDateTime.now());
         break;
 
       case MANAGER_REFUSAL:
         // si riparte dall'inizio del flusso.
         // resetFlow(absenceRequest);
         // Impostato a true per evitare di completare il flusso inserendo l'assenza
-        absenceRequest.flowEnded = true;
+        absenceRequest.setFlowEnded(true);
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
       case ADMINISTRATIVE_APPROVAL:
-        absenceRequest.administrativeApproved = LocalDateTime.now();
+        absenceRequest.setAdministrativeApproved(LocalDateTime.now());
         break;
 
       case ADMINISTRATIVE_REFUSAL:
         // si riparte dall'inizio del flusso.
         // resetFlow(absenceRequest);
         // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
-        absenceRequest.flowEnded = true;
+        absenceRequest.setFlowEnded(true);
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
       case OFFICE_HEAD_APPROVAL:
-        absenceRequest.officeHeadApproved = LocalDateTime.now();
+        absenceRequest.setOfficeHeadApproved(LocalDateTime.now());
         break;
 
       case OFFICE_HEAD_REFUSAL:
         // si riparte dall'inizio del flusso.
         // resetFlow(absenceRequest);
         // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
-        absenceRequest.flowEnded = true;
+        absenceRequest.setFlowEnded(true);
         notificationManager.notificationAbsenceRequestRefused(absenceRequest, person);
         break;
 
       case COMPLETE:
-        absenceRequest.managerApproved = LocalDateTime.now();
+        absenceRequest.setManagerApproved(LocalDateTime.now());
         break;
 
       case DELETE:
         // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
-        absenceRequest.flowEnded = true;
+        absenceRequest.setFlowEnded(true);
         break;
       case EPAS_REFUSAL:
         resetFlow(absenceRequest);
@@ -483,7 +483,7 @@ public class AbsenceRequestManager {
    * @return un report con l'inserimento dell'assenze se è stato possibile farlo.
    */
   public Optional<InsertReport> checkAndCompleteFlow(AbsenceRequest absenceRequest) {
-    if (absenceRequest.isFullyApproved() && !absenceRequest.flowEnded) {
+    if (absenceRequest.isFullyApproved() && !absenceRequest.isFlowEnded()) {
       return Optional.of(completeFlow(absenceRequest));
     }
     return Optional.absent();
@@ -497,7 +497,7 @@ public class AbsenceRequestManager {
    */
   private InsertReport completeFlow(AbsenceRequest absenceRequest) {
 
-    absenceRequest.flowEnded = true;
+    absenceRequest.setFlowEnded(true);
     absenceRequest.save();
     log.debug("Flusso relativo a {} terminato. Inserimento in corso delle assenze.",
         absenceRequest);
@@ -506,9 +506,9 @@ public class AbsenceRequestManager {
     Integer minutes = null;
     AbsenceType absenceType = null;
     JustifiedType type = null;
-    if (absenceRequest.type.equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
-      hours = absenceRequest.hours;
-      minutes = absenceRequest.minutes;
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.getHours();
+      minutes = absenceRequest.getMinutes();
       if (hours != null && minutes != null) {
         absenceType = absenceDao.absenceTypeByCode("661M").get();
         type = absenceDao
@@ -516,24 +516,24 @@ public class AbsenceRequestManager {
 
       }
     }
-    if (absenceRequest.type.equals(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
+    if (absenceRequest.getType().equals(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
       absenceType = absenceDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
     }
-    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.person,
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, type, hours, minutes, false, true);
     InsertReport insertReport =
-        absenceService.insert(absenceRequest.person, absenceForm.groupSelected, absenceForm.from,
+        absenceService.insert(absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
-        PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.person,
+        PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.getPerson(),
             absence.getAbsenceDate());
         absence.setPersonDay(personDay);
         if (absenceForm.justifiedTypeSelected.getName().equals(JustifiedTypeName.recover_time)) {
 
-          absence = absenceManager.handleRecoveryAbsence(absence, absenceRequest.person, null);
+          absence = absenceManager.handleRecoveryAbsence(absence, absenceRequest.getPerson(), null);
         }
         List<Absence> absences = personDay.getAbsences();
         absences.add(absence);
@@ -545,7 +545,7 @@ public class AbsenceRequestManager {
             groupAbsenceType, true, false, false);
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
-        absenceManager.sendReperibilityShiftEmail(absenceRequest.person,
+        absenceManager.sendReperibilityShiftEmail(absenceRequest.getPerson(),
             insertReport.reperibilityShiftDate());
         //TODO: aggiungere metodo che invia la stessa mail che mando al 
         //dipendente anche al responsabile
@@ -553,10 +553,10 @@ public class AbsenceRequestManager {
         warnSupervisorAndManager(absenceRequest);
 
         log.info("Inserite assenze con reperibilità e turni {} {}. Le email sono disabilitate.",
-            absenceRequest.person.fullName(), insertReport.reperibilityShiftDate());
+            absenceRequest.getPerson().fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
-      consistencyManager.updatePersonSituation(absenceRequest.person.id, absenceForm.from);
+      consistencyManager.updatePersonSituation(absenceRequest.getPerson().id, absenceForm.from);
 
     }
 
@@ -589,7 +589,7 @@ public class AbsenceRequestManager {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
-    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null) {
+    if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null) {
       executeEvent(absenceRequest, currentPerson, AbsenceRequestEventType.MANAGER_APPROVAL,
           Optional.absent());
       log.info("{} approvata dal responsabile di sede {} nelle veci del responsabile di gruppo.",
@@ -675,31 +675,32 @@ public class AbsenceRequestManager {
   public boolean approval(AbsenceRequest absenceRequest, User user) {
 
     // verifico se posso inserire l'assenza
-    if (!absenceRequest.officeHeadApprovalForManagerRequired && user.hasRoles(Role.GROUP_MANAGER)
-        && absenceRequest.person.equals(user.getPerson())) {
+    if (!absenceRequest.isOfficeHeadApprovalForManagerRequired() 
+        && user.hasRoles(Role.GROUP_MANAGER)
+        && absenceRequest.getPerson().equals(user.getPerson())) {
       managerSelfApproval(absenceRequest.id, user);
       return true;
     }
-    if (absenceRequest.managerApprovalRequired && absenceRequest.managerApproved == null
+    if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
         && user.hasRoles(Role.GROUP_MANAGER)) {
       // caso di approvazione da parte del responsabile di gruppo.
       managerApproval(absenceRequest.id, user);
       if (user.getUsersRolesOffices().stream()
           .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
-          && absenceRequest.officeHeadApprovalRequired) {
+          && absenceRequest.isOfficeHeadApprovalRequired()) {
         // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
         officeHeadApproval(absenceRequest.id, user);
       }
       return true;
     }
-    if (absenceRequest.administrativeApprovalRequired
-        && absenceRequest.administrativeApproved == null && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+    if (absenceRequest.isAdministrativeApprovalRequired()
+        && absenceRequest.getAdministrativeApproved() == null && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       personnelAdministratorApproval(absenceRequest.id, user);
       return true;
     }
-    if (absenceRequest.officeHeadApprovalForManagerRequired
-        && absenceRequest.officeHeadApproved == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+    if (absenceRequest.isOfficeHeadApprovalForManagerRequired()
+        && absenceRequest.getOfficeHeadApproved() == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       officeHeadApproval(absenceRequest.id, user);
       return true;
     }
@@ -748,7 +749,7 @@ public class AbsenceRequestManager {
     Optional<GroupAbsenceType> group = null;
 
     GroupAbsenceType groupAbsenceType = null;
-    switch (absenceRequest.type) {
+    switch (absenceRequest.getType()) {
       case VACATION_REQUEST:
         group = absenceDao.groupAbsenceTypeByName(FERIE_CNR);
         if (group.isPresent()) {
@@ -774,7 +775,7 @@ public class AbsenceRequestManager {
         }
         break;
       default:
-        log.error("Caso {} di richiesta non trattato", absenceRequest.type);
+        log.error("Caso {} di richiesta non trattato", absenceRequest.getType());
         break;
     }
     return groupAbsenceType;
@@ -790,7 +791,8 @@ public class AbsenceRequestManager {
   public AbsenceRequest checkAbsenceRequest(AbsenceRequest absenceRequest) {
     List<AbsenceRequest> existingList = absenceRequestDao.existingAbsenceRequests(absenceRequest);
     for (AbsenceRequest ar : existingList) {
-      DateInterval interval = new DateInterval(ar.startAt.toLocalDate(), ar.endTo.toLocalDate());
+      DateInterval interval = new DateInterval(ar.getStartAt().toLocalDate(), 
+          ar.getEndTo().toLocalDate());
       if (DateUtility.isDateIntoInterval(absenceRequest.startAtAsDate(), interval)
           || DateUtility.isDateIntoInterval(absenceRequest.endToAsDate(), interval)
           || DateUtility.intervalIntersection(
@@ -831,7 +833,7 @@ public class AbsenceRequestManager {
     Map<LocalDate, Boolean> map = Maps.newHashMap();
     List<LocalDate> troubleDays = Lists.newArrayList();
     while (!temp.isAfter(absenceRequest.endToAsDate())) {
-      if (checkIfAbsenceInShiftOrReperibility(absenceRequest.person, temp)) {
+      if (checkIfAbsenceInShiftOrReperibility(absenceRequest.getPerson(), temp)) {
         map.put(temp, Boolean.TRUE);
       } else {
         map.put(temp, Boolean.FALSE);
@@ -879,7 +881,7 @@ public class AbsenceRequestManager {
     //splitto le date incriminate tra reperibilità e turno
     while (!temp.isAfter(absenceRequest.endToAsDate())) {
       Optional<PersonReperibilityDay> prd =
-          personReperibilityDayDao.getPersonReperibilityDay(absenceRequest.person, temp);
+          personReperibilityDayDao.getPersonReperibilityDay(absenceRequest.getPerson(), temp);
       if (prd.isPresent()) {        
         List<LocalDate> list = repMap.get(prd.get().getReperibilityType());
         if (list == null) {
@@ -890,7 +892,7 @@ public class AbsenceRequestManager {
       }
 
       Optional<PersonShiftDay> psd =
-          personShiftDayDao.getPersonShiftDay(absenceRequest.person, temp);
+          personShiftDayDao.getPersonShiftDay(absenceRequest.getPerson(), temp);
       if (psd.isPresent()) {
         List<LocalDate> list = shiftMap.get(psd.get().getShiftType().getShiftCategories());
         if (list == null) {
@@ -947,8 +949,8 @@ public class AbsenceRequestManager {
     for (TemplateRow row : insertReport.insertTemplateRows) {
       checkDate = row.date;
     }
-    if (checkDate != null && absenceRequest.endTo.toLocalDate().isAfter(checkDate)) {
-      absenceRequest.endTo = checkDate.toLocalDateTime(new LocalTime(0, 0, 0));
+    if (checkDate != null && absenceRequest.getEndTo().toLocalDate().isAfter(checkDate)) {
+      absenceRequest.setEndTo(checkDate.toLocalDateTime(new LocalTime(0, 0, 0)));
     }
   }
 

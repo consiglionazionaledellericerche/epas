@@ -258,7 +258,7 @@ public class CompetenceRequestDao extends DaoBase {
   public List<CompetenceRequest> existingCompetenceRequests(CompetenceRequest request) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     return getQueryFactory().selectFrom(competenceRequest)
-        .where(competenceRequest.person.eq(request.person)
+        .where(competenceRequest.person.eq(request.getPerson())
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
   }

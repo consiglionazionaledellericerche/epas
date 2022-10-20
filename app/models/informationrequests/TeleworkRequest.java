@@ -21,6 +21,8 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -31,6 +33,8 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "telework_requests")
@@ -41,10 +45,10 @@ public class TeleworkRequest extends InformationRequest {
 
   @Required
   @NotNull
-  public int month;
+  private int month;
   @Required
   @NotNull
-  public int year;
+  private int year;
 
-  public String context;
+  private String context;
 }
