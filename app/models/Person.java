@@ -361,7 +361,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     this.getGroups().stream().forEach(g -> { 
       g.getAffiliations().stream().filter(a -> a.getPerson().equals(this)).forEach(a -> {
         a.delete();
-        log.info("Rimossa associazione {} a gruppo {}", getFullname(), g.name);
+        log.info("Rimossa associazione {} a gruppo {}", getFullname(), g.getName());
       });
     });
   }

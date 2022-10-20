@@ -131,13 +131,13 @@ public class InformationRequests extends Controller {
     Verify.verifyNotNull(type);
 
     val currentUser = Security.getUser().get();
-    if (currentUser.person == null) {
+    if (currentUser.getPerson() == null) {
       flash.error("L'utente corrente non ha associata una persona, non può vedere le proprie "
           + "richieste di assenza");
       Application.index();
       return;
     }
-    val person = currentUser.person;
+    val person = currentUser.getPerson();
     val fromDate = LocalDateTime.now().withDayOfYear(1).withMonth(1).minusMonths(1);
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}", type, person,
         fromDate);
@@ -183,12 +183,12 @@ public class InformationRequests extends Controller {
   public static void listToApprove(InformationType type) {
     Verify.verifyNotNull(type);
 
-    val person = Security.getUser().get().person;
+    val person = Security.getUser().get().getPerson();
     val fromDate = LocalDateTime.now().withDayOfYear(1).withMonth(1).minusMonths(1);
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
 
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<InformationRequest> myResults =
         informationRequestDao.toApproveResults(roleList, Optional.absent(),
             Optional.absent(), type, person);
@@ -243,8 +243,8 @@ public class InformationRequests extends Controller {
       rules.check("AbsenceRequests.blank4OtherPerson");
       person = personDao.getPersonById(personId.get());
     } else {
-      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-        person = Security.getUser().get().person;
+      if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
+        person = Security.getUser().get().getPerson();
       } else {
         flash.error("L'utente corrente non ha associato una persona.");
         list(type);
@@ -263,13 +263,13 @@ public class InformationRequests extends Controller {
     IllnessRequest illnessRequest = new IllnessRequest();
     switch (type) {
       case SERVICE_INFORMATION:
-        serviceRequest.person = person;
-        serviceRequest.informationType = type;
+        serviceRequest.setPerson(person);
+        serviceRequest.setInformationType(type);
         render("@editServiceRequest", serviceRequest, type, person);
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest.person = person;
-        illnessRequest.informationType = type;
+        illnessRequest.setPerson(person);
+        illnessRequest.setInformationType(type);
         render("@editIllnessRequest", illnessRequest, type, person);
         break;
       default:
@@ -295,16 +295,16 @@ public class InformationRequests extends Controller {
    */
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
-    InformationType type = serviceRequest.informationType;
+    InformationType type = serviceRequest.getInformationType();
     boolean insertable = true;
     if (Validation.hasErrors()) {
       response.status = 400;
       insertable = false;
       render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
-    serviceRequest.beginAt = informationRequestManager.deparseTime(begin);
-    serviceRequest.finishTo = informationRequestManager.deparseTime(finish);
-    if (serviceRequest.beginAt == null || serviceRequest.finishTo == null) {
+    serviceRequest.setBeginAt(informationRequestManager.deparseTime(begin));
+    serviceRequest.setFinishTo(informationRequestManager.deparseTime(finish));
+    if (serviceRequest.getBeginAt() == null || serviceRequest.getFinishTo() == null) {
       Validation.addError("serviceRequest.beginAt",
           "Entrambi i campi data devono essere valorizzati");
       Validation.addError("serviceRequest.finishTo",
@@ -313,7 +313,7 @@ public class InformationRequests extends Controller {
       insertable = false;
       render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
-    if (serviceRequest.beginAt.isAfter(serviceRequest.finishTo)) {
+    if (serviceRequest.getBeginAt().isAfter(serviceRequest.getFinishTo())) {
       Validation.addError("serviceRequest.beginAt",
           "L'orario di inizio non può essere successivo all'orario di fine");
       response.status = 400;
@@ -322,33 +322,33 @@ public class InformationRequests extends Controller {
     }
     informationRequestManager.configure(Optional.absent(),
         Optional.of(serviceRequest), Optional.absent());
-    serviceRequest.startAt = LocalDateTime.now();
+    serviceRequest.setStartAt(LocalDateTime.now());
     serviceRequest.save();
 
     boolean isNewRequest = !serviceRequest.isPersistent();
-    if (isNewRequest || !serviceRequest.flowStarted) {
+    if (isNewRequest || !serviceRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-          Optional.absent(), Optional.absent(), serviceRequest.person,
+          Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (serviceRequest.autoApproved()) {
         informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-            Optional.absent(), Optional.absent(), serviceRequest.person,
+            Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
             InformationRequestEventType.COMPLETE, Optional.absent());
       }
-      if (serviceRequest.person.isSeatSupervisor()) {
+      if (serviceRequest.getPerson().isSeatSupervisor()) {
         approval(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(serviceRequest.person.user,
+        notificationManager.notificationInformationRequestPolicy(serviceRequest.getPerson().getUser(),
             serviceRequest, true);
         // invio anche la mail
-        notificationManager.sendEmailInformationRequestPolicy(serviceRequest.person.user,
+        notificationManager.sendEmailInformationRequestPolicy(serviceRequest.getPerson().getUser(),
             serviceRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
     }
     flash.success("Operazione effettuata correttamente");
-    InformationRequests.list(serviceRequest.informationType);
+    InformationRequests.list(serviceRequest.getInformationType());
 
   }
 
@@ -358,8 +358,8 @@ public class InformationRequests extends Controller {
    * @param illnessRequest la richiesta informativa di malattia
    */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
-    InformationType type = illnessRequest.informationType;
-    if (illnessRequest.beginDate == null || illnessRequest.endDate == null) {
+    InformationType type = illnessRequest.getInformationType();
+    if (illnessRequest.getBeginDate() == null || illnessRequest.getEndDate() == null) {
       Validation.addError("illnessRequest.beginDate",
           "Entrambi i campi data devono essere valorizzati");
       Validation.addError("illnessRequest.endDate",
@@ -368,7 +368,7 @@ public class InformationRequests extends Controller {
 
       render("@editIllnessRequest", illnessRequest, type);
     }
-    if (illnessRequest.beginDate.isAfter(illnessRequest.endDate)) {
+    if (illnessRequest.getBeginDate().isAfter(illnessRequest.getEndDate())) {
       Validation.addError("illnessRequest.beginDate",
           "La data di inizio non può essere successiva alla data di fine");
       response.status = 400;
@@ -376,27 +376,27 @@ public class InformationRequests extends Controller {
     }
     informationRequestManager.configure(Optional.of(illnessRequest),
         Optional.absent(), Optional.absent());
-    illnessRequest.startAt = LocalDateTime.now();
+    illnessRequest.setStartAt(LocalDateTime.now());
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();
-    if (isNewRequest || !illnessRequest.flowStarted) {
+    if (isNewRequest || !illnessRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(),
-          Optional.fromNullable(illnessRequest), Optional.absent(), illnessRequest.person,
+          Optional.fromNullable(illnessRequest), Optional.absent(), illnessRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      if (illnessRequest.person.isSeatSupervisor()) {
+      if (illnessRequest.getPerson().isSeatSupervisor()) {
         approval(illnessRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(illnessRequest.person.user,
+        notificationManager.notificationInformationRequestPolicy(illnessRequest.getPerson().getUser(),
             illnessRequest, true);
         // invio anche la mail
-        notificationManager.sendEmailInformationRequestPolicy(illnessRequest.person.user,
+        notificationManager.sendEmailInformationRequestPolicy(illnessRequest.getPerson().getUser(),
             illnessRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
     }
     flash.success("Operazione effettuata correttamente");
-    InformationRequests.list(illnessRequest.informationType);
+    InformationRequests.list(illnessRequest.getInformationType());
   }
 
   /**
@@ -415,11 +415,11 @@ public class InformationRequests extends Controller {
     val teleworkRequestInPeriod = informationRequestDao.personTeleworkInPeriod(person, month, year);
     if (!teleworkRequestInPeriod.isPresent()) {
       teleworkRequest = new TeleworkRequest();
-      teleworkRequest.year = year;
-      teleworkRequest.month = month;
-      teleworkRequest.person = person;
-      teleworkRequest.startAt = LocalDateTime.now();
-      teleworkRequest.informationType = InformationType.TELEWORK_INFORMATION;
+      teleworkRequest.setYear(year);
+      teleworkRequest.setMonth(month);
+      teleworkRequest.setPerson(person);
+      teleworkRequest.setStartAt(LocalDateTime.now());
+      teleworkRequest.setInformationType(InformationType.TELEWORK_INFORMATION);
       teleworkRequest.save();
       informationRequestManager.configure(Optional.absent(), Optional.absent(),
           Optional.of(teleworkRequest));
@@ -428,24 +428,24 @@ public class InformationRequests extends Controller {
     }
     boolean isNewRequest = !teleworkRequest.isPersistent();
 
-    if (isNewRequest || !teleworkRequest.flowStarted) {
+    if (isNewRequest || !teleworkRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
-          Optional.fromNullable(teleworkRequest), teleworkRequest.person,
+          Optional.fromNullable(teleworkRequest), teleworkRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      if (teleworkRequest.person.isSeatSupervisor()) {
+      if (teleworkRequest.getPerson().isSeatSupervisor()) {
         approval(teleworkRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(teleworkRequest.person.user,
+        notificationManager.notificationInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
             teleworkRequest, true);
         // invio anche la mail
-        notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.person.user,
+        notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
             teleworkRequest, true);
         log.debug("Inviata la richiesta di approvazione");
       }
     }
     flash.success("Operazione effettuata correttamente");
-    InformationRequests.list(teleworkRequest.informationType);
+    InformationRequests.list(teleworkRequest.getInformationType());
 
   }
 
@@ -460,7 +460,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
-    switch (request.informationType) {
+    switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id);
         break;
@@ -487,10 +487,10 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (user.person.isSeatSupervisor() || user.person.isGroupManager()) {
-      InformationRequests.listToApprove(request.informationType);
+    if (user.getPerson().isSeatSupervisor() || user.getPerson().isGroupManager()) {
+      InformationRequests.listToApprove(request.getInformationType());
     } else {
-      InformationRequests.list(request.informationType);
+      InformationRequests.list(request.getInformationType());
     }
 
   }
@@ -508,7 +508,7 @@ public class InformationRequests extends Controller {
     TeleworkRequest teleworkRequest = null;
     notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
-    switch (informationRequest.informationType) {
+    switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
         if (!disapproval) {
@@ -534,13 +534,13 @@ public class InformationRequests extends Controller {
         break;
     }
 
-    if (informationRequest.officeHeadApprovalRequired
-        && informationRequest.officeHeadApproved == null
+    if (informationRequest.isOfficeHeadApprovalRequired()
+        && informationRequest.getOfficeHeadApproved() == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       // caso di approvazione da parte del responsabile di sede
       informationRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
-      InformationType type = informationRequest.informationType;
+      InformationType type = informationRequest.getInformationType();
       render("@show", informationRequest, type, serviceRequest,
           illnessRequest, teleworkRequest, user);
     }
@@ -592,7 +592,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
-    switch (informationRequest.informationType) {
+    switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = Optional.fromNullable(informationRequestDao.getServiceById(id).get());
         break;
@@ -606,10 +606,10 @@ public class InformationRequests extends Controller {
         break;
     }
     informationRequestManager.executeEvent(serviceRequest, illnessRequest,
-        teleworkRequest, Security.getUser().get().person,
+        teleworkRequest, Security.getUser().get().getPerson(),
         InformationRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(InformationRequest.class));
-    list(informationRequest.informationType);
+    list(informationRequest.getInformationType());
   }
 
   /**
@@ -655,8 +655,8 @@ public class InformationRequests extends Controller {
   public static void handleTeleworkApproval(Long personId) {
     PersonLite p = null;
     Person person = personDao.getPersonById(personId);
-    if (person.personConfigurations.stream().noneMatch(pc ->
-        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+    if (person.getPersonConfigurations().stream().noneMatch(pc ->
+        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) && pc.getFieldValue().equals("true"))) {
       @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
@@ -672,13 +672,13 @@ public class InformationRequests extends Controller {
     }
 
     Preconditions.checkNotNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     List<TeleworkApprovalDto> dtoList = Lists.newArrayList();
     List<TeleworkRequest> teleworkRequests = informationRequestDao.personTeleworkList(person);
     TeleworkApprovalDto dto = null;
     for (TeleworkRequest request : teleworkRequests) {
       Optional<TeleworkValidation> validation = validationDao
-          .byPersonYearAndMonth(person, request.year, request.month);
+          .byPersonYearAndMonth(person, request.getYear(), request.getMonth());
       if (validation.isPresent()) {
         dto = TeleworkApprovalDto.builder()
             .teleworkValidation(validation.get())
@@ -706,7 +706,7 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Validazione sconosciuta! Verificare l'identificativo.");
     }
-    Stampings.personStamping(Security.getUser().get().person.id,
+    Stampings.personStamping(Security.getUser().get().getPerson().id,
         Integer.parseInt(session.get("yearSelected")),
         Integer.parseInt(session.get("monthSelected")));
   }
