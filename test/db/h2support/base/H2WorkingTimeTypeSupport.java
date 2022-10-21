@@ -43,13 +43,13 @@ public class H2WorkingTimeTypeSupport {
       WorkingDayDefinition workingDayDefinition, WorkingTimeType workingTimeType) {
     
     WorkingTimeTypeDay workingTimeTypeDay = new WorkingTimeTypeDay();
-    workingTimeTypeDay.workingTimeType = workingTimeType;
-    workingTimeTypeDay.dayOfWeek = workingDayDefinition.dayOfWeek;
-    workingTimeTypeDay.workingTime = workingDayDefinition.workingTime;
-    workingTimeTypeDay.holiday = workingDayDefinition.holiday;
-    workingTimeTypeDay.mealTicketTime = workingDayDefinition.mealTicketTime;
-    workingTimeTypeDay.breakTicketTime = workingDayDefinition.breakTicketTime;
-    workingTimeTypeDay.ticketAfternoonThreshold = workingDayDefinition.ticketAfternoonThreshold;
+    workingTimeTypeDay.setWorkingTimeType(workingTimeType);
+    workingTimeTypeDay.setDayOfWeek(workingDayDefinition.dayOfWeek);
+    workingTimeTypeDay.setWorkingTime(workingDayDefinition.workingTime);
+    workingTimeTypeDay.setHoliday(workingDayDefinition.holiday);
+    workingTimeTypeDay.setMealTicketTime(workingDayDefinition.mealTicketTime);
+    workingTimeTypeDay.setBreakTicketTime(workingDayDefinition.breakTicketTime);
+    workingTimeTypeDay.setTicketAfternoonThreshold(workingDayDefinition.ticketAfternoonThreshold);
     workingTimeTypeDay.ticketAfternoonWorkingTime = workingDayDefinition.ticketAfternoonWorkingTime;
     workingTimeTypeDay.save();
     return workingTimeTypeDay;
@@ -81,11 +81,11 @@ public class H2WorkingTimeTypeSupport {
     
     log.debug("Costruisco il workingTimeType {}", workingDefinition);
     workingTimeType = new WorkingTimeType();
-    workingTimeType.description = workingDefinition.name();
-    workingTimeType.horizontal = workingDefinition.horizontal;
+    workingTimeType.setDescription(workingDefinition.name());
+    workingTimeType.setHorizontal(workingDefinition.horizontal);
     workingTimeType.save();
-    workingTimeType.workingTimeTypeDays = 
-        createWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition, workingTimeType);
+    workingTimeType.setWorkingTimeTypeDays(
+        createWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition, workingTimeType));
     return workingTimeType;
   }
   
