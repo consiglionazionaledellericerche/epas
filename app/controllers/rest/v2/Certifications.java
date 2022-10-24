@@ -35,13 +35,14 @@ import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.CertificationManager;
 import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
@@ -51,6 +52,7 @@ import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -77,12 +79,15 @@ public class Certifications extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static CertificationManager certificationManager;
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
    * di gestione degli attestati mensili (attestati per il CNR).
    */
-  public static void getMonthValidationStatusByOffice(String sedeId, Integer year, Integer month) {
+  public static void getMonthValidationStatusByOffice(
+      String sedeId, Integer year, Integer month, Boolean includePreviousMonthMealTickets) {
     log.debug("getMonthValidationStatus -> sedeId={}, year={}, month={}", sedeId, year, month);
     if (year == null || month == null || sedeId == null) {
       JsonResponse.badRequest("I parametri sedeId, year e month sono tutti obbligatori");
@@ -99,7 +104,8 @@ public class Certifications extends Controller {
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
     val validationStatus = new OfficeMonthValidationStatusDto();
     people.stream().forEach(person -> {
-      val certData = certificationManager.getPersonCertData(person, year, month);
+      val certData = 
+          certificationManager.getPersonCertData(person, year, month);
       if (certData.validate) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
@@ -139,7 +145,7 @@ public class Certifications extends Controller {
   @BasicAuth
   public static void getMonthSituation(
       Long id, String email, String eppn, Long personPersoId, String fiscalCode,
-      String number, int year, int month) {
+      String number, int year, int month, Boolean includePreviousMonthMealTickets) {
 
     log.debug("Richieste informazioni mensili da applicazione esterna");
     Optional<Person> person = 
@@ -156,8 +162,14 @@ public class Certifications extends Controller {
 
     rules.checkIfPermitted(person.get().office);
 
-    Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
+    Map<String, Certification> 
+      map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
+    if (Boolean.TRUE.equals(includePreviousMonthMealTickets)) {
+      val wrapperPerson = wrapperFactory.create(person.get());
+      dto.setMealTicketsPreviousMonth(
+          wrapperPerson.getNumberOfMealTicketsPreviousMonth(new YearMonth(year, month)));
+    }
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(dto));
 
@@ -172,9 +184,13 @@ public class Certifications extends Controller {
    * @param year l'anno
    * @param month il mese
    */
-  public static void getMonthSituationByOffice(String sedeId, int year, int month) {
+  public static void getMonthSituationByOffice(String sedeId, int year, int month,
+      Boolean includePreviousMonthMealTickets) {
     log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
         sedeId, year, month);
+    if (sedeId == null) {
+      JsonResponse.badRequest("Il parametro sedeId e' obbligatorio");
+    }
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
       JsonResponse.notFound(
@@ -189,8 +205,14 @@ public class Certifications extends Controller {
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
     for (Person person : personList) {
-      Map<String, Certification> map = monthData.getCertification(person, year, month);
+      Map<String, Certification> map = 
+          monthData.getCertification(person, year, month);
       CertificationDto dto = generateCertDto(map, year, month, person);
+      if (Boolean.TRUE.equals(includePreviousMonthMealTickets)) {
+        val wrapperPerson = wrapperFactory.create(person);
+        dto.setMealTicketsPreviousMonth(
+            wrapperPerson.getNumberOfMealTicketsPreviousMonth(new YearMonth(year, month)));
+      }
       list.add(dto);
     }
     val gson = gsonBuilder.create();

@@ -36,4 +36,5 @@ public class CertificationDto {
   private List<CertificationCompetencesDto> competences;
   private List<CertificationMealTicketDto> mealTickets;
   private List<CertificationTrainingHoursDto> trainingHours;
+  private Integer mealTicketsPreviousMonth;
 }
