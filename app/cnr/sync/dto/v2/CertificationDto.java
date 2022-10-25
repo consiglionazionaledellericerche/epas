@@ -37,4 +37,5 @@ public class CertificationDto {
   private List<CertificationMealTicketDto> mealTickets;
   private List<CertificationTrainingHoursDto> trainingHours;
   private Integer mealTicketsPreviousMonth;
+  private Integer remainingMealTickets;
 }

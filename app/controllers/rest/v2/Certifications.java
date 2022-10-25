@@ -35,6 +35,7 @@ import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import java.util.List;
@@ -167,8 +168,13 @@ public class Certifications extends Controller {
     CertificationDto dto = generateCertDto(map, year, month, person.get());
 
     val wrapperPerson = wrapperFactory.create(person.get());
+    List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
     dto.setMealTicketsPreviousMonth(
-        wrapperPerson.getNumberOfMealTicketsPreviousMonth(new YearMonth(year, month)));
+        contractMonthRecaps.stream().mapToInt(
+            cm -> cm.getValue().buoniPastoDalMesePrecedente).reduce(0, Integer::sum));
+    dto.setRemainingMealTickets(
+        contractMonthRecaps.stream().mapToInt(
+            cm -> cm.getValue().remainingMealTickets).reduce(0, Integer::sum));
 
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(dto));

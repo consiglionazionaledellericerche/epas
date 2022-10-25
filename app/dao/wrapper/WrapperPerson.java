@@ -546,9 +546,9 @@ public class WrapperPerson implements IWrapperPerson {
     }
     return previousContract;
   }
-  
-  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth) {
- // ******************************************************************************************
+
+  public List<IWrapperContractMonthRecap> getWrapperContractMonthRecaps(YearMonth yearMonth) {
+    // ******************************************************************************************
     // DATI MENSILI
     // ******************************************************************************************
     // I riepiloghi mensili (uno per ogni contratto attivo nel mese)
@@ -562,10 +562,13 @@ public class WrapperPerson implements IWrapperPerson {
           wrapperFactory.create(contract).getContractMonthRecap(yearMonth);
       if (cmr.isPresent()) {
         contractMonths.add(wrapperFactory.create(cmr.get()));
-      }      
+      }
     }
+    return contractMonths;
+  }
 
-    return contractMonths.stream().mapToInt(
+  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth) {
+    return getWrapperContractMonthRecaps(yearMonth).stream().mapToInt(
         cm -> cm.getValue().buoniPastoDalMesePrecedente).reduce(0, Integer::sum);
   }
 }
