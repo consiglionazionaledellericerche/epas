@@ -264,7 +264,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
           contract.person.office.configurations.stream()
           .filter(configuration -> 
           configuration.epasParam == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-      if (conf.isPresent()) {        
+      if (conf.isPresent()) {
         blockType = BlockType.valueOf(conf.get().fieldValue);
         switch (blockType) {
           case electronic:
@@ -286,7 +286,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       buoniDaConteggiare = buoniUsati;
       for (BlockMealTicket block : list) {
         dimBlocchetto = block.getDimBlock();
-        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {          
+        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {
           switch (block.getBlockType()) {
             case papery:
               buoniCartacei++;
