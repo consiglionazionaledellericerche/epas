@@ -217,7 +217,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
+    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -257,8 +257,8 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.office.codeId
-          + "/" + person.number + "/" + year + "/" + month;
+      String url = ATTESTATI_API_URL + "/" + person.getOffice().getCodeId()
+          + "/" + person.getNumber() + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
@@ -273,7 +273,8 @@ public class CertificationsComunication {
       SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
-      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, person.number));
+      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, 
+          person.getNumber()));
 
       return Optional.of(seatCertification);
 
@@ -499,7 +500,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.codeId
+    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -597,7 +598,7 @@ public class CertificationsComunication {
     
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     
-    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.codeId
+    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.getCodeId()
         + "/" + year + "/" + month;
     
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -612,7 +613,7 @@ public class CertificationsComunication {
     TipoBlocchettoSede tipoBlocchetto = new Gson()
         .fromJson(httpResponse.getJson(), TipoBlocchettoSede.class);
     
-    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.name);
+    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.getName());
     
     return tipoBlocchetto;
   }

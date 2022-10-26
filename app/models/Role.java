@@ -23,12 +23,16 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
 /**
  * Ruolo all'interno di ePAS.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "roles")
@@ -52,11 +56,11 @@ public class Role extends BaseModel {
   public static final String ABSENCE_MANAGER = "absenceManager";
   public static final String BADGE_MANAGER = "badgeManager";  
 
-  public String name;
+  private String name;
 
   
   @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+  private List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 
   @Override
   public String toString() {

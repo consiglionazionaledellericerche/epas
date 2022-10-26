@@ -181,10 +181,10 @@ public class Competences extends Controller {
       confirmed = true;
       render(comp, confirmed);
     }
-    if (comp.disabled) {
-      comp.disabled = false;
+    if (comp.isDisabled()) {
+      comp.setDisabled(false);
     } else {
-      comp.disabled = true;
+      comp.setDisabled(true);
     }
     comp.save();
     flash.success("Operazione effettuata");
@@ -209,11 +209,11 @@ public class Competences extends Controller {
    */
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
-    if (!code.limitUnit.name().equals(group.limitUnit.name())) {
+    if (!code.getLimitUnit().name().equals(group.getLimitUnit().name())) {
       Validation.addError("code", "L'unità di misura del limite del codice è diversa "
           + "da quella del gruppo");
     }
-    if (!code.limitType.name().equals(group.limitType.name())) {
+    if (!code.getLimitType().name().equals(group.getLimitType().name())) {
       Validation.addError("code", "Il tipo di limite del codice è diverso da quello del gruppo");
     }
     if (Validation.hasErrors()) {
@@ -221,7 +221,7 @@ public class Competences extends Controller {
       response.status = 400;
       render("@addCompetenceCodeToGroup", group);
     }
-    code.competenceCodeGroup = group;
+    code.setCompetenceCodeGroup(group);
     code.save();
     group.competenceCodes.add(code);
     group.save();
@@ -245,7 +245,7 @@ public class Competences extends Controller {
    */
   public static void edit(Long competenceCodeId) {
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
-    if (Security.getUser().get().person != null) {
+    if (Security.getUser().get().getPerson() != null) {
       render("@show", competenceCode);
     } else {
       render(competenceCode);
@@ -277,7 +277,7 @@ public class Competences extends Controller {
     }
     competenceCode.save();
 
-    flash.success(String.format("Codice %s aggiunto con successo", competenceCode.code));
+    flash.success(String.format("Codice %s aggiunto con successo", competenceCode.getCode()));
 
     manageCompetenceCode();
   }
@@ -296,11 +296,11 @@ public class Competences extends Controller {
     }
     group.save();
     for (CompetenceCode code : group.competenceCodes) {
-      code.competenceCodeGroup = group;
+      code.setCompetenceCodeGroup(group);
       code.save();
     }
 
-    flash.success(String.format("Gruppo %s aggiunto con successo", group.label));
+    flash.success(String.format("Gruppo %s aggiunto con successo", group.getLabel()));
 
     manageCompetenceCode();
   }
@@ -317,10 +317,10 @@ public class Competences extends Controller {
       confirmed = true;
       render(code, confirmed);
     }
-    CompetenceCodeGroup group = code.competenceCodeGroup;
+    CompetenceCodeGroup group = code.getCompetenceCodeGroup();
     group.competenceCodes.remove(code);
     group.save();
-    code.competenceCodeGroup = null;
+    code.setCompetenceCodeGroup(null);
     code.save();
     flash.success("Codice rimosso con successo");
     manageCompetenceCode();
@@ -343,7 +343,7 @@ public class Competences extends Controller {
     for (Person person : personDao.list(Optional.<String>absent(), Sets.newHashSet(office),
         false, monthInterval.getBegin(), monthInterval.getEnd(), true).list()) {
       boolean hasCompetence = false;
-      for (PersonCompetenceCodes personCompetenceCode : person.personCompetenceCodes) {
+      for (PersonCompetenceCodes personCompetenceCode : person.getPersonCompetenceCodes()) {
         if (DateUtility
             .intervalIntersection(personCompetenceCode.periodInterval(), monthInterval) != null) {
           List<PersonCompetenceCodes> list = mapEnabledCompetences.get(person);
@@ -372,7 +372,7 @@ public class Competences extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     boolean certificationsSent = false;
     List<Certification> certificationList = certificationDao
         .personCertifications(person, year, month);
@@ -385,7 +385,7 @@ public class Competences extends Controller {
         .listByPerson(person, Optional.fromNullable(date));
     List<CompetenceCode> codeListIds = Lists.newArrayList();
     for (PersonCompetenceCodes pcc : pccList) {
-      codeListIds.add(pcc.competenceCode);
+      codeListIds.add(pcc.getCompetenceCode());
     }
     render(person, codeListIds, year, month, certificationsSent);
   }
@@ -402,7 +402,7 @@ public class Competences extends Controller {
       Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     LocalDate date = new LocalDate(year, month, 1);
 
@@ -416,7 +416,7 @@ public class Competences extends Controller {
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
     Competences.enabledCompetences(date.getYear(),
-        date.getMonthOfYear(), person.office.id);
+        date.getMonthOfYear(), person.getOffice().id);
 
   }
 
@@ -432,7 +432,7 @@ public class Competences extends Controller {
     Optional<User> user = Security.getUser();
 
     Verify.verify(user.isPresent());
-    Verify.verifyNotNull(user.get().person);
+    Verify.verifyNotNull(user.get().getPerson());
 
     LocalDate today = LocalDate.now();
     if (year > today.getYear() || today.getYear() == year && month > today.getMonthOfYear()) {
@@ -441,7 +441,7 @@ public class Competences extends Controller {
       competences(year, today.getMonthOfYear());
     }
 
-    Person person = user.get().person;
+    Person person = user.get().getPerson();
 
     Optional<Contract> contract = wrapperFactory.create(person)
         .getLastContractInMonth(year, month);
@@ -456,7 +456,7 @@ public class Competences extends Controller {
             .withMonthOfYear(month).withYear(year)));
     List<CompetenceCode> codeListIds = Lists.newArrayList();
     for (PersonCompetenceCodes pcc : pccList) {
-      codeListIds.add(pcc.competenceCode);
+      codeListIds.add(pcc.getCompetenceCode());
     }
 
     List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
@@ -539,11 +539,11 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
-    Office office = person.office;
+    Office office = person.getOffice();
     Competence competence = new Competence(person, code, year, month);
-    if (competence.competenceCode.code.equals("S1")) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(competence.person,
-          competence.year, competence.month, true);
+    if (competence.getCompetenceCode().getCode().equals("S1")) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(competence.getPerson(),
+          competence.getYear(), competence.getMonth(), true);
       render("@editCompetence", competence, psDto, office, year, month, person);
     }
     render("@editCompetence", competence, office, year, month, person);
@@ -569,8 +569,8 @@ public class Competences extends Controller {
 
     notFoundIfNull(code);
     notFoundIfNull(person);
-    Office office = person.office;
-    if (code.code.equals("S1")) {
+    Office office = person.getOffice();
+    if (code.getCode().equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person,
           year, month, true);
       render(person, code, year, month, psDto, office, competence);
@@ -588,7 +588,7 @@ public class Competences extends Controller {
 
     notFoundIfNull(competence);
 
-    Office office = competence.person.office;
+    Office office = competence.getPerson().getOffice();
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
@@ -603,26 +603,27 @@ public class Competences extends Controller {
     if (Validation.hasErrors()) {
 
       response.status = 400;
-      Person person = competence.person;
-      CompetenceCode code = competence.competenceCode;
+      Person person = competence.getPerson();
+      CompetenceCode code = competence.getCompetenceCode();
       render("@editCompetence", competence, office, person, code);
     }
 
     competenceManager.saveCompetence(competence, valueApproved);
-    if (competence.competenceCode.code.equalsIgnoreCase("S1")
-        || competence.competenceCode.code.equalsIgnoreCase("S2")
-        || competence.competenceCode.code.equalsIgnoreCase("S3")) {
+    if (competence.getCompetenceCode().getCode().equalsIgnoreCase("S1")
+        || competence.getCompetenceCode().getCode().equalsIgnoreCase("S2")
+        || competence.getCompetenceCode().getCode().equalsIgnoreCase("S3")) {
 
-      consistencyManager.updatePersonSituation(competence.person.id,
-          new LocalDate(competence.year, competence.month, 1));
+      consistencyManager.updatePersonSituation(competence.getPerson().id,
+          new LocalDate(competence.getYear(), competence.getMonth(), 1));
     }
-    int month = competence.month;
-    int year = competence.year;
+    int month = competence.getMonth();
+    int year = competence.getYear();
 
-    flash.success("Competenza %s di %s aggiornata correttamente", competence.competenceCode.code, 
-        competence.person.fullName());
+    flash.success("Competenza %s di %s aggiornata correttamente", 
+        competence.getCompetenceCode().getCode(), 
+        competence.getPerson().fullName());
 
-    showCompetences(year, month, office.id, competence.competenceCode.id);
+    showCompetences(year, month, office.id, competence.getCompetenceCode().id);
 
   }
 
@@ -735,8 +736,9 @@ public class Competences extends Controller {
 
       //Filtro tipologia del primo contratto nel mese della competenza
       if (onlyDefined) {
-        IWrapperPerson wrPerson = wrapperFactory.create(competence.person);
-        Optional<Contract> firstContract = wrPerson.getFirstContractInMonth(year, competence.month);
+        IWrapperPerson wrPerson = wrapperFactory.create(competence.getPerson());
+        Optional<Contract> firstContract = wrPerson
+            .getFirstContractInMonth(year, competence.getMonth());
         if (!firstContract.isPresent()) {
           continue;    //questo errore andrebbe segnalato, competenza senza che esista contratto
         }
@@ -746,40 +748,40 @@ public class Competences extends Controller {
         }
       }
       //Filtro competenza non approvata
-      if (competence.valueApproved == 0) {
+      if (competence.getValueApproved() == 0) {
         continue;
       }
 
-      personSet.add(competence.person);
+      personSet.add(competence.getPerson());
 
       //aggiungo la competenza alla mappa della persona
-      Person person = competence.person;
+      Person person = competence.getPerson();
       Map<CompetenceCode, Integer> personCompetences = mapPersonCompetenceRecap.get(person);
 
       if (personCompetences == null) {
         personCompetences = Maps.newHashMap();
       }
-      Integer value = personCompetences.get(competence.competenceCode);
+      Integer value = personCompetences.get(competence.getCompetenceCode());
       if (value != null) {
-        value = value + competence.valueApproved;
+        value = value + competence.getValueApproved();
       } else {
-        value = competence.valueApproved;
+        value = competence.getValueApproved();
       }
 
-      personCompetences.put(competence.competenceCode, value);
+      personCompetences.put(competence.getCompetenceCode(), value);
 
       mapPersonCompetenceRecap.put(person, personCompetences);
 
       //aggiungo la competenza al valore totale per la competenza
-      value = totalValueAssigned.get(competence.competenceCode);
+      value = totalValueAssigned.get(competence.getCompetenceCode());
 
       if (value != null) {
-        value = value + competence.valueApproved;
+        value = value + competence.getValueApproved();
       } else {
-        value = competence.valueApproved;
+        value = competence.getValueApproved();
       }
 
-      totalValueAssigned.put(competence.competenceCode, value);
+      totalValueAssigned.put(competence.getCompetenceCode(), value);
     }
     List<IWrapperPerson> personList = FluentIterable
         .from(personSet)
@@ -809,13 +811,13 @@ public class Competences extends Controller {
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
         Optional.<String>absent(),
-        Sets.newHashSet(user.person.office),
+        Sets.newHashSet(user.getPerson().getOffice()),
         false,
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-        Optional.fromNullable(user.person));
+        Optional.fromNullable(user.getPerson()));
     tableFeature = competenceManager.composeTableForOvertime(year, month,
-        null, null, user.person.office, beginMonth, simpleResults, code);
+        null, null, user.getPerson().getOffice(), beginMonth, simpleResults, code);
 
     render(tableFeature, year, month, simpleResults);
 
@@ -840,7 +842,7 @@ public class Competences extends Controller {
     YearMonth yearMonth = new YearMonth(year, month);
     competenceManager.applyBonus(Optional.fromNullable(office), competenceCode, yearMonth);
 
-    flash.success("Aggiornati i valori per la competenza %s", competenceCode.code);
+    flash.success("Aggiornati i valori per la competenza %s", competenceCode.getCode());
 
     showCompetences(year, month, office.id, competenceCode.id);
 
@@ -878,7 +880,7 @@ public class Competences extends Controller {
   public static void addReperibility(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
-    List<Office> linkedOffices = officeDao.byInstitute(office.institute);
+    List<Office> linkedOffices = officeDao.byInstitute(office.getInstitute());
     rules.checkIfPermitted(office);
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -901,7 +903,7 @@ public class Competences extends Controller {
     if (Security.getUser().get().isSystemUser()) {
       linkedOffices = officeDao.allEnabledOffices();
     } else {
-      linkedOffices = officeDao.byInstitute(office.institute);
+      linkedOffices = officeDao.byInstitute(office.getInstitute());
     }
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -925,11 +927,11 @@ public class Competences extends Controller {
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
       render("@editReperibility", type, officePeople, office);
     }
-    type.office = office;
+    type.setOffice(office);
     type.save();
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
-        type.description, type.office);
-    activateServices(type.office.id);
+        type.getDescription(), type.getOffice());
+    activateServices(type.getOffice().id);
   }
 
   /**
@@ -949,7 +951,7 @@ public class Competences extends Controller {
       List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(office),
           new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
       Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
-      cat.shiftTypes.forEach(item -> {
+      cat.getShiftTypes().forEach(item -> {
         List<PersonShiftShiftType> psstList = shiftDao
             .getAssociatedPeopleToShift(item, Optional.fromNullable(LocalDate.now()));
         map.put(item, psstList);
@@ -957,13 +959,13 @@ public class Competences extends Controller {
       render("@editShift", cat, map, officePeople, office);
     }
 
-    cat.office = office;
+    cat.setOffice(office);
     cat.save();
 
 
     flash.success("Nuovo servizio %s inserito correttamente per la sede %s",
-        cat.description, cat.office);
-    activateServices(cat.office.id);
+        cat.getDescription(), cat.getOffice());
+    activateServices(cat.getOffice().id);
   }
 
   /**
@@ -975,38 +977,42 @@ public class Competences extends Controller {
   public static void evaluateReperibility(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
-    rules.checkIfPermitted(type.office);
+    rules.checkIfPermitted(type.getOffice());
     if (!confirmed) {
       confirmed = true;
       render(type, confirmed);
     }
-    if (type.disabled) {
-      type.disabled = false;
+    if (type.isDisabled()) {
+      type.setDisabled(false);
       type.save();
-      flash.success("Riabilitato servizio %s", type.description);
-      activateServices(type.office.id);
+      flash.success("Riabilitato servizio %s", type.getDescription());
+      activateServices(type.getOffice().id);
     }
 
     log.debug("Reperibility type = {}, personReperibilities.size = {}, "
         + "personReperibilitiesDays.size = {}", 
-        type, type.personReperibilities.size(), 
-        type.personReperibilities.stream().flatMap(pr -> pr.personReperibilityDays.stream()).collect(Collectors.toList()).size());
+        type, type.getPersonReperibilities().size(), 
+        type.getPersonReperibilities().stream()
+        .flatMap(pr -> pr.getPersonReperibilityDays().stream())
+        .collect(Collectors.toList()).size());
     
-    if (!type.personReperibilities.isEmpty() &&
-        !type.personReperibilities.stream().flatMap(pr -> pr.personReperibilityDays.stream()).collect(Collectors.toList()).isEmpty()) {
-      type.disabled = true;
+    if (!type.getPersonReperibilities().isEmpty() 
+        && !type.getPersonReperibilities().stream()
+        .flatMap(pr -> pr.getPersonReperibilityDays().stream())
+        .collect(Collectors.toList()).isEmpty()) {
+      type.setDisabled(true);
       type.save();
       log.info("Disabilitato servizio {}", type);
       flash.success("Il servizio è stato disabilitato e non rimosso perchè legato con informazioni "
           + "importanti presenti in altre tabelle");
 
     } else {
-      type.personReperibilities.stream().forEach(pr -> pr.delete());
+      type.getPersonReperibilities().stream().forEach(pr -> pr.delete());
       type.delete();
       log.info("Rimosso servizio {}", type);
       flash.success("Servizio rimosso con successo");
     }
-    activateServices(type.office.id);
+    activateServices(type.getOffice().id);
   }
 
   /**
@@ -1016,13 +1022,13 @@ public class Competences extends Controller {
    */
   public static void editReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
-    Office office = type.office;
+    Office office = type.getOffice();
     List<Office> linkedOffices = Lists.newArrayList();
     rules.checkIfPermitted(office);
     if (Security.getUser().get().isSystemUser()) {
       linkedOffices = officeDao.allEnabledOffices();
     } else {
-      linkedOffices = officeDao.byInstitute(office.institute);
+      linkedOffices = officeDao.byInstitute(office.getInstitute());
     }   
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
@@ -1042,43 +1048,43 @@ public class Competences extends Controller {
   public static void evaluateShift(Long shiftCategoryId, boolean confirmed) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
-    rules.checkIfPermitted(cat.office);
+    rules.checkIfPermitted(cat.getOffice());
     if (!confirmed) {
       confirmed = true;
       render(cat, confirmed);
     }
-    if (cat.disabled) {
-      cat.disabled = false;
+    if (cat.isDisabled()) {
+      cat.setDisabled(false);
       cat.save();
-      flash.success("Riabilitato servizio %s", cat.description);
-      activateServices(cat.office.id);
+      flash.success("Riabilitato servizio %s", cat.getDescription());
+      activateServices(cat.getOffice().id);
     }
     List<ShiftType> shiftTypeList = shiftDao.getTypesByCategory(cat);
     List<ShiftType> toDelete = Lists.newArrayList();
     for (ShiftType type : shiftTypeList) {
-      if (!type.monthsStatus.isEmpty()) {
-        long count = type.monthsStatus.stream().filter(st -> st.approved).count();
+      if (!type.getMonthsStatus().isEmpty()) {
+        long count = type.getMonthsStatus().stream().filter(st -> st.isApproved()).count();
         if (count > 0) {
-          cat.disabled = true;
+          cat.setDisabled(true);
           cat.save();          
         } else {
           toDelete.add(type);
-          log.debug("Elinino i person_shift_days relativi a {}", type.type);
-          for (PersonShiftDay psd : type.personShiftDays) {
+          log.debug("Elinino i person_shift_days relativi a {}", type.getType());
+          for (PersonShiftDay psd : type.getPersonShiftDays()) {
             psd.delete();
           }
-          type.monthsStatus.stream().map(st -> st.delete());  
-          log.debug("Elimino i gli shift_type_month relativi a {}", type.type);
+          type.getMonthsStatus().stream().map(st -> st.delete());  
+          log.debug("Elimino i gli shift_type_month relativi a {}", type.getType());
         }        
       } else {
         toDelete.add(type);
       }
       if (toDelete.contains(type)) {
         log.debug("Elimino le relazioni tra persone e shift_type");        
-        for (PersonShiftShiftType psst : type.personShiftShiftTypes) {
+        for (PersonShiftShiftType psst : type.getPersonShiftShiftTypes()) {
           psst.delete();
         }
-        log.debug("Elimino lo shift_type {}", type.type);
+        log.debug("Elimino lo shift_type {}", type.getType());
         type.delete();
       }
 
@@ -1091,7 +1097,7 @@ public class Competences extends Controller {
           + "importanti presenti in altre tabelle");
     }   
 
-    activateServices(cat.office.id);
+    activateServices(cat.getOffice().id);
   }
 
   /**
@@ -1102,17 +1108,17 @@ public class Competences extends Controller {
   public static void editShift(Long shiftCategoryId) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     List<Office> linkedOffices = Lists.newArrayList();
-    Office office = cat.office;    
+    Office office = cat.getOffice();    
     rules.checkIfPermitted(office);
     if (Security.getUser().get().isSystemUser()) {
       linkedOffices = officeDao.allEnabledOffices();
     } else {
-      linkedOffices = officeDao.byInstitute(office.institute);
+      linkedOffices = officeDao.byInstitute(office.getInstitute());
     }    
     Map<ShiftType, List<PersonShiftShiftType>> map = Maps.newHashMap();
     List<Person> officePeople = personDao.getActivePersonInMonth(Sets.newHashSet(linkedOffices),
         new YearMonth(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear()));
-    cat.shiftTypes.forEach(item -> {
+    cat.getShiftTypes().forEach(item -> {
       List<PersonShiftShiftType> psstList = shiftDao
           .getAssociatedPeopleToShift(item, Optional.fromNullable(LocalDate.now()));
       map.put(item, psstList);
@@ -1201,20 +1207,20 @@ public class Competences extends Controller {
       @Valid ShiftType type, Long shift, boolean breakInRange, boolean enableExitTolerance) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
-    rules.checkIfPermitted(cat.office);
+    rules.checkIfPermitted(cat.getOffice());
     final String key = SHIFT_TYPE_SERVICE_STEP 
-        + cat.description + Security.getUser().get().username;
+        + cat.getDescription() + Security.getUser().get().getUsername();
     final String internal = TIME_TABLE_STEP 
-        + cat.description + Security.getUser().get().username;
+        + cat.getDescription() + Security.getUser().get().getUsername();
     final String external = EXTERNAL_TIME_TABLE_STEP 
-        + cat.description + Security.getUser().get().username;
+        + cat.getDescription() + Security.getUser().get().getUsername();
     if (step == 0) {
       // ritorno il dto per creare l'attività
       breakInRange = false;
       List<ShiftTimeTableDto>  dtoList = competenceManager
-          .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
+          .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.getOffice()));
       List<OrganizationShiftTimeTable> timeTableList = 
-          shiftTimeTableDao.getAllFromOffice(cat.office);
+          shiftTimeTableDao.getAllFromOffice(cat.getOffice());
       step++;
       render(dtoList, cat, type, step, breakInRange, enableExitTolerance, timeTableList);
     }
@@ -1222,7 +1228,7 @@ public class Competences extends Controller {
 
       if (shift == null && organizationShift == null) {
         flash.error("selezionare una timetable!");
-        List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);        
+        List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.getOffice());        
         List<ShiftTimeTableDto>  dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
 
         render("@configureShift", dtoList, cat, type, step, 
@@ -1236,8 +1242,8 @@ public class Competences extends Controller {
         ShiftTimeTable stt = shiftDao.getShiftTimeTableById(shift);
         internalList.add(stt);
         Cache.safeAdd(internal, internalList, "10mn");
-        if (Range.closed(stt.startMorning, stt.endMorning)
-            .encloses(Range.closed(stt.startMorningLunchTime, stt.endMorningLunchTime))) {
+        if (Range.closed(stt.getStartMorning(), stt.getEndMorning())
+            .encloses(Range.closed(stt.getStartMorningLunchTime(), stt.getEndMorningLunchTime()))) {
           //ritornare un'informazione per far visualizzare diversamente la costruzione della form
           breakInRange = true;
         }
@@ -1256,9 +1262,9 @@ public class Competences extends Controller {
     }
     if (step == 2) {
 
-      if (type.breakInShift > type.breakMaxInShift 
-          || type.entranceTolerance > type.entranceMaxTolerance 
-          || type.exitTolerance > type.exitMaxTolerance) {
+      if (type.getBreakInShift() > type.getBreakMaxInShift() 
+          || type.getEntranceTolerance() > type.getEntranceMaxTolerance() 
+          || type.getExitTolerance() > type.getExitMaxTolerance()) {
         flash.error("Le soglie minime non possono essere superiori a quelle massime");
 
         render("@configureShift", step, cat, type, breakInRange, enableExitTolerance);
@@ -1296,9 +1302,9 @@ public class Competences extends Controller {
         flash.error("Scaduta sessione di creazione dell'attività di turno.");
         step = 0;
         List<ShiftTimeTableDto>  dtoList = competenceManager
-            .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.office));
+            .convertFromShiftTimeTable(shiftDao.getAllShifts(cat.getOffice()));
         List<OrganizationShiftTimeTable> timeTableList = 
-            shiftTimeTableDao.getAllFromOffice(cat.office);
+            shiftTimeTableDao.getAllFromOffice(cat.getOffice());
         render(cat, type, step, breakInRange, enableExitTolerance, dtoList, timeTableList);
       }
       ShiftType service = list.get(0);
@@ -1316,7 +1322,7 @@ public class Competences extends Controller {
 
       Cache.clear();
       flash.success("Attività salvata correttamente!");
-      activateServices(cat.office.id);
+      activateServices(cat.getOffice().id);
     }
 
   }
@@ -1333,9 +1339,9 @@ public class Competences extends Controller {
       flash.error("Si cerca di caricare un'attività inesistente! Verificare l'id");
       activateServices(Long.parseLong((session.get("officeSelected"))));
     } else {
-      rules.checkIfPermitted(shiftType.get().shiftCategories.office);
+      rules.checkIfPermitted(shiftType.get().getShiftCategories().getOffice());
       ShiftType type = shiftType.get();
-      Office office = officeDao.getOfficeById(type.shiftCategories.office.id);
+      Office office = officeDao.getOfficeById(type.getShiftCategories().getOffice().id);
       List<PersonShift> peopleForShift = shiftDao.getPeopleForShift(office, LocalDate.now());
 
       List<PersonShiftShiftType> associatedPeopleShift = shiftDao
@@ -1353,7 +1359,7 @@ public class Competences extends Controller {
   public static void handlePersonShiftShiftType(Long id) {
     PersonShiftShiftType psst = shiftDao.getById(id);
     notFoundIfNull(psst);
-    rules.checkIfPermitted(psst.personShift.person.office);    
+    rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());    
     render(psst);
   }
 
@@ -1363,10 +1369,10 @@ public class Competences extends Controller {
    * @param psst l'oggetto associazione tra persona e turno.
    */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
-    rules.checkIfPermitted(psst.personShift.person.office);
+    rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());
     psst.save();
     flash.success("Informazioni salvate correttamente");
-    manageShiftType(psst.shiftType.id);
+    manageShiftType(psst.getShiftType().id);
   }
 
   /**
@@ -1375,13 +1381,13 @@ public class Competences extends Controller {
    * @param type l'attività di cui si vogliono modificare i parametri
    */
   public static void editActivity(ShiftType type, boolean considerEverySlot) {
-    if (type.organizaionShiftTimeTable != null) {
-      OrganizationShiftTimeTable ott = type.organizaionShiftTimeTable;
-      ott.considerEverySlot = considerEverySlot;
+    if (type.getOrganizaionShiftTimeTable() != null) {
+      OrganizationShiftTimeTable ott = type.getOrganizaionShiftTimeTable();
+      ott.setConsiderEverySlot(considerEverySlot);
       ott.save();
     }
     type.save();
-    flash.success("Modificati parametri per l'attività: %s", type.description);
+    flash.success("Modificati parametri per l'attività: %s", type.getDescription());
     manageShiftType(type.id);
   }
 
@@ -1392,22 +1398,22 @@ public class Competences extends Controller {
    */
   public static void deleteActivity(ShiftType type) {
 
-    rules.checkIfPermitted(type.shiftCategories.office);
-    if (!type.personShiftDays.isEmpty()) {
+    rules.checkIfPermitted(type.getShiftCategories().getOffice());
+    if (!type.getPersonShiftDays().isEmpty()) {
       flash.error("L'attività %s contiene dei giorni di turno configurati nei mesi precedenti. "
           + "Eliminare le giornate di turno prima di provvedere all'eliminazione dell'attività", 
-          type.type);
+          type.getType());
       manageShiftType(type.id);
     }
-    if (!type.personShiftShiftTypes.isEmpty()) {
+    if (!type.getPersonShiftShiftTypes().isEmpty()) {
       log.debug("L'attività {} è ancora referenziata a qualche persona");
-      type.personShiftShiftTypes.stream().forEach(psst -> psst.delete());
+      type.getPersonShiftShiftTypes().stream().forEach(psst -> psst.delete());
 
     }
     type.delete();
-    log.info("Eliminata attività {}", type.type);
-    flash.success("Attività %s eliminata", type.type);
-    activateServices(type.shiftCategories.office.id);
+    log.info("Eliminata attività {}", type.getType());
+    flash.success("Attività %s eliminata", type.getType());
+    activateServices(type.getShiftCategories().getOffice().id);
 
   }
 
@@ -1424,23 +1430,23 @@ public class Competences extends Controller {
       activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
-    rules.checkIfPermitted(type.get().shiftCategories.office);
+    rules.checkIfPermitted(type.get().getShiftCategories().getOffice());
     if (Validation.hasErrors()) {
       response.status = 400;
       List<PersonShift> peopleForShift = 
-          shiftDao.getPeopleForShift(type.get().shiftCategories.office, LocalDate.now());
-      Office office = type.get().shiftCategories.office;     
+          shiftDao.getPeopleForShift(type.get().getShiftCategories().getOffice(), LocalDate.now());
+      Office office = type.get().getShiftCategories().getOffice();     
       render("@manageShiftType", type, peopleForShift, office);
     }
     type.get().save();
     List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(type.get(), 
         Optional.fromNullable(LocalDate.now()));
     List<PersonShift> peopleForShift = 
-        shiftDao.getPeopleForShift(type.get().shiftCategories.office, LocalDate.now());
+        shiftDao.getPeopleForShift(type.get().getShiftCategories().getOffice(), LocalDate.now());
 
     List<PersonShift> available = peopleForShift.stream()
         .filter(e -> (psstList.stream()
-            .filter(d -> d.personShift.equals(e))
+            .filter(d -> d.getPersonShift().equals(e))
             .count()) < 1)
         .collect(Collectors.toList());
     ShiftType activity = type.get();
@@ -1460,7 +1466,7 @@ public class Competences extends Controller {
   public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.person.office);
+    rules.checkIfPermitted(person.getPerson().getOffice());
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
     }
@@ -1472,18 +1478,18 @@ public class Competences extends Controller {
       List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(activity, 
           Optional.fromNullable(LocalDate.now()));
       List<PersonShift> peopleForShift = 
-          shiftDao.getPeopleForShift(activity.shiftCategories.office, LocalDate.now());
+          shiftDao.getPeopleForShift(activity.getShiftCategories().getOffice(), LocalDate.now());
 
       List<PersonShift> available = peopleForShift.stream()
           .filter(e -> (psstList.stream()
-              .filter(d -> d.personShift.equals(e))
+              .filter(d -> d.getPersonShift().equals(e))
               .count()) < 1)
           .collect(Collectors.toList());
       response.status = 400;
       render("@linkPeopleToShift", activity, available);
     }
     competenceManager.persistPersonShiftShiftType(person, beginDate, activity, jolly);
-    flash.success("Aggiunto %s all'attività", person.person.fullName());
+    flash.success("Aggiunto %s all'attività", person.getPerson().fullName());
     manageShiftType(activity.id);
   }
 
@@ -1498,7 +1504,7 @@ public class Competences extends Controller {
       @Valid LocalDate endDate, boolean confirmed) {
     final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
     notFoundIfNull(psst);
-    rules.checkIfPermitted(psst.shiftType.shiftCategories.office);
+    rules.checkIfPermitted(psst.getShiftType().getShiftCategories().getOffice());
     if (!confirmed) {
       confirmed = true;
       render("@deletePersonShiftShiftType", psst, confirmed);
@@ -1507,12 +1513,13 @@ public class Competences extends Controller {
       response.status = 400;
       render("@deletePersonShiftShiftType", psst, confirmed);
     }
-    psst.endDate = endDate;
+    psst.setEndDate(endDate);
     psst.save();
 
     flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
-        psst.personShift.person.fullName(), psst.shiftType.description, psst.endDate);
-    manageShiftType(psst.shiftType.id);
+        psst.getPersonShift().getPerson().fullName(), 
+        psst.getShiftType().getDescription(), psst.getEndDate());
+    manageShiftType(psst.getShiftType().id);
   }
 
   /**
@@ -1525,23 +1532,23 @@ public class Competences extends Controller {
   public static void linkTimeTableToShift(Long shift, ShiftCategories cat, @Valid ShiftType type) {
 
     notFoundIfNull(cat);
-    rules.checkIfPermitted(cat.office);
+    rules.checkIfPermitted(cat.getOffice());
     ShiftTimeTable timeTable = shiftDao.getShiftTimeTableById(shift);
     notFoundIfNull(timeTable);  
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.office);
+      List<ShiftTimeTable> shiftList = shiftDao.getAllShifts(cat.getOffice());
       List<ShiftTimeTableDto> dtoList = competenceManager.convertFromShiftTimeTable(shiftList);
       render("@configureShift", shiftList, dtoList, cat, type);
 
     }
-    type.shiftCategories = cat;
-    type.shiftTimeTable = timeTable;
+    type.setShiftCategories(cat);
+    type.setShiftTimeTable(timeTable);
     type.save();
 
-    flash.success("Configurato correttamente il servizio %s", cat.description);
-    activateServices(cat.office.id);
+    flash.success("Configurato correttamente il servizio %s", cat.getDescription());
+    activateServices(cat.getOffice().id);
 
   }
 
@@ -1553,13 +1560,13 @@ public class Competences extends Controller {
   public static void manageReperibility(Long reperibilityTypeId) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
-    rules.checkIfPermitted(type.office);
-    List<CompetenceCode> codesList = type.monthlyCompetenceType.getCodesForActivity();
+    rules.checkIfPermitted(type.getOffice());
+    List<CompetenceCode> codesList = type.getMonthlyCompetenceType().getCodesForActivity();
     List<PersonCompetenceCodes> people = competenceCodeDao
-        .listByCodesAndOffice(codesList, type.office, Optional.fromNullable(LocalDate.now()));
-    List<PersonReperibility> linkedPeople = type.personReperibilities.stream()
-        .filter(pr -> pr.startDate != null 
-        && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        .listByCodesAndOffice(codesList, type.getOffice(), Optional.fromNullable(LocalDate.now()));
+    List<PersonReperibility> linkedPeople = type.getPersonReperibilities().stream()
+        .filter(pr -> pr.getStartDate() != null 
+        && (pr.getEndDate() == null || pr.getEndDate().isAfter(LocalDate.now())))
         .collect(Collectors.toList());
     LocalDate date = LocalDate.now();
     render(people, type, date, linkedPeople);
@@ -1577,14 +1584,14 @@ public class Competences extends Controller {
       activateServices(Long.parseLong((session.get("officeSelected"))));
     }
 
-    rules.checkIfPermitted(type.office);
+    rules.checkIfPermitted(type.getOffice());
 
-    List<CompetenceCode> codeList = type.monthlyCompetenceType.getCodesForActivity();
+    List<CompetenceCode> codeList = type.getMonthlyCompetenceType().getCodesForActivity();
     List<PersonCompetenceCodes> people = competenceCodeDao
-        .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()));
-    List<PersonReperibility> linkedPeople = type.personReperibilities.stream()
-        .filter(pr -> pr.startDate != null 
-        && (pr.endDate == null || pr.endDate.isAfter(LocalDate.now())))
+        .listByCodesAndOffice(codeList, type.getOffice(), Optional.fromNullable(LocalDate.now()));
+    List<PersonReperibility> linkedPeople = type.getPersonReperibilities().stream()
+        .filter(pr -> pr.getStartDate() != null 
+        && (pr.getEndDate() == null || pr.getEndDate().isAfter(LocalDate.now())))
         .collect(Collectors.toList());
 
     if (Validation.hasErrors()) {
@@ -1597,9 +1604,9 @@ public class Competences extends Controller {
 
     List<Person> available = people
         .stream().filter(e -> (linkedPeople.stream()
-            .noneMatch(d -> d.person.equals(e.person))))        
-        .map(pcc -> pcc.person).distinct()
-        .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+            .noneMatch(d -> d.getPerson().equals(e.getPerson()))))        
+        .map(pcc -> pcc.getPerson()).distinct()
+        .filter(p -> p.getOffice().equals(type.getOffice())).collect(Collectors.toList());
 
     render(available, type);
   }
@@ -1616,7 +1623,7 @@ public class Competences extends Controller {
     final Optional<PersonReperibility> personReperibility = 
         reperibilityDao.getPersonReperibilityById(personReperibilityId);
     notFoundIfNull(personReperibility.get());
-    rules.checkIfPermitted(personReperibility.get().personReperibilityType.office);
+    rules.checkIfPermitted(personReperibility.get().getPersonReperibilityType().getOffice());
     PersonReperibility per = personReperibility.get();
     if (!confirmed) {
       confirmed = true;
@@ -1626,12 +1633,13 @@ public class Competences extends Controller {
       response.status = 400;
       render("@deletePersonReperibility", per, confirmed);
     }
-    per.endDate = endDate;
+    per.setEndDate(endDate);
     per.save();
 
     flash.success("Terminata esperienza per %s nell'attività %s in data %s", 
-        per.person.fullName(), per.personReperibilityType.description, per.endDate);
-    manageReperibility(per.personReperibilityType.id);
+        per.getPerson().fullName(), per.getPersonReperibilityType().getDescription(), 
+        per.getEndDate());
+    manageReperibility(per.getPersonReperibilityType().id);
   }
 
   /**
@@ -1644,7 +1652,7 @@ public class Competences extends Controller {
   public static void saveReperibilityConfiguration(PersonReperibilityType type, 
       Person person, LocalDate beginDate) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     notFoundIfNull(type);
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
@@ -1654,16 +1662,16 @@ public class Competences extends Controller {
     }
     if (Validation.hasErrors()) {
       List<PersonReperibility> personAssociated = 
-          reperibilityDao.byOffice(type.office, LocalDate.now());
+          reperibilityDao.byOffice(type.getOffice(), LocalDate.now());
       List<CompetenceCode> codeList = Lists.newArrayList();
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("207"));
       codeList.add(competenceCodeDao.getCompetenceCodeByCode("208"));
       List<Person> available = competenceCodeDao
-          .listByCodesAndOffice(codeList, type.office, Optional.fromNullable(LocalDate.now()))
+          .listByCodesAndOffice(codeList, type.getOffice(), Optional.fromNullable(LocalDate.now()))
           .stream().filter(e -> (personAssociated.stream()
-              .noneMatch(d -> d.person.equals(e.person))))        
-          .map(pcc -> pcc.person).distinct()
-          .filter(p -> p.office.equals(type.office)).collect(Collectors.toList());
+              .noneMatch(d -> d.getPerson().equals(e.getPerson()))))        
+          .map(pcc -> pcc.getPerson()).distinct()
+          .filter(p -> p.getOffice().equals(type.getOffice())).collect(Collectors.toList());
       response.status = 400;
       render("@linkPeopleToReperibility", type, available);
     }

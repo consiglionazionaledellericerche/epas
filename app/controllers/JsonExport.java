@@ -63,9 +63,9 @@ public class JsonExport extends Controller {
               @Override
               public PersonInfo apply(Person person) {
                 return new PersonInfo(
-                Joiner.on(" ").skipNulls().join(person.name, person.othersSurnames),
-                Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames),
-                person.user.password);
+                Joiner.on(" ").skipNulls().join(person.getName(), person.getOthersSurnames()),
+                Joiner.on(" ").skipNulls().join(person.getSurname(), person.getOthersSurnames()),
+                person.getUser().getPassword());
               }
             }
        ).toList();

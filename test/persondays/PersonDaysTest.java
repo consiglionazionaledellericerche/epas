@@ -87,7 +87,7 @@ public class PersonDaysTest extends UnitTest {
         personDay.getDecurtedMeal()).isEqualTo(30);      //30 minuti
     org.assertj.core.api.Assertions.assertThat(personDay.getDifference()).isEqualTo(-42);
     org.assertj.core.api.Assertions.assertThat(personDay.getProgressive()).isEqualTo(18);
-    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable()).isEqualTo(true);
     
   }
   
@@ -117,7 +117,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
-        personDay.isTicketAvailable).isEqualTo(true);
+        personDay.isTicketAvailable()).isEqualTo(true);
     
   }
   
@@ -141,7 +141,7 @@ public class PersonDaysTest extends UnitTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
-    personDayManager.setValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.getStampings());
     org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia valida con dentro timbrature di servizio con ordine sparso ok 
@@ -152,7 +152,7 @@ public class PersonDaysTest extends UnitTest {
     stamps.add(stampings(personDay, 15, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
     stamps.add(stampings(personDay, 16, 30, WayType.in, StampTypes.MOTIVI_DI_SERVIZIO, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
-    personDayManager.setValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.getStampings());
     org.assertj.core.api.Assertions.assertThat(personDayManager.allValidStampings(personDay));
 
     //coppia non valida 
@@ -161,7 +161,7 @@ public class PersonDaysTest extends UnitTest {
     stamps.add(stampings(personDay, 8, 30, WayType.in, StampTypes.LAVORO_FUORI_SEDE, null));
     stamps.add(stampings(personDay, 15, 30, WayType.in, null, null));
     stamps.add(stampings(personDay, 19, 30, WayType.out, null, null));
-    personDayManager.setValidPairStampings(personDay.stampings);
+    personDayManager.setValidPairStampings(personDay.getStampings());
     org.assertj.core.api.Assertions.assertThat(!personDayManager.allValidStampings(personDay));
 
   }
@@ -195,7 +195,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
-        personDay.isTicketAvailable).isEqualTo(true);
+        personDay.isTicketAvailable()).isEqualTo(true);
     
     // # anche le coppie che hanno due causali diverse ma che hanno il parametro gapLunchPairs true
     
@@ -219,7 +219,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getDecurtedMeal()).isEqualTo(0);      //00 minuti
     org.assertj.core.api.Assertions.assertThat(
-        personDay.isTicketAvailable).isEqualTo(true);
+        personDay.isTicketAvailable()).isEqualTo(true);
     
   }
   
@@ -260,7 +260,7 @@ public class PersonDaysTest extends UnitTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
-    List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.stampings);
+    List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
     
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
@@ -289,7 +289,7 @@ public class PersonDaysTest extends UnitTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
@@ -317,7 +317,7 @@ public class PersonDaysTest extends UnitTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
@@ -333,7 +333,7 @@ public class PersonDaysTest extends UnitTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
     
-    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
@@ -353,7 +353,7 @@ public class PersonDaysTest extends UnitTest {
     LocalTime startLunch = new LocalTime(12, 0, 0);
     LocalTime endLunch = new LocalTime(15, 0, 0);
 
-    validPairs = personDayManager.getValidPairStampings(personDay.stampings);
+    validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());
     
@@ -398,7 +398,7 @@ public class PersonDaysTest extends UnitTest {
     org.assertj.core.api.Assertions.assertThat(
         personDay.getProgressive()).isEqualTo(18);
     org.assertj.core.api.Assertions.assertThat(
-        personDay.isTicketAvailable).isEqualTo(true);
+        personDay.isTicketAvailable()).isEqualTo(true);
     
     //Caso con uscita per pranzo
     personDay = new PersonDay(person, second);
@@ -417,7 +417,7 @@ public class PersonDaysTest extends UnitTest {
         new LocalTimeInterval(startLunch12, endLunch15), new LocalTimeInterval(startWork, endWork));
 
     org.assertj.core.api.Assertions.assertThat(personDay.getTimeAtWork()).isEqualTo(480);   //8 ore
-    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable).isEqualTo(true);
+    org.assertj.core.api.Assertions.assertThat(personDay.isTicketAvailable()).isEqualTo(true);
     
   }
 
@@ -427,11 +427,11 @@ public class PersonDaysTest extends UnitTest {
    */
   public WorkingTimeTypeDay normalDay() {
     WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
-    wttd.breakTicketTime = 30;
-    wttd.mealTicketTime = 360;
-    wttd.workingTime = 432;
-    wttd.ticketAfternoonThreshold = null;
-    wttd.holiday = false;
+    wttd.setBreakTicketTime(30);
+    wttd.setMealTicketTime(360);
+    wttd.setWorkingTime(432);
+    wttd.setTicketAfternoonThreshold(null);
+    wttd.setHoliday(false);
     return wttd;
   }
   
@@ -443,9 +443,9 @@ public class PersonDaysTest extends UnitTest {
     LocalDateTime time = new LocalDateTime(personDay.getDate().getYear(), 
         personDay.getDate().getMonthOfYear(), personDay.getDate().getDayOfMonth(), hour, minute);
     Stamping stamping = new Stamping(personDay, time);
-    stamping.way = way;
-    stamping.stampType = stampType;
-    stamping.stampingZone = stampingZone;
+    stamping.setWay(way);
+    stamping.setStampType(stampType);
+    stamping.setStampingZone(stampingZone);
     return stamping;
   }
   

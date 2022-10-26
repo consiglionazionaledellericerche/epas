@@ -66,13 +66,13 @@ public class H2AbsenceSupport {
       justifiedType = absenceComponentDao.getOrBuildJustifiedType(justifiedTypeName.get());
     } else {
       Verify.verify(absenceType.getJustifiedTypesPermitted().size() == 1);
-      justifiedType = absenceType.justifiedTypesPermitted.iterator().next();
+      justifiedType = absenceType.getJustifiedTypesPermitted().iterator().next();
     }
     Absence absence = new Absence();
     absence.date = date;
-    absence.absenceType = absenceType;
-    absence.justifiedType = justifiedType;
-    absence.justifiedMinutes = justifiedMinutes;
+    absence.setAbsenceType(absenceType);
+    absence.setJustifiedType(justifiedType);
+    absence.setJustifiedMinutes(justifiedMinutes);
     
     return absence;
   }
@@ -93,8 +93,8 @@ public class H2AbsenceSupport {
     Absence absence = 
         absenceInstance(defaultAbsenceType, date, justifiedTypeName, justifiedMinutes);
     
-    absence.personDay = getPersonDay(person, date);
-    absence.personDay.refresh();
+    absence.setPersonDay(getPersonDay(person, date));
+    absence.getPersonDay().refresh();
     absence.save();
     
     return absence;

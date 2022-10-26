@@ -125,7 +125,7 @@ public class TeleworkStampings extends Controller {
     if (year == null || month == null) {
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
-    val currentPerson = Security.getUser().get().person;
+    val currentPerson = Security.getUser().get().getPerson();
     //Accesso da utente di sistema senza persona associata
     if (currentPerson == null) {
       Application.index();
@@ -181,8 +181,9 @@ public class TeleworkStampings extends Controller {
     }
     Person person = personDao.getPersonById(personId);
     PersonLite p = null;
-    if (person.personConfigurations.stream().noneMatch(pc -> 
-        pc.epasParam.equals(EpasParam.TELEWORK_STAMPINGS) && pc.fieldValue.equals("true"))) {
+    if (person.getPersonConfigurations().stream().noneMatch(pc -> 
+        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) 
+        && pc.getFieldValue().equals("true"))) {
       @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
@@ -199,7 +200,7 @@ public class TeleworkStampings extends Controller {
 
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -288,20 +289,20 @@ public class TeleworkStampings extends Controller {
 
     if (result == Http.StatusCode.NO_RESPONSE) {
       PersonDay pd = personDayDao.getPersonDayById(stamping.getPersonDayId());
-      if (pd.person.isTopQualification()) {
+      if (pd.getPerson().isTopQualification()) {
 
         WayType way = stampingManager.retrieveWayFromTeleworkStamping(stamping);
         LocalDateTime dateTime = new LocalDateTime(stamping.getDate().getYear(), 
             stamping.getDate().getMonthValue(), stamping.getDate().getDayOfMonth(), 
             stamping.getDate().getHour(), stamping.getDate().getMinute(), 
             stamping.getDate().getSecond());
-        Optional<Stamping> stampingToDelete = stampingDao.getStamping(dateTime, pd.person, way);
+        Optional<Stamping> stampingToDelete = stampingDao.getStamping(dateTime, pd.getPerson(), way);
         if (stampingToDelete.isPresent()) {
           stampingToDelete.get().delete();
-          consistencyManager.updatePersonSituation(pd.person.id, pd.date);
+          consistencyManager.updatePersonSituation(pd.getPerson().id, pd.getDate());
         }        
         // Rimuovere il codice 103RT se non ci sono più timbrature nel giorno
-        if (pd.stampings.isEmpty()) {
+        if (pd.getStampings().isEmpty()) {
           manager.deleteTeleworkAbsenceCode(pd);
         }
       }
@@ -357,7 +358,7 @@ public class TeleworkStampings extends Controller {
         Stamping ordinaryStamping = stampingManager
             .generateStampingFromTelework(stamping, pd, time);
         String ordinaryStampingResult = stampingManager
-            .persistStamping(ordinaryStamping, person, person.user, true, true);
+            .persistStamping(ordinaryStamping, person, person.getUser(), true, true);
         //Inserisco in automatico il codice 103RT se il dipendente
         //è abilitato all'inserimento di questo codice e se non già presente
         if (absenceService.groupsPermitted(person, false)
@@ -415,7 +416,7 @@ public class TeleworkStampings extends Controller {
       throws NoSuchFieldException, ExecutionException {
 
     List<NewTeleworkDto> list = Lists.newArrayList();
-    val currentPerson = Security.getUser().get().person;
+    val currentPerson = Security.getUser().get().getPerson();
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {

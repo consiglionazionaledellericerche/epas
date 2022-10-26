@@ -62,8 +62,8 @@ public class AbsenceTypeShowDto extends AbsenceTypeShowTerseDto {
   public static AbsenceTypeShowDto build(AbsenceType at) {
     val dto = modelMapper.map(at, AbsenceTypeShowDto.class);
     dto.setJustifiedTypesPermitted(
-        at.justifiedTypesPermitted.stream()
-          .map(jt -> jt.name.name()).collect(Collectors.toSet()));    
+        at.getJustifiedTypesPermitted().stream()
+          .map(jt -> jt.getName().name()).collect(Collectors.toSet()));    
     return dto;
   }
 }

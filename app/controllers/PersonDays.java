@@ -37,6 +37,7 @@ import models.PersonDay;
 import models.Stamping;
 import models.ZoneToZones;
 import models.absences.Absence;
+import models.enumerate.MealTicketBehaviour;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -75,13 +76,13 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
     
     Integer hours = 0;
     Integer minutes = 0;
-    if (personDay.approvedOnHoliday > 0) {
-      hours = personDay.approvedOnHoliday / 60;
-      minutes = personDay.approvedOnHoliday % 60;
+    if (personDay.getApprovedOnHoliday() > 0) {
+      hours = personDay.getApprovedOnHoliday() / 60;
+      minutes = personDay.getApprovedOnHoliday() % 60;
     }
 
     render(personDay, hours, minutes);
@@ -98,10 +99,10 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
     
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
     
     Integer approvedMinutes = (hours * 60) + minutes;
-    if (approvedMinutes < 0 || approvedMinutes > personDay.onHoliday) {
+    if (approvedMinutes < 0 || approvedMinutes > personDay.getOnHoliday()) {
       Validation.addError("hours", "Valore non consentito.");
       Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
@@ -110,11 +111,11 @@ public class PersonDays extends Controller {
      
     personDay.setApprovedOnHoliday(approvedMinutes);
     
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
     
     flash.success("Ore festive approvate correttamente.");
-    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
-        personDay.date.getMonthOfYear());
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
+        personDay.getDate().getMonthOfYear());
   }
   
   /**
@@ -128,13 +129,13 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
     
     Integer hours = 0;
     Integer minutes = 0;
-    if (personDay.approvedOutOpening > 0) {
-      hours = personDay.approvedOutOpening / 60;
-      minutes = personDay.approvedOutOpening % 60;
+    if (personDay.getApprovedOutOpening() > 0) {
+      hours = personDay.getApprovedOutOpening() / 60;
+      minutes = personDay.getApprovedOutOpening() % 60;
     }
 
     render(personDay, hours, minutes);
@@ -151,10 +152,10 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
     
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
     
     Integer approvedMinutes = (hours * 60) + minutes;
-    if (approvedMinutes < 0 || approvedMinutes > personDay.outOpening) {
+    if (approvedMinutes < 0 || approvedMinutes > personDay.getOutOpening()) {
       Validation.addError("hours", "Valore non consentito.");
       Validation.addError("minutes", "Valore non consentito.");
       response.status = 400;
@@ -163,11 +164,11 @@ public class PersonDays extends Controller {
      
     personDay.setApprovedOutOpening(approvedMinutes);
     
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
     
     flash.success("Ore approvate correttamente.");
-    Stampings.personStamping(personDay.person.id, personDay.date.getYear(), 
-        personDay.date.getMonthOfYear());
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
+        personDay.getDate().getMonthOfYear());
   }
 
   /**
@@ -180,15 +181,15 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
 
-    rules.checkIfPermitted(personDay.person.office);
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
 
     if (!confirmed) {
       confirmed = true;
 
       mealTicketDecision = MealTicketDecision.COMPUTED;
 
-      if (personDay.isTicketForcedByAdmin) {
-        if (personDay.isTicketAvailable) {
+      if (personDay.isTicketForcedByAdmin()) {
+        if (personDay.isTicketAvailable()) {
           mealTicketDecision = MealTicketDecision.FORCED_TRUE;
         } else {
           mealTicketDecision = MealTicketDecision.FORCED_FALSE;
@@ -199,24 +200,24 @@ public class PersonDays extends Controller {
     }
 
     if (mealTicketDecision.equals(MealTicketDecision.COMPUTED)) {
-      personDay.isTicketForcedByAdmin = false;
+      personDay.setTicketForcedByAdmin(false);
     } else {
-      personDay.isTicketForcedByAdmin = true;
+      personDay.setTicketForcedByAdmin(true);
       if (mealTicketDecision.equals(MealTicketDecision.FORCED_FALSE)) {
-        personDay.isTicketAvailable = false;
+        personDay.setTicketAvailable(MealTicketBehaviour.notAllowMealTicket);
       }
       if (mealTicketDecision.equals(MealTicketDecision.FORCED_TRUE)) {
-        personDay.isTicketAvailable = true;
+        personDay.setTicketAvailable(MealTicketBehaviour.allowMealTicket);
       }
     }
 
     personDay.save();
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
 
     flash.success("Buono Pasto impostato correttamente.");
 
-    Stampings.personStamping(personDay.person.id, personDay.date.getYear(),
-        personDay.date.getMonthOfYear());
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(),
+        personDay.getDate().getMonthOfYear());
 
   }
 
@@ -283,9 +284,9 @@ public class PersonDays extends Controller {
       historyStampingsList.add(historyStamping);
     }
     boolean zoneDefined = false;
-    List<ZoneToZones> link = personDay.person.badges.stream()
-        .<ZoneToZones>flatMap(b -> b.badgeReader.zones.stream()
-            .map(z -> z.zoneLinkedAsMaster.stream().findAny().orElse(null)))       
+    List<ZoneToZones> link = personDay.getPerson().getBadges().stream()
+        .<ZoneToZones>flatMap(b -> b.getBadgeReader().getZones().stream()
+            .map(z -> z.getZoneLinkedAsMaster().stream().findAny().orElse(null)))       
         .collect(Collectors.toList());
     if (!link.isEmpty()) {
       zoneDefined = true;

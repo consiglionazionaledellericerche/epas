@@ -68,7 +68,7 @@ public class Groups extends Controller {
     rules.checkIfPermitted(office);
 
     val list = 
-        office.groups.stream().map(group -> GroupShowTerseDto.build(group))
+        office.getGroups().stream().map(group -> GroupShowTerseDto.build(group))
         .collect(Collectors.toSet());
     renderJSON(gsonBuilder.create().toJson(list));
   }
@@ -86,7 +86,7 @@ public class Groups extends Controller {
       JsonResponse.notFound();
     }
     notFoundIfNull(id);
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
     renderJSON(gsonBuilder.create().toJson(GroupShowDto.build(group)));
   }
 
@@ -115,7 +115,7 @@ public class Groups extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
     //nel DTO
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
 
     group.save();
 
@@ -140,7 +140,7 @@ public class Groups extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
 
     val gson = gsonBuilder.create();
     val groupDto = gson.fromJson(body, GroupUpdateDto.class); 
@@ -154,7 +154,7 @@ public class Groups extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato 
     //nel DTO
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
 
     if (!validation.valid(group).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -174,12 +174,12 @@ public class Groups extends Controller {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val group = groupDao.byId(id).orNull();
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
     
-    if (!group.affiliations.isEmpty()) {
+    if (!group.getAffiliations().isEmpty()) {
       JsonResponse.conflict(
           String.format("Ci sono %d affiliazioni di persone associate a questo gruppo. "
-              + "Cancellare prima le affiliazioni delle persone.", group.affiliations.size()));
+              + "Cancellare prima le affiliazioni delle persone.", group.getAffiliations().size()));
     }
 
     group.delete();

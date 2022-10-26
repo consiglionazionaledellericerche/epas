@@ -36,18 +36,18 @@ public class GroupUpdateDto extends GroupCreateDto {
    * presenti nell'instanza di questo DTO.
    */
   public void update(Group group) {
-    group.name = getName();
-    group.description = getDescription();
+    group.setName(getName());
+    group.setDescription(getDescription());
     if (getSendFlowsEmail() != null) {
-      group.sendFlowsEmail = getSendFlowsEmail();
+      group.setSendFlowsEmail(getSendFlowsEmail());
     }
     if (getOfficeId() != null) {
-      group.office = Office.findById(getOfficeId());
+      group.setOffice(Office.findById(getOfficeId()));
     }
     if (getManagerId() != null) {
-      group.manager = Person.findById(getManagerId());  
+      group.setManager(Person.findById(getManagerId()));  
     }
-    group.externalId = getExternalId();
-    group.endDate = getEndDate();
+    group.setExternalId(getExternalId());
+    group.setEndDate(getEndDate());
   }
 }

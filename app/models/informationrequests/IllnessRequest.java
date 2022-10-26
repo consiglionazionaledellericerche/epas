@@ -22,6 +22,8 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -32,6 +34,8 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "illness_requests")
@@ -42,11 +46,11 @@ public class IllnessRequest extends InformationRequest {
 
   @Required
   @NotNull
-  public LocalDate beginDate;
+  private LocalDate beginDate;
   @Required
   @NotNull
-  public LocalDate endDate;
+  private LocalDate endDate;
   @Required
   @NotNull
-  public String name;
+  private String name;
 }

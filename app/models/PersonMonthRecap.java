@@ -22,6 +22,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
@@ -31,6 +33,8 @@ import play.data.validation.Required;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Table(name = "person_month_recap")
 @Entity
 public class PersonMonthRecap extends BaseModel {
@@ -41,19 +45,19 @@ public class PersonMonthRecap extends BaseModel {
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(updatable = false)
-  public Person person;
+  private Person person;
 
-  public Integer year;
+  private Integer year;
 
-  public Integer month;
+  private Integer month;
 
-  public LocalDate fromDate;
+  private LocalDate fromDate;
 
-  public LocalDate toDate;
+  private LocalDate toDate;
 
-  public Integer trainingHours;
+  private Integer trainingHours;
 
-  public Boolean hoursApproved = false;
+  private Boolean hoursApproved = false;
   
   /**
    * Costruisce un nuono oggetto di ore formazione.
@@ -72,7 +76,7 @@ public class PersonMonthRecap extends BaseModel {
   public String toString() {
     return MoreObjects.toStringHelper(PersonMonthRecap.class)
         .add("person", person.fullName())
-        .add("matricola", person.number)
+        .add("matricola", person.getNumber())
         .add("year", year)
         .add("month", month)
         .toString();

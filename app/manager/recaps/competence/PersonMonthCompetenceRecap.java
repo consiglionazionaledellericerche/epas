@@ -74,12 +74,12 @@ public class PersonMonthCompetenceRecap {
     this.month = month;
 
     //TODO implementare dei metodi un pò più generali (con enum come parametro)
-    this.holidaysAvailability = getHolidaysAvailability(contract.person, year, month);
-    this.weekDayAvailability = getWeekDayAvailability(contract.person, year, month);
-    this.daylightWorkingDaysOvertime = getDaylightWorkingDaysOvertime(contract.person, year, month);
-    this.daylightholidaysOvertime = getDaylightholidaysOvertime(contract.person, year, month);
-    this.ordinaryShift = getOrdinaryShift(contract.person, year, month);
-    this.nightShift = getNightShift(contract.person, year, month);
+    this.holidaysAvailability = getHolidaysAvailability(contract.getPerson(), year, month);
+    this.weekDayAvailability = getWeekDayAvailability(contract.getPerson(), year, month);
+    this.daylightWorkingDaysOvertime = getDaylightWorkingDaysOvertime(contract.getPerson(), year, month);
+    this.daylightholidaysOvertime = getDaylightholidaysOvertime(contract.getPerson(), year, month);
+    this.ordinaryShift = getOrdinaryShift(contract.getPerson(), year, month);
+    this.nightShift = getNightShift(contract.getPerson(), year, month);
 
     Optional<ContractMonthRecap> recap =
             wrapperFactory.create(contract).getContractMonthRecap(new YearMonth(year, month));
@@ -99,7 +99,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      holidaysAvailability = competence.get().valueApproved;
+      holidaysAvailability = competence.get().getValueApproved();
     } else {
       holidaysAvailability = 0;
     }
@@ -116,7 +116,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      weekDayAvailability = competence.get().valueApproved;
+      weekDayAvailability = competence.get().getValueApproved();
     } else {
       weekDayAvailability = 0;
     }
@@ -134,7 +134,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      daylightWorkingDaysOvertime = competence.get().valueApproved;
+      daylightWorkingDaysOvertime = competence.get().getValueApproved();
     } else {
       daylightWorkingDaysOvertime = 0;
     }
@@ -152,7 +152,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      daylightholidaysOvertime = competence.get().valueApproved;
+      daylightholidaysOvertime = competence.get().getValueApproved();
     } else {
       daylightholidaysOvertime = 0;
     }
@@ -169,7 +169,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      ordinaryShift = competence.get().valueApproved;
+      ordinaryShift = competence.get().getValueApproved();
     } else {
       ordinaryShift = 0;
     }
@@ -189,7 +189,7 @@ public class PersonMonthCompetenceRecap {
     Optional<Competence> competence = competenceDao.getCompetence(person, year, month, cmpCode);
 
     if (competence.isPresent()) {
-      nightShift = competence.get().valueApproved;
+      nightShift = competence.get().getValueApproved();
     } else {
       nightShift = 0;
     }

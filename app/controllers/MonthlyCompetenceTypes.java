@@ -61,7 +61,7 @@ public class MonthlyCompetenceTypes extends Controller {
     }
     
     monthlyCompetencetype.save();
-    flash.success(String.format("Codice %s aggiunto con successo", monthlyCompetencetype.name));
+    flash.success(String.format("Codice %s aggiunto con successo", monthlyCompetencetype.getName()));
 
     Competences.manageCompetenceCode();
   }

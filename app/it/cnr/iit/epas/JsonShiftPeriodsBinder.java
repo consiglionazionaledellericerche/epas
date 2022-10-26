@@ -99,7 +99,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
             throw new IllegalArgumentException(
                 String.format("Person with id = %s not found", personId));
           }
-          log.debug("letto id = {} corrispondente a person = {}", personId, person.name);
+          log.debug("letto id = {} corrispondente a person = {}", personId, person.getName());
 
 
           // read and validate the shift slot (MORNING/AFTERNOON)
@@ -116,10 +116,10 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
           ShiftPeriod shiftPeriod =
               new ShiftPeriod(person, start, end, shiftType, false, shiftSlot);
           log.debug("Creato ShiftPeriod person = {}, start={}, end={}, shiftType={}, shiftSlot={}",
-              person.name, start, end, shiftType, shiftSlot);
+              person.getName(), start, end, shiftType, shiftSlot);
 
           shiftPeriods.add(shiftPeriod);
-          log.debug("letto id = {} corrispondente a person = {}", personId, person.name);
+          log.debug("letto id = {} corrispondente a person = {}", personId, person.getName());
         } else {
           ShiftPeriod shiftPeriod = new ShiftPeriod(start, end, shiftType, true);
           shiftPeriods.add(shiftPeriod);

@@ -90,13 +90,13 @@ public class TimeSlots extends Controller {
     rules.checkIfPermitted(office);
     
     List<IWrapperTimeSlot> tsAllowed = FluentIterable
-        .from(office.timeSlots)
+        .from(office.getTimeSlots())
         .transform(wrapperFunctionFactory.timeSlot()).toList();
 
     List<IWrapperTimeSlot> tsAllowedEnabled = Lists.newArrayList();
     List<IWrapperTimeSlot> tsAllowedDisabled = Lists.newArrayList();
     for (IWrapperTimeSlot ts : tsAllowed) {
-      if (ts.getValue().disabled) {
+      if (ts.getValue().isDisabled()) {
         tsAllowedDisabled.add(ts);
       } else {
         tsAllowedEnabled.add(ts);
@@ -117,8 +117,8 @@ public class TimeSlots extends Controller {
   public static void save(@Valid TimeSlot timeSlot) {
     notFoundIfNull(timeSlot);
 
-    if (timeSlot.office != null) {
-      rules.checkIfPermitted(timeSlot.office);
+    if (timeSlot.getOffice() != null) {
+      rules.checkIfPermitted(timeSlot.getOffice());
     } else {
       rules.checkAction("TimeSlots.savePredefined");
     }
@@ -126,14 +126,14 @@ public class TimeSlots extends Controller {
       response.status = 400;
       log.warn("validation errors for {}: {}", timeSlot,
           validation.errorsMap());
-      Long officeId = timeSlot.office != null ? timeSlot.office.id : null;
+      Long officeId = timeSlot.getOffice() != null ? timeSlot.getOffice().id : null;
       render("@blank", timeSlot, officeId);
     } else {
       timeSlot.save();
       log.info("Creata nuova fascia di orario {}, office = {}", 
-          timeSlot.getLabel(), timeSlot.office);
+          timeSlot.getLabel(), timeSlot.getOffice());
     }
-    manageTimeSlots(timeSlot.office != null ? timeSlot.office.id : null);
+    manageTimeSlots(timeSlot.getOffice() != null ? timeSlot.getOffice().id : null);
   }
   
   /**
@@ -151,7 +151,7 @@ public class TimeSlots extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    rules.checkIfPermitted(ts.office);
+    rules.checkIfPermitted(ts.getOffice());
     rules.checkIfPermitted(office);
 
     List<Contract> contractList = wrapperFactory.create(ts).getAssociatedActiveContract(office);
@@ -176,7 +176,7 @@ public class TimeSlots extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    rules.checkIfPermitted(ts.office);
+    rules.checkIfPermitted(ts.getOffice());
     rules.checkIfPermitted(office);
 
     IWrapperTimeSlot wts = wrapperFactory.create(ts);
@@ -197,22 +197,22 @@ public class TimeSlots extends Controller {
     val timeSlot = timeSlotDao.byId(id).orNull();
     notFoundIfNull(timeSlot);
     
-    if (timeSlot.office != null) {
-      rules.checkIfPermitted(timeSlot.office);
+    if (timeSlot.getOffice() != null) {
+      rules.checkIfPermitted(timeSlot.getOffice());
     } else {
       rules.checkAction("TimeSlots.deletePredefined");
     }
     
     //elimino la sorgente se non è associata ad alcun gruppo.
-    if (timeSlot.contractMandatoryTimeSlots.isEmpty()) {
+    if (timeSlot.getContractMandatoryTimeSlots().isEmpty()) {
       timeSlot.delete();
       flash.success(Web.msgDeleted(TimeSlot.class));
     } else {
       flash.error("Per poter una fascia oraria è necessario che non sia associata ad alcun "
           + "contratto.");      
     }
-    if (timeSlot.office != null) {
-      manageOfficeTimeSlots(timeSlot.office.id);
+    if (timeSlot.getOffice() != null) {
+      manageOfficeTimeSlots(timeSlot.getOffice().id);
     } else {
       manageTimeSlots(null);  
     }
@@ -228,20 +228,20 @@ public class TimeSlots extends Controller {
     val timeSlot = timeSlotDao.byId(id).orNull();
     notFoundIfNull(timeSlot);
     
-    if (timeSlot.office != null) {
-      rules.checkIfPermitted(timeSlot.office);
+    if (timeSlot.getOffice() != null) {
+      rules.checkIfPermitted(timeSlot.getOffice());
     } else {
       rules.checkAction("TimeSlots.tooglePredefined");
     }
     
-    timeSlot.disabled = !timeSlot.disabled;
+    timeSlot.setDisabled(!timeSlot.isDisabled());
     timeSlot.save();
 
-    flash.success("%s fascia oraria %s", timeSlot.disabled ? "Disabilita" : "Abilitata", 
+    flash.success("%s fascia oraria %s", timeSlot.isDisabled() ? "Disabilita" : "Abilitata", 
         timeSlot.getLabel());  
     
-    if (timeSlot.office != null) {
-      manageOfficeTimeSlots(timeSlot.office.id);  
+    if (timeSlot.getOffice() != null) {
+      manageOfficeTimeSlots(timeSlot.getOffice().id);  
     } else {
       manageTimeSlots(null);
     }    

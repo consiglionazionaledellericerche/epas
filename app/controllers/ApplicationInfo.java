@@ -25,18 +25,18 @@ public class ApplicationInfo extends Controller {
 
   @NoCheck
   public static void privacyPolicy() {
-    val content = generalSettingDao.generalSetting().cookiePolicyContent; 
+    val content = generalSettingDao.generalSetting().isCookiePolicyEnabled(); 
     render(content);
   }
 
   @Util
   public static boolean isCookiePolicyEnabled() {
-    return generalSettingDao.generalSetting().cookiePolicyEnabled;
+    return generalSettingDao.generalSetting().isCookiePolicyEnabled();
   }
 
   @Util
   public static boolean isRegulationsEnabled() {
-    return generalSettingDao.generalSetting().regulationsEnabled;
+    return generalSettingDao.generalSetting().isRegulationsEnabled();
   }
 
   /**

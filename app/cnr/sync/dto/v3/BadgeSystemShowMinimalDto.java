@@ -56,7 +56,7 @@ public class BadgeSystemShowMinimalDto {
    */
   public static BadgeSystemShowMinimalDto build(BadgeSystem badgeSystem) {
     val dto = modelMapper.map(badgeSystem, BadgeSystemShowMinimalDto.class);
-    dto.setOffice(OfficeDto.build(badgeSystem.office));
+    dto.setOffice(OfficeDto.build(badgeSystem.getOffice()));
     return dto;
   }
 }

@@ -55,7 +55,7 @@ public class SyncBadges extends Job<Void> {
     
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))
-        || !settings.generalSetting().syncBadgesEnabled) {
+        || !settings.generalSetting().isSyncBadgesEnabled()) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }

@@ -58,12 +58,12 @@ public class MealTicketBlockTypeJob extends Job<Void> {
     for (Office office : officeList) {
       BlockType blockType = null;
       TipoBlocchettoSede tipo = null;
-      log.info("Richiedo ad attestati info per sede: {}", office.name);
+      log.info("Richiedo ad attestati info per sede: {}", office.getName());
       //chiedo ad attestati l'informazione...
       try {
         tipo = certificationsComunication
             .getTipoBlocchetto(date.getYear(), date.getMonthOfYear(), office);
-        log.info("Recuperate info su tipo di blocchetto per la sede {}", office.name);
+        log.info("Recuperate info su tipo di blocchetto per la sede {}", office.getName());
       } catch (NoSuchFieldException ex) {
         log.error("Errore nel recupero dei campi inviati: {} ", ex.toString());
         ex.printStackTrace();
@@ -84,7 +84,7 @@ public class MealTicketBlockTypeJob extends Job<Void> {
           break;
         default:
           log.error("Informazione ricevuta da Attestati non comprensibile. "
-                + "Contattare Attestati per info sulla sede {}", office.name);
+                + "Contattare Attestati per info sulla sede {}", office.getName());
           return;
           
       }
@@ -95,16 +95,16 @@ public class MealTicketBlockTypeJob extends Job<Void> {
       
       List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
       RecomputeRecap recomputeRecap =
-          periodManager.buildRecap(newConfiguration.office.getBeginDate(),
+          periodManager.buildRecap(newConfiguration.getOffice().getBeginDate(),
               Optional.fromNullable(LocalDate.now()),
               periodRecaps, Optional.<LocalDate>absent());
-      recomputeRecap.epasParam = newConfiguration.epasParam;
+      recomputeRecap.epasParam = newConfiguration.getEpasParam();
       periodManager.updatePeriods(newConfiguration, true);
 
-      consistencyManager.performRecomputation(newConfiguration.office,
-          newConfiguration.epasParam.recomputationTypes, recomputeRecap.recomputeFrom);
+      consistencyManager.performRecomputation(newConfiguration.getOffice(),
+          newConfiguration.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
       log.info("Aggiornato parametro per la sede {} con valore {}", 
-          office.name, blockType.description);
+          office.getName(), blockType.description);
       
     }
     log.info("End meal ticket block type Job");

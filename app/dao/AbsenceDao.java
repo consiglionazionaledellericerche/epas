@@ -355,7 +355,7 @@ public class AbsenceDao extends DaoBase {
 
     List<Absence> absences =
         getAbsenceByCodeInPeriod(
-            Optional.fromNullable(contract.person), Optional.fromNullable(ab.code),
+            Optional.fromNullable(contract.getPerson()), Optional.fromNullable(ab.getCode()),
             contractInterInterval.getBegin(), contractInterInterval.getEnd(),
             Optional.<JustifiedTypeName>absent(), false, true);
 

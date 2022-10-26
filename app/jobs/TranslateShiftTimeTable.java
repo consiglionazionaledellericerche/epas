@@ -57,59 +57,59 @@ public class TranslateShiftTimeTable extends Job<Void> {
           dao.getByName(manager.transformTimeTableName(tt));
       if (!optional.isPresent()) {
         ostt = new OrganizationShiftTimeTable();
-        ostt.calculationType = tt.calculationType;
-        ostt.office = tt.office;
-        ostt.name = manager.transformTimeTableName(tt);
+        ostt.setCalculationType(tt.getCalculationType());
+        ostt.setOffice(tt.getOffice());
+        ostt.setName(manager.transformTimeTableName(tt));
         ostt.save();
-        log.info("Salvata timetable {}", ostt.name);
+        log.info("Salvata timetable {}", ostt.getName());
         OrganizationShiftSlot slotMorning = new OrganizationShiftSlot();
         
         OrganizationShiftSlot slotEvening = new OrganizationShiftSlot();
-        if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - " + ShiftSlot.MORNING.toString();
+        if (ostt.getName().contains("IIT")) {
+          slotMorning.setName("IIT - " + ShiftSlot.MORNING.toString());
         } else {
-          slotMorning.name = ShiftSlot.MORNING.toString();
+          slotMorning.setName(ShiftSlot.MORNING.toString());
         }      
-        slotMorning.beginSlot = tt.startMorning;
-        slotMorning.endSlot = tt.endMorning;
-        slotMorning.beginMealSlot = tt.startMorningLunchTime;
-        slotMorning.endMealSlot = tt.endMorningLunchTime;
-        slotMorning.minutesPaid = tt.paidMinutes;
-        slotMorning.paymentType = PaymentType.T1;
-        slotMorning.shiftTimeTable = ostt;
+        slotMorning.setBeginSlot(tt.getStartMorning());
+        slotMorning.setEndSlot(tt.getEndMorning());
+        slotMorning.setBeginMealSlot(tt.getStartMorningLunchTime());
+        slotMorning.setEndMealSlot(tt.getEndMorningLunchTime());
+        slotMorning.setMinutesPaid(tt.getPaidMinutes());
+        slotMorning.setPaymentType(PaymentType.T1);
+        slotMorning.setShiftTimeTable(ostt);
         slotMorning.save();
-        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        log.debug("Salvato slot {} per timetable {}", slotMorning.getName(), ostt.getName());
         OrganizationShiftSlot slotAfternoon = new OrganizationShiftSlot();
-        if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - " + ShiftSlot.AFTERNOON.toString();
+        if (ostt.getName().contains("IIT")) {
+          slotMorning.setName("IIT - " + ShiftSlot.AFTERNOON.toString());
         } else {
-          slotMorning.name = ShiftSlot.AFTERNOON.toString();
+          slotMorning.setName(ShiftSlot.AFTERNOON.toString());
         } 
-        slotAfternoon.beginSlot = tt.startAfternoon;
-        slotAfternoon.endSlot = tt.endAfternoon;
-        slotAfternoon.beginMealSlot = tt.startAfternoonLunchTime;
-        slotAfternoon.endMealSlot = tt.endAfternoonLunchTime;
-        slotAfternoon.minutesPaid = tt.paidMinutes;
-        slotMorning.paymentType = PaymentType.T1;
-        slotAfternoon.shiftTimeTable = ostt;
+        slotAfternoon.setBeginSlot(tt.getStartAfternoon());
+        slotAfternoon.setEndSlot(tt.getEndAfternoon());
+        slotAfternoon.setBeginMealSlot(tt.getStartAfternoonLunchTime());
+        slotAfternoon.setEndMealSlot(tt.getEndAfternoonLunchTime());
+        slotAfternoon.setMinutesPaid(tt.getPaidMinutes());
+        slotMorning.setPaymentType(PaymentType.T1);
+        slotAfternoon.setShiftTimeTable(ostt);
         slotAfternoon.save();
-        log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+        log.debug("Salvato slot {} per timetable {}", slotMorning.getName(), ostt.getName());
         
-        if (ostt.name.contains("IIT")) {
-          slotMorning.name = "IIT - " + ShiftSlot.EVENING.toString();
+        if (ostt.getName().contains("IIT")) {
+          slotMorning.setName("IIT - " + ShiftSlot.EVENING.toString());
         } else {
-          slotMorning.name = ShiftSlot.EVENING.toString();
+          slotMorning.setName(ShiftSlot.EVENING.toString());
         } 
-        if (tt.startEvening != null && tt.endEvening != null) {
-          slotEvening.beginSlot = tt.startEvening;
-          slotEvening.endSlot = tt.endEvening;
-          slotEvening.beginMealSlot = tt.startEveningLunchTime;
-          slotEvening.endMealSlot = tt.endEveningLunchTime;
-          slotEvening.minutesPaid = tt.paidMinutes;
-          slotMorning.paymentType = PaymentType.T1;
-          slotEvening.shiftTimeTable = ostt;
+        if (tt.getStartEvening() != null && tt.getEndEvening() != null) {
+          slotEvening.setBeginSlot(tt.getStartEvening());
+          slotEvening.setEndSlot(tt.getEndEvening());
+          slotEvening.setBeginMealSlot(tt.getStartEveningLunchTime());
+          slotEvening.setEndMealSlot(tt.getEndEveningLunchTime());
+          slotEvening.setMinutesPaid(tt.getPaidMinutes());
+          slotMorning.setPaymentType(PaymentType.T1);
+          slotEvening.setShiftTimeTable(ostt);
           slotEvening.save();
-          log.debug("Salvato slot {} per timetable {}", slotMorning.name, ostt.name);
+          log.debug("Salvato slot {} per timetable {}", slotMorning.getName(), ostt.getName());
         }
       }
       

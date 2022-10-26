@@ -99,7 +99,7 @@ public class CertificationManager {
         if (mealTicket > 0) {
           sb.append(person.getFullname());
           sb.append(";");
-          sb.append(fillNumber(person.number));
+          sb.append(fillNumber(person.getNumber()));
           sb.append(";");          
           sb.append(String.valueOf(mealTicket));
           sb.append(";");

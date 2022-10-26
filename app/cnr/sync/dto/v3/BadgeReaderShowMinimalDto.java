@@ -40,7 +40,7 @@ public class BadgeReaderShowMinimalDto {
    */
   public static BadgeReaderShowMinimalDto buildMinimal(BadgeReader badgeReader) {
     val dto = modelMapper.map(badgeReader, BadgeReaderShowMinimalDto.class);
-    dto.setUsername(badgeReader.user.username);
+    dto.setUsername(badgeReader.getUser().getUsername());
     return dto;
   }
 }

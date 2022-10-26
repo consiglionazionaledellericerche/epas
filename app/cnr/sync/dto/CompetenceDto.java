@@ -41,10 +41,10 @@ public class CompetenceDto {
     @Override
     public CompetenceDto apply(Competence competence) {
       CompetenceDto competenceDto = new CompetenceDto();
-      competenceDto.year = competence.year;
-      competenceDto.month = competence.month;
-      competenceDto.code = competence.competenceCode.code;
-      competenceDto.valueApproved = competence.valueApproved;
+      competenceDto.year = competence.getYear();
+      competenceDto.month = competence.getMonth();
+      competenceDto.code = competence.getCompetenceCode().getCode();
+      competenceDto.valueApproved = competence.getValueApproved();
       return competenceDto;
     }
   }

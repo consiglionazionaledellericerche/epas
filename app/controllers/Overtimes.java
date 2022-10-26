@@ -88,7 +88,7 @@ public class Overtimes extends Controller {
     if (person == null) {
       notFound(String.format("Person with email = %s doesn't exist", email));
     }
-    Logger.debug("Find persons %s with email %s", person.name, email);
+    Logger.debug("Find persons %s with email %s", person.getName(), email);
 
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
@@ -101,8 +101,8 @@ public class Overtimes extends Controller {
       // TODO:
     }
 
-    int totaleResiduoAnnoCorrenteFineMese = recap.get().remainingMinutesCurrentYear;
-    int residuoDelMese = recap.get().progressivoFinaleMese;
+    int totaleResiduoAnnoCorrenteFineMese = recap.get().getRemainingMinutesCurrentYear();
+    int residuoDelMese = recap.get().getProgressivoFinaleMese();
     int tempoDisponibilePerStraordinari = recap.get().getPositiveResidualInMonth();
     OvertimesData personOvertimesData =
             new OvertimesData(totaleResiduoAnnoCorrenteFineMese,
@@ -127,7 +127,7 @@ public class Overtimes extends Controller {
     if (person == null) {
       notFound(String.format("Person with email = %s doesn't exist", email));
     }
-    Logger.debug("Find persons %s with email %s", person.name, email);
+    Logger.debug("Find persons %s with email %s", person.getName(), email);
 
 
     PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
@@ -136,7 +136,7 @@ public class Overtimes extends Controller {
     }
 
     Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s",
-        personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
+        personHourForOvertime.getPerson(), personHourForOvertime.getNumberOfHourForOvertime());
 
     render(personHourForOvertime);
   }
@@ -174,7 +174,7 @@ public class Overtimes extends Controller {
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
     Optional<Person> person = personDao.byEmail(email);
     notFoundIfNull(person.orNull());
-    log.debug("Find persons %s with email %s", person.get().name, email);
+    log.debug("Find persons %s with email %s", person.get().getName(), email);
 
     overtimesManager.setSupervisorOvertime(person.get(), hours);
 
@@ -204,7 +204,7 @@ public class Overtimes extends Controller {
 
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
     log.debug("find  CompetenceCode %s con CompetenceCode.code=%s",
-        competenceCode, competenceCode.code);
+        competenceCode, competenceCode.getCode());
 
     overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);
 

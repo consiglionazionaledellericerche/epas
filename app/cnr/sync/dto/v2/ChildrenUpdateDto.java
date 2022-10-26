@@ -35,10 +35,10 @@ public class ChildrenUpdateDto extends ChildrenCreateDto {
    * presenti nell'instanza di questo DTO.
    */
   public void update(PersonChildren children) {
-    children.name = getName();
-    children.surname = getSurname();
-    children.bornDate = JodaConverters.javaToJodaLocalDate(getBornDate());
-    children.taxCode = getFiscalCode();
-    children.externalId = getExternalId();
+    children.setName(getName());
+    children.setSurname(getSurname());
+    children.setBornDate(JodaConverters.javaToJodaLocalDate(getBornDate()));
+    children.setTaxCode(getFiscalCode());
+    children.setExternalId(getExternalId());
   }
 }

@@ -61,9 +61,9 @@ public class ChildrenCreateDto {
   public static PersonChildren build(ChildrenCreateDto dto) {
     val children = modelMapper.map(dto, PersonChildren.class);
     if (dto.getPersonId() != null) {
-      children.person = Person.findById(dto.getPersonId());  
+      children.setPerson(Person.findById(dto.getPersonId()));  
     }
-    children.taxCode = dto.getFiscalCode();
+    children.setTaxCode(dto.getFiscalCode());
     return children;
   }
 }

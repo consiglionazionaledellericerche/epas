@@ -22,6 +22,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
@@ -32,6 +34,8 @@ import play.data.validation.Required;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "total_overtime")
 public class TotalOvertime extends BaseModel {
@@ -39,13 +43,13 @@ public class TotalOvertime extends BaseModel {
   private static final long serialVersionUID = 468974629639837568L;
 
   @Required
-  public LocalDate date;
+  private LocalDate date;
 
-  public Integer numberOfHours;
+  private Integer numberOfHours;
 
-  public Integer year;
+  private Integer year;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
-  public Office office;
+  private Office office;
 }

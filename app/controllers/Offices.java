@@ -118,7 +118,7 @@ public class Offices extends Controller {
     notFoundIfNull(institute);
 
     Office office = new Office();
-    office.institute = institute;
+    office.setInstitute(institute);
     render(office);
   }
 
@@ -129,7 +129,7 @@ public class Offices extends Controller {
    */
   public static void save(@Valid Office office) {
 
-    Preconditions.checkNotNull(office.institute);
+    Preconditions.checkNotNull(office.getInstitute());
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -142,8 +142,8 @@ public class Offices extends Controller {
         render("@edit", office, wrOffice);
       }
     } else {
-      if (office.beginDate == null) {
-        office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      if (office.getBeginDate() == null) {
+        office.setBeginDate(new LocalDate(LocalDate.now().getYear() - 1, 12, 31));
       }
       office.save();
 

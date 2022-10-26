@@ -233,15 +233,15 @@ public class ContractPerseoConsumer {
   private Contract epasConverter(PerseoContract perseoContract, Person person) {
 
     Contract contract = new Contract();
-    contract.beginDate = perseoContract.beginContract != null
-        ? new LocalDate(perseoContract.beginContract) : null;
-    contract.endDate = perseoContract.expireContract != null
-        ? new LocalDate(perseoContract.expireContract) : null;
-    contract.endContract = perseoContract.endContract != null
-        ? new LocalDate(perseoContract.endContract) : null;
-    contract.isTemporaryMissing = perseoContract.temporary;
-    contract.perseoId = perseoContract.id;
-    contract.person = person;
+    contract.setBeginDate(perseoContract.beginContract != null
+        ? new LocalDate(perseoContract.beginContract) : null);
+    contract.setEndDate(perseoContract.expireContract != null
+        ? new LocalDate(perseoContract.expireContract) : null);
+    contract.setEndContract(perseoContract.endContract != null
+        ? new LocalDate(perseoContract.endContract) : null);
+    contract.setTemporaryMissing(perseoContract.temporary);
+    contract.setPerseoId(perseoContract.id);
+    contract.setPerson(person);
 
     return contract;
   }
@@ -282,7 +282,7 @@ public class ContractPerseoConsumer {
 
     Optional<Long> officePerseoId = Optional.<Long>absent();
     if (office.isPresent()) {
-      officePerseoId = Optional.of(office.get().perseoId);
+      officePerseoId = Optional.of(office.get().getPerseoId());
     }
 
     List<PerseoContract> perseoContracts = Lists.newArrayList();
@@ -303,9 +303,9 @@ public class ContractPerseoConsumer {
 
     for (Contract contract : epasConverter(perseoContracts,
         departmentSyncrhonizedPeopleByPerseoId)) {
-      List<Contract> list = maps.get(contract.person.perseoId);
+      List<Contract> list = maps.get(contract.getPerson().getPerseoId());
       if (list == null) {
-        maps.put(contract.person.perseoId, Lists.newArrayList(contract));
+        maps.put(contract.getPerson().getPerseoId(), Lists.newArrayList(contract));
       } else {
         list.add(contract);
       }
@@ -375,9 +375,9 @@ public class ContractPerseoConsumer {
 
     Map<Long, Contract> activeSynchronizedEpas = Maps.newHashMap();
     for (IWrapperPerson wrPerson : wrapperedPeople) {
-      if (wrPerson.getCurrentContract().isPresent() && wrPerson.getValue().perseoId != null) {
+      if (wrPerson.getCurrentContract().isPresent() && wrPerson.getValue().getPerseoId() != null) {
         activeSynchronizedEpas
-        .put(wrPerson.getValue().perseoId, wrPerson.getCurrentContract().get());
+        .put(wrPerson.getValue().getPerseoId(), wrPerson.getCurrentContract().get());
       }
     }
     return activeSynchronizedEpas;
@@ -412,7 +412,7 @@ public class ContractPerseoConsumer {
     Map<Long, Contract> perseoContractsMap = Maps.newHashMap();
     for (Contract contract : epasConverter(perseoContracts,
         departmentSyncrhonizedPeopleByPerseoId)) {
-      perseoContractsMap.put(contract.person.perseoId, contract);
+      perseoContractsMap.put(contract.getPerson().getPerseoId(), contract);
     }
 
     return perseoContractsMap;

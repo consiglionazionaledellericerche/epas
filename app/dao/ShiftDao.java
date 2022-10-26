@@ -183,9 +183,10 @@ public class ShiftDao extends DaoBase {
 
     final QPersonShiftDay sc = QPersonShiftDay.personShiftDay;
     return getQueryFactory().delete(sc)
-        .where(sc.date.eq(personShiftDay.date)
-            .and(sc.shiftType.eq(personShiftDay.shiftType)
-                .and(sc.personShift.person.eq(personShiftDay.personShift.person)))).execute();
+        .where(sc.date.eq(personShiftDay.getDate())
+            .and(sc.shiftType.eq(personShiftDay.getShiftType())
+                .and(sc.personShift.person.eq(personShiftDay.getPersonShift().getPerson()))))
+        .execute();
   }
 
 

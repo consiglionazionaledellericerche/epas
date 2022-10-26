@@ -25,6 +25,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.MutableModel;
 import models.enumerate.NotificationSubject;
 import play.data.validation.Required;
@@ -34,6 +36,8 @@ import play.data.validation.Required;
  *
  * @author Marco Andreini
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "notifications")
 public class Notification extends MutableModel {
@@ -42,23 +46,23 @@ public class Notification extends MutableModel {
 
   @NotNull
   @ManyToOne(optional = false)
-  public User recipient;
+  private User recipient;
 
   @Required
   @NotNull
-  public String message;
+  private String message;
 
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public NotificationSubject subject;
+  private NotificationSubject subject;
 
   // id dell'oggetto correlato indicato dal target.
   @Column(name = "subject_id")
-  public Long subjectId;
+  private Long subjectId;
 
   @NotNull
-  public boolean read = false;
+  private boolean read = false;
 
   @Transient
   public boolean isRedirect() {

@@ -35,12 +35,12 @@ public class ContractEndContractCheck extends Check {
       return false;
     }
     final Contract contract = (Contract) validatedObject;
-    if (contract.endContract != null && contract.endContract.isBefore(contract.beginDate)) {
+    if (contract.getEndContract() != null && contract.getEndContract().isBefore(contract.getBeginDate())) {
       setMessage("validation.contract.endContractBeforeBeginContract");
       return false;
     }
-    if (contract.endDate != null && contract.endContract != null 
-        && contract.endContract.isAfter(contract.endDate)) {
+    if (contract.getEndDate() != null && contract.getEndContract() != null 
+        && contract.getEndContract().isAfter(contract.getEndDate())) {
       setMessage("validation.contract.endContractBeforeEndDate");
       return false;      
     }

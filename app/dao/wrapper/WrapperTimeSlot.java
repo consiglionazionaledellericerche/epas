@@ -71,7 +71,7 @@ public class WrapperTimeSlot implements IWrapperTimeSlot {
     for (Contract contract : activeContract) {
       Optional<ContractMandatoryTimeSlot> current = contractManager
               .getContractMandatoryTimeSlotFromDate(contract, today);
-      if (current.isPresent() && current.get().timeSlot.equals(this.value)) {
+      if (current.isPresent() && current.get().getTimeSlot().equals(this.value)) {
         list.add(contract);
       }
     }
@@ -89,14 +89,14 @@ public class WrapperTimeSlot implements IWrapperTimeSlot {
     List<Contract> activeContract = contractDao
         .getActiveContractsInPeriod(today, Optional.fromNullable(today), Optional.of(office));
 
-    return activeContract.stream().flatMap(c -> c.contractMandatoryTimeSlots.stream())
-      .filter(cmts -> cmts.timeSlot.equals(this.value)).collect(Collectors.toList());
+    return activeContract.stream().flatMap(c -> c.getContractMandatoryTimeSlots().stream())
+      .filter(cmts -> cmts.getTimeSlot().equals(this.value)).collect(Collectors.toList());
     
   }
 
   @Override
   public List<Contract> getAssociatedContract() {
-    return this.value.contractMandatoryTimeSlots.stream()
-        .map(cmts -> cmts.contract).collect(Collectors.toList());
+    return this.value.getContractMandatoryTimeSlots().stream()
+        .map(cmts -> cmts.getContract()).collect(Collectors.toList());
   }
 }

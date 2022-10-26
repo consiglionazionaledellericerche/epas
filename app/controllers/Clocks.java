@@ -122,7 +122,7 @@ public class Clocks extends Controller {
       show();
     }
 
-    final User user = person.user;
+    final User user = person.getUser();
 
     if (user == null) {
       flash.error("La persona selezionata non dispone di un account valido."
@@ -132,9 +132,9 @@ public class Clocks extends Controller {
 
     checkIpEnabled(person);
 
-    if (Security.authenticate(user.username, password)) {
+    if (Security.authenticate(user.getUsername(), password)) {
       // Mark user as connected
-      session.put("username", user.username);
+      session.put("username", user.getUsername());
       daySituation();
     } else {
       flash.error("Autenticazione fallita!");
@@ -172,7 +172,7 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.office)) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -192,7 +192,7 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -203,7 +203,7 @@ public class Clocks extends Controller {
 
     final LocalDate today = LocalDate.now();
 
-    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(user.person, today);
+    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(user.getPerson(), today);
 
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 
@@ -226,7 +226,7 @@ public class Clocks extends Controller {
       daySituation();
     }
 
-    final Person currentPerson = Security.getUser().get().person;
+    final Person currentPerson = Security.getUser().get().getPerson();
     final LocalDate today = LocalDate.now();
     render(wayType, currentPerson, today);
   }
@@ -246,7 +246,7 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -255,12 +255,12 @@ public class Clocks extends Controller {
     }
 
     final PersonDay personDay = personDayManager
-        .getOrCreateAndPersistPersonDay(user.person, LocalDate.now());
+        .getOrCreateAndPersistPersonDay(user.getPerson(), LocalDate.now());
     final Stamping stamping = new Stamping(personDay, LocalDateTime.now());
 
-    stamping.way = way;
-    stamping.stampType = stampType;
-    stamping.note = note;
+    stamping.setWay(way);
+    stamping.setStampType(stampType);
+    stamping.setNote(note);
 
     validation.valid(stamping);
 
@@ -269,11 +269,11 @@ public class Clocks extends Controller {
       daySituation();
     }
 
-    stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
+    stamping.getPersonDay().getStampings().stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
-      if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-          || s.way == stamping.way
-          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2) {
+      if (Minutes.minutesBetween(s.getDate(), stamping.getDate()).getMinutes() < 1
+          || s.getWay() == stamping.getWay()
+          && Minutes.minutesBetween(s.getDate(), stamping.getDate()).getMinutes() < 2) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
             + "Attendere 1 minuto per timbrature nel verso opposto o "
@@ -284,7 +284,7 @@ public class Clocks extends Controller {
 
     stamping.save();
 
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
 
     daySituation();
   }

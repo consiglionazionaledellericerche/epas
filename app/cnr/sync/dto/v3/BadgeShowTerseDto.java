@@ -52,7 +52,7 @@ public class BadgeShowTerseDto {
    */
   public static BadgeShowTerseDto build(Badge badge) {
     val dto = modelMapper.map(badge, BadgeShowTerseDto.class);
-    dto.setPerson(PersonShowTerseDto.build(badge.person));
+    dto.setPerson(PersonShowTerseDto.build(badge.getPerson()));
     return dto;
   }
 

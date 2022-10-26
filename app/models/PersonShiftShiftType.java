@@ -24,6 +24,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
@@ -35,6 +37,8 @@ import play.data.validation.Required;
  * @author Cristian Lucchesi
  * @author Arianna Del Soldato
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "person_shift_shift_type")
 public class PersonShiftShiftType extends BaseModel {
@@ -44,22 +48,22 @@ public class PersonShiftShiftType extends BaseModel {
   @Required
   @ManyToOne
   @JoinColumn(name = "personshifts_id")
-  public PersonShift personShift;
+  private PersonShift personShift;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "shifttypes_id")
-  public ShiftType shiftType;
+  private ShiftType shiftType;
 
 
   @Column(name = "begin_date")
-  public LocalDate beginDate;
+  private LocalDate beginDate;
 
 
   @Column(name = "end_date")
-  public LocalDate endDate;
+  private LocalDate endDate;
 
-  public boolean jolly;
+  private boolean jolly;
 
   /**
    * Il range di date di appartenenza della persona all'attività.

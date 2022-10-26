@@ -55,10 +55,10 @@ public class GroupCreateDto {
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val group = modelMapper.map(groupDto, Group.class);
     if (groupDto.getOfficeId() != null) {
-      group.office = Office.findById(groupDto.getOfficeId());  
+      group.setOffice(Office.findById(groupDto.getOfficeId()));  
     }
     if (groupDto.getManagerId() != null) {
-      group.manager = Person.findById(groupDto.getManagerId());  
+      group.setManager(Person.findById(groupDto.getManagerId()));  
     }
     return group;
   }

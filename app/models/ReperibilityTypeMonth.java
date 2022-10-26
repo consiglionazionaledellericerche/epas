@@ -23,6 +23,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
@@ -32,6 +34,8 @@ import play.data.validation.Required;
  * Mantiene l'informazione sull'approvazione delle reperibilità
  * di una persona in un determinato mese.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "reperibility_type_month", uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -42,12 +46,12 @@ public class ReperibilityTypeMonth extends MutableModel {
 
   @Required
   @Column(name = "year_month", nullable = false)
-  public YearMonth yearMonth;
+  private YearMonth yearMonth;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "person_reperibility_type_id", nullable = false)
-  public PersonReperibilityType personReperibilityType;
+  private PersonReperibilityType personReperibilityType;
 
-  public boolean approved;
+  private boolean approved;
 }

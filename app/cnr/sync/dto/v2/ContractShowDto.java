@@ -52,7 +52,7 @@ public class ContractShowDto extends ContractShowTerseDto {
    */
   public static ContractShowDto build(Contract contract) throws IllegalStateException {
     val contractDto = modelMapper.map(contract, ContractShowDto.class);
-    contractDto.setPerson(PersonShowTerseDto.build(contract.person));
+    contractDto.setPerson(PersonShowTerseDto.build(contract.getPerson()));
     if (contract.getPreviousContract() != null) {
       if (contract.getPreviousContract().id.equals(contract.id)) {
         throw new IllegalStateException(
@@ -63,7 +63,7 @@ public class ContractShowDto extends ContractShowTerseDto {
       contractDto.setPreviousContract(ContractShowTerseDto.build(contract.getPreviousContract()));
     }
     contractDto.setWorkingTimeTypes(
-        contract.contractWorkingTimeType.stream()
+        contract.getContractWorkingTimeType().stream()
           .map(ContractWorkingTimeTypeShowTerseDto::build)
           .collect(Collectors.toSet()));
     return contractDto;

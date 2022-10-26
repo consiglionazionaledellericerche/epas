@@ -105,13 +105,13 @@ public class EmailManager {
   public void recoveryPasswordMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 
-    final String message = "Utente: " + person.user.username
+    final String message = "Utente: " + person.getUser().getUsername()
             + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: "
-            + getRecoveryBaseUrl(person.user.recoveryToken);
+            + getRecoveryBaseUrl(person.getUser().getRecoveryToken());
 
     final String subject = "ePas Recupero Password";
 
-    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
+    sendMail(Optional.<String>absent(), person.getEmail(), Optional.absent(), subject, message);
   }
 
   /**
@@ -121,10 +121,10 @@ public class EmailManager {
   public void newUserMail(Person person) {
     Preconditions.checkState(person != null && person.isPersistent());
 
-    if (!(Boolean) configurationManager.configValue(person.office, EpasParam.SEND_EMAIL)) {
+    if (!(Boolean) configurationManager.configValue(person.getOffice(), EpasParam.SEND_EMAIL)) {
       log.info("Non verrà inviata la mail a {} in quanto "
           + "la sua sede {} ha invio mail disabilitato",
-          person.getFullname(), person.office.name);
+          person.getFullname(), person.getOffice().getName());
       return;
     }
     
@@ -139,12 +139,12 @@ public class EmailManager {
                     + "da questo indirizzo %s\r\n"
                     + "\r\n"
                     + "Il Team di ePas.",
-            person.fullName(), BASE_URL, person.user.username,
-            getRecoveryBaseUrl(person.user.recoveryToken));
+            person.fullName(), BASE_URL, person.getUser().getUsername(),
+            getRecoveryBaseUrl(person.getUser().getRecoveryToken()));
 
     final String subject = "Nuovo inserimento Utente in ePas";
 
-    sendMail(Optional.<String>absent(), person.email, Optional.absent(), subject, message);
+    sendMail(Optional.<String>absent(), person.getEmail(), Optional.absent(), subject, message);
   }
   
   /**
@@ -180,7 +180,7 @@ public class EmailManager {
         + "\n" 
         + "Il Direttore IIT";
     
-    sendMail(Optional.of("direttore@iit.cnr.it"), person.email, Optional.absent(), 
+    sendMail(Optional.of("direttore@iit.cnr.it"), person.getEmail(), Optional.absent(), 
         subject, message);
   }
   
@@ -214,12 +214,12 @@ public class EmailManager {
           new Comparator<CheckGreenPass>() {
             @Override
             public int compare(CheckGreenPass cgp1, CheckGreenPass cgp2) {
-              return cgp1.person.surname.compareTo(cgp2.person.surname);
+              return cgp1.getPerson().getSurname().compareTo(cgp2.getPerson().getSurname());
             }
           });
 
       for (CheckGreenPass gp : peopleSelected) {
-        sb.append(gp.person.getFullname() + "\r\n");
+        sb.append(gp.getPerson().getFullname() + "\r\n");
       }      
     }
 

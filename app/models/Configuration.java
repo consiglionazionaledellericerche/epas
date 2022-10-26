@@ -25,15 +25,20 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import manager.configurations.EpasParam;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;
 
 
+
 /**
  * Singola configurazione di un ufficio.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "configurations")
@@ -43,14 +48,14 @@ public class Configuration extends PropertyInPeriod {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
-  public Office office;
+  private Office office;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "epas_param")
-  public EpasParam epasParam;
+  private EpasParam epasParam;
 
   @Column(name = "field_value")
-  public String fieldValue;
+  private String fieldValue;
 
   @Override
   public IPropertiesInPeriodOwner getOwner() {

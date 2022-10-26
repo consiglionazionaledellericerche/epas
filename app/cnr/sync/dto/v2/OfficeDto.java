@@ -47,10 +47,10 @@ public class OfficeDto {
   public static OfficeDto build(Office office) {
     return OfficeDto.builder()
         .id(office.id)
-        .name(office.name)
-        .code(office.code)
-        .codeId(office.codeId)
-        .updatedAt(office.updatedAt)
+        .name(office.getName())
+        .code(office.getCode())
+        .codeId(office.getCodeId())
+        .updatedAt(office.getUpdatedAt())
         .build();
   }
 }

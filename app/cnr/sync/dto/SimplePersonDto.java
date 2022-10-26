@@ -45,10 +45,10 @@ public class SimplePersonDto {
     public SimplePersonDto apply(Person person) {
       SimplePersonDto personDto = new SimplePersonDto();
       personDto.id = person.id;
-      personDto.firstname = person.name;
-      personDto.surname = person.surname;
-      personDto.email = person.email;
-      personDto.uidCnr = person.eppn;
+      personDto.firstname = person.getName();
+      personDto.surname = person.getSurname();
+      personDto.email = person.getEmail();
+      personDto.uidCnr = person.getEppn();
       return personDto;
     }
   }

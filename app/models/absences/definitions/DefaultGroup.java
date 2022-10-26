@@ -464,7 +464,7 @@ public enum DefaultGroup {
     for (DefaultGroup defaultGroup : DefaultGroup.values()) {
       boolean found = false;
       for (GroupAbsenceType group : allGroup) {
-        if (defaultGroup.name().equals(group.name)) {
+        if (defaultGroup.name().equals(group.getName())) {
           found = true;
           break;
         }
@@ -483,7 +483,7 @@ public enum DefaultGroup {
    */
   public static Optional<DefaultGroup> byName(GroupAbsenceType group) {
     for (DefaultGroup defaultGroup : DefaultGroup.values()) {
-      if (defaultGroup.name().equals(group.name)) {
+      if (defaultGroup.name().equals(group.getName())) {
         return Optional.of(defaultGroup);
       }
     }

@@ -56,10 +56,10 @@ public class ShiftMonthStatus extends Job<Void> {
     final YearMonth currentMonth = YearMonth.now();
 
     shiftTypes.forEach(activity -> {
-      if (activity.monthsStatus.isEmpty()) {
-        final Optional<LocalDate> oldestShift = activity.personShiftDays.stream()
-            .min(Comparator.comparing(shift -> shift.date))
-            .map(personShiftDay -> personShiftDay.date);
+      if (activity.getMonthsStatus().isEmpty()) {
+        final Optional<LocalDate> oldestShift = activity.getPersonShiftDays().stream()
+            .min(Comparator.comparing(shift -> shift.getDate()))
+            .map(personShiftDay -> personShiftDay.getDate());
         if (!oldestShift.isPresent()) {
           log.debug("attività {} senza personShiftDays, monthStatus non creato.", activity);
           return;
@@ -68,9 +68,9 @@ public class ShiftMonthStatus extends Job<Void> {
         do {
 
           ShiftTypeMonth monthStatus = new ShiftTypeMonth();
-          monthStatus.shiftType = activity;
-          monthStatus.yearMonth = month;
-          monthStatus.approved = true;
+          monthStatus.setShiftType(activity);
+          monthStatus.setYearMonth(month);
+          monthStatus.setApproved(true);
           monthStatus.save();
 
           log.info("Creato nuovo {} per il turno {} nel mese {}",

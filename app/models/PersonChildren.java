@@ -24,6 +24,8 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -39,6 +41,8 @@ import play.data.validation.Required;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Audited
 public class PersonChildren extends BaseModel {
@@ -46,24 +50,24 @@ public class PersonChildren extends BaseModel {
   private static final long serialVersionUID = 2528486222814596830L;
 
   @Required
-  public String name;
+  private String name;
 
   @Required
-  public String surname;
+  private String surname;
 
   @CheckWith(LocalDatePast.class)
   @Required
-  public LocalDate bornDate;
+  private LocalDate bornDate;
   
-  public String taxCode;
+  private String taxCode;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  public Person person;
+  private Person person;
   
-  public String externalId;
+  private String externalId;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PrePersist
   @PreUpdate

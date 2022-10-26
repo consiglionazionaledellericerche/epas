@@ -95,7 +95,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     List<Contract> expriredContracts = contractDao.getExpiredContractsInPeriod(begin, end,
         Optional.absent()).stream().filter(
-            c -> !wrapperFactory.create(c.person).getCurrentContract().isPresent())
+            c -> !wrapperFactory.create(c.getPerson()).getCurrentContract().isPresent())
         .collect(Collectors.toList());
 
     Map<Group, Set<Contract>> groupsManagers = new HashMap<>();
@@ -104,7 +104,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     for (Contract expiredContract : expriredContracts) {
       LocalDate endContractDate = expiredContract.calculatedEnd();
-      Person person = expiredContract.person;
+      Person person = expiredContract.getPerson();
       log.info("Persona {} endDate contratto scaduto {}", person.fullName(), endContractDate);
 
       val groupsToNotify = disableGroupAffiliation(person, endContractDate);
@@ -171,29 +171,29 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     for (PersonReperibilityDay prd : reperibilities) {
 
-      val pr = prd.personReperibility;
+      val pr = prd.getPersonReperibility();
 
-      if (prd.date.isAfter(
+      if (prd.getDate().isAfter(
           endContractDate)) {
-        reperibilityTypes.add(prd.reperibilityType);
+        reperibilityTypes.add(prd.getReperibilityType());
         reperibilitiesToUpdate.add(pr);
 
         long cancelled =
-            personReperibilityDayDao.deletePersonReperibilityDay(prd.reperibilityType, prd.date);
+            personReperibilityDayDao.deletePersonReperibilityDay(prd.getReperibilityType(), prd.getDate());
         if (cancelled == 1) {
           log.info("Rimossa reperibilità di tipo {} del giorno {} di {}",
-              prd.reperibilityType, prd.date, person.fullName());
+              prd.getReperibilityType(), prd.getDate(), person.fullName());
         }
       }
     }
 
     for (PersonReperibility pr : reperibilitiesToUpdate) {
-      if (pr.endDate == null || pr.endDate.isAfter(endContractDate)) {
-        pr.endDate = endContractDate;
+      if (pr.getEndDate() == null || pr.getEndDate().isAfter(endContractDate)) {
+        pr.setEndDate(endContractDate);
         pr.save();
         log.info(
             "Aggiornata situazione date di reperibilità {}  start date {} end date {}",
-            person.fullName(), pr.startDate, pr.endDate);
+            person.fullName(), pr.getStartDate(), pr.getEndDate());
       }
     }
 
@@ -221,19 +221,19 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     var removeShift = false;
 
     for (PersonShiftShiftType psst : personShiftShiftType) {
-      if (psst.endDate == null || psst.endDate.isAfter(endContractDate)) {
+      if (psst.getEndDate() == null || psst.getEndDate().isAfter(endContractDate)) {
         removeShift = true;
         shiftToDeactivated.add(psst);
-        psst.endDate = endContractDate;
+        psst.setEndDate(endContractDate);
         psst.save();
         log.info(
             "Aggiornata situazione date di abilitazione ai turni di {}  start date {} end date {}",
-            person.fullName(), psst.beginDate, psst.endDate);
+            person.fullName(), psst.getBeginDate(), psst.getEndDate());
       }
     }
 
     if (removeShift) {
-      personShift.disabled = true;
+      personShift.setDisabled(true);
       personShift.save();
     }
 
@@ -259,7 +259,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     groups.forEach(group ->
         {
-          group.affiliations.stream()
+          group.getAffiliations().stream()
               .filter(a -> a.isActive() && a.getPerson().id.equals(person.id)).forEach(a -> {
                 groupsToDeactivated.add(a.getGroup());
                 java.time.LocalDate endDate = java.time.LocalDate.of(endContractDate.getYear(),

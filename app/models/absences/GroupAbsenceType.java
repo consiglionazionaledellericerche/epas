@@ -32,6 +32,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -41,6 +42,8 @@ import play.data.validation.Required;
 /**
  * Tipologia di gruppo di assenze.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "group_absence_types")
@@ -52,60 +55,60 @@ public class GroupAbsenceType extends BaseModel {
 
   @Required
   @Column
-  public String name;
+  private String name;
   
   //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
   @Required
   @Column
-  public String description;
+  private String description;
 
   //Se i gruppi sono concatenati e si vuole una unica etichetta (da assegnare alla radice)
   // Esempio Congedi primo figlio 100%, Congedi primo figlio 30% hanno una unica chainDescription
   @Column(name = "chain_description")
-  public String chainDescription;
+  private String chainDescription;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_type_id")
-  public CategoryGroupAbsenceType category;
+  private CategoryGroupAbsenceType category;
   
   @Column
-  public int priority;
+  private int priority;
   
   @Required
   @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
-  public GroupAbsenceTypePattern pattern;
+  private GroupAbsenceTypePattern pattern;
   
   @Required
   @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
-  public PeriodType periodType;
+  private PeriodType periodType;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "takable_behaviour_id")
-  public TakableAbsenceBehaviour takableAbsenceBehaviour;
+  private TakableAbsenceBehaviour takableAbsenceBehaviour;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "complation_behaviour_id")
-  public ComplationAbsenceBehaviour complationAbsenceBehaviour;
+  private ComplationAbsenceBehaviour complationAbsenceBehaviour;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")
-  public GroupAbsenceType nextGroupToCheck;
+  private GroupAbsenceType nextGroupToCheck;
 
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> previousGroupChecked = Sets.newHashSet();
+  private Set<GroupAbsenceType> previousGroupChecked = Sets.newHashSet();
 
   @Column
-  public boolean automatic = false;
+  private boolean automatic = false;
   
   @Column
-  public boolean initializable = false;
+  private boolean initializable = false;
     
   /**
    * Label.
@@ -226,11 +229,11 @@ public class GroupAbsenceType extends BaseModel {
       if (defaultGroup.name().equals(this.name)) {
         if (defaultGroup.description.equals(this.description) 
             && defaultGroup.chainDescription.equals(this.chainDescription)
-            && defaultGroup.category.name().equals(this.category.name)
+            && defaultGroup.category.name().equals(this.category.getName())
             && defaultGroup.priority == this.priority
             && defaultGroup.pattern.equals(this.pattern)
             && defaultGroup.periodType.equals(this.periodType)
-            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.name)
+            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.getName())
             && defaultGroup.automatic == this.automatic
             && defaultGroup.initializable == this.initializable) {
           //campi nullable complation
@@ -240,7 +243,8 @@ public class GroupAbsenceType extends BaseModel {
             }
           } else {
             if (this.complationAbsenceBehaviour == null 
-                || !defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
+                || !defaultGroup.complation.name()
+                .equals(this.complationAbsenceBehaviour.getName())) {
               return Optional.of(false);
             }
           }

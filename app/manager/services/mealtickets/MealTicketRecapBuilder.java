@@ -108,7 +108,7 @@ public class MealTicketRecapBuilder {
       //Non ho altri buoni pasto da assegnare. Run Out.
       if (nextTicketToAssign 
           >= mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit().size()) {
-        mealTicketRecap.setDateRunOut(personDay.date);
+        mealTicketRecap.setDateRunOut(personDay.getDate());
         return mealTicketRecap;
       }
       
@@ -118,11 +118,11 @@ public class MealTicketRecapBuilder {
       
       //Mi salvo la data in cui ho iniziato a consumare buoni pasto scaduti 
       if (mealTicketRecap.getDateExpire() == null  
-          && personDay.date.isAfter(mealTicket.expireDate)) {
-        mealTicketRecap.setDateExpire(personDay.date);
+          && personDay.getDate().isAfter(mealTicket.getExpireDate())) {
+        mealTicketRecap.setDateExpire(personDay.getDate());
       }
       
-      personDay.mealTicketAssigned = mealTicket;
+      personDay.setMealTicketAssigned(mealTicket);
       mealTicket.used = true;
     }
 

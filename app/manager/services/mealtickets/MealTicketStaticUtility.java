@@ -54,38 +54,41 @@ public class MealTicketStaticUtility {
     for (MealTicket mealTicket : mealTicketListOrdered) {
 
       if (interval.isPresent()
-          && !DateUtility.isDateIntoInterval(mealTicket.date, interval.get())) {
+          && !DateUtility.isDateIntoInterval(mealTicket.getDate(), interval.get())) {
         continue;
       }
 
       //Primo buono pasto
       if (currentBlock == null) {
         previousMealTicket = mealTicket;
-        currentBlock = new BlockMealTicket(mealTicket.block, mealTicket.blockType);
+        currentBlock = new BlockMealTicket(mealTicket.getBlock(), mealTicket.getBlockType());
         currentBlock.getMealTickets().add(mealTicket);
-        currentBlock.setContract(mealTicket.contract);
+        currentBlock.setContract(mealTicket.getContract());
         continue;
       }
 
       //Stesso blocco
 
-      previousBlockLength = previousMealTicket.block.length();
+      previousBlockLength = previousMealTicket.getBlock().length();
       previousCode = 
-          previousMealTicket.code.substring(previousBlockLength, previousMealTicket.code.length());
-      int actualBlockLength = mealTicket.block.length();
-      String actualCode = mealTicket.code.substring(actualBlockLength, mealTicket.code.length());
+          previousMealTicket.getCode().substring(previousBlockLength, 
+              previousMealTicket.getCode().length());
+      int actualBlockLength = mealTicket.getBlock().length();
+      String actualCode = mealTicket.getCode().substring(actualBlockLength, 
+          mealTicket.getCode().length());
       BigDecimal previous = new BigDecimal(previousCode).add(BigDecimal.ONE);  
       BigDecimal actual = new BigDecimal(actualCode);
-      if (previousMealTicket.block.equals(mealTicket.block) && previous.compareTo(actual) == 0 
-          && previousMealTicket.contract.equals(mealTicket.contract)
-          && previousMealTicket.returned == mealTicket.returned) {
+      if (previousMealTicket.getBlock().equals(mealTicket.getBlock()) 
+          && previous.compareTo(actual) == 0 
+          && previousMealTicket.getContract().equals(mealTicket.getContract())
+          && previousMealTicket.isReturned() == mealTicket.isReturned()) {
         currentBlock.getMealTickets().add(mealTicket);
       } else {
         //Nuovo blocco
         blockList.add(currentBlock);
-        currentBlock = new BlockMealTicket(mealTicket.block, mealTicket.blockType);
+        currentBlock = new BlockMealTicket(mealTicket.getBlock(), mealTicket.getBlockType());
         currentBlock.getMealTickets().add(mealTicket);
-        currentBlock.setContract(mealTicket.contract);
+        currentBlock.setContract(mealTicket.getContract());
       }
       previousMealTicket = mealTicket;
     }
@@ -113,14 +116,14 @@ public class MealTicketStaticUtility {
     //Controllo di consistenza.
     for (MealTicket mealTicket : blockMealTicketsOrdered) {
       if (codeBlock == null) {
-        codeBlock = mealTicket.block;
+        codeBlock = mealTicket.getBlock();
       }
 
       // Tutti i buoni della lista devono appartenere allo stesso blocco.
-      Preconditions.checkArgument(codeBlock.equals(mealTicket.block));
+      Preconditions.checkArgument(codeBlock.equals(mealTicket.getBlock()));
 
-      if (mealTicket.number >= first && mealTicket.number <= last) {
-        if (!mealTicket.contract.equals(contract)) {
+      if (mealTicket.getNumber() >= first && mealTicket.getNumber() <= last) {
+        if (!mealTicket.getContract().equals(contract)) {
           // un buono nell'intervallo non appartiene al contratto effettivo!!! 
           //non si dovrebbe verificare.
           throw new IllegalStateException();

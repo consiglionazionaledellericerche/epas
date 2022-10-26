@@ -126,9 +126,9 @@ public class Users extends Controller {
     notFoundIfNull(user);
 
     if (roles == null) {
-      user.roles.clear();
+      user.getRoles().clear();
     } else {
-      user.roles = Sets.newHashSet(roles);
+      user.setRoles(Sets.newHashSet(roles));
     }
 
     user.save();
@@ -159,14 +159,14 @@ public class Users extends Controller {
       response.status = 400;
       log.warn("validation errors for {}: {}", userRoleOffice, validation.errorsMap());
       flash.error(Web.msgHasErrors());
-      final User user = userRoleOffice.user;
+      final User user = userRoleOffice.getUser();
       render("@addRole", user, userRoleOffice);
     }
 
     rules.checkIfPermitted(userRoleOffice);
 
     userRoleOffice.save();
-    final User user = userRoleOffice.user;
+    final User user = userRoleOffice.getUser();
     flash.success(Web.msgCreated(UsersRolesOffices.class));
     edit(user.id);
   }
@@ -189,7 +189,7 @@ public class Users extends Controller {
       flash.success(Web.msgDeleted(UsersRolesOffices.class));
     }
 
-    edit(uro.user.id);
+    edit(uro.getUser().id);
   }
 
   /**
@@ -234,7 +234,7 @@ public class Users extends Controller {
     notFoundIfNull(user);
     // Nuovo utente, nessun ruolo di sistema e nessun owner specificato
     if (!user.isPersistent() && !Security.getUser().get().isSystemUser()
-        && user.roles.isEmpty() && user.owner == null) {
+        && user.getRoles().isEmpty() && user.getOwner() == null) {
       Validation.addError("user.owner", "Specificare una sede proprietaria");
     }
     if (Validation.hasErrors()) {
@@ -244,7 +244,7 @@ public class Users extends Controller {
     }
 
     if (!Strings.isNullOrEmpty(password)) {
-      user.password = Codec.hexMD5(password);
+      user.setPassword(Codec.hexMD5(password));
     }
 
     rules.checkIfPermitted(user);

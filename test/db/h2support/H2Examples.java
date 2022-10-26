@@ -69,13 +69,13 @@ public class H2Examples {
   private Contract buildContract(Person person, LocalDate beginDate, Optional<LocalDate> endDate, 
       Optional<LocalDate> endContract, WorkingTimeType workingTimeType) {
     Contract contract = new Contract();
-    contract.person = person;
-    contract.beginDate = beginDate;
+    contract.setPerson(person);
+    contract.setBeginDate(beginDate);
     if (endDate.isPresent()) {
-      contract.endDate = endDate.get();
+      contract.setEndDate(endDate.get());
     }
     if (endContract.isPresent()) {
-      contract.endContract = endContract.get();
+      contract.setEndContract(endContract.get());
     }
     contractManager.properContractCreate(contract, Optional.of(workingTimeType), false);
     return contract;
@@ -91,15 +91,15 @@ public class H2Examples {
   private Person createPerson(Office office, String username) {
 
     User user = new User();    
-    user.username = username;
-    user.password = "UnaPasswordQualsiasi";
+    user.setUsername(username);
+    user.setPassword("UnaPasswordQualsiasi");
     user.save();
     Person person = new Person();
-    person.name = "Name " + username;
-    person.surname = "Surname " + username;
-    person.user = user;
-    person.office = office;
-    person.qualification = Qualification.findById(DEFAULT_PERSON_QUALIFICATION);
+    person.setName("Name " + username);
+    person.setSurname("Surname " + username);
+    person.setUser(user);
+    person.setOffice(office);
+    person.setQualification(Qualification.findById(DEFAULT_PERSON_QUALIFICATION));
     person.save();
     configurationManager.updateConfigurations(person);
     return person;
@@ -117,10 +117,10 @@ public class H2Examples {
   private Office buildOffice(LocalDate beginDate, String name, String codeId, String code) {
 
     Office office = new Office();
-    office.name = name;
-    office.beginDate = beginDate;
-    office.codeId = codeId;
-    office.code = code;
+    office.setName(name);
+    office.setBeginDate(beginDate);
+    office.setCodeId(codeId);
+    office.setCode(code);
     office.save();
     configurationManager.updateConfigurations(office);
     return office;

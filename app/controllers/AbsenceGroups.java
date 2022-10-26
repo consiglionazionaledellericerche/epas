@@ -189,7 +189,7 @@ public class AbsenceGroups extends Controller {
   public static void deleteCategoryTab(Long categoryTabId) {
     CategoryTab categoryTab = CategoryTab.findById(categoryTabId);
     notFoundIfNull(categoryTab);
-    if (!categoryTab.categoryGroupAbsenceTypes.isEmpty()) {
+    if (!categoryTab.getCategoryGroupAbsenceTypes().isEmpty()) {
       flash.error("Non è possibile eliminare una tab associata a categorie");
       editCategoryTab(categoryTabId);
     }
@@ -247,7 +247,7 @@ public class AbsenceGroups extends Controller {
     CategoryGroupAbsenceType categoryGroupAbsenceType =
         CategoryGroupAbsenceType.findById(categoryGroupAbsenceTypeId);
     notFoundIfNull(categoryGroupAbsenceType);
-    if (!categoryGroupAbsenceType.groupAbsenceTypes.isEmpty()) {
+    if (!categoryGroupAbsenceType.getGroupAbsenceTypes().isEmpty()) {
       flash.error("Non è possibile eliminare una categoria associata a un gruppo");
       editCategoryGroupAbsenceType(categoryGroupAbsenceTypeId);
     }
@@ -284,8 +284,8 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(categoryGroupAbsenceType);
 
     GroupAbsenceType groupAbsenceType = new GroupAbsenceType();
-    groupAbsenceType.category = categoryGroupAbsenceType;
-    groupAbsenceType.pattern = GroupAbsenceTypePattern.simpleGrouping;
+    groupAbsenceType.setCategory(categoryGroupAbsenceType);
+    groupAbsenceType.setPattern(GroupAbsenceTypePattern.simpleGrouping);
 
     List<CategoryGroupAbsenceType> allCategories = CategoryGroupAbsenceType.findAll();
     List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
@@ -311,18 +311,18 @@ public class AbsenceGroups extends Controller {
     List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
 
     //Stato precedente gruppo
-    AmountType takeAmountType = groupAbsenceType.takableAbsenceBehaviour.amountType;
-    Integer fixedLimit = groupAbsenceType.takableAbsenceBehaviour.fixedLimit;
-    Set<AbsenceType> takableCodes = groupAbsenceType.takableAbsenceBehaviour.takableCodes;
+    AmountType takeAmountType = groupAbsenceType.getTakableAbsenceBehaviour().getAmountType();
+    Integer fixedLimit = groupAbsenceType.getTakableAbsenceBehaviour().getFixedLimit();
+    Set<AbsenceType> takableCodes = groupAbsenceType.getTakableAbsenceBehaviour().getTakableCodes();
     TakeAmountAdjustment takableAmountAdjustment = groupAbsenceType
-        .takableAbsenceBehaviour.takableAmountAdjustment;
+        .getTakableAbsenceBehaviour().getTakableAmountAdjustment();
     AmountType complationAmountType = null;
     Set<AbsenceType> complationCodes = Sets.newHashSet();
     Set<AbsenceType> replacingCodes = Sets.newHashSet();
-    if (groupAbsenceType.complationAbsenceBehaviour != null) {
-      complationAmountType = groupAbsenceType.complationAbsenceBehaviour.amountType;
-      complationCodes = groupAbsenceType.complationAbsenceBehaviour.complationCodes;
-      replacingCodes = groupAbsenceType.complationAbsenceBehaviour.replacingCodes;
+    if (groupAbsenceType.getComplationAbsenceBehaviour() != null) {
+      complationAmountType = groupAbsenceType.getComplationAbsenceBehaviour().getAmountType();
+      complationCodes = groupAbsenceType.getComplationAbsenceBehaviour().getComplationCodes();
+      replacingCodes = groupAbsenceType.getComplationAbsenceBehaviour().getReplacingCodes();
     }
 
     render(groupAbsenceType, takeAmountType, fixedLimit, takableCodes, takableAmountAdjustment,
@@ -379,52 +379,55 @@ public class AbsenceGroups extends Controller {
     TakableAbsenceBehaviour takableBehaviour;
     if (!groupAbsenceType.isPersistent()) {
       takableBehaviour = new TakableAbsenceBehaviour();
-      takableBehaviour.groupAbsenceTypes.add(groupAbsenceType);
-      takableBehaviour.name = TakableAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
+      takableBehaviour.getGroupAbsenceTypes().add(groupAbsenceType);
+      takableBehaviour.setName(TakableAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.getName());
     } else {
-      takableBehaviour = groupAbsenceType.takableAbsenceBehaviour;
+      takableBehaviour = groupAbsenceType.getTakableAbsenceBehaviour();
     }
 
-    takableBehaviour.amountType = takeAmountType;
-    takableBehaviour.takableCodes.clear();
-    takableBehaviour.takenCodes.clear();
-    takableBehaviour.takableCodes = Sets.newHashSet(takableCodes);
-    takableBehaviour.takenCodes = Sets.newHashSet(takableCodes);
-    takableBehaviour.fixedLimit = fixedLimit;
-    takableBehaviour.takableAmountAdjustment = takableAmountAdjustment;
+    takableBehaviour.setAmountType(takeAmountType);
+    takableBehaviour.getTakableCodes().clear();
+    takableBehaviour.getTakenCodes().clear();
+    takableBehaviour.setTakableCodes(Sets.newHashSet(takableCodes));
+    takableBehaviour.setTakenCodes(Sets.newHashSet(takableCodes));
+    takableBehaviour.setFixedLimit(fixedLimit);
+    takableBehaviour.setTakableAmountAdjustment(takableAmountAdjustment);
     takableBehaviour.save();
-    groupAbsenceType.takableAbsenceBehaviour = takableBehaviour;
+    groupAbsenceType.setTakableAbsenceBehaviour(takableBehaviour);
 
     //Save complatio
     ComplationAbsenceBehaviour complationBehaviour;
-    if (!groupAbsenceType.isPersistent() || groupAbsenceType.complationAbsenceBehaviour == null) {
+    if (!groupAbsenceType.isPersistent() 
+        || groupAbsenceType.getComplationAbsenceBehaviour() == null) {
       complationBehaviour = new ComplationAbsenceBehaviour();
-      complationBehaviour.name = ComplationAbsenceBehaviour.NAME_PREFIX + groupAbsenceType.name;
-      complationBehaviour.groupAbsenceTypes.add(groupAbsenceType);
+      complationBehaviour.setName(ComplationAbsenceBehaviour.NAME_PREFIX 
+          + groupAbsenceType.getName());
+      complationBehaviour.getGroupAbsenceTypes().add(groupAbsenceType);
     } else {
-      complationBehaviour = groupAbsenceType.complationAbsenceBehaviour;
+      complationBehaviour = groupAbsenceType.getComplationAbsenceBehaviour();
     }
 
     if (complationAmountType == null) {
       //distruzione
-      if (groupAbsenceType.complationAbsenceBehaviour != null) {
-        ComplationAbsenceBehaviour complationToRemove = groupAbsenceType.complationAbsenceBehaviour;
-        groupAbsenceType.complationAbsenceBehaviour = null;
+      if (groupAbsenceType.getComplationAbsenceBehaviour() != null) {
+        ComplationAbsenceBehaviour complationToRemove = 
+            groupAbsenceType.getComplationAbsenceBehaviour();
+        groupAbsenceType.setComplationAbsenceBehaviour(null);
         groupAbsenceType.save();
-        complationToRemove.groupAbsenceTypes.remove(groupAbsenceType);
-        complationToRemove.complationCodes.clear();
-        complationToRemove.replacingCodes.clear();
+        complationToRemove.getGroupAbsenceTypes().remove(groupAbsenceType);
+        complationToRemove.getComplationCodes().clear();
+        complationToRemove.getReplacingCodes().clear();
         complationToRemove.delete();
       }
     } else {
       //creazione / modifica
-      complationBehaviour.complationCodes.clear();
-      complationBehaviour.replacingCodes.clear();
-      complationBehaviour.complationCodes = Sets.newHashSet(complationCodes);
-      complationBehaviour.replacingCodes = Sets.newHashSet(replacingCodes);
-      complationBehaviour.amountType = complationAmountType;
+      complationBehaviour.getComplationCodes().clear();
+      complationBehaviour.getReplacingCodes().clear();
+      complationBehaviour.setComplationCodes(Sets.newHashSet(complationCodes));
+      complationBehaviour.setReplacingCodes(Sets.newHashSet(replacingCodes));
+      complationBehaviour.setAmountType(complationAmountType);
       complationBehaviour.save();
-      groupAbsenceType.complationAbsenceBehaviour = complationBehaviour;
+      groupAbsenceType.setComplationAbsenceBehaviour(complationBehaviour);
     }
 
     groupAbsenceType.save();
@@ -467,7 +470,7 @@ public class AbsenceGroups extends Controller {
     boolean tecnologi = false;
     boolean tecnici = false;
 
-    for (Qualification q : absenceType.qualifications) {
+    for (Qualification q : absenceType.getQualifications()) {
       tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
       tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
     }
@@ -496,31 +499,31 @@ public class AbsenceGroups extends Controller {
       render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
     }
 
-    absenceType.qualifications.clear();
+    absenceType.getQualifications().clear();
     if (tecnici) {
-      absenceType.qualifications.addAll(
+      absenceType.getQualifications().addAll(
           qualificationDao.getByQualificationMapping(QualificationMapping.TECNICI));
     }
     if (tecnologi) {
-      absenceType.qualifications.addAll(
+      absenceType.getQualifications().addAll(
           qualificationDao.getByQualificationMapping(QualificationMapping.TECNOLOGI));
     }
 
-    if (absenceType.qualifications.isEmpty()) {
+    if (absenceType.getQualifications().isEmpty()) {
       flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
       render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
     }
-    if (absenceType.justifiedTypesPermitted.isEmpty()) {
+    if (absenceType.getJustifiedTypesPermitted().isEmpty()) {
       flash.error("Selezionare almeno una tipologia di Tempo Giustificato");
       render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
     }
-    if (absenceType.isAbsenceTypeMinutesPermitted() && absenceType.justifiedTime == null) {
+    if (absenceType.isAbsenceTypeMinutesPermitted() && absenceType.getJustifiedTime() == null) {
       flash.error("Specificare i minuti del tipo assenza.");
       render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
     }
 
     absenceType.save();
-    flash.success("Inserito/modificato codice di assenza %s", absenceType.code);
+    flash.success("Inserito/modificato codice di assenza %s", absenceType.getCode());
 
     editAbsenceType(absenceType.id);
   }
@@ -543,14 +546,14 @@ public class AbsenceGroups extends Controller {
     //La lista di tutti i codici takable... con associato il gruppo con maggiore priorità.
     Set<AbsenceType> allTakable = Sets.newHashSet();
     for (GroupAbsenceType group : absenceComponentDao.allGroupAbsenceType(false)) {
-      for (AbsenceType abt : group.takableAbsenceBehaviour.takableCodes) {
+      for (AbsenceType abt : group.getTakableAbsenceBehaviour().getTakableCodes()) {
         if (abt.defaultTakableGroup() == null) {
-          log.debug("Il defaultTakable è null per {}", abt.code);
+          log.debug("Il defaultTakable è null per {}", abt.getCode());
           abt.defaultTakableGroup();
         }
       }
       //TODO eventualmente controllo prendibilità della persona alla data (figli, l 104 etc.)
-      allTakable.addAll(group.takableAbsenceBehaviour.takableCodes);
+      allTakable.addAll(group.getTakableAbsenceBehaviour().getTakableCodes());
     }
 
     render(absenceForm, allTakable);
@@ -639,7 +642,7 @@ public class AbsenceGroups extends Controller {
     if (groupAbsenceType.firstOfChain() != null) {
       groupAbsenceType = groupAbsenceType.firstOfChain();
     }
-    if (groupAbsenceType.pattern != GroupAbsenceTypePattern.simpleGrouping) {
+    if (groupAbsenceType.getPattern() != GroupAbsenceTypePattern.simpleGrouping) {
       absenceType = null;
     }
 
@@ -689,7 +692,7 @@ public class AbsenceGroups extends Controller {
 
     log.info("Richiesto inserimento assenze per {}. "
         + "Codice/Tipo {}, dal {} al {} (ore:{}, minuti:{})", 
-        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType,
+        person.getFullname(), absenceType != null ? absenceType.getCode() : groupAbsenceType,
         from, to, hours, minutes);
     
     absenceManager.saveAbsences(insertReport, person, from, recoveryDate, 
@@ -697,13 +700,13 @@ public class AbsenceGroups extends Controller {
     
     log.info("Effettuato inserimento assenze per {}. "
         + "Codice/Tipo {}, dal {} al {} (ore:{}, minuti:{})", 
-        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType, 
+        person.getFullname(), absenceType != null ? absenceType.getCode() : groupAbsenceType, 
         from, to, hours, minutes);
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
     if (!currentUser.isSystemUser()) {
-      if (currentUser.person.id.equals(person.id)
+      if (currentUser.getPerson().id.equals(person.id)
           && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
         Stampings.stampings(from.getYear(), from.getMonthOfYear());
       }
@@ -737,12 +740,13 @@ public class AbsenceGroups extends Controller {
     //se l'user è amministratore visualizzo lo switcher del gruppo
     final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
-        || userDao.getUsersWithRoles(person.office, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
+        || userDao.getUsersWithRoles(person.getOffice(), 
+            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
         .contains(currentUser)) {
       isAdmin = true;
     }
 
-    if (groupAbsenceType.automatic) {
+    if (groupAbsenceType.isAutomatic()) {
       render(from, groupAbsenceType, periodChain, isAdmin);  //no switcher
     }
 
@@ -782,10 +786,10 @@ public class AbsenceGroups extends Controller {
     for (Person person : personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, LocalDate.now(), LocalDate.now(), false).list()) {
       boolean existInitialization = false;
-      for (InitializationGroup initializationGroup : person.initializationGroups) {
+      for (InitializationGroup initializationGroup : person.getInitializationGroups()) {
 
         if (groupAbsenceType == null
-            || groupAbsenceType.equals(initializationGroup.groupAbsenceType)) {
+            || groupAbsenceType.equals(initializationGroup.getGroupAbsenceType())) {
           existInitialization = true;
           initializations.add(initializationGroup);
         }
@@ -814,7 +818,7 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
@@ -846,11 +850,11 @@ public class AbsenceGroups extends Controller {
 
     if (absencePeriod.initialization != null) {
       initializationGroup = absencePeriod.initialization;
-      if (absencePeriod.initialization.averageWeekTime != averageWeekWorkingTime) {
+      if (absencePeriod.initialization.getAverageWeekTime() != averageWeekWorkingTime) {
         //TODO: un warning? Se non è stato fatto andrebbe fatto l'update dei derivati
       }
     } else {
-      initializationGroup.averageWeekTime = averageWeekWorkingTime;
+      initializationGroup.setAverageWeekTime(averageWeekWorkingTime);
     }
 
     render(date, initializationGroup, periodChain, absencePeriod, redirectToStatus);
@@ -867,23 +871,24 @@ public class AbsenceGroups extends Controller {
 
     // Lo stato della richiesta
 
-    notFoundIfNull(initializationGroup.person);
-    notFoundIfNull(initializationGroup.groupAbsenceType);
-    notFoundIfNull(initializationGroup.date);
+    notFoundIfNull(initializationGroup.getPerson());
+    notFoundIfNull(initializationGroup.getGroupAbsenceType());
+    notFoundIfNull(initializationGroup.getDate());
 
-    rules.checkIfPermitted(initializationGroup.person.office);
+    rules.checkIfPermitted(initializationGroup.getPerson().getOffice());
 
-    PeriodChain periodChain = absenceService.residual(initializationGroup.person,
-        initializationGroup.groupAbsenceType, initializationGroup.date);
+    PeriodChain periodChain = absenceService.residual(initializationGroup.getPerson(),
+        initializationGroup.getGroupAbsenceType(), initializationGroup.getDate());
     Preconditions.checkState(!periodChain.periods.isEmpty());
     AbsencePeriod absencePeriod = periodChain.periods.iterator().next();
 
     //Tempo a lavoro medio
     Optional<WorkingTimeType> wtt = workingTimeTypeDao
-        .getWorkingTimeType(initializationGroup.date, initializationGroup.person);
+        .getWorkingTimeType(initializationGroup.getDate(), initializationGroup.getPerson());
     if (!wtt.isPresent()) {
       wtt = workingTimeTypeDao
-          .getWorkingTimeType(initializationGroup.date.plusDays(1), initializationGroup.person);
+          .getWorkingTimeType(initializationGroup.getDate().plusDays(1), 
+              initializationGroup.getPerson());
     }
     if (!wtt.isPresent()) {
       Validation.addError("date", "Deve essere una data attiva, "
@@ -902,7 +907,7 @@ public class AbsenceGroups extends Controller {
     }
 
     //new average
-    initializationGroup.averageWeekTime = wtt.get().weekAverageWorkingTime();
+    initializationGroup.setAverageWeekTime(wtt.get().weekAverageWorkingTime());
 
     initializationGroup.save();
 
@@ -911,11 +916,11 @@ public class AbsenceGroups extends Controller {
     flash.success("Inizializzazione salvata con successo.");
 
     if (redirectToStatus) {
-      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
-          initializationGroup.date);
+      groupStatus(initializationGroup.getPerson().id, initializationGroup.getGroupAbsenceType().id,
+          initializationGroup.getDate());
     } else {
-      absenceInitializations(initializationGroup.person.office.id,
-          initializationGroup.groupAbsenceType.id);
+      absenceInitializations(initializationGroup.getPerson().getOffice().id,
+          initializationGroup.getGroupAbsenceType().id);
     }
   }
 
@@ -929,7 +934,7 @@ public class AbsenceGroups extends Controller {
 
     notFoundIfNull(initializationGroup);
 
-    rules.checkIfPermitted(initializationGroup.person.office);
+    rules.checkIfPermitted(initializationGroup.getPerson().getOffice());
 
     initializationGroup.delete();
 
@@ -938,11 +943,11 @@ public class AbsenceGroups extends Controller {
     //TODO: check del gruppo per i ricalcoli
 
     if (redirectToStatus) {
-      groupStatus(initializationGroup.person.id, initializationGroup.groupAbsenceType.id,
-          initializationGroup.date);
+      groupStatus(initializationGroup.getPerson().id, initializationGroup.getGroupAbsenceType().id,
+          initializationGroup.getDate());
     } else {
-      absenceInitializations(initializationGroup.person.office.id,
-          initializationGroup.groupAbsenceType.id);
+      absenceInitializations(initializationGroup.getPerson().getOffice().id,
+          initializationGroup.getGroupAbsenceType().id);
     }
 
   }
@@ -963,9 +968,9 @@ public class AbsenceGroups extends Controller {
 
     List<HistoryValue<Absence>> historyAbsence = absenceHistoryDao.absences(absence.id);
 
-    LocalDate dateFrom = absence.personDay.date;
-    LocalDate dateTo = absence.personDay.date;
-    log.debug("Code: {}", absence.absenceType);
+    LocalDate dateFrom = absence.getPersonDay().getDate();
+    LocalDate dateTo = absence.getPersonDay().getDate();
+    log.debug("Code: {}", absence.getAbsenceType());
 
     render(absence, dateFrom, dateTo, historyAbsence);
   }
@@ -984,8 +989,8 @@ public class AbsenceGroups extends Controller {
 
     rules.checkIfPermitted(absence);
 
-    Person person = absence.personDay.person;
-    LocalDate dateFrom = absence.personDay.date;
+    Person person = absence.getPersonDay().getPerson();
+    LocalDate dateFrom = absence.getPersonDay().getDate();
 
     if (dateTo != null && dateTo.isBefore(dateFrom)) {
       flash.error("Errore nell'inserimento del campo Fino a, inserire una data valida. "
@@ -997,16 +1002,17 @@ public class AbsenceGroups extends Controller {
 
     //Logica
     int deleted = absenceManager
-        .removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
+        .removeAbsencesInPeriod(person, dateFrom, dateTo, absence.getAbsenceType());
 
     if (deleted > 0) {
-      flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+      flash.success("Rimossi %s codici assenza di tipo %s", 
+          deleted, absence.getAbsenceType().getCode());
     }
 
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
     if (!currentUser.isSystemUser()) {
-      if (currentUser.person.id.equals(person.id)
+      if (currentUser.getPerson().id.equals(person.id)
           && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
         Stampings.stampings(dateFrom.getYear(), dateFrom.getMonthOfYear());
       }
@@ -1046,14 +1052,16 @@ public class AbsenceGroups extends Controller {
     List<Absence> notPermitted = Lists.newArrayList();
     List<Absence> outOfDate = Lists.newArrayList();
     for (Absence absence : absences) {
-      if (!absence.absenceType.justifiedTypesPermitted.contains(absence.justifiedType)) {
+      if (!absence.getAbsenceType().getJustifiedTypesPermitted()
+          .contains(absence.getJustifiedType())) {
         notPermitted.add(absence);
         log.debug("{} is: {}, permitted: {}", absence.toString(),
-            absence.justifiedType, absence.absenceType.justifiedTypesPermitted);
+            absence.getJustifiedType(), absence.getAbsenceType().getJustifiedTypesPermitted());
       }
-      if (absence.absenceType.isExpired()) {
+      if (absence.getAbsenceType().isExpired()) {
         if (!DateUtility.isDateIntoInterval(absence.getAbsenceDate(),
-            new DateInterval(absence.absenceType.validFrom, absence.absenceType.validTo))) {
+            new DateInterval(absence.getAbsenceType().getValidFrom(), 
+                absence.getAbsenceType().getValidTo()))) {
           outOfDate.add(absence);
         }
       }
@@ -1090,8 +1098,8 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(justifiedType);
 
     //TODO: deve appartenere a absenceType.justifiedTypePermitted
-    absence.justifiedType = justifiedType;
-    absence.justifiedMinutes = justifiedMinutes;
+    absence.setJustifiedType(justifiedType);
+    absence.setJustifiedMinutes(justifiedMinutes);
 
     absence.save();
 
@@ -1126,13 +1134,13 @@ public class AbsenceGroups extends Controller {
     List<GroupAbsenceType> allGroups = absenceComponentDao.allGroupAbsenceType(true);
     List<ComplationAbsenceBehaviour> allComplations = Lists.newArrayList();
     for (GroupAbsenceType group : allGroups) {
-      if (group.complationAbsenceBehaviour != null) {
-        allComplations.add(group.complationAbsenceBehaviour);
+      if (group.getComplationAbsenceBehaviour() != null) {
+        allComplations.add(group.getComplationAbsenceBehaviour());
       }
     }
     List<TakableAbsenceBehaviour> allTakables = Lists.newArrayList();
     for (GroupAbsenceType group : allGroups) {
-      allTakables.add(group.takableAbsenceBehaviour);
+      allTakables.add(group.getTakableAbsenceBehaviour());
     }
     List<AbsenceType> allAbsenceTypes = AbsenceType.findAll();
     render(allCategoryTabs, allCategories, allGroups, allComplations, allTakables, allAbsenceTypes);
@@ -1195,28 +1203,28 @@ public class AbsenceGroups extends Controller {
     for (Absence absence : absences) {
 
       // utilizzate dal 1/1/2018 al 31/12/2018
-      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(), yearInterval)) {
+      if (!DateUtility.isDateIntoInterval(absence.getPersonDay().getDate(), yearInterval)) {
         continue;
       }
-      IWrapperPerson wrapperPerson = wrapperFactory.create(absence.personDay.person);
+      IWrapperPerson wrapperPerson = wrapperFactory.create(absence.getPersonDay().getPerson());
 
       Optional<Contract> contract = wrapperPerson.getCurrentContract();
       if (!contract.isPresent()) {
         continue;
       }
 
-      if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
-        beginCalculation = contract.get().beginDate;
+      if (!contract.get().getBeginDate().isBefore(yearInterval.getBegin())) {
+        beginCalculation = contract.get().getBeginDate();
       } else {
         beginCalculation = yearInterval.getBegin();
       }
 
-      if (!DateUtility.isDateIntoInterval(absence.personDay.getDate(),
-          new DateInterval(contract.get().beginDate, contract.get().endDate))) {
+      if (!DateUtility.isDateIntoInterval(absence.getPersonDay().getDate(),
+          new DateInterval(contract.get().getBeginDate(), contract.get().getEndDate()))) {
         continue;
       }
 
-      IWrapperPersonDay wrapperPersonDay = wrapperFactory.create(absence.personDay);
+      IWrapperPersonDay wrapperPersonDay = wrapperFactory.create(absence.getPersonDay());
 
       Optional<WorkingTimeTypeDay> wttd = wrapperPersonDay.getWorkingTimeTypeDay();
 
@@ -1225,34 +1233,34 @@ public class AbsenceGroups extends Controller {
       }
 
       // di 7:12 quando la persona ha un orario 7:12
-      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 432) {
+      if (wttd.get().getWorkingTime() == 432 && absence.getJustifiedMinutes() == 432) {
 
         // sono convertite in 661G
-        absence.justifiedMinutes = null;
-        absence.justifiedType = allDay;
-        absence.absenceType = a661G.get();
+        absence.setJustifiedMinutes(null);
+        absence.setJustifiedType(allDay);
+        absence.setAbsenceType(a661G.get());
         absence.save();
-        toUpdate.add(absence.personDay.person);
+        toUpdate.add(absence.getPersonDay().getPerson());
         continue;
       }
 
       // di 7:00 quando la persona ha un orario 7:12
-      if (wttd.get().workingTime == 432 && absence.justifiedMinutes == 420) {
+      if (wttd.get().getWorkingTime() == 432 && absence.getJustifiedMinutes() == 420) {
 
         // sono convertite in 661G
-        absence.justifiedMinutes = null;
-        absence.justifiedType = allDay;
-        absence.absenceType = a661G.get();
+        absence.setJustifiedMinutes(null);
+        absence.setJustifiedType(allDay);
+        absence.setAbsenceType(a661G.get());
         absence.save();
-        toUpdate.add(absence.personDay.person);
+        toUpdate.add(absence.getPersonDay().getPerson());
         continue;
       }
 
       // non di 7:12 ma di un valore uguale o superiore a 6 ore
-      if (absence.justifiedMinutes > 300) {
+      if (absence.getJustifiedMinutes() > 300) {
 
         // saranno inserite in uno stato di warning
-        toScan.add(absence.personDay.person);
+        toScan.add(absence.getPersonDay().getPerson());
       }
 
     }
@@ -1265,8 +1273,8 @@ public class AbsenceGroups extends Controller {
         IWrapperPerson wrapperPerson = wrapperFactory.create(person);
 
         Optional<Contract> contract = wrapperPerson.getCurrentContract();
-        if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
-          beginCalculation = contract.get().beginDate;
+        if (!contract.get().getBeginDate().isBefore(yearInterval.getBegin())) {
+          beginCalculation = contract.get().getBeginDate();
         } else {
           beginCalculation = yearInterval.getBegin();
         }
@@ -1280,8 +1288,8 @@ public class AbsenceGroups extends Controller {
         IWrapperPerson wrapperPerson = wrapperFactory.create(person);
 
         Optional<Contract> contract = wrapperPerson.getCurrentContract();
-        if (!contract.get().beginDate.isBefore(yearInterval.getBegin())) {
-          beginCalculation = contract.get().beginDate;
+        if (!contract.get().getBeginDate().isBefore(yearInterval.getBegin())) {
+          beginCalculation = contract.get().getBeginDate();
         } else {
           beginCalculation = yearInterval.getBegin();
         }
@@ -1326,7 +1334,7 @@ public class AbsenceGroups extends Controller {
       people.add(wrPerson);
 
       //prelevo dalla cache la situazione se è già presente.
-      certificationsSummary.put(wrPerson.getValue().number, absenceCertificationService
+      certificationsSummary.put(wrPerson.getValue().getNumber(), absenceCertificationService
           .certificationYearSituationCached(wrPerson.getValue(), year));
     }
 
@@ -1341,7 +1349,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     CertificationYearSituation yearSituation = absenceCertificationService
         .buildCertificationYearSituation(person, year, false);
@@ -1358,7 +1366,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     int year = LocalDate.now().getYear();
     if (LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY) {
       year = year - 1;
@@ -1371,7 +1379,7 @@ public class AbsenceGroups extends Controller {
           + " all'interno della sede selezionata");
     }
 
-    importCertificationsAbsences(person.office.id);
+    importCertificationsAbsences(person.getOffice().id);
 
   }
 
@@ -1383,7 +1391,7 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     LocalDate updateFrom = LocalDate.now();
     LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue()
         .dayOfMonth().withMinimumValue();
@@ -1393,28 +1401,29 @@ public class AbsenceGroups extends Controller {
     for (Absence absence : absences) {
       JPA.em().flush(); //potrebbero esserci dei doppioni, per sicurezza flusho a ogni assenza.
       if (!absenceComponentDao
-          .findAbsences(person, absence.getAbsenceDate(), absence.absenceType.code).isEmpty()) {
+          .findAbsences(person, absence.getAbsenceDate(), 
+              absence.getAbsenceType().getCode()).isEmpty()) {
         continue;
       }
 
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-      absence.personDay = personDay;
-      personDay.absences.add(absence);
+      absence.setPersonDay(personDay);
+      personDay.getAbsences().add(absence);
       absence.save();
       personDay.save();
-      if (absence.absenceType.code.equals(DefaultAbsenceType.A_91.certificationCode) 
+      if (absence.getAbsenceType().getCode().equals(DefaultAbsenceType.A_91.certificationCode) 
           && !absence.getAbsenceDate().isBefore(beginYear)) {
         IWrapperPerson wrPerson = wrapperFactory.create(person);
         Optional<Contract> contract = wrPerson.getCurrentContract();
         if (contract.isPresent()) {
-          contract.get().sourceDateRecoveryDay = absence.getAbsenceDate();
-          contract.get().sourceRecoveryDayUsed++;
+          contract.get().setSourceDateRecoveryDay(absence.getAbsenceDate());
+          contract.get().setSourceRecoveryDayUsed(contract.get().getSourceRecoveryDayUsed() + 1);
           contract.get().save();
         }
       }
-      if (personDay.date.isBefore(updateFrom)) {
-        updateFrom = personDay.date;
+      if (personDay.getDate().isBefore(updateFrom)) {
+        updateFrom = personDay.getDate();
       }
     }
 
@@ -1425,7 +1434,7 @@ public class AbsenceGroups extends Controller {
 
     flash.success("Tutti i dati sono stati caricati correttamente.");
 
-    importCertificationsAbsences(person.office.id);
+    importCertificationsAbsences(person.getOffice().id);
   }
 
 }

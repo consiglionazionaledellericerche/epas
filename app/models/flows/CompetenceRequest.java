@@ -29,6 +29,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.Person;
 import models.base.MutableModel;
 import models.enumerate.ShiftSlot;
@@ -44,6 +46,8 @@ import play.data.validation.Required;
  * @author Dario Tagliaferri
  *
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {
@@ -53,61 +57,61 @@ public class CompetenceRequest extends MutableModel {
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public CompetenceRequestType type;
+  private CompetenceRequestType type;
 
   @Required
   @NotNull
   @ManyToOne(optional = false)
-  public Person person;
+  private Person person;
   
   /*
    * Descrizione della richiesta
    */
-  public String note;
+  private String note;
   
   /*
    * Destinatario della richiesta di cambio turno/reperibilità
    */
   @ManyToOne(optional = true)
-  public Person teamMate;
+  private Person teamMate;
   
   /*
    * L'eventuale valore da salvare
    */
-  public Integer value;
+  private Integer value;
   
   /*
    * L'eventuale anno in cui salvare la competenza
    */
-  public Integer year;
+  private Integer year;
   
   /*
    * L'eventuale mese in cui salvare la competenza
    */
-  public Integer month;
+  private Integer month;
   
   /*
    * L'eventuale data inizio da chiedere
    */
-  public LocalDate beginDateToAsk;
+  private LocalDate beginDateToAsk;
   /*
    * L'eventuale data fine da chiedere
    */
-  public LocalDate endDateToAsk;
+  private LocalDate endDateToAsk;
   /*
    * L'eventuale data inizio da dare
    */
-  public LocalDate beginDateToGive;
+  private LocalDate beginDateToGive;
   /*
    * L'eventuale data fine da dare
    */
-  public LocalDate endDateToGive;
+  private LocalDate endDateToGive;
   
   /*
    * Lo slot per cui richiedere il cambio
    */
   @Enumerated(EnumType.STRING)
-  public ShiftSlot shiftSlot;
+  private ShiftSlot shiftSlot;
   
   /**
    * Data e ora di inizio.
@@ -115,34 +119,34 @@ public class CompetenceRequest extends MutableModel {
   @Required
   @NotNull
   @Column(name = "start_at")
-  public LocalDateTime startAt;
+  private LocalDateTime startAt;
 
   @Column(name = "end_to")
-  public LocalDateTime endTo;
+  private LocalDateTime endTo;
   
-  public LocalDateTime employeeApproved;
+  private LocalDateTime employeeApproved;
   
-  public LocalDateTime reperibilityManagerApproved;
+  private LocalDateTime reperibilityManagerApproved;
   
-  public boolean employeeApprovalRequired = true;
+  private boolean employeeApprovalRequired = true;
   
-  public boolean reperibilityManagerApprovalRequired = true;
+  private boolean reperibilityManagerApprovalRequired = true;
   
   
   @NotAudited
   @OneToMany(mappedBy = "competenceRequest")
   @OrderBy("createdAt DESC")
-  public List<CompetenceRequestEvent> events = Lists.newArrayList();
+  private List<CompetenceRequestEvent> events = Lists.newArrayList();
   
   /**
    * Se il flusso è avviato.
    */
-  public boolean flowStarted = false; 
+  private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
-  public boolean flowEnded = false;
+  private boolean flowEnded = false;
   
   @Transient
   public LocalDate startAtAsDate() {

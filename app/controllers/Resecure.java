@@ -215,7 +215,7 @@ public class Resecure extends Controller {
         String username = jwtUsername.get();
         val person = personDao.byEppn(username);
         if (person.isPresent()) {
-          username = person.get().user.username;
+          username = person.get().getUser().getUsername();
           session.put(USERNAME, username);
           session.put(OAUTH, true);
           log.info("Login OAuth per l'utente {}", username);

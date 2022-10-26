@@ -56,6 +56,6 @@ public class BadgeUpdateDto {
    * presenti nell'instanza di questo DTO.
    */
   public void update(Badge badge) {
-    badge.code = getCode();
+    badge.setCode(getCode());
   }
 }

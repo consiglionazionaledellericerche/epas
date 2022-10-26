@@ -22,12 +22,16 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 
 
 /**
  * Ore associate ad una persona per straordinario.
  */
+@Getter
+@Setter
 @Table(name = "person_hour_for_overtime")
 @Entity
 public class PersonHourForOvertime extends BaseModel {
@@ -38,11 +42,11 @@ public class PersonHourForOvertime extends BaseModel {
    * numero di ore assegnato (viene modificato mese per mese) di straordinari per quella persona che
    * è responsabile di gruppo.
    */
-  public Integer numberOfHourForOvertime;
+  private Integer numberOfHourForOvertime;
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
-  public Person person;
+  private Person person;
 
 
   public PersonHourForOvertime(Person person, Integer numberOfHourForOvertime) {

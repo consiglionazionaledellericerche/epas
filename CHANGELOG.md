@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
  - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
    REST /rest/v2/certifications/getMonthSituation
+ - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
 
 ## [2.6.1] - 2022-10-13
 ### Added

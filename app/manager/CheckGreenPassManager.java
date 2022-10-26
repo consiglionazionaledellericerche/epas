@@ -107,17 +107,17 @@ public class CheckGreenPassManager {
     List<Office> offices = officeDao.allEnabledOffices();
     for (Office office : offices) {
       if (office.equals(iit)) {
-        log.info("Seleziono la lista dei sorteggiati per {}", office.name);
+        log.info("Seleziono la lista dei sorteggiati per {}", office.getName());
         list = peopleActiveInDate(date, office);
         listDrawn = peopleDrawn(office, list, date);
         if (listDrawn.isEmpty()) {
           log.warn("Nessuna persona selezionata per la sede {}! Verificare con l'amministrazione", 
-              office.name);
+              office.getName());
         } else {
           for (CheckGreenPass gp : listDrawn) {
             //Invio una mail a ciascun dipendente selezionato
-            emailManager.infoDrawnPersonForCheckingGreenPass(gp.person);
-            log.info("Inviata mail informativa per il controllo green pass a {}", gp.person);
+            emailManager.infoDrawnPersonForCheckingGreenPass(gp.getPerson());
+            log.info("Inviata mail informativa per il controllo green pass a {}", gp.getPerson());
           }
         }
         emailManager.infoPeopleSelected(listDrawn, date, list.size());
@@ -145,10 +145,10 @@ public class CheckGreenPassManager {
         .populatePersonStampingDayRecapList(list, date, numberOfInOut);
     List<Person> filteredList = Lists.newArrayList();
     for (PersonStampingDayRecap recap : recapList) {
-      log.debug("Controllo {}", recap.personDay.person.fullName());
+      log.debug("Controllo {}", recap.personDay.getPerson().fullName());
       if (!recap.personDay.getStampings().isEmpty()) {
         log.debug("Ci sono timbrature, lo aggiungo alla lista");
-        filteredList.add(recap.personDay.person);
+        filteredList.add(recap.personDay.getPerson());
       }
     }
     return filteredList;
@@ -164,7 +164,7 @@ public class CheckGreenPassManager {
       final Office office, final List<Person> list, final LocalDate date) {
 
     log.info("{} ({}) -> effettuo il sorteggio tra {} presenti.", 
-        office.name, date, list.size());
+        office.getName(), date, list.size());
 
     Integer numberOfPeopleToDraw = peopleToDrawn(list.size());
 
@@ -178,7 +178,7 @@ public class CheckGreenPassManager {
 
     log.info("{} ({}) -> {} persone non sorteggiabili "
         + "perché già sorteggiate. Numero di sorteggiabili: {}.", 
-        office.name, date, peopleAlreadyDrawnInDate.size(), peopleToDraw.size());
+        office.getName(), date, peopleAlreadyDrawnInDate.size(), peopleToDraw.size());
 
     //preparo una mappa con chiave il numero dei sorteggi e valore la lista
     //di persone che hanno subito quel numero di sorteggi
@@ -233,9 +233,9 @@ public class CheckGreenPassManager {
       Optional<CheckGreenPass> obj = passDao.byPersonAndDate(person, LocalDate.now());
       if (!obj.isPresent()) {
         CheckGreenPass gp = new CheckGreenPass();
-        gp.person = person;
-        gp.checked = false;
-        gp.checkDate = LocalDate.now();
+        gp.setPerson(person);
+        gp.setChecked(false);
+        gp.setCheckDate(LocalDate.now());
         gp.save();
         checkGreenPassList.add(gp);
         log.info("Salvato checkgreenpass per {}", person.fullName());

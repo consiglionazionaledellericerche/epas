@@ -80,7 +80,7 @@ public class PersonMonths extends Controller {
   public static void hourRecap(int year) {
 
     Optional<User> user = Security.getUser();
-    if (!user.isPresent() || user.get().person == null) {
+    if (!user.isPresent() || user.get().getPerson() == null) {
       flash.error("Accesso negato.");
       renderTemplate("Application/indexAdmin.html");
     }
@@ -90,7 +90,7 @@ public class PersonMonths extends Controller {
       renderTemplate("Application/indexAdmin.html");
     }
 
-    Person person = user.get().person;
+    Person person = user.get().getPerson();
 
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
@@ -118,7 +118,7 @@ public class PersonMonths extends Controller {
    */
   public static void trainingHours(int year) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     List<PersonMonthRecap> personMonthRecapList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
@@ -138,7 +138,7 @@ public class PersonMonths extends Controller {
    */
   public static void insertTrainingHours(Integer month, Integer year) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     rules.checkIfPermitted(person);
     render(person, month, year);
@@ -157,7 +157,7 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, 
       Long personMonthSituationId) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     if (personMonthSituationId != null) {
 
@@ -173,7 +173,7 @@ public class PersonMonths extends Controller {
         render("@insertTrainingHours",
             person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
-      pm.trainingHours = value;
+      pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
       trainingHours(year);
@@ -205,13 +205,13 @@ public class PersonMonths extends Controller {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
 
-    int year = pm.year;
-    int month = pm.month;
-    Person person = pm.person;
+    int year = pm.getYear();
+    int month = pm.getMonth();
+    Person person = pm.getPerson();
 
-    int begin = pm.fromDate.getDayOfMonth();
-    int end = pm.toDate.getDayOfMonth();
-    int value = pm.trainingHours;
+    int begin = pm.getFromDate().getDayOfMonth();
+    int end = pm.getToDate().getDayOfMonth();
+    int value = pm.getTrainingHours();
 
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
@@ -229,13 +229,13 @@ public class PersonMonths extends Controller {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
 
-    int year = pm.year;
-    int month = pm.month;
-    Person person = pm.person;
+    int year = pm.getYear();
+    int month = pm.getMonth();
+    Person person = pm.getPerson();
 
-    int begin = pm.fromDate.getDayOfMonth();
-    int end = pm.toDate.getDayOfMonth();
-    int value = pm.trainingHours;
+    int begin = pm.getFromDate().getDayOfMonth();
+    int end = pm.getToDate().getDayOfMonth();
+    int value = pm.getTrainingHours();
 
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
@@ -295,7 +295,7 @@ public class PersonMonths extends Controller {
 
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.trainingHours(pm.year); 
+    PersonMonths.trainingHours(pm.getYear()); 
 
   }
 
@@ -313,7 +313,7 @@ public class PersonMonths extends Controller {
     
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.visualizePeopleTrainingHours(pm.year, pm.month, officeId);
+    PersonMonths.visualizePeopleTrainingHours(pm.getYear(), pm.getMonth(), officeId);
 
   }
 
@@ -372,7 +372,7 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
       Long personMonthSituationId) {
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     checkErrors(begin, end, year, month, value);
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -387,10 +387,10 @@ public class PersonMonths extends Controller {
         render("@insertPeopleTrainingHours",
             person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
-      pm.trainingHours = value;
+      pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-      visualizePeopleTrainingHours(year, month, pm.person.office.id);
+      visualizePeopleTrainingHours(year, month, pm.getPerson().getOffice().id);
       
     } else {
       checkPerson(person);
@@ -398,7 +398,7 @@ public class PersonMonths extends Controller {
     
     if (Validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
-          ImmutableSet.of(person.office), false, null, null, false).list();
+          ImmutableSet.of(person.getOffice()), false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
           person, month, year, begin, end, value, simplePersonList);
@@ -406,7 +406,7 @@ public class PersonMonths extends Controller {
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
-    PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
+    PersonMonths.visualizePeopleTrainingHours(year, month, person.getOffice().id);
   }
 
   /**
@@ -458,7 +458,7 @@ public class PersonMonths extends Controller {
    */
   private static void checkErrorsInUpdate(Integer value, PersonMonthRecap pm) {
     if (!Validation.hasErrors()) {
-      if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
+      if (value > 24 * (pm.getToDate().getDayOfMonth() - pm.getFromDate().getDayOfMonth() + 1)) {
         Validation.addError("value",
             "valore troppo alto");
       }
@@ -469,7 +469,7 @@ public class PersonMonths extends Controller {
    * aggiunge al validation un controllo sulla presenza della persona passata come parametro.
    */
   private static void checkPerson(Person person) {
-    if (person == null || person.name == null || person.surname == null) {
+    if (person == null || person.getName() == null || person.getSurname() == null) {
       Validation.addError("person", "la persona non può essere nulla");
     }
   }

@@ -35,46 +35,46 @@ public class ParentalCodesFix extends Job {
         "254MO", "25OH7", "252OH7", "253OH7", "254OH7");
     List<Absence> allChildrenCodes = absenceComponentDao.absences(codes);
     List<Absence> childrenCodesFiltered = allChildrenCodes.stream()
-        .filter(ab -> !ab.personDay.date.isBefore(new LocalDate(2022, 8, 13)))
+        .filter(ab -> !ab.getPersonDay().getDate().isBefore(new LocalDate(2022, 8, 13)))
         .collect(Collectors.toList());
     log.debug("Ci sono {} assenze da modificare", childrenCodesFiltered.size() );
     for (Absence abs : childrenCodesFiltered) {
-      switch (abs.absenceType.code) {
+      switch (abs.getAbsenceType().getCode()) {
         case "25O":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("25").get();          
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("25").get());          
           break;
         case "252O":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("252").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("252").get());
           break;
         case "253O":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("253").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("253").get());
           break;
         case "254O":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("254").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("254").get());
           break;
         case "25MO":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("25M").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("25M").get());
           break;
         case "252MO":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("252M").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("252M").get());
           break;
         case "253MO":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("253M").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("253M").get());
           break;
         case "254MO":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("254M").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("254M").get());
           break;
         case "25OH7":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("25H7").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("25H7").get());
           break;
         case "252OH7":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("252H7").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("252H7").get());
           break;
         case "253OH7":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("253H7").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("253H7").get());
           break;
         case "254OH7":
-          abs.absenceType = absenceComponentDao.absenceTypeByCode("254H7").get();
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("254H7").get());
           break;          
         default:
           break;          

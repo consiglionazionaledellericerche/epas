@@ -117,7 +117,7 @@ public class Certifications extends Controller {
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
-    if (generalSettingDao.generalSetting().onlyMealTicket == true) {
+    if (generalSettingDao.generalSetting().isOnlyMealTicket() == true) {
       //Caso di invio solo buoni pasto per INAF
       render("@partialCertifications", people, office, validYear, validMonth);
       
@@ -166,7 +166,7 @@ public class Certifications extends Controller {
         render(office, validYear, validMonth);
       }
       
-      final Set<String> matricoleEpas = people.stream().map(person -> person.number)
+      final Set<String> matricoleEpas = people.stream().map(person -> person.getNumber())
           .collect(Collectors.toSet());
 
       final Set<String> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
@@ -177,16 +177,16 @@ public class Certifications extends Controller {
       matchNumbers.retainAll(matricoleAttestati);
 
       // Controlli sull'abilitazione del calendario turni
-      final boolean enabledCalendar = office.configurations.stream()
-          .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
-              && "true".equals(configuration.fieldValue));
+      final boolean enabledCalendar = office.getConfigurations().stream()
+          .anyMatch(configuration -> configuration.getEpasParam() == EpasParam.ENABLE_CALENDARSHIFT
+              && "true".equals(configuration.getFieldValue()));
 
       final List<ShiftTypeMonth> unApprovedActivities;
 
       if (enabledCalendar) {
         unApprovedActivities = shiftTypeMonthDao
             .byOfficeInMonth(office, monthToUpload.get()).stream()
-            .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+            .filter(shiftTypeMonth -> !shiftTypeMonth.isApproved()).collect(Collectors.toList());
       } else {
         unApprovedActivities = new ArrayList<>();
       }
@@ -280,7 +280,7 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -355,7 +355,7 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -366,7 +366,7 @@ public class Certifications extends Controller {
     // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
     // informazioni per una sola persona tramite link (button sulla singola persona)
     if (redirect) {
-      certifications(person.office.id, year, month);
+      certifications(person.getOffice().id, year, month);
     }
 
     render("@personStatus", personCertData, stepSize, person);

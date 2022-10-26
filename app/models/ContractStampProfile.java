@@ -23,6 +23,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;
@@ -31,6 +33,8 @@ import org.joda.time.LocalDate;
 /**
  * Tipologia di orario di lavoro associata ad un contratto in un certo periodo temporale.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "contract_stamp_profiles")
@@ -39,11 +43,11 @@ public class ContractStampProfile extends PropertyInPeriod {
   private static final long serialVersionUID = 3503562995113282540L;
 
   @Column(name = "fixed_working_time")
-  public boolean fixedworkingtime;
+  private boolean fixedworkingtime;
 
   @ManyToOne
   @JoinColumn(name = "contract_id", nullable = false)
-  public Contract contract;
+  private Contract contract;
 
   /**
    * TODO: questa implementazione andrebbe spostata nel PeriodModel
@@ -53,17 +57,18 @@ public class ContractStampProfile extends PropertyInPeriod {
    * @return esito
    */
   public boolean includeDate(LocalDate date) {
-    if (beginDate == null && endDate == null) {
+    if (getBeginDate() == null && getEndDate() == null) {
       //TODO decidere se considerare l'intervallo infinito, oppure nullo
       return false;
     }
-    if (beginDate == null) {
-      return !endDate.isAfter(date);
+    if (getBeginDate() == null) {
+      return !getEndDate().isAfter(date);
     }
-    if (endDate == null) {
-      return !beginDate.isBefore(date);
+    if (getEndDate() == null) {
+      return !getBeginDate().isBefore(date);
     }
-    return !beginDate.isBefore(date) && !endDate.isAfter(date);
+    return !getBeginDate().isBefore(date) && !getEndDate()
+        .isAfter(date);
   }
 
   /**
@@ -73,16 +78,16 @@ public class ContractStampProfile extends PropertyInPeriod {
    * @return range
    */
   public Range<LocalDate> dateRange() {
-    if (beginDate == null && endDate == null) {
+    if (getBeginDate() == null && getEndDate() == null) {
       return Range.all();
     }
-    if (beginDate == null) {
-      return Range.atMost(endDate);
+    if (getBeginDate() == null) {
+      return Range.atMost(getEndDate());
     }
-    if (endDate == null) {
-      return Range.atLeast(beginDate);
+    if (getEndDate() == null) {
+      return Range.atLeast(getBeginDate());
     }
-    return Range.closed(beginDate, endDate);
+    return Range.closed(getBeginDate(), getEndDate());
   }
 
   @Override

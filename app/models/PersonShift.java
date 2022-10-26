@@ -24,34 +24,38 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.PeriodModel;
 
 /**
  * Associazione di una persona ad una tipologia di turno.
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "person_shift")
 public class PersonShift extends PeriodModel {
 
   private static final long serialVersionUID = 651448817233184716L;
 
-  public String description;
+  private String description;
 
   @ManyToOne
   @JoinColumn(name = "person_id", nullable = false, updatable = false)
-  public Person person;
+  private Person person;
 
   @OneToMany(mappedBy = "personShift")
-  public List<PersonShiftShiftType> personShiftShiftTypes;
+  private List<PersonShiftShiftType> personShiftShiftTypes;
 
   @OneToMany(mappedBy = "personShift")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+  private List<PersonShiftDay> personShiftDays = new ArrayList<>();
 
-  public boolean disabled;
+  private boolean disabled;
 
   @Override
   public String toString() {
-    return person.name + " " + person.surname;
+    return person.getName() + " " + person.getSurname();
   }
 
 }

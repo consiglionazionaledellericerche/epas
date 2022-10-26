@@ -58,7 +58,7 @@ public class ContractShowTerseDto {
    */
   public static ContractShowTerseDto build(Contract contract) throws IllegalStateException {
     val contractDto = modelMapper.map(contract, ContractShowTerseDto.class);
-    contractDto.setPerson(PersonShowTerseDto.build(contract.person));
+    contractDto.setPerson(PersonShowTerseDto.build(contract.getPerson()));
     if (contract.getPreviousContract() != null) {
       if (contract.getPreviousContract().id.equals(contract.id)) {
         throw new IllegalStateException(

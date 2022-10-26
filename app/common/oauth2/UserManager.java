@@ -43,11 +43,11 @@ public class UserManager {
    * @return l'id dello user se c'è
    */
   public Optional<UserRepresentation> find(User user) {
-    return Optional.ofNullable(user.keycloakId).map(id -> usersApi.realmUsersIdGet(realm, id));
+    return Optional.ofNullable(user.getKeycloakId()).map(id -> usersApi.realmUsersIdGet(realm, id));
   }
 
   Map<String, Object> byUsername(User user) {
-    return usersApi.realmUsersGet(realm, Map.of("username", user.username))
+    return usersApi.realmUsersGet(realm, Map.of("username", user.getUsername()))
         .stream().findFirst().orElseThrow();
   }
 
@@ -63,7 +63,7 @@ public class UserManager {
     data.setTemporary(false);
     data.setValue(password);
     data.setType("password");
-    usersApi.realmUsersIdResetPasswordPut(realm, user.keycloakId, data);
+    usersApi.realmUsersIdResetPasswordPut(realm, user.getKeycloakId(), data);
   }
 
 

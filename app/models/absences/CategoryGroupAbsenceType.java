@@ -32,6 +32,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultCategoryType;
 import models.base.BaseModel;
 import models.contractual.ContractualClause;
@@ -42,6 +44,8 @@ import org.hibernate.envers.Audited;
  * Associazione tra tipologie di gruppi di assenze e le tab in cui mostrarle
  * nell'interfaccia di gestione delle assenze.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "category_group_absence_types")
@@ -51,24 +55,24 @@ public class CategoryGroupAbsenceType extends BaseModel
   private static final long serialVersionUID = 4580659910825885894L;
 
   @Column
-  public String name;
+  private String name;
 
   @Column
-  public String description;
+  private String description;
   
   @Column
-  public int priority;
+  private int priority;
   
   @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> groupAbsenceTypes;
+  private Set<GroupAbsenceType> groupAbsenceTypes;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_tab_id")
-  public CategoryTab tab;
+  private CategoryTab tab;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "contractual_clause_id")
-  public ContractualClause contractualClause;
+  private ContractualClause contractualClause;
 
   @Override
   public int compareTo(CategoryGroupAbsenceType obj) {
@@ -89,13 +93,13 @@ public class CategoryGroupAbsenceType extends BaseModel
     
     //ogni gruppo lo inserisco con quelli della stessa priorità
     for (GroupAbsenceType group : this.groupAbsenceTypes) {
-      if (onlyFirstOfChain && !group.previousGroupChecked.isEmpty()) {
+      if (onlyFirstOfChain && !group.getPreviousGroupChecked().isEmpty()) {
         continue;
       }
-      Set<GroupAbsenceType> prioritySet = setByPriority.get(group.priority);
+      Set<GroupAbsenceType> prioritySet = setByPriority.get(group.getPriority());
       if (prioritySet == null) {
         prioritySet = Sets.newHashSet();
-        setByPriority.put(group.priority, prioritySet);
+        setByPriority.put(group.getPriority(), prioritySet);
       }
       prioritySet.add(group);
     }
@@ -118,7 +122,7 @@ public class CategoryGroupAbsenceType extends BaseModel
       if (defaultCategory.name().equals(this.name)) {
         if (defaultCategory.description.equals(this.description)
             && defaultCategory.priority == this.priority
-            && defaultCategory.categoryTab.name().equals(this.tab.name)) {
+            && defaultCategory.categoryTab.name().equals(this.tab.getName())) {
           return Optional.of(true);
         } else {
           return Optional.of(false);
@@ -138,7 +142,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   @Transient
   public Set<AbsenceType> getAbsenceTypes() {
     return groupAbsenceTypes.stream()
-        .flatMap(gat -> gat.takableAbsenceBehaviour.takableCodes.stream())
+        .flatMap(gat -> gat.getTakableAbsenceBehaviour().getTakableCodes().stream())
         .collect(Collectors.toSet());
   }
   

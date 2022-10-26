@@ -324,7 +324,7 @@ public class AbsencePeriod {
         .takenAmount(takenAmount)
         .build();
     if (this.initialization != null 
-        && !absence.getAbsenceDate().isAfter(this.initialization.date)) {
+        && !absence.getAbsenceDate().isAfter(this.initialization.getDate())) {
       takenAbsence.beforeInitialization = true;
     }  
     return takenAbsence;
@@ -405,7 +405,8 @@ public class AbsencePeriod {
 
     int complationAmount = getInitializationComplationUsed(absenceEngineUtility);
     for (DayInPeriod dayInPeriod : this.daysInPeriod.values()) {
-      if (this.initialization != null && !dayInPeriod.getDate().isAfter(this.initialization.date)) {
+      if (this.initialization != null && !dayInPeriod.getDate()
+          .isAfter(this.initialization.getDate())) {
         continue;
       }
       if (dayInPeriod.getExistentComplations().isEmpty()) {
@@ -490,14 +491,14 @@ public class AbsencePeriod {
       return 0;
     }
     
-    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    int minutes = this.initialization.getHoursInput() * 60 + this.initialization.getMinutesInput();
     //Takable used
     if (this.isTakableMinutes()) {
       return minutes;
     } else if (this.isTakableUnits()) {
-      int units = (this.initialization.unitsInput * 100);
+      int units = (this.initialization.getUnitsInput() * 100);
       if (minutes > 0) {
-        units = units + workingTypePercent(minutes, this.initialization.averageWeekTime); 
+        units = units + workingTypePercent(minutes, this.initialization.getAverageWeekTime()); 
       }
       return units; 
     }
@@ -519,17 +520,17 @@ public class AbsencePeriod {
       return 0;
     }
     
-    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    int minutes = this.initialization.getHoursInput() * 60 + this.initialization.getMinutesInput();
     
     //Complation used
     if (this.isComplationUnits()) {
-      return workingTypePercentModule(minutes, this.initialization.averageWeekTime);
+      return workingTypePercentModule(minutes, this.initialization.getAverageWeekTime());
     } else if (this.isComplationMinutes()) {
       
       //completare finchè si può minutes
       while (true) {
         Optional<AbsenceType> absenceType = absenceEngineUtility
-            .whichReplacingCode(this.replacingCodesDesc, this.initialization.date, minutes);
+            .whichReplacingCode(this.replacingCodesDesc, this.initialization.getDate(), minutes);
         if (!absenceType.isPresent()) {
           break;
         }

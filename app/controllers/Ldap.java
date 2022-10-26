@@ -83,7 +83,7 @@ public class Ldap extends Controller {
     //Se la person è diversa da null il metodo getPersonByLdapUser dovrebbe 
     //aver già fatto la redirect.
     if (person != null) {
-      flash.success("Benvenuto " + person.name + ' ' + person.surname);
+      flash.success("Benvenuto " + person.getName() + ' ' + person.getSurname());
       log.info("user {} successfully logged in using LDAP from ip {}", person.getFullname(),
           Http.Request.current().remoteAddress);
       redirectToOriginalUrl();
@@ -117,10 +117,10 @@ public class Ldap extends Controller {
     
     Person person = personDao.byEppn(eppn).orNull();
     if (person != null) {
-      Cache.set(person.user.username, person, Security.CACHE_DURATION);
+      Cache.set(person.getUser().getUsername(), person, Security.CACHE_DURATION);
       Cache.set("personId", person.id, Security.CACHE_DURATION);
 
-      session.put("username", person.user.username);
+      session.put("username", person.getUser().getUsername());
       session.put("ldap", true);
 
       return person;

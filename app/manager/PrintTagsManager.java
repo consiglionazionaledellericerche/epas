@@ -88,8 +88,8 @@ public class PrintTagsManager {
 
     for (PersonStampingDayRecap day : psDto.daysRecap) {
       if (!day.ignoreDay) {
-        for (Stamping stamping : day.personDay.stampings) {
-          if (stamping.markedByAdmin) {
+        for (Stamping stamping : day.personDay.getStampings()) {
+          if (stamping.isMarkedByAdmin()) {
             historyStampingsList.add(stampingHistoryDao.stampings(stamping.id));
           }
         }
@@ -108,14 +108,14 @@ public class PrintTagsManager {
     List<OffSiteWorkingTemp> list = Lists.newArrayList();
     for (PersonStampingDayRecap day : psDto.daysRecap) {
       if (!day.ignoreDay) {
-        for (Stamping stamping : day.personDay.stampings) {
+        for (Stamping stamping : day.personDay.getStampings()) {
           if (stamping.isOffSiteWork()) {
             OffSiteWorkingTemp temp = new OffSiteWorkingTemp();
-            temp.date = stamping.personDay.date;
+            temp.date = stamping.getPersonDay().getDate();
             temp.stamping = stamping;
-            temp.reason = stamping.reason;
-            temp.place = stamping.place;
-            temp.note = stamping.note;
+            temp.reason = stamping.getReason();
+            temp.place = stamping.getPlace();
+            temp.note = stamping.getNote();
             list.add(temp);
           }            
         }
@@ -147,10 +147,10 @@ public class PrintTagsManager {
     personDays.forEach(pd -> {
       personDayHistoryDao.stampingsAtCreation(pd.id).forEach(s -> {
         if (!badgeReaderMap.containsKey(s.revision.owner)) {
-          Set<LocalDate> dates = Sets.newHashSet(s.value.date.toLocalDate());
+          Set<LocalDate> dates = Sets.newHashSet(s.value.getDate().toLocalDate());
           badgeReaderMap.put(s.revision.owner, dates);
         } else {
-          badgeReaderMap.get(s.revision.owner).add(s.value.date.toLocalDate());
+          badgeReaderMap.get(s.revision.owner).add(s.value.getDate().toLocalDate());
         }
       });
     });
@@ -172,9 +172,9 @@ public class PrintTagsManager {
       return days;
     }
     psDto.daysRecap.forEach(day -> {
-      if (day.personDay.isHoliday) {
+      if (day.personDay.isHoliday()) {
         personShiftDays.forEach(psd -> { 
-          if (psd.date.isEqual(day.personDay.date)) {
+          if (psd.getDate().isEqual(day.personDay.getDate())) {
             days.add(day.personDay);
           }
         });

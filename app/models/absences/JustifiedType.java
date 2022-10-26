@@ -28,6 +28,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
@@ -37,6 +38,8 @@ import org.hibernate.envers.Audited;
  * @author dario
  *
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "justified_types")
@@ -82,13 +85,13 @@ public class JustifiedType extends BaseModel {
   @Getter
   @Column
   @Enumerated(EnumType.STRING)
-  public JustifiedTypeName name;
+  private JustifiedTypeName name;
 
   @ManyToMany(mappedBy = "justifiedTypesPermitted")
-  public Set<AbsenceType> absenceTypes;
+  private Set<AbsenceType> absenceTypes;
 
   @OneToMany(mappedBy = "justifiedType")
-  public List<Absence> absences = Lists.newArrayList();
+  private List<Absence> absences = Lists.newArrayList();
 
   @Override
   public String toString() {
