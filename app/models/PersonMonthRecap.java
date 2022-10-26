@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package models;
 
 import com.google.common.base.MoreObjects;
@@ -26,7 +25,6 @@ import javax.validation.constraints.NotNull;
 import models.base.BaseModel;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
-
 
 /**
  * Entità ore di formazione.
@@ -44,7 +42,6 @@ public class PersonMonthRecap extends BaseModel {
   @ManyToOne(optional = false)
   @JoinColumn(updatable = false)
   public Person person;
-
 
   public Integer year;
 
@@ -70,17 +67,17 @@ public class PersonMonthRecap extends BaseModel {
     this.year = year;
     this.month = month;
   }
-  
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(PersonMonthRecap.class)
         .add("person", person.fullName())
         .add("matricola", person.number)
         .add("year", year)
-        .add("month", month)        
+        .add("month", month)
         .toString();
   }
-  
+
   /**
    * Ritorna true se le ore si riferiscono al mese attuale od al mese precedente 
    * e non sono ancora state approvate.
@@ -88,11 +85,11 @@ public class PersonMonthRecap extends BaseModel {
    * @return se possono essere modificate.
    */
   public boolean isEditable() {
-    
+
     if (hoursApproved) {
       return false;
     }
-    
+
     LocalDate date = LocalDate.now();
     //mese attuale
     if (month == date.getMonthOfYear() && year == date.getYear()) { 
@@ -102,7 +99,7 @@ public class PersonMonthRecap extends BaseModel {
     if (month == date.minusMonths(1).getMonthOfYear() && year == date.minusMonths(1).getYear()) {
       return true;
     }
-    
+
     return false;
   }
 
