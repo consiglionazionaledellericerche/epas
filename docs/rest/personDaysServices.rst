@@ -66,11 +66,11 @@ Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
       GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice
       sedeId==223400 year==2020 month==10
 
-Timbrature per lavoro fuori sede o per motivi di servizio con luogo e/o motivazione
------------------------------------------------------------------------------------
+Timbrature per lavoro fuori sede o per motivi di servizio fuori sede con luogo e/o motivazione
+----------------------------------------------------------------------------------------------
 
 Sono disponibili due endpoint per prelevare le informazioni relative alla timbrature per lavori
-fuori o per motivi di servizio con impostato luogo e/o motivazione.
+fuori o per motivi di servizio di servizio fuori sede con impostato luogo e/o motivazione.
 Queste informazioni possono per esempio essere utilizzate da un eventuale sistema esterno di
 rendicontazione dei progetti.
 
@@ -219,3 +219,24 @@ Un esempio di risultato è il seguente:
         "timeAtWork": 0
     }
   ]
+
+Timbrature per motivi di servizio
+---------------------------------
+
+È disponibile un endpoint per prelevare le informazioni relative alla timbrature con
+causale motivi di servizio.
+
+Per prelevare la lista delle giornate con timbrature con causale motivi di
+servizio di una sede è possibile utilizzare una GET alll'endpoint
+**/rest/v3/personDays/serviceExitByPersonAndMonth**.
+
+La sede è individuata tramite il parametro *sedeId*.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_person_day_reader
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/serviceExitByOfficeAndMonth
+      sedeId==223400 year==2022 month==10
+
+La risposta ottenuta è analoga a quella descritta nel paragrafo precedente relativamente
+al metodo /rest/v3/personDays/offSiteWorkByOfficeAndMonth.
