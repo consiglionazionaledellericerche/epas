@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package controllers.rest.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
@@ -238,6 +237,26 @@ public class PersonDays extends Controller {
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
     val personDays = personDayDao.getOffSitePersonDaysByOfficeInPeriod(
+        office, yearMonth.toLocalDate(1), 
+        yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
+    renderJSON(gson.toJson(personDays.stream().map(
+        pd -> PersonDayShowDto.build(pd)).collect(Collectors.toList())));
+  }
+
+  /**
+   * Metodo rest che ritorna un json contenente la lista dei person day di una sede
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
+   * motivi di servizio.
+   */
+  public static void serviceExitByOfficeAndMonth(Long id, String code, String codeId,
+      String sedeId, Integer year, Integer month) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office =
+        Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
+    val gson = gsonBuilder.create();
+    val yearMonth = new YearMonth(year, month);
+    val personDays = personDayDao.getServiceExitPersonDaysByOFficeInPeriod(
         office, yearMonth.toLocalDate(1), 
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
 

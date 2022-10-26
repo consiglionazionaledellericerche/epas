@@ -266,6 +266,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
           configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
       if (conf.isPresent()) {        
         blockType = BlockType.valueOf(conf.get().getFieldValue());
+
         switch (blockType) {
           case electronic:
             buoniElettronici = buoniDaConteggiare;
@@ -286,7 +287,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       buoniDaConteggiare = buoniUsati;
       for (BlockMealTicket block : list) {
         dimBlocchetto = block.getDimBlock();
-        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {          
+        while (buoniDaConteggiare > 0 && dimBlocchetto != 0) {
           switch (block.getBlockType()) {
             case papery:
               buoniCartacei++;

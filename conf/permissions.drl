@@ -3755,6 +3755,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.list",
         "rest.v3.Competences.show",
@@ -3813,6 +3814,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.personCompetenceCodes",
         
@@ -3869,6 +3871,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.list",
         "rest.v3.Competences.show",

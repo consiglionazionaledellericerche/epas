@@ -39,6 +39,7 @@ import models.Certification;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
@@ -544,5 +545,30 @@ public class WrapperPerson implements IWrapperPerson {
       previousContract = contractDao.getPreviousContract(getCurrentContract().get());
     }
     return previousContract;
+  }
+
+  public List<IWrapperContractMonthRecap> getWrapperContractMonthRecaps(YearMonth yearMonth) {
+    // ******************************************************************************************
+    // DATI MENSILI
+    // ******************************************************************************************
+    // I riepiloghi mensili (uno per ogni contratto attivo nel mese)
+    List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
+    
+    List<Contract> monthContracts = wrapperFactory.create(value)
+        .orderedMonthContracts(yearMonth.getYear(), yearMonth.getMonthOfYear());
+
+    for (Contract contract : monthContracts) {
+      Optional<ContractMonthRecap> cmr =
+          wrapperFactory.create(contract).getContractMonthRecap(yearMonth);
+      if (cmr.isPresent()) {
+        contractMonths.add(wrapperFactory.create(cmr.get()));
+      }
+    }
+    return contractMonths;
+  }
+
+  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth) {
+    return getWrapperContractMonthRecaps(yearMonth).stream().mapToInt(
+        cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum);
   }
 }

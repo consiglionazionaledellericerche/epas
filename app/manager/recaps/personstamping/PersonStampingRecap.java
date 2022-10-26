@@ -236,4 +236,5 @@ public class PersonStampingRecap {
     log.debug("fine creazione nuovo PersonStampingRecap in {} ms. Person = {}, year = {}, "
         + "month = {}", System.currentTimeMillis() - start, person.getFullname(), year, month);
   }
+  
 }
