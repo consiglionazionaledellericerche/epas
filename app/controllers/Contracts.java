@@ -1510,4 +1510,16 @@ public class Contracts extends Controller {
 
   }
 
+  public void fixPreviousContractLink(Long id) {
+    val contract = contractDao.byId(id);
+    contractManager.fixPreviousContractLink(contract);
+    renderText("ok");
+  }
+  
+  public void previousContract(Long id) {
+    val contract = contractDao.byId(id);
+    renderText(
+        String.format("Current contract = %s\npreviousContract = %s",
+            contract, contractDao.getPreviousContract(contract)));
+  }
 }
