@@ -2272,6 +2272,9 @@ when
         "MealTickets.convertPersonCodeBlock",
         "MealTickets.performConvertPersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
+        
+        "MealTicketCards.mealTicketCards",
+        "MealTicketCards.addNewCard",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",
@@ -2305,6 +2308,9 @@ when
         "MealTickets.convertPersonCodeBlock",
         "MealTickets.performConvertPersonCodeBlock",
         "MealTickets.mealTicketsLegacy",
+        
+        "MealTicketCards.mealTicketCards",
+        "MealTicketCards.addNewCard",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",

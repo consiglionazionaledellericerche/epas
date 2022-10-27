@@ -29,6 +29,10 @@ public class QMealTicketCard extends EntityPathBase<MealTicketCard> {
     //inherited
     public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
+    public final DatePath<java.time.LocalDate> deliveryDate = createDate("deliveryDate", java.time.LocalDate.class);
+
+    public final QOffice deliveryOffice;
+
     //inherited
     public final DatePath<org.joda.time.LocalDate> endDate = _super.endDate;
 
@@ -37,6 +41,8 @@ public class QMealTicketCard extends EntityPathBase<MealTicketCard> {
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final BooleanPath isActive = createBoolean("isActive");
 
     public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
@@ -68,6 +74,7 @@ public class QMealTicketCard extends EntityPathBase<MealTicketCard> {
 
     public QMealTicketCard(Class<? extends MealTicketCard> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.deliveryOffice = inits.isInitialized("deliveryOffice") ? new QOffice(forProperty("deliveryOffice"), inits.get("deliveryOffice")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

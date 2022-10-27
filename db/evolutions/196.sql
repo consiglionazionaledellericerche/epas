@@ -6,6 +6,9 @@ CREATE TABLE meal_ticket_card(
 	begin_date DATE,
 	end_date DATE,
 	number INTEGER,
+	is_active BOOLEAN,
+	delivery_date DATE,
+	delivery_office_id BIGINT REFERENCES office(id),
 	version INT DEFAULT 0);
 	
 CREATE TABLE meal_ticket_card_history(
@@ -15,11 +18,14 @@ CREATE TABLE meal_ticket_card_history(
 	person_id BIGINT,
 	begin_date DATE,
 	end_date DATE,
-	number INTEGER);
+	number INTEGER,
+	is_active BOOLEAN,
+	delivery_date DATE,
+	delivery_office_id BIGINT);
 	
-ALTER TABLE meal_ticket_card ADD COLUMN meal_ticket_card_id BIGINT;
-ALTER TABLE meal_ticket_card_history ADD COLUMN meal_ticket_card_id BIGINT;
-ALTER TABLE meal_ticket_card ADD FOREIGN KEY (meal_ticket_card_id) REFERENCES meal_ticket_card(id);
+ALTER TABLE meal_ticket ADD COLUMN meal_ticket_card_id BIGINT;
+ALTER TABLE meal_ticket_history ADD COLUMN meal_ticket_card_id BIGINT;
+ALTER TABLE meal_ticket ADD FOREIGN KEY (meal_ticket_card_id) REFERENCES meal_ticket_card(id);
 
 # ---!Downs
 

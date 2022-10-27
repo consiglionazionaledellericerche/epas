@@ -1,6 +1,7 @@
 package models;
 
 import com.google.common.collect.Lists;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,7 @@ import models.base.PeriodModel;
 import models.flows.Affiliation;
 import models.flows.Group;
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
+
 import play.data.validation.Required;
 
 /**
@@ -40,4 +41,18 @@ public class MealTicketCard extends PeriodModel {
   
   @OneToMany(mappedBy = "mealTicketCard")
   private List<MealTicket> mealTickets = Lists.newArrayList();
+  
+  private boolean isActive;
+  
+  /**
+   * Data di consegna
+   */
+  private LocalDate deliveryDate;
+  
+  /**
+   * La sede che ha consegnato la tessera
+   */
+  @ManyToOne
+  @Required
+  private Office deliveryOffice;
 }

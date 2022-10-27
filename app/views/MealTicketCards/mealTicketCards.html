@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione tessere elettroniche buoni pasto'  /}
+
+<div class="container">
+
+ #{title title:'Gestione tessere elettroniche buoni pasto '+ office.name, administration:true /}
+	
+      <table class="table table-bordered center" datatable>
+        <thead>
+        <tr>
+	      <th>Nome</th>
+	      <th>Tessera attualmente in uso</th>
+	      <th>Consegna nuova tessera</th>
+	      <th>Lista tessere associate</th>
+	  	</tr>
+	  	</thead>
+	  	<tbody>
+	  	  #{list items:personList, as:'person'}
+	  	  <tr>
+	  	    <td>${person.fullName()}</td> 
+	  	    	  	    
+	  	    <td>
+	  	    #{if person.actualMealTicketCard() != null} 
+	  	    	${person.actualMealTicketCard()}
+	  	    #{/if}
+	  	    #{else}
+	  	    	<p>Nessuna tessera attualmente assegnata</p>
+	  	    #{/else}	  	    
+	  	    </td>	  	    
+	  	    
+	  	    <td><a href="@{MealTicketCards.addNewCard(person.id)}" data-async-modal="#defaultModal">
+	  	    	<i class="fa fa-plus" aria-hidden="true">Aggiungi</i></a></td>
+	  	    <td></td>  	    
+	  	  </tr>
+	  	  #{/list}
+	  	</tbody>	
+	  </table>
+
+</div>
