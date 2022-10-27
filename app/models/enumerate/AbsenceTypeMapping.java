@@ -50,7 +50,7 @@ public enum AbsenceTypeMapping {
   }
 
   public boolean is(AbsenceType absenceType) {
-    return absenceType != null && absenceType.code.equals(code);
+    return absenceType != null && absenceType.getCode().equals(code);
   }
 }
 

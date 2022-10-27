@@ -38,7 +38,7 @@ public class AbsenceAddedRest {
   public static AbsenceAddedRest build(TemplateRow templateRow) {
     AbsenceAddedRest aar = new AbsenceAddedRest();
     aar.date = templateRow.absence.getDate().toString();
-    aar.absenceCode = templateRow.absence.absenceType.code;
+    aar.absenceCode = templateRow.absence.getAbsenceType().getCode();
     aar.isOk = templateRow.absenceErrors.isEmpty();
     aar.reason = Joiner.on(", ").join(
         templateRow.absenceErrors.stream()

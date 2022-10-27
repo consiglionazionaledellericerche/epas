@@ -69,7 +69,8 @@ public enum OrganizationShiftConfiguration {
     List<ShiftComposition> list = Lists.newArrayList();
     for (PairStamping validPair : validPairs) {
       TimeInterval stampingInterval = 
-          new TimeInterval(validPair.first.date.toLocalTime(), validPair.second.date.toLocalTime());
+          new TimeInterval(validPair.first.getDate().toLocalTime(), 
+              validPair.second.getDate().toLocalTime());
       for (OrganizationShiftConfiguration conf : OrganizationShiftConfiguration.values()) {
         TimeInterval shiftInterval = new TimeInterval(conf.beginSlot, conf.endSlot);
         if (DateUtility.intervalIntersection(stampingInterval, shiftInterval) != null) {

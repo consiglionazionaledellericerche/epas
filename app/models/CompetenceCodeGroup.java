@@ -26,6 +26,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.LimitType;
 import models.enumerate.LimitUnit;
@@ -40,6 +42,8 @@ import play.data.validation.Unique;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "competence_code_groups",
@@ -53,18 +57,18 @@ public class CompetenceCodeGroup extends BaseModel {
 
   @Required
   @Unique
-  public String label;
+  private String label;
 
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_type")
-  public LimitType limitType;
+  private LimitType limitType;
 
   @Column(name = "limit_value")
-  public Integer limitValue;
+  private Integer limitValue;
 
   @Required
   @Enumerated(EnumType.STRING)
   @Column(name = "limit_unit")
-  public LimitUnit limitUnit;
+  private LimitUnit limitUnit;
 }

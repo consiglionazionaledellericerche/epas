@@ -59,11 +59,12 @@ public class TimeVariationManager {
       Optional<LocalDate> dateVariation) {
     
     TimeVariation timeVariation = new TimeVariation();
-    timeVariation.absence = absence;
-    timeVariation.dateVariation = dateVariation.or(LocalDate.now());
-    timeVariation.timeVariation = (hours * DateTimeConstants.MINUTES_PER_HOUR) + minutes;
+    timeVariation.setAbsence(absence);
+    timeVariation.setDateVariation(dateVariation.or(LocalDate.now()));
+    timeVariation.setTimeVariation((hours * DateTimeConstants.MINUTES_PER_HOUR) + minutes);
     log.info("Creata variazione oraria per giustificare l'assenza {} di {} del giorno {}", 
-        absence.absenceType.code, absence.personDay.person.fullName(), absence.personDay.date);
+        absence.getAbsenceType().getCode(), absence.getPersonDay().getPerson().fullName(), 
+        absence.getPersonDay().getDate());
     return timeVariation;
   }
   
@@ -80,7 +81,7 @@ public class TimeVariationManager {
     Map<Person, List<AbsenceToRecoverDto>> map = Maps.newHashMap();
     for (Person person : personList) {
       List<Absence> absenceList = absenceDao
-          .absenceInPeriod(person, office.beginDate, LocalDate.now().plusMonths(2), "91CE");
+          .absenceInPeriod(person, office.getBeginDate(), LocalDate.now().plusMonths(2), "91CE");
       if (!absenceList.isEmpty()) {
         map.put(person, personManager.dtoList(absenceList));
       }      

@@ -60,7 +60,7 @@ public class PersonShowDto extends PersonShowTerseDto {
           PersonShowDto::setQualification);
     });
     val personDto = modelMapper.map(person, PersonShowDto.class);
-    personDto.setBadges(person.getBadges().stream().map(b -> b.code).collect(Collectors.toSet()));
+    personDto.setBadges(person.getBadges().stream().map(b -> b.getCode()).collect(Collectors.toSet()));
     return personDto;
     
   }

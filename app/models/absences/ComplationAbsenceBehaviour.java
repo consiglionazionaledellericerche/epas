@@ -32,6 +32,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultComplation;
 import models.base.BaseModel;
@@ -40,6 +41,8 @@ import org.hibernate.envers.Audited;
 /**
  * Modella il comportamente delle assenze con completamento dell'orario di lavoro.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "complation_absence_behaviours")
@@ -49,31 +52,28 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   public static final String NAME_PREFIX = "C_";
 
   @Column(name = "name")
-  public String name;
+  private String name;
   
   @OneToMany(mappedBy = "complationAbsenceBehaviour", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
+  private Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
-  @Getter
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
-  public AmountType amountType;
+  private AmountType amountType;
 
-  @Getter
   @ManyToMany
   @JoinTable(name = "complation_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
         inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> complationCodes = Sets.newHashSet();
+  private Set<AbsenceType> complationCodes = Sets.newHashSet();
 
-  @Getter
   @ManyToMany
   @JoinTable(name = "replacing_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
         inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> replacingCodes = Sets.newHashSet();
+  private Set<AbsenceType> replacingCodes = Sets.newHashSet();
 
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
@@ -115,7 +115,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
     }
     Set<String> codes2 = Sets.newHashSet();
     for (AbsenceType type : set) {
-      codes2.add(type.code);
+      codes2.add(type.getCode());
     }
     for (String code : codes1) {
       if (!codes2.contains(code)) {

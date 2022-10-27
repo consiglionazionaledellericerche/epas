@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.PaymentType;
 import org.hibernate.envers.Audited;
@@ -37,13 +39,15 @@ import org.joda.time.LocalTime;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Audited
 @Entity
 public class OrganizationShiftSlot extends BaseModel {
 
   private static final long serialVersionUID = 2019_10_28_1039L;
 
-  public String name;
+  private String name;
 
   /**
    * Ritorna il nome dello slot formato attraverso inizio e fine dell'orario.
@@ -61,27 +65,27 @@ public class OrganizationShiftSlot extends BaseModel {
 
   @NotNull
   @Column(columnDefinition = "VARCHAR")
-  public LocalTime beginSlot;
+  private LocalTime beginSlot;
 
   @NotNull
   @Column(columnDefinition = "VARCHAR")
-  public LocalTime endSlot;
+  private LocalTime endSlot;
 
   @Column(columnDefinition = "VARCHAR")
   @Nullable
-  public LocalTime beginMealSlot;
+  private LocalTime beginMealSlot;
 
   @Column(columnDefinition = "VARCHAR")
   @Nullable
-  public LocalTime endMealSlot;
+  private LocalTime endMealSlot;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "payment_type")
-  public PaymentType paymentType;
+  private PaymentType paymentType;
  
-  public Integer minutesPaid;
+  private Integer minutesPaid;
 
   @ManyToOne
   @JoinColumn(name = "shift_time_table_id")
-  public OrganizationShiftTimeTable shiftTimeTable;
+  private OrganizationShiftTimeTable shiftTimeTable;
 }

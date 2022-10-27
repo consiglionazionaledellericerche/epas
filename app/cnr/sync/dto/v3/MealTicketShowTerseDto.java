@@ -68,8 +68,8 @@ public class MealTicketShowTerseDto {
    */
   public static MealTicketShowTerseDto build(MealTicket mealTicket) {
     val dto = modelMapper.map(mealTicket, MealTicketShowTerseDto.class);
-    dto.setPerson(PersonShowTerseDto.build(mealTicket.contract.person));
-    dto.setAdminId(mealTicket.admin.id);
+    dto.setPerson(PersonShowTerseDto.build(mealTicket.getContract().getPerson()));
+    dto.setAdminId(mealTicket.getAdmin().id);
     return dto;
   }
 

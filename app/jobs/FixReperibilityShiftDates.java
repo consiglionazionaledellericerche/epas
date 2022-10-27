@@ -66,30 +66,30 @@ public class FixReperibilityShiftDates extends Job<Void> {
     List<PersonShift> list = PersonShift.findAll();
     for (PersonShift ps : list) {
       Optional<PersonCompetenceCodes> pcc = 
-          codeDao.getByPersonAndCodeAndDate(ps.person, t1, LocalDate.now());
+          codeDao.getByPersonAndCodeAndDate(ps.getPerson(), t1, LocalDate.now());
       if (pcc.isPresent()) {
-        ps.beginDate = pcc.get().beginDate;
-        ps.endDate = pcc.get().endDate;
-        ps.disabled = false;
+        ps.setBeginDate(pcc.get().getBeginDate());
+        ps.setEndDate(pcc.get().getEndDate());
+        ps.setDisabled(false);
         
       } else {
-        ps.disabled = true;
-        ps.beginDate = LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue();
-        ps.endDate = LocalDate.now().dayOfMonth().withMaximumValue();
+        ps.setDisabled(true);
+        ps.setBeginDate(LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue());
+        ps.setEndDate(LocalDate.now().dayOfMonth().withMaximumValue());
       }
-      log.info("Aggiornata situazione date di abilitazione ai turni di {}", ps.person.fullName());
+      log.info("Aggiornata situazione date di abilitazione ai turni di {}", ps.getPerson().fullName());
       ps.save();
     }
     
     List<PersonReperibility> reperibilities = PersonReperibility.findAll();
     for (PersonReperibility pr : reperibilities) {
       Optional<PersonCompetenceCodes> pcc = 
-          codeDao.getByPersonAndCodeAndDate(pr.person, fer, LocalDate.now());
-      if (pcc.isPresent() && pr.startDate == null) {
-        pr.startDate = pcc.get().beginDate;
+          codeDao.getByPersonAndCodeAndDate(pr.getPerson(), fer, LocalDate.now());
+      if (pcc.isPresent() && pr.getStartDate() == null) {
+        pr.setStartDate(pcc.get().getBeginDate());
       }
       log.info("Aggiornata situazione date di abilitazione alla reperibilità di {}", 
-          pr.person.fullName());
+          pr.getPerson().fullName());
       pr.save();
     }
         

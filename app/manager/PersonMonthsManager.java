@@ -54,10 +54,10 @@ public class PersonMonthsManager {
         Integer end, boolean approved, Integer value) {
     PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
     LocalDate beginDate = new LocalDate(year, month, begin);
-    pm.hoursApproved = false;
-    pm.trainingHours = value;
-    pm.fromDate = beginDate;
-    pm.toDate = new LocalDate(year, month, end);
+    pm.setHoursApproved(false);
+    pm.setTrainingHours(value);
+    pm.setFromDate(beginDate);
+    pm.setToDate(new LocalDate(year, month, end));
     pm.save();
   }
 

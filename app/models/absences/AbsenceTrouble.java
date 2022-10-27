@@ -24,12 +24,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
 /**
  * Problema su un'assenza.
  */
+@Getter
+@Setter
 @Builder
 @Audited
 @Entity
@@ -39,11 +43,11 @@ public class AbsenceTrouble extends BaseModel {
   private static final long serialVersionUID = -5066077912284859060L;
 
   @Enumerated(EnumType.STRING)
-  public AbsenceProblem trouble;
+  private AbsenceProblem trouble;
 
   @ManyToOne//(fetch = FetchType.LAZY)
   @JoinColumn(name = "absence_id", nullable = false, updatable = false)
-  public Absence absence;
+  private Absence absence;
 
   /**
    * Tipo di problemi sulle assenze che si possono verificare.

@@ -44,11 +44,11 @@ public class YearlyAbsencesManager {
 
     public int compare(Person person1, Person person2) {
 
-      String name1 = person1.surname.toUpperCase();
-      String name2 = person2.surname.toUpperCase();
+      String name1 = person1.getSurname().toUpperCase();
+      String name2 = person2.getSurname().toUpperCase();
 
       if (name1.equals(name2)) {
-        return person1.name.toUpperCase().compareTo(person2.name.toUpperCase());
+        return person1.getName().toUpperCase().compareTo(person2.getName().toUpperCase());
       }
       return name1.compareTo(name2);
 
@@ -61,7 +61,7 @@ public class YearlyAbsencesManager {
    */
   public Comparator<AbsenceType> absenceCodeComparator = new Comparator<AbsenceType>() {
     public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2) {
-      return absenceCode1.code.compareTo(absenceCode2.code);
+      return absenceCode1.getCode().compareTo(absenceCode2.getCode());
     }
 
   };
@@ -91,17 +91,17 @@ public class YearlyAbsencesManager {
 
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
-        Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
+        Integer value = tableMonthlyAbsences.row(p).get(abs.getAbsenceType());
         log.trace("Per la persona {} il codice {} vale: {}",
-            new Object[]{p, abs.absenceType.code, value});
+            new Object[]{p, abs.getAbsenceType().getCode(), value});
         if (value == null) {
           log.trace("Inserisco in tabella nuova assenza per {} con codice {}",
-              p, abs.absenceType.code);
-          tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
+              p, abs.getAbsenceType().getCode());
+          tableMonthlyAbsences.row(p).put(abs.getAbsenceType(), 1);
         } else {
-          tableMonthlyAbsences.row(p).put(abs.absenceType, value + 1);
+          tableMonthlyAbsences.row(p).put(abs.getAbsenceType(), value + 1);
           log.trace("Incremento il numero di giorni per l'assenza {} di {} al valore {}",
-              new Object[]{abs.absenceType.code, p, value + 1});
+              new Object[]{abs.getAbsenceType().getCode(), p, value + 1});
 
         }
       }

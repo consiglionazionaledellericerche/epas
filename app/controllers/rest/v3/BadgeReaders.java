@@ -100,7 +100,7 @@ public class BadgeReaders extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //leato al badgeReader
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
     return badgeReader;
   }
 }

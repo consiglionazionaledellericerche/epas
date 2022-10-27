@@ -23,6 +23,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
@@ -35,6 +37,8 @@ import play.data.validation.Required;
  * 
  * @since 09/06/17
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "shift_type_month", uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -45,12 +49,12 @@ public class ShiftTypeMonth extends MutableModel {
 
   @Required
   @Column(name = "year_month", nullable = false)
-  public YearMonth yearMonth;
+  private YearMonth yearMonth;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "shift_type_id", nullable = false)
-  public ShiftType shiftType;
+  private ShiftType shiftType;
 
-  public boolean approved;
+  private boolean approved;
 }

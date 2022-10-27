@@ -81,7 +81,7 @@ global models.User currentOperator;
  */
 rule disabledUser
 when
-  eval (currentOperator.disabled)
+  eval (currentOperator.isDisabled())
   $c: PermissionCheck()
 then
    $c.revoke();
@@ -108,11 +108,11 @@ end
  */
 rule isCompetenceFlowsVisible
 when
-  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $p: Person(qualification != null && qualification.qualification > 3 
+  $uro: UsersRolesOffices(role.getName() == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.getQualification() > 3 
   		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $o: Office() from $p.getOffice()
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.getConfigurations()
   $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
 then
   $c.grant();
@@ -124,10 +124,10 @@ end
  */
 rule isInformationFlowsVisible
 when
-  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $p: Person(qualification != null) from currentOperator.person
-  $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.configurations
+  $uro: UsersRolesOffices(role.getName() == Role.EMPLOYEE)
+  $p: Person(qualification != null) from currentOperator.getPerson()
+  $o: Office() from $p.getOffice()
+  Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.getConfigurations()
   $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
 then
   $c.grant();
@@ -3755,6 +3755,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.list",
         "rest.v3.Competences.show",
@@ -3813,6 +3814,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.personCompetenceCodes",
         
@@ -3869,6 +3871,7 @@ when
         "rest.v3.PersonDays.getMonthSituationByPerson",
         "rest.v3.PersonDays.offSiteWorkByPersonAndMonth",
         "rest.v3.PersonDays.offSiteWorkByOfficeAndMonth",
+        "rest.v3.PersonDays.serviceExitByOfficeAndMonth",
 
         "rest.v3.Competences.list",
         "rest.v3.Competences.show",

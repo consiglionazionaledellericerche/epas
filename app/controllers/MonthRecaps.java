@@ -108,7 +108,7 @@ public class MonthRecaps extends Controller {
 
     for (IWrapperPerson person : personList) {
 
-      for (Contract c : person.getValue().contracts) {
+      for (Contract c : person.getValue().getContracts()) {
         IWrapperContract contract = wrapperFactory.create(c);
 
         YearMonth yearMonth = new YearMonth(year, month);
@@ -216,17 +216,17 @@ public class MonthRecaps extends Controller {
                 new YearMonth(year, month));
 
         danilaDto.monteOreAnnoPassato = recap.get()
-            .remainingMinutesLastYear;
+            .getRemainingMinutesLastYear();
         danilaDto.monteOreAnnoCorrente = recap.get()
-            .remainingMinutesCurrentYear;
+            .getRemainingMinutesCurrentYear();
         danilaDto.giorni = 22 - personManager
             .numberOfCompensatoryRestUntilToday(person,
                 year, month);
 
         danilaDto.straordinariFeriali = recap.get()
-            .straordinariMinutiS1Print;
+            .getStraordinariMinutiS1Print();
         danilaDto.straordinariFestivi = recap.get()
-            .straordinariMinutiS2Print;
+            .getStraordinariMinutiS2Print();
         danilaDto.person = person;
         customRecapList.add(danilaDto);
       }

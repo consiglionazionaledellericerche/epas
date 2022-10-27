@@ -98,7 +98,7 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
@@ -122,14 +122,14 @@ public class MealTickets extends Controller {
 
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.person.office));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
 
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
@@ -216,8 +216,8 @@ public class MealTickets extends Controller {
       Contract contract) {
 
     RestUtils.checkIfPresent(contract);
-    val person = contract.person;
-    rules.checkIfPermitted(person.office);
+    val person = contract.getPerson();
+    rules.checkIfPermitted(person.getOffice());
 
     val validationResult = validation.valid(blockMealTicketCreateDto);
     if (!validationResult.ok) {
@@ -230,7 +230,7 @@ public class MealTickets extends Controller {
     if (!matchingAlreadyExisting.isEmpty()) {
       JsonResponse.badRequest("Meal ticket(s) already exists: ".concat(Joiner.on(", ")
           .join(matchingAlreadyExisting.stream()
-              .map(ml -> ml.code).collect(Collectors.toList()))));
+              .map(ml -> ml.getCode()).collect(Collectors.toList()))));
     }    
 
     if (blockMealTicketCreateDto.getFirst() > blockMealTicketCreateDto.getLast()) {
@@ -253,12 +253,12 @@ public class MealTickets extends Controller {
 
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
     ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
-        first, last, expireDate, person.office));
+        first, last, expireDate, person.getOffice()));
 
     ticketToAddOrdered.forEach(ticket -> {
-      ticket.contract = contract;
-      ticket.date = deliveryDate;
-      ticket.admin = admin;
+      ticket.setContract(contract);
+      ticket.setDate(deliveryDate);
+      ticket.setAdmin(admin);
       validation.valid(ticket);
     });
 
@@ -270,9 +270,9 @@ public class MealTickets extends Controller {
 
     //Persistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
-      mealTicket.date = deliveryDate;
-      mealTicket.contract = contract;
-      mealTicket.admin = admin;
+      mealTicket.setDate(deliveryDate);
+      mealTicket.setContract(contract);
+      mealTicket.setAdmin(admin);
       mealTicket.save();
     }
     consistencyManager.updatePersonRecaps(person.id, deliveryDate);
@@ -295,13 +295,13 @@ public class MealTickets extends Controller {
       BlockMealTicketCreateDto blockMealTicketCreateDto, Person person) {
     val alreadyPresentMealTickets = 
         mealTicketDao.getMealTicketsMatchCodeBlock(
-            blockMealTicketCreateDto.getCodeBlock(), Optional.of(person.office));
+            blockMealTicketCreateDto.getCodeBlock(), Optional.of(person.getOffice()));
 
     List<MealTicket> matchingAlreadyExisting = Lists.newArrayList();
     IntStream.range(blockMealTicketCreateDto.getFirst(), blockMealTicketCreateDto.getLast() + 1)
         .forEachOrdered(n -> {
           matchingAlreadyExisting.addAll(alreadyPresentMealTickets.stream()
-              .filter(ml -> ml.code.equals(String.format("%s%02d", 
+              .filter(ml -> ml.getCode().equals(String.format("%s%02d", 
               blockMealTicketCreateDto.getCodeBlock(), n)))
               .collect(Collectors.toList()));
         });
@@ -330,8 +330,8 @@ public class MealTickets extends Controller {
         adminId = person.get().id;
       }
     }
-    if (adminId != null && Security.getUser().get().person != null) {
-      adminId = Security.getUser().get().person.id;
+    if (adminId != null && Security.getUser().get().getPerson() != null) {
+      adminId = Security.getUser().get().getPerson().id;
     }
     if (adminId == null) {
       JsonResponse.notFound("Admin non trovato per effettuare l'inserimento");
@@ -349,7 +349,7 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao
         .getMealTicketsInCodeBlock(codeBlock, Optional.fromNullable(contract));
@@ -363,8 +363,8 @@ public class MealTickets extends Controller {
     LocalDate pastDate = LocalDate.now();
 
     for (MealTicket mealTicket : mealTicketToRemove) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
 
       mealTicket.delete();
@@ -372,7 +372,7 @@ public class MealTickets extends Controller {
       deleted++;
     }
 
-    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
     log.info("Deleted {} mealTickets via REST", deleted);
 
     JsonResponse.ok();
@@ -387,24 +387,24 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.person.office));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
     }
 
     int converted = 0;
     for (MealTicket mealTicket : mealTicketList) {
-      if (mealTicket.blockType.equals(BlockType.papery)) {
-        mealTicket.blockType = BlockType.electronic;
+      if (mealTicket.getBlockType().equals(BlockType.papery)) {
+        mealTicket.setBlockType(BlockType.electronic);
       } else {
-        mealTicket.blockType = BlockType.papery;
+        mealTicket.setBlockType(BlockType.papery);
       }
       mealTicket.save();
       converted++;
@@ -424,14 +424,14 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.person.office));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
     }
@@ -441,24 +441,24 @@ public class MealTickets extends Controller {
         .blockPortion(mealTicketList, contract, first, last);
 
     for (MealTicket mealTicket : blockPortionToReturn) {
-      mealTicket.returned = true;
+      mealTicket.setReturned(true);
       returned++;
     }
 
     // Perform
     LocalDate pastDate = LocalDate.now();
     for (MealTicket mealTicket : mealTicketList) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
     }
     for (MealTicket mealTicket : blockPortionToReturn) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
       mealTicket.save();
     }
-    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
 
     log.info("Returned {} mealTickets via REST", returned);
 

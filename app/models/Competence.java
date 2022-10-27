@@ -22,6 +22,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -35,6 +37,8 @@ import play.data.validation.Required;
  * @author Dario Tagliaferri
  * @author Arianna Del Soldato
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "competences")
 @Audited
@@ -43,25 +47,25 @@ public class Competence extends BaseModel {
   private static final long serialVersionUID = -36737525666037452L;
 
   @ManyToOne
-  public Person person;
+  private Person person;
 
   @NotNull
   @Required
   @ManyToOne
-  public CompetenceCode competenceCode;
+  private CompetenceCode competenceCode;
 
-  public int year;
+  private int year;
 
-  public int month;
+  private int month;
 
-  public BigDecimal valueRequested = BigDecimal.ZERO;
+  private BigDecimal valueRequested = BigDecimal.ZERO;
 
-  public Integer exceededMins;
+  private Integer exceededMins;
 
-  public int valueApproved;
+  private int valueApproved;
 
 
-  public String reason;
+  private String reason;
 
 
   /**

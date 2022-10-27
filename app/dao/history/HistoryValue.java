@@ -72,7 +72,7 @@ public class HistoryValue<T extends BaseModel> {
    */
   public String formattedOwner() {
     if (this.revision.owner != null) {
-      return this.revision.owner.username;
+      return this.revision.owner.getUsername();
     } else {
       return "ePAS";
     }

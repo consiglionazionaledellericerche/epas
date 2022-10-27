@@ -52,9 +52,9 @@ public class BadgeShowDto extends BadgeShowTerseDto {
    */
   public static BadgeShowDto build(Badge badge) {
     val dto = modelMapper.map(badge, BadgeShowDto.class);
-    dto.setBadgeReaderId(badge.badgeReader.id);
-    if (badge.badgeSystem != null) {
-      dto.setBadgeSystemId(badge.badgeSystem.id);
+    dto.setBadgeReaderId(badge.getBadgeReader().id);
+    if (badge.getBadgeSystem() != null) {
+      dto.setBadgeSystemId(badge.getBadgeSystem().id);
     }
     return dto;
   }

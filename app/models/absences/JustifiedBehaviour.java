@@ -26,6 +26,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
@@ -34,6 +35,8 @@ import org.hibernate.envers.Audited;
  * di lavoro da parte delle varie tipologie di assenza.
  *
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "justified_behaviours")
@@ -56,10 +59,10 @@ public class JustifiedBehaviour extends BaseModel {
   @Getter
   @Column
   @Enumerated(EnumType.STRING)
-  public JustifiedBehaviourName name;
+  private JustifiedBehaviourName name;
   
   @OneToMany(mappedBy = "justifiedBehaviour")
-  public Set<AbsenceTypeJustifiedBehaviour> absenceTypesJustifiedBehaviours = Sets.newHashSet();
+  private Set<AbsenceTypeJustifiedBehaviour> absenceTypesJustifiedBehaviours = Sets.newHashSet();
 
   @Override
   public String toString() {

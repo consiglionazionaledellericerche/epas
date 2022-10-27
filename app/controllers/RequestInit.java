@@ -139,8 +139,8 @@ public class RequestInit extends Controller {
       personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
       personId = Long.parseLong(session.get("personSelected"));
-    } else if (currentUser.person != null) {
-      personId = currentUser.person.id;
+    } else if (currentUser.getPerson() != null) {
+      personId = currentUser.getPerson().id;
     } else {
       val personList = personDao.liteList(offices, year, month, false);
       if (!personList.isEmpty()) {
@@ -153,13 +153,13 @@ public class RequestInit extends Controller {
     List<Integer> years = Lists.newArrayList();
     int minYear = LocalDate.now().getYear();
     for (Office office : offices) {
-      if (office.beginDate.getYear() < minYear) {
-        minYear = office.beginDate.getYear();
+      if (office.getBeginDate().getYear() < minYear) {
+        minYear = office.getBeginDate().getYear();
       }
     }
     // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
-    if (user.get().person != null && user.get().person.office != null) {
-      minYear = user.get().person.office.beginDate.getYear();
+    if (user.get().getPerson() != null && user.get().getPerson().getOffice() != null) {
+      minYear = user.get().getPerson().getOffice().getBeginDate().getYear();
     }
     for (int i = minYear; i <= LocalDate.now().plusYears(1).getYear(); i++) {
       years.add(i);
@@ -177,9 +177,9 @@ public class RequestInit extends Controller {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
       officeId = offices.stream()
-            .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
-    } else if (currentUser.person != null && currentUser.person.office != null) {
-      officeId = currentUser.person.office.id;      
+            .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
+    } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
+      officeId = currentUser.getPerson().getOffice().id;      
     }
     
     session.put("officeSelected", officeId);
@@ -404,8 +404,8 @@ public class RequestInit extends Controller {
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
       //su me stesso, ma la mia sede non appartiene alle sedi che amministro
       //OSS: le action switch person sono tutte in sola lettura quindi il redirect è poco rischioso
-      if (!offices.isEmpty() && user.person != null && user.person.id.equals(personId)) {
-        if (!offices.contains(user.person.office)) {
+      if (!offices.isEmpty() && user.getPerson() != null && user.getPerson().id.equals(personId)) {
+        if (!offices.contains(user.getPerson().getOffice())) {
           Long personSelected = persons.iterator().next().id;
           session.put("personSelected", personSelected);
           Map<String, Object> args = Maps.newHashMap();
@@ -426,7 +426,8 @@ public class RequestInit extends Controller {
     }
     if (officeSwitcher.contains(currentAction)) {
 
-      renderArgs.put("navOffices", offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+      renderArgs.put("navOffices", offices.stream()
+          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
           .collect(Collectors.toList()));
       renderArgs.put("switchOffice", true);
     }

@@ -112,7 +112,7 @@ public class UploadSituation extends Controller {
     }
 
     String body = updloadSituationManager.createFile(office, year, month);
-    String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
+    String fileName = FILE_PREFIX + office.getCodeId() + " - " + year + month + FILE_SUFFIX;
     try (InputStream inputStream = IOUtils.toInputStream(body, Charset.defaultCharset())) {
       renderBinary(inputStream, fileName);
     }

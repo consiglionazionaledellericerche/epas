@@ -61,9 +61,9 @@ public class CompetenceCodeShowDto extends CompetenceCodeShowTerseDto {
    */
   public static CompetenceCodeShowDto build(CompetenceCode competenceCode) {
     val dto = modelMapper.map(competenceCode, CompetenceCodeShowDto.class);
-    if (competenceCode.competenceCodeGroup != null) {
+    if (competenceCode.getCompetenceCodeGroup() != null) {
       dto.setCompetenceCodeGroup(
-          CompetenceCodeGroupShowTerseDto.build(competenceCode.competenceCodeGroup));
+          CompetenceCodeGroupShowTerseDto.build(competenceCode.getCompetenceCodeGroup()));
     }
     return dto;
   }

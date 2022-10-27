@@ -118,22 +118,24 @@ public class ContractService {
 
       PersonDay personDay = personDayManager
           .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-      absence.personDay = personDay;
-      personDay.absences.add(absence);
+      absence.setPersonDay(personDay);
+      List<Absence> pdAbsences = personDay.getAbsences();
+      pdAbsences.add(absence);
+      personDay.setAbsences(pdAbsences);
       absence.save();
       personDay.save();
-      if (absence.absenceType.code.equals(DefaultAbsenceType.A_91.certificationCode) 
+      if (absence.getAbsenceType().getCode().equals(DefaultAbsenceType.A_91.certificationCode) 
           && !absence.getAbsenceDate().isBefore(beginYear)) {
         IWrapperPerson wrPerson = wrapperFactory.create(person);
         Optional<Contract> contract = wrPerson.getCurrentContract();
         if (contract.isPresent()) {
-          contract.get().sourceDateRecoveryDay = absence.getAbsenceDate();
-          contract.get().sourceRecoveryDayUsed++;
+          contract.get().setSourceDateRecoveryDay(absence.getAbsenceDate());
+          contract.get().setSourceRecoveryDayUsed(contract.get().getSourceRecoveryDayUsed() + 1);
           contract.get().save();
         }
       }
-      if (personDay.date.isBefore(updateFrom)) {
-        updateFrom = personDay.date;
+      if (personDay.getDate().isBefore(updateFrom)) {
+        updateFrom = personDay.getDate();
       }
     }
 
@@ -153,10 +155,10 @@ public class ContractService {
   public Contract createNewContract(Person person, LocalDate dateToSplit, 
       Optional<WorkingTimeType> wtt, DateInterval previousInterval) {
     Contract newContract = new Contract();
-    newContract.person = person;
-    newContract.beginDate = dateToSplit;
-    newContract.endDate = !DateUtility.isInfinity(previousInterval.getEnd()) 
-        ? previousInterval.getEnd() : null;
+    newContract.setPerson(person);
+    newContract.setBeginDate(dateToSplit);
+    newContract.setEndDate(!DateUtility.isInfinity(previousInterval.getEnd()) 
+        ? previousInterval.getEnd() : null);
     return newContract;
   }
 
@@ -170,27 +172,27 @@ public class ContractService {
     AbsenceType absenceType = null;
     JustifiedType justifiedType;
     for (Absence abs : absences) {
-      if (abs.absenceType.defaultTakableGroup() == null) {
+      if (abs.getAbsenceType().defaultTakableGroup() == null) {
         continue;
       }
-      justifiedType = abs.justifiedType;
-      Integer hours = abs.justifiedMinutes != null ? abs.justifiedMinutes / 60 : null;
-      Integer minutes = abs.justifiedMinutes != null ? abs.justifiedMinutes % 60 : null;
-      InsertReport insertReport = absenceService.insert(abs.personDay.person, 
-          abs.absenceType.defaultTakableGroup(), 
-          abs.personDay.date, abs.personDay.date,
+      justifiedType = abs.getJustifiedType();
+      Integer hours = abs.getJustifiedMinutes() != null ? abs.getJustifiedMinutes() / 60 : null;
+      Integer minutes = abs.getJustifiedMinutes() != null ? abs.getJustifiedMinutes() % 60 : null;
+      InsertReport insertReport = absenceService.insert(abs.getPersonDay().getPerson(), 
+          abs.getAbsenceType().defaultTakableGroup(), 
+          abs.getPersonDay().getDate(), abs.getPersonDay().getDate(),
           absenceType, justifiedType, hours, minutes, false, absenceManager);
       if (insertReport.absencesToPersist.isEmpty()) {
-        insertReport = absenceService.insert(abs.personDay.person, 
-            abs.absenceType.defaultTakableGroup(), 
-            abs.personDay.date, abs.personDay.date,
-            abs.absenceType, justifiedType, hours, minutes, true, absenceManager);
+        insertReport = absenceService.insert(abs.getPersonDay().getPerson(), 
+            abs.getAbsenceType().defaultTakableGroup(), 
+            abs.getPersonDay().getDate(), abs.getPersonDay().getDate(),
+            abs.getAbsenceType(), justifiedType, hours, minutes, true, absenceManager);
       }
 
-      absenceManager.saveAbsences(insertReport, abs.personDay.person, abs.personDay.date, null, 
-          justifiedType, groupAbsenceType);
-      log.info("Salvata assenza {} nel giorno {} per {}", abs.absenceType.code, 
-          abs.personDay.date, abs.personDay.person);
+      absenceManager.saveAbsences(insertReport, abs.getPersonDay().getPerson(), 
+          abs.getPersonDay().getDate(), null, justifiedType, groupAbsenceType);
+      log.info("Salvata assenza {} nel giorno {} per {}", abs.getAbsenceType().getCode(), 
+          abs.getPersonDay().getDate(), abs.getPersonDay().getPerson());
     }
 
   }

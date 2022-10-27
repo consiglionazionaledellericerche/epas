@@ -47,7 +47,7 @@ public class GroupShowDto extends GroupShowTerseDto {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val groupDto = modelMapper.map(group, GroupShowDto.class);
-    groupDto.setManager(PersonShowTerseDto.build(group.manager));
+    groupDto.setManager(PersonShowTerseDto.build(group.getManager()));
     groupDto.setPeople(
         group.getPeople().stream().map(p -> PersonShowTerseDto.build(p))
           .collect(Collectors.toSet()));

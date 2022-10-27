@@ -90,8 +90,8 @@ public class Groups extends Controller {
       Set<Person> people) {
 
     boolean hasErrors = Validation.hasErrors();
-    if (!Strings.isNullOrEmpty(group.externalId) 
-        && groupDao.byOfficeAndExternalId(office, group.externalId).isPresent()) {
+    if (!Strings.isNullOrEmpty(group.getExternalId()) 
+        && groupDao.byOfficeAndExternalId(office, group.getExternalId()).isPresent()) {
       hasErrors = true;
       Validation.addError("group.externalId", "deve essere univoco");
     }
@@ -99,16 +99,16 @@ public class Groups extends Controller {
 
     if (hasErrors) {
       response.status = 400;
-      List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+      List<Person> peopleForGroups = personDao.byInstitute(office.getInstitute());
       log.info("Create groups errors = {}", validation.errorsMap());
       render("@edit", group, office, peopleForGroups);
     } 
 
-    rules.checkIfPermitted(group.office);
-    group.office = office;
+    rules.checkIfPermitted(group.getOffice());
+    group.setOffice(office);
     final boolean isNew = group.id != null;
     group.save();
-    log.debug("Salvato gruppo di lavoro: {} per la sede {}", group.name, group.office);
+    log.debug("Salvato gruppo di lavoro: {} per la sede {}", group.getName(), group.getOffice());
 
     groupManager.updatePeople(group, people);
 
@@ -117,7 +117,7 @@ public class Groups extends Controller {
     String message = isNew 
         ? "Nuovo gruppo di lavoro %s salvato correttamente." 
             : "Gruppo  di lavoro %s salvato correttamente.";
-    flash.success(message, group.name);
+    flash.success(message, group.getName());
     showGroups(office.id);
   }
 
@@ -129,26 +129,26 @@ public class Groups extends Controller {
   public static void deleteGroup(long groupId) {
     final Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.office);
+    rules.checkIfPermitted(group.getOffice());
 
     //elimino il ruolo di manager
     groupManager.deleteManager(group);
 
     if (group.getPeople().isEmpty()) {
       //Elimino eventuali vecchie associazioni
-      group.affiliations.stream().forEach(a -> a.delete());
+      group.getAffiliations().stream().forEach(a -> a.delete());
       //elimino il gruppo.
       group.delete();
       flash.success(Web.msgDeleted(Group.class));
-      log.info("Eliminato gruppo {}", group.name);
+      log.info("Eliminato gruppo {}", group.getName());
     } else {
-      group.endDate = LocalDate.now();
+      group.setEndDate(LocalDate.now());
       group.save();
-      log.info("Disattivato gruppo {}", group.name);
+      log.info("Disattivato gruppo {}", group.getName());
       flash.success("Gruppo disattivato con successo");
     }
 
-    showGroups(group.office.id);
+    showGroups(group.getOffice().id);
   }
 
   /**
@@ -164,8 +164,8 @@ public class Groups extends Controller {
     List<Group> groups = Lists.newArrayList();
     if (uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.GROUP_MANAGER), office)
         .isPresent()) {
-      groups = 
-          groupDao.groupsByOffice(office, Optional.fromNullable(user.person), Optional.of(true));
+      groups = groupDao.groupsByOffice(office, 
+          Optional.fromNullable(user.getPerson()), Optional.of(true));
     }
     if (user.isSystemUser() 
         || uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN), office)
@@ -191,9 +191,9 @@ public class Groups extends Controller {
   public static void edit(long groupId) {
     Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.manager.office);
-    Office office = group.manager.office;
-    List<Person> peopleForGroups = personDao.byInstitute(office.institute);
+    rules.checkIfPermitted(group.getManager().getOffice());
+    Office office = group.getManager().getOffice();
+    List<Person> peopleForGroups = personDao.byInstitute(office.getInstitute());
     render(group, office, peopleForGroups);
   }
 
@@ -208,8 +208,8 @@ public class Groups extends Controller {
     rules.checkIfPermitted(office);
     List<Person> peopleForGroups = null;
     GeneralSetting settings = settingDao.generalSetting();
-    if (settings.handleGroupsByInstitute) {
-      peopleForGroups = personDao.byInstitute(office.institute);
+    if (settings.isHandleGroupsByInstitute()) {
+      peopleForGroups = personDao.byInstitute(office.getInstitute());
     } else {
       peopleForGroups = personDao.byOffice(office);
     }
@@ -221,7 +221,7 @@ public class Groups extends Controller {
    */
   public static void seatOrganizationChart() {
     
-    val currentPerson = Security.getUser().get().person;
+    val currentPerson = Security.getUser().get().getPerson();
     //Accesso da utente di sistema senza persona associata
     if (currentPerson == null) {
       Application.index();
@@ -244,10 +244,11 @@ public class Groups extends Controller {
         .createOrganizationChart(currentPerson, roleDao.getRoleByName(Role.REPERIBILITY_MANAGER));
     
     
-    List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.user)
-        .stream().map(uro -> uro.role).collect(Collectors.toList());
-    render(seatSupervisors, personnelAdmins, technicalAdmins, registryManagers, mealTicketsManagers, 
-        personnelAdminsMini, shiftManagers, reperibilityManagers, currentPerson, roles);
+    List<Role> roles = uroDao.getUsersRolesOfficesByUser(currentPerson.getUser())
+        .stream().map(uro -> uro.getRole()).collect(Collectors.toList());
+    render(seatSupervisors, personnelAdmins, technicalAdmins, 
+        registryManagers, mealTicketsManagers, personnelAdminsMini, shiftManagers, 
+        reperibilityManagers, currentPerson, roles);
   }
   
   public static void viewInfoRole(Long id) {

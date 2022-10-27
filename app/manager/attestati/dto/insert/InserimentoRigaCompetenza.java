@@ -28,17 +28,17 @@ public class InserimentoRigaCompetenza extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaCompetenza(Certification certification) {
-    codiceSede = certification.person.office.codeId;
-    anno = certification.year;
-    mese = certification.month;
+    codiceSede = certification.getPerson().getOffice().getCodeId();
+    anno = certification.getYear();
+    mese = certification.getMonth();
 
     ItemDipendente dipendente = new ItemDipendente();
     dipendenti.add(dipendente);
 
-    dipendente.matricola = certification.person.number;
+    dipendente.matricola = certification.getPerson().getNumber();
     InsertRigaCompetenza rigaCompetenza = new InsertRigaCompetenza();
-    rigaCompetenza.codiceCompetenza = deserializeCode(certification.content);
-    rigaCompetenza.numOre = deserializeNumber(certification.content);
+    rigaCompetenza.codiceCompetenza = deserializeCode(certification.getContent());
+    rigaCompetenza.numOre = deserializeNumber(certification.getContent());
     dipendente.righeCompetenza.add(rigaCompetenza);
   }
 

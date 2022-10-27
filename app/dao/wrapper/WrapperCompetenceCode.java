@@ -61,13 +61,13 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
 
     int totale = 0;
     List<String> competenceCodeList = Lists.newArrayList();
-    competenceCodeList.add(this.value.code);
+    competenceCodeList.add(this.value.getCode());
 
     List<Competence> compList = competenceDao.getCompetencesInOffice(year, month,
             competenceCodeList, office, false);
 
     for (Competence comp : compList) {
-      totale = totale + comp.valueApproved;
+      totale = totale + comp.getValueApproved();
     }
     return totale;
   }

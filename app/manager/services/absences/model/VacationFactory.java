@@ -97,15 +97,15 @@ public class VacationFactory {
     int initializationLastYear = 0;
     int initializationCurrentYear = 0;
     int initializationPermission = 0;
-    if (contract.sourceDateVacation != null) {
-      if (contract.sourceDateVacation.getYear() == year) {
-        initializationLastYear = contract.sourceVacationLastYearUsed;
-        initializationCurrentYear = contract.sourceVacationCurrentYearUsed;
-        initializationPermission = contract.sourcePermissionUsed;
-      } else if (contract.sourceDateVacation.getYear() == year - 1) {
-        initializationLastYear = contract.sourceVacationCurrentYearUsed; 
-      } else if (contract.sourceDateVacation.getYear() == year + 1) {
-        initializationCurrentYear = contract.sourceVacationLastYearUsed;
+    if (contract.getSourceDateVacation() != null) {
+      if (contract.getSourceDateVacation().getYear() == year) {
+        initializationLastYear = contract.getSourceVacationLastYearUsed();
+        initializationCurrentYear = contract.getSourceVacationCurrentYearUsed();
+        initializationPermission = contract.getSourcePermissionUsed();
+      } else if (contract.getSourceDateVacation().getYear() == year - 1) {
+        initializationLastYear = contract.getSourceVacationCurrentYearUsed(); 
+      } else if (contract.getSourceDateVacation().getYear() == year + 1) {
+        initializationCurrentYear = contract.getSourceVacationLastYearUsed();
       }
     }
     
@@ -113,8 +113,8 @@ public class VacationFactory {
     List<AbsencePeriod> permission  = null;
     List<AbsencePeriod> vacationCurrentYear = null;
     
-    if (group.name.equals(DefaultGroup.FERIE_CNR.name()) 
-        || group.name.equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())) {
+    if (group.getName().equals(DefaultGroup.FERIE_CNR.name()) 
+        || group.getName().equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())) {
       //se il gruppo è vacation i codici posso anche prenderli.
       vacationLastYear = vacationPeriodPerYear(person, group, year - 1, contract, 
           initializationLastYear, false);
@@ -164,7 +164,7 @@ public class VacationFactory {
     List<AbsencePeriod> periods = Lists.newArrayList();
     
     //TODO: questo deve essere un require nella modellazione, altrimenti dopo schianta.
-    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
+    Set<AbsenceType> codes = group.getTakableAbsenceBehaviour().getTakenCodes(); // === 31-32-94-37
     Set<AbsenceType> takableCodes = subSetCode(codes, DefaultAbsenceType.A_32);
     Set<AbsenceType> takenCodes = subSetCode(codes, DefaultAbsenceType.A_32);
     if (prorogation) {
@@ -181,9 +181,9 @@ public class VacationFactory {
       }
       LocalDate beginDate = yearInterval.getBegin();
       periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
-          YearProgression.whichVacationProgression(vacationPeriod.vacationCode), 
+          YearProgression.whichVacationProgression(vacationPeriod.getVacationCode()), 
           vacationPeriod, takableCodes, takenCodes));
-      limits.add(vacationPeriod.vacationCode.vacations);
+      limits.add(vacationPeriod.getVacationCode().vacations);
     }
     
     //Fix del caso sfortunato
@@ -206,7 +206,7 @@ public class VacationFactory {
     Set<AbsenceType> takable = subSetCode(codes, DefaultAbsenceType.A_31);
     Set<AbsenceType> taken = subSetCode(codes, DefaultAbsenceType.A_31);
     LocalDate beginNextYear = new LocalDate(year + 1, 1, 1);
-    LocalDate endUsableNextYear = vacationsExpireDate(year, person.office);
+    LocalDate endUsableNextYear = vacationsExpireDate(year, person.getOffice());
     if (contract.calculatedEnd() != null 
         && contract.calculatedEnd().isBefore(endUsableNextYear)) {
       endUsableNextYear = contract.calculatedEnd();
@@ -239,7 +239,7 @@ public class VacationFactory {
     }
     
     //Collapse initialization days
-    handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
+    handleInitialization(periods, initializationDays, contract.getSourceDateVacation(), group);
     
     return periods.stream().distinct().collect(Collectors.toList());
   }
@@ -248,7 +248,7 @@ public class VacationFactory {
       int year, Contract contract, int initializationDays) {
     List<AbsencePeriod> periods = Lists.newArrayList();
 
-    Set<AbsenceType> codes = group.takableAbsenceBehaviour.takenCodes; // === 31-32-94-37
+    Set<AbsenceType> codes = group.getTakableAbsenceBehaviour().getTakenCodes(); // === 31-32-94-37
     Set<AbsenceType> takableCodes = subSetCode(codes, DefaultAbsenceType.A_94);
     Set<AbsenceType> takenCodes = subSetCode(codes, DefaultAbsenceType.A_94);
     
@@ -262,9 +262,9 @@ public class VacationFactory {
       }
       LocalDate beginDate = yearInterval.getBegin();
       periods.addAll(periodsFromProgression(person, contract, group, beginDate, 
-          YearProgression.whichPermissionProgression(vacationPeriod.vacationCode),
+          YearProgression.whichPermissionProgression(vacationPeriod.getVacationCode()),
           vacationPeriod, takableCodes, takenCodes));
-      limits.add(vacationPeriod.vacationCode.permissions);
+      limits.add(vacationPeriod.getVacationCode().permissions);
     }
 
     //Fix del caso sfortunato
@@ -280,7 +280,7 @@ public class VacationFactory {
     periods = handleAccruedFirstYear(person, group, contract, periods);
     
     //Collapse initialization days
-    handleInitialization(periods, initializationDays, contract.sourceDateVacation, group);
+    handleInitialization(periods, initializationDays, contract.getSourceDateVacation(), group);
     
     return periods;
   }
@@ -384,7 +384,7 @@ public class VacationFactory {
     GroupAbsenceType reducingGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.RIDUCE_FERIE_CNR.name()).get();
     periods.get(0).reducingAbsences = absenceComponentDao.orderedAbsences(person, 
-        beginPostPartum, endPostPartum, reducingGroup.takableAbsenceBehaviour.takableCodes);
+        beginPostPartum, endPostPartum, reducingGroup.getTakableAbsenceBehaviour().getTakableCodes());
     int postPartum = periods.get(0).reducingAbsences.size();
     if (postPartum == 0) {
       return periods;
@@ -419,8 +419,8 @@ public class VacationFactory {
     List<AbsencePeriod> fixed = Lists.newArrayList();
     
     LocalDate secondYearStart = contract.getPreviousContract() != null
-        ? contract.getPreviousContract().beginDate.plusYears(1)
-            : contract.beginDate.plusYears(1);
+        ? contract.getPreviousContract().getBeginDate().plusYears(1)
+            : contract.getBeginDate().plusYears(1);
     for (AbsencePeriod period : periods) {
 
       if (!period.from.isBefore(secondYearStart)) {
@@ -433,7 +433,7 @@ public class VacationFactory {
           new DateInterval(period.from, period.to))) {
         
         // creo il period aggiuntivo con amount 0 (default)
-        AbsencePeriod splitted = new AbsencePeriod(contract.person, group, 
+        AbsencePeriod splitted = new AbsencePeriod(contract.getPerson(), group, 
             personDayManager, absenceTypeDao);
         splitted.from = secondYearStart;
         splitted.to = period.to;
@@ -494,10 +494,10 @@ public class VacationFactory {
         // assegno l'inizializzazione se è ricaduta proprio nel periodo splitted
         // (trasferendo l'intero postPonedAmount)
         if (splittedWith.initialization != null && DateUtility
-            .isDateIntoInterval(splittedWith.initialization.date, splittedWith.periodInterval())) {
+            .isDateIntoInterval(splittedWith.initialization.getDate(), splittedWith.periodInterval())) {
 
           // qualche verifica per assicurarmi che non perdo nessuna informazione ...
-          Preconditions.checkState(subPeriod.initialization.unitsInput == 0);
+          Preconditions.checkState(subPeriod.initialization.getUnitsInput() == 0);
           Preconditions.checkState(subPeriod.getFixedPeriodTakableAmount() == 0);
           Preconditions.checkState(splittedWith.vacationAmountBeforeFixPostPartum == 0);
           Preconditions.checkState(splittedWith.vacationAmountBeforeInitializationPatch == 0);
@@ -531,8 +531,8 @@ public class VacationFactory {
     if (beginDate.isBefore(vacationPeriod.getBeginDate())) {
       beginDate = vacationPeriod.getBeginDate();
     }
-    if (vacationPeriod.endDate != null && endYear.isAfter(vacationPeriod.endDate)) {
-      endYear = vacationPeriod.endDate;
+    if (vacationPeriod.getEndDate() != null && endYear.isAfter(vacationPeriod.getEndDate())) {
+      endYear = vacationPeriod.getEndDate();
     }
     
     LocalDate date = beginDate;
@@ -541,7 +541,7 @@ public class VacationFactory {
 
       AbsencePeriod absencePeriod = period(person, contract, group, date, endYear, 
           takableCodes, takenCodes, yearPortion.days, yearPortion.amount);
-      absencePeriod.vacationCode = vacationPeriod.vacationCode;
+      absencePeriod.vacationCode = vacationPeriod.getVacationCode();
       periods.add(absencePeriod);
       date = absencePeriod.to.plusDays(1);
       if (date.isAfter(endYear)) {
@@ -575,14 +575,14 @@ public class VacationFactory {
         absencePeriod.setFixedPeriodTakableAmount(0);
         InitializationGroup initialization = 
             new InitializationGroup(absencePeriod.person, group, initializationDate);
-        initialization.unitsInput = 0;
+        initialization.setUnitsInput(0);
         absencePeriod.initialization = initialization;
         continue;
       } 
 
       InitializationGroup initialization = 
           new InitializationGroup(absencePeriod.person, group, initializationDate);
-      initialization.unitsInput = initializationDays;
+      initialization.setUnitsInput(initializationDays);
       absencePeriod.initialization = initialization;
       absencePeriod.setFixedPeriodTakableAmount(postPonedAmount);
       
@@ -640,7 +640,7 @@ public class VacationFactory {
    */
   private Set<AbsenceType> subSetCode(Set<AbsenceType> set, DefaultAbsenceType defaultType) {
     for (AbsenceType type : set) {
-      if (type.code.equals(defaultType.getCode())) {
+      if (type.getCode().equals(defaultType.getCode())) {
         return Sets.newHashSet(type);
       }
     }

@@ -55,7 +55,7 @@ public class SyncPeopleInOffices extends Job<Void> {
     
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))
-        || !settings.generalSetting().syncOfficesEnabled) {
+        || !settings.generalSetting().isSyncOfficesEnabled()) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }

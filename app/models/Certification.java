@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.base.BaseModel;
 import models.enumerate.CertificationType;
@@ -41,6 +43,8 @@ import play.data.validation.Required;
  *
  * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "certifications")
@@ -51,26 +55,26 @@ public class Certification extends BaseModel {
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
 
-  public int year;
+  private int year;
 
-  public int month;
+  private int month;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "certification_type")
-  public CertificationType certificationType;
+  private CertificationType certificationType;
 
-  public String content;
+  private String content;
 
   @Column(name = "problems")
-  public String problems = null;
+  private String problems = null;
 
   @Column(name = "warnings")
-  public String warnings = null;
+  private String warnings = null;
 
   @Column(name = "attestati_id")
-  public Integer attestatiId;
+  private Integer attestatiId;
 
   @Transient
   public boolean containProblems() {
@@ -107,7 +111,7 @@ public class Certification extends BaseModel {
   public String toString() {
     return MoreObjects.toStringHelper(PersonCertification.class)
         .add("person", person.fullName())
-        .add("matricola", person.number)
+        .add("matricola", person.getNumber())
         .add("year", year)
         .add("month", month)
         .add("key", aMapKey())

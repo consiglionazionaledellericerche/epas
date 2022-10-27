@@ -28,18 +28,18 @@ public class InserimentoRigaAssenza extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaAssenza(Certification certification) {
-    codiceSede = certification.person.office.codeId;
-    anno = certification.year;
-    mese = certification.month;
+    codiceSede = certification.getPerson().getOffice().getCodeId();
+    anno = certification.getYear();
+    mese = certification.getMonth();
 
     ItemDipendente dipendente = new ItemDipendente();
     dipendenti.add(dipendente);
 
-    dipendente.matricola = certification.person.number;
+    dipendente.matricola = certification.getPerson().getNumber();
     InsertRigaAssenza rigaAssenza = new InsertRigaAssenza();
-    rigaAssenza.codiceAssenza = deserializeCode(certification.content);
-    rigaAssenza.giornoInizio = deserializeBegin(certification.content);
-    rigaAssenza.giornoFine = deserializeEnd(certification.content);
+    rigaAssenza.codiceAssenza = deserializeCode(certification.getContent());
+    rigaAssenza.giornoInizio = deserializeBegin(certification.getContent());
+    rigaAssenza.giornoFine = deserializeEnd(certification.getContent());
     dipendente.righeAssenza.add(rigaAssenza);
   }
 

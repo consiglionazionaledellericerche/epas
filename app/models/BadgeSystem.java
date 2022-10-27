@@ -27,6 +27,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import net.sf.oval.constraint.NotNull;
 import org.hibernate.envers.Audited;
@@ -39,6 +41,8 @@ import play.data.validation.Unique;
  *
  * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "badge_systems")
 @Audited
@@ -49,22 +53,22 @@ public class BadgeSystem extends BaseModel {
   @Unique
   @NotNull
   @Required
-  public String name;
+  private String name;
 
-  public String description;
+  private String description;
 
   @OrderBy("code ASC")
   @OneToMany(mappedBy = "badgeSystem")
-  public Set<Badge> badges = Sets.newHashSet();
+  private Set<Badge> badges = Sets.newHashSet();
 
   @ManyToMany(mappedBy = "badgeSystems")
-  public List<BadgeReader> badgeReaders = Lists.newArrayList();
+  private List<BadgeReader> badgeReaders = Lists.newArrayList();
 
   @Required
   @ManyToOne
-  public Office office;
+  private Office office;
 
-  public boolean enabled = true;
+  private boolean enabled = true;
 
   @Override
   public String toString() {

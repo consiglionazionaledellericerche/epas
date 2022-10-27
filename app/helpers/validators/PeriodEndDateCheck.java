@@ -35,7 +35,7 @@ public class PeriodEndDateCheck extends Check {
       return false;
     }
     final PeriodModel period = (PeriodModel) validatedObject;
-    if (period.endDate != null && period.endDate.isBefore(period.beginDate)) {
+    if (period.getEndDate() != null && period.getEndDate().isBefore(period.getBeginDate())) {
       setMessage("validation.period.endDateBeforeBeginDate");
       return false;
     }

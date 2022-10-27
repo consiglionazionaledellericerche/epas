@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.attestati.service.PersonCertData;
 import models.Person;
 import org.joda.time.YearMonth;
@@ -61,7 +61,7 @@ public class CertificationManager {
    * Informazioni sui dati mensili inviati ad Attestati prelevati
    * da attestati stesso.
    */
-  public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {    
+  public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {
     final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
         .SimpleEntry<>(person, new YearMonth(year, month));
     try {
@@ -99,7 +99,7 @@ public class CertificationManager {
         if (mealTicket > 0) {
           sb.append(person.getFullname());
           sb.append(";");
-          sb.append(fillNumber(person.number));
+          sb.append(fillNumber(person.getNumber()));
           sb.append(";");          
           sb.append(String.valueOf(mealTicket));
           sb.append(";");

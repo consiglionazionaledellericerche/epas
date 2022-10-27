@@ -26,6 +26,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.ShiftTroubles;
 import org.hibernate.envers.Audited;
@@ -33,6 +35,8 @@ import org.hibernate.envers.Audited;
 /**
  * Problemi su una giornata di turno di un dipendente.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "person_shift_day_in_trouble", uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -44,13 +48,13 @@ public class PersonShiftDayInTrouble extends BaseModel {
 
   @ManyToOne
   @JoinColumn(name = "person_shift_day_id", nullable = false, updatable = false)
-  public PersonShiftDay personShiftDay;
+  private PersonShiftDay personShiftDay;
 
   @Enumerated(EnumType.STRING)
-  public ShiftTroubles cause;
+  private ShiftTroubles cause;
 
   @Column(name = "email_sent")
-  public boolean emailSent;
+  private boolean emailSent;
 
   public PersonShiftDayInTrouble(PersonShiftDay pd, ShiftTroubles cause) {
     personShiftDay = pd;

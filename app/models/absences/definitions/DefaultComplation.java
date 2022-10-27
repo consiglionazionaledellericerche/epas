@@ -261,7 +261,7 @@ public enum DefaultComplation {
     for (DefaultComplation defaultComplation : DefaultComplation.values()) {
       boolean found = false;
       for (ComplationAbsenceBehaviour complation : allComplations) {
-        if (defaultComplation.name().equals(complation.name)) {
+        if (defaultComplation.name().equals(complation.getName())) {
           found = true;
           break;
         }
@@ -280,7 +280,7 @@ public enum DefaultComplation {
    */
   public static Optional<DefaultComplation> byName(ComplationAbsenceBehaviour complation) {
     for (DefaultComplation defaultComplation : DefaultComplation.values()) {
-      if (defaultComplation.name().equals(complation.name)) {
+      if (defaultComplation.name().equals(complation.getName())) {
         return Optional.of(defaultComplation);
       }
     }

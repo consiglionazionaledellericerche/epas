@@ -205,10 +205,10 @@ public class WrapperOffice implements IWrapperOffice {
   
   private List<UsersRolesOffices> filterUros(Role role) {
     List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
+    for (UsersRolesOffices uro : this.value.getUsersRolesOffices()) {
 
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(role.id)
-          && uro.user.person != null) {
+      if (uro.getOffice().id.equals(this.value.id) && uro.getRole().id.equals(role.id)
+          && uro.getUser().getPerson() != null) {
         uroList.add(uro);
       }
     }

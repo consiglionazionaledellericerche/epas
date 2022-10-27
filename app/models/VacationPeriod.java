@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
@@ -39,6 +41,8 @@ import play.data.validation.Required;
  *
  * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "vacation_periods")
 @Audited
@@ -49,17 +53,17 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   @Enumerated(EnumType.STRING)
   @Column(name = "vacation_code")
   @Required
-  public VacationCode vacationCode;
+  private VacationCode vacationCode;
 
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "contract_id", nullable = false, updatable = false)
-  public Contract contract;
+  private Contract contract;
   
   @Transient
   @Deprecated
   public DateInterval getDateInterval() {
-    return new DateInterval(this.beginDate, this.endDate);
+    return new DateInterval(this.getBeginDate(), this.getEndDate());
   }
 
   @Override
@@ -108,7 +112,7 @@ public class VacationPeriod extends PropertyInPeriod implements IPropertyInPerio
   }
   
   public String toString() {
-    return "[" + beginDate + "," + endDate + "] " + vacationCode.name;
+    return "[" + getBeginDate() + "," + getEndDate() + "] " + vacationCode.name;
   }
  
 }

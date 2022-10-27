@@ -66,9 +66,9 @@ public class Child extends Controller {
       String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     List<ChildrenShowDto> childs = 
-        person.personChildren.stream().map(c -> ChildrenShowDto.build(c))
+        person.getPersonChildren().stream().map(c -> ChildrenShowDto.build(c))
         .collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(childs));
   }
@@ -108,9 +108,9 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.getPerson().getOffice());
 
-    children.person = personDao.getPersonById(childrenDto.getPersonId());
+    children.setPerson(personDao.getPersonById(childrenDto.getPersonId()));
     children.save();
 
     log.info("Created children {} via REST", children);
@@ -140,7 +140,7 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.getPerson().getOffice());
 
     if (!validation.valid(children).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -187,7 +187,7 @@ public class Child extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(children.person.office);
+    rules.checkIfPermitted(children.getPerson().getOffice());
     return children;
   }
 }

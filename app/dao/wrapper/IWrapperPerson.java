@@ -163,5 +163,8 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    */
   Optional<YearMonth> lastUpload();
 
+  public List<IWrapperContractMonthRecap> getWrapperContractMonthRecaps(YearMonth yearMonth);
+  
+  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth);
 
 }

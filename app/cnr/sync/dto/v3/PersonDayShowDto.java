@@ -50,7 +50,7 @@ public class PersonDayShowDto extends PersonDayShowTerseDto {
   public static PersonDayShowDto build(PersonDay pd) {
     PersonDayShowDto personDto = 
         modelMapper.map(PersonDayShowTerseDto.build(pd), PersonDayShowDto.class);
-    personDto.setPerson(PersonShowTerseDto.build(pd.person));
+    personDto.setPerson(PersonShowTerseDto.build(pd.getPerson()));
     return personDto;
   }
 }

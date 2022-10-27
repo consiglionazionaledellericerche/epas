@@ -162,8 +162,8 @@ public class SecurityRules {
     commands.add(CommandFactory.newInsert(check));
     commands.add(CommandFactory.newInsert(check.getTarget()));
     commands.add(CommandFactory.newInsert(user));
-    commands.add(CommandFactory.newInsertElements(user.roles));
-    commands.add(CommandFactory.newInsertElements(user.usersRolesOffices));
+    commands.add(CommandFactory.newInsertElements(user.getRoles()));
+    commands.add(CommandFactory.newInsertElements(user.getUsersRolesOffices()));
     session.execute(CommandFactory.newBatchExecution(commands));
 
 

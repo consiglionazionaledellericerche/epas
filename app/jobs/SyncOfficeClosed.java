@@ -54,20 +54,20 @@ public class SyncOfficeClosed extends Job<Void> {
     List<Office> list = Office.findAll();
     List<Office> offices = null;
     for (Office office : list) {
-      if (office.endDate != null) {
+      if (office.getEndDate() != null) {
         continue;
       }
-      log.debug("Analizzo la sede: {}", office.name);
+      log.debug("Analizzo la sede: {}", office.getName());
       offices = Lists.newArrayList();
       offices.add(office);
       List<Person> people = personDao.listFetched(Optional.<String>absent(),
           new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
       if (people.isEmpty()
           //"Ufficio da cambiare" è l'ufficio predefinito creato al primo setup dell'applicazione
-          && !office.name.equalsIgnoreCase("Ufficio da cambiare")) {
+          && !office.getName().equalsIgnoreCase("Ufficio da cambiare")) {
         log.info("Non ci sono persone con contratto attivo sulla sede {}. "
-            + "Inserisco la data di chiusura sede.", office.name);
-        office.endDate = LocalDate.now();
+            + "Inserisco la data di chiusura sede.", office.getName());
+        office.setEndDate(LocalDate.now());
         office.save();
         count++;
       }

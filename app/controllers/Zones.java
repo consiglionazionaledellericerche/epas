@@ -58,7 +58,7 @@ public class Zones extends Controller {
       flash.error("Non esiste una sorgente timbratura con id: %s", badgeReaderId);
       render();
     }
-    rules.checkIfPermitted(reader.user.owner);
+    rules.checkIfPermitted(reader.getUser().getOwner());
     Zone zone = new Zone();
     render(zone, reader);
   }
@@ -72,11 +72,11 @@ public class Zones extends Controller {
     BadgeReader reader = badgeReaderDao.byId(readerId);
     notFoundIfNull(reader);
     notFoundIfNull(zone);
-    rules.checkIfPermitted(reader.user.owner);
-    zone.badgeReader = reader;
+    rules.checkIfPermitted(reader.getUser().getOwner());
+    zone.setBadgeReader(reader);
     zone.save();
-    flash.success("Nuova zona %s - %s salvata con successo", zone.name, zone.description);
-    BadgeReaders.edit(zone.badgeReader.id);
+    flash.success("Nuova zona %s - %s salvata con successo", zone.getName(), zone.getDescription());
+    BadgeReaders.edit(zone.getBadgeReader().id);
   }
   
   /**
@@ -87,8 +87,8 @@ public class Zones extends Controller {
   public static void linkZones(long badgeReaderId, ZoneToZones link) {
     BadgeReader reader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(reader);
-    rules.checkIfPermitted(reader.user.owner);
-    List<Zone> zones = reader.zones;
+    rules.checkIfPermitted(reader.getUser().getOwner());
+    List<Zone> zones = reader.getZones();
     if (link == null) {
       link = new ZoneToZones();
     }
@@ -104,36 +104,38 @@ public class Zones extends Controller {
    */
   public static void saveLinks(@Valid ZoneToZones link) {
     notFoundIfNull(link);
-    rules.checkIfPermitted(link.zoneBase.badgeReader.user.owner);
+    rules.checkIfPermitted(link.getZoneBase().getBadgeReader().getUser().getOwner());
     if (Validation.hasErrors()) {
       response.status = 400;
-      List<Zone> zones = link.zoneBase.badgeReader.zones;
-      List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.zoneBase.badgeReader);
-      BadgeReader reader = link.zoneBase.badgeReader;
+      List<Zone> zones = link.getZoneBase().getBadgeReader().getZones();
+      List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.getZoneBase().getBadgeReader());
+      BadgeReader reader = link.getZoneBase().getBadgeReader();
       render("@linkZones", zones, list, link, reader);
     }
     //controllo che il link non sia tra le stesse zone
-    if (link.zoneBase == link.zoneLinked) {
+    if (link.getZoneBase() == link.getZoneLinked()) {
       flash.error("Il collegamento tra una zona e se stessa non è possibile.");
-      List<Zone> zones = link.zoneBase.badgeReader.zones;      
-      val reader = link.zoneBase.badgeReader;
+      List<Zone> zones = link.getZoneBase().getBadgeReader().getZones();      
+      val reader = link.getZoneBase().getBadgeReader();
       List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(reader);      
       render("@linkZones", zones, link, reader, list);
-      linkZones(link.zoneBase.badgeReader.id, link);
+      linkZones(link.getZoneBase().getBadgeReader().id, link);
     }
     //controllo che non esista già il collegamento tra le zone in entrambi i sensi
-    List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.zoneBase.badgeReader);
+    List<ZoneToZones> list = zoneDao.getZonesByBadgeReader(link.getZoneBase().getBadgeReader());
     boolean found = list.stream()
-        .anyMatch(l -> (l.zoneBase == link.zoneBase && l.zoneLinked == link.zoneLinked) 
-            || (l.zoneBase == link.zoneLinked && l.zoneLinked == link.zoneBase));
+        .anyMatch(l -> (l.getZoneBase() == link.getZoneBase() 
+        && l.getZoneLinked() == link.getZoneLinked()) 
+            || (l.getZoneBase() == link.getZoneLinked() 
+            && l.getZoneLinked() == link.getZoneBase()));
     if (found) {
       flash.error("Esiste già un collegamento tra le zone selezionate!");
-      linkZones(link.zoneBase.badgeReader.id, link);
+      linkZones(link.getZoneBase().getBadgeReader().id, link);
     }
     
     link.save();
     flash.success("Collegamento salvato correttamente");
-    linkZones(link.zoneBase.badgeReader.id, null);
+    linkZones(link.getZoneBase().getBadgeReader().id, null);
   }
   
   /**
@@ -145,7 +147,7 @@ public class Zones extends Controller {
   public static void deleteLink(long linkId, boolean confirmed) {
     ZoneToZones link = zoneDao.getLinkById(linkId);
     notFoundIfNull(link);
-    rules.checkIfPermitted(link.zoneBase.badgeReader.user.owner);
+    rules.checkIfPermitted(link.getZoneBase().getBadgeReader().getUser().getOwner());
     if (!confirmed) {
       confirmed = true;
       render("@deleteLink", link, confirmed);
@@ -158,7 +160,7 @@ public class Zones extends Controller {
     link.delete();
 
     flash.success("Eliminato collegamento tra %s e %s ", 
-        link.zoneBase.name, link.zoneLinked.name);
-    linkZones(link.zoneBase.badgeReader.id, null);
+        link.getZoneBase().getName(), link.getZoneLinked().getName());
+    linkZones(link.getZoneBase().getBadgeReader().id, null);
   }
 }

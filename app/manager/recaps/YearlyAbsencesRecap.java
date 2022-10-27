@@ -64,8 +64,8 @@ public class YearlyAbsencesRecap {
   private int checkHourAbsence(List<Absence> yearlyAbsence) {
     int count = 0;
     for (Absence abs : yearlyAbsence) {
-      if (abs.justifiedType.name.equals(JustifiedTypeName.specified_minutes) 
-          || abs.justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
+      if (abs.getJustifiedType().getName().equals(JustifiedTypeName.specified_minutes) 
+          || abs.getJustifiedType().getName().equals(JustifiedTypeName.absence_type_minutes)) {
         count++;
       }
     }
@@ -102,8 +102,8 @@ public class YearlyAbsencesRecap {
 
     //inserimento valori
     for (Absence abs : yearlyAbsenceList) {
-      int absMonth = abs.personDay.date.getMonthOfYear();
-      int absDay = abs.personDay.date.getDayOfMonth();
+      int absMonth = abs.getPersonDay().getDate().getMonthOfYear();
+      int absDay = abs.getPersonDay().getDate().getDayOfMonth();
 
       List<Absence> values = table.get(absMonth, absDay);
       values.add(abs);
@@ -126,14 +126,14 @@ public class YearlyAbsencesRecap {
 
     Integer idx = 0;
     for (Absence abs : yearlyAbsence) {
-      boolean stato = mappa.containsKey(abs.absenceType);
+      boolean stato = mappa.containsKey(abs.getAbsenceType());
       if (stato == false) {
         idx = 1;
-        mappa.put(abs.absenceType, idx);
+        mappa.put(abs.getAbsenceType(), idx);
       } else {
-        idx = mappa.get(abs.absenceType);
-        mappa.remove(abs.absenceType);
-        mappa.put(abs.absenceType, idx + 1);
+        idx = mappa.get(abs.getAbsenceType());
+        mappa.remove(abs.getAbsenceType());
+        mappa.put(abs.getAbsenceType(), idx + 1);
       }
     }
     return mappa;

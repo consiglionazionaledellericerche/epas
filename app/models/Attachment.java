@@ -27,6 +27,8 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.MutableModel;
 import models.enumerate.AttachmentType;
 import org.hibernate.envers.Audited;
@@ -39,6 +41,8 @@ import play.db.jpa.Blob;
  * @author Daniele Murgia
  * @since 06/10/16
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "attachments")
@@ -48,21 +52,21 @@ public class Attachment extends MutableModel {
 
   @NotNull
   @Required
-  public String filename;
+  private String filename;
 
-  public String description;
+  private String description;
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  public AttachmentType type;
+  private AttachmentType type;
 
   @NotNull
   @Column(nullable = false)
-  public Blob file;
+  private Blob file;
 
   @ManyToOne(optional = true)
   @JoinColumn(name = "office_id")
-  public Office office;
+  private Office office;
 
   /**
    * Dimensione dell'allegato.

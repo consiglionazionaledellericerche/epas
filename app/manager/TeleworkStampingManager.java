@@ -202,7 +202,7 @@ public class TeleworkStampingManager {
     List<TeleworkPersonDayDto> dtoList = Lists.newArrayList();
     List<PersonStampingDayRecap> pastDaysRecap = 
         psDto.daysRecap.stream().filter(d -> {
-          return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+          return d.personDay.getDate().isBefore(LocalDate.now().plusDays(1));
         }).collect(Collectors.toList());
     for (PersonStampingDayRecap day : pastDaysRecap) {
       List<TeleworkDto> beginEnd = Lists.newArrayList();
@@ -210,7 +210,7 @@ public class TeleworkStampingManager {
       List<TeleworkDto> interruptions = Lists.newArrayList();
       List<TeleworkDto> list = Lists.newArrayList();
       if (day.personDay.id == null) {
-        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.getDate());
       } else {
         list = comunication.getList(day.personDay.id);        
       }
@@ -269,14 +269,14 @@ public class TeleworkStampingManager {
       throws NoSuchFieldException, ExecutionException {
     List<PersonStampingDayRecap> pastDaysRecap = 
         psDto.daysRecap.stream().filter(d -> {
-          return d.personDay.date.isBefore(LocalDate.now().plusDays(1));
+          return d.personDay.getDate().isBefore(LocalDate.now().plusDays(1));
         }).collect(Collectors.toList());
     List<NewTeleworkDto> dtoList = Lists.newArrayList();
     for (PersonStampingDayRecap day : pastDaysRecap) {
      
       List<TeleworkDto> list = Lists.newArrayList();
       if (day.personDay.id == null) {
-        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.date);
+        log.trace("PersonDay con id nullo in data {}, creo l'oggetto.", day.personDay.getDate());
       } else {
         list = comunication.getList(day.personDay.id);        
       }
@@ -397,9 +397,9 @@ public class TeleworkStampingManager {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(person,
             absence.getAbsenceDate());
-        absence.personDay = personDay;
+        absence.setPersonDay(personDay);
         
-        personDay.absences.add(absence);
+        personDay.getAbsences().add(absence);
         absence.save();
         personDay.save();
       }
@@ -415,10 +415,10 @@ public class TeleworkStampingManager {
   public void deleteTeleworkAbsenceCode(PersonDay pd) {
     AbsenceType absenceType = absenceDao.absenceTypeByCode("103RT").get();
     int deleted = absenceManager
-        .removeAbsencesInPeriod(pd.person, pd.date, pd.date, absenceType);
+        .removeAbsencesInPeriod(pd.getPerson(), pd.getDate(), pd.getDate(), absenceType);
 
     if (deleted > 0) {
-      log.info("Rimossi {} codici assenza di tipo {}", deleted, absenceType.code);
+      log.info("Rimossi {} codici assenza di tipo {}", deleted, absenceType.getCode());
     } else {
       log.info("Nessun codice d'assenza eliminato");
     }
@@ -473,7 +473,7 @@ public class TeleworkStampingManager {
       error.advice = "Inizio telelavoro già presente";
       return Optional.of(error);
     }
-    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.getDate());
     if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.BEGIN_STAMPING_PRESENT;
@@ -512,7 +512,7 @@ public class TeleworkStampingManager {
       error.advice = "Fine telelavoro già presente";
       return Optional.of(error);
     }
-    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.getDate());
     if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.END_STAMPING_BEFORE_BEGIN;
@@ -552,8 +552,8 @@ public class TeleworkStampingManager {
       error.advice = "Inizio pranzo in telelavoro già presente";
       return Optional.of(error);
     }
-    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
-    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.getDate());
+    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.getDate());
     if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;
@@ -602,8 +602,8 @@ public class TeleworkStampingManager {
       error.advice = "Fine pranzo in telelavoro già presente";
       return Optional.of(error);
     }
-    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.date);
-    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.date);
+    Range<LocalDateTime> beginEndRange = getStampingRange(beginEnd, pd.getDate());
+    Range<LocalDateTime> mealRange = getStampingRange(meal, pd.getDate());
     if (!beginEndRange.contains(stamping.getDate())) {
       Errors error = new Errors();
       error.error = TeleworkStampingError.MEAL_STAMPING_OUT_OF_BOUNDS;

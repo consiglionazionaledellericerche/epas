@@ -89,12 +89,12 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
           throw new IllegalArgumentException(
               String.format("Person with email = %s doesn't exist", personEmail));
         }
-        log.debug("Find persons {} with email {}", person.name, personEmail);
+        log.debug("Find persons {} with email {}", person.getName(), personEmail);
 
         CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
         Competence competence = new Competence(person, competenceCode, 0, 0);
-        competence.valueApproved = jsonObject.get("ore").getAsInt();
-        competence.reason = jsonObject.get("motivazione").getAsString();
+        competence.setValueApproved(jsonObject.get("ore").getAsInt());
+        competence.setReason(jsonObject.get("motivazione").getAsString());
 
         log.debug("Letto ore = {} e motivazione = {}",
             jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());

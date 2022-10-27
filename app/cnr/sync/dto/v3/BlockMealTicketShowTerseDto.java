@@ -62,7 +62,7 @@ public class BlockMealTicketShowTerseDto {
   public static BlockMealTicketShowTerseDto build(BlockMealTicket blockMealTicket) {
     Preconditions.checkNotNull(blockMealTicket);
     val dto = modelMapper.map(blockMealTicket, BlockMealTicketShowTerseDto.class);
-    dto.setPerson(PersonShowTerseDto.build(blockMealTicket.getContract().person));
+    dto.setPerson(PersonShowTerseDto.build(blockMealTicket.getContract().getPerson()));
     dto.setContractId(blockMealTicket.getContract().getId());
     dto.setAdminId(blockMealTicket.getAdmin().id);
     return dto;

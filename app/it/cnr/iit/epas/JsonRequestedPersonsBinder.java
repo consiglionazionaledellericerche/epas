@@ -85,7 +85,7 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
           throw new IllegalArgumentException(
               String.format("Person with email = %s doesn't exist", personEmail));
         }
-        log.debug("Find person {} with email {}", person.name, personEmail);
+        log.debug("Find person {} with email {}", person.getName(), personEmail);
 
         persons.add(person);
       }

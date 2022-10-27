@@ -45,12 +45,13 @@ public class SecureManager {
     Preconditions.checkState(user.isPersistent());
 
     // Utente con ruoli di sistema
-    if (!user.roles.isEmpty()) {
+    if (!user.getRoles().isEmpty()) {
       return Sets.newHashSet(Office.findAll());
     }
 
-    return user.usersRolesOffices.stream().filter(uro -> rolesNames.contains(uro.role.name))
-        .map(uro -> uro.office).distinct().collect(Collectors.toSet());
+    return user.getUsersRolesOffices().stream().filter(uro -> 
+    rolesNames.contains(uro.getRole().getName()))
+        .map(uro -> uro.getOffice()).distinct().collect(Collectors.toSet());
   }
 
   /**

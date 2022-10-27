@@ -86,10 +86,10 @@ public class ContractualReferences extends Controller {
       render("@editContractualClause", contractualReference);
     }
 
-    contractualReference.filename = file.getName();
+    contractualReference.setFilename(file.getName());
     Blob blob = new Blob();
     blob.set(new FileInputStream(file), MimeTypes.getContentType(file.getName()));
-    contractualReference.file = blob;
+    contractualReference.setFile(blob);
     
     contractualReference.save();
     flash.success("Operazione eseguita.");
@@ -120,8 +120,8 @@ public class ContractualReferences extends Controller {
     ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);
     notFoundIfNull(contractualReference);
-    contractualReference.file.getFile().delete();
-    contractualReference.filename = null;
+    contractualReference.getFile().getFile().delete();
+    contractualReference.setFilename(null);
     contractualReference.save();
     flash.success("Operazione effettuata.");
     edit(contractualReferenceId);    
@@ -136,8 +136,8 @@ public class ContractualReferences extends Controller {
     final ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);
     notFoundIfNull(contractualReference);
-    notFoundIfNull(contractualReference.file);
-    renderBinary(contractualReference.file.get(), contractualReference.filename, false);
+    notFoundIfNull(contractualReference.getFile());
+    renderBinary(contractualReference.getFile().get(), contractualReference.getFilename(), false);
   }
 
 }

@@ -33,6 +33,8 @@ import play.data.validation.Required;
 /**
  * Una entity con data di inizio e fine.
  */
+@Getter
+@Setter
 @Audited
 @MappedSuperclass
 public abstract class PeriodModel extends BaseModel 
@@ -40,18 +42,17 @@ public abstract class PeriodModel extends BaseModel
 
   private static final long serialVersionUID = 701063571599514955L;
 
-  @Getter
-  @Setter
+
   @NotNull
   @Required
   @Column(name = "begin_date")
-  public LocalDate beginDate;
+  private LocalDate beginDate;
 
   @CheckWith(PeriodEndDateCheck.class)
   @Getter
   @Setter
   @Column(name = "end_date")
-  public LocalDate endDate;
+  private LocalDate endDate;
 
   private Comparator<PeriodModel> comparator() {
     return Comparator.comparing(

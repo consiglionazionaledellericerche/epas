@@ -90,7 +90,7 @@ public class PersonCertData {
         if (actualCertification == null) {
 
           //Patch mealTicket record
-          if (attestatiCertification.certificationType == CertificationType.MEAL) {
+          if (attestatiCertification.getCertificationType() == CertificationType.MEAL) {
             attestatiMealToOverwrite = attestatiCertification;
           } else {
             toDeleteCertifications.put(key, attestatiCertification);

@@ -93,6 +93,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_21P2), 
       20, null),
   
+  T_22(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_22), 
+      ImmutableSet.of(DefaultAbsenceType.A_22), 
+      -1, null),
+  
   T_26(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
       ImmutableSet.of(DefaultAbsenceType.A_26, DefaultAbsenceType.A_26BP), 
@@ -812,7 +817,7 @@ public enum DefaultTakable {
     for (DefaultTakable defaultTakable : DefaultTakable.values()) {
       boolean found = false;
       for (TakableAbsenceBehaviour takable : allTakables) {
-        if (defaultTakable.name().equals(takable.name)) {
+        if (defaultTakable.name().equals(takable.getName())) {
           found = true;
           break;
         }
@@ -831,7 +836,7 @@ public enum DefaultTakable {
    */
   public static Optional<DefaultTakable> byName(TakableAbsenceBehaviour takable) {
     for (DefaultTakable defaultTakable : DefaultTakable.values()) {
-      if (defaultTakable.name().equals(takable.name)) {
+      if (defaultTakable.name().equals(takable.getName())) {
         return Optional.of(defaultTakable);
       }
     }

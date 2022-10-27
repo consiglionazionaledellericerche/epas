@@ -72,9 +72,9 @@ public class BadgeCreateDto extends BadgeUpdateDto {
    */
   public static Badge build(BadgeCreateDto badgeCreateDto) {
     val badge = modelMapper.map(badgeCreateDto, Badge.class);
-    badge.person = personDao.getPersonById(badgeCreateDto.getPersonId());
-    badge.badgeReader = badgeReaderDao.byId(badgeCreateDto.getBadgeReaderId());
-    badge.badgeSystem = badgeSystemDao.byId(badgeCreateDto.getBadgeSystemId());
+    badge.setPerson(personDao.getPersonById(badgeCreateDto.getPersonId()));
+    badge.setBadgeReader(badgeReaderDao.byId(badgeCreateDto.getBadgeReaderId()));
+    badge.setBadgeSystem(badgeSystemDao.byId(badgeCreateDto.getBadgeSystemId()));
     return badge;
   }
 

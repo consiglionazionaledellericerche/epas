@@ -25,6 +25,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -34,6 +35,8 @@ import play.data.validation.Required;
  * Associazione tra tipo di assenza e comportamento nella giustificazione
  * dell'orario giornaliero.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "absence_types_justified_behaviours")
@@ -44,16 +47,16 @@ public class AbsenceTypeJustifiedBehaviour extends BaseModel {
   @Required
   @ManyToOne
   @JoinColumn(name = "absence_type_id")
-  public AbsenceType absenceType;
+  private AbsenceType absenceType;
   
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "justified_behaviour_id")
-  public JustifiedBehaviour justifiedBehaviour;
+  private JustifiedBehaviour justifiedBehaviour;
   
   @Getter
   @Column
-  public Integer data;
+  private Integer data;
   
   /**
    * Stampa la quantità di ore e minuti giustificata.
@@ -61,11 +64,11 @@ public class AbsenceTypeJustifiedBehaviour extends BaseModel {
    * @return la stringa in cui stampare la quantità di ore e minuti giustificata.
    */
   public String printData() {
-    if (justifiedBehaviour.name.equals(JustifiedBehaviourName.minimumTime) 
-        || justifiedBehaviour.name.equals(JustifiedBehaviourName.maximumTime)) {
+    if (justifiedBehaviour.getName().equals(JustifiedBehaviourName.minimumTime) 
+        || justifiedBehaviour.getName().equals(JustifiedBehaviourName.maximumTime)) {
       return DateUtility.fromMinuteToHourMinute(data);
     }
-    if (justifiedBehaviour.name.equals(JustifiedBehaviourName.takenPercentageTime)) {
+    if (justifiedBehaviour.getName().equals(JustifiedBehaviourName.takenPercentageTime)) {
       return DateUtility.fromMinuteToHourMinute(432 * data / 1000);
     }
     return data + "";

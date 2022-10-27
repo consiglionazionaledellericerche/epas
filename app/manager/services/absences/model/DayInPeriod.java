@@ -86,7 +86,7 @@ public class DayInPeriod {
     }
     List<Absence> wrong = Lists.newArrayList();
     for (Absence existentReplacing : existentReplacings) {
-      if (!existentReplacing.absenceType.equals(correctReplacing)) {
+      if (!existentReplacing.getAbsenceType().equals(correctReplacing)) {
         wrong.add(existentReplacing);
       }
     }
@@ -103,7 +103,7 @@ public class DayInPeriod {
       return false;
     }
     for (Absence existentReplacing : existentReplacings) {
-      if (existentReplacing.absenceType.equals(correctReplacing)) {
+      if (existentReplacing.getAbsenceType().equals(correctReplacing)) {
         return false;
       }
     }
@@ -186,7 +186,7 @@ public class DayInPeriod {
     
     //FIXME: questo justifiedType serve per i replacing. Injettarlo
     JustifiedType nothing = new JustifiedType();
-    nothing.name = JustifiedTypeName.nothing;   
+    nothing.setName(JustifiedTypeName.nothing);   
 
     List<TemplateRow> templateRows = Lists.newArrayList();
 
@@ -310,8 +310,8 @@ public class DayInPeriod {
     replacingRow.complationColumn = true;
     Absence absence = new Absence();
     absence.date = this.date;
-    absence.absenceType = this.correctReplacing;
-    absence.justifiedType = nothing;
+    absence.setAbsenceType(this.correctReplacing);
+    absence.setJustifiedType(nothing);
     replacingRow.absence = absence;
     replacingRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter,

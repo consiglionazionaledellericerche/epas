@@ -77,17 +77,17 @@ public class AbsenceFromJsonManager {
 
           if (previousAbsence == null) {
             previousAbsence = abs;
-            startCurrentPeriod = abs.personDay.date;
-            endCurrentPeriod = abs.personDay.date;
+            startCurrentPeriod = abs.getPersonDay().getDate();
+            endCurrentPeriod = abs.getPersonDay().getDate();
             continue;
           }
-          if (abs.absenceType.code.equals(previousAbsence.absenceType.code)) {
-            if (!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))) {
+          if (abs.getAbsenceType().getCode().equals(previousAbsence.getAbsenceType().getCode())) {
+            if (!endCurrentPeriod.isEqual(abs.getPersonDay().getDate().minusDays(1))) {
               personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
               personPeriodAbsenceCode.personId = person.id;
-              personPeriodAbsenceCode.name = person.name;
-              personPeriodAbsenceCode.surname = person.surname;
-              personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+              personPeriodAbsenceCode.name = person.getName();
+              personPeriodAbsenceCode.surname = person.getSurname();
+              personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
               if (startCurrentPeriod.getMonthOfYear() < 10) {
                 meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
               } else {
@@ -116,20 +116,20 @@ public class AbsenceFromJsonManager {
               personsToRender.add(personPeriodAbsenceCode);
 
               previousAbsence = abs;
-              startCurrentPeriod = abs.personDay.date;
-              endCurrentPeriod = abs.personDay.date;
+              startCurrentPeriod = abs.getPersonDay().getDate();
+              endCurrentPeriod = abs.getPersonDay().getDate();
               continue;
 
             } else {
-              endCurrentPeriod = abs.personDay.date;
+              endCurrentPeriod = abs.getPersonDay().getDate();
               continue;
             }
           } else {
             personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
             personPeriodAbsenceCode.personId = person.id;
-            personPeriodAbsenceCode.name = person.name;
-            personPeriodAbsenceCode.surname = person.surname;
-            personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+            personPeriodAbsenceCode.name = person.getName();
+            personPeriodAbsenceCode.surname = person.getSurname();
+            personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
 
             if (startCurrentPeriod.getMonthOfYear() < 10) {
               meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
@@ -159,17 +159,17 @@ public class AbsenceFromJsonManager {
             personsToRender.add(personPeriodAbsenceCode);
 
             previousAbsence = abs;
-            startCurrentPeriod = abs.personDay.date;
-            endCurrentPeriod = abs.personDay.date;
+            startCurrentPeriod = abs.getPersonDay().getDate();
+            endCurrentPeriod = abs.getPersonDay().getDate();
           }
         }
 
         if (previousAbsence != null) {
           personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
           personPeriodAbsenceCode.personId = person.id;
-          personPeriodAbsenceCode.name = person.name;
-          personPeriodAbsenceCode.surname = person.surname;
-          personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+          personPeriodAbsenceCode.name = person.getName();
+          personPeriodAbsenceCode.surname = person.getSurname();
+          personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
           if (startCurrentPeriod.getMonthOfYear() < 10) {
             meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
           } else {

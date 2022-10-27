@@ -123,13 +123,13 @@ public class PersonMonthlySituationData {
 
       // Nuova certificazione
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.FORMATION;
-      certification.content = Certification
-          .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
-              personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.FORMATION);
+      certification.setContent(Certification
+          .serializeTrainingHours(personMonthRecap.getFromDate().getDayOfMonth(),
+              personMonthRecap.getToDate().getDayOfMonth(), personMonthRecap.getTrainingHours()));
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -163,24 +163,24 @@ public class PersonMonthlySituationData {
     for (Absence absence : absences) {
 
       //codici a uso interno li salto
-      if (absence.absenceType.internalUse) {
+      if (absence.getAbsenceType().isInternalUse()) {
         continue;
       }
 
       //Codice per attestati
-      String absenceCodeToSend = absence.absenceType.code.toUpperCase();
-      if (absence.absenceType.certificateCode != null
-          && !absence.absenceType.certificateCode.trim().isEmpty()) {
-        absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
+      String absenceCodeToSend = absence.getAbsenceType().getCode().toUpperCase();
+      if (absence.getAbsenceType().getCertificateCode() != null
+          && !absence.getAbsenceType().getCertificateCode().trim().isEmpty()) {
+        absenceCodeToSend = absence.getAbsenceType().getCertificateCode().toUpperCase();
       }
 
       // 1) Continua Assenza più giorni
       Integer dayEnd;
-      if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
+      if (previousDate != null && previousDate.plusDays(1).equals(absence.getPersonDay().getDate())
           && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = absence.personDay.date.getDayOfMonth();
-        previousDate = absence.personDay.date;
-        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
+        dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
+        previousDate = absence.getPersonDay().getDate();
+        certification.setContent(absenceCodeToSend + ";" + dayBegin + ";" + dayEnd);
         continue;
       }
 
@@ -192,18 +192,18 @@ public class PersonMonthlySituationData {
       }
 
       // 3) Nuova Assenza  
-      dayBegin = absence.personDay.date.getDayOfMonth();
-      dayEnd = absence.personDay.date.getDayOfMonth();
-      previousDate = absence.personDay.date;
+      dayBegin = absence.getPersonDay().getDate().getDayOfMonth();
+      dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
+      previousDate = absence.getPersonDay().getDate();
       previousAbsenceCode = absenceCodeToSend;
 
       certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.ABSENCE;
-      certification.content = Certification.serializeAbsences(absenceCodeToSend,
-          dayBegin, dayEnd);
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.ABSENCE);
+      certification.setContent(Certification.serializeAbsences(absenceCodeToSend,
+          dayBegin, dayEnd));
     }
 
     certifications.put(certification.aMapKey(), certification);
@@ -229,12 +229,12 @@ public class PersonMonthlySituationData {
 
     for (Competence competence : competences) {
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.COMPETENCE;
-      certification.content = Certification.serializeCompetences(competence.competenceCode.code,
-          competence.valueApproved);
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.COMPETENCE);
+      certification.setContent(Certification.serializeCompetences(competence.getCompetenceCode()
+          .getCode(), competence.getValueApproved()));
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -254,10 +254,10 @@ public class PersonMonthlySituationData {
       Map<String, Certification> certifications) {
 
     Certification certification = new Certification();
-    certification.person = person;
-    certification.year = year;
-    certification.month = month;
-    certification.certificationType = CertificationType.MEAL;
+    certification.setPerson(person);
+    certification.setYear(year);
+    certification.setMonth(month);
+    certification.setCertificationType(CertificationType.MEAL);
     //Inserire qui il conteggio dei buoni pasto
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = begin.dayOfMonth().withMaximumValue();
@@ -281,7 +281,7 @@ public class PersonMonthlySituationData {
       }
     }
 
-    certification.content = String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici);
+    certification.setContent(String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
 
     certifications.put(certification.aMapKey(), certification);
 

@@ -24,6 +24,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -34,6 +36,8 @@ import play.data.validation.Required;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(
@@ -47,17 +51,17 @@ public class PersonReperibilityDay extends BaseModel {
   @Required
   @ManyToOne
   @JoinColumn(name = "person_reperibility_id", nullable = false)
-  public PersonReperibility personReperibility;
+  private PersonReperibility personReperibility;
 
   @Required
-  public LocalDate date;
+  private LocalDate date;
 
   @Column(name = "holiday_day")
-  public Boolean holidayDay;
+  private Boolean holidayDay;
 
   @ManyToOne
   @JoinColumn(name = "reperibility_type")
-  public PersonReperibilityType reperibilityType;
+  private PersonReperibilityType reperibilityType;
   
   @Transient
   public String getLabel() {

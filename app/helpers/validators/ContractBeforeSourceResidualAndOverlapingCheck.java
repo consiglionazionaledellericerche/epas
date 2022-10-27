@@ -40,10 +40,10 @@ public class ContractBeforeSourceResidualAndOverlapingCheck extends Check {
     }
     final Contract contract = (Contract) validatedObject;
     // sto creando una perosna, non ci sono contratti che si intersecano
-    if (contract.person == null || !contract.person.isPersistent()) {
+    if (contract.getPerson() == null || !contract.getPerson().isPersistent()) {
       return true;
     }
-    if (contract.person.contracts.stream()
+    if (contract.getPerson().getContracts().stream()
         .filter(c -> !c.id.equals(contract.getId()))
         .anyMatch(con -> con.overlap(contract))) {
       log.debug("Contract {} contract is overlaping");
@@ -53,8 +53,8 @@ public class ContractBeforeSourceResidualAndOverlapingCheck extends Check {
       return false;
     }
 
-    if (contract.sourceDateResidual != null
-        && contract.sourceDateResidual.isBefore(contract.beginDate)) {
+    if (contract.getSourceDateResidual() != null
+        && contract.getSourceDateResidual().isBefore(contract.getBeginDate())) {
       log.debug("Contract.sourceDateResidual {} is before contract.beginDate {}");
       val validationMsgKey = "validation.contract.sourceDateResidualBeforeBeginDate"; 
       Validation.addError("contract.beginDate", validationMsgKey);

@@ -280,6 +280,12 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0,
       JustifiedTypeName.all_day, Sets.newHashSet(), null, null, false, true, true),
+  
+  A_22("22", "Permesso 2h per figlio portatore di handicap con età <= 3 anni", false,
+      ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
+      Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), 
+          null, null, false, true, true), 
 
   // Il tempo per buono pasto in questo momento è disabilitato. Capire.
   A_26("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere", false,
@@ -2505,7 +2511,7 @@ public enum DefaultAbsenceType {
     for (DefaultAbsenceType defaultTypes : DefaultAbsenceType.values()) {
       boolean found = false;
       for (AbsenceType type : allAbsenceTypes) {
-        if (defaultTypes.getCode().equals(type.code)) {
+        if (defaultTypes.getCode().equals(type.getCode())) {
           found = true;
           break;
         }
@@ -2528,7 +2534,7 @@ public enum DefaultAbsenceType {
    */
   public static Optional<DefaultAbsenceType> byCode(AbsenceType absenceType) {
     for (DefaultAbsenceType defaultAbsenceType : DefaultAbsenceType.values()) {
-      if (absenceType.code.equals(defaultAbsenceType.getCode())) {
+      if (absenceType.getCode().equals(defaultAbsenceType.getCode())) {
         return Optional.of(defaultAbsenceType);
       }
     }

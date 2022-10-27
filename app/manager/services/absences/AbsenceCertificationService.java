@@ -412,8 +412,8 @@ public class AbsenceCertificationService {
     
     Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(code);
     if (!absenceType.isPresent() 
-        || (absenceType.get().certificateCode != null 
-        && !absenceType.get().certificateCode.equalsIgnoreCase(code))) {
+        || (absenceType.get().getCertificateCode() != null 
+        && !absenceType.get().getCertificateCode().equalsIgnoreCase(code))) {
       
       //Se non lo trovo oppure il codice in attestati è diverso da quello trovato
       //Lo cerco per codice attestati. Si potrebbe migliorare popolando per ogni codice 
@@ -567,8 +567,8 @@ public class AbsenceCertificationService {
     if (dates == null || dates.isEmpty()) {
       return;
     }
-    LocalDate sourceDate = wrPerson.getCurrentContract().get().sourceDateResidual;
-    LocalDate beginContract = wrPerson.getCurrentContract().get().beginDate;
+    LocalDate sourceDate = wrPerson.getCurrentContract().get().getSourceDateResidual();
+    LocalDate beginContract = wrPerson.getCurrentContract().get().getBeginDate();
     Set<LocalDate> manually = Sets.newHashSet();
     for (LocalDate date : dates) {
       if (date.isBefore(beginContract)) {
@@ -630,8 +630,8 @@ public class AbsenceCertificationService {
       DefaultGroup group, Set<String> codes) {
     GroupAbsenceType groupAbsenceType = absenceComponentDao
         .groupAbsenceTypeByName(group.name()).get();
-    for (InitializationGroup initialization : person.initializationGroups) {
-      if (initialization.groupAbsenceType.equals(groupAbsenceType)) {
+    for (InitializationGroup initialization : person.getInitializationGroups()) {
+      if (initialization.getGroupAbsenceType().equals(groupAbsenceType)) {
         return; //inizializzazione già presente o importata... si cambia solo manualmente.
       }
     }
@@ -647,8 +647,8 @@ public class AbsenceCertificationService {
     Collections.sort(list);
     InitializationGroup initializationGroup = new InitializationGroup(person, groupAbsenceType, 
         list.iterator().next().minusDays(1));
-    initializationGroup.unitsInput = group.takable.fixedLimit;
-    initializationGroup.averageWeekTime = 432;
+    initializationGroup.setUnitsInput(group.takable.fixedLimit);
+    initializationGroup.setAverageWeekTime(432);
     initializationGroup.save();
   }
   
@@ -808,7 +808,7 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
@@ -823,7 +823,7 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
@@ -863,32 +863,32 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
           
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
-          if (type.get().justifiedTypesPermitted.size() != 1) {
+          if (type.get().getJustifiedTypesPermitted().size() != 1) {
             log.debug("Impossibile importare una assenza senza justified univoco o definito {}", 
-                type.get().code);
+                type.get().getCode());
             continue;
           }
-          JustifiedType justifiedType = type.get().justifiedTypesPermitted.iterator().next();
-          if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
+          JustifiedType justifiedType = type.get().getJustifiedTypesPermitted().iterator().next();
+          if (justifiedType.getName().equals(JustifiedTypeName.all_day)) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, 0, 0).absencesToPersist); 
             continue;
           }
-          if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-            int hour = type.get().justifiedTime / 60;
-            int minute = type.get().justifiedTime % 60;
+          if (justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
+            int hour = type.get().getJustifiedTime() / 60;
+            int minute = type.get().getJustifiedTime() % 60;
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, hour, minute).absencesToPersist); 
             continue;
           }
-          if (justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          if (justifiedType.getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, 0, 0).absencesToPersist);
             continue;

@@ -68,7 +68,7 @@ public class Security extends Secure.Security {
         .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
 
     if (user != null) {
-      log.info("user {} successfully logged in from ip {}", user.username,
+      log.info("user {} successfully logged in from ip {}", user.getUsername(),
           Http.Request.current().remoteAddress);
       return true;
     }
