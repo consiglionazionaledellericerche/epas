@@ -22,7 +22,7 @@
 	  	    	  	    
 	  	    <td>
 	  	    #{if person.actualMealTicketCard() != null} 
-	  	    	${person.actualMealTicketCard()}
+	  	    	<h4><span class="label label-success label-badge">${person.actualMealTicketCard().number}</span></h4>
 	  	    #{/if}
 	  	    #{else}
 	  	    	<p>Nessuna tessera attualmente assegnata</p>

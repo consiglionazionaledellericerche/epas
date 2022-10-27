@@ -538,6 +538,11 @@ MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
 mealTicketDecision=Valore Buono Pasto
 
+mealTicketCard.person =Dipendente
+mealTicketCard.number =Numero tessera
+mealTicketCard.deliveryDate =Data di rilascio
+mealTicketCard.deliveryOffice =Sede rilasciante
+
 ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione

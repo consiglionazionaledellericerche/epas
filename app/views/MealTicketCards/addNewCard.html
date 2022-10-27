@@ -1,0 +1,25 @@
+#{modalAsync title:'Aggiungi nuova tessera elettronica'}
+
+<div class="insertCard">
+
+	#{alert color:'info'}
+	  Inserire i dettagli della tessera da associare a ${person.fullName()}. 
+	#{/alert}
+	
+	#{form @MealTicketCards.saveNewCard(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#insertCard'}
+	
+	  <input type="hidden" name="person.id" value="${mealTicketCard.person.id}"/>
+	  <input type="hidden" name="office.id" value="${mealTicketCard.deliveryOffice.id}"/>
+	  
+	  #{f.view 'Dipendente', value:mealTicketCard.person.fullName() /}
+	  #{f.input 'mealTicketCard.number', required:true /}
+	  #{f.date 'mealTicketCard.deliveryDate', required:true /}
+	  #{f.view 'Sede rilasciante', value:mealTicketCard.deliveryOffice.getName() /}
+	  
+  		#{b.buttons center:true}
+    		#{b.save /}
+  		#{/b.buttons}
+	#{/form}
+</div>
+#{/modalAsync}
