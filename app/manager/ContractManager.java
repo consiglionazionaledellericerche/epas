@@ -545,25 +545,24 @@ public class ContractManager {
     //Controllo se il contratto deve essere linkato al precedente...
     if (linkedToPreviousContract) {
       if (contract.getPreviousContract() == null) {
-        IWrapperPerson wrapperPerson = wrapperFactory.create(contract.getPerson());
-        Optional<Contract> previousContract = wrapperPerson.getPreviousContract();
+        Optional<Contract> previousContract = contractDao.getPreviousContract(contract);
         if (previousContract.isPresent()) {
-          contract.setPreviousContract(previousContract.get());          
+          contract.setPreviousContract(previousContract.get());
           if (contract.getBeginDate().minusDays(1).isEqual(previousContract.get().getEndDate())) {
-            mergeVacationPeriods(contract, previousContract.get());            
+            mergeVacationPeriods(contract, previousContract.get());
           }
         } else {
           return false;
         }
-      }    
+      }
     } else {
       Contract temp = contract.getPreviousContract();
-      if (temp != null) {        
+      if (temp != null) {
         contract.setPreviousContract(null);
 
         if (contract.getBeginDate().minusDays(1).isEqual(temp.getEndDate())) {
           splitVacationPeriods(contract);
-        }         
+        }
       }
     }
     return true;
