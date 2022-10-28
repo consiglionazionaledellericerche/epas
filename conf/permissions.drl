@@ -2276,6 +2276,7 @@ when
         "MealTicketCards.mealTicketCards",
         "MealTicketCards.addNewCard",
         "MealTicketCards.saveNewCard",
+        "MealTicketCards.deleteCard",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",
@@ -2313,6 +2314,7 @@ when
         "MealTicketCards.mealTicketCards",
         "MealTicketCards.addNewCard",
         "MealTicketCards.saveNewCard",
+        "MealTicketCards.deleteCard",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",

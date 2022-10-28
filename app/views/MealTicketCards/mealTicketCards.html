@@ -22,7 +22,10 @@
 	  	    	  	    
 	  	    <td>
 	  	    #{if person.actualMealTicketCard() != null} 
-	  	    	<h4><span class="label label-success label-badge">${person.actualMealTicketCard().number}</span></h4>
+	  	    	<h4>
+	  	    	<a class="label label-success label-badge" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera">
+	  	    	${person.actualMealTicketCard().number}</a>
+	  	    	</h4>
 	  	    #{/if}
 	  	    #{else}
 	  	    	<p>Nessuna tessera attualmente assegnata</p>
@@ -30,8 +33,17 @@
 	  	    </td>	  	    
 	  	    
 	  	    <td><a href="@{MealTicketCards.addNewCard(person.id)}" data-async-modal="#defaultModal">
-	  	    	<i class="fa fa-plus" aria-hidden="true">Aggiungi</i></a></td>
-	  	    <td></td>  	    
+	  	    	<i class="fa fa-plus" aria-hidden="true">Nuova tessera</i></a></td>
+	  	    <td>
+	  	    <ul class="list-group">
+	  	    #{list items:person.getMealTicketCards(), as:'card'}
+	  	    	<li class="list-group-item">
+    				<span class="badge">${card.number}</span>
+    				
+  				</li>
+	  	    #{/list}
+	  	    </ul>
+	  	    </td>  	    
 	  	  </tr>
 	  	  #{/list}
 	  	</tbody>	

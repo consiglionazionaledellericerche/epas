@@ -2,16 +2,18 @@ package controllers;
 
 import com.google.common.base.Optional;
 import common.security.SecurityRules;
+import dao.MealTicketCardDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import manager.MealTicketCardManager;
 import java.util.List;
 import javax.inject.Inject;
+import manager.MealTicketCardManager;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
 import models.User;
 import org.joda.time.LocalDate;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -32,7 +34,9 @@ public class MealTicketCards extends Controller {
   private static PersonDao personDao;
   @Inject
   private static MealTicketCardManager mealTicketCardManager;
-  
+  @Inject
+  private static MealTicketCardDao mealTicketCardDao;
+
   /**
    * Ritorna la lista delle persone per verificare le associazioni con le card dei buoni 
    * elettronici.
@@ -40,14 +44,14 @@ public class MealTicketCards extends Controller {
    * @param officeId l'id della sede di cui cercare la lista di persone
    */
   public static void mealTicketCards(Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     List<Person> personList = personDao.activeWithNumber(office);
     render(office, personList);
   }
-  
+
   /**
    * Apre la form di inserimento di una nuova tessera elettronica.
    *
@@ -63,7 +67,7 @@ public class MealTicketCards extends Controller {
     mealTicketCard.setDeliveryOffice(user.get().getPerson().getOffice());
     render(person, mealTicketCard);
   }
-  
+
   /**
    * Salva la nuova tessera elettronica.
    *
@@ -75,16 +79,41 @@ public class MealTicketCards extends Controller {
     notFoundIfNull(person);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    String result = mealTicketCardManager.saveMealTicketCard(mealTicketCard, person, office);
-    if (result.isEmpty()) {
-      flash.success("Associata nuova tessera a %s", person.getFullname());
-    } else {
-      flash.error("Qualcosa è andato storto...invia una segnalazione ai responsabili di ePAS");
-    }    
+    if (mealTicketCard.getDeliveryDate() == null) {
+      Validation.addError("mealTicketCard.deliveryDate", "La data deve essere valorizzata!!!");
+    }
+    if (mealTicketCard.getNumber() < 1) {
+      Validation.addError("mealTicketCard.number", 
+          "Il numero della card deve essere maggiore di zero!!!");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      person = personDao.getPersonById(person.id);
+      mealTicketCard.setPerson(person);
+      mealTicketCard.setDeliveryOffice(office);
+      render("@addNewCard", mealTicketCard, person);
+    }
+    mealTicketCardManager.saveMealTicketCard(mealTicketCard, person, office);
+
+    flash.success("Associata nuova tessera a %s", person.getFullname());
+
     MealTicketCards.mealTicketCards(person.getOffice().id);
   }
-  
+
+  /**
+   * Metodo di rimozione di una tessera elettronica.
+   *
+   * @param mealTicketCardId l'identificativo della tessera da rimuovere
+   */
   public static void deleteCard(Long mealTicketCardId) {
-    //TODO: eliminare solo se non esistono altre tessere!!!
+    java.util.Optional<MealTicketCard> mealTicketCard = mealTicketCardDao
+        .getMealTicketCardById(mealTicketCardId);
+    if (mealTicketCard.isPresent()) {
+      mealTicketCard.get().delete();
+      flash.success("Tessera correttamente rimossa");      
+    } else {
+      flash.error("Nessuna tessera corrispondente all'id selezionato. Verificare.");
+    }
+    MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
   }
 }

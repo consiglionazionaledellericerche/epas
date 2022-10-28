@@ -9,16 +9,24 @@ import models.Person;
 @Slf4j
 public class MealTicketCardManager {
 
-  public String saveMealTicketCard(MealTicketCard mealTicketCard, Person person, Office office) {
-    String s = "";
-    //TODO: inserire qui la lista delle precedenti tessere da disattivare e da "chiudere" inserendo
-    // la endDate
+  public void saveMealTicketCard(MealTicketCard mealTicketCard, Person person, Office office) {
+    
+    MealTicketCard previous = person.actualMealTicketCard();
+    if (previous != null) {
+      log.info("Termino la validità della precedente tessera per {}", person.getFullname());
+      previous.setActive(false);
+      previous.setEndDate(LocalDate.now().minusDays(1));
+      previous.save();
+    }
     mealTicketCard.setActive(true);
     mealTicketCard.setPerson(person);
     mealTicketCard.setDeliveryOffice(office);
     mealTicketCard.setBeginDate(LocalDate.now());
     mealTicketCard.setEndDate(null);
     mealTicketCard.save();
-    return s;
+    log.info("Aggiunta nuova tessera con identificativo {} a {}", 
+        mealTicketCard.getNumber(), person.getFullname());
   }
+  
+  
 }
