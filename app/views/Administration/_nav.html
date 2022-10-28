@@ -30,5 +30,10 @@
         #{secure.link @Administration.emergency(), fa:'ambulance'}Emergency#{/secure.link}
       </li>
     #{/secure.check}
+    #{secure.check 'Administration.contractsToFix'}
+      <li#{if actionSelected.equals("Administration.contractsToFix")} class="active"#{set editable:true /}#{/if}>
+        #{secure.link @Administration.contractsToFix()}Contratti da correggere#{/secure.link}
+      </li>
+    #{/secure.check}
   </ul>
 </div>

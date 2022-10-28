@@ -302,35 +302,28 @@ public class ContractDao extends DaoBase {
     Verify.verifyNotNull(actualContract);
     Contract previousContract = null;
     List<Contract> contractList = getPersonContractList(actualContract.getPerson());
-    log.info("Cerco il previousContract del contract {}", actualContract);
-    
+
     for (Contract contract : contractList) {
       if (contract.getId().equals(actualContract.getId())) {
-        log.debug("scarto il contratto id = {}, perché uguale al contratto corrente id = {}",
+        log.trace("scarto il contratto id = {}, perché uguale al contratto corrente id = {}",
             contract.getId(), actualContract.getId());
         continue;
       }
-      log.debug("Valuto il contratto {}", contract);
-      log.debug("contract.calculatedEnd() != null = {}", contract.calculatedEnd() != null);
-      log.debug("contract.calculatedEnd().isBefore(actualContract.getBeginDate() = {}", 
-          contract.calculatedEnd().isBefore(actualContract.getBeginDate()));
-      log.debug("contract.getBeginDate().isAfter(actualContract.calculatedEnd() = {}",
-          contract.getBeginDate().isAfter(actualContract.getEndDate()));
-      
+
       if (contract.calculatedEnd() != null
           && contract.calculatedEnd().isBefore(actualContract.getBeginDate()) 
           && (previousContract == null || contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
         previousContract = contract;
-        log.debug("Impostato previousContract {}", previousContract);
       }
     }
     return Optional.fromNullable(previousContract);
   }
 
   /**
-   * @return la lista dei contratti che hanno impostato come previousContract se stesso (erroneamente)
+   * @return la lista dei contratti che hanno impostato come previousContract 
+   *  se stesso (erroneamente).
    */
-  public List<Contract> getContractWithWrongPreviousContract() {
+  public List<Contract> getContractsWithWrongPreviousContract() {
     QContract contract = QContract.contract;
     BooleanBuilder contractEqPreviousCondition = 
         new BooleanBuilder(contract.previousContract.isNotNull().and(contract.previousContract.id.eq(contract.id)));

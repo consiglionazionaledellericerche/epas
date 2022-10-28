@@ -1510,16 +1510,16 @@ public class Contracts extends Controller {
 
   }
 
-  public void fixPreviousContractLink(Long id) {
-    val contract = contractDao.byId(id);
-    contractManager.fixPreviousContractLink(contract);
-    renderText("ok");
-  }
-  
+  /**
+   * Metodo di utilità/debug per verificare il contratto precedente
+   * di un contratto.
+   */
   public void previousContract(Long id) {
     val contract = contractDao.byId(id);
+    notFoundIfNull(contract);
     renderText(
         String.format("Current contract = %s\npreviousContract = %s",
             contract, contractDao.getPreviousContract(contract)));
   }
+
 }

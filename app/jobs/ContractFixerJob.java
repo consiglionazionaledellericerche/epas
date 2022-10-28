@@ -16,6 +16,7 @@
  */
 package jobs;
 
+import com.google.common.base.Optional;
 import dao.ContractDao;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 @Slf4j
-//@OnApplicationStart(async = true)
+@OnApplicationStart(async = true)
 public class ContractFixerJob  extends Job<Void>{
   
   @Inject
@@ -38,10 +39,11 @@ public class ContractFixerJob  extends Job<Void>{
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(Bootstrap.JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
-      //return;
+      return;
     }
-    contractDao.getContractWithWrongPreviousContract().stream().forEach(contract -> {
-      contractManager.fixPreviousContractLink(contract);
-    });
+    log.info("Avviato il job per controllare i contratti da verificare e correggere "
+        + "per il previousContract");
+    int fixedContract = contractManager.fixContractsWithWrongPreviousContract(Optional.absent());
+    log.info("Corretti {} contratti con previousContract errato", fixedContract);
   }
 }
