@@ -8,6 +8,7 @@
   'Vacations.list',
   'Competences.showCompetences',
   'MealTickets.recapMealTickets',
+  'MealTicketCards.recapElectronicMealTickets',
   'PersonMonths.visualizePeopleTrainingHours',
   'Stampings.missingStamping',
   'Stampings.dailyPresence',
@@ -73,10 +74,17 @@
       #{secure.li @MealTicketCards.mealTicketCards(currentData.officeId) }
       <i class="fa fa-id-card" aria-hidden="true"></i>
       #{/secure.li}
-
-      #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) }
-      <i class="fa fa-cutlery" aria-hidden="true"></i>
-      #{/secure.li}
+      
+	  #{if !electronicMealTicket}
+	      #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) }
+	      <i class="fa fa-cutlery" aria-hidden="true"></i>
+	      #{/secure.li}
+      #{/if}
+      #{else}
+	      #{secure.li @MealTicketCards.recapElectronicMealTickets(currentData.year, currentData.month, currentData.officeId) }
+	      <i class="fa fa-cutlery" aria-hidden="true"></i>
+	      #{/secure.li}
+      #{/else}
 
       #{secure.li @PersonMonths.visualizePeopleTrainingHours(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-graduation-cap" aria-hidden="true"></i>

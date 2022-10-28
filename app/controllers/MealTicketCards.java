@@ -125,4 +125,8 @@ public class MealTicketCards extends Controller {
       render(mealTicketCard);
     }
   }
+  
+  public static void recapElectronicMealTickets(int year, int mont, Long officeId) {
+    
+  }
 }
