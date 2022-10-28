@@ -116,4 +116,13 @@ public class MealTicketCards extends Controller {
     }
     MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
   }
+  
+  public static void infoCard(Long mealTicketCardId) {
+    java.util.Optional<MealTicketCard> card = mealTicketCardDao
+        .getMealTicketCardById(mealTicketCardId);
+    if (card.isPresent()) {
+      MealTicketCard mealTicketCard = card.get();
+      render(mealTicketCard);
+    }
+  }
 }

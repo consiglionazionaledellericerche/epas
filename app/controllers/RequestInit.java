@@ -83,6 +83,8 @@ public class RequestInit extends Controller {
     if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
       renderArgs.put("attestatiActive", true);
     }
+    
+    
 
     Optional<User> user = Security.getUser();
 
