@@ -1063,6 +1063,7 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nu
 
 Institutes.list= Sedi e Amministratori
 MealTicketCards.mealTicketCards= Gestione card buoni pasto elettronici
+MealTicketCards.recapElectronicMealTickets= Gestione buoni pasto elettronici
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
 MealTickets.mealTickets= Riepilogo Buoni Pasto

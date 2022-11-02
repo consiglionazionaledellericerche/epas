@@ -1,18 +1,40 @@
+/*
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
 import dao.MealTicketCardDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import java.util.List;
 import javax.inject.Inject;
+import manager.ConsistencyManager;
 import manager.MealTicketCardManager;
+import models.Contract;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
 import models.User;
 import org.joda.time.LocalDate;
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -36,6 +58,8 @@ public class MealTicketCards extends Controller {
   private static MealTicketCardManager mealTicketCardManager;
   @Inject
   private static MealTicketCardDao mealTicketCardDao;
+  @Inject
+  private static ConsistencyManager consistencyManager;
 
   /**
    * Ritorna la lista delle persone per verificare le associazioni con le card dei buoni 
@@ -126,7 +150,31 @@ public class MealTicketCards extends Controller {
     }
   }
   
-  public static void recapElectronicMealTickets(int year, int mont, Long officeId) {
+  public static void personMealTickets(Long personId, Integer year, Integer month) {
     
+    Person person = personDao.getPersonById(personId);
+
+    Preconditions.checkArgument(person.isPersistent());
+    rules.checkIfPermitted(person.getOffice());
+    
+    if (year == null || month == null) {
+      year = LocalDate.now().getYear();
+      month = LocalDate.now().getMonthOfYear();
+    }
+    LocalDate deliveryDate = LocalDate.now();
+    MealTicketCard card = person.actualMealTicketCard();
+    User admin = Security.getUser().get();
+    
+    render(person, card, admin, deliveryDate, year, month);
+  }
+  
+  public static void submitPersonMealTicket(Long personId, MealTicketCard card, 
+      LocalDate deliveryDate, Integer tickets, @Valid @Required LocalDate expireDate) {
+    /*
+     * TODO: implementare la creazione dei vari mealTicket elettronici 
+     */
+    Person person = personDao.getPersonById(personId);
+    consistencyManager.updatePersonRecaps(person.id, deliveryDate);
   }
 }
+
