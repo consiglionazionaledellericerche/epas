@@ -9,6 +9,8 @@
 
 <div class="container">
 
+  #{include './_electronicMealTicketsTabs.html' /}
+
  #{alert color:'info'}
   <p>In questa form è possibile inserire i buoni pasto di tipo <strong>Elettronico</strong>.</p>
   <p>Occorre selezionare la tessera per i buoni elettronici associata al dipendente e su quella caricare la quantità di
@@ -38,8 +40,19 @@
     #{/form}
     
     <br>
+    #{if !unAssignedElectronicMealTickets.isEmpty()}
+    	#{alert color:'warning'}    
+			Esistono buoni pasto elettronici non associati ad alcuna card (probabilmente frutto di inserimenti di buoni
+			elettronici nella vecchia modalità).
+			Premere su questo bottone per associarli tutti alla card attualmente in uso da parte del dipendente:
+			<a class="btn btn-xs btn-warning"
+     		href="@{MealTicketCards.assignOrphanElectronicMealTickets(card.id, person.id)}">
+     		Carica buoni elettronici sulla card attuale<i class="fa fa-card" aria-hidden="true"></i></a>	
+   	 	#{/alert}
+    #{/if}
+    
     #{alert color:'info'}
-    #{if recap.getBlockMealTicketReceivedDeliveryDesc().isEmpty()}
+    #{if recap.getElectronicBlockMealTicketReceivedDeliveryDesc().isEmpty()}
     <em>Nessun blocco valido inserito per <strong>${person.fullname}</strong></em>
     #{/if}
     #{else}
@@ -54,7 +67,7 @@
         <th>Consegnato il</th>
         <th>Scadenza</th>
       </tr>
-      #{list items:recap.getBlockMealTicketReceivedDeliveryDesc(), as:'block'}
+      #{list items:recap.getElectronicBlockMealTicketReceivedDeliveryDesc(), as:'block'}
       #{if block_index <= 3 }
       <tr>
         <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
@@ -67,6 +80,8 @@
     </table>
     #{/else}
     #{/alert}
+    
+    
   	</div>
 
 

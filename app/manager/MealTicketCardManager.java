@@ -18,9 +18,12 @@
 package manager;
 
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -30,17 +33,22 @@ import models.MealTicket;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
+import models.User;
+import models.enumerate.BlockType;
 
 @Slf4j
 public class MealTicketCardManager {
 
   private MealTicketDao mealTicketDao;
   private IWrapperFactory wrapperFactory;
+  private ContractDao contractDao;
   
   @Inject
-  public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory) {
+  public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory,
+      ContractDao contractDao) {
     this.mealTicketDao = mealTicketDao;
     this.wrapperFactory = wrapperFactory;
+    this.contractDao = contractDao;
   }
   
   public void saveMealTicketCard(MealTicketCard mealTicketCard, Person person, Office office) {
@@ -81,7 +89,34 @@ public class MealTicketCardManager {
       mealTicket.setMealTicketCard(card);
       mealTicket.save();
     }
-    return true;
-    
+    return true;    
+  }
+  
+  public void saveElectronicMealTicketBlock(MealTicketCard card, LocalDate deliveryDate, 
+      Integer tickets, User admin, Person person, LocalDate expireDate, Office office) {
+    String block = "" + card.getNumber() + deliveryDate.getYear() + deliveryDate.getMonthOfYear();
+    for (Integer i = 1; i <= tickets; i++) {
+      MealTicket mealTicket = new MealTicket();
+      mealTicket.setBlock(block);
+      mealTicket.setBlockType(BlockType.electronic);
+      mealTicket.setContract(contractDao.getContract(deliveryDate, person));
+      mealTicket.setMealTicketCard(card);
+      mealTicket.setAdmin(admin.getPerson());
+      mealTicket.setDate(deliveryDate);
+      mealTicket.setExpireDate(expireDate);
+      mealTicket.setOffice(office);
+      mealTicket.setNumber(i);
+      if (i < 10) {
+        mealTicket.setCode(block + "0" + i);
+      } else {
+        mealTicket.setCode("" + block + i);
+      }
+      mealTicket.save();
+    }
+  }
+  
+  public Map<LocalDate, List<MealTicket>> recapElectronicDelivery(Person person) {
+    Map<LocalDate, List<MealTicket>> map = Maps.newHashMap();
+    return null;
   }
 }

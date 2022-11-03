@@ -21,13 +21,20 @@ import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
 import dao.MealTicketCardDao;
+import dao.MealTicketDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.WrapperPerson;
 import java.util.List;
 import javax.inject.Inject;
 import manager.ConsistencyManager;
 import manager.MealTicketCardManager;
+import manager.services.mealtickets.IMealTicketsService;
+import manager.services.mealtickets.MealTicketRecap;
 import models.Contract;
+import models.MealTicket;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
@@ -60,6 +67,12 @@ public class MealTicketCards extends Controller {
   private static MealTicketCardDao mealTicketCardDao;
   @Inject
   private static ConsistencyManager consistencyManager;
+  @Inject
+  private static MealTicketDao mealTicketDao;
+  @Inject
+  private static IMealTicketsService mealTicketService;
+  @Inject
+  private static IWrapperFactory wrapperFactory;
 
   /**
    * Ritorna la lista delle persone per verificare le associazioni con le card dei buoni 
@@ -141,6 +154,11 @@ public class MealTicketCards extends Controller {
     MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
   }
   
+  /**
+   * Informazioni sulla card elettronica.
+   *
+   * @param mealTicketCardId l'identificativo della card
+   */
   public static void infoCard(Long mealTicketCardId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao
         .getMealTicketCardById(mealTicketCardId);
@@ -150,6 +168,13 @@ public class MealTicketCards extends Controller {
     }
   }
   
+  /**
+   * Ritorna la pagina di inserimento dei buoni pasto elettronici.
+   *
+   * @param personId l'identificativo della persona
+   * @param year l'anno
+   * @param month il mese
+   */
   public static void personMealTickets(Long personId, Integer year, Integer month) {
     
     Person person = personDao.getPersonById(personId);
@@ -161,20 +186,124 @@ public class MealTicketCards extends Controller {
       year = LocalDate.now().getYear();
       month = LocalDate.now().getMonthOfYear();
     }
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    MealTicketRecap recap = mealTicketService.create(wrPerson.getCurrentContract().get()).orNull();
+    Preconditions.checkNotNull(recap);
     LocalDate deliveryDate = LocalDate.now();
     MealTicketCard card = person.actualMealTicketCard();
+    LocalDate expireDate = mealTicketDao
+        .getFurtherExpireDateInOffice(person.getOffice());
+    List<MealTicket> unAssignedElectronicMealTickets = mealTicketDao
+        .getUnassignedElectronicMealTickets(wrPerson.getCurrentContract().get());
     User admin = Security.getUser().get();
     
-    render(person, card, admin, deliveryDate, year, month);
+    render(person, card, admin, deliveryDate, year, month, 
+        expireDate, recap, unAssignedElectronicMealTickets);
   }
   
+  /**
+   * Assegna i buoni elettronici senza card alla card attualmente in uso dal dipendente.
+   *
+   * @param cardId l'identificativo della card elettronica
+   * @param personId l'identificativo della persona
+   * @param unAssignedElectronicMealTickets la lista dei buoni da assegnare
+   */
+  public static void assignOrphanElectronicMealTickets(Long cardId, Long personId) {
+    java.util.Optional<MealTicketCard> card = mealTicketCardDao.getMealTicketCardById(cardId);
+    Person person = personDao.getPersonById(personId);
+    if (!card.isPresent()) {
+      flash.error("Non sono presenti card associate al dipendente! "
+          + "Assegnare una card e riprovare!");      
+    } else {
+      mealTicketCardManager.assignOldElectronicMealTicketsToCard(card.get());
+      flash.success("Buoni elettronici associati correttamente alla card %s", 
+          card.get().getNumber());
+    }
+    personMealTickets(personId, LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+  }
+  
+  /**
+   * Salva i buoni elettronici sulla card del dipendente.
+   *
+   * @param personId l'identificativo del dipendente
+   * @param card la card su cui caricare i buoni
+   * @param deliveryDate la data di consegna dei buoni
+   * @param tickets il numero di buoni da caricare
+   * @param expireDate la data di scadenza dei buoni
+   */
   public static void submitPersonMealTicket(Long personId, MealTicketCard card, 
       LocalDate deliveryDate, Integer tickets, @Valid @Required LocalDate expireDate) {
-    /*
-     * TODO: implementare la creazione dei vari mealTicket elettronici 
-     */
+    
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
+    Office office = person.getOffice();
+    User admin = Security.getUser().get();
+    
+    mealTicketCardManager.saveElectronicMealTicketBlock(card, deliveryDate, tickets, 
+        admin, person, expireDate, office);
     consistencyManager.updatePersonRecaps(person.id, deliveryDate);
+    flash.success("Il blocco inserito è stato salvato correttamente.");
+
+    personMealTickets(person.id, deliveryDate.getYear(), deliveryDate.getMonthOfYear());
+  }
+  
+  /**
+   * La pagina di modifica dei buoni elettronici consegnati al dipendente.
+   *
+   * @param personId l'identificativo della persona
+   * @param year l'anno
+   * @param month il mese
+   */
+  public static void editPersonMealTickets(Long personId, Integer year, Integer month) {
+    notFoundIfNull(personId);
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
+
+    // riepilogo contratto corrente
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    Optional<MealTicketRecap> currentRecap = mealTicketService
+        .create(wrPerson.getCurrentContract().get());
+    Preconditions.checkState(currentRecap.isPresent());
+    MealTicketRecap recap = currentRecap.get();
+    
+    render(person, recap, year, month);
+  }
+  
+  /**
+   * La pagina di riepilogo dei buoni elettronici consegnati al dipendente.
+   *
+   * @param personId l'identificativo della persona
+   * @param year l'anno
+   * @param month il mese
+   */
+  public static void recapPersonMealTickets(Long personId, Integer year, Integer month) {
+    Person person = personDao.getPersonById(personId);
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    Contract contract = wrPerson.getCurrentContract().get();
+    Preconditions.checkState(contract.isPersistent());
+    Preconditions.checkArgument(contract.getPerson().isPersistent());
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    MealTicketRecap recap;
+    MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
+
+    // riepilogo contratto corrente
+    Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
+    Preconditions.checkState(currentRecap.isPresent());
+    recap = currentRecap.get();
+
+    //riepilogo contratto precedente
+    Contract previousContract = personDao.getPreviousPersonContract(contract);
+    if (previousContract != null) {
+      Optional<MealTicketRecap> previousRecap = mealTicketService.create(previousContract);
+      if (previousRecap.isPresent()) {
+        recapPrevious = previousRecap.get();
+      }
+    }
+    
+    render(person, recap, recapPrevious, year, month);
   }
 }
 

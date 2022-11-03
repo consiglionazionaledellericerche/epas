@@ -21,12 +21,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 
 /**
@@ -118,6 +120,19 @@ public class MealTicketRecap {
         Optional.fromNullable(this.getMealTicketInterval()));
   }
 
+  /**
+   * I buoni pasto elettronici sotto forma di blocchi consegnati del contratto 
+   * (da quelli consegnati per ultimi).
+   *
+   * @return i blocchi.
+   */
+  public List<BlockMealTicket> getElectronicBlockMealTicketReceivedDeliveryDesc() {
+    List<BlockMealTicket> list = getBlockMealTicketReceivedDeliveryDesc().stream()
+        .filter(b -> b.getMealTicketCard() != null && b.getBlockType().equals(BlockType.electronic))
+        .collect(Collectors.toList());
+    
+    return list;
+  }
   /**
    * I blocchi riconsegnati del contratto (da quelli consegnati per ultimi).
    */

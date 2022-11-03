@@ -72,4 +72,9 @@ public class MealTicketCard extends PeriodModel {
   @ManyToOne
   @Required
   private Office deliveryOffice;
+  
+  @Override
+  public String getLabel() {
+    return this.number + "";
+  }
 }

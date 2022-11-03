@@ -84,7 +84,6 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
 
-
   /**
    * Riepilogo buoni pasto dipendente.
    */

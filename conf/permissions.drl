@@ -2280,6 +2280,9 @@ when
         "MealTicketCards.infoCard",
         "MealTicketCards.recapElectronicMealTickets",
         "MealTicketCards.personMealTickets",
+        "MealTicketCards.editPersonMealTickets",
+        "MealTicketCards.recapPersonMealTickets",
+        "MealTicketCards.submitPersonMealTicket",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",
@@ -2321,6 +2324,9 @@ when
         "MealTicketCards.infoCard",
         "MealTicketCards.recapElectronicMealTickets",
         "MealTicketCards.personMealTickets",
+        "MealTicketCards.editPersonMealTickets",
+        "MealTicketCards.recapPersonMealTickets",
+        "MealTicketCards.submitPersonMealTicket",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",

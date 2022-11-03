@@ -48,4 +48,6 @@ public class MealTicketCardDao extends DaoBase {
     return getQueryFactory().selectFrom(mealTicket)
         .where(mealTicket.mealTicketCard.isNotNull().and(mealTicket.mealTicketCard.eq(card))).fetch();
   }
+  
+  
 }
