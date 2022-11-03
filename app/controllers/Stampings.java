@@ -310,6 +310,9 @@ public class Stampings extends Controller {
         && !Security.getUser().get().hasRoles(Role.PERSONNEL_ADMIN)) {
       ownStamping = true;
     }
+    if (stamping.isServiceReasons() && ownStamping) {
+      render("@editServiceReasons", stamping, person, date, historyStamping);
+    }
 
     render(stamping, person, date, historyStamping, ownStamping);
   }
@@ -389,14 +392,14 @@ public class Stampings extends Controller {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person);  
+    notFoundIfNull(person);
   
     //Temporaneo per la validazione
     stamping.setDate(LocalDateTime.now());
     validation.valid(stamping);
 
     if (Validation.hasErrors()) {
-      response.status = 400;     
+      response.status = 400;
       List<StampTypes> offsite = Lists.newArrayList();
       offsite.add(StampTypes.LAVORO_FUORI_SEDE);
       boolean disableInsert = false;
@@ -407,7 +410,7 @@ public class Stampings extends Controller {
           disableInsert = true;
         }
       }
-      render("@insert", stamping, person, date, time, disableInsert, offsite);
+      render("@editOffSite", stamping, person, date, time, disableInsert, offsite);
     }
 
     stamping.setDate(stampingManager.deparseStampingDateTime(date, time));
@@ -443,7 +446,33 @@ public class Stampings extends Controller {
   }
   
 
-  
+  /**
+   * Effettua il salvataggio dei soli campi reason, place e note di una
+   * timbratura per motivi di servizio.
+   */
+  public static void saveServiceReasons(Long stampingId, Stamping stamping) {
+    log.info("Inside saveServiceReasons");
+    notFoundIfNull(stampingId);
+    notFoundIfNull(stamping);
+    val currentStamping = stampingDao.getStampingById(stampingId);
+    notFoundIfNull(currentStamping);
+    currentStamping.setReason(stamping.getReason());
+    currentStamping.setPlace(stamping.getPlace());
+    currentStamping.setNote(stamping.getNote());
+    currentStamping.save();
+    flash.success(Web.msgSaved(Stampings.class));
+    log.info("Modificata timbratura per motivi di servizio {}", currentStamping);
+
+    val currentUser = Security.getUser().get();
+    val person = currentStamping.getPersonDay().getPerson();
+    val date = currentStamping.getDate();
+    if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
+        && currentUser.getPerson().id.equals(person.id)) {
+      stampings(date.getYear(), date.getMonthOfYear());
+    }
+    personStamping(person.id, date.getYear(), date.getMonthOfYear());
+  }
+
   /**
    * Elimina la timbratura.
    *

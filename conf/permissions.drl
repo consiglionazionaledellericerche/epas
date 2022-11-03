@@ -1054,7 +1054,8 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping(markedByTelework == false)
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.delete"),
+ $c: PermissionCheck(action in (
+    "Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.saveServiceReasons", "Stampings.delete"),
   target == $target, granted == false )
 then
  $c.grant();
@@ -1935,6 +1936,7 @@ when
        	"Stampings.editOffSite",
      	"Stampings.save",
      	"Stampings.saveOffSite",
+     	"Stampings.saveServiceReasons",
      	"Stampings.delete",
      	"TimeVariations.addVariation",
      	"TimeVariations.saveVariation",
@@ -2108,8 +2110,10 @@ when
         "Stampings.insertOffsite",
         "Stampings.edit",
         "Stampings.editOffSite",
+        "Stampings.editServiceReasons",
         "Stampings.save",
         "Stampings.saveOffSite",
+        "Stampings.saveServiceReasons",
         "Stampings.delete",
         "TimeVariations.addVariation",
         "TimeVariations.saveVariation",
@@ -2750,6 +2754,8 @@ when
     "Stampings.edit",
     "Stampings.editOffSite",
     "Stampings.saveOffSite",
+    "Stampings.editServiceReasons",
+    "Stampings.saveServiceReasons",
     "Stampings.delete"
   
     ), granted == false, target == null)
@@ -2842,7 +2848,9 @@ when
  	"Stampings.insertOffsite", 
  	"Stampings.edit", 
  	"Stampings.editOffSite", 
- 	"Stampings.saveOffSite"), target == $p, granted == false)
+ 	"Stampings.saveOffSite",
+ 	"Stampings.editServiceReasons",
+ 	"Stampings.saveServiceReasons"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -2862,6 +2870,23 @@ when
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature per uscita di servizio se ...
+ ******************************************************************************/
+rule employeeCanEditStampingsServiceReasons
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ $target: Stamping(isServiceReasons(), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editServiceReasons", "Stampings.saveServiceReasons"), 
+   target == $target, granted == false)
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
 then
  $c.grant();
 end
@@ -3240,7 +3265,6 @@ when
  $p: Person() from currentOperator.person
  $target: Stamping(this.getOwner() == $p && stampType == StampTypes.MOTIVI_DI_SERVIZIO)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
- eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
 then
  $c.grant();
 end

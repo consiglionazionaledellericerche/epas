@@ -140,4 +140,10 @@ public enum StampTypes {
     return this != LAVORO_FUORI_SEDE;
   }
 
+  /**
+   * Controlla se questa causale è motivi di servizio.
+  */
+  public boolean isServiceReasons() {
+    return this == MOTIVI_DI_SERVIZIO;
+  }
 }
