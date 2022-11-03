@@ -305,5 +305,9 @@ public class MealTicketCards extends Controller {
     
     render(person, recap, recapPrevious, year, month);
   }
+  
+  public static void deleteElectronicMealTicketFromCard() {
+    
+  }
 }
 
