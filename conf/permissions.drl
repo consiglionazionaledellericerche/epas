@@ -2283,6 +2283,8 @@ when
         "MealTicketCards.editPersonMealTickets",
         "MealTicketCards.recapPersonMealTickets",
         "MealTicketCards.submitPersonMealTicket",
+        "MealTicketCards.deleteElectronicMealTicketFromCard",
+        "MealTicketCards.performDeletePersonCodeBlock",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",
@@ -2327,6 +2329,8 @@ when
         "MealTicketCards.editPersonMealTickets",
         "MealTicketCards.recapPersonMealTickets",
         "MealTicketCards.submitPersonMealTicket",
+        "MealTicketCards.deleteElectronicMealTicketFromCard",
+        "MealTicketCards.performDeletePersonCodeBlock",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",

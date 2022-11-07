@@ -13,14 +13,14 @@ session.get('monthSelected'), session.get('officeSelected')), (person.fullname):
   
   <!-- Consegnati -->
   #{alert color:'info'}
-  <p>Elenco dei buoni elettronici consegnati a <strong>${recap.contract.person.fullname}</strong>.</p>
+  <p>Elenco dei buoni elettronici consegnati a <strong>${person.fullname}</strong>.</p>
   <p><i class="fa fa-lightbulb-o"></i> Cliccando sui titoli delle colonne è possibile ordinare
     i blocchi consegnati per <em>Codice Blocco</em>, <em>Data Consegna</em> e <em>Data Scadenza</em></p>
   <p><i class="fa fa-info-circle"></i> Per aprire la form di cancellazione dei blocchi cliccare sul tasto <strong>Rimuovi</strong>.</p>
   #{/alert}
   #{if recap.getBlockMealTicketReceivedDeliveryDesc().empty}
   <br>
-  <p class="center">Nessun Blocco consegnato per <strong>${recap.contract.person.fullname}</strong></p>
+  <p class="center">Nessun Blocco consegnato per <strong>${person.fullname}</strong></p>
   #{/if}
   #{else}
   #{mealTickets.showElectronicBlockList blocks:recap.getElectronicBlockMealTicketReceivedDeliveryDesc(), showType:'delivered' /}

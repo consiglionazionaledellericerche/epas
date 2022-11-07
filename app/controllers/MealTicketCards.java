@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
+import dao.ContractDao;
 import dao.MealTicketCardDao;
 import dao.MealTicketDao;
 import dao.OfficeDao;
@@ -27,12 +28,15 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.WrapperPerson;
+import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import javax.inject.Inject;
 import manager.ConsistencyManager;
 import manager.MealTicketCardManager;
+import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
+import manager.services.mealtickets.MealTicketStaticUtility;
 import models.Contract;
 import models.MealTicket;
 import models.MealTicketCard;
@@ -73,6 +77,8 @@ public class MealTicketCards extends Controller {
   private static IMealTicketsService mealTicketService;
   @Inject
   private static IWrapperFactory wrapperFactory;
+  @Inject
+  private static ContractDao contractDao;
 
   /**
    * Ritorna la lista delle persone per verificare le associazioni con le card dei buoni 
@@ -206,7 +212,6 @@ public class MealTicketCards extends Controller {
    *
    * @param cardId l'identificativo della card elettronica
    * @param personId l'identificativo della persona
-   * @param unAssignedElectronicMealTickets la lista dei buoni da assegnare
    */
   public static void assignOrphanElectronicMealTickets(Long cardId, Long personId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao.getMealTicketCardById(cardId);
@@ -306,8 +311,88 @@ public class MealTicketCards extends Controller {
     render(person, recap, recapPrevious, year, month);
   }
   
-  public static void deleteElectronicMealTicketFromCard() {
-    
+  /**
+   * Ritorna la schermata di cancellazione dei buoni.
+   *
+   * @param contractId l'identificativo del contratto
+   * @param codeBlock il codice di blocco 
+   * @param first il primo buono consegnato
+   * @param last l'ultimo buono consegnato
+   */
+  public static void deleteElectronicMealTicketFromCard(Long contractId, 
+      String codeBlock, int first, int last) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+
+    Preconditions.checkState(mealTicketList.size() > 0);
+
+    BlockMealTicket block = MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
+        MealTicketStaticUtility.blockPortion(mealTicketList, contract, first, last),
+        Optional.<DateInterval>absent()).get(0);
+
+    render(contract, codeBlock, block);
+  }
+  
+  /**
+   * Esecuzione comando di eliminazione inserimento blocco alla persona.
+   *
+   * @param contractId contratto di riferimento
+   * @param codeBlock  codice blocco
+   * @param first      dal
+   * @param last       al
+   * @param confirmed  conferma
+   */
+  public static void performDeletePersonCodeBlock(Long contractId, String codeBlock,
+      int first, int last, boolean confirmed) {
+
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
+        Optional.fromNullable(contract));
+
+    Preconditions.checkState(mealTicketList.size() > 0);
+
+    List<MealTicket> mealTicketToRemove = MealTicketStaticUtility
+        .blockPortion(mealTicketList, contract, first, last);
+    LocalDate pastDate = LocalDate.now();
+    for (MealTicket mealTicket : mealTicketList) {
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
+      }
+    }
+
+    List<BlockMealTicket> blocks = MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
+        mealTicketToRemove, Optional.<DateInterval>absent());
+
+    if (!confirmed) {
+      response.status = 400;
+      confirmed = true;
+      render("@deleteElectronicMealTicketFromCard", contract, 
+          codeBlock, blocks, first, last, confirmed);
+    }
+
+    int deleted = 0;
+    for (MealTicket mealTicket : mealTicketToRemove) {
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
+      }
+
+      mealTicket.delete();
+      deleted++;
+    }
+
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
+
+    flash.success("Blocco di %d buoni rimosso correttamente.", deleted);
+    //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
+    editPersonMealTickets(contract.getPerson().id, Integer.parseInt(session.get("yearSelected")), 
+        Integer.parseInt(session.get("monthSelected")));
   }
 }
 
