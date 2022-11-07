@@ -129,6 +129,10 @@ public class MealTicketCards extends Controller {
       Validation.addError("mealTicketCard.number", 
           "Il numero della card deve essere maggiore di zero!!!");
     }
+    if (mealTicketCardDao
+        .getMealTicketCardByNumberAndOffice(mealTicketCard.getNumber(), office).isPresent()) {
+      Validation.addError("mealTicketCard.number", "Il numero di tessera esiste già!!");
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
       person = personDao.getPersonById(person.id);

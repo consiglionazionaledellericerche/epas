@@ -8,19 +8,27 @@
 #{breadcrumbs breadcrumbs, noHome:true, container:true /}
 
 <div class="container">
-
+	
   #{include './_electronicMealTicketsTabs.html' /}
 
- #{alert color:'info'}
-  <p>In questa form è possibile inserire i buoni pasto di tipo <strong>Elettronico</strong>.</p>
-  <p>Occorre selezionare la tessera per i buoni elettronici associata al dipendente e su quella caricare la quantità di
-  	buoni pasto che si intende inserire.
-  </p>
-  <p>Nel caso si volesse inserire per questo mese un blocchetto cartaceo, trovate la possibilità di farlo a questo link:
-  <a href="@{MealTickets.personMealTickets(recap.contract.id, year, month)}">
+  #{if card == null}
+  	#{alert color:'danger'}
+  	<p>Il dipendente ${person.fullName()} non ha ancora associata alcuna tessera per buoni pasto elettronici.
+  	   Per assegnarla cliccare <a href="@{MealTicketCards.mealTicketCards(person.office.id)}">
+	  	    	qui</a></p>
+  	#{/alert}
+  #{/if}
+  #{else}
+  #{alert color:'info'}
+   <p>In questa form è possibile inserire i buoni pasto di tipo <strong>Elettronico</strong>.</p>
+   <p>Occorre selezionare la tessera per i buoni elettronici associata al dipendente e su quella caricare la quantità di
+  	 buoni pasto che si intende inserire.
+   </p>
+   <p>Nel caso si volesse inserire per questo mese un blocchetto cartaceo, trovate la possibilità di farlo a questo link:
+   <a href="@{MealTickets.personMealTickets(recap.contract.id, year, month)}">
 	  	    	<i class="fa fa-plus" aria-hidden="true">Nuovo blocchetto cartaceo</i></a>
-  </p>
-  #{/alert}
+   </p>
+   #{/alert}
 
 	<div id="insertMeal">
     #{form @MealTicketCards.submitPersonMealTicket(), class:'form-horizontal',
@@ -79,10 +87,8 @@
       #{/list}
     </table>
     #{/else}
-    #{/alert}
-    
+    #{/alert}    
     
   	</div>
-
-
+    #{/else}
 </div>

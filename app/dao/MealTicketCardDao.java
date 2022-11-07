@@ -25,9 +25,16 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import models.MealTicket;
 import models.MealTicketCard;
+import models.Office;
 import models.query.QMealTicket;
 import models.query.QMealTicketCard;
 
+/**
+ * Dao per le info sulle tessere elettroniche.
+ *
+ * @author dario
+ *
+ */
 public class MealTicketCardDao extends DaoBase {
 
   @Inject
@@ -35,6 +42,12 @@ public class MealTicketCardDao extends DaoBase {
     super(queryFactory, emp);
   }
   
+  /**
+   * Ritorna se esiste la card associata all'id passato come parametro.
+   *
+   * @param id l'identificativo della card
+   * @return l'opzionale contenente o meno la card con id passato come parametro.
+   */
   public Optional<MealTicketCard> getMealTicketCardById(Long id) {
     final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
     
@@ -42,11 +55,34 @@ public class MealTicketCardDao extends DaoBase {
         .where(mealTicketCard.id.eq(id)).fetchFirst());
   }
   
+  /**
+   * Ritorna la lista dei buoni associati alla card passata come parametro.
+   *
+   * @param card la tessera elettronica di cui controllare i buoni associati
+   * @return la lista dei buoni associati alla tessera passata come parametro.
+   */
   public List<MealTicket> getMealTicketByCard(MealTicketCard card) {
     final QMealTicket mealTicket = QMealTicket.mealTicket;
     
     return getQueryFactory().selectFrom(mealTicket)
-        .where(mealTicket.mealTicketCard.isNotNull().and(mealTicket.mealTicketCard.eq(card))).fetch();
+        .where(mealTicket.mealTicketCard.isNotNull()
+            .and(mealTicket.mealTicketCard.eq(card))).fetch();
+  }
+  
+  /**
+   * Ritorna l'opzionale contenente o meno la card associata al numero passato come parametro.
+   *
+   * @param number il numero di card da ricercare
+   * @return l'opzionale contenente o meno la card associata al numero passato come parametro.
+   */
+  public Optional<MealTicketCard> getMealTicketCardByNumberAndOffice(int number, Office office) {
+    final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
+    
+    return Optional.ofNullable(getQueryFactory()
+        .selectFrom(mealTicketCard)
+            .where(mealTicketCard.number.eq(number)
+                .and(mealTicketCard.person.office.eq(office))
+                .and(mealTicketCard.isActive.eq(true))).fetchFirst());
   }
   
   
