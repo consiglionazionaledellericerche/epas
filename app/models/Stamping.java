@@ -161,7 +161,16 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public boolean isOffSiteWork() {
     return stampType != null && stampType.isOffSiteWork();
   }
-  
+
+  /**
+   * Verifica se è motivi di servizio.
+   *
+   * @return @see StampTypes::isServiceReasons
+   */
+  @Transient
+  public boolean isServiceReasons() {
+    return stampType != null && stampType.isServiceReasons();
+  }
   /**
    * costruttore di default implicitamente utilizzato dal play(controllers).
    */
