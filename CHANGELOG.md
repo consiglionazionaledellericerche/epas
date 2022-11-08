@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
  - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
 
+### Changed
+ - Corretta associazione contratto precedente per i contratti continuativi
+ 
+>>>>>>> CHANGELOG.md
 ## [2.6.1] - 2022-10-13
 ### Added
  - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio
