@@ -1093,7 +1093,7 @@ public class Administration extends Controller {
     } else {
       flash.error("Non ci sono contratti da correggere");
     }
-    redirect("@Administration.contractsToFix");
+    redirect("Administration.contractsToFix");
   }
 
   public static void contractsToFix() {
