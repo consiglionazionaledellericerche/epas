@@ -361,12 +361,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_20,
       DefaultComplation.C_20, null, false, false),
   
-  G_21P("21P - Congedo parentale per il padre da definire....",
+  G_21P("21P - Congedo paternità",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_21P, null, null,
       false, true),
   
-  G_21P2("21P2 - Congedo parentale per il padre da definire....",
+  G_21P2("21P2 - Congedo paternità gemelli",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_21P2, null, null,
       false, true),

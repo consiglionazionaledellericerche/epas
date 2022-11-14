@@ -1314,6 +1314,9 @@ SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione 
 SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di gruppo
 
+FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli I-III da parte del responsabile amministrativo
+FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli IV-VIII da parte del responsabile amministrativo
+
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
 configurationDto.validityBegin=Validità Inizio
