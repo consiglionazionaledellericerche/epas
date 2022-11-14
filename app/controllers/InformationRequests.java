@@ -110,6 +110,9 @@ public class InformationRequests extends Controller {
     list(InformationType.SERVICE_INFORMATION);
   }
 
+  public static void parentalLeave() {
+    list(InformationType.PARENTAL_LEAVE_INFORMATION);
+  }
   public static void teleworksToApprove() {
     listToApprove(InformationType.TELEWORK_INFORMATION);
   }
@@ -120,6 +123,10 @@ public class InformationRequests extends Controller {
 
   public static void serviceExitToApprove() {
     listToApprove(InformationType.SERVICE_INFORMATION);
+  }
+  
+  public static void parentalLeaveToApprove() {
+    listToApprove(InformationType.PARENTAL_LEAVE_INFORMATION);
   }
 
   /**
