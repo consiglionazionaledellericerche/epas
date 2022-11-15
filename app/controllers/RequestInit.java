@@ -193,7 +193,7 @@ public class RequestInit extends Controller {
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
     
     BlockType type = (BlockType) configurationManager
-        .configValue(officeDao.getOfficeById(officeId), EpasParam.MEAL_TICKET_BLOCK_TYPE);
+        .configValue(officeDao.getOfficeById(officeId), EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
     if (type.equals(BlockType.electronic)) {
       renderArgs.put("electronicMealTicket", true);
     }

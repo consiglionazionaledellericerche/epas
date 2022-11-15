@@ -125,9 +125,9 @@ public class MealTicketCards extends Controller {
     if (mealTicketCard.getDeliveryDate() == null) {
       Validation.addError("mealTicketCard.deliveryDate", "La data deve essere valorizzata!!!");
     }
-    if (mealTicketCard.getNumber() < 1) {
+    if (mealTicketCard.getNumber() == null || mealTicketCard.getNumber().isEmpty()) {
       Validation.addError("mealTicketCard.number", 
-          "Il numero della card deve essere maggiore di zero!!!");
+          "Il numero della card deve essere valorizzato!!!");
     }
     if (mealTicketCardDao
         .getMealTicketCardByNumberAndOffice(mealTicketCard.getNumber(), office).isPresent()) {

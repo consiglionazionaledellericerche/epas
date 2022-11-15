@@ -543,6 +543,8 @@ mealTicketCard.number =Numero tessera
 mealTicketCard.deliveryDate =Data di rilascio
 mealTicketCard.deliveryOffice =Sede rilasciante
 
+tickets=Numero buoni
+
 ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione
@@ -551,6 +553,9 @@ forbidden= Operazione non permessa
 
 block.first=Dal
 block.last=Al
+
+first = Dal
+last= Al
 
 MOD= Modifica
 

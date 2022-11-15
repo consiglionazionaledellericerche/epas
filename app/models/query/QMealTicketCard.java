@@ -46,7 +46,7 @@ public class QMealTicketCard extends EntityPathBase<MealTicketCard> {
 
     public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
-    public final NumberPath<Integer> number = createNumber("number", Integer.class);
+    public final StringPath number = createString("number");
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

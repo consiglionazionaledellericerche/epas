@@ -2285,6 +2285,7 @@ when
         "MealTicketCards.submitPersonMealTicket",
         "MealTicketCards.deleteElectronicMealTicketFromCard",
         "MealTicketCards.performDeletePersonCodeBlock",
+        "MealTicketCards.assignOrphanElectronicMealTickets",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",
@@ -2331,6 +2332,7 @@ when
         "MealTicketCards.submitPersonMealTicket",
         "MealTicketCards.deleteElectronicMealTicketFromCard",
         "MealTicketCards.performDeletePersonCodeBlock",
+        "MealTicketCards.assignOrphanElectronicMealTickets",
 
         "rest.v3.MealTickets.list",
         "rest.v3.MealTickets.show",

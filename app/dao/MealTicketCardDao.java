@@ -75,7 +75,7 @@ public class MealTicketCardDao extends DaoBase {
    * @param number il numero di card da ricercare
    * @return l'opzionale contenente o meno la card associata al numero passato come parametro.
    */
-  public Optional<MealTicketCard> getMealTicketCardByNumberAndOffice(int number, Office office) {
+  public Optional<MealTicketCard> getMealTicketCardByNumberAndOffice(String number, Office office) {
     final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
     
     return Optional.ofNullable(getQueryFactory()

@@ -18,8 +18,8 @@
 		  #{f.simpleView 'person', value:contract.person /} 
 		  *{ #{f.hidden 'confirmed', value:confirmed /} }*
 		  #{f.simpleView 'codeBlock', hidden:'true' /}
-		  #{f.input 'first', label:'block.first', value:block.first /}
-		  #{f.input 'last', label:'block.last', value:block.last /}
+		  #{f.input 'first', value:block.first /}
+		  #{f.input 'last', value:block.last /}
 		  <div class="container-fluid center">
 		    <input class="btn btn-danger" type="submit" value="Elimina"/>
 		  </div>

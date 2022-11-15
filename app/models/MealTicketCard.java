@@ -50,7 +50,7 @@ import play.data.validation.Required;
 @Table(name = "meal_ticket_card")
 public class MealTicketCard extends PeriodModel {
   
-  private int number;
+  private String number;
 
   @ManyToOne
   @Required
