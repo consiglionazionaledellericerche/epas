@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.2] - UNRELEASED
+## [2.6.2] - 2022-11-10
 ### Added
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
  - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
    REST /rest/v2/certifications/getMonthSituation
  - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
+ - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
 
 ## [2.6.1] - 2022-10-13
 ### Added
