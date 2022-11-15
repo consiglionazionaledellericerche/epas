@@ -67,7 +67,7 @@ public class MealTicketCardManager {
     mealTicketCard.setEndDate(null);
     mealTicketCard.save();
     log.info("Aggiunta nuova tessera con identificativo {} a {}", 
-        mealTicketCard.getNumber(), person.getFullname());
+        ""+mealTicketCard.getNumber(), person.getFullname());
   }
   
   /**

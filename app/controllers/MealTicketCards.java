@@ -125,6 +125,11 @@ public class MealTicketCards extends Controller {
     if (mealTicketCard.getDeliveryDate() == null) {
       Validation.addError("mealTicketCard.deliveryDate", "La data deve essere valorizzata!!!");
     }
+    if (mealTicketCardDao.getMealTicketCardByDeliveryDate(mealTicketCard
+        .getDeliveryDate()).isPresent()) {
+      Validation.addError("mealTicketCard.deliveryDate", 
+          "Esiste già una card con questa data di consegna!!");
+    }
     if (mealTicketCard.getNumber() == null || mealTicketCard.getNumber().isEmpty()) {
       Validation.addError("mealTicketCard.number", 
           "Il numero della card deve essere valorizzato!!!");
@@ -156,8 +161,15 @@ public class MealTicketCards extends Controller {
     java.util.Optional<MealTicketCard> mealTicketCard = mealTicketCardDao
         .getMealTicketCardById(mealTicketCardId);
     if (mealTicketCard.isPresent()) {
-      mealTicketCard.get().delete();
-      flash.success("Tessera correttamente rimossa");      
+      if (!mealTicketCard.get().getMealTickets().isEmpty()) {
+        flash.error("La tessera presenta %s buoni elettronici associati. "
+            + "Rimuoverli prima di eliminarla!", 
+            mealTicketCard.get().getMealTickets().size());
+      } else {
+        mealTicketCard.get().delete();
+        flash.success("Tessera correttamente rimossa"); 
+      }      
+           
     } else {
       flash.error("Nessuna tessera corrispondente all'id selezionato. Verificare.");
     }

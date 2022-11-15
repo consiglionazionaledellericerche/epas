@@ -20,6 +20,7 @@ package dao;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
@@ -83,6 +84,18 @@ public class MealTicketCardDao extends DaoBase {
             .where(mealTicketCard.number.eq(number)
                 .and(mealTicketCard.person.office.eq(office))
                 .and(mealTicketCard.isActive.eq(true))).fetchFirst());
+  }
+  
+  /**
+   * Ritorna se esiste la card con data di consegna uguale a quella passata come parametro.
+   * @param deliveryDate la data di consegna della card
+   * @return se esiste la card con data di consegna uguale a quella passata come parametro.
+   */
+  public Optional<MealTicketCard> getMealTicketCardByDeliveryDate(LocalDate deliveryDate) {
+    final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
+    return Optional.ofNullable(getQueryFactory()
+        .selectFrom(mealTicketCard)
+        .where(mealTicketCard.deliveryDate.eq(deliveryDate)).fetchFirst());
   }
   
   

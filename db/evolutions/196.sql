@@ -28,7 +28,7 @@ ALTER TABLE meal_ticket_history ADD COLUMN meal_ticket_card_id BIGINT;
 ALTER TABLE meal_ticket ADD FOREIGN KEY (meal_ticket_card_id) REFERENCES meal_ticket_card(id);
 
 CREATE INDEX meal_ticket_card_person_id_idx ON meal_ticket_card(person_id);
-CREATE INDEX meal_ticket_card_delivery_office_idx ON meal_ticket_card(delivery_office);
+CREATE INDEX meal_ticket_card_delivery_office_idx ON meal_ticket_card(delivery_office_id);
 CREATE INDEX meal_ticket_card_delivery_date_idx ON meal_ticket_card(delivery_date);
 
 CREATE INDEX meal_ticket_meal_ticket_card_id_idx ON meal_ticket(meal_ticket_card_id);

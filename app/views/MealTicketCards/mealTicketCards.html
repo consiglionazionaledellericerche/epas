@@ -23,7 +23,7 @@
 	  	    <td>
 	  	    #{if person.actualMealTicketCard() != null} 
 	  	    	<h4>
-	  	    	<a class="label label-success label-badge" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera">
+	  	    	<a class="label label-success label-badge" href="@{infoCard(person.actualMealTicketCard().id)}" data-async-modal="#defaultModal" webui-popover-hover data-content="Visualizza tessera">
 	  	    	${person.actualMealTicketCard().number}</a>
 	  	    	</h4>
 	  	    #{/if}
@@ -35,11 +35,14 @@
 	  	    <td><a href="@{MealTicketCards.addNewCard(person.id)}" data-async-modal="#defaultModal">
 	  	    	<i class="fa fa-plus" aria-hidden="true">Nuova tessera</i></a></td>
 	  	    <td>
-	  	    <ul>
+	  	    <ul class="list-group">
 	  	    #{list items:person.getMealTicketCards(), as:'card'}
-	  	    	<li>
-    				<a class="badge" href="@{infoCard(card.id)}" data-async-modal="#defaultModal" webui-popover-hover data-content="Info tessera">
-    				${card.number}</a>    				
+	  	    	<li class="list-group-item clearfix">
+	  	    	<span class="label label-default"> ${card.number} </span>
+    				
+    				<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
+               		<i class="fa fa-trash"></i> Rimuovi
+             		</a>   				
   				</li>
 	  	    #{/list}
 	  	    </ul>
