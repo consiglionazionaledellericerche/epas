@@ -91,7 +91,8 @@ public class InformationRequestDao extends DaoBase {
         .and(informationRequest.flowEnded.isFalse()));
 
     List<InformationRequest> results = new ArrayList<>();
-    if (informationType.equals(InformationType.ILLNESS_INFORMATION)
+    if ((informationType.equals(InformationType.ILLNESS_INFORMATION) 
+        || informationType.equals(InformationType.PARENTAL_LEAVE_INFORMATION))
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       results.addAll(toApproveResultsAsPersonnelAdmin(uroList,
           informationType, signer, conditions));

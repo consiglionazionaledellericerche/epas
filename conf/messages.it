@@ -1013,9 +1013,11 @@ AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno pa
 InformationRequests.illness =Mie richieste per malattia
 InformationRequests.teleworks =Mie richieste per telelavoro
 InformationRequests.serviceExit =Mie richieste uscite di servizio
+InformationRequests.parentalLeave =Mie richieste di congedo parentale per padre
 InformationRequests.illnessToApprove =Flussi di richieste per malattia
 InformationRequests.teleworksToApprove =Flussi di richieste per telelavoro
 InformationRequests.serviceExitToApprove =Flussi di richieste uscite di servizio
+InformationRequests.parentalLeaveToApprove =Flussi di richieste congedo parentale per padre
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
