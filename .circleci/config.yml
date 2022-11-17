@@ -10,7 +10,7 @@ jobs:
           name: Compile SPHINX
           command: |
             apt update
-            apt install tex-gyre
+            apt install -y tex-gyre
             pip install -r requirements.txt
             make html
             make epub
