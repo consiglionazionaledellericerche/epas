@@ -92,11 +92,14 @@ CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibi
 InformationType.TELEWORK_INFORMATIONS =Flussi per Telelavoro
 InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
 InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
+InformationType.PARENTAL_LEAVE_INFORMATIONS =Flussi per comunicazione congedo parentale padre
 InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+InformationType.PARENTAL_LEAVE_INFORMATION.blank =Nuovo flusso informativo per congedo parentale del padre
 InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
 InformationType.ILLNESS_INFORMATION =Informazione di malattia
 InformationType.TELEWORK_INFORMATION =Richiesta presa visione di telelavoro
+InformationType.PARENTAL_LEAVE_INFORMATION =Informazione congedo parentale per il padre
 InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
 InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
 InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
@@ -129,6 +132,10 @@ serviceRequest.reason =Motivazione
 illnessRequest.beginDate =Giorno iniziale
 illnessRequest.endDate =Giorno finale
 illnessRequest.name =Note sull'assenza
+parentalLeaveRequest.beginDate =Giorno Iniziale
+parentalLeaveRequest.endDate =Giorno finale
+parentalLeaveRequest.bornCertificate =Certificato di nascita
+parentalLeaveRequest.expectedDateOfBirth =Documento di data presunta parto
 
 
 type =Servizio di reperibilità

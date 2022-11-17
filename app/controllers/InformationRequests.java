@@ -58,6 +58,7 @@ import models.dto.TeleworkApprovalDto;
 import models.enumerate.InformationType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.joda.time.YearMonth;
@@ -113,6 +114,7 @@ public class InformationRequests extends Controller {
   public static void parentalLeave() {
     list(InformationType.PARENTAL_LEAVE_INFORMATION);
   }
+  
   public static void teleworksToApprove() {
     listToApprove(InformationType.TELEWORK_INFORMATION);
   }
@@ -155,6 +157,8 @@ public class InformationRequests extends Controller {
     List<ServiceRequest> servicesClosed = Lists.newArrayList();
     List<IllnessRequest> illness = Lists.newArrayList();
     List<IllnessRequest> illnessClosed = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeaves = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeavesClosed = Lists.newArrayList();
     switch (type) {
       case TELEWORK_INFORMATION:
         teleworks = informationRequestDao.teleworksByPersonAndDate(person, fromDate,
@@ -174,12 +178,18 @@ public class InformationRequests extends Controller {
         servicesClosed = informationRequestDao.servicesByPersonAndDate(person, fromDate,
             Optional.absent(), InformationType.SERVICE_INFORMATION, false);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaves = informationRequestDao.parentalLeaveByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.PARENTAL_LEAVE_INFORMATION, true);
+        parentalLeavesClosed = informationRequestDao.parentalLeaveByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.PARENTAL_LEAVE_INFORMATION, false);
+        break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
     }
     render(teleworks, services, illness, teleworksClosed,
-        illnessClosed, servicesClosed, config, type);
+        illnessClosed, servicesClosed, config, type, parentalLeaves, parentalLeavesClosed);
   }
 
   /**
@@ -268,6 +278,7 @@ public class InformationRequests extends Controller {
     }
     ServiceRequest serviceRequest = new ServiceRequest();
     IllnessRequest illnessRequest = new IllnessRequest();
+    ParentalLeaveRequest parentalLeaveRequest = new ParentalLeaveRequest();
     switch (type) {
       case SERVICE_INFORMATION:
         serviceRequest.setPerson(person);
@@ -278,6 +289,11 @@ public class InformationRequests extends Controller {
         illnessRequest.setPerson(person);
         illnessRequest.setInformationType(type);
         render("@editIllnessRequest", illnessRequest, type, person);
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest.setPerson(person);
+        parentalLeaveRequest.setInformationType(type);
+        render("@editParentalLeaveRequest", parentalLeaveRequest, type, person);
         break;
       default:
         break;
@@ -346,7 +362,8 @@ public class InformationRequests extends Controller {
         approval(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(serviceRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(serviceRequest.getPerson().getUser(),
             serviceRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(serviceRequest.getPerson().getUser(),
@@ -394,7 +411,8 @@ public class InformationRequests extends Controller {
         approval(illnessRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(illnessRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(illnessRequest.getPerson().getUser(),
             illnessRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(illnessRequest.getPerson().getUser(),
@@ -404,6 +422,23 @@ public class InformationRequests extends Controller {
     }
     flash.success("Operazione effettuata correttamente");
     InformationRequests.list(illnessRequest.getInformationType());
+  }
+  
+  /**
+   * 
+   * @param parentalLeaveRequest
+   */
+  public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest) {
+    InformationType type = parentalLeaveRequest.getInformationType();
+    if (parentalLeaveRequest.getBeginDate() == null || parentalLeaveRequest.getEndDate() == null) {
+      Validation.addError("parentalLeaveRequest.beginDate",
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("parentalLeaveRequest.endDate",
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+
+      render("@editParentalLeaveRequest", parentalLeaveRequest, type);
+    }
   }
 
   /**

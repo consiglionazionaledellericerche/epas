@@ -783,6 +783,7 @@ when
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.parentalLeave",
 
 		
 		
@@ -2072,7 +2073,8 @@ when
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
         "InformationRequests.generateTeleworkReport",
-        "InformationRequests.serviceExitToApprove"
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.parentalLeaveToApprove"		
 
         ), target == null, granted == false)
 then
@@ -2248,7 +2250,8 @@ when
 //        "InformationRequests.disapproval",
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
-        "InformationRequests.generateTeleworkReport"
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.parentalLeaveToApprove"
 
        ), target == $o, granted == false)
 then
@@ -3391,7 +3394,7 @@ end
  when 
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null) from currentOperator.person
-  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION))
+  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION, InformationType.PARENTAL_LEAVE_INFORMATION))
   $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
  then
   $c.grant();

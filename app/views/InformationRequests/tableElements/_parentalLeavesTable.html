@@ -7,9 +7,10 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'informationRequest.person'}</th>
 			#{/if}
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Il</th>
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dalle</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>alle</th>		
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Dal</th>
+		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Al</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Certificato nascita</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Documento presunta nascita</th>		
 			
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
@@ -27,15 +28,16 @@
 	</thead>
 
 	<tbody>
-		#{list items:services, as:'item'}
+		#{list items:parentalLeaves, as:'item'}
 			<tr>
 				<td>#{f.value 'item.startAt', value:item.startAt /}</td>
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
-				<td>${item.day.format()}</td>	
-				<td>#{f.value 'item.beginAt', value:item.beginAt.format() /}</td>	    
-				<td>#{f.value 'item.finishTo', value:item.finishTo.format() /}</td>
+				<td>#{f.value 'item.beginDate', value:item.beginDate.format() /}</td>	    
+				<td>#{f.value 'item.endDate', value:item.endDate.format() /}</td>	
+				<td>#{f.value 'item.bornCertificate', value:item.bornCertificate }</td>
+				<td>#{f.value 'item.expectedDateOfBirth', value:item.expectedDateOfBirth }</td>
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
