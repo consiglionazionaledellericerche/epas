@@ -344,18 +344,18 @@ public class InformationRequests extends Controller {
       render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
     informationRequestManager.configure(Optional.absent(),
-        Optional.of(serviceRequest), Optional.absent());
+        Optional.of(serviceRequest), Optional.absent(), Optional.absent());
     serviceRequest.setStartAt(LocalDateTime.now());
     serviceRequest.save();
 
     boolean isNewRequest = !serviceRequest.isPersistent();
     if (isNewRequest || !serviceRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-          Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
+          Optional.absent(), Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (serviceRequest.autoApproved()) {
         informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-            Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
+            Optional.absent(), Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
             InformationRequestEventType.COMPLETE, Optional.absent());
       }
       if (serviceRequest.getPerson().isSeatSupervisor()) {
@@ -399,13 +399,14 @@ public class InformationRequests extends Controller {
       render("@editIllnessRequest", illnessRequest, type);
     }
     informationRequestManager.configure(Optional.of(illnessRequest),
-        Optional.absent(), Optional.absent());
+        Optional.absent(), Optional.absent(), Optional.absent());
     illnessRequest.setStartAt(LocalDateTime.now());
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();
     if (isNewRequest || !illnessRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(),
-          Optional.fromNullable(illnessRequest), Optional.absent(), illnessRequest.getPerson(),
+          Optional.fromNullable(illnessRequest), Optional.absent(), Optional.absent(),
+          illnessRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (illnessRequest.getPerson().isSeatSupervisor()) {
         approval(illnessRequest.id);
@@ -425,8 +426,9 @@ public class InformationRequests extends Controller {
   }
   
   /**
-   * 
-   * @param parentalLeaveRequest
+   * Persiste la richiesta e avvia il flusso informativo.
+   *
+   * @param parentalLeaveRequest la richiesta di flusso per congedo parentale per il padre
    */
   public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest) {
     InformationType type = parentalLeaveRequest.getInformationType();
@@ -439,6 +441,39 @@ public class InformationRequests extends Controller {
 
       render("@editParentalLeaveRequest", parentalLeaveRequest, type);
     }
+    if (parentalLeaveRequest.getBeginDate().isAfter(parentalLeaveRequest.getEndDate())) {
+      Validation.addError("parentalLeaveRequest.beginDate",
+          "La data di inizio non può essere successiva alla data di fine");
+      response.status = 400;
+      render("@editParentalLeaveRequest", parentalLeaveRequest, type);
+    }
+    informationRequestManager.configure(Optional.absent(),
+        Optional.absent(), Optional.absent(), Optional.of(parentalLeaveRequest));
+    parentalLeaveRequest.setStartAt(LocalDateTime.now());
+    parentalLeaveRequest.save();
+    boolean isNewRequest = !parentalLeaveRequest.isPersistent();
+    if (isNewRequest || !parentalLeaveRequest.isFlowStarted()) {
+      informationRequestManager.executeEvent(Optional.absent(),
+          Optional.absent(), Optional.absent(), 
+          Optional.fromNullable(parentalLeaveRequest),
+          parentalLeaveRequest.getPerson(),
+          InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (parentalLeaveRequest.getPerson().isSeatSupervisor()) {
+        approval(parentalLeaveRequest.id);
+      } else {
+        // invio la notifica al primo che deve validare la mia richiesta
+        notificationManager
+            .notificationInformationRequestPolicy(parentalLeaveRequest.getPerson().getUser(),
+                parentalLeaveRequest, true);
+        // invio anche la mail
+        notificationManager
+            .sendEmailInformationRequestPolicy(parentalLeaveRequest.getPerson().getUser(),
+            parentalLeaveRequest, true);
+        log.debug("Inviata la richiesta di approvazione");
+      }
+    }
+    flash.success("Operazione effettuata correttamente");
+    InformationRequests.list(parentalLeaveRequest.getInformationType());
   }
 
   /**
@@ -464,7 +499,7 @@ public class InformationRequests extends Controller {
       teleworkRequest.setInformationType(InformationType.TELEWORK_INFORMATION);
       teleworkRequest.save();
       informationRequestManager.configure(Optional.absent(), Optional.absent(),
-          Optional.of(teleworkRequest));
+          Optional.of(teleworkRequest), Optional.absent());
     } else {
       teleworkRequest = teleworkRequestInPeriod.get();
     }
@@ -472,13 +507,14 @@ public class InformationRequests extends Controller {
 
     if (isNewRequest || !teleworkRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
-          Optional.fromNullable(teleworkRequest), teleworkRequest.getPerson(),
+          Optional.fromNullable(teleworkRequest), Optional.absent(), teleworkRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (teleworkRequest.getPerson().isSeatSupervisor()) {
         approval(teleworkRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
             teleworkRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
@@ -634,6 +670,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = Optional.fromNullable(informationRequestDao.getServiceById(id).get());
@@ -644,11 +681,15 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = Optional.fromNullable(informationRequestDao.getTeleworkById(id).get());
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = Optional.fromNullable(informationRequestDao
+            .getParentalLeaveById(id).get());
+        break;
       default:
         break;
     }
     informationRequestManager.executeEvent(serviceRequest, illnessRequest,
-        teleworkRequest, Security.getUser().get().getPerson(),
+        teleworkRequest, parentalLeaveRequest, Security.getUser().get().getPerson(),
         InformationRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(InformationRequest.class));
     list(informationRequest.getInformationType());
@@ -698,7 +739,8 @@ public class InformationRequests extends Controller {
     PersonLite p = null;
     Person person = personDao.getPersonById(personId);
     if (person.getPersonConfigurations().stream().noneMatch(pc ->
-        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) && pc.getFieldValue().equals("true"))) {
+        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) 
+        && pc.getFieldValue().equals("true"))) {
       @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {

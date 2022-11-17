@@ -301,6 +301,22 @@ public class InformationRequestDao extends DaoBase {
     return Optional.fromNullable(result);
 
   }
+  
+  /**
+   * Cerca e ritorna la richiesta di congedo parentale per padre (se esiste) con id uguale 
+   * a quello passato.
+   *
+   * @param id l'identificativo della richiesta di congedo parentale per il padre
+   * @return la richiesta di congedo parentale per il padre (se esiste) con id uguale a 
+   *     quello passato
+   */
+  public Optional<ParentalLeaveRequest> getParentalLeaveById(Long id) {
+    final QParentalLeaveRequest parentalLeaveRequest = QParentalLeaveRequest.parentalLeaveRequest;
+    
+    final ParentalLeaveRequest result = getQueryFactory()
+        .selectFrom(parentalLeaveRequest).where(parentalLeaveRequest.id.eq(id)).fetchFirst();
+    return Optional.fromNullable(result);
+  }
 
   /**
    * La lista delle richieste di malattia appartenenti alla lista di id passati come parametro.
