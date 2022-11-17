@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,11 +922,11 @@
           
           
   <section id="consultazione-situazione-ferie-e-permessi-dei-dipendenti-via-rest">
-<h1><span class="section-number">8.11. </span>Consultazione situazione ferie e permessi dei dipendenti via REST<a class="headerlink" href="#consultazione-situazione-ferie-e-permessi-dei-dipendenti-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.11. </span>Consultazione situazione ferie e permessi dei dipendenti via REST<a class="headerlink" href="#consultazione-situazione-ferie-e-permessi-dei-dipendenti-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione della situazione
 delle ferie residue e maturate dei dipendenti di una sede.</p>
 <section id="permessi">
-<h2><span class="section-number">8.11.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.11.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di <em>Lettore Informazioni</em> oppure di <em>Gestore Assenze</em> per la sede su cui si vuole effettuare le operazioni.
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di <em>amministratore tecnico</em>.</p>
@@ -940,7 +942,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="situazione-ferie-e-permessi-residui-e-maturati-di-un-dipendente-in-un-anno">
-<h2><span class="section-number">8.11.2. </span>Situazione ferie e permessi, residui e maturati di un dipendente in un anno<a class="headerlink" href="#situazione-ferie-e-permessi-residui-e-maturati-di-un-dipendente-in-un-anno" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.11.2. </span>Situazione ferie e permessi, residui e maturati di un dipendente in un anno<a class="headerlink" href="#situazione-ferie-e-permessi-residui-e-maturati-di-un-dipendente-in-un-anno" title="Permalink to this heading">¶</a></h2>
 <p>Le informazioni relative al assenze di un singolo dipendente in uno spefico intervallo temporatale
 anno sono disponibili tramite una HTTP GET all'indirizzo
 <strong>/rest/v3/vacations/byPersonAndYear</strong>.</p>
@@ -956,54 +958,54 @@ cambiatelo con un utente appropriato per la vostra sede.</p>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-     <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;endContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-        <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-        <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-        <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4284</span><span class="p">,</span>
-        <span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-           <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-           <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-        <span class="p">},</span>
-        <span class="nt">&quot;previousContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-        <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;currentYear&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="nt">&quot;accrued&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-         <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-         <span class="nt">&quot;usable&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-         <span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-         <span class="nt">&quot;used&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-         <span class="nt">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2021</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-18&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;lastYear&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="nt">&quot;accrued&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-         <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
-         <span class="nt">&quot;usable&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-         <span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-         <span class="nt">&quot;used&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-         <span class="nt">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2020</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="nt">&quot;accrued&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-         <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-         <span class="nt">&quot;usable&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-         <span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-         <span class="nt">&quot;used&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-         <span class="nt">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2021</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;year&quot;</span><span class="p">:</span> <span class="mi">2021</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;contract&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;endContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4284</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;previousContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;currentYear&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;accrued&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usable&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2021</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-18&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;lastYear&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;accrued&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usable&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;accrued&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usable&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;usableTotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2021</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2021</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>La lista restituita contiene tutti i contratti della persona selezionata nell'anno richiesto.
@@ -1287,9 +1289,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,9 +922,9 @@
           
           
   <section id="startup-dell-applicazione">
-<h1><span class="section-number">9.1. </span>Startup dell'applicazione<a class="headerlink" href="#startup-dell-applicazione" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">9.1. </span>Startup dell'applicazione<a class="headerlink" href="#startup-dell-applicazione" title="Permalink to this heading">¶</a></h1>
 <section id="per-avviare-una-istanza-di-epas-con-postgres-locale">
-<h2><span class="section-number">9.1.1. </span>Per avviare una istanza di ePAS con postgres locale<a class="headerlink" href="#per-avviare-una-istanza-di-epas-con-postgres-locale" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.1.1. </span>Per avviare una istanza di ePAS con postgres locale<a class="headerlink" href="#per-avviare-una-istanza-di-epas-con-postgres-locale" title="Permalink to this heading">¶</a></h2>
 <p>ePAS può essere facilmente installato via docker-compose su server Linux utilizzando il file
 docker-compose.yml presente in questo repository.</p>
 <p>Accertati di aver installato docker e docker-compose dove vuoi installare ePAS ed in seguito
@@ -933,7 +935,7 @@ esegui il comando successivo per un setup di esempio.</p>
 <p>Collegarsi a <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> username: <em>admin</em> password <em>cambialaosarailicenziato</em> (da cambiare il prima possibile).</p>
 </section>
 <section id="avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm">
-<h2><span class="section-number">9.1.2. </span>Avviare ePAS in alta affidabilità in un cluster docker swarm<a class="headerlink" href="#avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.1.2. </span>Avviare ePAS in alta affidabilità in un cluster docker swarm<a class="headerlink" href="#avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm" title="Permalink to this heading">¶</a></h2>
 <p>Un esempio di installazione di ePAS tramite <em>Ansible</em> in un cluster <em>Docker Swarm</em>
 è disponibile, grazie ad Andrea Dell'Amico (ISTI - CNR), all'indirizzo:
 <a class="reference external" href="https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git">https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git</a></p>
@@ -943,14 +945,14 @@ esegui il comando successivo per un setup di esempio.</p>
 opzionale ed è eventualmente da personalizzare) e l'SMTP (anche questo da personalizzare).</p>
 </section>
 <section id="configurazione-funzionalita-di-epas">
-<h2><span class="section-number">9.1.3. </span>Configurazione funzionalità di ePAS<a class="headerlink" href="#configurazione-funzionalita-di-epas" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.1.3. </span>Configurazione funzionalità di ePAS<a class="headerlink" href="#configurazione-funzionalita-di-epas" title="Permalink to this heading">¶</a></h2>
 <p>Le funzionalità principali di ePAS possono essere configurate tramite le variabili
 d'ambiente presenti nel <a class="reference external" href="https://github.com/consiglionazionaledellericerche/epas/blob/main/docker-compose.yml">docker-compose.yml</a> presente nel repo github.
 La configurazione delle possibili modalità di autenticazione e la configurazione dei log
 sono descritte nei paragrafi successivi.</p>
 </section>
 <section id="configurazione-application-secret">
-<h2><span class="section-number">9.1.4. </span>Configurazione Application Secret<a class="headerlink" href="#configurazione-application-secret" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.1.4. </span>Configurazione Application Secret<a class="headerlink" href="#configurazione-application-secret" title="Permalink to this heading">¶</a></h2>
 <p><strong>N.B.</strong>
 Si raccomanda di modificare la varibile d'ambiente <strong>APPLICATION_SECRET</strong> per impostare
 una propria chiave univoca utilizzata nel funzioni di cifratura.
@@ -1236,9 +1238,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

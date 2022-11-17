@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,7 +922,7 @@
           
           
   <section id="consultazione-e-gestione-dei-badge-dei-dipendenti-via-rest">
-<h1><span class="section-number">8.14. </span>Consultazione e Gestione dei badge dei dipendenti via REST<a class="headerlink" href="#consultazione-e-gestione-dei-badge-dei-dipendenti-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.14. </span>Consultazione e Gestione dei badge dei dipendenti via REST<a class="headerlink" href="#consultazione-e-gestione-dei-badge-dei-dipendenti-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione e gestione dei badge
 che comprende i metodi per la visualizzazione, la creazione, la modifica e la cancellazione dei
 badge.
@@ -930,7 +932,7 @@ Le informazioni relative alle sorgenti timbrature ed ai gruppi badge della propr
 fondamentali quando si va a creare un nuovo badge, per questo motivo nell'interfaccia REST
 sono state inserite le funzionalità per mostrare i BagdeReader e BagdeSystem.</p>
 <section id="permessi">
-<h2><span class="section-number">8.14.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di <em>Gestore badge</em> per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
 utilizzato per la gestione delle persone e dei gruppi).</p>
@@ -941,7 +943,7 @@ ruolo <em>Gestore Badge</em>.</p>
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="badgereader-byoffice">
-<h2><span class="section-number">8.14.2. </span>BadgeReader byOffice<a class="headerlink" href="#badgereader-byoffice" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.2. </span>BadgeReader byOffice<a class="headerlink" href="#badgereader-byoffice" title="Permalink to this heading">¶</a></h2>
 <p>La lista delle sorgenti timbrature (BadgeReader) di una sede è fruibile tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
 <dl class="simple">
@@ -955,57 +957,57 @@ all'indirizzo <strong>/rest/v3/badgeReaders/byOffice</strong>.</p>
     <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-   <span class="p">{</span>
-      <span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-           <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-           <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-           <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
-             <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044000&quot;</span><span class="p">,</span>
-             <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223400&quot;</span><span class="p">,</span>
-             <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-             <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span>
-             <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
-           <span class="p">}</span>
-        <span class="p">}</span>
-     <span class="p">],</span>
-     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
-     <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-     <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-     <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
-   <span class="p">},</span>
-   <span class="p">{</span>
-     <span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span> <span class="p">[</span>
-       <span class="p">{</span>
-         <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-         <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-         <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Cosenza&quot;</span><span class="p">,</span>
-         <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
-           <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044001&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223410&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-           <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - UOS Cosenza&quot;</span><span class="p">,</span>
-           <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
-         <span class="p">}</span>
-       <span class="p">}</span>
-     <span class="p">],</span>
-     <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;cosenza-xxx-yyy&quot;</span><span class="p">,</span>
-     <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-     <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-      <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Sede di Cosenza&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;cosenza-xxx-yyy&quot;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;044000&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;codeId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;223400&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span><span class="w"></span>
+<span class="w">           </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="p">],</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">       </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Badge IIT Cosenza&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;044001&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;codeId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;223410&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IIT - UOS Cosenza&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span><span class="w"></span>
+<span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="w">       </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="p">],</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cosenza-xxx-yyy&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sede di Cosenza&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cosenza-xxx-yyy&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="badgereader-show">
-<h2><span class="section-number">8.14.3. </span>BadgeReader show<a class="headerlink" href="#badgereader-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.3. </span>BadgeReader show<a class="headerlink" href="#badgereader-show" title="Permalink to this heading">¶</a></h2>
 <p>Per ogni BadgeReader è possibile avere le informazioni ad esso collegate tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badgeReaders/show</strong>.</p>
 <p>Per individuare il BadgeReader è necessario utilizzare il suo <strong>id</strong>.</p>
@@ -1013,68 +1015,68 @@ all'indirizzo <strong>/rest/v3/badgeReaders/show</strong>.</p>
     GET https://epas-demo.devel.iit.cnr.it/rest/v3/badgeReaders/show <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span> <span class="p">[</span>
-      <span class="p">{</span>
-          <span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span> <span class="p">[</span>
-              <span class="p">{</span>
-                  <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
-                  <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-                  <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                  <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
-              <span class="p">}</span>
-          <span class="p">],</span>
-          <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044000&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223400&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
-          <span class="p">}</span>
-      <span class="p">}</span>
-  <span class="p">],</span>
-  <span class="nt">&quot;badges&quot;</span><span class="p">:</span> <span class="p">[</span>
-      <span class="p">{</span>
-          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;1234111&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">99</span><span class="p">,</span>
-          <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galileo@cnr.it&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Gallilei Gallileo&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-              <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-          <span class="p">}</span>
-      <span class="p">},</span>
-      <span class="p">{</span>
-          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;1235111&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">140</span><span class="p">,</span>
-          <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;FBCLNR74P10G702B&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
-              <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9801&quot;</span>
-          <span class="p">}</span>
-      <span class="p">}],</span>
-    <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-    <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;badgeSystems&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">              </span><span class="p">{</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="w"></span>
+<span class="w">              </span><span class="p">}</span><span class="w"></span>
+<span class="w">          </span><span class="p">],</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;044000&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;codeId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;223400&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;badges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234111&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">99</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galileo@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gallilei Gallileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1235111&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FBCLNR74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9801&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Area della Ricerca di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="w"></span>
 
-<span class="p">}</span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="badgesystem-byoffice">
-<h2><span class="section-number">8.14.4. </span>BadgeSystem byOffice<a class="headerlink" href="#badgesystem-byoffice" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.4. </span>BadgeSystem byOffice<a class="headerlink" href="#badgesystem-byoffice" title="Permalink to this heading">¶</a></h2>
 <p>La lista dei gruppi badge (BadgeSystem) di una sede è fruibile tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badgeSystems/byOffice</strong>.</p>
 <dl class="simple">
@@ -1088,34 +1090,34 @@ all'indirizzo <strong>/rest/v3/badgeSystems/byOffice</strong>.</p>
     <span class="nv">id</span><span class="o">==</span><span class="m">1</span>
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-      <span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span> <span class="p">[</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;pisa-xxx-yyy&quot;</span>
-          <span class="p">}</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Gruppo Badge sede di Pisa&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;044000&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;codeId&quot;</span><span class="p">:</span> <span class="s2">&quot;223400&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-          <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;badgeReaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pisa-xxx-yyy&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo Badge sede di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Badge IIT Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;044000&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;codeId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;223400&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IIT - Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08T09:00:50.648975&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="badgesystem-show">
-<h2><span class="section-number">8.14.5. </span>BadgeSystem show<a class="headerlink" href="#badgesystem-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.5. </span>BadgeSystem show<a class="headerlink" href="#badgesystem-show" title="Permalink to this heading">¶</a></h2>
 <p>Per ogni BadgeSystem è possibile avere le informazioni ad esso collegate tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badgesystems/show</strong>.</p>
 <p>Per individuare il BadgeSystem è necessario utilizzare il suo <strong>id</strong>.</p>
@@ -1125,7 +1127,7 @@ all'indirizzo <strong>/rest/v3/badgesystems/show</strong>.</p>
 </div>
 </section>
 <section id="badge-byoffice">
-<h2><span class="section-number">8.14.6. </span>Badge byOffice<a class="headerlink" href="#badge-byoffice" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.6. </span>Badge byOffice<a class="headerlink" href="#badge-byoffice" title="Permalink to this heading">¶</a></h2>
 <p>La lista di tutti i badge associati ad una sede (cioè quelli associati a tutti gruppi badge della sede)
 è possibile ottenerla una HTTP GET all'indirizzo <strong>/rest/v3/badges/byOffice</strong>.</p>
 <dl class="simple">
@@ -1140,7 +1142,7 @@ all'indirizzo <strong>/rest/v3/badgesystems/show</strong>.</p>
 </div>
 </section>
 <section id="badge-bybadgesystem">
-<h2><span class="section-number">8.14.7. </span>Badge byBadgeSystem<a class="headerlink" href="#badge-bybadgesystem" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.7. </span>Badge byBadgeSystem<a class="headerlink" href="#badge-bybadgesystem" title="Permalink to this heading">¶</a></h2>
 <p>La lista di tutti i badge associati ad un gruppo è possibile ottenerla una HTTP GET all'indirizzo <strong>/rest/v3/badges/byBadgeSystem</strong>.</p>
 <p>Per individuare il BadgeSystem è necessario utilizzare il suo <strong>id</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_badge_manager
@@ -1149,7 +1151,7 @@ all'indirizzo <strong>/rest/v3/badgesystems/show</strong>.</p>
 </div>
 </section>
 <section id="id1">
-<h2><span class="section-number">8.14.8. </span>Badge byBadgeSystem<a class="headerlink" href="#id1" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.8. </span>Badge byBadgeSystem<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p>La lista di tutti i badge associati ad una persone è possibile ottenerla una HTTP GET
 all'indirizzo <strong>/rest/v3/badges/byPerson</strong>.</p>
 <p>Per individuare la persona da aggiornare si utilizzano gli stessi parametri previsti per la show:</p>
@@ -1162,27 +1164,27 @@ all'indirizzo <strong>/rest/v3/badges/byPerson</strong>.</p>
     GET https://epas-demo.devel.iit.cnr.it/rest/v3/badges/byPerson <span class="nv">eppn</span><span class="o">==</span>galileo.galilei@cnr.it
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-      <span class="nt">&quot;badgeReaderId&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;badgeSystemId&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">161</span><span class="p">,</span>
-      <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-          <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-      <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;badgeReaderId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;badgeSystemId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">161</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="badge-show">
-<h2><span class="section-number">8.14.9. </span>Badge show<a class="headerlink" href="#badge-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.9. </span>Badge show<a class="headerlink" href="#badge-show" title="Permalink to this heading">¶</a></h2>
 <p>Per ogni Badge è possibile avere le informazioni ad esso collegate tramite una HTTP GET
 all'indirizzo <strong>/rest/v3/badges/show</strong>.</p>
 <p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong>.</p>
@@ -1192,7 +1194,7 @@ all'indirizzo <strong>/rest/v3/badges/show</strong>.</p>
 </div>
 </section>
 <section id="badge-create">
-<h2><span class="section-number">8.14.10. </span>Badge create<a class="headerlink" href="#badge-create" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.10. </span>Badge create<a class="headerlink" href="#badge-create" title="Permalink to this heading">¶</a></h2>
 <p>La creazione di un badge è possibile tramite una <em>HTTP POST</em> all'indirizzo
 <strong>/rest/v2/badges/create</strong> passando un json contenente i quattro campi obbligatori per la creazione di un badge:</p>
 <blockquote>
@@ -1207,7 +1209,7 @@ all'indirizzo <strong>/rest/v3/badges/show</strong>.</p>
 </div>
 </section>
 <section id="badge-update">
-<h2><span class="section-number">8.14.11. </span>Badge Update<a class="headerlink" href="#badge-update" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.11. </span>Badge Update<a class="headerlink" href="#badge-update" title="Permalink to this heading">¶</a></h2>
 <p>L'aggiornamento di un badge è possibile tramite una <em>HTTP PUT</em> ad un indirizzo del tipo
 <strong>/rest/v2/badges/update?id={id_badge_da_aggiornare}</strong>.</p>
 <p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong> e passarlo come parametro nell'url, non nel JSON.</p>
@@ -1221,7 +1223,7 @@ e re-inserirlo con i dati corretti.</p>
 </div>
 </section>
 <section id="badge-delete">
-<h2><span class="section-number">8.14.12. </span>Badge Delete<a class="headerlink" href="#badge-delete" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.14.12. </span>Badge Delete<a class="headerlink" href="#badge-delete" title="Permalink to this heading">¶</a></h2>
 <p>La cancellazione di un badge è possibile tramite una <em>HTTP DELETE</em> all'indirizzo
 <strong>/rest/v2/persons/delete</strong>.</p>
 <p>Per individuare il Badge è necessario utilizzare il suo <strong>id</strong> e passarlo come parametro nell'url, non nel JSON.</p>
@@ -1507,9 +1509,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

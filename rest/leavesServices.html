@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,11 +922,11 @@
           
           
   <section id="consultazione-periodi-di-aspettativa-dei-dipendenti-via-rest">
-<h1><span class="section-number">8.5. </span>Consultazione Periodi di Aspettativa dei dipendenti via REST<a class="headerlink" href="#consultazione-periodi-di-aspettativa-dei-dipendenti-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.5. </span>Consultazione Periodi di Aspettativa dei dipendenti via REST<a class="headerlink" href="#consultazione-periodi-di-aspettativa-dei-dipendenti-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione dei periodi di
 aspettativa del personale di una sede.</p>
 <section id="permessi">
-<h2><span class="section-number">8.5.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.5.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di <em>Lettore Informazioni</em> per la sede su cui si vuole effettuare le operazioni.
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di <em>amministratore tecnico</em>.</p>
@@ -935,7 +937,7 @@ ruolo <em>Lettore informazioni</em>.</p>
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="aspettative-per-persona-e-anno-bypersonandyear">
-<h2><span class="section-number">8.5.2. </span>Aspettative per persona e anno (byPersonAndYear)<a class="headerlink" href="#aspettative-per-persona-e-anno-bypersonandyear" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.5.2. </span>Aspettative per persona e anno (byPersonAndYear)<a class="headerlink" href="#aspettative-per-persona-e-anno-bypersonandyear" title="Permalink to this heading">¶</a></h2>
 <p>Le informazioni relative alle aspettative di un singolo dipendente in uno spefico anno sono
 disponibili tramite una HTTP GET all'indirizzo <strong>/rest/v2/leaves/byPersonAndYear</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
@@ -949,21 +951,21 @@ cambiatelo con un utente appropriato per la vostra sede.</p>
 </div>
 <p>Il JSON restituto contiene una lista con le eventuali aspettative del dipendente per
 l'anno selezionato</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&quot;person&quot;</span><span class="p">:</span>
-      <span class="p">{</span>
-        <span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">9999</span><span class="p">,</span>
-        <span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span>
-        <span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-      <span class="p">},</span>
-    <span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-06-02&quot;</span><span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">9999</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-06-02&quot;</span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Per avere anche la lista delle assenze associate al periodo di aspettativa utilizzare nella chiamata
@@ -971,7 +973,7 @@ REST il parametro <em>includeDetails=true</em>, nel JSON di risposta sarà popol
 aspettativa il campo <em>absences</em> con la lista delle assenze nel periodo.</p>
 </section>
 <section id="aspettative-per-ufficio-e-anno-byofficeandyear">
-<h2><span class="section-number">8.5.3. </span>Aspettative per ufficio e anno (byOfficeAndYear)<a class="headerlink" href="#aspettative-per-ufficio-e-anno-byofficeandyear" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.5.3. </span>Aspettative per ufficio e anno (byOfficeAndYear)<a class="headerlink" href="#aspettative-per-ufficio-e-anno-byofficeandyear" title="Permalink to this heading">¶</a></h2>
 <p>Analogamente ai metodi precedenti è possibile avere le informazioni annuali di tutte le aspettative
 dei dipendenti di una sede tramite una HTTP GET all'indirizzo <strong>/rest/v2/leaves/byOfficeAndYear</strong>.</p>
 <p>La sede è individuata tramite il parametro <em>codeId</em>, per esempio per l'IIT corrisponde a <em>223400</em>.
@@ -983,36 +985,36 @@ Negli esempio successivi sostituite <em>223400</em> con il <em>codeId</em> della
 </div>
 <p>Il JSON restituto contiene una lista con le eventuali aspettative di tutti i dipendenti della
 sede per l'anno selezionato.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-    <span class="nt">&quot;person&quot;</span><span class="p">:</span>
-      <span class="p">{</span>
-        <span class="nt">&quot;id&quot;</span> <span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-        <span class="nt">&quot;fullname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;fiscalCode&quot;</span> <span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;email&quot;</span> <span class="p">:</span> <span class="nt">&quot;galileo.galilei@cnr.it&quot;</span>
-        <span class="nt">&quot;number&quot;</span> <span class="p">:</span> <span class="s2">&quot;9802&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;eppn&quot;</span> <span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span>
-      <span class="p">},</span>
-    <span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-06-02&quot;</span>
-  <span class="p">},</span>
-  <span class="p">{</span>
-    <span class="nt">&quot;person&quot;</span><span class="p">:</span>
-      <span class="p">{</span>
-        <span class="nt">&quot;id&quot;</span> <span class="p">:</span> <span class="mi">1235</span><span class="p">,</span>
-        <span class="nt">&quot;fullname&quot;</span> <span class="p">:</span> <span class="s2">&quot;Leonardo Fibonacci&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;fiscalCode&quot;</span> <span class="p">:</span> <span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;email&quot;</span> <span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="s2">&quot;9801&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
-      <span class="p">},</span>
-    <span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-03-06&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-09-23&quot;</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fullname&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fiscalCode&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;galileo.galilei@cnr.it&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;number&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;eppn&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-06-02&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1235</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fullname&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Leonardo Fibonacci&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;fiscalCode&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="s2">&quot;9801&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="s2">&quot;54A17&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="s2">&quot;2020-03-06&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="s2">&quot;2020-09-23&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Anche in questo caso per avere anche la lista delle assenze associate al periodo di aspettativa
@@ -1297,9 +1299,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

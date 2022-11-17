@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,12 +922,12 @@
           
           
   <section id="consultazione-e-gestione-contratti-dei-dipendenti-via-rest">
-<h1><span class="section-number">8.3. </span>Consultazione e Gestione Contratti dei dipendenti via REST<a class="headerlink" href="#consultazione-e-gestione-contratti-dei-dipendenti-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.3. </span>Consultazione e Gestione Contratti dei dipendenti via REST<a class="headerlink" href="#consultazione-e-gestione-contratti-dei-dipendenti-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione e gestione dei contratti
 che comprende i metodi per la visualizzazione, la creazione, la modifica, la cancellazione e
 l'impostazione della continuità dei contratti.</p>
 <section id="permessi">
-<h2><span class="section-number">8.3.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di <em>Gestore anagrafica</em> per la sede su cui si vuole effettuare le operazioni (lo stesso ruolo
 utilizzato per la gestione delle persone e dei gruppi).</p>
@@ -941,7 +943,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="contract-byperson">
-<h2><span class="section-number">8.3.2. </span>Contract byPerson<a class="headerlink" href="#contract-byperson" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.2. </span>Contract byPerson<a class="headerlink" href="#contract-byperson" title="Permalink to this heading">¶</a></h2>
 <p>La lista dei contratti di una persona è fruibile tramite una HTTP GET all'indirizzo
 <strong>/rest/v2/contracts/byPerson</strong>.</p>
 <p>La persona può essere individuata passando i soliti parametri identificativi delle persone:
@@ -951,31 +953,31 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
     <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-   <span class="p">{</span>
-      <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;endContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4284</span><span class="p">,</span>
-      <span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-      <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-         <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-         <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-         <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-         <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-         <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-         <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;previousContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
-   <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;endContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4284</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;previousContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="contract-show">
-<h2><span class="section-number">8.3.3. </span>Contract Show<a class="headerlink" href="#contract-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.3. </span>Contract Show<a class="headerlink" href="#contract-show" title="Permalink to this heading">¶</a></h2>
 <p>La visualizzazione dei dati di un contratto è possibile tramite una HTTP GET all'indirizzo
 <strong>/rest/v2/contracts/show</strong>.</p>
 <p>Per individuare il contratto è possibile utilizzare solo il campo <em>id</em>.</p>
@@ -984,39 +986,39 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
     <span class="nv">id</span><span class="o">==</span><span class="m">4284</span>
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-   <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;endContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4284</span><span class="p">,</span>
-   <span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-   <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-       <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4222</span><span class="p">,</span>
-       <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-   <span class="p">},</span>
-   <span class="nt">&quot;previousContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span> <span class="p">[</span>
-         <span class="p">{</span>
-            <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-            <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-            <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">680</span><span class="p">,</span>
-            <span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span> <span class="p">{</span>
-               <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Normale&quot;</span><span class="p">,</span>
-               <span class="nt">&quot;disabled&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-               <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-               <span class="nt">&quot;horizontal&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-               <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-               <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="kc">null</span>
-            <span class="p">}</span>
-         <span class="p">}</span>
-      <span class="p">],</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4284</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;previousContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">680</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Normale&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;horizontal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>La stessa GET può essere effettuata passando l'id del contratto nel modo seguente:</p>
@@ -1026,7 +1028,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 </div>
 </section>
 <section id="contract-update">
-<h2><span class="section-number">8.3.4. </span>Contract Update<a class="headerlink" href="#contract-update" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.4. </span>Contract Update<a class="headerlink" href="#contract-update" title="Permalink to this heading">¶</a></h2>
 <p>La modifica di un contratto è possibile tramite una HTTP PUT all'indirizzo
 <strong>/rest/v2/contracts/update</strong>.</p>
 <p>Per individuare il contratto è possibile utilizzare solo il campo <em>id</em>.</p>
@@ -1036,44 +1038,44 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-   <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;endContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-10-20&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4284</span><span class="p">,</span>
-   <span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-   <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-       <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4222</span><span class="p">,</span>
-       <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-   <span class="p">},</span>
-   <span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span> <span class="p">[</span>
-      <span class="p">{</span>
-          <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">680</span><span class="p">,</span>
-          <span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Normale&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;disabled&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;horizontal&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="kc">null</span>
-          <span class="p">}</span>
-      <span class="p">}</span>
-   <span class="p">]</span>
-   <span class="nt">&quot;previousContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-20&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4284</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-12-27&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">680</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Normale&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;horizontal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="p">]</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;previousContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="contract-create">
-<h2><span class="section-number">8.3.5. </span>Contract Create<a class="headerlink" href="#contract-create" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.5. </span>Contract Create<a class="headerlink" href="#contract-create" title="Permalink to this heading">¶</a></h2>
 <p>La creazione di un contratto è possibile tramite una HTTP POST all'indirizzo
 <strong>/rest/v2/contracts/create</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
@@ -1082,38 +1084,38 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-   <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-10-21&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;endContract&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-   <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4678</span><span class="p">,</span>
-   <span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-   <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-       <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-       <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4222</span><span class="p">,</span>
-       <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-   <span class="p">},</span>
-   <span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span> <span class="p">[</span>
-      <span class="p">{</span>
-          <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-10-21&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">681</span><span class="p">,</span>
-          <span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Normale&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;disabled&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;horizontal&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="kc">null</span>
-          <span class="p">}</span>
-      <span class="p">}</span>
-   <span class="p">]</span>
-  <span class="nt">&quot;previousContract&quot;</span><span class="p">:</span> <span class="kc">null</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-21&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4678</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;onCertificate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4222</span><span class="p">,</span><span class="w"></span>
+<span class="w">       </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;workingTimeTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-21&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">681</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Normale&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;horizontal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;previousContract&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Le uniche cosa da notare sono la necessità di indicare obbligatoriamente il campo <em>personId</em>
@@ -1127,7 +1129,7 @@ lavoro &quot;<em>Normale</em>&quot;, quello con 7:12 giornalieri.</p>
 si intersechino con quelle di altri contratti già esistenti.</p>
 </section>
 <section id="continuazione-di-due-contratti-consecutivi">
-<h2><span class="section-number">8.3.6. </span>Continuazione di due contratti consecutivi<a class="headerlink" href="#continuazione-di-due-contratti-consecutivi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.6. </span>Continuazione di due contratti consecutivi<a class="headerlink" href="#continuazione-di-due-contratti-consecutivi" title="Permalink to this heading">¶</a></h2>
 <p>È possibile impostare che un contratto è continuativo rispetto al precedente e che qundi ne erediti
 le ferie non godute precedenti.
 Questa funzionalità è da utilizzare per esempio per alcune stabilizzazioni dove il dipendente
@@ -1150,7 +1152,7 @@ utilizzare con un HTTP PUT i metodi:</p>
 </div>
 </section>
 <section id="contract-delete">
-<h2><span class="section-number">8.3.7. </span>Contract Delete<a class="headerlink" href="#contract-delete" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.7. </span>Contract Delete<a class="headerlink" href="#contract-delete" title="Permalink to this heading">¶</a></h2>
 <p>La cancellazione di un contratto è possibile tramite una HTTP DELETE all'indirizzo
 <strong>/rest/v2/contract/delete</strong>.</p>
 <p>Per individuare il contratto da eliminare si utilizza il parametro <em>id</em> del contratto.</p>
@@ -1160,7 +1162,7 @@ utilizzare con un HTTP PUT i metodi:</p>
 </div>
 </section>
 <section id="contractworkingtimetype-show">
-<h2><span class="section-number">8.3.8. </span>ContractWorkingTimeType Show<a class="headerlink" href="#contractworkingtimetype-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.8. </span>ContractWorkingTimeType Show<a class="headerlink" href="#contractworkingtimetype-show" title="Permalink to this heading">¶</a></h2>
 <p>La visualizzazione dell'associazione tra un contratto ed una tipologia di orario di lavoro è
 possibile tramite una <em>HTTP GET</em> all'indirizzo
 <strong>/rest/v2/contractworkingtimetypes/show</strong>.</p>
@@ -1172,27 +1174,27 @@ campo <em>id</em>.</p>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;beginDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-04-02&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;endDate&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">681</span><span class="p">,</span>
-  <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-08T11:49:00.100485&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Normale&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;disabled&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;externalId&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;horizontal&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="nt">&quot;office&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-      <span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-01-15T17:55:05.972315&quot;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-04-02&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">681</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-03-08T11:49:00.100485&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;workingTimeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Normale&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;horizontal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;office&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.972315&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="contractworkingtimetype-updateexternalid">
-<h2><span class="section-number">8.3.9. </span>ContractWorkingTimeType updateExternalId<a class="headerlink" href="#contractworkingtimetype-updateexternalid" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.3.9. </span>ContractWorkingTimeType updateExternalId<a class="headerlink" href="#contractworkingtimetype-updateexternalid" title="Permalink to this heading">¶</a></h2>
 <p>Riguardo all'associazione tra contratto e tipologia di orario di lavoro via REST è possibile
 cambiare solo il campo externalId di questa assocazione.
 Per cambiare il campo externalId è possibile utilizzare una <em>HTTP PUT</em> all'endpoint
@@ -1480,9 +1482,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

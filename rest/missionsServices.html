@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,7 +922,7 @@
           
           
   <section id="inserimento-ordini-e-rimborsi-di-missione-rest">
-<h1><span class="section-number">8.13. </span>Inserimento ordini e rimborsi di missione REST<a class="headerlink" href="#inserimento-ordini-e-rimborsi-di-missione-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.13. </span>Inserimento ordini e rimborsi di missione REST<a class="headerlink" href="#inserimento-ordini-e-rimborsi-di-missione-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST utilizzata per l'inserimento via REST delle missioni
 da parte di un applicazione esterna che gestisce in autonomia le missioni e comunica ad ePAS gli
 ordini di missioni, i rimborsi di missione e gli eventuali annullamenti di un ordine di missione.</p>
@@ -934,7 +936,7 @@ inseriti dalla piattaforma <em>Missioni</em> all'interno di un topic <em>AMQP</e
 lette dal topic <em>AMQP</em> da parte di un componente aggiuntivo che si occupa di leggere dalla coda ed
 inviare le informazione via REST ad ePAS tramite questo endpoint REST.</p>
 <section id="permessi">
-<h2><span class="section-number">8.13.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.13.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è possibile utilizzare un utente di sistema con ruolo
 di sistema <strong>Gestore Missioni</strong>.
 Questo utente sarà utiizzato per l'integrazione con sistemi esterni di gestione delle missioni
@@ -944,7 +946,7 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="inserimento-ordine-rimborso-annullamento-missione">
-<h2><span class="section-number">8.13.2. </span>Inserimento ordine/rimborso/annullamento missione<a class="headerlink" href="#inserimento-ordine-rimborso-annullamento-missione" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.13.2. </span>Inserimento ordine/rimborso/annullamento missione<a class="headerlink" href="#inserimento-ordine-rimborso-annullamento-missione" title="Permalink to this heading">¶</a></h2>
 <p>Per effettuare l'inserimento di un ordine/rimborso/annullamento missione effettuare una <em>HTTP POST</em>
 all'endpoint <strong>/rest/missions/amqpreceiver</strong>.</p>
 <p>La <em>POST</em> deve contenere nel body un json con i campi della dell'ordine/rimborso/annullamento.</p>
@@ -972,23 +974,23 @@ dell'ordine di missione a cui si riferisce questo rimborso/annullamento.</p></li
 </ul>
 </div></blockquote>
 <p>Un esempio dei campi JSON per un <em>ordine di missione</em> sono i seguenti:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;dest_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ITALIA&quot;</span><span class="p">,</span> <span class="nt">&quot;tipo_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ORDINE&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;codice_sede&quot;</span><span class="p">:</span><span class="s2">&quot;222300&quot;</span><span class="p">,</span> <span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">30064974</span><span class="p">,</span> <span class="nt">&quot;matricola&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;data_inizio&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T08:00:56.698+0200&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;data_fine&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T18:00:56.699+0200&quot;</span><span class="p">,</span>
-   <span class="nt">&quot;id_ordine&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span> <span class="nt">&quot;anno&quot;</span><span class="p">:</span><span class="mi">2019</span><span class="p">,</span> <span class="nt">&quot;numero&quot;</span><span class="p">:</span><span class="mi">396</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dest_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ITALIA&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;tipo_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ORDINE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;codice_sede&quot;</span><span class="p">:</span><span class="s2">&quot;222300&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">30064974</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;matricola&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;data_inizio&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T08:00:56.698+0200&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;data_fine&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T18:00:56.699+0200&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;id_ordine&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;anno&quot;</span><span class="p">:</span><span class="mi">2019</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;numero&quot;</span><span class="p">:</span><span class="mi">396</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Un esempio dei campi JSON per un <em>rimborso di missione</em> sono i seguenti:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;dest_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ITALIA&quot;</span><span class="p">,</span> <span class="nt">&quot;tipo_missione&quot;</span><span class="p">:</span><span class="s2">&quot;RIMBORSO&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;codice_sede&quot;</span><span class="p">:</span><span class="s2">&quot;222300&quot;</span><span class="p">,</span> <span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">46512</span><span class="p">,</span> <span class="nt">&quot;matricola&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;data_inizio&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T08:00:56.698+0200&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;data_fine&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T18:00:56.699+0200&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;id_ordine&quot;</span><span class="p">:</span><span class="mi">30064974</span><span class="p">,</span> <span class="nt">&quot;anno&quot;</span><span class="p">:</span><span class="mi">2019</span><span class="p">,</span> <span class="nt">&quot;numero&quot;</span><span class="p">:</span><span class="mi">396</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dest_missione&quot;</span><span class="p">:</span><span class="s2">&quot;ITALIA&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;tipo_missione&quot;</span><span class="p">:</span><span class="s2">&quot;RIMBORSO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;codice_sede&quot;</span><span class="p">:</span><span class="s2">&quot;222300&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">46512</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;matricola&quot;</span><span class="p">:</span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;data_inizio&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T08:00:56.698+0200&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;data_fine&quot;</span><span class="p">:</span><span class="s2">&quot;2021-04-16T18:00:56.699+0200&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id_ordine&quot;</span><span class="p">:</span><span class="mi">30064974</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;anno&quot;</span><span class="p">:</span><span class="mi">2019</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;numero&quot;</span><span class="p">:</span><span class="mi">396</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Durante l'inserimento dell'ordine/rimborso di missione se il sistema trova che esiste già
@@ -1278,9 +1280,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

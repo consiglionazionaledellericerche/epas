@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,7 +922,7 @@
           
           
   <section id="gestione-delle-timbrature-via-rest">
-<h1><span class="section-number">8.10. </span>Gestione delle timbrature via REST<a class="headerlink" href="#gestione-delle-timbrature-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.10. </span>Gestione delle timbrature via REST<a class="headerlink" href="#gestione-delle-timbrature-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alle operazioni sulle timbrature dei
 dipendenti di una sede.
 Ogni sede potrà utilizzare l'API, accedendo con un utente apposito opportunamente configurato, ai
@@ -934,7 +936,7 @@ se possibile, è consigliato utilizzare uno degli ePAS client opensource disponi
 </ul>
 </div></blockquote>
 <section id="permessi">
-<h2><span class="section-number">8.10.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a questa interfaccia REST è necessario utilizzare le credenziali associate
 ad una <strong>Sorgente Timbratura</strong> della propria sede. Eventualmente verificare nella documentazione
 di ePAS come creare le Sorgenti Timbrature.</p>
@@ -943,7 +945,7 @@ utente associato alla vostra sede, con uno username tipo <em>client_timbrature_s
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="inserimento-di-una-timbratura-versione-utilizzata-dagli-epas-client">
-<h2><span class="section-number">8.10.2. </span>Inserimento di una timbratura (versione utilizzata dagli epas-client)<a class="headerlink" href="#inserimento-di-una-timbratura-versione-utilizzata-dagli-epas-client" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.2. </span>Inserimento di una timbratura (versione utilizzata dagli epas-client)<a class="headerlink" href="#inserimento-di-una-timbratura-versione-utilizzata-dagli-epas-client" title="Permalink to this heading">¶</a></h2>
 <p>Per effettuare l'inserimento di una timbratura è necessario effettuare una <em>HTTP POST</em> all'endpoint
 <strong>/stampingsfromclient/create</strong>. La <em>POST</em> deve contenere nel body un json con i campi della
 timbratura che sono:</p>
@@ -978,7 +980,7 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 </div></blockquote>
 </section>
 <section id="stamping-create">
-<h2><span class="section-number">8.10.3. </span>Stamping Create<a class="headerlink" href="#stamping-create" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.3. </span>Stamping Create<a class="headerlink" href="#stamping-create" title="Permalink to this heading">¶</a></h2>
 <p>Dalla versione 3 dell'API è presente un nuovo metodo per l'inserimento di una timbratura.
 La nuova versione è utilizzabile con una <em>HTTP POST</em> all'endpoint
 <strong>/rest/v3/stampings/create</strong>.</p>
@@ -1015,32 +1017,32 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 </div></blockquote>
 <p>Se l'inserimento va a buon fine (con codice HTTP <em>200</em>) il metodo restituisce anche le informazioni
 della timbratura inserita.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-12T08:20:00&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398946</span><span class="p">,</span>
-  <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nt">&quot;markedByTelework&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="s2">&quot;Note eccezionali veramente&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-      <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-  <span class="p">},</span>
-  <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;stampingZone&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;in&quot;</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-12T08:20:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398946</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;markedByTelework&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Note eccezionali veramente&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;stampingZone&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="stamping-show">
-<h2><span class="section-number">8.10.4. </span>Stamping Show<a class="headerlink" href="#stamping-show" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.4. </span>Stamping Show<a class="headerlink" href="#stamping-show" title="Permalink to this heading">¶</a></h2>
 <p>La visualizzazione dei dati di una timbratura è tramite una <em>HTTP</em> GET all'indirizzo
 <strong>/rest/v3/stampings/show</strong>.</p>
 <p>Per individuare la timbratura è possibile utilizzare solo il campo <strong>id</strong>.</p>
@@ -1052,7 +1054,7 @@ della timbratura inserita.</p>
 di una timbratura</p>
 </section>
 <section id="stamping-update">
-<h2><span class="section-number">8.10.5. </span>Stamping Update<a class="headerlink" href="#stamping-update" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.5. </span>Stamping Update<a class="headerlink" href="#stamping-update" title="Permalink to this heading">¶</a></h2>
 <p>La modifica di la timbratura è possibile tramite una <em>HTTP PUT</em> all'indirizzo
 <strong>/rest/v3/stampings/update</strong>.</p>
 <p>Per individuare il gruppo è possibile utilizzare solo il campo <strong>id</strong>.
@@ -1079,7 +1081,7 @@ la data e ora della timbratura, se è necessario modificare uno di questi campi 
 </div>
 </section>
 <section id="stamping-delete">
-<h2><span class="section-number">8.10.6. </span>Stamping Delete<a class="headerlink" href="#stamping-delete" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.10.6. </span>Stamping Delete<a class="headerlink" href="#stamping-delete" title="Permalink to this heading">¶</a></h2>
 <p>La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo <strong>/rest/v3/stampings/delete</strong></p>
 <p>Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: <strong>id</strong>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
@@ -1364,9 +1366,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

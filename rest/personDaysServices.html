@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,11 +922,11 @@
           
           
   <section id="consultazione-situazione-giornaliera-dipendenti-via-rest">
-<h1><span class="section-number">8.6. </span>Consultazione situazione giornaliera dipendenti via REST<a class="headerlink" href="#consultazione-situazione-giornaliera-dipendenti-via-rest" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">8.6. </span>Consultazione situazione giornaliera dipendenti via REST<a class="headerlink" href="#consultazione-situazione-giornaliera-dipendenti-via-rest" title="Permalink to this heading">¶</a></h1>
 <p>Di seguito una breve spiegazione dell'API REST relativa alla consultazione della situazione
 giornaliera delle presenze e assenze dei dipendenti di una sede.</p>
 <section id="permessi">
-<h2><span class="section-number">8.6.1. </span>Permessi<a class="headerlink" href="#permessi" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.6.1. </span>Permessi<a class="headerlink" href="#permessi" title="Permalink to this heading">¶</a></h2>
 <p>Per poter accedere a queste interfaccie REST è necessario utilizzare un utente che abbia il ruolo
 di <em>Lettore Informazioni</em> per la sede su cui si vuole effettuare le operazioni.
 I nuovi utenti possono essere definiti dagli utenti che hanno il ruolo di <em>amministratore tecnico</em>.</p>
@@ -935,7 +937,7 @@ ruolo <em>Lettore informazioni</em>.</p>
 <p>L'autenticazione da utilizzare è come per gli altri servizi REST quella <em>Basic Auth</em>.</p>
 </section>
 <section id="cartellino-byperson-giornaliero-e-o-mensile">
-<h2><span class="section-number">8.6.2. </span>Cartellino byPerson (giornaliero e/o mensile)<a class="headerlink" href="#cartellino-byperson-giornaliero-e-o-mensile" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.6.2. </span>Cartellino byPerson (giornaliero e/o mensile)<a class="headerlink" href="#cartellino-byperson-giornaliero-e-o-mensile" title="Permalink to this heading">¶</a></h2>
 <p>Le informazioni di un singolo giorno sulle timbrature e assenze di una persona è fruibile tramite
 una HTTP GET all'indirizzo <strong>/rest/v3/personDays/getDaySituation</strong>.</p>
 <p>La persona può essere individuata passando i parametri identificativi delle persone:
@@ -957,7 +959,7 @@ del parametro <em>date</em> i parametri <em>year</em> e <em>month</em> con un GE
 </div>
 </section>
 <section id="cartellino-byoffice-giornaliero-e-o-mensile">
-<h2><span class="section-number">8.6.3. </span>Cartellino byOffice (giornaliero e/o mensile)<a class="headerlink" href="#cartellino-byoffice-giornaliero-e-o-mensile" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">8.6.3. </span>Cartellino byOffice (giornaliero e/o mensile)<a class="headerlink" href="#cartellino-byoffice-giornaliero-e-o-mensile" title="Permalink to this heading">¶</a></h2>
 <p>Analogamente ai metodi precedenti è possibile avere le informazioni giornaliere o mensili di tutti
 i dipendenti di una sede.
 La sede è individuata tramite il parametro <em>sedeId</em>, per esempio per l'IIT corrisponde a <em>223400</em>.
@@ -973,10 +975,10 @@ Negli esempio successivi sostituite <em>223400</em> con il <em>sedeId</em> della
 </pre></div>
 </div>
 </section>
-<section id="timbrature-per-lavoro-fuori-sede-o-per-motivi-di-servizio-con-luogo-e-o-motivazione">
-<h2><span class="section-number">8.6.4. </span>Timbrature per lavoro fuori sede o per motivi di servizio con luogo e/o motivazione<a class="headerlink" href="#timbrature-per-lavoro-fuori-sede-o-per-motivi-di-servizio-con-luogo-e-o-motivazione" title="Link a questa intestazione">¶</a></h2>
+<section id="timbrature-per-lavoro-fuori-sede-o-per-motivi-di-servizio-fuori-sede-con-luogo-e-o-motivazione">
+<h2><span class="section-number">8.6.4. </span>Timbrature per lavoro fuori sede o per motivi di servizio fuori sede con luogo e/o motivazione<a class="headerlink" href="#timbrature-per-lavoro-fuori-sede-o-per-motivi-di-servizio-fuori-sede-con-luogo-e-o-motivazione" title="Permalink to this heading">¶</a></h2>
 <p>Sono disponibili due endpoint per prelevare le informazioni relative alla timbrature per lavori
-fuori o per motivi di servizio con impostato luogo e/o motivazione.
+fuori o per motivi di servizio di servizio fuori sede con impostato luogo e/o motivazione.
 Queste informazioni possono per esempio essere utilizzate da un eventuale sistema esterno di
 rendicontazione dei progetti.</p>
 <p>Per prelevare la lista delle giornate con timbrature per lavoro fuori sede o per motivi di
@@ -991,42 +993,42 @@ individuare l'anno ed il mese.</p>
 </pre></div>
 </div>
 <p>Il risultato sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-      <span class="nt">&quot;absences&quot;</span><span class="p">:</span> <span class="p">[],</span>
-      <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;difference&quot;</span><span class="p">:</span> <span class="mi">-222</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">363239</span><span class="p">,</span>
-      <span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;progressive&quot;</span><span class="p">:</span> <span class="mi">-222</span><span class="p">,</span>
-      <span class="nt">&quot;stampings&quot;</span><span class="p">:</span> <span class="p">[</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04T09:00:00&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398918</span><span class="p">,</span>
-              <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Verificare ipotesi caduta dei gravi&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;in&quot;</span>
-          <span class="p">},</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04T12:30:00&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398919</span><span class="p">,</span>
-              <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Terminato esperimento caduta dei gravi&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;out&quot;</span>
-          <span class="p">}</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span> <span class="mi">210</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;absences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;difference&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-222</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">363239</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;progressive&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-222</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;stampings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04T09:00:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398918</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verificare ipotesi caduta dei gravi&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">},</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04T12:30:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398919</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Terminato esperimento caduta dei gravi&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;out&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">210</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Analogamente è possibile ottenere le stesse informazioni ma per tutto il personale dipendente
@@ -1038,83 +1040,99 @@ di una sede utilizzando una GET all'indirizzo <strong>/rest/v3/personDays/offSit
 </pre></div>
 </div>
 <p>Un esempio di risultato è il seguente:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-  <span class="p">{</span>
-      <span class="nt">&quot;absences&quot;</span><span class="p">:</span> <span class="p">[],</span>
-      <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;difference&quot;</span><span class="p">:</span> <span class="mi">-222</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">363239</span><span class="p">,</span>
-      <span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1234</span><span class="p">,</span>
-          <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9802&quot;</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;progressive&quot;</span><span class="p">:</span> <span class="mi">-222</span><span class="p">,</span>
-      <span class="nt">&quot;stampings&quot;</span><span class="p">:</span> <span class="p">[</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04T09:00:00&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398918</span><span class="p">,</span>
-              <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Controllore accelerazione di gravità di due corpi&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;in&quot;</span>
-          <span class="p">},</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-04T12:30:00&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398919</span><span class="p">,</span>
-              <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Terminato esperimento caduta dei gravi&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;out&quot;</span>
-          <span class="p">}</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span> <span class="mi">210</span>
-  <span class="p">},</span>
-  <span class="p">{</span>
-      <span class="nt">&quot;absences&quot;</span><span class="p">:</span> <span class="p">[],</span>
-      <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;difference&quot;</span><span class="p">:</span> <span class="mi">-432</span><span class="p">,</span>
-      <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">363244</span><span class="p">,</span>
-      <span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-      <span class="nt">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
-          <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;eppn&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-          <span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span> <span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;fullname&quot;</span><span class="p">:</span> <span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span>
-          <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1235</span><span class="p">,</span>
-          <span class="nt">&quot;number&quot;</span><span class="p">:</span> <span class="s2">&quot;9801&quot;</span>
-      <span class="p">},</span>
-      <span class="nt">&quot;progressive&quot;</span><span class="p">:</span> <span class="mi">-432</span><span class="p">,</span>
-      <span class="nt">&quot;stampings&quot;</span><span class="p">:</span> <span class="p">[</span>
-          <span class="p">{</span>
-              <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-02-08T08:00:00&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">398920</span><span class="p">,</span>
-              <span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-              <span class="nt">&quot;note&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-              <span class="nt">&quot;place&quot;</span><span class="p">:</span> <span class="s2">&quot;Lungarno Pisano&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;Esperimento su successioni numeriche&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;stampType&quot;</span><span class="p">:</span> <span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span>
-              <span class="nt">&quot;way&quot;</span><span class="p">:</span> <span class="s2">&quot;in&quot;</span>
-          <span class="p">}</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span> <span class="mi">0</span>
-  <span class="p">}</span>
-<span class="p">]</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;absences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;difference&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-222</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">363239</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;progressive&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-222</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;stampings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04T09:00:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398918</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Controllore accelerazione di gravità di due corpi&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">},</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-04T12:30:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398919</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Torre di Pisa&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Terminato esperimento caduta dei gravi&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;out&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">210</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;absences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;difference&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-432</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">363244</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isHoliday&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;isTicketAvailable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1235</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9801&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;progressive&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-432</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;stampings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">          </span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-08T08:00:00&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398920</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lungarno Pisano&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Esperimento su successioni numeriche&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAVORO_FUORI_SEDE&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">              </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;timeAtWork&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="timbrature-per-motivi-di-servizio">
+<h2><span class="section-number">8.6.5. </span>Timbrature per motivi di servizio<a class="headerlink" href="#timbrature-per-motivi-di-servizio" title="Permalink to this heading">¶</a></h2>
+<p>È disponibile un endpoint per prelevare le informazioni relative alla timbrature con
+causale motivi di servizio.</p>
+<p>Per prelevare la lista delle giornate con timbrature con causale motivi di
+servizio di una sede è possibile utilizzare una GET alll'endpoint
+<strong>/rest/v3/personDays/serviceExitByPersonAndMonth</strong>.</p>
+<p>La sede è individuata tramite il parametro <em>sedeId</em>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
+    GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/serviceExitByOfficeAndMonth
+    <span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span> <span class="nv">year</span><span class="o">==</span><span class="m">2022</span> <span class="nv">month</span><span class="o">==</span><span class="m">10</span>
+</pre></div>
+</div>
+<p>La risposta ottenuta è analoga a quella descritta nel paragrafo precedente relativamente
+al metodo /rest/v3/personDays/offSiteWorkByOfficeAndMonth.</p>
 </section>
 </section>
 
@@ -1393,9 +1411,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">

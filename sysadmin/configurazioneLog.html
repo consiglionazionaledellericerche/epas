@@ -601,7 +601,8 @@
         </li>
       </ul>
       
-      <ul class="current">
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -785,7 +786,8 @@
           </li>
         </ul>
         
-        <ul class="current">
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
@@ -920,7 +922,7 @@
           
           
   <section id="configurazione-dei-log-di-epas">
-<h1><span class="section-number">9.6. </span>Configurazione dei log di ePAS<a class="headerlink" href="#configurazione-dei-log-di-epas" title="Link a questa intestazione">¶</a></h1>
+<h1><span class="section-number">9.6. </span>Configurazione dei log di ePAS<a class="headerlink" href="#configurazione-dei-log-di-epas" title="Permalink to this heading">¶</a></h1>
 <dl>
 <dt>I log in ePAS sono gestiti tramite la Log4J e la loro configurazione può essere</dt><dd><p>effettuata tramite alcuni parametri impostabili nel <em>docker_compose.yml</em>.</p>
 <p>È possibile utilizzare quattro tipo di appender diversi a cui inviare i log:
@@ -930,14 +932,14 @@
 <p>Tramite il docker compose è possibile configurare il livello dei log, gli
 appender da utilizzare e gli eventuali parametri per l'invio dei log ad un
 <a class="reference external" href="https://www.graylog.org/">graylog</a> server esterno.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#  [...]</span>
- <span class="p p-Indicator">-</span> <span class="nt">environment</span><span class="p">:</span>
-<span class="c1">#  [...]</span>
-<span class="c1">#      - LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)</span>
-       <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">APPENDERS=file</span>                        <span class="c1"># Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog</span>
-<span class="c1">#      - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull&#39;appender graylog2. default: null</span>
-<span class="c1">#      - GRAYLOG_PORT=                         # Opzionale. default: 3514</span>
-<span class="c1">#      - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#  [...]</span><span class="w"></span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="c1">#  [...]</span><span class="w"></span>
+<span class="c1">#      - LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)</span><span class="w"></span>
+<span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">APPENDERS=file</span><span class="w">                        </span><span class="c1"># Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog</span><span class="w"></span>
+<span class="c1">#      - GRAYLOG_HOST=                         # Obbligatorio se attivato log sull&#39;appender graylog2. default: null</span><span class="w"></span>
+<span class="c1">#      - GRAYLOG_PORT=                         # Opzionale. default: 3514</span><span class="w"></span>
+<span class="c1">#      - GRAYLOG_ORIGIN_HOST=                  # Opzionale. default: valore in VIRTUAL_HOST</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Se non specificato tramite la variabile APPENDERS gli appender abilitati
@@ -947,7 +949,7 @@ standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</
 abilitati più appender contemporanemente, per utilizzare più appender scrivere
 i nomi degli appender separati da virgola (es.: APPENDERS=file, graylog2).</p>
 <section id="appender-di-tipo-stdout-e-stderr">
-<h2><span class="section-number">9.6.1. </span>Appender di tipo stdout e stderr<a class="headerlink" href="#appender-di-tipo-stdout-e-stderr" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.6.1. </span>Appender di tipo stdout e stderr<a class="headerlink" href="#appender-di-tipo-stdout-e-stderr" title="Permalink to this heading">¶</a></h2>
 <p>Gli appender di tipo <em>stdout</em> e <em>stderr</em> inviano i log sullo standard output e
 standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</em>).</p>
 <p>La configurazione specifica per questi appender da impostare nel file
@@ -973,13 +975,13 @@ standard error a seconda del livello di log (ERROR e FATAL vanno su <em>stderr</
 </div>
 </section>
 <section id="appender-di-tipo-file">
-<h2><span class="section-number">9.6.2. </span>Appender di tipo file<a class="headerlink" href="#appender-di-tipo-file" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.6.2. </span>Appender di tipo file<a class="headerlink" href="#appender-di-tipo-file" title="Permalink to this heading">¶</a></h2>
 <p>Nel caso si utilizzi l'appender di tipo file i log vengono salvati all'interno
 del container nel file log/epas.log, si consiglia quindi di effettuare all'interno
 del <strong>docker-compose.yml</strong> un mapping del volume tipo:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># [...]</span>
-<span class="nt">volumes</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">${PWD}/logs:/home/epas/epas/logs</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># [...]</span><span class="w"></span>
+<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${PWD}/logs:/home/epas/epas/logs</span><span class="w"></span>
 </pre></div>
 </div>
 <p>I log sono di tipo DailyRollingFileAppender, quindi vengono ruotati automaticamente
@@ -996,7 +998,7 @@ ogni giorno.</p>
 </div>
 </section>
 <section id="appender-di-tipo-graylog">
-<h2><span class="section-number">9.6.3. </span>Appender di tipo Graylog<a class="headerlink" href="#appender-di-tipo-graylog" title="Link a questa intestazione">¶</a></h2>
+<h2><span class="section-number">9.6.3. </span>Appender di tipo Graylog<a class="headerlink" href="#appender-di-tipo-graylog" title="Permalink to this heading">¶</a></h2>
 <p>Le informazioni sull'host graylog a cui inviare i log sono configurabili tramite
 i parametri: <em>GRAYLOG_HOST</em>, <em>GRAYLOG_PORT</em> e <em>GRAYLOG_ORIGIN_HOST</em>, vedere i
 commenti nel <em>docker-compose.yml</em> per maggiori informazioni.</p>
@@ -1291,9 +1293,11 @@ var DOCUMENTATION_OPTIONS = {
 };
 </script>
 <script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
 <script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script type="text/javascript" src="../_static/doctools.js"></script>
-<script type="text/javascript" src="../_static/language_data.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
 <script type="text/javascript" src="../_static/translations.js"></script>
   
   <script type="text/javascript">
