@@ -73,7 +73,7 @@ public class VacationSituationTest extends UnitTest {
         new LocalDate(2016, 9, 13), Optional.absent(), 0, person);
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
+        person.getContracts().get(0), 2016, vacationGroup, Optional.of(today), false);
 
     assertTrue(vacationSituation.lastYear.expired());
     assertEquals(vacationSituation.lastYear.total(), 28);
@@ -107,7 +107,7 @@ public class VacationSituationTest extends UnitTest {
         new LocalDate(2016, 9, 13), Optional.absent(), 0, person2);
     
     VacationSituation vacationSituation2 = absenceService.buildVacationSituation(
-        person2.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
+        person2.getContracts().get(0), 2016, vacationGroup, Optional.of(today), false);
     
     assertTrue(vacationSituation2.lastYear.expired());
     assertEquals(vacationSituation2.lastYear.total(), 28);
@@ -148,7 +148,7 @@ public class VacationSituationTest extends UnitTest {
     // riepilogo all'ultimo giorno del primo anno, posso prendere solo quelle maturate
     LocalDate today = contractBegin.plusYears(1).minusDays(1);
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false);
+        person.getContracts().get(0), 2018, vacationGroup, Optional.of(today), false);
 
     assertEquals(vacationSituation.currentYear.total(), 26);
     assertEquals(vacationSituation.currentYear.usable(), 13);
@@ -156,7 +156,7 @@ public class VacationSituationTest extends UnitTest {
     // riepilogo al primo giorno del secondo anno, posso prenderle tutte
     today = contractBegin.plusYears(1);
     vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2018, vacationGroup, Optional.of(today), false);
+        person.getContracts().get(0), 2018, vacationGroup, Optional.of(today), false);
     
     assertEquals(vacationSituation.currentYear.total(), 26);
     assertEquals(vacationSituation.currentYear.usable(), 26);
@@ -192,7 +192,7 @@ public class VacationSituationTest extends UnitTest {
     final LocalDate today = new LocalDate(2015, 1, 1); //recap date
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2015, vacationGroup, Optional.of(today), false);
+        person.getContracts().get(0), 2015, vacationGroup, Optional.of(today), false);
 
     assertEquals(vacationSituation.currentYear.total(), 26);
     assertEquals(vacationSituation.currentYear.accrued(), 1);
@@ -219,7 +219,7 @@ public class VacationSituationTest extends UnitTest {
     final LocalDate today = new LocalDate(2016, 1, 1); //recap date
 
     VacationSituation vacationSituation = absenceService.buildVacationSituation(
-        person.contracts.get(0), 2016, vacationGroup, Optional.of(today), false);
+        person.getContracts().get(0), 2016, vacationGroup, Optional.of(today), false);
 
     assertEquals(vacationSituation.currentYear.total(), 28);
     assertEquals(vacationSituation.currentYear.accrued(), 0);
@@ -248,11 +248,11 @@ public class VacationSituationTest extends UnitTest {
 
     //un tempo determinato
     Person person = h2Examples.normalEmployee(new LocalDate(2001, 1, 16), Optional.absent());
-    Contract contract = person.contracts.get(0);
-    contract.sourceDateVacation = new LocalDate(2016, 10, 31);
-    contract.sourceVacationLastYearUsed = 28;
-    contract.sourceVacationCurrentYearUsed = 5;
-    contract.sourcePermissionUsed = 4;
+    Contract contract = person.getContracts().get(0);
+    contract.setSourceDateVacation(new LocalDate(2016, 10, 31));
+    contract.setSourceVacationLastYearUsed(28);
+    contract.setSourceVacationCurrentYearUsed(5);
+    contract.setSourcePermissionUsed(4);
     
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();

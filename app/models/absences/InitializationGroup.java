@@ -24,15 +24,20 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.Person;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+
 /**
  * Dati per l'inizializzazione di un gruppo di assenza di un dipendente.
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "initialization_groups")
@@ -42,50 +47,50 @@ public class InitializationGroup extends BaseModel {
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "group_absence_type_id", nullable = false)
-  public GroupAbsenceType groupAbsenceType;
+  private GroupAbsenceType groupAbsenceType;
 
   @Column(name = "date")
-  public LocalDate date;
+  private LocalDate date;
 
   @Column(name = "forced_begin")
-  public LocalDate forcedBegin;
+  private LocalDate forcedBegin;
 
   @Column(name = "forced_end")
-  public LocalDate forcedEnd;
+  private LocalDate forcedEnd;
 
   // if (groupAbsenceType.pattern == programmed)
 
   @Column(name = "units_input")
-  public Integer unitsInput = 0;
+  private Integer unitsInput = 0;
 
   @Column(name = "hours_input")
-  public Integer hoursInput = 0;
+  private Integer hoursInput = 0;
 
   @Column(name = "minutes_input")
-  public Integer minutesInput = 0;
+  private Integer minutesInput = 0;
 
   @Column(name = "average_week_time")
-  public Integer averageWeekTime;
+  private Integer averageWeekTime;
 
   @Column(name = "takable_total")
-  public Integer takableTotal;
+  private Integer takableTotal;
 
   // if (groupAbsenceType.pattern == vacationsCnr)
 
   @Column(name = "vacation_year")
-  public Integer vacationYear;
+  private Integer vacationYear;
 
   //if (groupAbsenceType.pattern == compensatoryRestCnr)
 
   @Column(name = "residual_minutes_last_year")
-  public Integer residualMinutesLastYear;
+  private Integer residualMinutesLastYear;
 
   @Column(name = "residual_minutes_current_year")
-  public Integer residualMinutesCurrentYear;
+  private Integer residualMinutesCurrentYear;
 
   /**
    * Constructor.

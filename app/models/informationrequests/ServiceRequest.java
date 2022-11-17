@@ -25,6 +25,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.InformationRequest;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -35,6 +37,8 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "service_requests")
@@ -45,16 +49,16 @@ public class ServiceRequest extends InformationRequest {
 
   @Required
   @NotNull
-  public LocalDate day;
+  private LocalDate day;
   @Required
   @NotNull
-  public LocalTime beginAt;
+  private LocalTime beginAt;
   @Required
   @NotNull
-  public LocalTime finishTo;
+  private LocalTime finishTo;
   @Required
   @NotNull
-  public String reason;
+  private String reason;
   
   /**
    * Orario formattato come HH:mm.

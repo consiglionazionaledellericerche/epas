@@ -22,15 +22,20 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.Absence;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+
 /**
  * Variazione nel monte orario di un dipendente in relazione ad alcune
  * tipologie di assenza (per esempio per gli ex 92CE).
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "time_variations")
@@ -39,12 +44,12 @@ public class TimeVariation extends BaseModel {
   private static final long serialVersionUID = -6067037671772984710L;
 
   @Column(name = "date_variation")
-  public LocalDate dateVariation;
+  private LocalDate dateVariation;
   
   @Column(name = "time_variation")
-  public int timeVariation;
+  private int timeVariation;
 
   @ManyToOne//(fetch = FetchType.LAZY)
   @JoinColumn(name = "absence_id", nullable = false, updatable = false)
-  public Absence absence;
+  private Absence absence;
 }

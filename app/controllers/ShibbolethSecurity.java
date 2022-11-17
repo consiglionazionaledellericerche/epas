@@ -82,16 +82,16 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 
     if (person != null) {
 
-      Cache.set(person.user.username, person, Security.CACHE_DURATION);
+      Cache.set(person.getUser().getUsername(), person, Security.CACHE_DURATION);
       Cache.set("personId", person.id, Security.CACHE_DURATION);
 
-      session.put("username", person.user.username);
+      session.put("username", person.getUser().getUsername());
       session.put("shibboleth", true);
       
-      flash.success("Benvenuto " + person.name + ' ' + person.surname);
-      log.info("Person {} successfully logged in", person.user.username);
+      flash.success("Benvenuto " + person.getName() + ' ' + person.getSurname());
+      log.info("Person {} successfully logged in", person.getUser().getUsername());
       log.trace("Permission list for {} {}: {}",
-          person.name, person.surname, person.user.usersRolesOffices);
+          person.getName(), person.getSurname(), person.getUser().getUsersRolesOffices());
     } else {
       flash.error(
           "Autenticazione shibboleth riuscita ma utente con eppn=%s non presente in ePAS", eppn);

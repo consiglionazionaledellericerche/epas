@@ -428,15 +428,16 @@ public class Reperibility extends Controller {
     LocalDate firstOfYear = new LocalDate(year, 1, 1);
     Options options = new Options();
     options.pageSize = IHtmlToPdfTransformer.A4L;
-    final String description = reperibilityType.description;
+    final String description = reperibilityType.getDescription();
     String supervisor =
-        reperibilityType.supervisor.name.concat(" ").concat(reperibilityType.supervisor.surname);
+        reperibilityType.getSupervisor().getName().concat(" ")
+        .concat(reperibilityType.getSupervisor().getSurname());
     String seatSupervisor = "";
-    Office office = reperibilityType.office;
+    Office office = reperibilityType.getOffice();
     List<User> directors = uroDao
         .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
     if (!directors.isEmpty()) {
-      seatSupervisor = directors.get(0).person.getFullname();
+      seatSupervisor = directors.get(0).getPerson().getFullname();
     } else {
       seatSupervisor = "responsabile di sede non configurato";
     }
@@ -578,15 +579,15 @@ public class Reperibility extends Controller {
     final String cFs = codFs;
     final String thNoStamp = Messages.get("PDFReport.thNoStampings");
     final String thAbs = Messages.get("PDFReport.thAbsences");
-    final String description = reperibilityType.description;
+    final String description = reperibilityType.getDescription();
     final String supervisor =
-        reperibilityType.supervisor.getFullname();
+        reperibilityType.getSupervisor().getFullname();
     String seatSupervisor = "";
-    Office office = reperibilityType.office;
+    Office office = reperibilityType.getOffice();
     List<User> directors = uroDao
         .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
     if (!directors.isEmpty()) {
-      seatSupervisor = directors.get(0).person.getFullname();
+      seatSupervisor = directors.get(0).getPerson().getFullname();
     } else {
       seatSupervisor = "responsabile di sede non configurato";
     }
@@ -622,11 +623,11 @@ public class Reperibility extends Controller {
     ImmutableList<Person> canAccess =
         ImmutableList.<Person>builder()
         .addAll(personDao.getPersonForReperibility(type))
-        .add(reperibilityType.supervisor).build();
+        .add(reperibilityType.getSupervisor()).build();
 
 
-    if (!currentUser.isPresent() || currentUser.get().person == null
-        || !canAccess.contains(currentUser.get().person)) {
+    if (!currentUser.isPresent() || currentUser.get().getPerson() == null
+        || !canAccess.contains(currentUser.get().getPerson())) {
       log.debug(
           "Accesso all'iCal delle reperibilità non autorizzato: Type = {}, Current User = {}, "
               + "canAccess = {}",

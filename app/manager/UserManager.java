@@ -69,9 +69,9 @@ public class UserManager {
     //generate random token
     SecureRandom random = new SecureRandom();
 
-    person.user.recoveryToken = new BigInteger(130, random).toString(32);
-    person.user.expireRecoveryToken = LocalDate.now();
-    person.user.save();
+    person.getUser().setRecoveryToken(new BigInteger(130, random).toString(32));
+    person.getUser().setExpireRecoveryToken(LocalDate.now());
+    person.getUser().save();
   }
 
   /**
@@ -125,16 +125,16 @@ public class UserManager {
 
     User user = new User();
 
-    user.username = generateUserName(person.name, person.surname);
+    user.setUsername(generateUserName(person.getName(), person.getSurname()));
 
     SecureRandom random = new SecureRandom();
-    user.password = Codec.hexMD5(new BigInteger(130, random).toString(32));
+    user.setPassword(Codec.hexMD5(new BigInteger(130, random).toString(32)));
 
     user.save();
 
-    person.user = user;
+    person.setUser(user);
 
-    log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.username);
+    log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.getUsername());
 
     return user;
   }
@@ -148,18 +148,18 @@ public class UserManager {
    * @param enable  se deve essere disabilitato
    */
   public void saveUser(User user, Set<Office> offices, Set<Role> roles, boolean enable) {
-    user.password = Codec.hexMD5(user.password);
+    user.setPassword(Codec.hexMD5(user.getPassword()));
     if (enable) {
-      user.disabled = false;
-      user.expireDate = null;
+      user.setDisabled(false);
+      user.setExpireDate(null);
     }
     user.save();
     for (Role role : roles) {
       for (Office office : offices) {
         UsersRolesOffices uro = new UsersRolesOffices();
-        uro.user = user;
-        uro.office = office;
-        uro.role = role;
+        uro.setUser(user);
+        uro.setOffice(office);
+        uro.setRole(role);
         uro.save();
       }
     }

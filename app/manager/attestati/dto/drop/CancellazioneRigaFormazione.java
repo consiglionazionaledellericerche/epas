@@ -51,17 +51,17 @@ public class CancellazioneRigaFormazione {
    * Constructor.
    */
   public CancellazioneRigaFormazione(Certification certification) {
-    codiceSede = Integer.parseInt(certification.person.office.codeId);
-    anno = certification.year;
-    mese = certification.month;
+    codiceSede = Integer.parseInt(certification.getPerson().getOffice().getCodeId());
+    anno = certification.getYear();
+    mese = certification.getMonth();
 
     ItemDipendente dipendente = new ItemDipendente();
     dipendenti.add(dipendente);
 
-    dipendente.matricola = certification.person.number;
+    dipendente.matricola = certification.getPerson().getNumber();
 
     DropItem dropItem = new DropItem();
-    dropItem.id = certification.attestatiId;
+    dropItem.id = certification.getAttestatiId();
     dipendente.righeFormazione.add(dropItem);
   }
 

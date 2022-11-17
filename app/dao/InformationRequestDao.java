@@ -75,9 +75,9 @@ public class InformationRequestDao extends DaoBase {
 
     BooleanBuilder conditions = new BooleanBuilder();
 
-    if (uroList.stream().noneMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)
-        || uro.role.name.equals(Role.PERSONNEL_ADMIN)
-        || uro.role.name.equals(Role.GROUP_MANAGER))) {
+    if (uroList.stream().noneMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR)
+        || uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
+        || uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
       return Lists.newArrayList();
     }
     if (fromDate.isPresent()) {
@@ -92,12 +92,12 @@ public class InformationRequestDao extends DaoBase {
 
     List<InformationRequest> results = new ArrayList<>();
     if (informationType.equals(InformationType.ILLNESS_INFORMATION)
-        && uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
+        && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       results.addAll(toApproveResultsAsPersonnelAdmin(uroList,
           informationType, signer, conditions));
     } 
     if (informationType.equals(InformationType.SERVICE_INFORMATION) 
-        && uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
+        && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
       results.addAll(toApproveResultsAsGroupManager(uroList, informationType, signer, conditions));
     }
     else {
@@ -354,9 +354,9 @@ public class InformationRequestDao extends DaoBase {
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
 
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR)
-        || uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
-      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR)
+        || uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
+      List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = seatSupervisorQuery(officeList, conditions, signer);
       return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
     } else {
@@ -371,8 +371,8 @@ public class InformationRequestDao extends DaoBase {
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
 
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))) {
-      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
+      List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = personnelAdminQuery(officeList, conditions, signer);
       return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
     } else {
@@ -386,8 +386,8 @@ public class InformationRequestDao extends DaoBase {
   private List<InformationRequest> toApproveResultsAsGroupManager(List<UsersRolesOffices> uros,
       InformationType informationType, Person signer, BooleanBuilder conditions) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.GROUP_MANAGER))) {
-      List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
+      List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = groupManagerQuery(officeList, conditions, signer);
       return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
     } else {
@@ -470,7 +470,7 @@ public class InformationRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     List<InformationRequest> results = new ArrayList<>();
 
-    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
@@ -499,23 +499,23 @@ public class InformationRequestDao extends DaoBase {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     final QPerson person = QPerson.person;
     final QOffice office = QOffice.office;
-    List<Office> officeList = uros.stream().map(u -> u.office).collect(Collectors.toList());
+    List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
-            .and(informationRequest.person.office.eq(signer.office)));
+            .and(informationRequest.person.office.eq(signer.getOffice())));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
     }
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))) {
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
       conditions.and(
           informationRequest.officeHeadApprovalRequired.isTrue()
               .and(informationRequest.officeHeadApproved.isNotNull())
               .and(person.office.in(officeList)));
     } 
-    if (uros.stream().anyMatch(uro -> uro.role.name.equals(Role.PERSONNEL_ADMIN))){
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))){
       conditions.and(
           informationRequest.administrativeApprovalRequired.isTrue()
               .and(informationRequest.administrativeApproved.isNotNull())
@@ -530,7 +530,7 @@ public class InformationRequestDao extends DaoBase {
         .join(informationRequest.person, person)
         .join(person.office, office)
         .where(office.in(uros.stream().map(
-                userRoleOffices -> userRoleOffices.office)
+                userRoleOffices -> userRoleOffices.getOffice())
             .collect(Collectors.toSet())).and(conditions))
         .orderBy(informationRequest.startAt.desc())
         .fetch();

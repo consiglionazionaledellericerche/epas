@@ -82,25 +82,26 @@ public class ChartJob extends Job<List<RenderResult>> {
       RenderResult result = null;
       List<Absence> values = absences
           .stream()
-          .filter(r -> r.personDay.date.isEqual(item.dataAssenza))
+          .filter(r -> r.getPersonDay().getDate().isEqual(item.dataAssenza))
           .collect(Collectors.toList());
       if (!values.isEmpty()) {
-        final Predicate<Absence> compareCode = a -> a.absenceType.code.equalsIgnoreCase(item.codice)
-            || a.absenceType.certificateCode.equalsIgnoreCase(item.codice);
+        final Predicate<Absence> compareCode = a -> a.getAbsenceType().getCode()
+            .equalsIgnoreCase(item.codice)
+            || a.getAbsenceType().getCertificateCode().equalsIgnoreCase(item.codice);
         if (values.stream().anyMatch(compareCode)) {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, true, "Ok",
+          result = new RenderResult(null, person.getNumber(), person.getName(),
+              person.getSurname(), item.codice, item.dataAssenza, true, "Ok",
               values.stream().filter(compareCode)
-                  .findFirst().get().absenceType.code, CheckType.SUCCESS);
+                  .findFirst().get().getAbsenceType().getCode(), CheckType.SUCCESS);
         } else {
-          result = new RenderResult(null, person.number, person.name,
-              person.surname, item.codice, item.dataAssenza, false,
+          result = new RenderResult(null, person.getNumber(), person.getName(),
+              person.getSurname(), item.codice, item.dataAssenza, false,
               "Mismatch tra assenza trovata e quella dello schedone",
-              values.stream().findFirst().get().absenceType.code, CheckType.WARNING);
+              values.stream().findFirst().get().getAbsenceType().getCode(), CheckType.WARNING);
         }
       } else {
-        result = new RenderResult(null, person.number, person.name,
-            person.surname, item.codice, item.dataAssenza, false,
+        result = new RenderResult(null, person.getNumber(), person.getName(),
+            person.getSurname(), item.codice, item.dataAssenza, false,
             "Nessuna assenza per il giorno", null, CheckType.DANGER);
       }
       resultList.add(result);

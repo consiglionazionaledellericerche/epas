@@ -178,7 +178,7 @@ public class PrintTags extends Controller {
    * @param month il mese di riferimento
    */
   public static void autocertOffsite(int year, int month) {
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
     List<PrintTagsInfo> dtoList = Lists.newArrayList();
     PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
     log.debug("Creato il person stamping recap per {}", psDto.person.fullName());

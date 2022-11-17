@@ -40,7 +40,7 @@ public enum QualificationMapping {
   }
 
   public boolean contains(Qualification qualification) {
-    return qualifiche.contains(qualification.qualification);
+    return qualifiche.contains(qualification.getQualification());
   }
 
 }

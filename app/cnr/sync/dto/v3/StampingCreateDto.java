@@ -58,7 +58,7 @@ public class StampingCreateDto extends StampingUpdateDto {
     val stamping = modelMapper.map(stampingDto, Stamping.class);
 
     if (stampingDto.getReasonType() != null) {
-      stamping.stampType = StampTypes.byCode(stampingDto.getReasonType().name());
+      stamping.setStampType(StampTypes.byCode(stampingDto.getReasonType().name()));
     }
 
     return stamping;

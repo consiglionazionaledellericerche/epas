@@ -48,31 +48,31 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
     Person person = new Person();
 
     if (jsonPerson.has("otherNames")) {
-      person.name = jsonPerson.get("firstname").getAsString() + " "
-          + jsonPerson.get("otherNames").getAsString();
+      person.setName(jsonPerson.get("firstname").getAsString() + " "
+          + jsonPerson.get("otherNames").getAsString());
     } else {
-      person.name = jsonPerson.get("firstname").getAsString();
+      person.setName(jsonPerson.get("firstname").getAsString());
     }
 
     if (jsonPerson.has("otherSurnames")) {
-      person.surname = jsonPerson.get("surname").getAsString() + " "
-          + jsonPerson.get("otherSurnames").getAsString();
+      person.setSurname(jsonPerson.get("surname").getAsString() + " "
+          + jsonPerson.get("otherSurnames").getAsString());
     } else {
-      person.surname = jsonPerson.get("surname").getAsString();
+      person.setSurname(jsonPerson.get("surname").getAsString());
     }
 
-    person.birthday = LocalDate.parse(jsonPerson.get("birthDate").getAsString(), dtf);
+    person.setBirthday(LocalDate.parse(jsonPerson.get("birthDate").getAsString(), dtf));
 
-    person.email = jsonPerson.get("email").getAsString();
-    person.number = jsonPerson.get("number").getAsString();
+    person.setEmail(jsonPerson.get("email").getAsString());
+    person.setNumber(jsonPerson.get("number").getAsString());
 
     JsonArray contacts = jsonPerson.get("contacts").getAsJsonArray();
 
     if (contacts.iterator().hasNext()) {
       JsonObject contact = contacts.iterator().next().getAsJsonObject();
-      person.telephone = contact.get("telephone").getAsString();
-      person.fax = contact.get("fax").getAsString();
-      person.mobile = contact.get("mobile").getAsString();
+      person.setTelephone(contact.get("telephone").getAsString());
+      person.setFax(contact.get("fax").getAsString());
+      person.setMobile(contact.get("mobile").getAsString());
     }
 
     JsonArray contracts = jsonPerson.get("contracts").getAsJsonArray();
@@ -81,12 +81,12 @@ public class PersonDeserializer implements JsonDeserializer<Person> {
       for (JsonElement je : contracts) {
         JsonObject jcontract = (JsonObject) je;
         Contract contract = new Contract();
-        contract.beginDate = LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf);
+        contract.setBeginDate(LocalDate.parse(jcontract.get("beginContract").getAsString(), dtf));
       }
       JsonObject contact = contacts.iterator().next().getAsJsonObject();
-      person.telephone = contact.get("telephone").getAsString();
-      person.fax = contact.get("fax").getAsString();
-      person.mobile = contact.get("mobile").getAsString();
+      person.setTelephone(contact.get("telephone").getAsString());
+      person.setFax(contact.get("fax").getAsString());
+      person.setMobile(contact.get("mobile").getAsString());
     }
 
     return person;

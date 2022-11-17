@@ -26,6 +26,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
@@ -40,6 +41,8 @@ import play.data.validation.Required;
  *
  * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @ToString
 @Audited
 @Entity
@@ -52,18 +55,18 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   @Required
   @ManyToOne
   @JoinColumn(name = "contract_id")
-  public Contract contract;
+  private Contract contract;
 
   @Getter
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "working_time_type_id")
-  public WorkingTimeType workingTimeType;
+  private WorkingTimeType workingTimeType;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
-  public String externalId;
+  private String externalId;
 
   @PreUpdate
   @PrePersist
@@ -109,7 +112,7 @@ public class ContractWorkingTimeType extends PropertyInPeriod implements IProper
   
   @Override
   public String getLabel() {
-    return this.workingTimeType.description;
+    return this.workingTimeType.getDescription();
   }
 
 

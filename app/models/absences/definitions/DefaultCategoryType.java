@@ -114,7 +114,7 @@ public enum DefaultCategoryType {
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
       boolean found = false;
       for (CategoryGroupAbsenceType category : allCategories) {
-        if (defaultCategory.name().equals(category.name)) {
+        if (defaultCategory.name().equals(category.getName())) {
           found = true;
           break;
         }
@@ -133,7 +133,7 @@ public enum DefaultCategoryType {
    */
   public static Optional<DefaultCategoryType> byName(CategoryGroupAbsenceType category) {
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
-      if (defaultCategory.name().equals(category.name)) {
+      if (defaultCategory.name().equals(category.getName())) {
         return Optional.of(defaultCategory);
       }
     }

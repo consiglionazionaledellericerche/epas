@@ -31,6 +31,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultTakable;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
@@ -41,6 +42,8 @@ import org.testng.collections.Sets;
  *
  * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "takable_absence_behaviours")
@@ -50,44 +53,39 @@ public class TakableAbsenceBehaviour extends BaseModel {
   public static final String NAME_PREFIX = "T_";
 
   @Column(name = "name")
-  public String name;
+  private String name;
   
   @OneToMany(mappedBy = "takableAbsenceBehaviour", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
+  private Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
-  @Getter
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
-  public AmountType amountType;
+  private AmountType amountType;
   
-  @Getter
   @ManyToMany
   @JoinTable(name = "taken_codes_group", 
       joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
         inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> takenCodes = Sets.newHashSet();
+  private Set<AbsenceType> takenCodes = Sets.newHashSet();
   
   //  @Column(name = "takable_count_behaviour")
   //  @Enumerated(EnumType.STRING)
   //  public TakeCountBehaviour takableCountBehaviour;
   
-  @Getter
   @ManyToMany
   @JoinTable(name = "takable_codes_group", 
       joinColumns = { @JoinColumn(name = "takable_behaviour_id") }, 
       inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> takableCodes = Sets.newHashSet();
+  private Set<AbsenceType> takableCodes = Sets.newHashSet();
   
-  @Getter
   @Column(name = "fixed_limit")
-  public Integer fixedLimit;
+  private Integer fixedLimit;
   
-  @Getter
   @Column(name = "takable_amount_adjust")
   @Enumerated(EnumType.STRING)
-  public TakeAmountAdjustment takableAmountAdjustment;
+  private TakeAmountAdjustment takableAmountAdjustment;
  
   /**
    * Tipologia di comportamento per i codici di assenza presi. 

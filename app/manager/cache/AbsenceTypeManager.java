@@ -158,7 +158,7 @@ public class AbsenceTypeManager {
         .fetchOne();
 
     if (group != null) {
-      return group.takableAbsenceBehaviour.takableCodes;
+      return group.getTakableAbsenceBehaviour().getTakableCodes();
     }
 
     // Nel caso il gruppo non esista si applica la versione precedente.

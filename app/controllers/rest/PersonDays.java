@@ -72,12 +72,12 @@ public class PersonDays extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
     if (pd == null) {
       JsonResponse.notFound("Non sono presenti informazioni per "
-              + person.name + " " + person.surname + " nel giorno " + date);
+              + person.getName() + " " + person.getSurname() + " nel giorno " + date);
     }
     PersonDayDto pdDto = generateDayDto(pd);
     renderJSON(pdDto);
@@ -117,7 +117,7 @@ public class PersonDays extends Controller {
       } else {
         JsonResponse.notFound(
             "Non sono presenti informazioni per "
-            + person.name + " " + person.surname + " nel mese di "
+            + person.getName() + " " + person.getSurname() + " nel mese di "
             + DateUtility.fromIntToStringMonth(month));
       }
     }
@@ -134,18 +134,18 @@ public class PersonDays extends Controller {
    */
   private static PersonDayDto generateDayDto(PersonDay pd) {
     PersonDayDto pdDto = new PersonDayDto();
-    pdDto.buonopasto = pd.isTicketAvailable;
-    pdDto.differenza = pd.difference;
-    pdDto.progressivo = pd.progressive;
-    pdDto.tempolavoro = pd.timeAtWork;
-    if (pd.absences != null && pd.absences.size() > 0) {
-      for (Absence abs : pd.absences) {
-        pdDto.codiceassenza.add(abs.absenceType.code);
+    pdDto.buonopasto = pd.isTicketAvailable();
+    pdDto.differenza = pd.getDifference();
+    pdDto.progressivo = pd.getProgressive();
+    pdDto.tempolavoro = pd.getTimeAtWork();
+    if (pd.getAbsences() != null && pd.getAbsences().size() > 0) {
+      for (Absence abs : pd.getAbsences()) {
+        pdDto.codiceassenza.add(abs.getAbsenceType().getCode());
       }
     }
-    if (pd.stampings != null && pd.stampings.size() > 0) {
-      for (Stamping s : pd.stampings) {
-        pdDto.timbrature.add(s.date.toString());
+    if (pd.getStampings() != null && pd.getStampings().size() > 0) {
+      for (Stamping s : pd.getStampings()) {
+        pdDto.timbrature.add(s.getDate().toString());
       }
     }
     return pdDto;
@@ -159,12 +159,12 @@ public class PersonDays extends Controller {
    */
   private static PersonMonthDto generateMonthDto(ContractMonthRecap cmr) {
     PersonMonthDto pmDto = new PersonMonthDto();
-    pmDto.buoniMensa = cmr.remainingMealTickets;
-    pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.possibileUtilizzareResiduoAnnoPrecedente;
-    pmDto.progressivoFinaleMese = cmr.progressivoFinaleMese;
-    pmDto.straordinari = cmr.straordinariMinuti;
-    pmDto.residuoTotaleAnnoCorrente = cmr.remainingMinutesCurrentYear;
-    pmDto.residuoTotaleAnnoPassato = cmr.remainingMinutesLastYear;
+    pmDto.buoniMensa = cmr.getRemainingMealTickets();
+    pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.isPossibileUtilizzareResiduoAnnoPrecedente();
+    pmDto.progressivoFinaleMese = cmr.getProgressivoFinaleMese();
+    pmDto.straordinari = cmr.getStraordinariMinuti();
+    pmDto.residuoTotaleAnnoCorrente = cmr.getRemainingMinutesCurrentYear();
+    pmDto.residuoTotaleAnnoPassato = cmr.getRemainingMinutesLastYear();
     return pmDto;
   }
 

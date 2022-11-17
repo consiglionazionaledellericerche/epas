@@ -60,7 +60,7 @@ public class SecurityTokens extends Controller {
    * Risponde con un nuovo token attivo per 1 ora.
    */
   public static void token() {
-    String username = Resecure.getCurrentUser().orElseThrow().username;
+    String username = Resecure.getCurrentUser().orElseThrow().getUsername();
     String token = Jwts.builder().setSubject(username)
         .setIssuer(Router.getBaseUrl())
         .setExpiration(Date.from(ZonedDateTime.now().plusHours(1).toInstant()))

@@ -29,6 +29,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
@@ -47,6 +48,7 @@ import org.joda.time.LocalDate;
  * @author Dario Tagliaferri
  * @author Cristian Lucchesi
  */
+@Slf4j
 public class ContractDao extends DaoBase {
 
   private final IWrapperFactory factory;
@@ -214,7 +216,7 @@ public class ContractDao extends DaoBase {
     // allineati con tutti i record presenti sul db e capita che viene restituito un valore nullo
     // incongruente con i dati presenti
     // TODO da sostituire con una query?
-    for (Contract c : person.contracts) {
+    for (Contract c : person.getContracts()) {
       if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval())) {
         return c;
       }
@@ -299,16 +301,35 @@ public class ContractDao extends DaoBase {
   public Optional<Contract> getPreviousContract(Contract actualContract) {
     Verify.verifyNotNull(actualContract);
     Contract previousContract = null;
-    List<Contract> contractList = getPersonContractList(actualContract.person);
+    List<Contract> contractList = getPersonContractList(actualContract.getPerson());
+
     for (Contract contract : contractList) {
-      if (previousContract == null
-          || (contract.calculatedEnd() != null && contract.calculatedEnd()
-          .isBefore(actualContract.beginDate)
-          && contract.beginDate.isAfter(previousContract.endDate))) {
+      if (contract.getId().equals(actualContract.getId())) {
+        log.trace("scarto il contratto id = {}, perché uguale al contratto corrente id = {}",
+            contract.getId(), actualContract.getId());
+        continue;
+      }
+
+      if (contract.calculatedEnd() != null
+          && contract.calculatedEnd().isBefore(actualContract.getBeginDate()) 
+          && (previousContract == null || contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
         previousContract = contract;
       }
     }
     return Optional.fromNullable(previousContract);
   }
 
+  /**
+   * @return la lista dei contratti che hanno impostato come previousContract 
+   *  se stesso (erroneamente).
+   */
+  public List<Contract> getContractsWithWrongPreviousContract() {
+    QContract contract = QContract.contract;
+    BooleanBuilder contractEqPreviousCondition = 
+        new BooleanBuilder(contract.previousContract.isNotNull().and(contract.previousContract.id.eq(contract.id)));
+    BooleanBuilder previousConditionAfterCurrentContract = 
+        new BooleanBuilder(contract.previousContract.isNotNull().and(contract.beginDate.before(contract.previousContract.beginDate)));
+    return getQueryFactory().selectFrom(contract)
+        .where(contractEqPreviousCondition.or(previousConditionAfterCurrentContract)).fetch();
+  }
 }

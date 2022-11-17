@@ -58,6 +58,8 @@ import play.data.validation.Required;
 /**
  * Contratto di un dipendente.
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "contracts")
 @Audited
@@ -65,16 +67,16 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
   
-  public String perseoId;
+  private String perseoId;
 
-  public String externalId;
+  private String externalId;
   
   /**
    * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
    * determinato senza data fine specificata.
    */
   @Column(name = "is_temporary")
-  public boolean isTemporaryMissing;
+  private boolean isTemporaryMissing;
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
@@ -82,89 +84,89 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   @CheckWith(ContractBeforeSourceResidualAndOverlapingCheck.class)
   @Getter
-  public LocalDate sourceDateResidual = null;
+  private LocalDate sourceDateResidual = null;
   
   @Getter
-  public LocalDate sourceDateVacation = null;
+  private LocalDate sourceDateVacation = null;
 
   @Getter
-  public LocalDate sourceDateMealTicket = null;
+  private LocalDate sourceDateMealTicket = null;
   
   @Getter
-  public LocalDate sourceDateRecoveryDay = null;
+  private LocalDate sourceDateRecoveryDay = null;
 
   public boolean sourceByAdmin = true;
 
   @Getter
   @Max(32)
-  public Integer sourceVacationLastYearUsed = null;
+  private Integer sourceVacationLastYearUsed = null;
 
   @Getter
   @Max(32)
-  public Integer sourceVacationCurrentYearUsed = null;
+  private Integer sourceVacationCurrentYearUsed = null;
 
   @Getter
   @Max(4)
-  public Integer sourcePermissionUsed = null;
+  private Integer sourcePermissionUsed = null;
 
   // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
   @Min(0)
   @Max(100)
-  public Integer sourceRecoveryDayUsed = null;
+  private Integer sourceRecoveryDayUsed = null;
 
-  public Integer sourceRemainingMinutesLastYear = null;
+  private Integer sourceRemainingMinutesLastYear = null;
 
-  public Integer sourceRemainingMinutesCurrentYear = null;
+  private Integer sourceRemainingMinutesCurrentYear = null;
 
   @Getter
-  public Integer sourceRemainingMealTicket = null;
+  private Integer sourceRemainingMealTicket = null;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  public Person person;
+  private Person person;
 
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
+  private List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
+  private List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
   @CheckWith(ContractEndContractCheck.class)
   @Getter
-  public LocalDate endContract;
+  private LocalDate endContract;
 
   @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
+  private Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
   @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
+  private Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
   
   @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<PersonalWorkingTime> personalWorkingTimes = Sets.newHashSet();
+  private Set<PersonalWorkingTime> personalWorkingTimes = Sets.newHashSet();
   
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
+  private Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  public List<MealTicket> mealTickets;
+  private List<MealTicket> mealTickets;
 
   @Required
-  public boolean onCertificate = true;
+  private boolean onCertificate = true;
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
@@ -175,7 +177,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   private Contract previousContract;
 
   @NotAudited
-  public LocalDateTime updatedAt;
+  private LocalDateTime updatedAt;
 
   @PreUpdate
   @PrePersist
@@ -201,9 +203,11 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
-            + "beginDate = %s, endDate = %s, endContract = %s, perseoId = %s",
-        id, person != null ? person.id : null, beginDate, endDate, endContract,
-            perseoId);
+            + "beginDate = %s, endDate = %s, endContract = %s, calculatedEnd = %s,"
+            + "previousContractId = %s, perseoId = %s",
+        id, person != null ? person.id : null, getBeginDate(), getEndDate(), endContract,
+        calculatedEnd(), previousContract != null ? previousContract.getId() : null, 
+        perseoId);
   }
 
   /**
@@ -265,7 +269,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   @Override
   public LocalDate calculatedEnd() {
-    return computeEnd(endDate, endContract);
+    return computeEnd(getEndDate(), endContract);
   }
 
   /**
@@ -300,9 +304,9 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   public Range<LocalDate> getRange() {
     if (calculatedEnd() != null) {
-      return Range.closed(beginDate, calculatedEnd());
+      return Range.closed(getBeginDate(), calculatedEnd());
     }
-    return Range.atLeast(beginDate);
+    return Range.atLeast(getBeginDate());
   }
 
   /**

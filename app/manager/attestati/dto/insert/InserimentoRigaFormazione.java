@@ -29,18 +29,18 @@ public class InserimentoRigaFormazione extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaFormazione(Certification certification) {
-    codiceSede = certification.person.office.codeId;
-    anno = certification.year;
-    mese = certification.month;
+    codiceSede = certification.getPerson().getOffice().getCodeId();
+    anno = certification.getYear();
+    mese = certification.getMonth();
 
     ItemDipendente dipendente = new ItemDipendente();
     dipendenti.add(dipendente);
 
-    dipendente.matricola = certification.person.number;
+    dipendente.matricola = certification.getPerson().getNumber();
     InsertRigaFormazione rigaFormazione = new InsertRigaFormazione();
-    rigaFormazione.giornoInizio = deserializeBegin(certification.content);
-    rigaFormazione.giornoFine = deserializeEnd(certification.content);
-    rigaFormazione.numOre = deserializeNumber(certification.content);
+    rigaFormazione.giornoInizio = deserializeBegin(certification.getContent());
+    rigaFormazione.giornoFine = deserializeEnd(certification.getContent());
+    rigaFormazione.numOre = deserializeNumber(certification.getContent());
 
     dipendente.righeFormazione.add(rigaFormazione);
   }

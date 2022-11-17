@@ -86,15 +86,15 @@ public class CheckPersonCompetence extends Job<Void> {
           temp = pcc;
           continue;
         }
-        DateInterval interval = new DateInterval(pcc.beginDate, pcc.endDate);
+        DateInterval interval = new DateInterval(pcc.getBeginDate(), pcc.getEndDate());
         if (DateUtility.isIntervalIntoAnother(interval, 
-            new DateInterval(temp.beginDate, temp.endDate))) {
+            new DateInterval(temp.getBeginDate(), temp.getEndDate()))) {
           //toDelete.add(pcc); 
           pcc.delete();
           log.debug("Cancellato {}", pcc.toString());
 
         }
-        if (DateUtility.isIntervalIntoAnother(new DateInterval(temp.beginDate, temp.endDate), 
+        if (DateUtility.isIntervalIntoAnother(new DateInterval(temp.getBeginDate(), temp.getEndDate()), 
             interval)) {
           //toDelete.add(prev);
           temp.delete();
@@ -109,7 +109,7 @@ public class CheckPersonCompetence extends Job<Void> {
     
     List<PersonShift> wrongDisabled = shiftDao.getWrongDisabled();
     wrongDisabled.forEach(ps -> {
-      ps.disabled = false;
+      ps.setDisabled(false);
       ps.save();
     });
     log.info("Sistemati i dipendenti erroneamente disabilitati.");

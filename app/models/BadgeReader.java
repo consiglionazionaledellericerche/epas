@@ -29,6 +29,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import net.sf.oval.constraint.NotNull;
 import org.hibernate.envers.Audited;
@@ -42,6 +44,8 @@ import play.data.validation.Unique;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "badge_readers")
 @Audited
@@ -52,28 +56,28 @@ public class BadgeReader extends BaseModel {
   @Unique
   @NotNull
   @Required
-  public String code;
+  private String code;
 
-  public String description;
+  private String description;
 
-  public String location;
+  private String location;
 
   @OneToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
-  public User user;
+  private User user;
 
   @OrderBy("code ASC")
   @OneToMany(mappedBy = "badgeReader")
-  public Set<Badge> badges = Sets.newHashSet();
+  private Set<Badge> badges = Sets.newHashSet();
 
   @ManyToMany
-  public List<BadgeSystem> badgeSystems = Lists.newArrayList();
+  private List<BadgeSystem> badgeSystems = Lists.newArrayList();
   
   @OneToMany(mappedBy = "badgeReader")
   @NotAudited
-  public List<Zone> zones = Lists.newArrayList();
+  private List<Zone> zones = Lists.newArrayList();
 
-  public boolean enabled = true;
+  private boolean enabled = true;
 
   @Override
   public String toString() {

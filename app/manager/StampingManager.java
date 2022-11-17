@@ -119,8 +119,8 @@ public class StampingManager {
     if (stamp == null) {
       return false;
     }
-    if (stamp.stampType != null && stamp.stampType.equals(StampTypes.LAVORO_FUORI_SEDE)
-        && stamp.way.equals(WayType.in)
+    if (stamp.getStampType() != null && stamp.getStampType().equals(StampTypes.LAVORO_FUORI_SEDE)
+        && stamp.getWay().equals(WayType.in)
         && stampingFromClient.stampType == null
         && stampingFromClient.inOut == 0) {
       return true;
@@ -189,7 +189,7 @@ public class StampingManager {
   public boolean isTooFarInPast(LocalDateTime dateTime) {
     return dateTime.compareTo(
       LocalDateTime.now().minusDays(
-        generalSettingDao.generalSetting().maxDaysInPastForRestStampings)) < 0;
+        generalSettingDao.generalSetting().getMaxDaysInPastForRestStampings())) < 0;
   }
 
   /**
@@ -204,7 +204,7 @@ public class StampingManager {
       Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
-    val alreadyPresentStamping = stampingDao.getStamping(stamping.date, person, stamping.way);
+    val alreadyPresentStamping = stampingDao.getStamping(stamping.getDate(), person, stamping.getWay());
     //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
     //alla timbratura esistente allora creo/modifico la timbratura.
     if (!alreadyPresentStamping.isPresent() 
@@ -212,30 +212,31 @@ public class StampingManager {
 
       if (!currentUser.isSystemUser()) {
         if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-          stamping.markedByEmployee = false;
-          stamping.markedByAdmin = true;
+          stamping.setMarkedByEmployee(false);
+          stamping.setMarkedByAdmin(true);
         } else {
-          stamping.markedByAdmin = false;
+          stamping.setMarkedByAdmin(false);
           if (isTeleworkStamping) {
-            stamping.markedByTelework = true;
-            stamping.markedByEmployee = false;
+            stamping.setMarkedByTelework(true);
+            stamping.setMarkedByEmployee(false);
           } else {
-            stamping.markedByTelework = false;
-            stamping.markedByEmployee = true;
+            stamping.setMarkedByTelework(false);
+            stamping.setMarkedByEmployee(true);
           }
         }
       }
       stamping.save();
 
       consistencyManager
-      .updatePersonSituation(stamping.personDay.person.id, stamping.personDay.date);
+          .updatePersonSituation(stamping.getPersonDay().getPerson().id, 
+          stamping.getPersonDay().getDate());
 
       notificationManager
       .notificationStampingPolicy(currentUser, stamping, newInsert, !newInsert, false);
     } else {
-      if ((stamping.stampType != null 
-          && !stamping.stampType.equals(alreadyPresentStamping.get().stampType)) 
-          || (stamping.stampType == null && alreadyPresentStamping.get().stampType != null)) {
+      if ((stamping.getStampType() != null 
+          && !stamping.getStampType().equals(alreadyPresentStamping.get().getStampType())) 
+          || (stamping.getStampType() == null && alreadyPresentStamping.get().getStampType() != null)) {
         result = "Timbratura già presente ma con causale diversa, "
             + "modificare la timbratura presente.";  
       } else {
@@ -256,27 +257,27 @@ public class StampingManager {
    */
   public Stamping generateStampingFromTelework(TeleworkDto stamping, PersonDay pd, String time) {
     Stamping persistStamping = new Stamping(pd, 
-        deparseStampingDateTime(pd.date, time));
+        deparseStampingDateTime(pd.getDate(), time));
     switch (stamping.getStampType()) {
       case INIZIO_TELELAVORO:
-        persistStamping.way = WayType.in;
+        persistStamping.setWay(WayType.in);
         break;
       case FINE_TELELAVORO:
-        persistStamping.way = WayType.out;
+        persistStamping.setWay(WayType.out);
         break;
       case INIZIO_PRANZO_TELELAVORO:
-        persistStamping.way = WayType.out;
-        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        persistStamping.setWay(WayType.out);
+        persistStamping.setStampType(StampTypes.PAUSA_PRANZO);
         break;
       case FINE_PRANZO_TELELAVORO:
-        persistStamping.way = WayType.in;
-        persistStamping.stampType = StampTypes.PAUSA_PRANZO;
+        persistStamping.setWay(WayType.in);
+        persistStamping.setStampType(StampTypes.PAUSA_PRANZO);
         break;
       case INIZIO_INTERRUZIONE:
-        persistStamping.way = WayType.out;
+        persistStamping.setWay(WayType.out);
         break;
       case FINE_INTERRUZIONE:
-        persistStamping.way = WayType.in;
+        persistStamping.setWay(WayType.in);
         break;
       default:
         break;
@@ -320,7 +321,7 @@ public class StampingManager {
     WayType way = stampingFromClient.inOut == 0 ? WayType.in : WayType.out;
     if (stampingDao.getStamping(stampingFromClient.dateTime, person, way).isPresent()) {
       log.info("Timbratura delle {} già presente per {} (matricola = {}) ",
-          stampingFromClient.dateTime, person, person.number);
+          stampingFromClient.dateTime, person, person.getNumber());
       return Optional.absent();
     }
 
@@ -330,34 +331,34 @@ public class StampingManager {
           + "per fine lavoro fuori sede alle ore {}.", 
           person.fullName(), stampingFromClient.dateTime.minusMinutes(1));
       Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime.minusMinutes(1));
-      stamping.date = stampingFromClient.dateTime.minusMinutes(1);
-      stamping.markedByAdmin = stampingFromClient.markedByAdmin;
-      stamping.way = WayType.out;
-      stamping.stampType = StampTypes.LAVORO_FUORI_SEDE;      
-      stamping.note = Messages.get("stampingNote");
+      stamping.setDate(stampingFromClient.dateTime.minusMinutes(1));
+      stamping.setMarkedByAdmin(stampingFromClient.markedByAdmin);
+      stamping.setWay(WayType.out);
+      stamping.setStampType(StampTypes.LAVORO_FUORI_SEDE);      
+      stamping.setNote(Messages.get("stampingNote"));
       stamping.save();
     }
 
     //Creazione stamping e inserimento
     Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime);
-    stamping.date = stampingFromClient.dateTime;
-    stamping.markedByAdmin = stampingFromClient.markedByAdmin;
-    stamping.way = way;
-    stamping.stampType = stampingFromClient.stampType;
-    stamping.stampingZone = 
+    stamping.setDate(stampingFromClient.dateTime);
+    stamping.setMarkedByAdmin(stampingFromClient.markedByAdmin);
+    stamping.setWay(way);
+    stamping.setStampType(stampingFromClient.stampType);
+    stamping.setStampingZone(
         (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
-        ? stampingFromClient.zona : null;
-    stamping.note = stampingFromClient.note;
-    stamping.reason = stampingFromClient.reason;
-    stamping.place = stampingFromClient.place;
+        ? stampingFromClient.zona : null);
+    stamping.setNote(stampingFromClient.note);
+    stamping.setReason(stampingFromClient.reason);
+    stamping.setPlace(stampingFromClient.place);
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",
-        stamping.getLabel(), person, person.number);
+        stamping.getLabel(), person, person.getNumber());
 
     // Ricalcolo
     if (recompute) {
-      consistencyManager.updatePersonSituation(person.id, personDay.date);
+      consistencyManager.updatePersonSituation(person.id, personDay.getDate());
     }
 
     return Optional.of(stamping);
@@ -377,7 +378,7 @@ public class StampingManager {
       Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence);
 
       if (pd.isPresent()) {
-        personDayManager.setValidPairStampings(pd.get().stampings);
+        personDayManager.setValidPairStampings(pd.get().getStampings());
         daysRecap.add(stampingDayRecapFactory
             .create(pd.get(), numberOfInOut, true, Optional.absent()));
       }
@@ -398,16 +399,17 @@ public class StampingManager {
     String key = "";
     int value = 0;
     for (PersonStampingDayRecap day : daysRecap) {
-      if (day.personDay.stampings.isEmpty() && day.personDay.absences.isEmpty()) {
+      if (day.personDay.getStampings().isEmpty() && day.personDay.getAbsences().isEmpty()) {
         key = "Giorno in attesa di completamento";
-      } else if (day.personDay.stampings.isEmpty() 
-          && (day.personDay.absences.get(0).justifiedType.name.equals(JustifiedTypeName.all_day) 
-          || day.personDay.absences.get(0).justifiedType.name
+      } else if (day.personDay.getStampings().isEmpty() 
+          && (day.personDay.getAbsences().get(0).getJustifiedType().getName()
+              .equals(JustifiedTypeName.all_day) 
+          || day.personDay.getAbsences().get(0).getJustifiedType().getName()
           .equals(JustifiedTypeName.assign_all_day)
-          || day.personDay.absences.get(0).justifiedType.name
+          || day.personDay.getAbsences().get(0).getJustifiedType().getName()
           .equals(JustifiedTypeName.complete_day_and_add_overtime))) {
-        key = day.personDay.absences.get(0).getAbsenceType().getCode() + " - " 
-            + day.personDay.absences.get(0).getAbsenceType().getShortDescription();
+        key = day.personDay.getAbsences().get(0).getAbsenceType().getCode() + " - " 
+            + day.personDay.getAbsences().get(0).getAbsenceType().getShortDescription();
       } else {
         key = "Presenti";
       }
@@ -434,8 +436,8 @@ public class StampingManager {
    *     timbratura fuori sede, false altrimenti.
    */
   public boolean checkStampType(Stamping stamping, User user, Person employee) {
-    return user.person.id.equals(employee.id)
-        && stamping.stampType == StampTypes.LAVORO_FUORI_SEDE;
+    return user.getPerson().id.equals(employee.id)
+        && stamping.getStampType() == StampTypes.LAVORO_FUORI_SEDE;
   }
 
   /**
@@ -453,7 +455,7 @@ public class StampingManager {
     }
     if (user.get().getBadgeReader() == null) {
       log.error("L'utente {} utilizzato per l'invio della timbratura"
-          + " non ha una istanza badgeReader valida associata.", user.get().username);
+          + " non ha una istanza badgeReader valida associata.", user.get().getUsername());
       return Optional.absent();
     }
     if (stamping.numeroBadge == null) {
@@ -490,7 +492,7 @@ public class StampingManager {
     }
     if (user.get().getBadgeReader() == null) {
       log.warn("L'utente {} utilizzato per l'invio della timbratura"
-          + " non ha una istanza badgeReader valida associata.", user.get().username);
+          + " non ha una istanza badgeReader valida associata.", user.get().getUsername());
       return Optional.absent();
     }
     if (Strings.isNullOrEmpty(badgeNumber)) {

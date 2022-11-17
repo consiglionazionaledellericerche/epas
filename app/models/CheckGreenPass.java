@@ -21,6 +21,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
@@ -32,19 +33,21 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @Entity
 @Audited
 public class CheckGreenPass extends BaseModel {
   
   private static final long serialVersionUID = 4909012051833782360L;
 
-  public LocalDate checkDate;
+  private LocalDate checkDate;
   
   @Getter
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
   
-  public boolean checked;
+  private boolean checked;
 }

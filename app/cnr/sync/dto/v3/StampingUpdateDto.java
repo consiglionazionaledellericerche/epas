@@ -81,7 +81,7 @@ public class StampingUpdateDto {
     val stamping = modelMapper.map(stampingDto, Stamping.class);
 
     if (stampingDto.reasonType != null) {
-      stamping.stampType = StampTypes.byCode(stampingDto.reasonType.name());
+      stamping.setStampType(StampTypes.byCode(stampingDto.reasonType.name()));
     }
 
     return stamping;
@@ -92,15 +92,15 @@ public class StampingUpdateDto {
    * presenti nell'instanza di questo DTO.
    */
   public void update(Stamping stamping) {
-    stamping.markedByAdmin = isMarkedByAdmin();
-    stamping.markedByEmployee = isMarkedByEmployee();
-    stamping.note = getNote();
-    stamping.place = getPlace();
-    stamping.reason = getReason();
-    stamping.stampingZone = getStampingZone();
-    stamping.way = getWayType();
+    stamping.setMarkedByAdmin(isMarkedByAdmin());
+    stamping.setMarkedByEmployee(isMarkedByEmployee());
+    stamping.setNote(getNote());
+    stamping.setPlace(getPlace());
+    stamping.setReason(getReason());
+    stamping.setStampingZone(getStampingZone());
+    stamping.setWay(getWayType());
     if (getReasonType() != null) {
-      stamping.stampType = StampTypes.byCode(getReasonType().name());
+      stamping.setStampType(StampTypes.byCode(getReasonType().name()));
     }
   }
 }

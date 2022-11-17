@@ -76,9 +76,9 @@ public class OfficeManager {
     if (!uro.isPresent()) {
 
       UsersRolesOffices newUro = new UsersRolesOffices();
-      newUro.user = user;
-      newUro.office = office;
-      newUro.role = role;
+      newUro.setUser(user);
+      newUro.setOffice(office);
+      newUro.setRole(role);
       newUro.save();
       return true;
     }
@@ -116,8 +116,8 @@ public class OfficeManager {
           (String) configuration.getValue());
       for (String ip : ipAddresses) {
         if (ipList != null && ipList.ipList.contains(ip) 
-            && officesWebStampingEnabled.contains(configuration.office)) {
-          offices.add(configuration.office);
+            && officesWebStampingEnabled.contains(configuration.getOffice())) {
+          offices.add(configuration.getOffice());
         }
       }
     }

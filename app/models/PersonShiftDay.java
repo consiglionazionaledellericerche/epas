@@ -30,6 +30,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
 import models.enumerate.ShiftTroubles;
@@ -42,6 +44,8 @@ import play.data.validation.Required;
 /**
  * Giornata in turno di una persona.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "person_shift_days")
@@ -52,36 +56,36 @@ public class PersonShiftDay extends BaseModel {
   // morning or afternoon slot
   @Column(name = "shift_slot")
   @Enumerated(EnumType.STRING)
-  public ShiftSlot shiftSlot;
+  private ShiftSlot shiftSlot;
 
   //@Required
   @ManyToOne
-  public OrganizationShiftSlot organizationShiftSlot;
+  private OrganizationShiftSlot organizationShiftSlot;
 
   // shift date
   @Required
-  public LocalDate date;
+  private LocalDate date;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "shift_type_id", nullable = false)
-  public ShiftType shiftType;
+  private ShiftType shiftType;
 
   @Required
   @ManyToOne
   @JoinColumn(name = "person_shift_id", nullable = false)
   @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-  public PersonShift personShift;
+  private PersonShift personShift;
 
   //  Nuova relazione con gli errori associati ai personShiftDay
   @OneToMany(mappedBy = "personShiftDay", cascade = CascadeType.REMOVE)
-  public Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
+  private Set<PersonShiftDayInTrouble> troubles = Sets.newHashSet();
   
   /**
    * numero di soglie (minime) superate.
    */
   @Column(name = "exceeded_thresholds")
-  public int exceededThresholds;
+  private int exceededThresholds;
 
   /**
    * Controlla l'orario di inizio dello slot.
@@ -92,11 +96,11 @@ public class PersonShiftDay extends BaseModel {
   public LocalTime slotBegin() {
     switch (shiftSlot) {
       case MORNING:
-        return shiftType.shiftTimeTable.startMorning;
+        return shiftType.getShiftTimeTable().getStartMorning();
       case AFTERNOON:
-        return shiftType.shiftTimeTable.startAfternoon;
+        return shiftType.getShiftTimeTable().getStartAfternoon();
       case EVENING:
-        return shiftType.shiftTimeTable.startEvening;
+        return shiftType.getShiftTimeTable().getStartEvening();
       default:
         return null;
     }
@@ -111,11 +115,11 @@ public class PersonShiftDay extends BaseModel {
   public LocalTime slotEnd() {
     switch (shiftSlot) {
       case MORNING:
-        return shiftType.shiftTimeTable.endMorning;
+        return shiftType.getShiftTimeTable().getEndMorning();
       case AFTERNOON:
-        return shiftType.shiftTimeTable.endAfternoon;
+        return shiftType.getShiftTimeTable().getEndAfternoon();
       case EVENING:
-        return shiftType.shiftTimeTable.endEvening;
+        return shiftType.getShiftTimeTable().getEndEvening();
       default:
         return null;
     }
@@ -130,11 +134,11 @@ public class PersonShiftDay extends BaseModel {
   public LocalTime lunchTimeBegin() {
     switch (shiftSlot) {
       case MORNING:
-        return shiftType.shiftTimeTable.startMorningLunchTime;
+        return shiftType.getShiftTimeTable().getStartMorningLunchTime();
       case AFTERNOON:
-        return shiftType.shiftTimeTable.startAfternoonLunchTime;
+        return shiftType.getShiftTimeTable().getStartAfternoonLunchTime();
       case EVENING:
-        return shiftType.shiftTimeTable.startEveningLunchTime;
+        return shiftType.getShiftTimeTable().getStartEveningLunchTime();
       default:
         return null;
     }
@@ -149,11 +153,11 @@ public class PersonShiftDay extends BaseModel {
   public LocalTime lunchTimeEnd() {
     switch (shiftSlot) {
       case MORNING:
-        return shiftType.shiftTimeTable.endMorningLunchTime;
+        return shiftType.getShiftTimeTable().getEndMorningLunchTime();
       case AFTERNOON:
-        return shiftType.shiftTimeTable.endAfternoonLunchTime;
+        return shiftType.getShiftTimeTable().getEndAfternoonLunchTime();
       case EVENING:
-        return shiftType.shiftTimeTable.endEveningLunchTime;
+        return shiftType.getShiftTimeTable().getEndEveningLunchTime();
       default:
         return null;
     }
@@ -161,7 +165,7 @@ public class PersonShiftDay extends BaseModel {
 
   @Transient
   public boolean hasError(ShiftTroubles trouble) {
-    return troubles.stream().anyMatch(error -> error.cause == trouble);
+    return troubles.stream().anyMatch(error -> error.getCause() == trouble);
   }
 
   /**
@@ -173,7 +177,7 @@ public class PersonShiftDay extends BaseModel {
   @Transient
   public boolean hasOneOfErrors(Collection<ShiftTroubles> shiftTroubles) {
     return troubles.stream().anyMatch(trouble -> {
-      return shiftTroubles.contains(trouble.cause);
+      return shiftTroubles.contains(trouble.getCause());
     });
   }
 

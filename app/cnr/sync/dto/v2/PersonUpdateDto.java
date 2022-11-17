@@ -36,24 +36,24 @@ public class PersonUpdateDto extends PersonCreateDto {
    * presenti nell'instanza di questo DTO.
    */
   public void update(Person person) {
-    person.name = getName();
-    person.surname = getSurname();
-    person.othersSurnames = getOthersSurnames();
-    person.fiscalCode = getFiscalCode();
-    person.email = getEmail();
-    person.number = getNumber();
-    person.eppn = getEppn();
-    person.telephone = getTelephone();
-    person.fax = getFax();
-    person.mobile = getMobile();
+    person.setName(getName());
+    person.setSurname(getSurname());
+    person.setOthersSurnames(getOthersSurnames());
+    person.setFiscalCode(getFiscalCode());
+    person.setEmail(getEmail());
+    person.setNumber(getNumber());
+    person.setEppn(getEppn());
+    person.setTelephone(getTelephone());
+    person.setFax(getFax());
+    person.setMobile(getMobile()); 
     if (getQualification() != null) {
-      person.qualification = 
+      person.setQualification( 
           ((Qualification) Qualification.findAll().stream()
-              .filter(q -> ((Qualification) q).qualification == getQualification().intValue())
-              .findFirst().get());        
+              .filter(q -> ((Qualification) q).getQualification() == getQualification().intValue())
+              .findFirst().get()));        
     }
     if (getOfficeId() != null) {
-      person.office = Office.findById(getOfficeId());  
+      person.setOffice(Office.findById(getOfficeId()));  
     }
 
   }
