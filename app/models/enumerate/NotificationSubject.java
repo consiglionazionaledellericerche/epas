@@ -90,6 +90,11 @@ public enum NotificationSubject {
    * Notifica per telelavoro
    */
   TELEWORK_INFORMATION,
+  
+  /*
+   * Notifica per congedo parentale per il padre
+   */
+  PARENTAL_LEAVE_INFORMATION,
 
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.

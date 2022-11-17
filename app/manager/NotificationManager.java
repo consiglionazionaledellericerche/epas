@@ -64,6 +64,7 @@ import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.apache.commons.mail.EmailException;
@@ -1684,6 +1685,9 @@ public class NotificationManager {
       case TELEWORK_INFORMATION:
         subject = NotificationSubject.TELEWORK_INFORMATION;
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        subject = NotificationSubject.PARENTAL_LEAVE_INFORMATION;
+        break;
       default:
         break;
     }
@@ -1730,6 +1734,7 @@ public class NotificationManager {
    */
   public void notificationInformationRequestRefused(Optional<ServiceRequest> serviceRequest,
       Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest,
       Person refuser) {
 
     val request = serviceRequest.isPresent() ? serviceRequest.get() :
@@ -1757,6 +1762,13 @@ public class NotificationManager {
         message.append(String.format(" per il mese %s",
             DateUtility.fromIntToStringMonth(teleworkRequest.get().getMonth())));
         message.append(String.format(" dell'anno %s", teleworkRequest.get().getYear()));
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        subject = NotificationSubject.PARENTAL_LEAVE_INFORMATION;
+        message.append(String.format("dal giorno %s", 
+            parentalLeaveRequest.get().getBeginDate().toString()));
+        message.append(String.format(" al giorno %s", 
+            parentalLeaveRequest.get().getEndDate().toString()));
         break;
       default:
         break;
@@ -1875,8 +1887,10 @@ public class NotificationManager {
       requestType = Messages.get("InformationType.SERVICE_INFORMATION");
     } else if (informationRequest.getInformationType() == InformationType.TELEWORK_INFORMATION) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
-    } else {
+    } else if (informationRequest.getInformationType() == InformationType.ILLNESS_INFORMATION) {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
+    } else {
+      requestType = Messages.get("InformationType.PARENTAL_LEAVE_INFORMATION");
     }
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
@@ -1911,6 +1925,21 @@ public class NotificationManager {
             DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
         message.append(String.format(" dell'anno %s", teleworkRequest.getYear()));
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        ParentalLeaveRequest parentalLeaveRequest = requestDao
+            .getParentalLeaveById(informationRequest.id).get();
+        if (parentalLeaveRequest.getBeginDate().isEqual(parentalLeaveRequest.getEndDate())) {
+          message.append(String.format(" per il giorno: %s",
+              parentalLeaveRequest.getStartAt().toLocalDate().toString()));
+        } else {
+          message.append(String.format(" dal: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+          if (parentalLeaveRequest.getEndDate() != null) {
+            message.append(String.format(" al: %s",
+                parentalLeaveRequest.getEndDate().toString()));
+          }
+        }
+        break;
       default:
         break;
     }
@@ -1943,6 +1972,9 @@ public class NotificationManager {
     } else if (informationRequest.getInformationType()
         .equals(InformationType.TELEWORK_INFORMATION)) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
+    } else if (informationRequest.getInformationType()
+        .equals(InformationType.PARENTAL_LEAVE_INFORMATION)) {
+      requestType = Messages.get("InformationType.PARENTAL_LEAVE_INFORMATION");
     } else {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
     }
@@ -1985,6 +2017,19 @@ public class NotificationManager {
         message.append(String.format("\r\nper il mese di %s",
             DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
         message.append(String.format("\r\ndell'anno %s", teleworkRequest.getYear()));
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        ParentalLeaveRequest parentalLeaveRequest = requestDao
+            .getParentalLeaveById(informationRequest.id).get();
+        if (parentalLeaveRequest.getBeginDate().isEqual(parentalLeaveRequest.getEndDate())) {
+          message.append(String.format("\r\n per il giorno: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+        } else {
+          message.append(String.format(" dal: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+          message.append(String.format(" al: %s",
+              parentalLeaveRequest.getEndDate().toString()));
+        }
         break;
       default:
         break;

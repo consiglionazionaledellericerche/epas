@@ -784,6 +784,7 @@ when
 		"InformationRequests.saveServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.parentalLeave",
+		"InformationRequests.saveParentalLeaveRequest",
 
 		
 		
@@ -1516,6 +1517,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1579,6 +1581,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1636,6 +1639,7 @@ when
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
@@ -1652,6 +1656,8 @@ when
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
