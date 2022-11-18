@@ -134,8 +134,8 @@ illnessRequest.endDate =Giorno finale
 illnessRequest.name =Note sull'assenza
 parentalLeaveRequest.beginDate =Giorno Iniziale
 parentalLeaveRequest.endDate =Giorno finale
-parentalLeaveRequest.bornCertificate =Certificato di nascita
-parentalLeaveRequest.expectedDateOfBirth =Documento di data presunta parto
+bornCertificate =Certificato di nascita
+expectedDateOfBirth =Documento di data presunta parto
 
 
 type =Servizio di reperibilità

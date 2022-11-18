@@ -10,9 +10,8 @@ CREATE TABLE parental_leave_requests(
 	
 CREATE TABLE parental_leave_requests_history(
 	information_request_id BIGINT NOT NULL,
-	id BIGINT NOT NULL,
 	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-    _revision_type SMALLINT NOT NULL,
+    _revision_type SMALLINT NOT NULL DEFAULT 0,
     begin_date DATE,
 	end_date DATE,
 	born_certificate TEXT,

@@ -30,9 +30,11 @@ import dao.TeleworkValidationDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.ImageUtils;
 import helpers.Web;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -64,6 +66,7 @@ import models.informationrequests.TeleworkRequest;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
 import play.data.validation.Validation;
+import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -222,6 +225,8 @@ public class InformationRequests extends Controller {
     List<ServiceRequest> serviceApprovedResult = Lists.newArrayList();
     List<TeleworkRequest> myTeleworkResult = Lists.newArrayList();
     List<TeleworkRequest> teleworkApprovedResult = Lists.newArrayList();
+    List<ParentalLeaveRequest> myParentalLeaveResult = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeaveApprovedResult = Lists.newArrayList();
     switch (type) {
       case ILLNESS_INFORMATION:
         myIllnessResult = informationRequestDao.illnessByIds(idMyResults);
@@ -235,6 +240,10 @@ public class InformationRequests extends Controller {
         myTeleworkResult = informationRequestDao.teleworksByIds(idMyResults);
         teleworkApprovedResult = informationRequestDao.teleworksByIds(idApprovedResults);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        myParentalLeaveResult = informationRequestDao.parentalLeavesByIds(idMyResults);
+        parentalLeaveApprovedResult = informationRequestDao.parentalLeavesByIds(idApprovedResults);
+        break;
       default:
         break;
     }
@@ -243,7 +252,8 @@ public class InformationRequests extends Controller {
 
     render(config, type, onlyOwn, approvedResults, myResults,
         myIllnessResult, illnessApprovedResult, myServiceResult, serviceApprovedResult,
-        myTeleworkResult, teleworkApprovedResult);
+        myTeleworkResult, teleworkApprovedResult, myParentalLeaveResult, 
+        parentalLeaveApprovedResult);
   }
 
   /**
@@ -430,7 +440,8 @@ public class InformationRequests extends Controller {
    *
    * @param parentalLeaveRequest la richiesta di flusso per congedo parentale per il padre
    */
-  public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest) {
+  public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest, 
+      Blob bornCertificate, Blob expectedDateOfBirth) {
     InformationType type = parentalLeaveRequest.getInformationType();
     if (parentalLeaveRequest.getBeginDate() == null || parentalLeaveRequest.getEndDate() == null) {
       Validation.addError("parentalLeaveRequest.beginDate",
@@ -450,6 +461,8 @@ public class InformationRequests extends Controller {
     informationRequestManager.configure(Optional.absent(),
         Optional.absent(), Optional.absent(), Optional.of(parentalLeaveRequest));
     parentalLeaveRequest.setStartAt(LocalDateTime.now());
+    parentalLeaveRequest.setBornCertificate(bornCertificate);
+    parentalLeaveRequest.setExpectedDateOfBirth(expectedDateOfBirth);
     parentalLeaveRequest.save();
     boolean isNewRequest = !parentalLeaveRequest.isPersistent();
     if (isNewRequest || !parentalLeaveRequest.isFlowStarted()) {
@@ -538,6 +551,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id);
@@ -548,6 +562,9 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
@@ -555,7 +572,7 @@ public class InformationRequests extends Controller {
     User user = Security.getUser().get();
 
     boolean approved = informationRequestManager.approval(serviceRequest,
-        illnessRequest, teleworkRequest, user);
+        illnessRequest, teleworkRequest, parentalLeaveRequest, user);
 
     if (approved) {
       notificationManager.sendEmailToUser(Optional.absent(), Optional.absent(),
@@ -565,7 +582,8 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (user.getPerson().isSeatSupervisor() || user.getPerson().isGroupManager()) {
+    if (user.getPerson().isSeatSupervisor() || user.getPerson().isGroupManager()
+        || user.hasRoles(Role.PERSONNEL_ADMIN)) {
       InformationRequests.listToApprove(request.getInformationType());
     } else {
       InformationRequests.list(request.getInformationType());
@@ -639,6 +657,7 @@ public class InformationRequests extends Controller {
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
     switch (type) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
@@ -649,13 +668,16 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id).get();
+        break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
     }
     boolean disapproval = false;
     render(informationRequest, teleworkRequest, illnessRequest, serviceRequest,
-        type, user, disapproval);
+        parentalLeaveRequest, type, user, disapproval);
   }
 
   /**
@@ -793,5 +815,43 @@ public class InformationRequests extends Controller {
     Stampings.personStamping(Security.getUser().get().getPerson().id,
         Integer.parseInt(session.get("yearSelected")),
         Integer.parseInt(session.get("monthSelected")));
+  }
+  
+  /**
+   * Permette lo scaricamento dei documenti associati alla richiesta di congedo parentale
+   * per il padre.
+   * 
+   * @param informationRequestId l'identificativo della richiesta di congedo parentale
+   */
+  public static void downloadAttachment(Long informationRequestId) {
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = informationRequestDao
+        .getParentalLeaveById(informationRequestId);
+    String fileName = "";
+    long length = 0;
+    InputStream is;
+    if (!parentalLeaveRequest.isPresent()) {
+      flash.error("Non esiste la richiesta associata a questo file! Verificare!");
+      redirect("InformationRequests.list");
+    }
+    if (parentalLeaveRequest.get().getBornCertificate() != null) {
+      response.setContentTypeIfNotSet(parentalLeaveRequest.get().getBornCertificate().type());
+      fileName = String.format("certificatoNascitaFiglioDi-%s",
+          parentalLeaveRequest.get().getPerson().getFullname().replace(" ", "-"));
+      fileName = String.format("%s%s", fileName, 
+          ImageUtils.fileExtension(parentalLeaveRequest.get().getBornCertificate()));
+      length = parentalLeaveRequest.get().getBornCertificate().length();
+      is = parentalLeaveRequest.get().getBornCertificate().get();
+      
+    } else {
+      response.setContentTypeIfNotSet(parentalLeaveRequest.get().getExpectedDateOfBirth().type());
+      fileName = String.format("documentoNascitaPresuntaFiglioDi-%s",
+          parentalLeaveRequest.get().getPerson().getFullname().replace(" ", "-"));
+      fileName = String.format("%s%s", fileName, 
+          ImageUtils.fileExtension(parentalLeaveRequest.get().getExpectedDateOfBirth()));
+      length = parentalLeaveRequest.get().getExpectedDateOfBirth().length();
+      is = parentalLeaveRequest.get().getExpectedDateOfBirth().get();
+      
+    }
+    renderBinary(is, fileName, length);
   }
 }

@@ -357,6 +357,20 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(teleworkRequest)
         .where(teleworkRequest.id.in(ids)).fetch();
   }
+  
+  /**
+   * La lista delle richieste di congedo parentale per padri appartenenti alla lista di id
+   * passati come parametro.
+   *
+   * @param ids la lista di id di richieste di congedo parentale per i padri
+   * @return la lista delle richieste di congedo parentale per i padri appartenenti alla lista di id
+   *     passati come parametro.
+   */
+  public List<ParentalLeaveRequest> parentalLeavesByIds(List<Long> ids) {
+    final QParentalLeaveRequest parentalLeaveRequest = QParentalLeaveRequest.parentalLeaveRequest;
+    return getQueryFactory().selectFrom(parentalLeaveRequest)
+        .where(parentalLeaveRequest.id.in(ids)).fetch();
+  }
 
   /**
    * La lista di tutte le richieste di telelavoro effettuate dalla persona passata come parametro.

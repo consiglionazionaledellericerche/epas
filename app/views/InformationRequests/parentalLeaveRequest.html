@@ -2,14 +2,19 @@
 #{alert color: 'info' }
 <p>Compila il form sottostante per avviare un flusso di informazione di assenza per congedo parentale per il padre.
 Specifica la <strong>data di inizio</strong> , la <strong>data di fine</strong> e allega i documenti necessari:<br>
- 
+<ul>
+	<li>Se si chiede il congedo <strong>prima</strong> della nascita del figlio, occorre inserire <strong>SOLO</strong> il
+	documento con la data presunta della nascita</li>
+	<li>Se si chiede il congedo <strong>dopo</strong> la nascita del figlio, occorre inserire <strong>SOLO</strong> il 
+	certificato di nascita del figlio</li>
+</ul>
 </p>
 #{/alert}
 </div>
 
 
 #{form action:@saveParentalLeaveRequest(), method:'POST', autocomplete:false, class:'form form-horizontal',
-	  'data-spinner':'#defaultSpinner'}
+	  'data-spinner':'#defaultSpinner', enctype:'multipart/form-data'}
 	  
 	#{f.hidden 'parentalLeaveRequest.id' /}
 	#{f.hidden 'parentalLeaveRequest.person.id' /}
@@ -19,8 +24,8 @@ Specifica la <strong>data di inizio</strong> , la <strong>data di fine</strong> 
 	#{f.date 'parentalLeaveRequest.beginDate', required:true, value:parentalLeaveRequest.beginDate?.format() /}
 	#{f.date 'parentalLeaveRequest.endDate', required:true, value:parentalLeaveRequest.endDate?.format() /}
 	
-	#{f.input 'parentalLeaveRequest.bornCertificate', type:'file' /}
-	#{f.input 'parentalLeaveRequest.expectedDateOfBirth', type:'file' /}
+	#{f.input 'bornCertificate', type:'file' /}
+	#{f.input 'expectedDateOfBirth', type:'file' /}
             
 	#{b.buttons center:true}
 		 #{b.link @list(type), color:'default', title:'Indietro' /}

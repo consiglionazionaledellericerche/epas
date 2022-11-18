@@ -60,6 +60,7 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.enumerate.InformationType;
 
 import common.security.PermissionCheck;
@@ -785,6 +786,7 @@ when
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.parentalLeave",
 		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.downloadAttachment",
 
 		
 		
@@ -1648,7 +1650,7 @@ then
 end
 
 
-rule PersonnelAdmin_editAndApprovalForInformationFlows
+rule PersonnelAdmin_editAndApprovalForIllnessFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
@@ -1661,6 +1663,23 @@ when
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule PersonnelAdmin_editAndApprovalForParentalLeavesFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $pr: ParentalLeaveRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $pr, granted == false)
 then
  $c.grant();
 end

@@ -511,8 +511,8 @@ public class InformationRequestManager {
    * @return true se il flusso è stato approvato correttamente, false altrimenti.
    */
   public boolean approval(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
-      User user) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest, User user) {
     if (serviceRequest.isPresent()) {
       if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
         // caso di approvazione da parte del responsabile di sede
@@ -548,6 +548,14 @@ public class InformationRequestManager {
         return true;
       }
     }  
+    if (parentalLeaveRequest.isPresent()) {
+      if (parentalLeaveRequest.get().isAdministrativeApprovalRequired()
+          && parentalLeaveRequest.get().getAdministrativeApproved() == null
+          && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        personnelAdministratorApproval(parentalLeaveRequest.get().id, user);
+        return true;
+      }
+    }
     
     return false;
   }
