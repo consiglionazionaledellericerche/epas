@@ -103,6 +103,7 @@ InformationType.PARENTAL_LEAVE_INFORMATION =Informazione congedo parentale per i
 InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
 InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
 InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
+InformationType.PARENTAL_LEAVE_INFORMATION_TO_APPROVE =Congedi parentali per il padre da approvare
 
 InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
 InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT=Richiesta validata dal responsabile di sede
