@@ -291,7 +291,7 @@ public class InformationRequestManager {
 
       case OFFICE_HEAD_REFUSAL:
         // si riparte dall'inizio del flusso.
-        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         request.setFlowEnded(true);
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
             illnessRequest, teleworkRequest, parentalLeaveRequest, person);
@@ -305,7 +305,7 @@ public class InformationRequestManager {
         break;
         
       case ADMINISTRATIVE_REFUSAL:
-        //TODO: completare
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         break;
         
       case MANAGER_ACKNOWLEDGMENT:
@@ -330,7 +330,7 @@ public class InformationRequestManager {
         request.setFlowEnded(true);
         break;
       case EPAS_REFUSAL:
-        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         //TODO: aggiungere notifica
         //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
@@ -423,7 +423,8 @@ public class InformationRequestManager {
    * @param teleworkRequest l'eventuale richiesta di telelavoro
    */
   public void resetFlow(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().setFlowStarted(false);
       serviceRequest.get().setOfficeHeadApproved(null);
@@ -436,6 +437,10 @@ public class InformationRequestManager {
     if (teleworkRequest.isPresent()) {
       teleworkRequest.get().setFlowStarted(false);
       teleworkRequest.get().setOfficeHeadApproved(null);
+    }
+    if (parentalLeaveRequest.isPresent()) {
+      parentalLeaveRequest.get().setFlowStarted(false);
+      parentalLeaveRequest.get().setAdministrativeApproved(null);
     }
   }
   

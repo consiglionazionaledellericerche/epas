@@ -602,6 +602,7 @@ public class InformationRequests extends Controller {
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
     notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
     switch (informationRequest.getInformationType()) {
@@ -609,23 +610,29 @@ public class InformationRequests extends Controller {
         serviceRequest = informationRequestDao.getServiceById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(serviceRequest, informationRequest, disapproval);
+          render(serviceRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
       case ILLNESS_INFORMATION:
         illnessRequest = informationRequestDao.getIllnessById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(illnessRequest, informationRequest, disapproval);
+          render(illnessRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(teleworkRequest, informationRequest, disapproval);
+          render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id).get();
+        if (!disapproval) {
+          disapproval = true;
+          render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
+        }
       default:
         break;
     }
@@ -638,8 +645,18 @@ public class InformationRequests extends Controller {
       flash.error("Richiesta respinta");
       InformationType type = informationRequest.getInformationType();
       render("@show", informationRequest, type, serviceRequest,
-          illnessRequest, teleworkRequest, user);
+          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
     }
+    if (informationRequest.isAdministrativeApprovalRequired()
+        && informationRequest.getAdministrativeApproved() == null
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+      informationRequestManager.personnelAdministratorDisapproval(id, reason);
+      flash.error("Richiesta respinta");
+      InformationType type = informationRequest.getInformationType();
+      render("@show", informationRequest, type, serviceRequest,
+          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
+    }
+      
     render("@show", informationRequest, user);
   }
 
