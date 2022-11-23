@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] - UNRELEASED
+### Added
+ - Aggiunto nuov codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ 
+### Changed
+ - Modificato comportamento del codice 98CV che deve decurtare le ferie
+
+
 ## [2.6.2] - 2022-11-17
 ### Added
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
