@@ -92,14 +92,18 @@ CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibi
 InformationType.TELEWORK_INFORMATIONS =Flussi per Telelavoro
 InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
 InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
+InformationType.PARENTAL_LEAVE_INFORMATIONS =Flussi per comunicazione congedo parentale padre
 InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+InformationType.PARENTAL_LEAVE_INFORMATION.blank =Nuovo flusso informativo per congedo parentale del padre
 InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
 InformationType.ILLNESS_INFORMATION =Informazione di malattia
 InformationType.TELEWORK_INFORMATION =Richiesta presa visione di telelavoro
+InformationType.PARENTAL_LEAVE_INFORMATION =Informazione congedo parentale per il padre
 InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
 InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
 InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
+InformationType.PARENTAL_LEAVE_INFORMATION_TO_APPROVE =Congedi parentali per il padre da approvare
 
 InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
 InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT=Richiesta validata dal responsabile di sede
@@ -129,6 +133,10 @@ serviceRequest.reason =Motivazione
 illnessRequest.beginDate =Giorno iniziale
 illnessRequest.endDate =Giorno finale
 illnessRequest.name =Note sull'assenza
+parentalLeaveRequest.beginDate =Giorno Iniziale
+parentalLeaveRequest.endDate =Giorno finale
+bornCertificate =Certificato di nascita
+expectedDateOfBirth =Documento di data presunta parto
 
 
 type =Servizio di reperibilità
@@ -1013,9 +1021,11 @@ AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno pa
 InformationRequests.illness =Mie richieste per malattia
 InformationRequests.teleworks =Mie richieste per telelavoro
 InformationRequests.serviceExit =Mie richieste uscite di servizio
+InformationRequests.parentalLeave =Mie richieste di congedo parentale per padre
 InformationRequests.illnessToApprove =Flussi di richieste per malattia
 InformationRequests.teleworksToApprove =Flussi di richieste per telelavoro
 InformationRequests.serviceExitToApprove =Flussi di richieste uscite di servizio
+InformationRequests.parentalLeaveToApprove =Flussi di richieste congedo parentale per padre
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
@@ -1313,6 +1323,9 @@ TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visi
 SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di gruppo
+
+FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli I-III da parte del responsabile amministrativo
+FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli IV-VIII da parte del responsabile amministrativo
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi

@@ -52,7 +52,14 @@ public enum InformationType {
       Optional.absent(),
       Optional.absent(),
       Optional.absent(),
-      Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED));
+      Optional.of(EpasParam.SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED)),
+  PARENTAL_LEAVE_INFORMATION(true, false, true,
+      Optional.absent(),
+      Optional.absent(),
+      Optional.of(EpasParam.FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED),
+      Optional.absent(),
+      Optional.absent());
   
   public final boolean alwaysSkipOfficeHeadApproval;
   public final boolean alwaysSkipAdministrativeApproval;

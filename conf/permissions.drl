@@ -60,6 +60,7 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.enumerate.InformationType;
 
 import common.security.PermissionCheck;
@@ -783,6 +784,9 @@ when
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.parentalLeave",
+		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.downloadAttachment",
 
 		
 		
@@ -1515,6 +1519,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1578,6 +1583,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1635,6 +1641,7 @@ when
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
@@ -1643,7 +1650,7 @@ then
 end
 
 
-rule PersonnelAdmin_editAndApprovalForInformationFlows
+rule PersonnelAdmin_editAndApprovalForIllnessFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
@@ -1651,9 +1658,28 @@ when
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule PersonnelAdmin_editAndApprovalForParentalLeavesFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $pr: ParentalLeaveRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $pr, granted == false)
 then
  $c.grant();
 end
@@ -2072,7 +2098,8 @@ when
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
         "InformationRequests.generateTeleworkReport",
-        "InformationRequests.serviceExitToApprove"
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.parentalLeaveToApprove"		
 
         ), target == null, granted == false)
 then
@@ -2248,7 +2275,8 @@ when
 //        "InformationRequests.disapproval",
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
-        "InformationRequests.generateTeleworkReport"
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.parentalLeaveToApprove"
 
        ), target == $o, granted == false)
 then
@@ -3391,7 +3419,7 @@ end
  when 
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null) from currentOperator.person
-  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION))
+  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION, InformationType.PARENTAL_LEAVE_INFORMATION))
   $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
  then
   $c.grant();

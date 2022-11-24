@@ -6,11 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.3] - UNRELEASED
 ### Added
- - Aggiunto nuov codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
  
 ### Changed
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
-
 
 ## [2.6.2] - 2022-11-17
 ### Added
@@ -19,10 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    REST /rest/v2/certifications/getMonthSituation
  - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
  - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
-
 ### Changed
  - Corretta associazione contratto precedente per i contratti continuativi
- 
+
 ## [2.6.1] - 2022-10-13
 ### Added
  - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio

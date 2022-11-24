@@ -450,6 +450,18 @@
       </p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di congedo parentale per il padre per i tecnologi/ricercatori venga inviata
+       al responsabile amministrativo della sede di lavoro di cui fanno parte.      
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di congedo parentale per il padre per i tecnici/amministrativi venga inviata
+       al responsabile amministrativo della sede di lavoro di cui fanno parte.      
+      </p>
+    #{/if}
+    
     
   #{/alert} 
   

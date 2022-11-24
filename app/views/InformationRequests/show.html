@@ -19,6 +19,9 @@
 #{elseif type.equals(models.enumerate.InformationType.SERVICE_INFORMATION)}
 	#{title title: 'Richiesta per il giorno '+ serviceRequest.day.format() + ' dalle ' + serviceRequest.beginAt.format() + ' alle ' + serviceRequest.finishTo.format()/}
 #{/elseif}
+#{elseif type.equals(models.enumerate.InformationType.PARENTAL_LEAVE_INFORMATION)}
+	#{title title: 'Richiesta per il/i giorno/i '+ parentalLeaveRequest.beginDate.format() + ' - ' + parentalLeaveRequest.endDate.format() /}
+#{/elseif}
 #{else}
 	#{title title: 'Richiesta per il mese di '+ templateUtility.monthName(teleworkRequest.month) + ' anno ' + teleworkRequest.year /}
 #{/else}
