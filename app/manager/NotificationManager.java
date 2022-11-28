@@ -1231,16 +1231,28 @@ public class NotificationManager {
           approver, requestType));
     }
 
-    if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
-      message.append(String.format("\r\n per il giorno %s con il giorno %s.",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter),
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+    if (competenceRequest.getBeginDateToAsk() != null) {
+      if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
+        message.append(String.format("\r\n per il giorno %s con il giorno %s.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+      } else {
+        message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getEndDateToGive().toString(dateFormatter),
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter),
+            competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+      }
     } else {
-      message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter),
-          competenceRequest.getEndDateToGive().toString(dateFormatter),
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter),
-          competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+      //Questo è il caso di cessione di giorni di reperibilità senza prenderne in cambio.
+      if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
+        message.append(String.format("\r\n per il giorno %s senza cedere giorni in cambio.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+      } else {
+        message.append(String.format("\r\n per i giorni %s - %s senza cedere giorni in cambio.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getEndDateToGive().toString(dateFormatter)));
+      }
     }
 
     val mailBody = message.toString();

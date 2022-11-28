@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  
 ### Changed
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
+ - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
 
 ## [2.6.2] - 2022-11-17
 ### Added
