@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.3] - UNRELEASED
 ### Added
+ - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
  - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
  - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
  
@@ -14,12 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
 
 ## [2.6.2] - 2022-11-17
+
 ### Added
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
  - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
    REST /rest/v2/certifications/getMonthSituation
- - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
+ - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello 
  - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
+
 ### Changed
  - Corretta associazione contratto precedente per i contratti continuativi
 

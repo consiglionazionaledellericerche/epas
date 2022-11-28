@@ -89,6 +89,10 @@ public class MealTicket extends BaseModel {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id", nullable = false)
   private Office office;
+  
+  @ManyToOne
+  @JoinColumn(name = "meal_ticket_card_id")
+  private MealTicketCard mealTicketCard;
 
   @Transient
   public Boolean used = null;

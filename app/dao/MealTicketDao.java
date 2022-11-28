@@ -30,6 +30,8 @@ import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
+import models.Person;
+import models.enumerate.BlockType;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
@@ -164,6 +166,17 @@ public class MealTicketDao extends DaoBase {
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();
 
+  }
+  
+  public List<MealTicket> getUnassignedElectronicMealTickets(Contract contract) {
+    QMealTicket mealTicket = QMealTicket.mealTicket;
+    
+    final JPQLQuery<MealTicket> query = getQueryFactory()
+        .selectFrom(mealTicket);
+    
+    query.where(mealTicket.blockType.eq(BlockType.electronic)
+        .and(mealTicket.mealTicketCard.isNull()).and(mealTicket.contract.eq(contract)));
+    return query.fetch();
   }
 
 }

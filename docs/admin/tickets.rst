@@ -42,6 +42,50 @@ sempre nel mese di settembre gli vengono anche rilasciati 30 buoni elettronici, 
 numero di buoni pasto maturati ma, a fine mese nell'invio dei dati ad Attestati, quel quantitativo sarà suddiviso in 
 5 buoni cartacei e 11 buoni elettronici con cui verrà "coperto" il numero dei buoni maturati.
 
+Inserire buoni pasto elettronici
+--------------------------------
+
+La possibilità di utilizzare i buoni pasto elettronici ha portato anche ePAS a differenziare le modalità di inserimento dei buoni
+pasto.
+In particolare, se si è selezionata la tipologia di buoni pasto elettronici, cliccando sul dipendente per cui si vuole effettuare
+l'inserimento, si aprirà questa nuova schermata di inserimento buoni:
+
+.. figure:: _static/images/assegnaBuoniElettronici.png
+   :scale: 40
+   :align: center
+   
+   Schermata di assegnamento buoni pasto elettronici
+   
+E' facilmente intuibile che la schermata sia del tutto analoga a quella prevista per i buoni cartacei (di cui si parla di seguito).
+In questo caso occorre specificare la tessera (che deve essere stata preventivamente assegnata) su cui si vogliono caricare i
+buoni pasto, quanti se ne vogliono caricare, la data di consegna, e la data di scadenza.
+Premendo sul bottone "Salva" posizionato sotto la form si procederà all'assegnazione dei buoni elettronici al dipendente.
+
+In questa pagina è altresì possibile passare all'inserimento di un blocchetto cartaceo (spiegazione presente nell'alert azzurro in alto), 
+qualora ci fosse la necessità di inserire dei buoni nei mesi passati e questi fossero di tipo cartaceo.
+
+Inoltre, nel caso in cui nel corso dei mesi precedenti siano stati assegnati dei buoni elettronici usando la form di inserimento
+standard (selezionando l'etichetta *elettronico* nella form di inserimento) nella parte bassa della pagina è presente un ulteriore alert, 
+di colore giallo, in cui è possibile procedere con l'associazione di quei buoni inseriti alla card attualmente in uso dal dipendente.
+Premendo il bottone giallo, il sistema provvederà in automatico all'associazione. 
+
+Cliccando sulla scheda *Modifica buoni elettronici consegnati*, si aprirà una pagina in cui sarà possibile eliminare l'inserimento
+fatto nella sua totalità o solo parte di esso. 
+
+.. figure:: _static/images/gestisciBuoniElettronici.png
+   :scale: 40
+   :align: center
+   
+   Schermata di gestione degli inserimenti dei buoni pasto elettronici
+
+
+Cliccando infatti sul bottone *Rimuovi*, si aprirà una finestra in cui specificare quanti buoni eliminare dell'inserimento in 
+questione e, una volta approvata la rimozione, il conteggio dei buoni del dipendente si aggiornerà in automatico.
+   
+
+Inserire buoni pasto cartacei
+-----------------------------
+
 Cliccando sulla persona, si aprirà la form di inserimento dei ticket:
 
 .. figure:: _static/images/assegnaBuoniTop.png

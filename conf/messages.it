@@ -546,6 +546,13 @@ MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
 mealTicketDecision=Valore Buono Pasto
 
+mealTicketCard.person =Dipendente
+mealTicketCard.number =Numero tessera
+mealTicketCard.deliveryDate =Data di rilascio
+mealTicketCard.deliveryOffice =Sede rilasciante
+
+tickets=Numero buoni
+
 ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione
@@ -554,6 +561,9 @@ forbidden= Operazione non permessa
 
 block.first=Dal
 block.last=Al
+
+first = Dal
+last= Al
 
 MOD= Modifica
 
@@ -1067,6 +1077,12 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nu
 
 
 Institutes.list= Sedi e Amministratori
+MealTicketCards.mealTicketCards= Gestione card buoni pasto elettronici
+MealTicketCards.recapElectronicMealTickets= Gestione buoni pasto elettronici
+MealTicketCards.personMealTickets= Nuovo Inserimento
+MealTicketCards.editPersonMealTickets= Modifica Buoni Elettronici Consegnati
+MealTicketCards.recapPersonMealTickets= Riepilogo Buoni Pasto Elettronici Consegnati
+
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
 MealTickets.mealTickets= Riepilogo Buoni Pasto

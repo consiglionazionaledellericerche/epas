@@ -44,6 +44,7 @@ Sistemi Informativi del CNR.
    absences
    vacations
    competences
+   electronicCards
    tickets
    sendStampings
    variousRecap

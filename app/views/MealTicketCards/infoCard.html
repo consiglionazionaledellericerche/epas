@@ -1,0 +1,20 @@
+#{modalAsync title:'Info tessera elettronica'}
+
+<div id="insertCard">
+
+#{form action:@saveNewCard(), method:'POST', autocomplete:false,
+  class:'form form-horizontal', 'data-async':'#badgeSystemList',
+  'data-async-error':'#badgeSystemData'}
+	#{alert color:'info'}
+	  Informazioni relative alla tessera ${mealTicketCard.number}. 
+	#{/alert}
+	  
+	  #{f.view 'Dipendente', value:mealTicketCard.person.fullName() /}
+	  #{f.view 'mealTicketCard.number' /}
+	  #{f.view 'mealTicketCard.deliveryDate' /}
+	  #{f.view 'Sede rilasciante', value:mealTicketCard.deliveryOffice.getName() /}
+	  #{f.view 'Data fine validità', value:mealTicketCard.getEndDate() /}
+#{/form}
+
+</div>
+#{/modalAsync}
