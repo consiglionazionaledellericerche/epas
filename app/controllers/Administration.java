@@ -1060,4 +1060,44 @@ public class Administration extends Controller {
     }.afterRequest();
     redirect("/");
   }
+
+  /**
+   * Controlla che se è presente un previousContract e che
+   * sia effettivamento il contratto precedente, altrimenti 
+   * lo corregge.
+   * 
+   * @param id l'id del contratto da verificare e correggere se necessario
+   */
+  public static void fixPreviousContract(Long id) {
+    val contract = contractDao.byId(id);
+    notFoundIfNull(contract);
+    boolean fixed = contractManager.fixPreviousContract(contract);
+    if (fixed) {
+      flash.success("Precedente contratto di %s corretto", contract.getLabel());
+    } else {
+      flash.error("Correzione del contratto %s non necessaria", contract.getLabel());
+    }
+    contractsToFix();
+  }
+
+  /**
+   * Controlla tutti i contratti con previousContract impostato
+   * che potrebbero avere dei problemi e li corregge se necessario.
+   */
+  public static void fixContractsWithWrongPreviousContract(Optional<Integer> maxSize) {
+    log.info("Richiesto il fix del previousContract di max {} contratti", maxSize);
+    int fixedContracts = contractManager.fixContractsWithWrongPreviousContract(maxSize);
+    log.info("Corretti {} contratti", fixedContracts);
+    if (fixedContracts > 0) {
+      flash.success("Corretti %s contratti", fixedContracts);
+    } else {
+      flash.error("Non ci sono contratti da correggere");
+    }
+    redirect("Administration.contractsToFix");
+  }
+
+  public static void contractsToFix() {
+    val contracts = contractDao.getContractsWithWrongPreviousContract();
+    render(contracts);
+  }
 }

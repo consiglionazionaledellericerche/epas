@@ -38,9 +38,11 @@ import models.base.InformationRequest;
 import models.base.query.QInformationRequest;
 import models.enumerate.InformationType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import models.informationrequests.query.QIllnessRequest;
+import models.informationrequests.query.QParentalLeaveRequest;
 import models.informationrequests.query.QServiceRequest;
 import models.informationrequests.query.QTeleworkRequest;
 import models.query.QOffice;
@@ -91,7 +93,8 @@ public class InformationRequestDao extends DaoBase {
         .and(informationRequest.flowEnded.isFalse()));
 
     List<InformationRequest> results = new ArrayList<>();
-    if (informationType.equals(InformationType.ILLNESS_INFORMATION)
+    if ((informationType.equals(InformationType.ILLNESS_INFORMATION) 
+        || informationType.equals(InformationType.PARENTAL_LEAVE_INFORMATION))
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       results.addAll(toApproveResultsAsPersonnelAdmin(uroList,
           informationType, signer, conditions));
@@ -99,8 +102,7 @@ public class InformationRequestDao extends DaoBase {
     if (informationType.equals(InformationType.SERVICE_INFORMATION) 
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
       results.addAll(toApproveResultsAsGroupManager(uroList, informationType, signer, conditions));
-    }
-    else {
+    } else {
       results.addAll(toApproveResultsAsSeatSuperVisor(uroList,
           informationType, signer, conditions));
     }
@@ -206,6 +208,41 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(serviceRequest)
         .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
   }
+  
+  /**
+   * Lista delle richieste di congedo parentale per il padre.
+   *
+   * @param person          La persona della quale recuperare le richieste di assenza
+   * @param fromDate        La data iniziale dell'intervallo temporale da considerare
+   * @param toDate          La data finale dell'intervallo temporale da considerare (opzionale)
+   * @param informationType Il tipo di richiesta di assenza specifico
+   * @return la lista delle richieste del congedo parentale per il padre.
+   */
+  public List<ParentalLeaveRequest> parentalLeaveByPersonAndDate(Person person,
+      LocalDateTime fromDate, Optional<LocalDateTime> toDate,
+      InformationType informationType, boolean active) {
+    
+    Preconditions.checkNotNull(person);
+    Preconditions.checkNotNull(fromDate);
+    
+    final QParentalLeaveRequest parentaLeaveRequest = QParentalLeaveRequest.parentalLeaveRequest;
+    
+    BooleanBuilder conditions = new BooleanBuilder(parentaLeaveRequest.person.eq(person)
+        .and(parentaLeaveRequest.startAt.after(fromDate))
+        .and(parentaLeaveRequest.informationType.eq(informationType)));
+    if (toDate.isPresent()) {
+      conditions.and(parentaLeaveRequest.endTo.before(toDate.get()));
+    }
+    if (active) {
+      conditions.and(parentaLeaveRequest.flowEnded.eq(false));
+    } else {
+      conditions.and(parentaLeaveRequest.flowEnded.eq(true));
+    }
+    return getQueryFactory().selectFrom(parentaLeaveRequest)
+        .where(conditions).orderBy(parentaLeaveRequest.startAt.desc()).fetch();
+  }
+  
+
 
   /**
    * Ritorna la richiesta informativa con id passato come parametro.
@@ -264,13 +301,29 @@ public class InformationRequestDao extends DaoBase {
     return Optional.fromNullable(result);
 
   }
+  
+  /**
+   * Cerca e ritorna la richiesta di congedo parentale per padre (se esiste) con id uguale 
+   * a quello passato.
+   *
+   * @param id l'identificativo della richiesta di congedo parentale per il padre
+   * @return la richiesta di congedo parentale per il padre (se esiste) con id uguale a 
+   *     quello passato
+   */
+  public Optional<ParentalLeaveRequest> getParentalLeaveById(Long id) {
+    final QParentalLeaveRequest parentalLeaveRequest = QParentalLeaveRequest.parentalLeaveRequest;
+    
+    final ParentalLeaveRequest result = getQueryFactory()
+        .selectFrom(parentalLeaveRequest).where(parentalLeaveRequest.id.eq(id)).fetchFirst();
+    return Optional.fromNullable(result);
+  }
 
   /**
    * La lista delle richieste di malattia appartenenti alla lista di id passati come parametro.
    *
    * @param ids la lista di id di richieste di malattia
    * @return la lista delle richieste di malattia appartenenti alla lista di id passati come
-   * parametro.
+   *     parametro.
    */
   public List<IllnessRequest> illnessByIds(List<Long> ids) {
     final QIllnessRequest illnessRequest = QIllnessRequest.illnessRequest;
@@ -284,7 +337,7 @@ public class InformationRequestDao extends DaoBase {
    *
    * @param ids la lista di id di richieste di uscita di servizio
    * @return la lista delle richieste di uscita di servizio appartenenti alla lista di id passati
-   * come parametro.
+   *     come parametro.
    */
   public List<ServiceRequest> servicesByIds(List<Long> ids) {
     final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
@@ -297,12 +350,26 @@ public class InformationRequestDao extends DaoBase {
    *
    * @param ids la lista di id di richieste di telelavoro
    * @return la lista delle richieste di telelavoro appartenenti alla lista di id passati come
-   * parametro.
+   *     parametro.
    */
   public List<TeleworkRequest> teleworksByIds(List<Long> ids) {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
     return getQueryFactory().selectFrom(teleworkRequest)
         .where(teleworkRequest.id.in(ids)).fetch();
+  }
+  
+  /**
+   * La lista delle richieste di congedo parentale per padri appartenenti alla lista di id
+   * passati come parametro.
+   *
+   * @param ids la lista di id di richieste di congedo parentale per i padri
+   * @return la lista delle richieste di congedo parentale per i padri appartenenti alla lista di id
+   *     passati come parametro.
+   */
+  public List<ParentalLeaveRequest> parentalLeavesByIds(List<Long> ids) {
+    final QParentalLeaveRequest parentalLeaveRequest = QParentalLeaveRequest.parentalLeaveRequest;
+    return getQueryFactory().selectFrom(parentalLeaveRequest)
+        .where(parentalLeaveRequest.id.in(ids)).fetch();
   }
 
   /**
@@ -310,7 +377,7 @@ public class InformationRequestDao extends DaoBase {
    *
    * @param person la persona di cui ricercare le richieste di telelavoro
    * @return la lista di tutte le richieste di telelavoro effettuate dalla persona passata come
-   * parametro.
+   *     parametro.
    */
   public List<TeleworkRequest> personTeleworkList(Person person) {
     final QTeleworkRequest teleworkRequest = QTeleworkRequest.teleworkRequest;
@@ -325,7 +392,7 @@ public class InformationRequestDao extends DaoBase {
    * @param month  il mese della richiesta di telelavoro
    * @param year   l'anno della richieste di telelavoro
    * @return la richiesta di telelavoro effettuate dalla persona del mese ed anno passati come
-   * parametro.
+   *     parametro.
    */
   public Optional<TeleworkRequest> personTeleworkInPeriod(Person person, Integer month,
       Integer year) {
@@ -440,13 +507,14 @@ public class InformationRequestDao extends DaoBase {
    * @param officeList la lista delle sedi
    * @param condition  le condizioni pregresse
    * @param signer     colui che deve firmare la richiesta
-   * @return le condizioni per determinare se il responsabile di gruppo è coinvolto nell'approvazione.
+   * @return le condizioni per determinare se il responsabile di gruppo è coinvolto 
+   *     nell'approvazione.
    */
   private BooleanBuilder groupManagerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(informationRequest.person.office.in(officeList))
-    .and(informationRequest.managerApprovalRequired.isTrue()
+        .and(informationRequest.managerApprovalRequired.isTrue()
         .and(informationRequest.managerApproved.isNull()));
     return condition;
   }
@@ -515,7 +583,7 @@ public class InformationRequestDao extends DaoBase {
               .and(informationRequest.officeHeadApproved.isNotNull())
               .and(person.office.in(officeList)));
     } 
-    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))){
+    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       conditions.and(
           informationRequest.administrativeApprovalRequired.isTrue()
               .and(informationRequest.administrativeApproved.isNotNull())

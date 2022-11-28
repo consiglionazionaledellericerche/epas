@@ -172,7 +172,8 @@ public abstract class InformationRequest extends BaseModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired);
+    return flowStarted && ((officeHeadApproved == null || !officeHeadApprovalRequired)
+        && (administrativeApproved == null || !administrativeApprovalRequired));
   }
 
   @Transient

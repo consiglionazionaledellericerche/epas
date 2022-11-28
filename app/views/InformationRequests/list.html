@@ -69,6 +69,16 @@
 	 	#{/else}
  		
  	#{/if}
+ 	#{if type.equals(models.enumerate.InformationType.PARENTAL_LEAVE_INFORMATION)}
+ 		#{if parentalLeaves.isEmpty()}
+	 		#{alert color:'info'}
+	 		<p>Al momento non ci sono flussi di richiesta in esecuzione.</p>
+	 		#{/alert}
+	 	#{/if}
+	 	#{else}
+	 		#{include './tableElements/_parentalLeavesTable.html' /}
+	 	#{/else}
+ 	#{/if}
   	
   #{/tabContentItem}
 

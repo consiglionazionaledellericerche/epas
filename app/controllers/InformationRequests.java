@@ -30,9 +30,11 @@ import dao.TeleworkValidationDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import helpers.ImageUtils;
 import helpers.Web;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -58,11 +60,13 @@ import models.dto.TeleworkApprovalDto;
 import models.enumerate.InformationType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.joda.time.YearMonth;
 import play.data.validation.CheckWith;
 import play.data.validation.Validation;
+import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -110,6 +114,10 @@ public class InformationRequests extends Controller {
     list(InformationType.SERVICE_INFORMATION);
   }
 
+  public static void parentalLeave() {
+    list(InformationType.PARENTAL_LEAVE_INFORMATION);
+  }
+  
   public static void teleworksToApprove() {
     listToApprove(InformationType.TELEWORK_INFORMATION);
   }
@@ -120,6 +128,10 @@ public class InformationRequests extends Controller {
 
   public static void serviceExitToApprove() {
     listToApprove(InformationType.SERVICE_INFORMATION);
+  }
+  
+  public static void parentalLeaveToApprove() {
+    listToApprove(InformationType.PARENTAL_LEAVE_INFORMATION);
   }
 
   /**
@@ -148,6 +160,8 @@ public class InformationRequests extends Controller {
     List<ServiceRequest> servicesClosed = Lists.newArrayList();
     List<IllnessRequest> illness = Lists.newArrayList();
     List<IllnessRequest> illnessClosed = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeaves = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeavesClosed = Lists.newArrayList();
     switch (type) {
       case TELEWORK_INFORMATION:
         teleworks = informationRequestDao.teleworksByPersonAndDate(person, fromDate,
@@ -167,12 +181,18 @@ public class InformationRequests extends Controller {
         servicesClosed = informationRequestDao.servicesByPersonAndDate(person, fromDate,
             Optional.absent(), InformationType.SERVICE_INFORMATION, false);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaves = informationRequestDao.parentalLeaveByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.PARENTAL_LEAVE_INFORMATION, true);
+        parentalLeavesClosed = informationRequestDao.parentalLeaveByPersonAndDate(person, fromDate, 
+            Optional.absent(), InformationType.PARENTAL_LEAVE_INFORMATION, false);
+        break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
     }
     render(teleworks, services, illness, teleworksClosed,
-        illnessClosed, servicesClosed, config, type);
+        illnessClosed, servicesClosed, config, type, parentalLeaves, parentalLeavesClosed);
   }
 
   /**
@@ -205,6 +225,8 @@ public class InformationRequests extends Controller {
     List<ServiceRequest> serviceApprovedResult = Lists.newArrayList();
     List<TeleworkRequest> myTeleworkResult = Lists.newArrayList();
     List<TeleworkRequest> teleworkApprovedResult = Lists.newArrayList();
+    List<ParentalLeaveRequest> myParentalLeaveResult = Lists.newArrayList();
+    List<ParentalLeaveRequest> parentalLeaveApprovedResult = Lists.newArrayList();
     switch (type) {
       case ILLNESS_INFORMATION:
         myIllnessResult = informationRequestDao.illnessByIds(idMyResults);
@@ -218,6 +240,10 @@ public class InformationRequests extends Controller {
         myTeleworkResult = informationRequestDao.teleworksByIds(idMyResults);
         teleworkApprovedResult = informationRequestDao.teleworksByIds(idApprovedResults);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        myParentalLeaveResult = informationRequestDao.parentalLeavesByIds(idMyResults);
+        parentalLeaveApprovedResult = informationRequestDao.parentalLeavesByIds(idApprovedResults);
+        break;
       default:
         break;
     }
@@ -226,7 +252,8 @@ public class InformationRequests extends Controller {
 
     render(config, type, onlyOwn, approvedResults, myResults,
         myIllnessResult, illnessApprovedResult, myServiceResult, serviceApprovedResult,
-        myTeleworkResult, teleworkApprovedResult);
+        myTeleworkResult, teleworkApprovedResult, myParentalLeaveResult, 
+        parentalLeaveApprovedResult);
   }
 
   /**
@@ -261,6 +288,7 @@ public class InformationRequests extends Controller {
     }
     ServiceRequest serviceRequest = new ServiceRequest();
     IllnessRequest illnessRequest = new IllnessRequest();
+    ParentalLeaveRequest parentalLeaveRequest = new ParentalLeaveRequest();
     switch (type) {
       case SERVICE_INFORMATION:
         serviceRequest.setPerson(person);
@@ -271,6 +299,11 @@ public class InformationRequests extends Controller {
         illnessRequest.setPerson(person);
         illnessRequest.setInformationType(type);
         render("@editIllnessRequest", illnessRequest, type, person);
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest.setPerson(person);
+        parentalLeaveRequest.setInformationType(type);
+        render("@editParentalLeaveRequest", parentalLeaveRequest, type, person);
         break;
       default:
         break;
@@ -321,25 +354,26 @@ public class InformationRequests extends Controller {
       render("@editServiceRequest", serviceRequest, insertable, begin, finish, type);
     }
     informationRequestManager.configure(Optional.absent(),
-        Optional.of(serviceRequest), Optional.absent());
+        Optional.of(serviceRequest), Optional.absent(), Optional.absent());
     serviceRequest.setStartAt(LocalDateTime.now());
     serviceRequest.save();
 
     boolean isNewRequest = !serviceRequest.isPersistent();
     if (isNewRequest || !serviceRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-          Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
+          Optional.absent(), Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (serviceRequest.autoApproved()) {
         informationRequestManager.executeEvent(Optional.fromNullable(serviceRequest),
-            Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
+            Optional.absent(), Optional.absent(), Optional.absent(), serviceRequest.getPerson(),
             InformationRequestEventType.COMPLETE, Optional.absent());
       }
       if (serviceRequest.getPerson().isSeatSupervisor()) {
         approval(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(serviceRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(serviceRequest.getPerson().getUser(),
             serviceRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(serviceRequest.getPerson().getUser(),
@@ -375,19 +409,21 @@ public class InformationRequests extends Controller {
       render("@editIllnessRequest", illnessRequest, type);
     }
     informationRequestManager.configure(Optional.of(illnessRequest),
-        Optional.absent(), Optional.absent());
+        Optional.absent(), Optional.absent(), Optional.absent());
     illnessRequest.setStartAt(LocalDateTime.now());
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();
     if (isNewRequest || !illnessRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(),
-          Optional.fromNullable(illnessRequest), Optional.absent(), illnessRequest.getPerson(),
+          Optional.fromNullable(illnessRequest), Optional.absent(), Optional.absent(),
+          illnessRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (illnessRequest.getPerson().isSeatSupervisor()) {
         approval(illnessRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(illnessRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(illnessRequest.getPerson().getUser(),
             illnessRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(illnessRequest.getPerson().getUser(),
@@ -397,6 +433,60 @@ public class InformationRequests extends Controller {
     }
     flash.success("Operazione effettuata correttamente");
     InformationRequests.list(illnessRequest.getInformationType());
+  }
+  
+  /**
+   * Persiste la richiesta e avvia il flusso informativo.
+   *
+   * @param parentalLeaveRequest la richiesta di flusso per congedo parentale per il padre
+   */
+  public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest, 
+      Blob bornCertificate, Blob expectedDateOfBirth) {
+    InformationType type = parentalLeaveRequest.getInformationType();
+    if (parentalLeaveRequest.getBeginDate() == null || parentalLeaveRequest.getEndDate() == null) {
+      Validation.addError("parentalLeaveRequest.beginDate",
+          "Entrambi i campi data devono essere valorizzati");
+      Validation.addError("parentalLeaveRequest.endDate",
+          "Entrambi i campi data devono essere valorizzati");
+      response.status = 400;
+
+      render("@editParentalLeaveRequest", parentalLeaveRequest, type);
+    }
+    if (parentalLeaveRequest.getBeginDate().isAfter(parentalLeaveRequest.getEndDate())) {
+      Validation.addError("parentalLeaveRequest.beginDate",
+          "La data di inizio non può essere successiva alla data di fine");
+      response.status = 400;
+      render("@editParentalLeaveRequest", parentalLeaveRequest, type);
+    }
+    informationRequestManager.configure(Optional.absent(),
+        Optional.absent(), Optional.absent(), Optional.of(parentalLeaveRequest));
+    parentalLeaveRequest.setStartAt(LocalDateTime.now());
+    parentalLeaveRequest.setBornCertificate(bornCertificate);
+    parentalLeaveRequest.setExpectedDateOfBirth(expectedDateOfBirth);
+    parentalLeaveRequest.save();
+    boolean isNewRequest = !parentalLeaveRequest.isPersistent();
+    if (isNewRequest || !parentalLeaveRequest.isFlowStarted()) {
+      informationRequestManager.executeEvent(Optional.absent(),
+          Optional.absent(), Optional.absent(), 
+          Optional.fromNullable(parentalLeaveRequest),
+          parentalLeaveRequest.getPerson(),
+          InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+      if (parentalLeaveRequest.getPerson().isSeatSupervisor()) {
+        approval(parentalLeaveRequest.id);
+      } else {
+        // invio la notifica al primo che deve validare la mia richiesta
+        notificationManager
+            .notificationInformationRequestPolicy(parentalLeaveRequest.getPerson().getUser(),
+                parentalLeaveRequest, true);
+        // invio anche la mail
+        notificationManager
+            .sendEmailInformationRequestPolicy(parentalLeaveRequest.getPerson().getUser(),
+            parentalLeaveRequest, true);
+        log.debug("Inviata la richiesta di approvazione");
+      }
+    }
+    flash.success("Operazione effettuata correttamente");
+    InformationRequests.list(parentalLeaveRequest.getInformationType());
   }
 
   /**
@@ -422,7 +512,7 @@ public class InformationRequests extends Controller {
       teleworkRequest.setInformationType(InformationType.TELEWORK_INFORMATION);
       teleworkRequest.save();
       informationRequestManager.configure(Optional.absent(), Optional.absent(),
-          Optional.of(teleworkRequest));
+          Optional.of(teleworkRequest), Optional.absent());
     } else {
       teleworkRequest = teleworkRequestInPeriod.get();
     }
@@ -430,13 +520,14 @@ public class InformationRequests extends Controller {
 
     if (isNewRequest || !teleworkRequest.isFlowStarted()) {
       informationRequestManager.executeEvent(Optional.absent(), Optional.absent(),
-          Optional.fromNullable(teleworkRequest), teleworkRequest.getPerson(),
+          Optional.fromNullable(teleworkRequest), Optional.absent(), teleworkRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (teleworkRequest.getPerson().isSeatSupervisor()) {
         approval(teleworkRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
+        notificationManager
+            .notificationInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
             teleworkRequest, true);
         // invio anche la mail
         notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
@@ -460,6 +551,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id);
@@ -470,6 +562,9 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
@@ -477,7 +572,7 @@ public class InformationRequests extends Controller {
     User user = Security.getUser().get();
 
     boolean approved = informationRequestManager.approval(serviceRequest,
-        illnessRequest, teleworkRequest, user);
+        illnessRequest, teleworkRequest, parentalLeaveRequest, user);
 
     if (approved) {
       notificationManager.sendEmailToUser(Optional.absent(), Optional.absent(),
@@ -487,7 +582,8 @@ public class InformationRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (user.getPerson().isSeatSupervisor() || user.getPerson().isGroupManager()) {
+    if (user.getPerson().isSeatSupervisor() || user.getPerson().isGroupManager()
+        || user.hasRoles(Role.PERSONNEL_ADMIN)) {
       InformationRequests.listToApprove(request.getInformationType());
     } else {
       InformationRequests.list(request.getInformationType());
@@ -506,6 +602,7 @@ public class InformationRequests extends Controller {
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
     notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
     switch (informationRequest.getInformationType()) {
@@ -513,23 +610,29 @@ public class InformationRequests extends Controller {
         serviceRequest = informationRequestDao.getServiceById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(serviceRequest, informationRequest, disapproval);
+          render(serviceRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
       case ILLNESS_INFORMATION:
         illnessRequest = informationRequestDao.getIllnessById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(illnessRequest, informationRequest, disapproval);
+          render(illnessRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(teleworkRequest, informationRequest, disapproval);
+          render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id).get();
+        if (!disapproval) {
+          disapproval = true;
+          render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
+        }
       default:
         break;
     }
@@ -542,8 +645,18 @@ public class InformationRequests extends Controller {
       flash.error("Richiesta respinta");
       InformationType type = informationRequest.getInformationType();
       render("@show", informationRequest, type, serviceRequest,
-          illnessRequest, teleworkRequest, user);
+          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
     }
+    if (informationRequest.isAdministrativeApprovalRequired()
+        && informationRequest.getAdministrativeApproved() == null
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+      informationRequestManager.personnelAdministratorDisapproval(id, reason);
+      flash.error("Richiesta respinta");
+      InformationType type = informationRequest.getInformationType();
+      render("@show", informationRequest, type, serviceRequest,
+          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
+    }
+      
     render("@show", informationRequest, user);
   }
 
@@ -561,6 +674,7 @@ public class InformationRequests extends Controller {
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
     switch (type) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
@@ -571,13 +685,16 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = informationRequestDao.getTeleworkById(id).get();
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id).get();
+        break;
       default:
         log.info("Passato argomento non conosciuto");
         break;
     }
     boolean disapproval = false;
     render(informationRequest, teleworkRequest, illnessRequest, serviceRequest,
-        type, user, disapproval);
+        parentalLeaveRequest, type, user, disapproval);
   }
 
   /**
@@ -592,6 +709,7 @@ public class InformationRequests extends Controller {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = Optional.fromNullable(informationRequestDao.getServiceById(id).get());
@@ -602,11 +720,15 @@ public class InformationRequests extends Controller {
       case TELEWORK_INFORMATION:
         teleworkRequest = Optional.fromNullable(informationRequestDao.getTeleworkById(id).get());
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = Optional.fromNullable(informationRequestDao
+            .getParentalLeaveById(id).get());
+        break;
       default:
         break;
     }
     informationRequestManager.executeEvent(serviceRequest, illnessRequest,
-        teleworkRequest, Security.getUser().get().getPerson(),
+        teleworkRequest, parentalLeaveRequest, Security.getUser().get().getPerson(),
         InformationRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(InformationRequest.class));
     list(informationRequest.getInformationType());
@@ -656,7 +778,8 @@ public class InformationRequests extends Controller {
     PersonLite p = null;
     Person person = personDao.getPersonById(personId);
     if (person.getPersonConfigurations().stream().noneMatch(pc ->
-        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) && pc.getFieldValue().equals("true"))) {
+        pc.getEpasParam().equals(EpasParam.TELEWORK_STAMPINGS) 
+        && pc.getFieldValue().equals("true"))) {
       @SuppressWarnings("unchecked")
       List<PersonDao.PersonLite> persons = (List<PersonLite>) renderArgs.get("navPersons");
       if (persons.isEmpty()) {
@@ -709,5 +832,43 @@ public class InformationRequests extends Controller {
     Stampings.personStamping(Security.getUser().get().getPerson().id,
         Integer.parseInt(session.get("yearSelected")),
         Integer.parseInt(session.get("monthSelected")));
+  }
+  
+  /**
+   * Permette lo scaricamento dei documenti associati alla richiesta di congedo parentale
+   * per il padre.
+   * 
+   * @param informationRequestId l'identificativo della richiesta di congedo parentale
+   */
+  public static void downloadAttachment(Long informationRequestId) {
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = informationRequestDao
+        .getParentalLeaveById(informationRequestId);
+    String fileName = "";
+    long length = 0;
+    InputStream is;
+    if (!parentalLeaveRequest.isPresent()) {
+      flash.error("Non esiste la richiesta associata a questo file! Verificare!");
+      redirect("InformationRequests.list");
+    }
+    if (parentalLeaveRequest.get().getBornCertificate() != null) {
+      response.setContentTypeIfNotSet(parentalLeaveRequest.get().getBornCertificate().type());
+      fileName = String.format("certificatoNascitaFiglioDi-%s",
+          parentalLeaveRequest.get().getPerson().getFullname().replace(" ", "-"));
+      fileName = String.format("%s%s", fileName, 
+          ImageUtils.fileExtension(parentalLeaveRequest.get().getBornCertificate()));
+      length = parentalLeaveRequest.get().getBornCertificate().length();
+      is = parentalLeaveRequest.get().getBornCertificate().get();
+      
+    } else {
+      response.setContentTypeIfNotSet(parentalLeaveRequest.get().getExpectedDateOfBirth().type());
+      fileName = String.format("documentoNascitaPresuntaFiglioDi-%s",
+          parentalLeaveRequest.get().getPerson().getFullname().replace(" ", "-"));
+      fileName = String.format("%s%s", fileName, 
+          ImageUtils.fileExtension(parentalLeaveRequest.get().getExpectedDateOfBirth()));
+      length = parentalLeaveRequest.get().getExpectedDateOfBirth().length();
+      is = parentalLeaveRequest.get().getExpectedDateOfBirth().get();
+      
+    }
+    renderBinary(is, fileName, length);
   }
 }

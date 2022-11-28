@@ -4,20 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.3] - 2022-11-17
+## [2.6.3] - UNRELEASED
 ### Added
  - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
+ - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
+ 
+### Changed
+ - Modificato comportamento del codice 98CV che deve decurtare le ferie
+ - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
 
-## [2.6.2] - 2022-11-10
+## [2.6.2] - 2022-11-17
+
 ### Added
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
  - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
    REST /rest/v2/certifications/getMonthSituation
  - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello 
+ - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
+
+### Changed
+ - Corretta associazione contratto precedente per i contratti continuativi
 
 ## [2.6.1] - 2022-10-13
 ### Added
  - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio
+ 
 ### Changed
  - Rivista la procedura di merge di contratto con spostamento delle assenze senza effettuare il re-inserimento
  - Cambiato il tipo a text nelle input per la modifica della matricola del personale
@@ -51,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
    nell'inserimento di una richiesta di missione o di rimborso
  - Aggiunto codice 35R ai codici che riducono le ferie
+ 
 ### Changed
  - Reso più robusto il cambio di menu in caso di giorno/mese/anno corrente mancante
  - Corretto orrdinamento delle datatable con data e ora in italiano
@@ -79,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    l'utente
  - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
    sede, anche sulle sedi diversa dalla propria di assegnazione
+
 ### Changed 
  - Corretto controllo dei buoni pasto inviati ad Attestati (funzionalità solo per CNR)
  - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
@@ -101,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di cedere un giorno di reperibilità
  - Aggiunto controllo sulla visibilità della presenza giornaliera dei dipendenti appartenenti ad un 
    gruppo da parte del responsabile di gruppo
+
 ### Changed
  - Corretto messaggio di errore in caso di attestato di fine mese non calcolato correttamente
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
@@ -118,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto campo enumerato per la gestione del buono pasto sul modello di absenceType
    Risolve anche la problematica del 103RT che non deve permettere l'attribuzione del buono
    pasto per coloro i quali fanno telelavoro che finisce sul cartellino come orario di lavoro.
+
 ### Changed
  - Migliorato messaggio di errore in caso di inserimento via REST di buoni pasto già esistenti
  - Fix bug del permesso breve che non veniva eliminato quando si completava la giornata
@@ -136,6 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta verifica nella richiesta di ferie/permesso che il giorno ricada in un contratto
    del dipendente
  - Aggiunta documentazione su parametri di sede e del dipendente
+
 ### Changed
  - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
    alla presenza della configurazione specifica di attestati (la password di accesso)
@@ -148,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
  - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto
+
 ### Changed
  - Corretta attivazione pulsante inserimento richieste assenza nel passato quando
    compilato il campo note.
@@ -156,6 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.0] - 2022-03-09
 ### Added
  - Aggiunto il supporto all'utenticazione tramite OAuth, test effettuati solo con keycloak.
+
 ### Changed
  - Corretta visualizzazione assenze annuali, codice VAC19 non era incolonnato correttamente.
  - Aggiornata la versione del fullcalendar alla 3.10.2 e della query-ui.

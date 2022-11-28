@@ -60,6 +60,7 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.enumerate.InformationType;
 
 import common.security.PermissionCheck;
@@ -591,7 +592,7 @@ rule approveDisapproveTargetChangeForEmployee
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && employeeApproved == null, flowEnded == false)
+  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && !employeeApproved, flowEnded == false)
   $c: PermissionCheck( action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval"),
@@ -783,6 +784,9 @@ when
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveServiceRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.parentalLeave",
+		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.downloadAttachment",
 
 		
 		
@@ -1054,7 +1058,8 @@ when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping(markedByTelework == false)
  Office(persons.contains($target.getOwner())) from $uro.office
- $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.delete"),
+ $c: PermissionCheck(action in (
+    "Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.saveServiceReasons", "Stampings.delete"),
   target == $target, granted == false )
 then
  $c.grant();
@@ -1514,6 +1519,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1577,6 +1583,7 @@ when
         "InformationRequests.editServiceRequest",
         "InformationRequests.saveIllnessRequest",
         "InformationRequests.saveServiceRequest",
+        "InformationRequests.saveParentalLeaveRequest",
         "InformationRequests.illnessToApprove",
         "InformationRequests.serviceExitToApprove",
         "InformationRequests.teleworksToApprove",
@@ -1634,6 +1641,7 @@ when
 		"InformationRequests.editServiceRequest",
 		"InformationRequests.saveIllnessRequest",
 		"InformationRequests.saveServiceRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
@@ -1642,7 +1650,7 @@ then
 end
 
 
-rule PersonnelAdmin_editAndApprovalForInformationFlows
+rule PersonnelAdmin_editAndApprovalForIllnessFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
@@ -1650,9 +1658,28 @@ when
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $ir, granted == false)
+then
+ $c.grant();
+end
+
+rule PersonnelAdmin_editAndApprovalForParentalLeavesFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
+ $pr: ParentalLeaveRequest(flowEnded == false)
+ $c: PermissionCheck(action in (
+		"InformationRequests.editIllnessRequest",
+		"InformationRequests.saveIllnessRequest",
+		"InformationRequests.editParentalLeaveRequest",
+		"InformationRequests.saveParentalLeaveRequest",
+		"InformationRequests.approval",
+		"InformationRequests.disapproval"		
+		), target == $pr, granted == false)
 then
  $c.grant();
 end
@@ -1935,6 +1962,7 @@ when
        	"Stampings.editOffSite",
      	"Stampings.save",
      	"Stampings.saveOffSite",
+     	"Stampings.saveServiceReasons",
      	"Stampings.delete",
      	"TimeVariations.addVariation",
      	"TimeVariations.saveVariation",
@@ -2070,7 +2098,8 @@ when
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
         "InformationRequests.generateTeleworkReport",
-        "InformationRequests.serviceExitToApprove"
+        "InformationRequests.serviceExitToApprove",
+        "InformationRequests.parentalLeaveToApprove"		
 
         ), target == null, granted == false)
 then
@@ -2108,8 +2137,10 @@ when
         "Stampings.insertOffsite",
         "Stampings.edit",
         "Stampings.editOffSite",
+        "Stampings.editServiceReasons",
         "Stampings.save",
         "Stampings.saveOffSite",
+        "Stampings.saveServiceReasons",
         "Stampings.delete",
         "TimeVariations.addVariation",
         "TimeVariations.saveVariation",
@@ -2244,7 +2275,8 @@ when
 //        "InformationRequests.disapproval",
         "InformationRequests.show",
         "InformationRequests.teleworksToApprove",
-        "InformationRequests.generateTeleworkReport"
+        "InformationRequests.generateTeleworkReport",
+        "InformationRequests.parentalLeaveToApprove"
 
        ), target == $o, granted == false)
 then
@@ -2778,6 +2810,8 @@ when
     "Stampings.edit",
     "Stampings.editOffSite",
     "Stampings.saveOffSite",
+    "Stampings.editServiceReasons",
+    "Stampings.saveServiceReasons",
     "Stampings.delete"
   
     ), granted == false, target == null)
@@ -2870,7 +2904,9 @@ when
  	"Stampings.insertOffsite", 
  	"Stampings.edit", 
  	"Stampings.editOffSite", 
- 	"Stampings.saveOffSite"), target == $p, granted == false)
+ 	"Stampings.saveOffSite",
+ 	"Stampings.editServiceReasons",
+ 	"Stampings.saveServiceReasons"), target == $p, granted == false)
 then
  $c.grant();
 end
@@ -2890,6 +2926,23 @@ when
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
  /** non più indietro di 2 mesi fa e solo nei mesi non ancora inviati sugli attestati **/
  eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*******************************************************************************
+ * Un dipendente può modificare le sue timbrature per uscita di servizio se ...
+ ******************************************************************************/
+rule employeeCanEditStampingsServiceReasons
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ $o: Office() from $p.office
+ $target: Stamping(isServiceReasons(), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editServiceReasons", "Stampings.saveServiceReasons"), 
+   target == $target, granted == false)
+ Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
+ PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
 then
  $c.grant();
 end
@@ -3268,7 +3321,6 @@ when
  $p: Person() from currentOperator.person
  $target: Stamping(this.getOwner() == $p && stampType == StampTypes.MOTIVI_DI_SERVIZIO)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
- eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
 then
  $c.grant();
 end
@@ -3395,7 +3447,7 @@ end
  when 
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null) from currentOperator.person
-  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION))
+  $it: InformationType(this in (InformationType.ILLNESS_INFORMATION, InformationType.SERVICE_INFORMATION, InformationType.PARENTAL_LEAVE_INFORMATION))
   $c: PermissionCheck(action == "InformationRequests.blank", target == $it, granted == false)
  then
   $c.grant();

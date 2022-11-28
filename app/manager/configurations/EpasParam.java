@@ -917,6 +917,24 @@ public enum EpasParam {
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
       Office.class);
 
   public final String name;
