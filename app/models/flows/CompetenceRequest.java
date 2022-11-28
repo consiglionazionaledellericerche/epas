@@ -161,8 +161,12 @@ public class CompetenceRequest extends MutableModel {
   @Transient
   public boolean isEmployeeApproved() {
     return employeeApproved != null;
-  }  
+  }
   
+  public boolean toBeAEmployeeApproved() {
+    return employeeApprovalRequired && !isEmployeeApproved();
+  }
+
   @Transient
   public boolean isManagerApproved() {
     return reperibilityManagerApproved != null;
