@@ -592,7 +592,7 @@ rule approveDisapproveTargetChangeForEmployee
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && !employeeApproved, flowEnded == false)
+  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && toBeAEmployeeApproved(), flowEnded == false)
   $c: PermissionCheck( action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval"),
