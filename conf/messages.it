@@ -1129,8 +1129,8 @@ WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 Groups.showGroups= Gestione gruppi
 Shift.handleShifts =Gestisci turni
-Calendar.show =Gestisci turni
-ReperibilityCalendar.show =Gestisci reperibilità
+Calendar.show =Calendario turni
+ReperibilityCalendar.show =Calendario reperibilità
 Shift.personalShift =Visualizza turno
 TimeSlots.manageTimeSlots= Fasce orarie di lavoro
 

@@ -185,7 +185,7 @@ public class RequestInit extends Controller {
       officeId = offices.stream()
             .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
-      officeId = currentUser.getPerson().getOffice().id;      
+      officeId = currentUser.getPerson().getOffice().id;
     }
     
     session.put("officeSelected", officeId);
@@ -194,7 +194,7 @@ public class RequestInit extends Controller {
     
     BlockType type = (BlockType) configurationManager
         .configValue(officeDao.getOfficeById(officeId), EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
-    if (type.equals(BlockType.electronic)) {
+    if (type != null && type.equals(BlockType.electronic)) {
       renderArgs.put("electronicMealTicket", true);
     }
     computeActionSelected(currentUser, offices, year, month, day, personId, officeId);

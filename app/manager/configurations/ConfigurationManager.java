@@ -520,7 +520,7 @@ public class ConfigurationManager {
 
     // Parametro necessario inesistente
     if (DateUtility.isDateIntoInterval(date, owner.periodInterval())) {
-      throw new IllegalStateException();
+      return null;
     }
 
     // Parametro non necessario, risposta di cortesia.
