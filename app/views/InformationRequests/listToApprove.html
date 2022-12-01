@@ -47,6 +47,9 @@
   	  	#{elseif !serviceApprovedResult.isEmpty()}
   	  		#{include './tableElements/_approvedServiceTable.html' /}
   	  	#{/elseif}
+  	  	#{elseif !parentalLeaveApprovedResult.isEmpty()}
+  	  		#{include './tableElements/_approvedParentalLeaveTable.html' /}
+  	  	#{/elseif}
   	  	#{else}
   	  		#{include './tableElements/_approvedTeleworkTable.html' /}
   	  	#{/else} 	
