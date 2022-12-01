@@ -686,30 +686,30 @@ public class InformationRequestManager {
    * @param reason la motivazione della respinta.
    */
   public void personnelAdministratorDisapproval(long id, String reason) {
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
-    ParentalLeaveRequest parentalLeaveRequest = null;
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
-        serviceRequest = dao.getServiceById(id).get();
+        serviceRequest = dao.getServiceById(id);
         break;
       case ILLNESS_INFORMATION:
-        illnessRequest = dao.getIllnessById(id).get();
+        illnessRequest = dao.getIllnessById(id);
         break;
       case TELEWORK_INFORMATION:
-        teleworkRequest = dao.getTeleworkById(id).get();
+        teleworkRequest = dao.getTeleworkById(id);
         break;
       case PARENTAL_LEAVE_INFORMATION:
-        parentalLeaveRequest = dao.getParentalLeaveById(id).get();
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
         break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), Optional.of(parentalLeaveRequest), currentPerson,
+    executeEvent(serviceRequest, illnessRequest, 
+        teleworkRequest, parentalLeaveRequest, currentPerson,
         InformationRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
