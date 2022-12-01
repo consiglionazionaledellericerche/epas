@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.3] - UNRELEASED
+## [2.6.3] - 2022-12-01
 ### Added
  - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
  - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
  - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
+ - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
 
 ## [2.6.2] - 2022-11-17
 
