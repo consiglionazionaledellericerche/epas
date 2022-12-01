@@ -126,7 +126,7 @@ public class MealTicketCards extends Controller {
       Validation.addError("mealTicketCard.deliveryDate", "La data deve essere valorizzata!!!");
     }
     if (mealTicketCardDao.getMealTicketCardByDeliveryDate(mealTicketCard
-        .getDeliveryDate()).isPresent()) {
+        .getDeliveryDate(), person).isPresent()) {
       Validation.addError("mealTicketCard.deliveryDate", 
           "Esiste già una card con questa data di consegna!!");
     }
