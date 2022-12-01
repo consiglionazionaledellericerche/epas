@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import models.MealTicket;
 import models.MealTicketCard;
 import models.Office;
+import models.Person;
 import models.query.QMealTicket;
 import models.query.QMealTicketCard;
 
@@ -88,14 +89,17 @@ public class MealTicketCardDao extends DaoBase {
   
   /**
    * Ritorna se esiste la card con data di consegna uguale a quella passata come parametro.
+   *
    * @param deliveryDate la data di consegna della card
    * @return se esiste la card con data di consegna uguale a quella passata come parametro.
    */
-  public Optional<MealTicketCard> getMealTicketCardByDeliveryDate(LocalDate deliveryDate) {
+  public Optional<MealTicketCard> getMealTicketCardByDeliveryDate(LocalDate deliveryDate, 
+      Person person) {
     final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
     return Optional.ofNullable(getQueryFactory()
         .selectFrom(mealTicketCard)
-        .where(mealTicketCard.deliveryDate.eq(deliveryDate)).fetchFirst());
+        .where(mealTicketCard.deliveryDate.eq(deliveryDate)
+            .and(mealTicketCard.person.eq(person))).fetchFirst());
   }
   
   
