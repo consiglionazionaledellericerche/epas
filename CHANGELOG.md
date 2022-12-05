@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
  - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
  - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
+ - Aggiunta possibilità auto inserimento codici congedo parentale per il padre
  
 ### Changed
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
