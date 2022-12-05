@@ -1288,6 +1288,7 @@ PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di per
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
 AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
+PARENTAL_LEAVE_FOR_FATHERS =Inserimento codici di congedo parentale per il padre
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

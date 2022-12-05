@@ -2857,7 +2857,8 @@ when
  				|| epasParam == EpasParam.TELEWORK
  				|| epasParam == EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME
  				|| epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE
- 				|| epasParam == EpasParam.SMARTWORKING && fieldValue == true) from $p.personConfigurations
+ 				|| epasParam == EpasParam.SMARTWORKING
+ 				|| epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS && fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",
@@ -2979,7 +2980,8 @@ when
  				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)
  				|| (epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE && fieldValue == true)
  				|| (epasParam == EpasParam.SMARTWORKING && fieldValue == true)
- 				|| (epasParam == EpasParam.AGILE_WORK && fieldValue == true)) from $p.personConfigurations
+ 				|| (epasParam == EpasParam.AGILE_WORK && fieldValue == true)
+ 				|| (epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS && fieldValue == true)) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
  $c.grant();
@@ -3196,6 +3198,26 @@ when
 then
  $c.grant();
 end
+
+
+/***********************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per congedo parentale per il padre 
+ ***********************************************************************************************/
+rule EmployeeCanEditParentalLeaveForFatherAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.parentalLeaveForFathers().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+
+
 
 /**********************************************************************************
  * L'impiegato può modificare/salvare una determinata assenza per visita medica se:

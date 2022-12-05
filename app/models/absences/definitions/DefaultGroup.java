@@ -550,6 +550,16 @@ public enum DefaultGroup {
   }
   
   /**
+   * Ritorna la lista di codici da considerare per i congedi parentali per il padre
+   */
+  
+  public static List<String> parentalLeaveForFathers() {
+    List<String> g21p = getCodes(DefaultGroup.G_21P);
+    List<String> g21p2 = getCodes(DefaultGroup.G_21P2);
+    
+    return Stream.of(g21p, g21p2).flatMap(x -> x.stream()).collect(Collectors.toList());
+  }
+  /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
   public static List<String> employeeDisabledPersonCodes() {
@@ -572,10 +582,6 @@ public enum DefaultGroup {
     List<String> g232 = getCodes(DefaultGroup.G_232);
     List<String> g233 = getCodes(DefaultGroup.G_233);
     List<String> g234 = getCodes(DefaultGroup.G_234);
-//    List<String> g24 = getCodes(DefaultGroup.G_24);
-//    List<String> g242 = getCodes(DefaultGroup.G_242);
-//    List<String> g243 = getCodes(DefaultGroup.G_243);
-//    List<String> g244 = getCodes(DefaultGroup.G_244);
     List<String> g25 = getCodes(DefaultGroup.G_25);
     List<String> g252 = getCodes(DefaultGroup.G_252);
     List<String> g253 = getCodes(DefaultGroup.G_253);
