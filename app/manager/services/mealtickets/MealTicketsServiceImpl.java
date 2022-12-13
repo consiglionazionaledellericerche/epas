@@ -247,15 +247,15 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
 
 
   @Override
-  public MealTicketComposition whichBlock(MealTicketRecap recap, 
+  public MealTicketComposition whichBlock(List<BlockMealTicket> list, 
       ContractMonthRecap monthRecap, Contract contract) {
+    
     BlockType blockType = null;
     int buoniCartacei = 0;
     int buoniElettronici = 0;
     int buoniUsati = monthRecap.getBuoniPastoUsatiNelMese();
     int buoniDaConteggiare = 0;
     MealTicketComposition composition = new MealTicketComposition();
-    List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
     if (monthRecap.getRemainingMealTickets() < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
       buoniDaConteggiare = buoniUsati;
@@ -264,7 +264,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
           contract.getPerson().getOffice().getConfigurations().stream()
           .filter(configuration -> 
           configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-      if (conf.isPresent()) {        
+      if (conf.isPresent()) {
         blockType = BlockType.valueOf(conf.get().getFieldValue());
 
         switch (blockType) {
