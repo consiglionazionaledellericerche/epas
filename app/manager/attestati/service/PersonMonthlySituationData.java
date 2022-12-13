@@ -18,6 +18,7 @@
 package manager.attestati.service;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
@@ -25,8 +26,10 @@ import dao.ContractDao;
 import dao.ContractMonthRecapDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
@@ -99,11 +102,26 @@ public class PersonMonthlySituationData {
     actualCertifications = absences(person, year, month, actualCertifications);
     actualCertifications = competences(person, year, month, actualCertifications);
     actualCertifications = mealTicket(person, year, month, actualCertifications);
-    
+
     return actualCertifications;
   }
-  
-  
+
+  public Map<Person, Map<String, Certification>> getCertifications(List<Person> persons, int year, int month) {
+    
+    Map<Person, Map<String, Certification>> actualCertifications = Maps.newHashMap();
+    actualCertifications = trainingHours(persons, year, month, actualCertifications);
+    actualCertifications = absences(persons, year, month, actualCertifications);
+    actualCertifications = competences(persons, year, month, actualCertifications);
+    for (Person person : persons) {
+      Map<String, Certification> certificationMap = Optional.fromNullable(actualCertifications.get(person)).or(new HashMap<>());
+      log.info("actualCertification di {} = {}", person, certificationMap);
+      certificationMap = mealTicket(person, year, month, certificationMap);
+      actualCertifications.put(person, certificationMap);
+    }
+    //actualCertifications = mealTicket(person, year, month, actualCertifications);
+
+    return actualCertifications;
+  }
   /**
    * Produce le certification delle ore di formazione per la persona.
    *
@@ -114,29 +132,46 @@ public class PersonMonthlySituationData {
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month,
       Map<String, Certification> certifications) {
-
-
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
-
       // Nuova certificazione
-      Certification certification = new Certification();
-      certification.setPerson(person);
-      certification.setYear(year);
-      certification.setMonth(month);
-      certification.setCertificationType(CertificationType.FORMATION);
-      certification.setContent(Certification
-          .serializeTrainingHours(personMonthRecap.getFromDate().getDayOfMonth(),
-              personMonthRecap.getToDate().getDayOfMonth(), personMonthRecap.getTrainingHours()));
-
+      Certification certification = certificationByPersonMonthRecap(personMonthRecap);
       certifications.put(certification.aMapKey(), certification);
     }
-
     return certifications;
   }
 
+  private Map<Person, Map<String, Certification>> trainingHours(List<Person> persons, int year, int month,
+      Map<Person, Map<String, Certification>> certificationsMap) {
+
+    Map<Person, List<PersonMonthRecap>> trainingHoursMap = 
+        personMonthRecapDao.getPersonMonthRecaps(persons, year, month);
+
+    trainingHoursMap.entrySet().forEach(es -> {
+      Map<String, Certification> certificationMap = new HashMap<>();
+      es.getValue().stream().forEach(pmr -> {
+        Certification certification = certificationByPersonMonthRecap(pmr);
+        certificationMap.put(certification.aMapKey(), certification);
+      });
+      certificationsMap.put(es.getKey(), certificationMap);
+    });
+    return certificationsMap;
+  }
+
+  static Certification certificationByPersonMonthRecap(PersonMonthRecap personMonthRecap) {
+    // Nuova certificazione
+    Certification certification = new Certification();
+    certification.setPerson(personMonthRecap.getPerson());
+    certification.setYear(personMonthRecap.getYear());
+    certification.setMonth(personMonthRecap.getMonth());
+    certification.setCertificationType(CertificationType.FORMATION);
+    certification.setContent(Certification
+        .serializeTrainingHours(personMonthRecap.getFromDate().getDayOfMonth(),
+            personMonthRecap.getToDate().getDayOfMonth(), personMonthRecap.getTrainingHours()));
+    return certification;
+  }
 
   /**
    * Produce le certification delle assenze per la persona.
@@ -155,58 +190,90 @@ public class PersonMonthlySituationData {
       return certifications;
     }
 
+    List<Certification> certificationList = byAbsences(absences);
+    for (Certification c : certificationList) {
+      certifications.put(c.aMapKey(), c);
+    }
+
+    return certifications;
+  }
+
+  private List<Certification> byAbsences(List<Absence> absences) {
+    List<Certification> certifications = Lists.newArrayList();
+
     Certification certification = null;
     LocalDate previousDate = null;
     String previousAbsenceCode = null;
     Integer dayBegin = null;
-
+    
     for (Absence absence : absences) {
-
-      //codici a uso interno li salto
-      if (absence.getAbsenceType().isInternalUse()) {
-        continue;
-      }
-
-      //Codice per attestati
-      String absenceCodeToSend = absence.getAbsenceType().getCode().toUpperCase();
-      if (absence.getAbsenceType().getCertificateCode() != null
-          && !absence.getAbsenceType().getCertificateCode().trim().isEmpty()) {
-        absenceCodeToSend = absence.getAbsenceType().getCertificateCode().toUpperCase();
-      }
-
-      // 1) Continua Assenza più giorni
-      Integer dayEnd;
-      if (previousDate != null && previousDate.plusDays(1).equals(absence.getPersonDay().getDate())
-          && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
-        previousDate = absence.getPersonDay().getDate();
-        certification.setContent(absenceCodeToSend + ";" + dayBegin + ";" + dayEnd);
-        continue;
-      }
-
-      // 2) Fine Assenza più giorni
-      if (previousDate != null) {
-
-        certifications.put(certification.aMapKey(), certification);
-        previousDate = null;
-      }
-
-      // 3) Nuova Assenza  
-      dayBegin = absence.getPersonDay().getDate().getDayOfMonth();
-      dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
-      previousDate = absence.getPersonDay().getDate();
-      previousAbsenceCode = absenceCodeToSend;
-
-      certification = new Certification();
-      certification.setPerson(person);
-      certification.setYear(year);
-      certification.setMonth(month);
-      certification.setCertificationType(CertificationType.ABSENCE);
-      certification.setContent(Certification.serializeAbsences(absenceCodeToSend,
-          dayBegin, dayEnd));
+    //codici a uso interno li salto
+    if (absence.getAbsenceType().isInternalUse()) {
+      continue;
     }
 
-    certifications.put(certification.aMapKey(), certification);
+    //Codice per attestati
+    String absenceCodeToSend = absence.getAbsenceType().getCode().toUpperCase();
+    if (absence.getAbsenceType().getCertificateCode() != null
+        && !absence.getAbsenceType().getCertificateCode().trim().isEmpty()) {
+      absenceCodeToSend = absence.getAbsenceType().getCertificateCode().toUpperCase();
+    }
+
+    // 1) Continua Assenza più giorni
+    Integer dayEnd;
+    if (previousDate != null && previousDate.plusDays(1).equals(absence.getPersonDay().getDate())
+        && previousAbsenceCode.equals(absenceCodeToSend)) {
+      dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
+      previousDate = absence.getPersonDay().getDate();
+      certification.setContent(absenceCodeToSend + ";" + dayBegin + ";" + dayEnd);
+      continue;
+    }
+
+    // 2) Fine Assenza più giorni
+    if (previousDate != null) {
+
+      certifications.add(certification);
+      previousDate = null;
+    }
+
+    // 3) Nuova Assenza  
+    dayBegin = absence.getPersonDay().getDate().getDayOfMonth();
+    dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
+    previousDate = absence.getPersonDay().getDate();
+    previousAbsenceCode = absenceCodeToSend;
+
+    certification = new Certification();
+    certification.setPerson(absence.getPersonDay().getPerson());
+    certification.setYear(absence.getPersonDay().getDate().getYear());
+    certification.setMonth(absence.getPersonDay().getDate().getMonthOfYear());
+    certification.setCertificationType(CertificationType.ABSENCE);
+    certification.setContent(Certification.serializeAbsences(absenceCodeToSend,
+        dayBegin, dayEnd));
+    }
+
+    certifications.add(certification);
+
+    return certifications;
+  }
+
+  private Map<Person, Map<String, Certification>> absences(List<Person> persons, int year, int month,
+      Map<Person, Map<String, Certification>> certifications) {
+
+    Map<Person, List<Absence>> personAbsencesMap = absenceDao
+        .getAbsencesNotInternalUseInMonth(persons, year, month);
+    if (personAbsencesMap.isEmpty()) {
+      return certifications;
+    }
+
+    personAbsencesMap.keySet().forEach(person -> {
+      Map<String, Certification> certificationMap = new HashMap<>();
+      List<Certification> certificationList = byAbsences(personAbsencesMap.get(person));
+      for (Certification c : certificationList) {
+        certificationMap.put(c.aMapKey(), c);
+      }
+      certifications.put(person, certificationMap);
+    });
+   
 
     return certifications;
   }
@@ -228,20 +295,41 @@ public class PersonMonthlySituationData {
             Optional.<CompetenceCodeGroup>absent());
 
     for (Competence competence : competences) {
-      Certification certification = new Certification();
-      certification.setPerson(person);
-      certification.setYear(year);
-      certification.setMonth(month);
-      certification.setCertificationType(CertificationType.COMPETENCE);
-      certification.setContent(Certification.serializeCompetences(competence.getCompetenceCode()
-          .getCode(), competence.getValueApproved()));
-
+      Certification certification = byCompetence(competence);
       certifications.put(certification.aMapKey(), certification);
     }
 
     return certifications;
   }
 
+  private Map<Person, Map<String, Certification>> competences(
+      List<Person> persons, int year, int month,
+      final Map<Person, Map<String, Certification>> certifications) {
+
+    Map<Person, List<Competence>> competencesMap = 
+        competenceDao.competencesInMonth(persons, year, month);
+
+    competencesMap.keySet().stream().forEach(person -> {
+      Map<String, Certification> certificationMap = new HashMap<>();
+      competencesMap.get(person).forEach(competence -> {
+        Certification certification = byCompetence(competence);
+        certificationMap.put(certification.aMapKey(), certification);
+      });
+      certifications.put(person, certificationMap);
+    });
+    return certifications;
+  }
+
+  private static Certification byCompetence(Competence competence) {
+    Certification certification = new Certification();
+    certification.setPerson(competence.getPerson());
+    certification.setYear(competence.getYear());
+    certification.setMonth(competence.getMonth());
+    certification.setCertificationType(CertificationType.COMPETENCE);
+    certification.setContent(Certification.serializeCompetences(competence.getCompetenceCode()
+        .getCode(), competence.getValueApproved()));
+    return certification;
+  }
   /**
    * Produce la certificazione buoni pasto della persona.
    *
@@ -282,7 +370,8 @@ public class PersonMonthlySituationData {
     }
 
     certification.setContent(String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
-
+    log.info("certification = {}, certification.key = {}", certification, certification.aMapKey());
+   
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;

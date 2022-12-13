@@ -221,6 +221,39 @@ public class Certifications extends Controller {
     renderJSON(gson.toJson(list));
   }
 
+  public static void getMonthSituationByOffice2(String sedeId, int year, int month) {
+    log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
+        sedeId, year, month);
+    if (sedeId == null) {
+      JsonResponse.badRequest("Il parametro sedeId e' obbligatorio");
+    }
+    Optional<Office> office = officeDao.byCodeId(sedeId);
+    if (!office.isPresent()) {
+      JsonResponse.notFound(
+          String.format("Ufficio con sedeId = %s non trovato", sedeId));
+    }
+    rules.checkIfPermitted(office.get()); 
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office.get());
+    LocalDate start = new LocalDate(year, month, 1);
+    LocalDate end = start.dayOfMonth().withMaximumValue();
+    List<CertificationDto> list = Lists.newArrayList();
+    List<Person> personList = personDao
+        .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
+    
+    val personCertificationsMap = monthData.getCertifications(personList, year, month);
+
+    for (Person person : personCertificationsMap.keySet()) {
+      log.debug("analizzo la situazione mensile di {}...", person.getFullname());
+      Map<String, Certification> map = personCertificationsMap.get(person);
+      CertificationDto dto = generateCertDto(map, year, month, person);
+      list.add(dto);
+      log.debug("...analizzata la situazione mensile di {}", person.getFullname());
+    }
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(list));
+  }
+
   /**
    * Metodo privato che permette la generazione di un dto contenente informazioni
    * mensili del dipendente.
@@ -316,11 +349,11 @@ public class Certifications extends Controller {
     String justifiedType = "";
     for (Absence abs : absencesPlus) {
 
-      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();      
+      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();
       if (previousDate != null && previousDate.plusDays(1).equals(abs.getPersonDay().getDate())
           && previousAbsenceCode.equals(absenceCodeToSend)) {
         dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
-        previousDate = abs.getPersonDay().getDate();        
+        previousDate = abs.getPersonDay().getDate();
         continue;
       }
       // 2) Fine Assenza più giorni

@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
@@ -32,6 +33,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import lombok.val;
@@ -261,6 +263,19 @@ public class AbsenceDao extends DaoBase {
         .orderBy(absence.personDay.date.asc()).fetch();
   }
 
+  public Map<Person, List<Absence>> getAbsenceWithNotInternalUseInMonth(
+      List<Person> persons, LocalDate begin, LocalDate end) {
+
+    final QAbsence absence = QAbsence.absence;
+
+    return getQueryFactory().selectFrom(absence)
+        .where(absence.personDay.person.in(persons)
+            .and(absence.personDay.date.between(begin, end)
+                .and(absence.absenceType.internalUse.eq(false))))
+        .orderBy(absence.personDay.date.asc())
+        .transform(GroupBy.groupBy(absence.personDay.person).as(GroupBy.list(absence)));
+  }
+
   /**
    * Metodo per la ricerca di tutte le assenze che giustificano qualcosa.
    *
@@ -318,6 +333,14 @@ public class AbsenceDao extends DaoBase {
 
     return getAbsenceWithNotInternalUseInMonth(
         person, new LocalDate(year, month, 1),
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+  }
+
+  public Map<Person, List<Absence>> getAbsencesNotInternalUseInMonth(
+      List<Person> persons, Integer year, Integer month) {
+
+    return getAbsenceWithNotInternalUseInMonth(
+        persons, new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
   }
 
