@@ -79,7 +79,7 @@ public interface IMealTicketsService {
    * @param contract il contratto su cui verificare la situazione dei buoni pasto
    * @return la composizione con cui gestire la maturazione dei buoni pasto in un anno/mese.
    */
-  MealTicketComposition whichBlock(List<BlockMealTicket> list, ContractMonthRecap monthRecap, 
+  MealTicketComposition whichBlock(MealTicketRecap recap, ContractMonthRecap monthRecap, 
       Contract contract);
 
   

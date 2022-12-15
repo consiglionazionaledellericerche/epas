@@ -209,37 +209,6 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    for (Person person : personList) {
-      log.debug("analizzo la situazione mensile di {}...", person.getFullname());
-      Map<String, Certification> map = 
-          monthData.getCertification(person, year, month);
-      CertificationDto dto = generateCertDto(map, year, month, person);
-      list.add(dto);
-      log.debug("...analizzata la situazione mensile di {}", person.getFullname());
-    }
-    val gson = gsonBuilder.create();
-    renderJSON(gson.toJson(list));
-  }
-
-  public static void getMonthSituationByOffice2(String sedeId, int year, int month) {
-    log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
-        sedeId, year, month);
-    if (sedeId == null) {
-      JsonResponse.badRequest("Il parametro sedeId e' obbligatorio");
-    }
-    Optional<Office> office = officeDao.byCodeId(sedeId);
-    if (!office.isPresent()) {
-      JsonResponse.notFound(
-          String.format("Ufficio con sedeId = %s non trovato", sedeId));
-    }
-    rules.checkIfPermitted(office.get()); 
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office.get());
-    LocalDate start = new LocalDate(year, month, 1);
-    LocalDate end = start.dayOfMonth().withMaximumValue();
-    List<CertificationDto> list = Lists.newArrayList();
-    List<Person> personList = personDao
-        .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
     
     val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
@@ -247,6 +216,14 @@ public class Certifications extends Controller {
       log.debug("analizzo la situazione mensile di {}...", person.getFullname());
       Map<String, Certification> map = personCertificationsMap.get(person);
       CertificationDto dto = generateCertDto(map, year, month, person);
+      val wrapperPerson = wrapperFactory.create(person);
+      List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+      dto.setMealTicketsPreviousMonth(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
+      dto.setRemainingMealTickets(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getRemainingMealTickets()).reduce(0, Integer::sum));
       list.add(dto);
       log.debug("...analizzata la situazione mensile di {}", person.getFullname());
     }
@@ -407,7 +384,7 @@ public class Certifications extends Controller {
           .from(new LocalDate(year, month, dayBegin))
           .to(new LocalDate(year, month, dayEnd))
           .build();
-      absences.add(absence);   
+      absences.add(absence);
     }
 
     return absences;

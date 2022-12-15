@@ -35,12 +35,10 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import manager.ConsistencyManager;
-import manager.attestati.service.PersonMonthlySituationData;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
-import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
@@ -567,7 +565,7 @@ public class MealTickets extends Controller {
 
     for (MealTicket mealTicket : mealTicketList) {
       if (mealTicket.getBlockType().equals(BlockType.papery)) {
-        mealTicket.setBlockType(BlockType.electronic);
+        mealTicket.setBlockType(BlockType.electronic);        
       } else {
         mealTicket.setBlockType(BlockType.papery);
       }
@@ -651,15 +649,7 @@ public class MealTickets extends Controller {
     MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
 
-    Optional<DateInterval> dateInterval =
-        mealTicketService.getContractMealTicketDateInterval(contract);
-    List<MealTicket> deliveryOrderedDesc = mealTicketDao
-        .contractMealTickets(contract, Optional.absent(),
-            MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
-    List<BlockMealTicket> blockMealTicketReceived =
-        PersonMonthlySituationData.getBlockMealTicketReceivedDeliveryDesc(deliveryOrderedDesc, dateInterval.get());
-
-    MealTicketComposition composition = mealTicketService.whichBlock(blockMealTicketReceived, monthRecap, contract);
+    MealTicketComposition composition = mealTicketService.whichBlock(recap, monthRecap, contract);
 
 
     render(month, year, contract, composition); 

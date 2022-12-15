@@ -38,8 +38,8 @@ import manager.PersonDayManager;
 import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
 import manager.services.mealtickets.IMealTicketsService;
+import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
-import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 import models.Certification;
 import models.Competence;
 import models.CompetenceCodeGroup;
@@ -129,7 +129,7 @@ public class PersonMonthlySituationData {
   public Map<Person, Map<String, Certification>> getCertifications(List<Person> persons, int year, int month) {
     Map<Person, Map<String, Certification>> actualCertifications = Maps.newHashMap();
     actualCertifications = trainingHours(persons, year, month, actualCertifications);
-    actualCertifications = absences(persons, year, month, actualCertifications);
+    //actualCertifications = absences(persons, year, month, actualCertifications);
     actualCertifications = competences(persons, year, month, actualCertifications);
     actualCertifications = mealTickets(persons, year, month, actualCertifications);
 
@@ -286,28 +286,6 @@ public class PersonMonthlySituationData {
     return certifications;
   }
 
-  private Map<Person, Map<String, Certification>> absences(List<Person> persons, int year, int month,
-      Map<Person, Map<String, Certification>> certifications) {
-
-    Map<Person, List<Absence>> personAbsencesMap = absenceDao
-        .getAbsencesNotInternalUseInMonth(persons, year, month);
-    if (personAbsencesMap.isEmpty()) {
-      return certifications;
-    }
-
-    personAbsencesMap.keySet().forEach(person -> {
-      Map<String, Certification> certificationMap = new HashMap<>();
-      List<Certification> certificationList = byAbsences(personAbsencesMap.get(person));
-      for (Certification c : certificationList) {
-        certificationMap.put(c.aMapKey(), c);
-      }
-      certifications.put(person, certificationMap);
-    });
-   
-
-    return certifications;
-  }
-
   /**
    * Metodo che compone la certificazione aggiungendo le competenze.
    *
@@ -360,6 +338,7 @@ public class PersonMonthlySituationData {
         .getCode(), competence.getValueApproved()));
     return certification;
   }
+
   /**
    * Produce la certificazione buoni pasto della persona.
    *
@@ -391,18 +370,9 @@ public class PersonMonthlySituationData {
         log.info("ContractMonthRecap non presente nel mese {}/{} per {} ( id = {} )",
             month, year, person.getFullname(), person.id);
       } else {
-        
-        //MealTicketRecap recap = mealTicketService.create(contract).orNull();
-        Optional<DateInterval> dateInterval =
-            mealTicketService.getContractMealTicketDateInterval(contract);
-        List<MealTicket> deliveryOrderedDesc = mealTicketDao
-            .contractMealTickets(contract, Optional.absent(),
-                MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
-        List<BlockMealTicket> blockMealTicketReceived =
-            getBlockMealTicketReceivedDeliveryDesc(deliveryOrderedDesc, dateInterval.get());
-
+        MealTicketRecap recap = mealTicketService.create(contract).orNull();
         MealTicketComposition composition = mealTicketService
-            .whichBlock(blockMealTicketReceived, monthRecap, contract);
+            .whichBlock(recap, monthRecap, contract);
         buoniCartacei = buoniCartacei + composition.paperyMealTicket;
         buoniElettronici = buoniElettronici + composition.electronicMealTicket;
       }
@@ -442,7 +412,12 @@ public class PersonMonthlySituationData {
       int buoniCartacei = 0;
       int buoniElettronici = 0;
       if (conf.isPresent()) {
-        val blockType = BlockType.valueOf(conf.get().getFieldValue());
+        BlockType blockType = null;
+        try { 
+          blockType = BlockType.valueOf(conf.get().getFieldValue()); 
+        } catch (Exception e) {
+          blockType = BlockType.electronic;
+        }
         switch (blockType) {
           case electronic:
             buoniElettronici = mealTicketMap.get(person);
