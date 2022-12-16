@@ -296,7 +296,7 @@ public enum DefaultAbsenceType {
   A_26BP("26", "Permesso per dipendente disabile L. 104/92 due ore giornaliere con buono pasto", 
       false, ImmutableSet.of(JustifiedTypeName.absence_type_minutes), 120, false, 
       MealTicketBehaviour.allowMealTicket, 0, null,
-      Sets.newHashSet(), null, null, false, true, true),
+      Sets.newHashSet(), null, new LocalDate(2022,12,1), false, true, true),
 
   A_C16("C16", "Cong. gravi motivi familiari NR", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, MealTicketBehaviour.notAllowMealTicket, 
