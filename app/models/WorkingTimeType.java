@@ -219,6 +219,5 @@ public class WorkingTimeType extends BaseModel {
     return totalMinutes / totalDays;
   }
     
-
 }
 

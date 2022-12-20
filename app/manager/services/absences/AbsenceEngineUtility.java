@@ -218,6 +218,8 @@ public class AbsenceEngineUtility {
   public Integer takenBehaviouralFixes(Absence absence, Integer amount,
       List<Contract> fetchedContracts, DateInterval periodInterval, 
       TakeAmountAdjustment adjustment) {
+    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time orizzontale,
+    //non devono togliere l'intera giornata ma l'intera giornata meno un'ora
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.getAbsenceType().getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
@@ -235,10 +237,10 @@ public class AbsenceEngineUtility {
           
           if (workTimeAdjustment && cwtt.getWorkingTimeType().isEnableAdjustmentForQuantity()) {
             //Adeguamento sull'incidenza del tipo orario
-            if (cwtt.getWorkingTimeType().averageMinutesInWeek() >= Max_Minutes_To_Cut_Back) {
+            if (cwtt.getWorkingTimeType().averageMinutesInWeek() > Max_Minutes_To_Cut_Back) {
               return Max_Minutes_To_Cut_Back;
             }
-            return cwtt.getWorkingTimeType().averageMinutesInWeek();
+            return cwtt.getWorkingTimeType().averageMinutesInWeek() - 60;
           }          
           
         }
