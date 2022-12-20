@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
  - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
  - Corretta visualizzazione privacy policy
+ - Rimosso codice 26BP
 
 ## [2.6.2] - 2022-11-17
 
