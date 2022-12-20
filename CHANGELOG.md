@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
  - Corretta visualizzazione privacy policy
  - Modificato il calcolo della quantità di ore da togliere per i 661G ai part time orizzontali
+ - Rimosso codice 26BP
 
 ## [2.6.2] - 2022-11-17
 
