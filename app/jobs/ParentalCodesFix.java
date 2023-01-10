@@ -1,14 +1,11 @@
 package jobs;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import dao.absences.AbsenceComponentDao;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import models.Person;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
 import play.Play;
@@ -17,7 +14,7 @@ import play.jobs.OnApplicationStart;
 
 @Slf4j
 @OnApplicationStart(async = true)
-public class ParentalCodesFix extends Job {
+public class ParentalCodesFix extends Job<Void> {
   
   @Inject
   static AbsenceComponentDao absenceComponentDao;

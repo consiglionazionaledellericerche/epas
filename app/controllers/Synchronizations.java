@@ -377,7 +377,7 @@ public class Synchronizations extends Controller {
   }
 
   /**
-   * Le persone in epas non sincronizzare.
+   * Le persone in epas non sincronizzate.
    */
   public static void oldPeople(Long officeId) {
 
@@ -395,14 +395,15 @@ public class Synchronizations extends Controller {
     List<IWrapperPerson> wrapperedPeople = FluentIterable.from(people)
         .transform(wrapperFunctionFactory.person()).toList();
 
-    Map<String, Person> perseoPeopleByNumber = null;
-    try {
-      perseoPeopleByNumber =
-          peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.getPerseoId()));
-    } catch (ApiRequestException ex) {
-      flash.error("%s", ex);
+    Map<String, Person> perseoPeopleByNumber = Maps.newHashMap();
+    if (office.getPerseoId() != null) {
+      try {
+        perseoPeopleByNumber =
+            peoplePerseoConsumer.perseoPeopleByNumber(Optional.of(office.getPerseoId()));
+      } catch (ApiRequestException ex) {
+        flash.error("%s", ex);
+      }
     }
-
     render(wrapperedPeople, perseoPeopleByNumber, office);
   }
 
@@ -478,6 +479,13 @@ public class Synchronizations extends Controller {
         Sets.newHashSet(Lists.newArrayList(office)), false, null, null, false).list();
 
     Map<String, Person> perseoPeopleByNumber = null;
+    if (office.getPerseoId() == null) {
+      flash.error("Impossibile effettuare la join delle persone per ufficio {}. "
+          + "Id anagrafica esterna non presente.",
+          office.getLabel());
+      oldPeople(office.id);
+      return;
+    }
     try {
       perseoPeopleByNumber = peoplePerseoConsumer
           .perseoPeopleByNumber(Optional.fromNullable(office.getPerseoId()));
@@ -556,7 +564,8 @@ public class Synchronizations extends Controller {
    * Importa tutte le persone di perseo non ancora presenti in epas.
    */
   private static boolean managerImportAllPersonInOffice(Office office) {
-
+    Verify.verifyNotNull(office);
+    Verify.verifyNotNull(office.getPerseoId());
     Map<Long, Person> perseoPeopleByPerseoId = null;
     try {
       perseoPeopleByPerseoId = peoplePerseoConsumer
@@ -950,6 +959,11 @@ public class Synchronizations extends Controller {
 
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
+    if (office.getPerseoId() == null) {
+      badRequest(
+          String.format("Id Anagrafica Esterna non presente per l'ufficio %s, "
+              + "impossibile completare la richiesta", office.getName()));
+    }
     List<PerseoPerson> people = new ArrayList<>(0);
     try {
       people = peoplePerseoConsumer.perseoPeople(Optional.fromNullable(office.getPerseoId())).get();
