@@ -21,9 +21,11 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import models.Competence;
 import models.CompetenceCode;
@@ -250,7 +252,16 @@ public class CompetenceDao extends DaoBase {
     return getQueryFactory().selectFrom(competence)
         .where(condition).fetch();
   }
-  
+
+  public Map<Person, List<Competence>> competencesInMonth(List<Person> persons, int year, int month) {
+    final QCompetence competence = QCompetence.competence;
+    return getQueryFactory().selectFrom(competence)
+        .where(competence.person.in(persons), 
+            competence.year.eq(year), competence.month.eq(month),
+            competence.valueApproved.gt(0))
+        .transform(GroupBy.groupBy(competence.person).as(GroupBy.list(competence)));
+  }
+
   private List<Competence> competenceFromGroupInMonth(Person person, Integer year, 
       Integer month, CompetenceCodeGroup group) {
     final QCompetence competence = QCompetence.competence;
