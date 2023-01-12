@@ -1,0 +1,94 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto elettronici'  /}
+
+#{set breadcrumbs:[recapMealTickets:@MealTickets.recapMealTickets(currentData.year,
+ currentData.month, currentData.officeId), (person.fullname):null] /}
+
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+	
+  #{include './_electronicMealTicketsTabs.html' /}
+
+  #{if card == null}
+  	#{alert color:'danger'}
+  	<p>Il dipendente ${person.fullName()} non ha ancora associata alcuna tessera per buoni pasto elettronici.
+  	   Per assegnarla cliccare <a href="@{MealTicketCards.mealTicketCards(person.office.id)}">
+	  	    	qui</a></p>
+  	#{/alert}
+  #{/if}
+  #{else}
+  #{alert color:'info'}
+   <p>In questa form è possibile inserire i buoni pasto di tipo <strong>Elettronico</strong>.</p>
+   <p>Occorre selezionare la tessera per i buoni elettronici associata al dipendente e su quella caricare la quantità di
+  	 buoni pasto che si intende inserire.
+   </p>
+   <p>Nel caso si volesse inserire per questo mese un blocchetto cartaceo, trovate la possibilità di farlo a questo link:
+   <a href="@{MealTickets.personMealTickets(recap.contract.id, year, month)}">
+	  	    	<i class="fa fa-plus" aria-hidden="true">Nuovo blocchetto cartaceo</i></a>
+   </p>
+   #{/alert}
+
+	<div id="insertMeal">
+    #{form @MealTicketCards.submitPersonMealTicket(), class:'form-horizontal',
+    'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
+    <input type="hidden" name="personId" value="${person.id}"/>
+	#{f.view 'office', value:person.office?.name /}
+    #{f.selectModel 'card',items:person.getMealTicketCards(),value:card, label:'Tessera' /}
+    #{f.input 'tickets', type:'number', required:'true' /}
+    
+    #{f.date 'deliveryDate', required:'true' /}
+    #{f.date 'expireDate', required:'true' /}
+    #{f.view 'administrator', value:admin.person?.fullname /}
+
+    <div class="center">
+      <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+    </div>
+    #{/form}
+    
+    <br>
+    #{if !unAssignedElectronicMealTickets.isEmpty()}
+    	#{alert color:'warning'}    
+			Esistono buoni pasto elettronici non associati ad alcuna card (probabilmente frutto di inserimenti di buoni
+			elettronici nella vecchia modalità).
+			Premere su questo bottone per associarli tutti alla card attualmente in uso da parte del dipendente:
+			<a class="btn btn-xs btn-warning"
+     		href="@{MealTicketCards.assignOrphanElectronicMealTickets(card.id, person.id)}">
+     		Carica buoni elettronici sulla card attuale<i class="fa fa-card" aria-hidden="true"></i></a>	
+   	 	#{/alert}
+    #{/if}
+    
+    #{alert color:'info'}
+    #{if recap.getElectronicBlockMealTicketReceivedDeliveryDesc().isEmpty()}
+    <em>Nessun blocco valido inserito per <strong>${person.fullname}</strong></em>
+    #{/if}
+    #{else}
+    <p>
+      <i class="fa fa-thumb-tack"></i>
+      Gli ultimi 3 inserimenti per <strong>${person.fullname}</strong> sono stati
+    </p>
+    <table class="table center">
+      <tr>
+        <th>Codice</th>
+        <th>Tipo</th>
+        <th>Consegnato il</th>
+        <th>Scadenza</th>
+      </tr>
+      #{list items:recap.getElectronicBlockMealTicketReceivedDeliveryDesc(), as:'block'}
+      #{if block_index <= 3 }
+      <tr>
+        <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
+        <td>${block.blockType.description}</td>
+        <td>${block.getDate()?.format()}</td>
+        <td>${block.getExpireDate()?.format()}</td>
+      </tr>
+      #{/if}
+      #{/list}
+    </table>
+    #{/else}
+    #{/alert}    
+    
+  	</div>
+    #{/else}
+</div>

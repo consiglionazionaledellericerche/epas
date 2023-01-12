@@ -64,6 +64,7 @@ import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.apache.commons.mail.EmailException;
@@ -1230,16 +1231,28 @@ public class NotificationManager {
           approver, requestType));
     }
 
-    if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
-      message.append(String.format("\r\n per il giorno %s con il giorno %s.",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter),
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+    if (competenceRequest.getBeginDateToAsk() != null) {
+      if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
+        message.append(String.format("\r\n per il giorno %s con il giorno %s.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+      } else {
+        message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getEndDateToGive().toString(dateFormatter),
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter),
+            competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+      }
     } else {
-      message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter),
-          competenceRequest.getEndDateToGive().toString(dateFormatter),
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter),
-          competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+      //Questo è il caso di cessione di giorni di reperibilità senza prenderne in cambio.
+      if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
+        message.append(String.format("\r\n per il giorno %s senza cedere giorni in cambio.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+      } else {
+        message.append(String.format("\r\n per i giorni %s - %s senza cedere giorni in cambio.",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter),
+            competenceRequest.getEndDateToGive().toString(dateFormatter)));
+      }
     }
 
     val mailBody = message.toString();
@@ -1338,21 +1351,35 @@ public class NotificationManager {
         competenceRequest.getPerson().fullName()));
     message.append(String.format(" di tipo %s\r\n", requestType));
 
-    if (competenceRequest.getBeginDateToAsk() != null 
-        && competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
+    if (competenceRequest.getBeginDateToAsk() != null) { 
+      if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
       message.append(String.format("per il giorno %s",
           competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
       message.append(String.format(" in cambio del giorno %s",
           competenceRequest.getBeginDateToGive().toString(dateFormatter)));
-    } else {
-      message.append(String.format("dal %s",
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
-      message.append(String.format(" al %s",
-          competenceRequest.getEndDateToAsk().toString(dateFormatter)));
-      message.append(String.format(" in cambio dei giorni dal %s",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter)));
-      message.append(String.format(" al %s",
-          competenceRequest.getEndDateToGive().toString(dateFormatter)));
+      } else {
+        message.append(String.format("dal %s",
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+        message.append(String.format(" al %s",
+            competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+        message.append(String.format(" in cambio dei giorni dal %s",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+        message.append(String.format(" al %s",
+            competenceRequest.getEndDateToGive().toString(dateFormatter)));
+      }
+    }
+    //Questo è il caso in cui si cedono giorni senza riceverne in cambio
+    else {
+      if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
+        message.append(
+            String.format("per cedere i giorno %s (senza prendere in cambio un altro giorno)",
+                competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+      } else {
+        message.append(
+            String.format("per cedere ii giorni dal %s al %s (senza prendere in cambio altri giorni)",
+                competenceRequest.getBeginDateToGive().toString(dateFormatter),
+                competenceRequest.getEndDateToGive().toString(dateFormatter)));
+      }
     }
     message.append(String.format(", con destinatario %s.\r\n",
         competenceRequest.getTeamMate().fullName()));
@@ -1684,6 +1711,9 @@ public class NotificationManager {
       case TELEWORK_INFORMATION:
         subject = NotificationSubject.TELEWORK_INFORMATION;
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        subject = NotificationSubject.PARENTAL_LEAVE_INFORMATION;
+        break;
       default:
         break;
     }
@@ -1730,6 +1760,7 @@ public class NotificationManager {
    */
   public void notificationInformationRequestRefused(Optional<ServiceRequest> serviceRequest,
       Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest,
       Person refuser) {
 
     val request = serviceRequest.isPresent() ? serviceRequest.get() :
@@ -1757,6 +1788,13 @@ public class NotificationManager {
         message.append(String.format(" per il mese %s",
             DateUtility.fromIntToStringMonth(teleworkRequest.get().getMonth())));
         message.append(String.format(" dell'anno %s", teleworkRequest.get().getYear()));
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        subject = NotificationSubject.PARENTAL_LEAVE_INFORMATION;
+        message.append(String.format("dal giorno %s", 
+            parentalLeaveRequest.get().getBeginDate().toString()));
+        message.append(String.format(" al giorno %s", 
+            parentalLeaveRequest.get().getEndDate().toString()));
         break;
       default:
         break;
@@ -1875,8 +1913,10 @@ public class NotificationManager {
       requestType = Messages.get("InformationType.SERVICE_INFORMATION");
     } else if (informationRequest.getInformationType() == InformationType.TELEWORK_INFORMATION) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
-    } else {
+    } else if (informationRequest.getInformationType() == InformationType.ILLNESS_INFORMATION) {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
+    } else {
+      requestType = Messages.get("InformationType.PARENTAL_LEAVE_INFORMATION");
     }
     final StringBuilder message =
         new StringBuilder().append(String.format("Gentile %s,\r\n", user.getPerson().fullName()));
@@ -1911,6 +1951,21 @@ public class NotificationManager {
             DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
         message.append(String.format(" dell'anno %s", teleworkRequest.getYear()));
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        ParentalLeaveRequest parentalLeaveRequest = requestDao
+            .getParentalLeaveById(informationRequest.id).get();
+        if (parentalLeaveRequest.getBeginDate().isEqual(parentalLeaveRequest.getEndDate())) {
+          message.append(String.format(" per il giorno: %s",
+              parentalLeaveRequest.getStartAt().toLocalDate().toString()));
+        } else {
+          message.append(String.format(" dal: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+          if (parentalLeaveRequest.getEndDate() != null) {
+            message.append(String.format(" al: %s",
+                parentalLeaveRequest.getEndDate().toString()));
+          }
+        }
+        break;
       default:
         break;
     }
@@ -1943,6 +1998,9 @@ public class NotificationManager {
     } else if (informationRequest.getInformationType()
         .equals(InformationType.TELEWORK_INFORMATION)) {
       requestType = Messages.get("InformationType.TELEWORK_INFORMATION");
+    } else if (informationRequest.getInformationType()
+        .equals(InformationType.PARENTAL_LEAVE_INFORMATION)) {
+      requestType = Messages.get("InformationType.PARENTAL_LEAVE_INFORMATION");
     } else {
       requestType = Messages.get("InformationType.ILLNESS_INFORMATION");
     }
@@ -1985,6 +2043,19 @@ public class NotificationManager {
         message.append(String.format("\r\nper il mese di %s",
             DateUtility.fromIntToStringMonth(teleworkRequest.getMonth())));
         message.append(String.format("\r\ndell'anno %s", teleworkRequest.getYear()));
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        ParentalLeaveRequest parentalLeaveRequest = requestDao
+            .getParentalLeaveById(informationRequest.id).get();
+        if (parentalLeaveRequest.getBeginDate().isEqual(parentalLeaveRequest.getEndDate())) {
+          message.append(String.format("\r\n per il giorno: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+        } else {
+          message.append(String.format(" dal: %s",
+              parentalLeaveRequest.getBeginDate().toString()));
+          message.append(String.format(" al: %s",
+              parentalLeaveRequest.getEndDate().toString()));
+        }
         break;
       default:
         break;

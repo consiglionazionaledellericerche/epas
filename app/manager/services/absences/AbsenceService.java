@@ -570,6 +570,11 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_39LA.name()).get();
     final GroupAbsenceType smart = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_SMART.name()).get();
+    final GroupAbsenceType parentalLeaveForFathers = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_21P.name()).get();
+    final GroupAbsenceType parentalLeaveTwinsForFathers = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_21P2.name()).get();
+    
 
     final User currentUser = Security.getUser().get();
 
@@ -602,6 +607,8 @@ public class AbsenceService {
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
+//      groupsPermitted.remove(parentalLeaveForFathers);
+//      groupsPermitted.remove(parentalLeaveTwinsForFathers);
       //groupsPermitted.remove(lagile);
       //groupsPermitted.remove(cod39LA);
       for (AbsenceType abt : smart.getCategory().getAbsenceTypes()) {
@@ -691,6 +698,11 @@ public class AbsenceService {
       
       if ((Boolean) confManager.configValue(person, EpasParam.SMARTWORKING)) {
         groupsPermitted.add(smart);
+      }
+      
+      if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_FOR_FATHERS)) {
+        groupsPermitted.add(parentalLeaveForFathers);
+        groupsPermitted.add(parentalLeaveTwinsForFathers);
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);

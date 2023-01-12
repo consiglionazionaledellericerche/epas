@@ -4,17 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] - 2023-01-12
+### Added
+ - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
+ - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
+ - Aggiunta possibilità auto inserimento codici congedo parentale per il padre
+ - Aggiunti codici per missione antartica per l'anno 2023
+ 
+### Changed
+ - Corretta gestione sincronizzazione personale afferente in una sede nel caso non
+   sia presente l'id anagrafica esterno
+ - Aggiornamento del logo del CNR
+ - Modificato comportamento del codice 98CV che deve decurtare le ferie
+ - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
+ - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
+ - Corretta visualizzazione privacy policy
+ - Migliorate le prestazioni del metodo /rest/v2/certifications/getmonthsituationbyoffice
+ - Modificato il calcolo della quantità di ore da togliere per i 661G ai part time orizzontali
+ - Rimosso codice 26BP
+
 ## [2.6.2] - 2022-11-17
+
 ### Added
  - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
  - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
    REST /rest/v2/certifications/getMonthSituation
- - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello
+ - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello 
  - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
 
 ### Changed
  - Corretta associazione contratto precedente per i contratti continuativi
- 
+
 ## [2.6.1] - 2022-10-13
 ### Added
  - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio

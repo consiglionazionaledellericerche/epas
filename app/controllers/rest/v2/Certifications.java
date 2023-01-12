@@ -209,11 +209,21 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    for (Person person : personList) {
+    
+    val personCertificationsMap = monthData.getCertifications(personList, year, month);
+
+    for (Person person : personCertificationsMap.keySet()) {
       log.debug("analizzo la situazione mensile di {}...", person.getFullname());
-      Map<String, Certification> map = 
-          monthData.getCertification(person, year, month);
+      Map<String, Certification> map = personCertificationsMap.get(person);
       CertificationDto dto = generateCertDto(map, year, month, person);
+      val wrapperPerson = wrapperFactory.create(person);
+      List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+      dto.setMealTicketsPreviousMonth(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
+      dto.setRemainingMealTickets(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getRemainingMealTickets()).reduce(0, Integer::sum));
       list.add(dto);
       log.debug("...analizzata la situazione mensile di {}", person.getFullname());
     }
@@ -316,11 +326,11 @@ public class Certifications extends Controller {
     String justifiedType = "";
     for (Absence abs : absencesPlus) {
 
-      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();      
+      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();
       if (previousDate != null && previousDate.plusDays(1).equals(abs.getPersonDay().getDate())
           && previousAbsenceCode.equals(absenceCodeToSend)) {
         dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
-        previousDate = abs.getPersonDay().getDate();        
+        previousDate = abs.getPersonDay().getDate();
         continue;
       }
       // 2) Fine Assenza più giorni
@@ -374,7 +384,7 @@ public class Certifications extends Controller {
           .from(new LocalDate(year, month, dayBegin))
           .to(new LocalDate(year, month, dayEnd))
           .build();
-      absences.add(absence);   
+      absences.add(absence);
     }
 
     return absences;

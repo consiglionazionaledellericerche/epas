@@ -384,6 +384,24 @@ public class TemplateUtility {
 
     return results.size();
   }
+  
+  /**
+   * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro. 
+   *
+   * @return la quantità di richieste di telelavoro pendenti.
+   */
+  public final int parentalLeaveRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<InformationRequest> results = informationRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            InformationType.PARENTAL_LEAVE_INFORMATION, user.getPerson());
+
+    return results.size();
+  }
 
 
   /**

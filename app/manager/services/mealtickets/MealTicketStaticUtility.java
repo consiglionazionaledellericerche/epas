@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import models.Contract;
 import models.MealTicket;
+import models.MealTicketCard;
 
 
 /**
@@ -49,6 +50,7 @@ public class MealTicketStaticUtility {
     List<BlockMealTicket> blockList = Lists.newArrayList();
     BlockMealTicket currentBlock = null;
     MealTicket previousMealTicket = null;
+    Optional<MealTicketCard> card = Optional.absent();
     int previousBlockLength;
     String previousCode;
     for (MealTicket mealTicket : mealTicketListOrdered) {
@@ -61,7 +63,11 @@ public class MealTicketStaticUtility {
       //Primo buono pasto
       if (currentBlock == null) {
         previousMealTicket = mealTicket;
-        currentBlock = new BlockMealTicket(mealTicket.getBlock(), mealTicket.getBlockType());
+        if (mealTicket.getMealTicketCard() != null) {
+          card = Optional.fromNullable(mealTicket.getMealTicketCard());
+        }
+        currentBlock = new BlockMealTicket(mealTicket.getBlock(), 
+            mealTicket.getBlockType(), card);
         currentBlock.getMealTickets().add(mealTicket);
         currentBlock.setContract(mealTicket.getContract());
         continue;
@@ -86,7 +92,13 @@ public class MealTicketStaticUtility {
       } else {
         //Nuovo blocco
         blockList.add(currentBlock);
-        currentBlock = new BlockMealTicket(mealTicket.getBlock(), mealTicket.getBlockType());
+        if (mealTicket.getMealTicketCard() != null) {
+          card = Optional.fromNullable(mealTicket.getMealTicketCard());
+        } else {
+          card = Optional.absent();
+        }
+        currentBlock = new BlockMealTicket(mealTicket.getBlock(), 
+            mealTicket.getBlockType(), card);
         currentBlock.getMealTickets().add(mealTicket);
         currentBlock.setContract(mealTicket.getContract());
       }

@@ -33,8 +33,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
+import models.enumerate.BlockType;
+import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;
@@ -62,6 +66,8 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UserDao userDao;
+  @Inject
+  static ConfigurationManager configurationManager;
 
   static final String TELEWORK_ACTIVE = "telework.stampings.active";
   
@@ -89,7 +95,7 @@ public class RequestInit extends Controller {
     if (!user.isPresent()) {
       return;
     }
-
+    
     final User currentUser = user.get();
 
     renderArgs.put("currentUser", currentUser);
@@ -179,13 +185,20 @@ public class RequestInit extends Controller {
       officeId = offices.stream()
             .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
-      officeId = currentUser.getPerson().getOffice().id;      
+      officeId = currentUser.getPerson().getOffice().id;
     }
     
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
-
+    if (user.get().getPerson() != null) {
+      BlockType type = (BlockType) configurationManager
+          .configValue(officeDao.getOfficeById(officeId), EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
+      if (type != null && type.equals(BlockType.electronic)) {
+        renderArgs.put("electronicMealTicket", true);
+      }
+    }
+    
     computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
@@ -234,6 +247,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
@@ -303,6 +317,7 @@ public class RequestInit extends Controller {
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
@@ -331,7 +346,8 @@ public class RequestInit extends Controller {
         "AbsenceGroups.importCertificationsAbsences",
         "Stampings.stampingsByAdmin",
         "PrintTags.listPersonForPrintTags",
-        "TimeVariations.show");
+        "TimeVariations.show",
+        "MealTicketCards.mealTicketCards");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -369,6 +385,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.customRecap",
         "UploadSituation.uploadData",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Certifications.certifications",

@@ -264,9 +264,12 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
           contract.getPerson().getOffice().getConfigurations().stream()
           .filter(configuration -> 
           configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
-      if (conf.isPresent()) {        
-        blockType = BlockType.valueOf(conf.get().getFieldValue());
-
+      if (conf.isPresent()) {
+        try { 
+          blockType = BlockType.valueOf(conf.get().getFieldValue()); 
+        } catch (Exception e) {
+          blockType = BlockType.electronic;
+        }
         switch (blockType) {
           case electronic:
             buoniElettronici = buoniDaConteggiare;

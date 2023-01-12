@@ -219,6 +219,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  PARENTAL_LEAVE_FOR_FATHERS("parental_leave_for_fathers",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),  
 
   
   //#######################################################################################
@@ -912,6 +920,24 @@ public enum EpasParam {
    */
   SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
       "service_information_iv_viii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

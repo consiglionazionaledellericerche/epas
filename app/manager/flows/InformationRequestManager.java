@@ -42,6 +42,7 @@ import models.enumerate.InformationType;
 import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.InformationRequestEvent;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import org.apache.commons.compress.utils.Lists;
@@ -170,9 +171,11 @@ public class InformationRequestManager {
    * @param teleworkRequest l'opzionale richiesta di telelavoro
    */
   public void configure(Optional<IllnessRequest> illnessRequest, 
-      Optional<ServiceRequest> serviceRequest, Optional<TeleworkRequest> teleworkRequest) {
+      Optional<ServiceRequest> serviceRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
     Verify.verifyNotNull(request.getInformationType());
     Verify.verifyNotNull(request.getPerson());
 
@@ -180,7 +183,7 @@ public class InformationRequestManager {
 
     request.setOfficeHeadApprovalRequired(config.officeHeadApprovalRequired);
     request.setManagerApprovalRequired(config.managerApprovalRequired);
-    if (illnessRequest.isPresent()) {
+    if (illnessRequest.isPresent() || parentalLeaveRequest.isPresent()) {
       request.setAdministrativeApprovalRequired(config.administrativeApprovalRequired);
     }    
   }
@@ -243,20 +246,23 @@ public class InformationRequestManager {
    * @param serviceRequest la richiesta di uscita di servizio (opzionale)
    * @param illnessRequest la richiesta di informazione di malattia (opzionale)
    * @param teleworkRequest la richiesta di telelavoro (opzionale)
+   * @param parentalLeaveRequest la richiesta di congedo parentale per il padre
    * @param person la persona che esegue la richiesta
    * @param eventType il tipo di evento da eseguire
    * @param reason la motivazione
    * @return il risultato dell'evento da eseguire nel flusso.
    */
   public Optional<String> executeEvent(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest,
       Person person, InformationRequestEventType eventType, Optional<String> reason) {
 
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
 
     val problem = checkInformationRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
-        person, eventType);
+        parentalLeaveRequest, person, eventType);
     if (problem.isPresent()) {
       log.warn("Impossibile inserire la richiesta di informazione {}. Problema: {}", request,
           problem.get());
@@ -285,10 +291,10 @@ public class InformationRequestManager {
 
       case OFFICE_HEAD_REFUSAL:
         // si riparte dall'inizio del flusso.
-        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         request.setFlowEnded(true);
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
-            illnessRequest, teleworkRequest, person);
+            illnessRequest, teleworkRequest, parentalLeaveRequest, person);
         break;
         
       case ADMINISTRATIVE_ACKNOWLEDGMENT:
@@ -299,7 +305,7 @@ public class InformationRequestManager {
         break;
         
       case ADMINISTRATIVE_REFUSAL:
-        //TODO: completare
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         break;
         
       case MANAGER_ACKNOWLEDGMENT:
@@ -324,7 +330,7 @@ public class InformationRequestManager {
         request.setFlowEnded(true);
         break;
       case EPAS_REFUSAL:
-        resetFlow(serviceRequest, illnessRequest, teleworkRequest);
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         //TODO: aggiungere notifica
         //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
@@ -334,13 +340,13 @@ public class InformationRequestManager {
             String.format("Evento di richiesta assenza %s non previsto", eventType));
     }
 
-    val event = InformationRequestEvent.builder().informationRequest(request).owner(person.getUser())
-        .eventType(eventType).build();
+    val event = InformationRequestEvent.builder().informationRequest(request)
+        .owner(person.getUser()).eventType(eventType).build();
     event.save();
 
     log.info("Costruito evento per richiesta di assenza {}", event);
     request.save();
-    checkAndCompleteFlow(serviceRequest, illnessRequest, teleworkRequest);
+    checkAndCompleteFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
     return Optional.absent();    
   }
   
@@ -356,11 +362,13 @@ public class InformationRequestManager {
    * @return l'eventuale problema riscontrati durante l'approvazione.
    */
   public Optional<String> checkInformationRequestEvent(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest,
       Person approver, InformationRequestEventType eventType) {
     
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : illnessRequest.get());
+        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
     
     if (eventType == InformationRequestEventType.STARTING_APPROVAL_FLOW) {
       if (!request.getPerson().equals(approver)) {
@@ -377,7 +385,8 @@ public class InformationRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di sede.");
       }
-      if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+      if (!uroDao.getUsersRolesOffices(approver.getUser(), 
+          roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
           request.getPerson().getOffice()).isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
@@ -414,7 +423,8 @@ public class InformationRequestManager {
    * @param teleworkRequest l'eventuale richiesta di telelavoro
    */
   public void resetFlow(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().setFlowStarted(false);
       serviceRequest.get().setOfficeHeadApproved(null);
@@ -428,6 +438,10 @@ public class InformationRequestManager {
       teleworkRequest.get().setFlowStarted(false);
       teleworkRequest.get().setOfficeHeadApproved(null);
     }
+    if (parentalLeaveRequest.isPresent()) {
+      parentalLeaveRequest.get().setFlowStarted(false);
+      parentalLeaveRequest.get().setAdministrativeApproved(null);
+    }
   }
   
   /**
@@ -438,22 +452,30 @@ public class InformationRequestManager {
    * @param teleworkRequest l'eventuale richiesta di telelavoro
    */
   public void checkAndCompleteFlow(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       if (serviceRequest.get().isFullyApproved() && !serviceRequest.get().isFlowEnded()) {
-        completeFlow(serviceRequest, Optional.absent(), Optional.absent());      
+        completeFlow(serviceRequest, Optional.absent(), Optional.absent(), Optional.absent());      
       } 
     }
     if (illnessRequest.isPresent()) {
       if (illnessRequest.get().isFullyApproved() && !illnessRequest.get().isFlowEnded()) {
-        completeFlow(Optional.absent(), illnessRequest, Optional.absent());      
+        completeFlow(Optional.absent(), illnessRequest, Optional.absent(), Optional.absent());      
       } 
     }
     if (teleworkRequest.isPresent()) {
       if (teleworkRequest.get().isFullyApproved() && !teleworkRequest.get().isFlowEnded()) {
-        completeFlow(Optional.absent(), Optional.absent(), teleworkRequest);      
+        completeFlow(Optional.absent(), Optional.absent(), 
+            teleworkRequest, Optional.absent());      
       } 
-    }       
+    }  
+    if (parentalLeaveRequest.isPresent()) {
+      if (parentalLeaveRequest.get().isFullyApproved() 
+          && !parentalLeaveRequest.get().isFlowEnded()) {
+        completeFlow(Optional.absent(), Optional.absent(), Optional.absent(), parentalLeaveRequest);
+      }
+    }
   }
  
   /**
@@ -464,7 +486,8 @@ public class InformationRequestManager {
    * @param teleworkRequest l'eventuale richiesta di approvazione telelavoro
    */
   private void completeFlow(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().setFlowEnded(true);
       serviceRequest.get().save();    
@@ -477,6 +500,10 @@ public class InformationRequestManager {
       teleworkRequest.get().setFlowEnded(true);
       teleworkRequest.get().save(); 
     }  
+    if (parentalLeaveRequest.isPresent()) {
+      parentalLeaveRequest.get().setFlowEnded(true);
+      parentalLeaveRequest.get().save();
+    }
   }
   
   /**
@@ -489,8 +516,8 @@ public class InformationRequestManager {
    * @return true se il flusso è stato approvato correttamente, false altrimenti.
    */
   public boolean approval(Optional<ServiceRequest> serviceRequest, 
-      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest, 
-      User user) {
+      Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
+      Optional<ParentalLeaveRequest> parentalLeaveRequest, User user) {
     if (serviceRequest.isPresent()) {
       if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
         // caso di approvazione da parte del responsabile di sede
@@ -526,6 +553,14 @@ public class InformationRequestManager {
         return true;
       }
     }  
+    if (parentalLeaveRequest.isPresent()) {
+      if (parentalLeaveRequest.get().isAdministrativeApprovalRequired()
+          && parentalLeaveRequest.get().getAdministrativeApproved() == null
+          && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        personnelAdministratorApproval(parentalLeaveRequest.get().id, user);
+        return true;
+      }
+    }
     
     return false;
   }
@@ -541,6 +576,7 @@ public class InformationRequestManager {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
@@ -552,11 +588,14 @@ public class InformationRequestManager {
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest,
         currentPerson, InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT,
         Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", request,
@@ -576,6 +615,7 @@ public class InformationRequestManager {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
@@ -587,12 +627,15 @@ public class InformationRequestManager {
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
     executeEvent(serviceRequest, illnessRequest, 
-        teleworkRequest, currentPerson, 
+        teleworkRequest, parentalLeaveRequest, currentPerson, 
         InformationRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
@@ -608,6 +651,7 @@ public class InformationRequestManager {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
@@ -619,11 +663,14 @@ public class InformationRequestManager {
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest,
         currentPerson, InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT,
         Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.", request,
@@ -639,35 +686,10 @@ public class InformationRequestManager {
    * @param reason la motivazione della respinta.
    */
   public void personnelAdministratorDisapproval(long id, String reason) {
-    ServiceRequest serviceRequest = null;
-    IllnessRequest illnessRequest = null;
-    TeleworkRequest teleworkRequest = null;
-    InformationRequest request = dao.getById(id);
-    switch (request.getInformationType()) {
-      case SERVICE_INFORMATION:
-        serviceRequest = dao.getServiceById(id).get();
-        break;
-      case ILLNESS_INFORMATION:
-        illnessRequest = dao.getIllnessById(id).get();
-        break;
-      case TELEWORK_INFORMATION:
-        teleworkRequest = dao.getTeleworkById(id).get();
-        break;
-      default:
-        break;
-    }
-    val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), currentPerson, 
-        InformationRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
-    log.info("{} disapprovata dal responsabile di sede {}.", request,
-        currentPerson.getFullname());
-  }
-  
-  public void managerApproval(long id, User user) {
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
     Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
@@ -679,11 +701,50 @@ public class InformationRequestManager {
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id);
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
+        break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(serviceRequest, illnessRequest, teleworkRequest,
+    executeEvent(serviceRequest, illnessRequest, 
+        teleworkRequest, parentalLeaveRequest, currentPerson,
+        InformationRequestEventType.ADMINISTRATIVE_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di sede {}.", request,
+        currentPerson.getFullname());
+  }
+  
+  /**
+   * Approvazione del responsabile di gruppo.
+   *
+   * @param id l'identificativo della richiesta
+   * @param user l'utente che approva
+   */
+  public void managerApproval(long id, User user) {
+    Optional<ServiceRequest> serviceRequest = Optional.absent();
+    Optional<IllnessRequest> illnessRequest = Optional.absent();
+    Optional<TeleworkRequest> teleworkRequest = Optional.absent();
+    Optional<ParentalLeaveRequest> parentalLeaveRequest = Optional.absent();
+    InformationRequest request = dao.getById(id);
+    switch (request.getInformationType()) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id);
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id);
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id);
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id);
+        break;
+      default:
+        break;
+    }
+    val currentPerson = Security.getUser().get().getPerson();
+    executeEvent(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest,
         currentPerson, InformationRequestEventType.MANAGER_ACKNOWLEDGMENT,
         Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.", request,
@@ -692,10 +753,17 @@ public class InformationRequestManager {
     notificationManager.notificationInformationRequestPolicy(user, request, true);
   }
   
+  /**
+   * Respinta del responsabile di gruppo.
+   *
+   * @param id l'identificativo della richiesta
+   * @param reason la motivazione del respingimento
+   */
   public void managerDisapproval(long id, String reason) {
     ServiceRequest serviceRequest = null;
     IllnessRequest illnessRequest = null;
     TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
     InformationRequest request = dao.getById(id);
     switch (request.getInformationType()) {
       case SERVICE_INFORMATION:
@@ -707,12 +775,15 @@ public class InformationRequestManager {
       case TELEWORK_INFORMATION:
         teleworkRequest = dao.getTeleworkById(id).get();
         break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id).get();
+        break;
       default:
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
     executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), currentPerson, 
+        Optional.of(teleworkRequest), Optional.of(parentalLeaveRequest), currentPerson, 
         InformationRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());

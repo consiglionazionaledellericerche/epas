@@ -174,6 +174,9 @@ public enum DefaultGroup {
   PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
+  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -361,12 +364,12 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_20,
       DefaultComplation.C_20, null, false, false),
   
-  G_21P("21P - Congedo parentale per il padre da definire....",
+  G_21P("21P - Congedo paternità",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_21P, null, null,
       false, true),
   
-  G_21P2("21P2 - Congedo parentale per il padre da definire....",
+  G_21P2("21P2 - Congedo paternità gemelli",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_21P2, null, null,
       false, true),
@@ -547,6 +550,16 @@ public enum DefaultGroup {
   }
   
   /**
+   * Ritorna la lista di codici da considerare per i congedi parentali per il padre
+   */
+  
+  public static List<String> parentalLeaveForFathers() {
+    List<String> g21p = getCodes(DefaultGroup.G_21P);
+    List<String> g21p2 = getCodes(DefaultGroup.G_21P2);
+    
+    return Stream.of(g21p, g21p2).flatMap(x -> x.stream()).collect(Collectors.toList());
+  }
+  /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
   public static List<String> employeeDisabledPersonCodes() {
@@ -569,10 +582,6 @@ public enum DefaultGroup {
     List<String> g232 = getCodes(DefaultGroup.G_232);
     List<String> g233 = getCodes(DefaultGroup.G_233);
     List<String> g234 = getCodes(DefaultGroup.G_234);
-//    List<String> g24 = getCodes(DefaultGroup.G_24);
-//    List<String> g242 = getCodes(DefaultGroup.G_242);
-//    List<String> g243 = getCodes(DefaultGroup.G_243);
-//    List<String> g244 = getCodes(DefaultGroup.G_244);
     List<String> g25 = getCodes(DefaultGroup.G_25);
     List<String> g252 = getCodes(DefaultGroup.G_252);
     List<String> g253 = getCodes(DefaultGroup.G_253);

@@ -25,6 +25,7 @@ import models.absences.Absence;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import play.mvc.Router;
@@ -90,6 +91,11 @@ public enum NotificationSubject {
    * Notifica per telelavoro
    */
   TELEWORK_INFORMATION,
+  
+  /*
+   * Notifica per congedo parentale per il padre
+   */
+  PARENTAL_LEAVE_INFORMATION,
 
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
@@ -175,6 +181,11 @@ public enum NotificationSubject {
         params.put("personId", person.id);
         return toUrl("Persons.edit", params);
       // case SYSTEM:
+      case PARENTAL_LEAVE_INFORMATION:
+        final ParentalLeaveRequest parentalLeaveRequest = ParentalLeaveRequest.findById(referenceId);
+        params.put("id", parentalLeaveRequest.id);
+        params.put("type", parentalLeaveRequest.getInformationType());
+        return toUrl("InformationRequests.show", params);
       default:
         throw new IllegalStateException("unknown target: " + this.name());
     }

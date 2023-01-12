@@ -1,0 +1,55 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione tessere elettroniche buoni pasto'  /}
+
+<div class="container">
+
+ #{title title:'Gestione tessere elettroniche buoni pasto '+ office.name, administration:true /}
+	
+      <table class="table table-bordered center" datatable>
+        <thead>
+        <tr>
+	      <th>Nome</th>
+	      <th>Tessera attualmente in uso</th>
+	      <th>Consegna nuova tessera</th>
+	      <th>Lista tessere associate</th>
+	  	</tr>
+	  	</thead>
+	  	<tbody>
+	  	  #{list items:personList, as:'person'}
+	  	  <tr>
+	  	    <td>${person.fullName()}</td> 
+	  	    	  	    
+	  	    <td>
+	  	    #{if person.actualMealTicketCard() != null} 
+	  	    	<h4>
+	  	    	<a class="label label-success label-badge" href="@{infoCard(person.actualMealTicketCard().id)}" data-async-modal="#defaultModal" webui-popover-hover data-content="Visualizza tessera">
+	  	    	${person.actualMealTicketCard().number}</a>
+	  	    	</h4>
+	  	    #{/if}
+	  	    #{else}
+	  	    	<p>Nessuna tessera attualmente assegnata</p>
+	  	    #{/else}	  	    
+	  	    </td>	  	    
+	  	    
+	  	    <td><a href="@{MealTicketCards.addNewCard(person.id)}" data-async-modal="#defaultModal">
+	  	    	<i class="fa fa-plus" aria-hidden="true">Nuova tessera</i></a></td>
+	  	    <td>
+	  	    <ul class="list-group">
+	  	    #{list items:person.getMealTicketCards(), as:'card'}
+	  	    	<li class="list-group-item clearfix">
+	  	    	<span class="label label-default"> ${card.number} </span>
+    				
+    				<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
+               		<i class="fa fa-trash"></i> Rimuovi
+             		</a>   				
+  				</li>
+	  	    #{/list}
+	  	    </ul>
+	  	    </td>  	    
+	  	  </tr>
+	  	  #{/list}
+	  	</tbody>	
+	  </table>
+
+</div>

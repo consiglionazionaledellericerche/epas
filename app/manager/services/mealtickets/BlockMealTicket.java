@@ -17,6 +17,7 @@
 
 package manager.services.mealtickets;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -25,6 +26,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Contract;
 import models.MealTicket;
+import models.MealTicketCard;
 import models.Person;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
@@ -43,12 +45,17 @@ public class BlockMealTicket {
   private String codeBlock;
   private BlockType blockType;
   private List<MealTicket> mealTickets;
+  private MealTicketCard mealTicketCard;
 
-  protected BlockMealTicket(String codeBlock, BlockType blockType) {
+  protected BlockMealTicket(String codeBlock, BlockType blockType, 
+      Optional<MealTicketCard> mealTicketCard) {
 
     this.codeBlock = codeBlock;
     this.blockType = blockType;
     this.mealTickets = Lists.newArrayList();
+    if (mealTicketCard.isPresent()) {
+      this.mealTicketCard = mealTicketCard.get();
+    }
   }
 
   /**

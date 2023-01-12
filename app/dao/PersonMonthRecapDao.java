@@ -20,8 +20,10 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.CertificatedData;
@@ -72,6 +74,16 @@ public class PersonMonthRecapDao extends DaoBase {
         .where(condition.and(personMonthRecap.person.eq(person)
             .and(personMonthRecap.year.eq(year))))
         .fetch();
+  }
+
+  public Map<Person, List<PersonMonthRecap>> getPersonMonthRecaps(List<Person> persons, int year, int month) {
+    QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+
+    return getQueryFactory().selectFrom(personMonthRecap)
+        .where(personMonthRecap.person.in(persons),
+            personMonthRecap.year.eq(year),
+            personMonthRecap.month.eq(month))
+        .transform(GroupBy.groupBy(personMonthRecap.person).as(GroupBy.list(personMonthRecap)));
   }
 
   /**
