@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità auto inserimento codici congedo parentale per il padre
  
 ### Changed
+ - Corretta gestione sincronizzazione personale afferente in una sede nel caso non
+   sia presente l'id anagrafica esterno
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
  - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
  - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi

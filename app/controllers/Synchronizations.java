@@ -17,6 +17,7 @@
 
 package controllers;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
@@ -999,7 +1000,16 @@ public class Synchronizations extends Controller {
   public void syncPeopleInOffice(Long id) {
     Office office = Office.findById(id);
     notFoundIfNull(office);
-    synchronizationManager.syncPeopleInOffice(office, false);
+    val result = synchronizationManager.syncPeopleInOffice(office, false);
+    if (result.isSuccess()) {
+    renderText(
+        String.format("Assegnazione personale dell'ufficio %s sincronizzata", 
+            office.getName()));
+    } else {
+      renderText(
+          String.format("Sincronizzazione personale ufficio %s KO: %s",
+              office.getName(), Joiner.on(",").join(result.getMessages())));
+    }
   }
 
   /**

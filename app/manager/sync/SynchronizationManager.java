@@ -94,8 +94,8 @@ public class SynchronizationManager {
     if (office.getPerseoId() == null) {
       result.setFailed();
       result.add(
-          String.format("Impossibile sincronizzare l'ufficio {} perché non ha un id anagrafica"
-          + "esterno impostato", office.getLabel()));
+          String.format("Impossibile sincronizzare l'ufficio %s perché non ha un id anagrafica "
+          + "esterno impostato.", office.getLabel()));
       return result;
     }
     val perseoPeople = peoplePerseoConsumer
