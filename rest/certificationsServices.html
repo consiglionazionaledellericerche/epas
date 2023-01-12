@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -946,58 +948,58 @@ di un singolo dipendente in uno spefico anno sono disponibili tramite una HTTP G
 campo <em>month</em>.
 Negli esempi successivi viene utilizzato il parametro <a class="reference external" href="mailto:email=galileo&#46;galilei&#37;&#52;&#48;cnr&#46;it">email=galileo<span>&#46;</span>galilei<span>&#64;</span>cnr<span>&#46;</span>it</a>,
 cambiatelo con un utente appropriato per la vostra sede.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">year</span><span class="o">==</span><span class="m">2020</span> <span class="nv">month</span><span class="o">==</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituation
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">year</span><span class="o">==</span><span class="m">2020</span><span class="w"> </span><span class="nv">month</span><span class="o">==</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;absences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;COVID19BP&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-01&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;justifiedTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">432</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;justifiedType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assign_all_day&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-02&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;37&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;justifiedTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">432</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;justifiedType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;all_day&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-03&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">   </span><span class="p">]</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;competences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;fullName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;mealTickets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;mealTicketsPreviousMonth&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;remainingMealTickets&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trainingHours&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;absences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;COVID19BP&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-01&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;justifiedTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">432</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;justifiedType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assign_all_day&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-02&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;37&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-03&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;justifiedTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">432</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;justifiedType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;all_day&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-03&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="w">   </span><span class="nt">&quot;competences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;fullName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo Galilei&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;mealTickets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;mealTicketsPreviousMonth&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;remainingMealTickets&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;trainingHours&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2020</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Per ottenere lo stesso riepilogo ma per tutti i dipendenti di una sede è possibile utilizzare il metodo:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice
-    <span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span> <span class="nv">year</span><span class="o">==</span><span class="m">2020</span> <span class="nv">month</span><span class="o">==</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthSituationByOffice
+<span class="w">    </span><span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span><span class="w"> </span><span class="nv">year</span><span class="o">==</span><span class="m">2020</span><span class="w"> </span><span class="nv">month</span><span class="o">==</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>Il risultato sarà una lista dei riepilogi strutturati come quello dell'esempio precedente per il
@@ -1011,40 +1013,40 @@ questi metodi sono solamente un _proxy_ rispetto ad <em>Attestati</em> nel senso
 le chiamate REST ad attestati per sapere se i cartellini sono stati validati o meno.</p>
 <p><strong>QUESTI DUE METODI HANNO SENSO SOLO PER IL CNR DOVE E' PRESENTE IL SERVIZIO ATTESTATI</strong>.</p>
 <p>I due metodi sono:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">year</span><span class="o">==</span><span class="m">2020</span> <span class="nv">month</span><span class="o">==</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByPerson
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">year</span><span class="o">==</span><span class="m">2020</span><span class="w"> </span><span class="nv">month</span><span class="o">==</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>Questo metodo ritorna il valore <strong>true</strong> se l'attestato è stato validato, <strong>false</strong> altrimenti.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice
-    <span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span> <span class="nv">year</span><span class="o">==</span><span class="m">2020</span> <span class="nv">month</span><span class="o">==</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/certifications/getMonthValidationStatusByOffice
+<span class="w">    </span><span class="nv">sedeId</span><span class="o">==</span><span class="m">223400</span><span class="w"> </span><span class="nv">year</span><span class="o">==</span><span class="m">2020</span><span class="w"> </span><span class="nv">month</span><span class="o">==</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>Il risultato è del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;allCertificationsValidated&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;notValidatedPersons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;fax&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="p">}</span><span class="w"></span>
-<span class="w">   </span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;validatedPersons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1235</span><span class="p">,</span><span class="w"></span>
-<span class="w">         </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9801&quot;</span><span class="w"></span>
-<span class="w">     </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;allCertificationsValidated&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;notValidatedPersons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;fax&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;validatedPersons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;leonardo.fibonacci@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FBNLRD74P10G702G&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fibonacci Leonardo&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1235</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9801&quot;</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p><strong>ATTENZIONE QUESTO METODO PUO' ESSERE MOLTO LENTO, perché effettua una chiamata ad Attestati per ogni dipendente</strong></p>

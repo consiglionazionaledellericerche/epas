@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -941,25 +943,25 @@ ruolo <em>Lettore informazioni</em>.</p>
 <p>La lista delle tipologie di competenze presenti nel sistema è disponibile tramite una
 HTTP GET all'indirizzo <strong>/rest/v3/competences/list</strong>.</p>
 <p>Per esempio:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/competences/list
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/competences/list
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Feriale&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;207&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Feriale&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 <p>Nell'esempio sopra sono riportate per semplicità solo alcune competenze ma l'elenco reale
@@ -971,26 +973,26 @@ sarà più lungo.</p>
 una <em>HTTP GET</em> all'endopoint <strong>/rest/v3/competences/show</strong>.</p>
 <p>Per individuare la tipologia di competenza è possibile passare il campo <strong>id</strong> oppure
 il campo <strong>code</strong> che corrisponde al codice della competenza (per esempio <em>S1</em>).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/competences/show
-    <span class="nv">id</span><span class="o">==</span><span class="m">3</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/competences/show
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">3</span>
 </pre></div>
 </div>
 <p>Il risultato sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;competenceCodeGroup&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo reperibilità&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Festiva&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;limitType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monthly&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;limitUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;days&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;limitValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;208&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;competenceCodeGroup&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo reperibilità&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Festiva&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;limitType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monthly&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;limitUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;days&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;limitValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Le competenze hanno associato anche un <em>competenceCodeGroup</em> che ne definisce alcuni
@@ -1001,32 +1003,32 @@ comportamenti e limiti.</p>
 <p>Si può visualizzare i dettagli relativi ad un gruppo di competenze tramite
 una <em>HTTP GET</em> all'endopoint <strong>/rest/v3/competencegroups/show</strong>.</p>
 <p>Per individuare la tipologia di competenza è possibile passare il campo <strong>id</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/competencegroups/show
-    <span class="nv">id</span><span class="o">==</span><span class="m">3</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/competencegroups/show
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">3</span>
 </pre></div>
 </div>
 <p>Il risultato sarà del tipo:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
-  <span class="s2">&quot;competenceCodes&quot;</span>: <span class="o">[</span>
-      <span class="o">{</span>
-          <span class="s2">&quot;code&quot;</span>: <span class="s2">&quot;207&quot;</span>,
-          <span class="s2">&quot;codeToPresence&quot;</span>: <span class="s2">&quot;207&quot;</span>,
-          <span class="s2">&quot;description&quot;</span>: <span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Feriale&quot;</span>,
-          <span class="s2">&quot;id&quot;</span>: <span class="m">2</span>
-      <span class="o">}</span>,
-      <span class="o">{</span>
-          <span class="s2">&quot;code&quot;</span>: <span class="s2">&quot;208&quot;</span>,
-          <span class="s2">&quot;codeToPresence&quot;</span>: <span class="s2">&quot;208&quot;</span>,
-          <span class="s2">&quot;description&quot;</span>: <span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Festiva&quot;</span>,
-          <span class="s2">&quot;id&quot;</span>: <span class="m">3</span>
-      <span class="o">}</span>
-  <span class="o">]</span>,
-  <span class="s2">&quot;id&quot;</span>: <span class="m">1</span>,
-  <span class="s2">&quot;label&quot;</span>: <span class="s2">&quot;Gruppo reperibilità&quot;</span>,
-  <span class="s2">&quot;limitType&quot;</span>: <span class="s2">&quot;monthly&quot;</span>,
-  <span class="s2">&quot;limitUnit&quot;</span>: <span class="s2">&quot;days&quot;</span>,
-  <span class="s2">&quot;limitValue&quot;</span>: <span class="m">16</span>
+<span class="w">  </span><span class="s2">&quot;competenceCodes&quot;</span>:<span class="w"> </span><span class="o">[</span>
+<span class="w">      </span><span class="o">{</span>
+<span class="w">          </span><span class="s2">&quot;code&quot;</span>:<span class="w"> </span><span class="s2">&quot;207&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;codeToPresence&quot;</span>:<span class="w"> </span><span class="s2">&quot;207&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;description&quot;</span>:<span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Feriale&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="m">2</span>
+<span class="w">      </span><span class="o">}</span>,
+<span class="w">      </span><span class="o">{</span>
+<span class="w">          </span><span class="s2">&quot;code&quot;</span>:<span class="w"> </span><span class="s2">&quot;208&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;codeToPresence&quot;</span>:<span class="w"> </span><span class="s2">&quot;208&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;description&quot;</span>:<span class="w"> </span><span class="s2">&quot;Ind.ta&#39; Reper.ta&#39; Festiva&quot;</span>,
+<span class="w">          </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="m">3</span>
+<span class="w">      </span><span class="o">}</span>
+<span class="w">  </span><span class="o">]</span>,
+<span class="w">  </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="m">1</span>,
+<span class="w">  </span><span class="s2">&quot;label&quot;</span>:<span class="w"> </span><span class="s2">&quot;Gruppo reperibilità&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;limitType&quot;</span>:<span class="w"> </span><span class="s2">&quot;monthly&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;limitUnit&quot;</span>:<span class="w"> </span><span class="s2">&quot;days&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;limitValue&quot;</span>:<span class="w"> </span><span class="m">16</span>
 <span class="o">}</span>
 </pre></div>
 </div>
@@ -1036,29 +1038,29 @@ una <em>HTTP GET</em> all'endopoint <strong>/rest/v3/competencegroups/show</stro
 <p>La lista dei gruppi di competenze presenti nel sistema è disponibili tramite una
 HTTP GET all'indirizzo <strong>/rest/v3/competencegroups/list</strong>.</p>
 <p>Per esempio:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/competencegroups/list
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/competencegroups/list
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo reperibilità&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo straordinari&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo turni&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo Ind.tà rischio&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo reperibilità&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo straordinari&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo turni&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gruppo Ind.tà rischio&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -1072,26 +1074,26 @@ Negli esempi successivi viene utilizzato il parametro <a class="reference extern
 cambiatelo con un utente appropriato per la vostra sede.</p>
 <p>Nel caso si voglia sapere le competenze abilitate ad una certa data è possibile passare
 il parametro <strong>date</strong>, se questo parametro non viene passato il default è la data corrente.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_person_day_reader
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/competences/personCompetenceCodes
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_person_day_reader
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/competences/personCompetenceCodes
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
 </pre></div>
 </div>
 <p>Il JSON restituto contiene una lista delle competenze abilitate per una persona con le date
 di inizio e fine abilitazione della competenza.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-07-30&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;competenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">71</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;beginDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-07-30&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;competenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;codeToPresence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S2&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;endDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">71</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>

@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -952,32 +954,32 @@ Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>en
 <em>YYYY-MM-dd</em>.</p>
 <p>Negli esempi successivi viene utilizzato il parametro <a class="reference external" href="mailto:email=galileo&#46;galilei&#37;&#52;&#48;cnr&#46;it">email=galileo<span>&#46;</span>galilei<span>&#64;</span>cnr<span>&#46;</span>it</a>,
 cambiatelo con un utente appropriato per la vostra sede.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">begin</span><span class="o">==</span><span class="m">2020</span>-12-01 <span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-12-31
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/absencesInPeriod
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">begin</span><span class="o">==</span><span class="m">2020</span>-12-01<span class="w"> </span><span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-12-31
 </pre></div>
 </div>
 <p>La risposta sarà del tipo</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;37&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-21&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ferie anno precedente (dopo il 31/8)&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107109</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;94&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-28&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;festività soppresse (ex legge 937/77)&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107110</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;37&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-21&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ferie anno precedente (dopo il 31/8)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107109</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;94&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-12-28&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;festività soppresse (ex legge 937/77)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107110</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -991,27 +993,27 @@ l'effettivo inserimento. Questa operazione è fruibile utilizzando l'endpoint
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenza deve essere indicato con il parametro <em>absenceCode</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-02 <span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-03 <span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/checkAbsence
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-02<span class="w"> </span><span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-03<span class="w"> </span><span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
 </pre></div>
 </div>
 <p>Il risultato conterrà i giorni in cui sarebbe possibile inserire l'assenza, con un formato
 tipo il seguente:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-02&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-02&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-03&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -1025,27 +1027,27 @@ Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>en
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenza deve essere indicato con il parametro <em>absenceCode</em>.
 Nel caso di tratti di un'assenza oraria è possibile indicare i campi <em>hours</em> and <em>minutes</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-02 <span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-03 <span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-02<span class="w"> </span><span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-03<span class="w"> </span><span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
 </pre></div>
 </div>
 <p>Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-02&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">},</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-03&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-02&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-03&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;isOk&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 <p>Per esempio nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi
@@ -1062,33 +1064,33 @@ L'inserimento di una assenza di tipo ferie è possibile tramite una <em>HTTP PUT
 <em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertVacation
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-03-05 <span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-03-08
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/insertVacation
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-03-05<span class="w"> </span><span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-03-08
 </pre></div>
 </div>
 <p>Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-03-05&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ferie anno precedente&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107159</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-03-08&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ferie anno precedente&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107160</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-03-05&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ferie anno precedente&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107159</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;absenceCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;31&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-03-08&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ferie anno precedente&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasAttachment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">107160</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galileo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 <p>Anche con questo metodo, nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi,
@@ -1099,9 +1101,9 @@ il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.</p>
 <p>La cancellazione di un'assenza è possibile tramite una HTTP DELETE all'indirizzo
 <strong>/rest/absences/delete</strong>.</p>
 <p>Per individuare l'assenza da eliminare si utilizza il parametro <em>id</em> dell'assenza.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_absence_manager
-    DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/delete
-    <span class="nv">id</span><span class="o">==</span><span class="m">107109</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/delete
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">107109</span>
 </pre></div>
 </div>
 </section>
@@ -1115,7 +1117,7 @@ Questa operazione può essere seguita con una <em>HTTP DELETE</em> all'endpoint 
 Il periodo può essere specificato tramite le variabili <em>begin</em> ed <em>end</em> con data nel formato
 <em>YYYY-MM-dd</em>.
 Il codice dell'assenze da cancellare deve essere indicato con il parametro <em>absenceCode</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_iit_absence_manager DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/deleteAbsencesInPeriod <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it <span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-15 <span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-16 <span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_iit_absence_manager<span class="w"> </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/deleteAbsencesInPeriod<span class="w"> </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">begin</span><span class="o">==</span><span class="m">2021</span>-02-15<span class="w"> </span><span class="nv">end</span><span class="o">==</span><span class="m">2021</span>-02-16<span class="w"> </span><span class="nv">absenceCode</span><span class="o">==</span><span class="m">31</span>
 </pre></div>
 </div>
 </section>
@@ -1125,9 +1127,9 @@ Il codice dell'assenze da cancellare deve essere indicato con il parametro <em>a
 la certificazione di una visita medifica).
 L'allegato può essere scaricato con una <em>HTTP GET</em> all'indirizzo <strong>/rest/absences/attachment</strong>.</p>
 <p>Per individuare l'assenza di cui prelevare l'allegato si utilizza il parametro <em>id</em> dell'assenza.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_iit_absence_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/absences/attachment
-    <span class="nv">id</span><span class="o">==</span><span class="m">107122</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_iit_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/attachment
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">107122</span>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
@@ -1150,9 +1152,9 @@ L'allegato può essere scaricato con una <em>HTTP GET</em> all'indirizzo <strong
 <p>Per individuare l'assenza a cui associare l'allegato si utilizza il parametro <em>id</em> dell'assenza.
 La <em>HTTP POST</em> deve essere di tipo <em>Multipart/form-data</em> e l'allegato deve essere passato con il nome <em>file</em>.</p>
 <p>Esempio:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_iit_absence_manager --form
-    POST https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
-    <span class="nv">id</span><span class="o">==</span><span class="m">107122</span> file@assenza-Galilei-Galileo-2021-02-15.pdf
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_iit_absence_manager<span class="w"> </span>--form
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">107122</span><span class="w"> </span>file@assenza-Galilei-Galileo-2021-02-15.pdf
 </pre></div>
 </div>
 <p>Nel caso sia già presente un allegato quello precedente viene sovrascritto.</p>
@@ -1166,9 +1168,9 @@ caricare sul server tramite queste API.</p>
 <p>Per eliminare l'allegato è possibile utilizzare una <em>HTTP DELETE</em> all'indirizzo <strong>/rest/absences/addAttachment</strong>.</p>
 <p>Per individuare l'assenza di cui rimuovere l'allegato si utilizza il parametro <em>id</em> dell'assenza.</p>
 <p>Esempio:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_iit_absence_manager
-    DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
-    <span class="nv">id</span><span class="o">==</span><span class="m">107122</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_iit_absence_manager
+<span class="w">    </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/absences/addAttachment
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">107122</span>
 </pre></div>
 </div>
 <p>Nel caso non fosse presente un'allegato viene restituito con codice <em>HTTP 404</em>, altrimenti un codice <em>HTTP 200</em> se

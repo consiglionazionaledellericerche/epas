@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -964,9 +966,9 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 </ul>
 </div></blockquote>
 <p>Un esempio è il seguente:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a client_timbrature_sede_xxx
-    POST https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create
-    <span class="nv">matricolaFirma</span><span class="o">=</span><span class="m">9802</span> <span class="nv">operazione</span><span class="o">=</span><span class="m">0</span> <span class="nv">anno</span><span class="o">=</span><span class="m">2021</span> <span class="nv">mese</span><span class="o">=</span><span class="m">02</span> <span class="nv">giorno</span><span class="o">=</span><span class="m">08</span> <span class="nv">ora</span><span class="o">=</span><span class="m">08</span> <span class="nv">minuti</span><span class="o">=</span><span class="m">10</span> <span class="nv">causale</span><span class="o">=</span>lavoroFuoriSede <span class="nv">luogo</span><span class="o">=</span>Pisa <span class="nv">motivazione</span><span class="o">=</span><span class="s1">&#39;ero sotto la torre&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>client_timbrature_sede_xxx
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/stampingsfromclient/create
+<span class="w">    </span><span class="nv">matricolaFirma</span><span class="o">=</span><span class="m">9802</span><span class="w"> </span><span class="nv">operazione</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="nv">anno</span><span class="o">=</span><span class="m">2021</span><span class="w"> </span><span class="nv">mese</span><span class="o">=</span><span class="m">02</span><span class="w"> </span><span class="nv">giorno</span><span class="o">=</span><span class="m">08</span><span class="w"> </span><span class="nv">ora</span><span class="o">=</span><span class="m">08</span><span class="w"> </span><span class="nv">minuti</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">causale</span><span class="o">=</span>lavoroFuoriSede<span class="w"> </span><span class="nv">luogo</span><span class="o">=</span>Pisa<span class="w"> </span><span class="nv">motivazione</span><span class="o">=</span><span class="s1">&#39;ero sotto la torre&#39;</span>
 </pre></div>
 </div>
 <p>Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:</p>
@@ -1001,9 +1003,9 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 </dd>
 </dl>
 <p>Per esempio:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a client_timbrature_sede_xxx
-    POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create
-    <span class="nv">badgeNumber</span><span class="o">=</span><span class="m">9802</span> <span class="nv">dateTime</span><span class="o">=</span><span class="s1">&#39;2021-02-12T08:20&#39;</span> <span class="nv">wayType</span><span class="o">=</span><span class="k">in</span> <span class="nv">note</span><span class="o">=</span><span class="s1">&#39;Note eccezionali veramente&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>client_timbrature_sede_xxx
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/create
+<span class="w">    </span><span class="nv">badgeNumber</span><span class="o">=</span><span class="m">9802</span><span class="w"> </span><span class="nv">dateTime</span><span class="o">=</span><span class="s1">&#39;2021-02-12T08:20&#39;</span><span class="w"> </span><span class="nv">wayType</span><span class="o">=</span><span class="k">in</span><span class="w"> </span><span class="nv">note</span><span class="o">=</span><span class="s1">&#39;Note eccezionali veramente&#39;</span>
 </pre></div>
 </div>
 <p>Il metodo restituisce uno dei seguenti codici HTTP di risposta:</p>
@@ -1017,27 +1019,27 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 </div></blockquote>
 <p>Se l'inserimento va a buon fine (con codice HTTP <em>200</em>) il metodo restituisce anche le informazioni
 della timbratura inserita.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-12T08:20:00&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398946</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;markedByTelework&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Note eccezionali veramente&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">},</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;stampingZone&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-02-12T08:20:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">398946</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;markedByAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;markedByEmployee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;markedByTelework&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Note eccezionali veramente&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;galileo.galilei@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLGLL74P10G702B&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei Galileo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9802&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;place&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stampType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stampingZone&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;way&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -1046,8 +1048,8 @@ della timbratura inserita.</p>
 <p>La visualizzazione dei dati di una timbratura è tramite una <em>HTTP</em> GET all'indirizzo
 <strong>/rest/v3/stampings/show</strong>.</p>
 <p>Per individuare la timbratura è possibile utilizzare solo il campo <strong>id</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a client_timbrature_sede_xxx
-    POST https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show <span class="nv">id</span><span class="o">==</span><span class="m">398946</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>client_timbrature_sede_xxx
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/show<span class="w"> </span><span class="nv">id</span><span class="o">==</span><span class="m">398946</span>
 </pre></div>
 </div>
 <p>Il risultato sarà uguale a quello dell'esempio riportato sopra come risposta all'inserimento
@@ -1074,9 +1076,9 @@ in alcuni rari casi per gestire le timbrature continuative tra due zone definite
 <p><strong>ATTENZIONE</strong> non è possibile modificare la persona a cui è associata la timbratura o
 la data e ora della timbratura, se è necessario modificare uno di questi campi allora
 è opportuno cancellare la vecchia timbratura ed inserirne una nuova.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a client_timbrature_sede_xxx
-    PUT https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946
-    <span class="nv">wayType</span><span class="o">=</span><span class="k">in</span> <span class="nv">place</span><span class="o">==</span><span class="s1">&#39;Torre di Pisa&#39;</span> <span class="nv">reason</span><span class="o">==</span><span class="s1">&#39;Esperimento caduta gravi&#39;</span> <span class="nv">reasonType</span><span class="o">=</span>lavoroFuoriSede
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>client_timbrature_sede_xxx
+<span class="w">    </span>PUT<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/stampings/update/398946
+<span class="w">    </span><span class="nv">wayType</span><span class="o">=</span><span class="k">in</span><span class="w"> </span><span class="nv">place</span><span class="o">==</span><span class="s1">&#39;Torre di Pisa&#39;</span><span class="w"> </span><span class="nv">reason</span><span class="o">==</span><span class="s1">&#39;Esperimento caduta gravi&#39;</span><span class="w"> </span><span class="nv">reasonType</span><span class="o">=</span>lavoroFuoriSede
 </pre></div>
 </div>
 </section>
@@ -1084,8 +1086,8 @@ la data e ora della timbratura, se è necessario modificare uno di questi campi 
 <h2><span class="section-number">8.10.6. </span>Stamping Delete<a class="headerlink" href="#stamping-delete" title="Permalink to this heading">¶</a></h2>
 <p>La cancellazione di una timbratura è possibile tramite una HTTP DELETE all'indirizzo <strong>/rest/v3/stampings/delete</strong></p>
 <p>Per individuare la timbratura da eliminare si utilizza lo stesso parametro previsti per la show: <strong>id</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id<span class="o">=</span><span class="m">398946</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/stampings/delete?id<span class="o">=</span><span class="m">398946</span>
 </pre></div>
 </div>
 </section>

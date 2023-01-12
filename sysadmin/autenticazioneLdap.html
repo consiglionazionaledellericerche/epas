@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -932,23 +934,23 @@ Active Directory di Microsoft che da amministrazioni che utilizzano
 <a class="reference external" href="https://www.openldap.org/">OpenLdap</a>.</p>
 <p>La configurazione dell'autenticazione LDAP è possibile tramite le variabili di ambiente
 presenti nel docker-compose.yml che sono quelle riportate sotto.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#  [...]</span><span class="w"></span>
-<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
-<span class="c1">#  [...]</span><span class="w"></span>
-<span class="c1">#### Autenticazione LDAP ####</span><span class="w"></span>
-<span class="w">    </span><span class="c1">#- LDAP_LOGIN=true                       # default: false. Impostare a true per attivare l&#39;autenticazione tramite LDAP</span><span class="w"></span>
-<span class="w">    </span><span class="c1">#- LDAP_URL=${LDAP_URL}                  # url del server LDAP, per esempio ldap://ldap.cnr.it:389</span><span class="w"></span>
-<span class="w">    </span><span class="c1">#- LDAP_STARTTLS=${LDAP_STARTTLS}        # default: false. Se impostato a true attiva la connessione cifrata tramite il protocollo starttls</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_TIMEOUT=${LDAP_TIMEOUT}          # default: 1000. Time in millisecondi della connessione LDAP.</span><span class="w"></span>
-<span class="w">    </span><span class="c1">#- LDAP_DN_BASE=${LDAP_DN_BASE}          # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}  # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.</span><span class="w"></span>
-<span class="w">    </span><span class="c1">### I due parametri successivi sono da impostare solo nel caso sia necessario effettuare la prima connessione ad LDAP con un utente privilegiato.</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_BIND_DN=${LDAP_BIND_DN}                                           # Eventuale DN dell&#39;utente LDAP privilegato</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_BIND_CREDENTIALS=${LDAP_BIND_CREDENTIALS}                         # Eventuale password dell&#39;utente LDAP privilegato</span><span class="w"></span>
-<span class="w">    </span><span class="c1">##- LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}   # Da utilizzare solo è presente un LDAP_BIND_DN. L&#39;utente viene cercato su LDAP con</span><span class="w"></span>
-<span class="w">                                                                               </span><span class="c1"># l&#39;utente amministratore e poi verificata l&#39;autenticazione facendo una search LDAP</span><span class="w"></span>
-<span class="w">                                                                               </span><span class="c1"># con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#  [...]</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">environment</span><span class="p">:</span>
+<span class="c1">#  [...]</span>
+<span class="c1">#### Autenticazione LDAP ####</span>
+<span class="w">    </span><span class="c1">#- LDAP_LOGIN=true                       # default: false. Impostare a true per attivare l&#39;autenticazione tramite LDAP</span>
+<span class="w">    </span><span class="c1">#- LDAP_URL=${LDAP_URL}                  # url del server LDAP, per esempio ldap://ldap.cnr.it:389</span>
+<span class="w">    </span><span class="c1">#- LDAP_STARTTLS=${LDAP_STARTTLS}        # default: false. Se impostato a true attiva la connessione cifrata tramite il protocollo starttls</span>
+<span class="w">    </span><span class="c1">##- LDAP_TIMEOUT=${LDAP_TIMEOUT}          # default: 1000. Time in millisecondi della connessione LDAP.</span>
+<span class="w">    </span><span class="c1">#- LDAP_DN_BASE=${LDAP_DN_BASE}          # DN per la ricerca degli utenti su LDAP, per esempio ou=People,dc=iit,dc=cnr,dc=it</span>
+<span class="w">    </span><span class="c1">##- LDAP_LOGIN_RETURN=${LDAP_LOGIN_RETURN} # default: /. Indirizzo relativo di reindirizzamento dopo il login LDAP.</span>
+<span class="w">    </span><span class="c1">##- LDAP_EPPN_ATTRIBUTE_NAME=${LDAP_EPPN_ATTRIBUTE_NAME}  # default: eduPersonPrincipalName. Campo LDAP utilizzato per il mapping con il campo eppn presente in ePAS.</span>
+<span class="w">    </span><span class="c1">### I due parametri successivi sono da impostare solo nel caso sia necessario effettuare la prima connessione ad LDAP con un utente privilegiato.</span>
+<span class="w">    </span><span class="c1">##- LDAP_BIND_DN=${LDAP_BIND_DN}                                           # Eventuale DN dell&#39;utente LDAP privilegato</span>
+<span class="w">    </span><span class="c1">##- LDAP_BIND_CREDENTIALS=${LDAP_BIND_CREDENTIALS}                         # Eventuale password dell&#39;utente LDAP privilegato</span>
+<span class="w">    </span><span class="c1">##- LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}   # Da utilizzare solo è presente un LDAP_BIND_DN. L&#39;utente viene cercato su LDAP con</span>
+<span class="w">                                                                               </span><span class="c1"># l&#39;utente amministratore e poi verificata l&#39;autenticazione facendo una search LDAP</span>
+<span class="w">                                                                               </span><span class="c1"># con le credenziali utente con contesto uguale a questo parametro. Es. o=cnr,c=it</span>
 </pre></div>
 </div>
 <p>Per attivare l'autenticazione LDAP è necessario decommentare il parametro <em>LDAP_LOGIN</em> ed

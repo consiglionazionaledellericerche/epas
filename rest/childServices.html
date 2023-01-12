@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -948,22 +950,22 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <strong>/rest/v2/child/byPerson</strong>.</p>
 <p>La persona può essere individuata passando i soliti parametri identificativi delle persone:
 <em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/child/byPerson
-    <span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/byPerson
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">   </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1600-08-13</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;GLLVGN00M53G702I&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1600-08-13</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;GLLVGN00M53G702I&quot;</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -972,25 +974,25 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>La visualizzazione dei dati di un figlio/figlia è possibile tramite una HTTP GET all'indirizzo
 <strong>/rest/v2/child/show</strong>.</p>
 <p>Per individuare il figlio/figlia è possibile utilizzare solo il campo <em>id</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/child/show
-    <span class="nv">id</span><span class="o">==</span><span class="m">1236</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/show
+<span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">1236</span>
 </pre></div>
 </div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1600-08-13</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;GLLVGN00M53G702I&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1600-08-13</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;GLLVGN00M53G702I&quot;</span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>La stessa GET può essere effettuata passando l'id del figlio/figlia nel modo seguente:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v2/child/show/1236
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/show/1236
 </pre></div>
 </div>
 </section>
@@ -999,22 +1001,22 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>La modifica di un figlio/figlia è possibile tramite una HTTP PUT all'indirizzo
 <strong>/rest/v2/child/update</strong>.</p>
 <p>Per individuare il figlio/figlia è possibile utilizzare solo il campo <em>id</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    https://epas-demo.devel.iit.cnr.it/rest/v2/child/update <span class="nv">id</span><span class="o">=</span><span class="m">1236</span>
-    <span class="nv">name</span><span class="o">=</span>Virginia <span class="nv">surname</span><span class="o">=</span>Galilei <span class="nv">fiscalCode</span><span class="o">=</span>GLLVGN00M53G702I
-    <span class="nv">bornDate</span><span class="o">=</span><span class="m">1600</span>-08-13 <span class="nv">externalId</span><span class="o">=</span>xyz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/update<span class="w"> </span><span class="nv">id</span><span class="o">=</span><span class="m">1236</span>
+<span class="w">    </span><span class="nv">name</span><span class="o">=</span>Virginia<span class="w"> </span><span class="nv">surname</span><span class="o">=</span>Galilei<span class="w"> </span><span class="nv">fiscalCode</span><span class="o">=</span>GLLVGN00M53G702I
+<span class="w">    </span><span class="nv">bornDate</span><span class="o">=</span><span class="m">1600</span>-08-13<span class="w"> </span><span class="nv">externalId</span><span class="o">=</span>xyz
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1600-08-13&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLVGN00M53G702I&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1600-08-13&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLVGN00M53G702I&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1236</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -1022,23 +1024,23 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <h2><span class="section-number">8.9.5. </span>Children Create<a class="headerlink" href="#children-create" title="Permalink to this heading">¶</a></h2>
 <p>La creazione di un figlio/figlia di una persona è possibile tramite una HTTP POST all'indirizzo
 <strong>/rest/v2/child/create</strong>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    POST https://epas-demo.devel.iit.cnr.it/rest/v2/child/create
-    <span class="nv">name</span><span class="o">=</span>Vincenzio <span class="nv">surname</span><span class="o">=</span>Galilei <span class="nv">fiscalCode</span><span class="o">=</span>VNCGLL00M21G702U
-    <span class="nv">bornDate</span><span class="o">=</span><span class="m">1606</span>-08-21 <span class="nv">externalId</span><span class="o">=</span>xyzw
-    <span class="nv">personId</span><span class="o">=</span><span class="m">1234</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/create
+<span class="w">    </span><span class="nv">name</span><span class="o">=</span>Vincenzio<span class="w"> </span><span class="nv">surname</span><span class="o">=</span>Galilei<span class="w"> </span><span class="nv">fiscalCode</span><span class="o">=</span>VNCGLL00M21G702U
+<span class="w">    </span><span class="nv">bornDate</span><span class="o">=</span><span class="m">1606</span>-08-21<span class="w"> </span><span class="nv">externalId</span><span class="o">=</span>xyzw
+<span class="w">    </span><span class="nv">personId</span><span class="o">=</span><span class="m">1234</span>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1606-08-21&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xyzw&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLVGN00M53G702I&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vincenzio&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;bornDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1606-08-21&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;externalId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xyzw&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GLLVGN00M53G702I&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1237</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vincenzio&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;surname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Galilei&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;updatedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-01-15T17:55:05.966788&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Le uniche cosa da notare sono la necessità di indicare obbligatoriamente il campo <em>personId</em>
@@ -1049,8 +1051,8 @@ può essere creato tra un utente con ruolo di <em>Amministratore</em> di ePAS.</
 <p>La cancellazione di un figlio/figlia è possibile tramite una HTTP DELETE all'indirizzo
 <strong>/rest/v2/child/delete</strong>.</p>
 <p>Per individuare il figlio/figlia da eliminare si utilizza il parametro <em>id</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_registry_manager
-    DELETE https://epas-demo.devel.iit.cnr.it/rest/v2/child/delete?id<span class="o">=</span><span class="m">1237</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/child/delete?id<span class="o">=</span><span class="m">1237</span>
 </pre></div>
 </div>
 </section>

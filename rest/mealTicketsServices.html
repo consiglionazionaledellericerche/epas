@@ -619,10 +619,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -804,10 +805,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../admin/absences.html">2.8. Assenze</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/vacations.html">2.9. Gestione Ferie e Permessi</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/competences.html">2.10. Gestione Competenze</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.11. Gestione buoni pasto</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.12. Invio attestati di presenza</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.13. Schermate di riepilogo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.14. Utilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/utility.html">2.15. Utilità</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">3. Documentazione per gli amministratori tecnici</a><ul>
@@ -968,9 +970,9 @@ assegnare il blocchetto dei buoni pasto:</p>
 </ul>
 </div></blockquote>
 <p>Un esempio è il seguente:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/createByPerson
-    <span class="nv">personId</span><span class="o">=</span><span class="m">4605</span> <span class="nv">codeBlock</span><span class="o">=</span><span class="m">5789</span> <span class="nv">blockType</span><span class="o">=</span>papery <span class="nv">first</span><span class="o">=</span><span class="m">1</span> <span class="nv">last</span><span class="o">=</span><span class="m">10</span> <span class="nv">expiredDate</span><span class="o">=</span><span class="m">2022</span>-05-31 <span class="nv">deliveryDate</span><span class="o">=</span><span class="m">2022</span>-04-01 <span class="nv">adminId</span><span class="o">=</span><span class="m">123</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/createByPerson
+<span class="w">    </span><span class="nv">personId</span><span class="o">=</span><span class="m">4605</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">=</span><span class="m">5789</span><span class="w"> </span><span class="nv">blockType</span><span class="o">=</span>papery<span class="w"> </span><span class="nv">first</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">last</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">expiredDate</span><span class="o">=</span><span class="m">2022</span>-05-31<span class="w"> </span><span class="nv">deliveryDate</span><span class="o">=</span><span class="m">2022</span>-04-01<span class="w"> </span><span class="nv">adminId</span><span class="o">=</span><span class="m">123</span>
 </pre></div>
 </div>
 <p>Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:</p>
@@ -999,9 +1001,9 @@ La <em>POST</em> deve contenere nel body un json con i campi del bloccheto dei b
 </ul>
 </div></blockquote>
 <p>Un esempio è il seguente:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    POST https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/create
-    <span class="nv">contractId</span><span class="o">=</span><span class="m">1017</span> <span class="nv">codeBlock</span><span class="o">=</span><span class="m">5789</span> <span class="nv">blockType</span><span class="o">=</span>papery <span class="nv">first</span><span class="o">=</span><span class="m">1</span> <span class="nv">last</span><span class="o">=</span><span class="m">10</span> <span class="nv">expiredDate</span><span class="o">=</span><span class="m">2022</span>-05-31 <span class="nv">deliveryDate</span><span class="o">=</span><span class="m">2022</span>-04-01  <span class="nv">adminId</span><span class="o">=</span><span class="m">123</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>POST<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/create
+<span class="w">    </span><span class="nv">contractId</span><span class="o">=</span><span class="m">1017</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">=</span><span class="m">5789</span><span class="w"> </span><span class="nv">blockType</span><span class="o">=</span>papery<span class="w"> </span><span class="nv">first</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">last</span><span class="o">=</span><span class="m">10</span><span class="w"> </span><span class="nv">expiredDate</span><span class="o">=</span><span class="m">2022</span>-05-31<span class="w"> </span><span class="nv">deliveryDate</span><span class="o">=</span><span class="m">2022</span>-04-01<span class="w">  </span><span class="nv">adminId</span><span class="o">=</span><span class="m">123</span>
 </pre></div>
 </div>
 <p>Il metodo restituisce una risposta vuota con uno dei seguenti codici HTTP di risposta:</p>
@@ -1022,44 +1024,44 @@ La <em>GET</em> deve avere come parametri obbligatori i seguenti campi:</p>
 <li><p><em>contractId</em>: è un numero obbligatorio. indica l'id del contratto associato a una persona.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/list <span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/list<span class="w"> </span><span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;adminId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">111</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5789&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;contractId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1017</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;adminId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;adminId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">111</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5789&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;contractId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1017</span>
+<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;adminId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -1074,27 +1076,27 @@ La <em>GET</em> deve avere come parametri obbligatori i seguenti campi:</p>
 <li><p><em>codeBlock</em>: è un numero obbligatorio. indica il codice del blocchetto dei buoni pasto da inserire nel sistema.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/show <span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span> <span class="nv">codeBlock</span><span class="o">==</span><span class="m">123456</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/show<span class="w"> </span><span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">==</span><span class="m">123456</span>
 </pre></div>
 </div>
 <p>La risposta sarà del tipo</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">]</span><span class="w"></span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;blockType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;papery&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;codeBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;first&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;last&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;person&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@iit.cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;eppn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kinzica.desismondi@cnr.it&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fiscalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fullname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;De Sismondi Kinzica&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">966</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9535&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -1113,9 +1115,9 @@ che sono parametri obbligatori:</p>
 <li><p><em>last</em>: è un intero obbligatorio. Indica il numero dell'ultimo buono pasto.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    DELETE https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/delete
-    <span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span> <span class="nv">codeBlock</span><span class="o">==</span><span class="m">5789</span> <span class="nv">first</span><span class="o">==</span><span class="m">1</span> <span class="nv">last</span><span class="o">==</span><span class="m">22</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>DELETE<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/delete
+<span class="w">    </span><span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">==</span><span class="m">5789</span><span class="w"> </span><span class="nv">first</span><span class="o">==</span><span class="m">1</span><span class="w"> </span><span class="nv">last</span><span class="o">==</span><span class="m">22</span>
 </pre></div>
 </div>
 </section>
@@ -1131,8 +1133,8 @@ tramite una <em>HTTP</em> GET all'indirizzo
 <li><p><em>codeBlock</em>: è un numero obbligatorio. indica il codice del blocchetto dei buoni pasto da inserire nel sistema.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/convert <span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span> <span class="nv">codeBlock</span><span class="o">==</span><span class="m">123456</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/convert<span class="w"> </span><span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">==</span><span class="m">123456</span>
 </pre></div>
 </div>
 </section>
@@ -1150,9 +1152,9 @@ tramite una <em>HTTP</em> GET all'indirizzo
 <li><p><em>last</em>: è un intero obbligatorio. Indica il numero dell'ultimo buono pasto.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ http -a istituto_xxx_mealtickets_manager
-    GET https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/returnBlock
-    <span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span> <span class="nv">codeBlock</span><span class="o">==</span><span class="m">5789</span> <span class="nv">first</span><span class="o">==</span><span class="m">1</span> <span class="nv">last</span><span class="o">==</span><span class="m">5</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_mealtickets_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/mealtickets/returnBlock
+<span class="w">    </span><span class="nv">contractId</span><span class="o">==</span><span class="m">1017</span><span class="w"> </span><span class="nv">codeBlock</span><span class="o">==</span><span class="m">5789</span><span class="w"> </span><span class="nv">first</span><span class="o">==</span><span class="m">1</span><span class="w"> </span><span class="nv">last</span><span class="o">==</span><span class="m">5</span>
 </pre></div>
 </div>
 </section>
