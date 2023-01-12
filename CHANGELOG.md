@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.3] - UNRELEASED
+## [2.6.3] - 2023-01-12
 ### Added
  - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
  - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
  - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
  - Aggiunta possibilità auto inserimento codici congedo parentale per il padre
+ - Aggiunti codici per missione antartica per l'anno 2023
  
 ### Changed
  - Corretta gestione sincronizzazione personale afferente in una sede nel caso non
