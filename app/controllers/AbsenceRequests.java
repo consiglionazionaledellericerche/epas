@@ -655,9 +655,13 @@ public class AbsenceRequests extends Controller {
       // caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
     }
-    if (absenceRequest.isOfficeHeadApprovalRequired() 
+
+    if ((absenceRequest.isOfficeHeadApprovalRequired() || 
+          absenceRequest.isOfficeHeadApprovalForManagerRequired())
         && absenceRequest.getOfficeHeadApproved() == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      log.info("Rifiuto da parte del responsabile di sede {} per {}", 
+          user.getLabel(), absenceRequest);
       // caso di approvazione da parte del responsabile di sede
       absenceRequestManager.officeHeadDisapproval(id, reason);
     }
