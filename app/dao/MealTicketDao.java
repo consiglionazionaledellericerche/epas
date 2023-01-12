@@ -21,20 +21,28 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import it.cnr.iit.epas.DateInterval;
+import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
+import lombok.val;
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.enumerate.BlockType;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
+import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
 /**
@@ -177,6 +185,22 @@ public class MealTicketDao extends DaoBase {
     query.where(mealTicket.blockType.eq(BlockType.electronic)
         .and(mealTicket.mealTicketCard.isNull()).and(mealTicket.contract.eq(contract)));
     return query.fetch();
+  }
+
+  public Map<Person, Integer> getNumberOfMealTicketAccrued(
+      List<Person> persons, LocalDate from, LocalDate to) {
+    QPersonDay personDay = QPersonDay.personDay;
+    Map<Person, List<PersonDay>> result = getQueryFactory()
+        .from(personDay)
+        .where(personDay.person.in(persons), personDay.date.goe(from),
+            personDay.date.loe(to), personDay.isTicketAvailable.eq(true))
+        .transform(GroupBy.groupBy(personDay.person).as(GroupBy.list(personDay)));
+
+    Map<Person, Integer> ticketsCountMap = new HashMap<>();
+    result.keySet().forEach(person -> {
+      ticketsCountMap.put(person, result.get(person).size());
+    });
+    return ticketsCountMap;
   }
 
 }

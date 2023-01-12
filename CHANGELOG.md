@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretta gestione sincronizzazione personale afferente in una sede nel caso non
    sia presente l'id anagrafica esterno
+ - Aggiornamento del logo del CNR
  - Modificato comportamento del codice 98CV che deve decurtare le ferie
  - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
  - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
  - Corretta visualizzazione privacy policy
+ - Migliorate le prestazioni del metodo /rest/v2/certifications/getmonthsituationbyoffice
  - Modificato il calcolo della quantità di ore da togliere per i 661G ai part time orizzontali
  - Rimosso codice 26BP
 
