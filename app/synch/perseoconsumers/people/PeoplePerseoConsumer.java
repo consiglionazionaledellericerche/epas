@@ -115,7 +115,7 @@ public class PeoplePerseoConsumer {
       if (departmentPerseoId.isPresent()) {
         url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        url = AnagraficaApis.getPeople();
+        throw new ApiRequestException("Impossibile prelevare le persone di una sede senza personId");
       }
       user = AnagraficaApis.getPerseoUser();
       pass = AnagraficaApis.getPerseoPass();
@@ -125,6 +125,8 @@ public class PeoplePerseoConsumer {
       throw new ApiRequestException(error);
     }
 
+    log.debug("Sto per effettuare la richiesta all'url {} con credenziali {}:{}", 
+        url, user, pass);
     final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
     log.info("Invio richiesta lista persone a Perseo: {}", request.url);

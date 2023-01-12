@@ -91,7 +91,13 @@ public class SynchronizationManager {
     log.debug("Sincronizzazione delle persone presenti nell'ufficio {}.",
         office.getName());
     val result = new SyncResult();
-
+    if (office.getPerseoId() == null) {
+      result.setFailed();
+      result.add(
+          String.format("Impossibile sincronizzare l'ufficio %s perché non ha un id anagrafica "
+          + "esterno impostato.", office.getLabel()));
+      return result;
+    }
     val perseoPeople = peoplePerseoConsumer
         .perseoPeopleByPerseoId(Optional.fromNullable(office.getPerseoId()));
     log.debug("Trovate {} persone in anagrafica associate all'ufficio {}.",
@@ -150,8 +156,9 @@ public class SynchronizationManager {
 
     if (epasPerson != null) {
       log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
-          + "Effettuo il cambio di sede.",
-          epasPerson.getFullname(), epasPerson.getNumber(), epasPerson.getOffice().getName());
+          + "Effettuo il cambio di sede verso {}.",
+          epasPerson.getFullname(), epasPerson.getNumber(), 
+          epasPerson.getOffice().getName(), office);
 
       Office oldOffice = epasPerson.getOffice(); 
       epasPerson.setOffice(office);
