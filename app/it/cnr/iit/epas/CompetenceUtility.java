@@ -268,7 +268,8 @@ public class CompetenceUtility {
         //if (!person.isHoliday(personReperibilityDay.date)) {
         if (!personDayManager.isHoliday(person, personReperibilityDay.getDate())) {
           log.debug("La reperibilità di {} {} è incompatibile con la sua mancata timbratura nel "
-              + "giorno {}", person.getName(), person.getSurname(), personReperibilityDay.getDate());
+              + "giorno {}", person.getName(), person.getSurname(), 
+              personReperibilityDay.getDate());
 
           noStampingDays =
               (inconsistentAbsenceTable.contains(person, thNoStampings))
@@ -295,7 +296,8 @@ public class CompetenceUtility {
           for (Absence absence : personDay.get().getAbsences()) {
             if (absence.getJustifiedType().getName() == JustifiedTypeName.all_day) {
               log.debug("La reperibilita' di {} {} e' incompatibile con la sua assenza nel "
-                  + "giorno {}", person.getName(), person.getSurname(), personReperibilityDay.getDate());
+                  + "giorno {}", person.getName(), person.getSurname(), 
+                  personReperibilityDay.getDate());
 
               absenceDays =
                   (inconsistentAbsenceTable.contains(person, thAbsences))
@@ -361,7 +363,8 @@ public class CompetenceUtility {
       //check for the absence inconsistencies
       //------------------------------------------
       Optional<PersonDay> personDay = personDayDao.getPersonDay(person, personShiftDay.getDate());
-      log.debug("Prelevo il personDay {} per la persona {}", personShiftDay.getDate(), person.getSurname());
+      log.debug("Prelevo il personDay {} per la persona {}", 
+          personShiftDay.getDate(), person.getSurname());
 
       // if there are no events and it is not an holiday -> error
       if (!personDay.isPresent()) {
@@ -369,7 +372,8 @@ public class CompetenceUtility {
         if (!personDayManager.isHoliday(person, personShiftDay.getDate())
             && personShiftDay.getDate().isBefore(LocalDate.now())) {
           log.debug("Il turno di {} {} e' incompatibile con la sua mancata timbratura nel giorno"
-              + " {} (personDay == null)", person.getName(), person.getSurname(), personShiftDay.getDate());
+              + " {} (personDay == null)", 
+              person.getName(), person.getSurname(), personShiftDay.getDate());
 
           noStampingDays =
               (inconsistentAbsenceTable.contains(person, thNoStampings))

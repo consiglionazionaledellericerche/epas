@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -126,7 +126,8 @@ public class PersonMonthlySituationData {
    *     competenze, buoni pasto e ore di formazione dei dipendente person nell'anno year
    *     e nel mese month.
    */
-  public Map<Person, Map<String, Certification>> getCertifications(List<Person> persons, int year, int month) {
+  public Map<Person, Map<String, Certification>> getCertifications(
+      List<Person> persons, int year, int month) {
     Map<Person, Map<String, Certification>> actualCertifications = Maps.newHashMap();
     actualCertifications = trainingHours(persons, year, month, actualCertifications);
     //actualCertifications = absences(persons, year, month, actualCertifications);
@@ -166,7 +167,8 @@ public class PersonMonthlySituationData {
    * @param month mese
    * @return certificazioni (sotto forma di mappa)
    */
-  private Map<Person, Map<String, Certification>> trainingHours(List<Person> persons, int year, int month,
+  private Map<Person, Map<String, Certification>> trainingHours(
+      List<Person> persons, int year, int month,
       Map<Person, Map<String, Certification>> certificationsMap) {
 
     Map<Person, List<PersonMonthRecap>> trainingHoursMap = 
@@ -235,50 +237,50 @@ public class PersonMonthlySituationData {
     LocalDate previousDate = null;
     String previousAbsenceCode = null;
     Integer dayBegin = null;
-    
+
     for (Absence absence : absences) {
-    //codici a uso interno li salto
-    if (absence.getAbsenceType().isInternalUse()) {
-      continue;
-    }
+      //codici a uso interno li salto
+      if (absence.getAbsenceType().isInternalUse()) {
+        continue;
+      }
 
-    //Codice per attestati
-    String absenceCodeToSend = absence.getAbsenceType().getCode().toUpperCase();
-    if (absence.getAbsenceType().getCertificateCode() != null
-        && !absence.getAbsenceType().getCertificateCode().trim().isEmpty()) {
-      absenceCodeToSend = absence.getAbsenceType().getCertificateCode().toUpperCase();
-    }
+      //Codice per attestati
+      String absenceCodeToSend = absence.getAbsenceType().getCode().toUpperCase();
+      if (absence.getAbsenceType().getCertificateCode() != null
+          && !absence.getAbsenceType().getCertificateCode().trim().isEmpty()) {
+        absenceCodeToSend = absence.getAbsenceType().getCertificateCode().toUpperCase();
+      }
 
-    // 1) Continua Assenza più giorni
-    Integer dayEnd;
-    if (previousDate != null && previousDate.plusDays(1).equals(absence.getPersonDay().getDate())
-        && previousAbsenceCode.equals(absenceCodeToSend)) {
+      // 1) Continua Assenza più giorni
+      Integer dayEnd;
+      if (previousDate != null && previousDate.plusDays(1).equals(absence.getPersonDay().getDate())
+          && previousAbsenceCode.equals(absenceCodeToSend)) {
+        dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
+        previousDate = absence.getPersonDay().getDate();
+        certification.setContent(absenceCodeToSend + ";" + dayBegin + ";" + dayEnd);
+        continue;
+      }
+
+      // 2) Fine Assenza più giorni
+      if (previousDate != null) {
+
+        certifications.add(certification);
+        previousDate = null;
+      }
+
+      // 3) Nuova Assenza  
+      dayBegin = absence.getPersonDay().getDate().getDayOfMonth();
       dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
       previousDate = absence.getPersonDay().getDate();
-      certification.setContent(absenceCodeToSend + ";" + dayBegin + ";" + dayEnd);
-      continue;
-    }
+      previousAbsenceCode = absenceCodeToSend;
 
-    // 2) Fine Assenza più giorni
-    if (previousDate != null) {
-
-      certifications.add(certification);
-      previousDate = null;
-    }
-
-    // 3) Nuova Assenza  
-    dayBegin = absence.getPersonDay().getDate().getDayOfMonth();
-    dayEnd = absence.getPersonDay().getDate().getDayOfMonth();
-    previousDate = absence.getPersonDay().getDate();
-    previousAbsenceCode = absenceCodeToSend;
-
-    certification = new Certification();
-    certification.setPerson(absence.getPersonDay().getPerson());
-    certification.setYear(absence.getPersonDay().getDate().getYear());
-    certification.setMonth(absence.getPersonDay().getDate().getMonthOfYear());
-    certification.setCertificationType(CertificationType.ABSENCE);
-    certification.setContent(Certification.serializeAbsences(absenceCodeToSend,
-        dayBegin, dayEnd));
+      certification = new Certification();
+      certification.setPerson(absence.getPersonDay().getPerson());
+      certification.setYear(absence.getPersonDay().getDate().getYear());
+      certification.setMonth(absence.getPersonDay().getDate().getMonthOfYear());
+      certification.setCertificationType(CertificationType.ABSENCE);
+      certification.setContent(Certification.serializeAbsences(absenceCodeToSend,
+          dayBegin, dayEnd));
     }
 
     certifications.add(certification);
@@ -378,9 +380,11 @@ public class PersonMonthlySituationData {
       }
     }
 
-    certification.setContent(String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
-    log.trace("certification = {}, certification.key = {}", certification, certification.aMapKey());
-   
+    certification.setContent(
+        String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
+    log.trace("certification = {}, certification.key = {}", 
+        certification, certification.aMapKey());
+
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;
@@ -430,7 +434,8 @@ public class PersonMonthlySituationData {
             break;
         }
       }
-      certification.setContent(String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
+      certification.setContent(
+          String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
       Map<String, Certification> certificationMap = new HashMap<>();
       certificationMap.put(certification.aMapKey(), certification);
       certifications.put(person, certificationMap);
