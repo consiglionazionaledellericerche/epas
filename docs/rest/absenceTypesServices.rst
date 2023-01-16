@@ -80,7 +80,7 @@ AbsenceType Show
 La visualizzazione dei dati di una tipologia di assenza è possibile tramite una HTTP GET all'indirizzo
 **/rest/v3/absenceTypes/show**.
 
-Per individuare la tipologia di assenza è possibile utilizzare solo il campo *id*.
+Per individuare la tipologia di assenza è possibile utilizzare il campo *id* oppure il campo *code*.
 
 .. code-block:: bash
 

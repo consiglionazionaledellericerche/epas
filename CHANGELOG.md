@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.6.4] - UNRELEASED
+### Added
+ - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
+   sulle assenze.
+ - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
+
 ### Changed
  - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
  - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili

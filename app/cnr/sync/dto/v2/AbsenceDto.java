@@ -38,6 +38,7 @@ public class AbsenceDto {
   private Long id;
   private LocalDate date;
   private String code;
+  private Long absenceTypeId;
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
@@ -54,6 +55,7 @@ public class AbsenceDto {
         .id(absence.id)
         .date(absence.date)
         .code(absence.getCode())
+        .absenceTypeId(absence.getAbsenceType().getId())
         .justifiedTime(absence.justifiedTime())
         .justifiedType(absence.getJustifiedType().getName().name())
         .note(absence.getNote())
