@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,13 +20,13 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
@@ -56,17 +56,7 @@ import org.testng.collections.Lists;
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
-  
-  private final PersonDayManager personDayManager;
 
-  /**
-   * Constructor for injection.
-   */
-  @Inject
-  public AbsenceEngineUtility(PersonDayManager personDayManager) {
-    this.personDayManager = personDayManager;
-  }
- 
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.

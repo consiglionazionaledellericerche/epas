@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,9 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
@@ -26,6 +24,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Competence;
 import models.CompetenceCode;
@@ -50,7 +49,6 @@ import org.joda.time.LocalDate;
  *
  */
 public class CompetenceDao extends DaoBase {
-
 
   @Inject
   CompetenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
