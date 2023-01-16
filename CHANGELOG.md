@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili
    di sede per i responsabili di gruppo.
+ - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
+   di visualizzazione per amministratori associati a sedi ormai chiuse
 
 ## [2.6.3] - 2023-01-12
 ### Added

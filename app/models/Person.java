@@ -462,6 +462,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     if (this.mealTicketCards.isEmpty()) {
       return null;
     }
-    return mealTicketCards.stream().filter(mtc -> mtc.isActive()).findFirst().get();
+    return mealTicketCards.stream().filter(mtc -> mtc.isActive()).findFirst().orElse(null);
   }
 }

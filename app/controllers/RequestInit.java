@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -182,7 +183,7 @@ public class RequestInit extends Controller {
         && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
-      officeId = offices.stream()
+      officeId = offices.stream().filter(off -> off.getEndDate() == null)
             .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
       officeId = currentUser.getPerson().getOffice().id;
