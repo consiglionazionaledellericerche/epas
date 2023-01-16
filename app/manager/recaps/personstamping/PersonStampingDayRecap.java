@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -39,8 +39,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -

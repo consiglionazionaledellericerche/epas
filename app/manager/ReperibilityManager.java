@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -45,7 +45,6 @@ import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.absences.Absence;
-import models.absences.JustifiedType.JustifiedTypeName;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import net.fortuna.ical4j.model.Calendar;

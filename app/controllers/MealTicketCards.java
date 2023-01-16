@@ -27,7 +27,6 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-import dao.wrapper.WrapperPerson;
 import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 import javax.inject.Inject;
