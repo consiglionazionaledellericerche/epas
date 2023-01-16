@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.4] - UNRELEASED
 ### Changed
+ - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
  - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili
    di sede per i responsabili di gruppo.
  - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
