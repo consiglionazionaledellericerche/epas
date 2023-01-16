@@ -14,13 +14,12 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package dao;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Institute;
 import models.query.QInstitute;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -32,14 +32,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
 import models.enumerate.BlockType;
-import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;

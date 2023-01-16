@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,16 +14,15 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package models.base;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 import common.injection.StaticInject;
 import common.security.SecurityModule;
+import javax.inject.Inject;
 import models.User;
 import org.hibernate.envers.RevisionListener;
 import org.slf4j.Logger;

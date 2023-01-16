@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ package manager.services.absences.model;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
 import dao.AbsenceTypeDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
@@ -28,6 +27,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.configurations.ConfigurationManager;

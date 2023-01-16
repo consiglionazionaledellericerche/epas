@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,12 +19,12 @@ package common.security;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
 import org.drools.KnowledgeBase;

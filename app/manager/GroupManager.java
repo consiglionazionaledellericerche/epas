@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,17 +14,13 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package manager;
-
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
-import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
-import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import java.time.LocalDate;
 import java.util.List;
@@ -32,14 +28,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.dto.SeatSituationDto;
 import models.flows.Affiliation;
 import models.flows.Group;
 import org.assertj.core.util.Lists;

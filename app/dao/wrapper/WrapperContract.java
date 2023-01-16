@@ -18,10 +18,10 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import javax.inject.Inject;
 import models.Contract;
 import models.ContractMonthRecap;
 import org.joda.time.LocalDate;

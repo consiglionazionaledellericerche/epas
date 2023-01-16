@@ -1,12 +1,12 @@
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.TeleworkValidation;
