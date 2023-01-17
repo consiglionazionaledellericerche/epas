@@ -46,6 +46,7 @@ public class ContractHistoryDao {
    * @param competenceId l'id della competenza di cui recuperare lo storico
    * @return la lista di modifiche per la competenza in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Competence>> competences(long competenceId) {
 
     final AuditQuery query = auditReader.get().createQuery()
@@ -65,6 +66,7 @@ public class ContractHistoryDao {
    * @param contractId l'id del contratto di cui recuperare lo storico
    * @return la lista di modifiche per il contratto in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Contract>> contracts(long contractId) {
     
     final AuditQuery query = auditReader.get().createQuery()
@@ -84,6 +86,7 @@ public class ContractHistoryDao {
    * @return la lista contenente un solo elemento relativo alle modifiche al contratto
    *     in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Contract>> lastRevision(long contractId) {
     
     final AuditQuery query = auditReader.get().createQuery()

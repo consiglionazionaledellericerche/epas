@@ -116,6 +116,7 @@ public class PersonDayHistoryDao {
    *
    * @return la lista dello storico di tutti i codici di missione orari.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> oldMissions() {
     List<AbsenceType> ids = Lists.newArrayList();
     AbsenceType type = absenceTypeDao.getAbsenceTypeByCode("92H1").get();
@@ -156,6 +157,7 @@ public class PersonDayHistoryDao {
    * @param id l'identificativo dell'assenza inserita
    * @return la lista delle revisioni dell'assenza con id passato.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> specificAbsence(long id) {
     final AuditQuery query = auditReader.get().createQuery()
         .forRevisionsOfEntity(Absence.class, false, true)

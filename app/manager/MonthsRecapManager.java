@@ -182,10 +182,14 @@ public class MonthsRecapManager {
           cell.setCellStyle(workingDay);
         }
         if (!day.personDay.getAbsences().isEmpty() 
-            && (day.personDay.getAbsences().get(0).getAbsenceType().getCode().equalsIgnoreCase(covid19) 
-            || day.personDay.getAbsences().get(0).getAbsenceType().getCode().equalsIgnoreCase(covid19bp)
-            || day.personDay.getAbsences().get(0).getAbsenceType().getCode().equalsIgnoreCase(lagile)
-            || day.personDay.getAbsences().get(0).getAbsenceType().getCode().equalsIgnoreCase(lagilebp)
+            && (day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(covid19) 
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(covid19bp)
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(lagile)
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(lagilebp)
             )) {
           cell.setCellValue("SW");
         } else if (!day.personDay.getStampings().isEmpty()) {

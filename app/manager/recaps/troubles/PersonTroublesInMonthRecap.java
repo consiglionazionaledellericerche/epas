@@ -75,11 +75,13 @@ public class PersonTroublesInMonthRecap {
       }
 
       if (trouble.getCause() == Troubles.UNCOUPLED_WORKING) {
-        troublesNoAbsenceUncoupledStampingsNotHolidayL.add(trouble.getPersonDay().getDate().getDayOfMonth());
+        troublesNoAbsenceUncoupledStampingsNotHolidayL.add(
+            trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
       if (trouble.getCause() == Troubles.UNCOUPLED_HOLIDAY) {
-        troublesNoAbsenceUncoupledStampingsHolidayL.add(trouble.getPersonDay().getDate().getDayOfMonth());
+        troublesNoAbsenceUncoupledStampingsHolidayL.add(
+            trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
       if (trouble.getCause() == Troubles.NOT_ENOUGH_WORKTIME) {

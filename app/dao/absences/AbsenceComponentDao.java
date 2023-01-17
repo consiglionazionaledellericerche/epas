@@ -34,8 +34,8 @@ import java.util.SortedMap;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -404,7 +404,6 @@ public class AbsenceComponentDao extends DaoBase {
    * @param complationTime tempo di completamento
    * @param internalUse se uso interno
    * @param consideredWeekEnd se considerare week end
-   * @param timeForMealticket se il tempo contribuisce al buono pasto
    * @param certificateCode codice per attestati
    * @param expire data scadenza
    * @return entity creata o modificata

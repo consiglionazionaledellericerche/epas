@@ -565,7 +565,8 @@ public class ReperibilityCalendar extends Controller {
     final List<Person> people = reperibilityManager2
         .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
 
-    CompetenceCode workDayActivity = reperibility.getMonthlyCompetenceType().getWorkdaysCode();        
+    CompetenceCode workDayActivity = 
+        reperibility.getMonthlyCompetenceType().getWorkdaysCode();        
     CompetenceCode holidayActivity = reperibility.getMonthlyCompetenceType().getHolidaysCode();
 
     people.forEach(person -> {
@@ -620,7 +621,8 @@ public class ReperibilityCalendar extends Controller {
     reperibilityTypeMonth.save();
     //TODO: completare questo metodo nel reperibility manager
     reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
-    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
+    args.put("date", 
+        TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
     args.put("activity.id", reperibilityTypeMonth.getPersonReperibilityType().id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
 
@@ -642,7 +644,8 @@ public class ReperibilityCalendar extends Controller {
     reperibilityTypeMonth.save();
 
     Map<String, Object> args = new HashMap<>();
-    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
+    args.put("date", 
+        TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
     args.put("activity.id", reperibilityTypeMonth.getPersonReperibilityType().id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
-import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import models.Contract;
 import models.Person;
@@ -166,7 +166,8 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     Set<PersonReperibilityType> reperibilityTypes = Sets.newHashSet();
     Set<PersonReperibility> reperibilitiesToUpdate = Sets.newHashSet();
 
-    List<PersonReperibilityDay> reperibilities = personReperibilityDayDao.getPersonReperibilityDayByPerson(
+    List<PersonReperibilityDay> reperibilities = 
+        personReperibilityDayDao.getPersonReperibilityDayByPerson(
         person, endContractDate);
 
     for (PersonReperibilityDay prd : reperibilities) {
@@ -179,7 +180,8 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
         reperibilitiesToUpdate.add(pr);
 
         long cancelled =
-            personReperibilityDayDao.deletePersonReperibilityDay(prd.getReperibilityType(), prd.getDate());
+            personReperibilityDayDao.deletePersonReperibilityDay(
+                prd.getReperibilityType(), prd.getDate());
         if (cancelled == 1) {
           log.info("Rimossa reperibilità di tipo {} del giorno {} di {}",
               prd.getReperibilityType(), prd.getDate(), person.fullName());
@@ -285,7 +287,6 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
    *                                notificare.
    * @param reperibilitySupervisors supervisor delle reperibilità con le persone con i contratti
    *                                scaduti da notificar.
-   * @return l'eventuale problema riscontrati durante l'approvazione.
    */
   public void sendNotification(Map<Group, Set<Contract>> groupsManagers,
       Map<PersonShiftShiftType, Set<Contract>> shiftSupervisors,

@@ -264,7 +264,8 @@ public class PersonDaysTest extends UnitTest {
     stampings.add(stampings(personDay, 17, 00, WayType.out, null, null));
     personDay.setStampings(stampings);
 
-    List<PairStamping> validPairs = personDayManager.getValidPairStampings(personDay.getStampings());
+    List<PairStamping> validPairs = 
+        personDayManager.getValidPairStampings(personDay.getStampings());
 
     gapLunchPair = personDayManager
         .getGapLunchPairs(personDay, startLunch, endLunch, Optional.absent());

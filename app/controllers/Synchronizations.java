@@ -740,7 +740,8 @@ public class Synchronizations extends Controller {
     for (Contract epasContract : activeContractsEpasByPersonPerseoId.values()) {
       if (epasContract.getPerseoId() == null) {
         Contract perseoContract =
-            perseoDepartmentActiveContractsByPersonPerseoId.get(epasContract.getPerson().getPerseoId());
+            perseoDepartmentActiveContractsByPersonPerseoId
+              .get(epasContract.getPerson().getPerseoId());
         if (perseoContract != null) {
           joinUpdateContract(epasContract, perseoContract);
         }

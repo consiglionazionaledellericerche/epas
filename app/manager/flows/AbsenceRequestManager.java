@@ -374,7 +374,8 @@ public class AbsenceRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di sede.");
       }
-      if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+      if (!uroDao.getUsersRolesOffices(
+          approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
           absenceRequest.getPerson().getOffice()).isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
@@ -516,19 +517,22 @@ public class AbsenceRequestManager {
 
       }
     }
-    if (absenceRequest.getType().equals(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
+    if (absenceRequest.getType().equals(
+        AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
       absenceType = absenceDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
     }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, type, hours, minutes, false, true);
     InsertReport insertReport =
-        absenceService.insert(absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
+        absenceService.insert(
+            absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             hours, minutes, false, absenceManager);
     if (insertReport.criticalErrors.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
-        PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.getPerson(),
+        PersonDay personDay = 
+            personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.getPerson(),
             absence.getAbsenceDate());
         absence.setPersonDay(personDay);
         if (absenceForm.justifiedTypeSelected.getName().equals(JustifiedTypeName.recover_time)) {
@@ -694,7 +698,8 @@ public class AbsenceRequestManager {
       return true;
     }
     if (absenceRequest.isAdministrativeApprovalRequired()
-        && absenceRequest.getAdministrativeApproved() == null && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && absenceRequest.getAdministrativeApproved() == null 
+        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       personnelAdministratorApproval(absenceRequest.id, user);
       return true;

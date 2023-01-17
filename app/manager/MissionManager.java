@@ -190,7 +190,8 @@ public class MissionManager {
             body.dataFine.toLocalDate(), types, Optional.<Boolean>absent(), 
             Optional.<Boolean>absent());
     if (!existingMissionWithoutId.isEmpty()  
-        && existingMissionWithoutId.stream().allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
+        && existingMissionWithoutId.stream()
+          .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
             || abs.getAbsenceType().getCode().equals("92M"))) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
           + " nei giorni {}-{}. Questa missione non viene processata.",
@@ -333,7 +334,8 @@ public class MissionManager {
       return false;
     }
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        body.person.getOffice(), EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
+        body.person.getOffice(), 
+        EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
           + "non è valorizzato per la sede {}", body.person.getOffice().getName());
@@ -500,7 +502,8 @@ public class MissionManager {
       mission = absenceTypeDao.getAbsenceTypeByCode("92NG").get();
       type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
 
-    } else if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
+    } else if (quantity == 0 
+                || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
@@ -554,7 +557,8 @@ public class MissionManager {
               absence, group, true, false, false);  
         }
 
-        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", absence.getAbsenceType().getCode(), 
+        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", 
+            absence.getAbsenceType().getCode(), 
             absence.getPersonDay().getDate(), absence.getPersonDay().getPerson().fullName());
 
       }
@@ -675,7 +679,8 @@ public class MissionManager {
    * @param body l'oggetto dto proveniente dal mission manager
    * @param actualDate la data attuale su cui lavorare
    */
-  private boolean atomicInsert(Situation situation, MissionFromClient body, LocalDateTime actualDate) {
+  private boolean atomicInsert(
+      Situation situation, MissionFromClient body, LocalDateTime actualDate) {
     boolean missionInserted = false;
     
     if (situation.isFirstOrLastDay) {

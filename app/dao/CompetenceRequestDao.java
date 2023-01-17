@@ -176,7 +176,8 @@ public class CompetenceRequestDao extends DaoBase {
     List<CompetenceRequest> results = new ArrayList<>();
 
     if (!signer.getReperibilityTypes().isEmpty()) {
-      List<Office> officeList = roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+      List<Office> officeList = 
+          roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = managerQuery(officeList, conditions, signer);
       List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)

@@ -265,7 +265,8 @@ public class CertificationService implements ICertificationService {
         epasCertification.save();
       }
 
-      if (!Objects.equals(epasCertification.getAttestatiId(), attestatiCertification.getAttestatiId())) {
+      if (!Objects.equals(
+          epasCertification.getAttestatiId(), attestatiCertification.getAttestatiId())) {
         epasCertification.setAttestatiId(attestatiCertification.getAttestatiId());
         epasCertification.save();
       }

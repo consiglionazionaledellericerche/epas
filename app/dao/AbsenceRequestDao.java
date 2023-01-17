@@ -196,7 +196,8 @@ public class AbsenceRequestDao extends DaoBase {
             .and(absenceRequest.flowStarted.isTrue())
             .and(absenceRequest.flowEnded.isFalse()));
 
-    val urosSupervisor = uros.stream().filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+    val urosSupervisor = 
+        uros.stream().filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
         .collect(Collectors.toList());
     val uroOffices = urosSupervisor.stream().map(uro -> uro.getOffice())
         .collect(Collectors.toList());
@@ -327,7 +328,8 @@ public class AbsenceRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     List<AbsenceRequest> results = new ArrayList<>();
     JPQLQuery<AbsenceRequest> query;
-    List<Office> officeList = uros.stream().filter(uro -> !uro.getRole().getName().equals(Role.EMPLOYEE))
+    List<Office> officeList = 
+        uros.stream().filter(uro -> !uro.getRole().getName().equals(Role.EMPLOYEE))
         .map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(absenceRequest.startAt.after(fromDate))
         .and(absenceRequest.type.eq(absenceRequestType).and(absenceRequest.flowEnded.isTrue())

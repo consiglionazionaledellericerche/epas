@@ -336,7 +336,8 @@ public class ChartsManager {
               totalOvertime += recap.get().getStraordinariMinuti() / 60;
               totalCompensatoryRest += recap.get().getRiposiCompensativiMinuti() / 60;
               totalPlusHours +=
-                  (recap.get().getPositiveResidualInMonth() + recap.get().getStraordinariMinuti()) / 60;
+                  (recap.get().getPositiveResidualInMonth() 
+                      + recap.get().getStraordinariMinuti()) / 60;
             } else {
               situazione += ("0" + ',' + "0" + ',' + "0");
             }
@@ -367,7 +368,8 @@ public class ChartsManager {
    *         residuo per la persona passata come parametro.
    */
   public FileInputStream exportDataSituation(Person person) throws IOException {
-    File tempFile = File.createTempFile("esportazioneSituazioneFinale" + person.getSurname(), ".csv");
+    File tempFile = 
+        File.createTempFile("esportazioneSituazioneFinale" + person.getSurname(), ".csv");
     FileInputStream inputStream = new FileInputStream(tempFile);
     FileWriter writer = new FileWriter(tempFile, true);
     BufferedWriter out = new BufferedWriter(writer);
@@ -685,8 +687,9 @@ public class ChartsManager {
         record.add(DateUtility.fromMinuteToHourMinute(justifiedTime));
         // Lista dei codici che giustificano ore al lavoro, concatenati da ;
         record.add(
-            Joiner.on(";").join(day.personDay.getAbsences().stream().filter(a -> a.justifiedTime() > 0)
-                .map(a -> a.getAbsenceType().getCode()).collect(Collectors.toList())));
+            Joiner.on(";")
+              .join(day.personDay.getAbsences().stream().filter(a -> a.justifiedTime() > 0)
+              .map(a -> a.getAbsenceType().getCode()).collect(Collectors.toList())));
 
         // Lista di tutti i codici di assenza ;
         record.add(
@@ -836,7 +839,7 @@ public class ChartsManager {
             case 6:
               cell.setCellValue(Joiner.on(";")
                   .join(day.personDay.getAbsences().stream()
-                      .map(a -> a.getAbsenceType().getCode()).collect(Collectors.toList())));              
+                      .map(a -> a.getAbsenceType().getCode()).collect(Collectors.toList())));
               break;
             default:
               break;

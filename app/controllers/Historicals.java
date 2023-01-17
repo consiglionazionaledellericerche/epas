@@ -88,9 +88,10 @@ public class Historicals extends Controller {
         Contract con = story.value;
         log.debug("Contract id = {}, revision = {}, perseoId = {}, "
             + "beginDate = {}, endDate = {}, endContract = {}", 
-            contract.id, story.revision.id, con.getPerseoId(), con.getBeginDate(), con.getEndDate(), 
+            contract.id, story.revision.id, con.getPerseoId(), con.getBeginDate(), con.getEndDate(),
             con.getEndContract());  
-        if (con.getBeginDate() == null && con.getEndDate() == null && con.getEndContract() == null) {
+        if (con.getBeginDate() == null && con.getEndDate() == null 
+            && con.getEndContract() == null) {
           log.debug("Storico con dati incompleti per {}", contract.getPerson().getFullname());
           continue;
         }
@@ -101,7 +102,7 @@ public class Historicals extends Controller {
             || !historicalManager.checkObjects(temp, con)) {
           contractModifications.add(story);
         }
-        temp = con;      
+        temp = con;
       }
       render(contractModifications, contract, found);
     } else {
@@ -109,7 +110,8 @@ public class Historicals extends Controller {
         Contract con = story.value;
         if (!historicalManager.checkDates(temp.getSourceDateResidual(), con.getSourceDateResidual())
             || temp.getSourceRemainingMinutesLastYear() != con.getSourceRemainingMinutesLastYear()
-            || temp.getSourceRemainingMinutesCurrentYear() != con.getSourceRemainingMinutesCurrentYear()) {
+            || temp.getSourceRemainingMinutesCurrentYear() 
+                  != con.getSourceRemainingMinutesCurrentYear()) {
           
           initializationModifications.add(story);
         }

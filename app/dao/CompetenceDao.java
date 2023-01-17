@@ -252,7 +252,8 @@ public class CompetenceDao extends DaoBase {
         .where(condition).fetch();
   }
 
-  public Map<Person, List<Competence>> competencesInMonth(List<Person> persons, int year, int month) {
+  public Map<Person, List<Competence>> competencesInMonth(
+      List<Person> persons, int year, int month) {
     final QCompetence competence = QCompetence.competence;
     return getQueryFactory().selectFrom(competence)
         .where(competence.person.in(persons), 

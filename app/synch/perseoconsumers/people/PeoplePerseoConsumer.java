@@ -115,7 +115,8 @@ public class PeoplePerseoConsumer {
       if (departmentPerseoId.isPresent()) {
         url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        throw new ApiRequestException("Impossibile prelevare le persone di una sede senza personId");
+        throw new ApiRequestException(
+            "Impossibile prelevare le persone di una sede senza personId");
       }
       user = AnagraficaApis.getPerseoUser();
       pass = AnagraficaApis.getPerseoPass();

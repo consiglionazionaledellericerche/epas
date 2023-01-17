@@ -263,7 +263,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent()) {
-      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}", getValue().getDate());
+      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}",
+          getValue().getDate());
       for (ContractWorkingTimeType cwtt :
               this.getPersonDayContract().get().getContractWorkingTimeType()) {
 

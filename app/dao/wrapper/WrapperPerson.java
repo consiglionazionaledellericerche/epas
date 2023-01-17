@@ -317,7 +317,8 @@ public class WrapperPerson implements IWrapperPerson {
     //ricerca
     for (ContractWorkingTimeType cwtt : currentContract.get().getContractWorkingTimeType()) {
       if (DateUtility
-          .isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
+          .isDateIntoInterval(
+              LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
         currentWorkingTimeType = Optional.fromNullable(cwtt.getWorkingTimeType());
         return currentWorkingTimeType;
       }
@@ -527,7 +528,8 @@ public class WrapperPerson implements IWrapperPerson {
     }
     YearMonth last = null;
     for (Certification certification : value.getCertifications()) {
-      if (last == null || last.isBefore(new YearMonth(certification.getYear(), certification.getMonth()))) {
+      if (last == null 
+          || last.isBefore(new YearMonth(certification.getYear(), certification.getMonth()))) {
         last = new YearMonth(certification.getYear(), certification.getMonth());
       }
     }

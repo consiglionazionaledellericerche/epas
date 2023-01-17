@@ -427,7 +427,8 @@ public class CompetenceUtility {
                   (personDay.get().getStampings().get(0).isIn())
                       ? personDay.get().getStampings().get(0).getDate().toLocalTime()
                       .toString("HH:mm").concat("- **:**")
-                      : "- **:**".concat(personDay.get().getStampings().get(0).getDate().toLocalTime()
+                      : "- **:**".concat(
+                          personDay.get().getStampings().get(0).getDate().toLocalTime()
                           .toString("HH:mm"));
 
               badStampingDays =
@@ -452,7 +453,8 @@ public class CompetenceUtility {
                       ? inconsistentAbsenceTable.get(person, thBadStampings)
                       : new ArrayList<String>();
               badStampingDays.add(
-                  personShiftDay.getDate().toString("dd MMM").concat(" -> timbrature disaccoppiate"));
+                  personShiftDay.getDate().toString("dd MMM")
+                    .concat(" -> timbrature disaccoppiate"));
               inconsistentAbsenceTable.put(person, thBadStampings, badStampingDays);
 
               log.debug("Nuovo inconsistentAbsenceTable({}, {}) = {}",
@@ -538,7 +540,8 @@ public class CompetenceUtility {
                       newLimit =
                           (pairStamping.first.getDate().toLocalTime()
                               .isBefore(startShift.minusMinutes(15)))
-                              ? startShift.minusMinutes(15) : pairStamping.first.getDate().toLocalTime();
+                              ? startShift.minusMinutes(15) 
+                                  : pairStamping.first.getDate().toLocalTime();
                       if (pairStamping.first.getDate().toLocalTime()
                           .isBefore(startShift.minusMinutes(15))) {
                         inTolleranceLimit = false;
@@ -548,7 +551,8 @@ public class CompetenceUtility {
                       newLimit =
                           (pairStamping.first.getDate().toLocalTime()
                               .isAfter(startShift.plusMinutes(15)))
-                              ? startShift.plusMinutes(15) : pairStamping.first.getDate().toLocalTime();
+                              ? startShift.plusMinutes(15) 
+                                  : pairStamping.first.getDate().toLocalTime();
                       if (pairStamping.first.getDate().toLocalTime()
                           .isAfter(startShift.plusMinutes(15))) {
                         inTolleranceLimit = false;
@@ -650,7 +654,8 @@ public class CompetenceUtility {
                       newLimit =
                           (endShift.minusMinutes(15)
                               .isAfter(pairStamping.second.getDate().toLocalTime()))
-                              ? endShift.minusMinutes(15) : pairStamping.second.getDate().toLocalTime();
+                              ? endShift.minusMinutes(15) 
+                                  : pairStamping.second.getDate().toLocalTime();
                       if (endShift.minusMinutes(15)
                           .isAfter(pairStamping.second.getDate().toLocalTime())) {
                         inTolleranceLimit = false;
@@ -659,8 +664,10 @@ public class CompetenceUtility {
                       log.trace("vedo uscita dopo la fine turno");
                       // il turnista è uscito dopo la fine del turno
                       newLimit =
-                          (pairStamping.second.getDate().toLocalTime().isAfter(endShift.plusMinutes(15)))
-                              ? endShift.plusMinutes(15) : pairStamping.second.getDate().toLocalTime();
+                          (pairStamping.second.getDate().toLocalTime()
+                              .isAfter(endShift.plusMinutes(15)))
+                              ? endShift.plusMinutes(15) 
+                                  : pairStamping.second.getDate().toLocalTime();
                     }
                     diffEndShift = DateUtility.getDifferenceBetweenLocalTime(endShift, newLimit);
                     log.debug("diffEndShift={}", diffEndShift);
@@ -833,8 +840,8 @@ public class CompetenceUtility {
 
                   log.debug("Il turno di {} {} nel giorno {} non e'stato completato per meno di "
                           + "2 ore ({} minuti ({})) - CONTROLLARE PERMESSO timbrature: {}",
-                      person.getName(), person.getSurname(), personDay.get().getDate(), lackOfMinutes,
-                      lackOfTime, stampings);
+                      person.getName(), person.getSurname(), personDay.get().getDate(), 
+                      lackOfMinutes, lackOfTime, stampings);
                   log.debug("Timbrature nella tolleranza dei 15 min. = {}", inTolleranceLimit);
 
                   badStampingDays = (inconsistentAbsenceTable.contains(person, label))

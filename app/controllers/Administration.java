@@ -673,7 +673,8 @@ public class Administration extends Controller {
               log.warn("Sono nel caso di due person reperibilities con data fine nulla "
                   + "per lo stesso tipo");
               if (rep.getStartDate().isBefore(pr.getStartDate())) {
-                log.debug("Cancello quello più futuro di {} con data {}", pr.getPerson(), pr.getStartDate());
+                log.debug("Cancello quello più futuro di {} con data {}",
+                    pr.getPerson(), pr.getStartDate());
                 pr.delete();                
               } else {
                 log.debug("Cancello quello più futuro di {} con data {}", 
@@ -870,7 +871,8 @@ public class Administration extends Controller {
       }
 
       Contract contract = wrPerson.getCurrentContract().get();
-      ContrattoAttestati contrattoAttestati = contrattiAttestati.get(wrPerson.getValue().getNumber());
+      ContrattoAttestati contrattoAttestati = 
+          contrattiAttestati.get(wrPerson.getValue().getNumber());
 
       //contratto attestati iniziato dopo di quello attivo epas (chiudere)
       if (contrattoAttestati.beginContract.isAfter(contract.getBeginDate())) {

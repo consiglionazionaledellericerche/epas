@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -89,7 +89,8 @@ public class GroupManager {
     uro.setRole(role);
     uro.setUser(group.getManager().getUser());
     uro.save();   
-    log.debug("Creato ruolo {} per l'utente {}", role.getName(), uro.getUser().getPerson().fullName());
+    log.debug("Creato ruolo {} per l'utente {}", 
+        role.getName(), uro.getUser().getPerson().fullName());
   }
 
   /**
@@ -108,7 +109,8 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, group.getManager().getOffice());
+        uroDao.getUsersRolesOffices(
+            group.getManager().getUser(), role, group.getManager().getOffice());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 

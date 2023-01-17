@@ -68,7 +68,8 @@ public class PairStamping {
 
     // TODO: decidere se entrambe o almeno una.
     if ((first.getStampType() != null && first.getStampType().equals(StampTypes.PAUSA_PRANZO))
-        || (second.getStampType() != null && second.getStampType().equals(StampTypes.PAUSA_PRANZO))) {
+        || (second.getStampType() != null 
+        && second.getStampType().equals(StampTypes.PAUSA_PRANZO))) {
       prPair = true;
     }
   }

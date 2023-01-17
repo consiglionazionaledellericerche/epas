@@ -206,8 +206,8 @@ public class AbsenceEngineUtility {
   public Integer takenBehaviouralFixes(Absence absence, Integer amount,
       List<Contract> fetchedContracts, DateInterval periodInterval, 
       TakeAmountAdjustment adjustment) {
-    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time orizzontale,
-    //non devono togliere l'intera giornata ma l'intera giornata meno un'ora
+    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time 
+    //orizzontale, non devono togliere l'intera giornata ma l'intera giornata meno un'ora
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.getAbsenceType().getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
@@ -258,7 +258,8 @@ public class AbsenceEngineUtility {
               while (!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), dateToChange)) {
                 dateToChange = dateToChange.plusDays(1);
               }
-              return cwtt.getWorkingTimeType().getWorkingTimeTypeDays().get(dateToChange.getDayOfWeek() - 1)
+              return cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
+                  .get(dateToChange.getDayOfWeek() - 1)
                   .getWorkingTime();
             } else {
               return 0;

@@ -581,7 +581,8 @@ public class ConsistencyManager {
         Stamping enterStamp =
             new Stamping(
                 pd.getValue(), new LocalDateTime(pd.getValue().getDate().getYear(),
-                pd.getValue().getDate().getMonthOfYear(), pd.getValue().getDate().getDayOfMonth(), 0, 0));
+                pd.getValue().getDate().getMonthOfYear(),
+                pd.getValue().getDate().getDayOfMonth(), 0, 0));
 
         enterStamp.setWay(WayType.in);
         enterStamp.setMarkedByAdmin(false);

@@ -171,10 +171,12 @@ public enum DefaultGroup {
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
 
-  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
+  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", 
+      DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
-  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
+  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", 
+      DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",

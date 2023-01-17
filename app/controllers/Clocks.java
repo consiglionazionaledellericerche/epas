@@ -203,7 +203,8 @@ public class Clocks extends Controller {
 
     final LocalDate today = LocalDate.now();
 
-    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(user.getPerson(), today);
+    final PersonDay personDay = 
+        personDayManager.getOrCreateAndPersistPersonDay(user.getPerson(), today);
 
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 

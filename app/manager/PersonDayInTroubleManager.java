@@ -268,7 +268,8 @@ public class PersonDayInTroubleManager {
               .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.getPersonDay().getDate(),
                   wrContract.getContractDatabaseInterval()));
           if (toDelete) {
-            log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.getPersonDay().getDate());
+            log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(),
+                pdt.getPersonDay().getDate());
             pdt.delete();
           }
         }         

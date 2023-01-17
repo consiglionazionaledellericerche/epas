@@ -596,7 +596,8 @@ public class AbsenceManager {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
 
-    return new AbsencesResponse(date, absenceType.getCode(), AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
+    return 
+        new AbsencesResponse(date, absenceType.getCode(), AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
   }
 
   private AbsencesResponse handlerGenericAbsenceType(

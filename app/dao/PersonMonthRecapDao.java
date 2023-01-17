@@ -76,7 +76,8 @@ public class PersonMonthRecapDao extends DaoBase {
         .fetch();
   }
 
-  public Map<Person, List<PersonMonthRecap>> getPersonMonthRecaps(List<Person> persons, int year, int month) {
+  public Map<Person, List<PersonMonthRecap>> getPersonMonthRecaps(
+      List<Person> persons, int year, int month) {
     QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
 
     return getQueryFactory().selectFrom(personMonthRecap)

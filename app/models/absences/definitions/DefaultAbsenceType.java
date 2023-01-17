@@ -1117,7 +1117,8 @@ public enum DefaultAbsenceType {
       true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       null, null, false, true, true),
   
-  A_21P2("21P2", "congedo di paternità gemelli", false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
+  A_21P2("21P2", "congedo di paternità gemelli", false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0,
       true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       null, null, false, true, true),
 

@@ -262,7 +262,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.getPerson());
@@ -283,7 +284,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.getPerson());
@@ -304,7 +306,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.getPerson());
@@ -482,11 +485,14 @@ public class TemplateUtility {
     return year;
   }
 
-  // Liste di utilità per i template
-
+  /**
+   *Liste di utilità per i template.
+   */
   public List<Office> officesAllowed() {
     return secureManager.officesWriteAllowed(Security.getUser().get())
-        .stream().sorted((o, o1) -> o.getName().compareTo(o1.getName())).collect(Collectors.toList());
+        .stream()
+          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
+          .collect(Collectors.toList());
   }
 
   public List<Qualification> getAllQualifications() {

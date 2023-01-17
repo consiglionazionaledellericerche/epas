@@ -596,7 +596,7 @@ public class WorkingTimes extends Controller {
     flash.keep();
     if (office != null && office.id != null) {
       manageOfficeWorkingTime(office.id);
-    } else if (session.get("officeSelected") != null){
+    } else if (session.get("officeSelected") != null) {
       manageWorkingTime(Long.parseLong(session.get("officeSelected")));
     } else {
       Application.indexAdmin();

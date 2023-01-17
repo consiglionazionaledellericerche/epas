@@ -1,7 +1,34 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package common.oauth2;
 
 import it.cnr.iit.keycloak.api.RealmsAdminApi;
-import it.cnr.iit.keycloak.model.*;
+import it.cnr.iit.keycloak.model.ApiResponse;
+import it.cnr.iit.keycloak.model.ClientPoliciesRepresentation;
+import it.cnr.iit.keycloak.model.ClientProfilesRepresentation;
+import it.cnr.iit.keycloak.model.ClientRepresentation;
+import it.cnr.iit.keycloak.model.GlobalRequestResult;
+import it.cnr.iit.keycloak.model.GroupRepresentation;
+import it.cnr.iit.keycloak.model.ManagementPermissionReference;
+import it.cnr.iit.keycloak.model.PartialImportRepresentation;
+import it.cnr.iit.keycloak.model.RealmEventsConfigRepresentation;
+import it.cnr.iit.keycloak.model.RealmRepresentation;
+import it.cnr.iit.keycloak.model.TestLdapConnectionRepresentation;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Costruttore che implementa RealmsAdminApi.
  *
- * @author Cristian
+ * @author Cristian Lucchesi
  *
  */
 @RequiredArgsConstructor

@@ -617,7 +617,7 @@ public class ContractManager {
    * Controlla tutti i contratti con previousContract impostato
    * che potrebbero avere dei problemi e li corregge se necessario.
    */
-  public int fixContractsWithWrongPreviousContract(Optional<Integer> maxSize){
+  public int fixContractsWithWrongPreviousContract(Optional<Integer> maxSize) {
     AtomicInteger contractFixed = new AtomicInteger(0);
     Stream<Contract> contractToFixStream = 
         contractDao.getContractsWithWrongPreviousContract().stream();

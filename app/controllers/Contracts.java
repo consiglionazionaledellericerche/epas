@@ -423,7 +423,8 @@ public class Contracts extends Controller {
           || (item.value.getEndContract() == null && contract.getEndContract() != null)) {
         PersonDay pd = personDayDao.getMoreFuturePersonDay(contract.getPerson());
         if ((contract.getEndDate() != null && pd.getDate().isAfter(contract.getEndDate())) 
-            || (contract.getEndContract() != null && pd.getDate().isAfter(contract.getEndContract()))) {
+            || (contract.getEndContract() != null 
+            && pd.getDate().isAfter(contract.getEndContract()))) {
           //Cancellazione dei personday successivi alla fine del contratto
           LocalDate from = null;
           if (contract.getEndDate() != null && contract.getEndContract() == null) {
@@ -1396,7 +1397,8 @@ public class Contracts extends Controller {
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
 
-    flash.success("Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
+    flash.success(
+        "Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
 
     initializationsMeal(contract.getPerson().getOffice().id);
   }
