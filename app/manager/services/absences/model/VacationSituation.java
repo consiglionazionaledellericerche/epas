@@ -458,7 +458,8 @@ public class VacationSituation {
       if (this.type.equals(TypeSummary.VACATION)) {
         return this.contract.getPerson().fullName() + " - " + "Riepilogo Ferie " + this.year;  
       } else {
-        return this.contract.getPerson().fullName() + " - " + "Riepilogo Permessi Legge " + this.year;
+        return this.contract.getPerson().fullName() + " - " 
+            + "Riepilogo Permessi Legge " + this.year;
       }
     }
   }

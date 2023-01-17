@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -28,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -88,7 +89,8 @@ public class GroupManager {
     uro.setRole(role);
     uro.setUser(group.getManager().getUser());
     uro.save();   
-    log.debug("Creato ruolo {} per l'utente {}", role.getName(), uro.getUser().getPerson().fullName());
+    log.debug("Creato ruolo {} per l'utente {}", 
+        role.getName(), uro.getUser().getPerson().fullName());
   }
 
   /**
@@ -107,7 +109,8 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, group.getManager().getOffice());
+        uroDao.getUsersRolesOffices(
+            group.getManager().getUser(), role, group.getManager().getOffice());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 
@@ -153,6 +156,7 @@ public class GroupManager {
   /**
    * Genera il dto contenente le liste dei possibili modificatori dello stato delle info
    * della persona passata come parametro.
+   *
    * @param person la persona di cui conoscere tutti i possibili modificatori delle proprie info
    * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
    *     modificare lo stato delle informazioni della persona passata come parametro.

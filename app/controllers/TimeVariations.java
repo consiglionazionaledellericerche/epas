@@ -112,8 +112,8 @@ public class TimeVariations extends Controller {
         .create(absence, hours, minutes, dateVariation);
     
     timeVariation.save();
-    consistencyManager
-    .updatePersonSituation(absence.getPersonDay().getPerson().id, dateVariation.or(LocalDate.now()));
+    consistencyManager.updatePersonSituation(
+        absence.getPersonDay().getPerson().id, dateVariation.or(LocalDate.now()));
     flash.success("Aggiornato recupero ore per assenza %s in data %s", 
         absence.getAbsenceType().getCode(), absence.getPersonDay().getDate());
     Stampings.personStamping(absence.getPersonDay().getPerson().id, 

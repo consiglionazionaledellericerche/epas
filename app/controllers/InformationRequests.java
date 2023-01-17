@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.NotificationManager;
 import manager.TeleworkStampingManager;
 import manager.configurations.EpasParam;
@@ -836,7 +836,7 @@ public class InformationRequests extends Controller {
   /**
    * Permette lo scaricamento dei documenti associati alla richiesta di congedo parentale
    * per il padre.
-   * 
+   *
    * @param informationRequestId l'identificativo della richiesta di congedo parentale
    */
   public static void downloadAttachment(Long informationRequestId) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,8 @@ package models.enumerate;
 /**
  * enumerato contenente le tipologie di comportamento dei codici d'assenza 
  * per la maturazione del buono pasto.
- * 
- * @author dario
+ *
+ * @author Dario Tagliaferri
  *
  */
 public enum MealTicketBehaviour {

@@ -42,7 +42,7 @@ import play.data.validation.Required;
 @Audited
 @Table(name = "meal_ticket_card")
 public class MealTicketCard extends PeriodModel {
-  
+
   private static final long serialVersionUID = -2102768569995667210L;
 
   private String number;
@@ -50,24 +50,24 @@ public class MealTicketCard extends PeriodModel {
   @ManyToOne
   @Required
   private Person person;
-  
+
   @OneToMany(mappedBy = "mealTicketCard")
   private List<MealTicket> mealTickets = Lists.newArrayList();
-  
+
   private boolean isActive;
-  
+
   /**
-   * Data di consegna
+   * Data di consegna.
    */
   private LocalDate deliveryDate;
-  
+
   /**
-   * La sede che ha consegnato la tessera
+   * La sede che ha consegnato la tessera.
    */
   @ManyToOne
   @Required
   private Office deliveryOffice;
-  
+
   @Override
   public String getLabel() {
     return this.number + "";

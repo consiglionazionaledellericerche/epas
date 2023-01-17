@@ -295,7 +295,8 @@ public class Configurations extends Controller {
     
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     final Attachment autocert = office.getAttachments().stream()
-        .filter(attachment -> attachment.getType() == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
+        .filter(
+            attachment -> attachment.getType() == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
     render(office, paramCategory, generals, yearlies, periodics, 
@@ -315,7 +316,8 @@ public class Configurations extends Controller {
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
         configuration.getBeginDate(), configuration.calculatedEnd(),
-        configurationManager.parseValue(configuration.getEpasParam(), configuration.getFieldValue()));
+        configurationManager.parseValue(
+            configuration.getEpasParam(), configuration.getFieldValue()));
 
     render(configuration, configurationDto);
   }
@@ -401,7 +403,8 @@ public class Configurations extends Controller {
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
         configuration.getBeginDate(), configuration.calculatedEnd(),
-        configurationManager.parseValue(configuration.getEpasParam(), configuration.getFieldValue()));
+        configurationManager.parseValue(
+            configuration.getEpasParam(), configuration.getFieldValue()));
 
     render(configuration, configurationDto);
   }

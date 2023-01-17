@@ -23,7 +23,7 @@ import play.test.FunctionalTest;
 
 /**
  * Classe di verifica di base dell'attivazione della parte di Security. 
- * 
+ *
  * @author Cristian Lucchesi
  *
  */

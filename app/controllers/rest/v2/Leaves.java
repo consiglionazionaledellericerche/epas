@@ -136,7 +136,8 @@ public class Leaves extends Controller {
         currentAbsencePeriod.setEnd(currentAbsencePeriod.getStart());
         abs.add(currentAbsencePeriod);
       } else {
-        currentAbsencePeriod.setEnd(JodaConverters.jodaToJavaLocalDate(absence.getPersonDay().getDate()));
+        currentAbsencePeriod.setEnd(
+            JodaConverters.jodaToJavaLocalDate(absence.getPersonDay().getDate()));
       }
       if (includeDetails) {
         currentAbsencePeriod.getAbsences().add(AbsenceShowTerseDto.build(absence));

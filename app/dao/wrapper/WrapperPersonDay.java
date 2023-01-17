@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
@@ -262,7 +263,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent()) {
-      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}", getValue().getDate());
+      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}",
+          getValue().getDate());
       for (ContractWorkingTimeType cwtt :
               this.getPersonDayContract().get().getContractWorkingTimeType()) {
 

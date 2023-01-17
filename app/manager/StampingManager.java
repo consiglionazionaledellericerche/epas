@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -31,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Person;
@@ -203,7 +204,8 @@ public class StampingManager {
       Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
-    val alreadyPresentStamping = stampingDao.getStamping(stamping.getDate(), person, stamping.getWay());
+    val alreadyPresentStamping = 
+        stampingDao.getStamping(stamping.getDate(), person, stamping.getWay());
     //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
     //alla timbratura esistente allora creo/modifico la timbratura.
     if (!alreadyPresentStamping.isPresent() 
@@ -235,7 +237,8 @@ public class StampingManager {
     } else {
       if ((stamping.getStampType() != null 
           && !stamping.getStampType().equals(alreadyPresentStamping.get().getStampType())) 
-          || (stamping.getStampType() == null && alreadyPresentStamping.get().getStampType() != null)) {
+          || (stamping.getStampType() == null 
+          && alreadyPresentStamping.get().getStampType() != null)) {
         result = "Timbratura già presente ma con causale diversa, "
             + "modificare la timbratura presente.";  
       } else {

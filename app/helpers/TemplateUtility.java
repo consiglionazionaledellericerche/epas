@@ -211,22 +211,23 @@ public class TemplateUtility {
   public boolean enableSmartworking() {
     return generalSettingDao.generalSetting().isEnableAutoconfigSmartworking();
   }
-  
+
   /**
    * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
    */
   public boolean enableIllnessFlow() {
     return generalSettingDao.generalSetting().isEnableIllnessFlow();
   }
-  
+
   /**
-   * 
+   * Verifica la presenza giornaliera.
+   *
    * @return se è attiva la presenza giornaliera per il responsabile di gruppo.
    */
   public boolean enableDailyPresenceForManager() {
     return generalSettingDao.generalSetting().isEnableDailyPresenceForManager();
   }
-  
+
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
    * compensativi da approvare nel template.
@@ -240,7 +241,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.getPerson());
@@ -260,7 +262,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.getPerson());
@@ -281,7 +284,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.getPerson());
@@ -302,7 +306,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.getPerson());
@@ -480,11 +485,14 @@ public class TemplateUtility {
     return year;
   }
 
-  // Liste di utilità per i template
-
+  /**
+   *Liste di utilità per i template.
+   */
   public List<Office> officesAllowed() {
     return secureManager.officesWriteAllowed(Security.getUser().get())
-        .stream().sorted((o, o1) -> o.getName().compareTo(o1.getName())).collect(Collectors.toList());
+        .stream()
+          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
+          .collect(Collectors.toList());
   }
 
   public List<Qualification> getAllQualifications() {
@@ -932,7 +940,7 @@ public class TemplateUtility {
    * Indica se è permessa la configurabilità delle richieste di assenza 
    * per i livelli I-III.
    */
-  public boolean absenceRequestAuthorizationTopLevelEnabled () {
+  public boolean absenceRequestAuthorizationTopLevelEnabled() {
     return generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization();
   }
 }

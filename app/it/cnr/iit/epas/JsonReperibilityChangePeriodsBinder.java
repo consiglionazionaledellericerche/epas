@@ -59,11 +59,11 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
    *     "req_start_date" : "2012-12-10",
    *     "req_end_date" :"2012-12-10", "sub_start_date" : "2012-12-10",
    *     "sub_end_date" : "2012-12-10"
-   * <p>
-   * - mail_req: mail richiedente - mail_sub: mail sostituto - req_start_date: data inizio del
-   * periodo del richiedente - req_end_date: data fine del periodo del richiedente - sub_start_date:
-   * data inizio del periodo del sostituto - sub_end_date: data fine del periodo del sostituto
-   * </p>
+   *     <p>
+   *       - mail_req: mail richiedente - mail_sub: mail sostituto - req_start_date: data inizio del
+   *       periodo del richiedente - req_end_date: data fine periodo richiedente - sub_start_date:
+   *       data inizio del periodo del sostituto - sub_end_date: data fine del periodo del sostituto
+   *     </p>
    */
   @SuppressWarnings("rawtypes")
   @Override

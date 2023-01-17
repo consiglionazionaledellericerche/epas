@@ -201,13 +201,13 @@ public class WorkingTimes extends Controller {
     Office office = null;
 
     if (allOffices) {
-       contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
-       rules.checkAction("WorkingTimes.showAllContracts");
+      contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
+      rules.checkAction("WorkingTimes.showAllContracts");
     } else {
       office = officeDao.getOfficeById(officeId);
       notFoundIfNull(office);
       rules.checkIfPermitted(office);
-      
+
       contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
     }
 
@@ -596,7 +596,7 @@ public class WorkingTimes extends Controller {
     flash.keep();
     if (office != null && office.id != null) {
       manageOfficeWorkingTime(office.id);
-    } else if (session.get("officeSelected") != null){
+    } else if (session.get("officeSelected") != null) {
       manageWorkingTime(Long.parseLong(session.get("officeSelected")));
     } else {
       Application.indexAdmin();

@@ -182,7 +182,8 @@ public enum NotificationSubject {
         return toUrl("Persons.edit", params);
       // case SYSTEM:
       case PARENTAL_LEAVE_INFORMATION:
-        final ParentalLeaveRequest parentalLeaveRequest = ParentalLeaveRequest.findById(referenceId);
+        final ParentalLeaveRequest parentalLeaveRequest = 
+            ParentalLeaveRequest.findById(referenceId);
         params.put("id", parentalLeaveRequest.id);
         params.put("type", parentalLeaveRequest.getInformationType());
         return toUrl("InformationRequests.show", params);

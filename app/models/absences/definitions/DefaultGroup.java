@@ -171,10 +171,12 @@ public enum DefaultGroup {
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
 
-  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
+  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", 
+      DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
-  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
+  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", 
+      DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
@@ -548,17 +550,18 @@ public enum DefaultGroup {
   public static List<String> employeeSmartworking() {
     return getCodes(DefaultGroup.G_SMART);
   }
-  
+
   /**
-   * Ritorna la lista di codici da considerare per i congedi parentali per il padre
+   * Ritorna la lista di codici da considerare per i congedi parentali per il padre.
    */
   
   public static List<String> parentalLeaveForFathers() {
     List<String> g21p = getCodes(DefaultGroup.G_21P);
     List<String> g21p2 = getCodes(DefaultGroup.G_21P2);
-    
+
     return Stream.of(g21p, g21p2).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
+
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
@@ -572,7 +575,7 @@ public enum DefaultGroup {
   public static List<String> medicalExamsCodes() {       
     return getCodes(DefaultGroup.G_631_DIPENDENTI);    
   }
-  
+
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con congedo parentale
    * e malattia figlio abilitato.

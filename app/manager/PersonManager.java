@@ -343,7 +343,8 @@ public class PersonManager {
                 absence, absence.getPersonDay().getDate(), absence.getExpireRecoverDate(),
                 absence.getTimeToRecover(),
                 absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum(),
-                Math.round(absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum() 
+                Math.round(
+                    absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum() 
                 / (float) absence.getTimeToRecover() * 100)
                 );
               }

@@ -17,6 +17,7 @@
 
 package models.contractual;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -28,7 +29,6 @@ import lombok.Getter;
 import lombok.Setter;
 import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
-import com.google.common.collect.Lists;
 import play.data.validation.Required;
 import play.data.validation.URL;
 import play.db.jpa.Blob;

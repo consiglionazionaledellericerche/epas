@@ -387,7 +387,8 @@ public class Absences extends Controller {
         absence.getAbsenceFile().type(), absence.id, absence.getAbsenceFile().getFile());
 
     String filename = String.format("assenza-%s-%s",
-        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"), absence.getAbsenceDate());
+        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"),
+        absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.getAbsenceFile()).isPresent()) {
       filename = 
           String.format("%s%s", filename, ImageUtils.fileExtension(absence.getAbsenceFile()).get());

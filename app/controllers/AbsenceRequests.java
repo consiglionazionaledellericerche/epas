@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.NotificationManager;
 import manager.NotificationManager.Crud;
@@ -343,8 +343,7 @@ public class AbsenceRequests extends Controller {
     }
     
 
-    boolean showVacationPeriods = false;
-    boolean retroactiveAbsence = false;
+
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
     absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     boolean insertable = true;
@@ -359,7 +358,8 @@ public class AbsenceRequests extends Controller {
             absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             null, null, false, absenceManager);
-
+    boolean showVacationPeriods = false;
+    boolean retroactiveAbsence = false;
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
@@ -656,8 +656,8 @@ public class AbsenceRequests extends Controller {
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
     }
 
-    if ((absenceRequest.isOfficeHeadApprovalRequired() || 
-          absenceRequest.isOfficeHeadApprovalForManagerRequired())
+    if ((absenceRequest.isOfficeHeadApprovalRequired() 
+          || absenceRequest.isOfficeHeadApprovalForManagerRequired())
         && absenceRequest.getOfficeHeadApproved() == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       log.info("Rifiuto da parte del responsabile di sede {} per {}", 

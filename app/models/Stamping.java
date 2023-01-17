@@ -171,6 +171,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public boolean isServiceReasons() {
     return stampType != null && stampType.isServiceReasons();
   }
+
   /**
    * costruttore di default implicitamente utilizzato dal play(controllers).
    */

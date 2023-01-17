@@ -740,7 +740,8 @@ public class Synchronizations extends Controller {
     for (Contract epasContract : activeContractsEpasByPersonPerseoId.values()) {
       if (epasContract.getPerseoId() == null) {
         Contract perseoContract =
-            perseoDepartmentActiveContractsByPersonPerseoId.get(epasContract.getPerson().getPerseoId());
+            perseoDepartmentActiveContractsByPersonPerseoId
+              .get(epasContract.getPerson().getPerseoId());
         if (perseoContract != null) {
           joinUpdateContract(epasContract, perseoContract);
         }
@@ -1002,9 +1003,9 @@ public class Synchronizations extends Controller {
     notFoundIfNull(office);
     val result = synchronizationManager.syncPeopleInOffice(office, false);
     if (result.isSuccess()) {
-    renderText(
-        String.format("Assegnazione personale dell'ufficio %s sincronizzata", 
-            office.getName()));
+      renderText(
+          String.format("Assegnazione personale dell'ufficio %s sincronizzata", 
+              office.getName()));
     } else {
       renderText(
           String.format("Sincronizzazione personale ufficio %s KO: %s",

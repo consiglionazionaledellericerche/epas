@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package dao.history;
 
 import com.google.common.collect.FluentIterable;
@@ -43,6 +44,7 @@ public class UserHistoryDao {
    * @param userId l'identificativo dell'utente
    * @return la lista delle revisioni sulla modifica di un utente.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<User>> historyUser(long userId) {
     final AuditQuery query = auditReader.get().createQuery()
             .forRevisionsOfEntity(User.class, false, true)

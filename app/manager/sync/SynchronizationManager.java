@@ -278,7 +278,8 @@ public class SynchronizationManager {
 
     if (!epasPerson.getName().equals(registryPerson.getName())) {
       syncResult.add(
-          String.format("Cambiato nome da %s a %s", epasPerson.getName(), registryPerson.getName()));
+          String.format(
+              "Cambiato nome da %s a %s", epasPerson.getName(), registryPerson.getName()));
       epasPerson.setName(registryPerson.getName());
     }
     if (!epasPerson.getSurname().equals(registryPerson.getSurname())) {

@@ -42,7 +42,8 @@ public class WorkingTimeTypeAdjust extends Job<Void> {
   public void doJob() {
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
-      if ((wtt.getDescription().contains(maternita) || wtt.getDescription().contains(maternitaAccento) 
+      if ((wtt.getDescription().contains(maternita) 
+          || wtt.getDescription().contains(maternitaAccento) 
           || wtt.getDescription().contains(maternitaLowerCase) 
           || wtt.getDescription().contains(maternitaLowerCaseAccento)
           || wtt.getDescription().contains(allattamento)

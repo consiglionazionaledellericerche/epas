@@ -24,7 +24,6 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import common.injection.AutoRegister;
-import common.security.SecurityModule.SecurityLogin;
 import controllers.Security;
 import java.util.Map;
 import models.User;

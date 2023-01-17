@@ -107,7 +107,8 @@ public class ServiceFactories {
         absencesToScan, orderedChildren, fetchedContracts, initializationGroups,
         this, absenceEngineUtility, personDayManager);
     for (Absence absence : absenceEngineScan.absencesToScan) {
-      Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.getAbsenceType()); 
+      Set<GroupAbsenceType> groupsToScan = 
+          absenceEngineUtility.involvedGroup(absence.getAbsenceType()); 
       absenceEngineScan.absencesGroupsToScan.put(absence, groupsToScan);
     }
     return absenceEngineScan;

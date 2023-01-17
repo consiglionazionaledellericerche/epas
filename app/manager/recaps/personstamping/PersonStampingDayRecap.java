@@ -378,7 +378,7 @@ public class PersonStampingDayRecap {
 
   /**
    * Metodo privato per la restituzione dell'intervallo orario.
-   * 
+   *
    * @param pwt il personal working time del dipendente.
    * @return l'intervallo orario di lavoro.
    */

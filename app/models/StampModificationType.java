@@ -27,7 +27,6 @@ import lombok.Setter;
 import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
 import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 
 /**

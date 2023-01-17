@@ -160,7 +160,8 @@ public class PersonDays extends Controller {
   private static PersonMonthDto generateMonthDto(ContractMonthRecap cmr) {
     PersonMonthDto pmDto = new PersonMonthDto();
     pmDto.buoniMensa = cmr.getRemainingMealTickets();
-    pmDto.possibileUtilizzareResiduoAnnoPrecedente = cmr.isPossibileUtilizzareResiduoAnnoPrecedente();
+    pmDto.possibileUtilizzareResiduoAnnoPrecedente = 
+        cmr.isPossibileUtilizzareResiduoAnnoPrecedente();
     pmDto.progressivoFinaleMese = cmr.getProgressivoFinaleMese();
     pmDto.straordinari = cmr.getStraordinariMinuti();
     pmDto.residuoTotaleAnnoCorrente = cmr.getRemainingMinutesCurrentYear();

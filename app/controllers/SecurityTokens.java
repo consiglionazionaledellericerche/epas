@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,11 @@ package controllers;
 import com.google.common.base.Strings;
 import common.oauth2.OpenIdConnectClient;
 import controllers.Resecure.NoCheck;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
@@ -34,9 +38,14 @@ import lombok.val;
 import play.Play;
 import play.cache.Cache;
 import play.libs.OAuth2;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Http.Header;
+import play.mvc.Router;
+import play.mvc.Scope;
 import play.mvc.Scope.Session;
+import play.mvc.Util;
+import play.mvc.With;
 
 /**
  * Integrazione essenziale con JWT per la generazione di token e la

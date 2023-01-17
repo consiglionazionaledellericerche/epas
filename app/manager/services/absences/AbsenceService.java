@@ -607,8 +607,8 @@ public class AbsenceService {
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
-//      groupsPermitted.remove(parentalLeaveForFathers);
-//      groupsPermitted.remove(parentalLeaveTwinsForFathers);
+      //groupsPermitted.remove(parentalLeaveForFathers);
+      //groupsPermitted.remove(parentalLeaveTwinsForFathers);
       //groupsPermitted.remove(lagile);
       //groupsPermitted.remove(cod39LA);
       for (AbsenceType abt : smart.getCategory().getAbsenceTypes()) {

@@ -77,7 +77,8 @@ public class FixReperibilityShiftDates extends Job<Void> {
         ps.setBeginDate(LocalDate.now().minusMonths(1).dayOfMonth().withMinimumValue());
         ps.setEndDate(LocalDate.now().dayOfMonth().withMaximumValue());
       }
-      log.info("Aggiornata situazione date di abilitazione ai turni di {}", ps.getPerson().fullName());
+      log.info("Aggiornata situazione date di abilitazione ai turni di {}", 
+          ps.getPerson().fullName());
       ps.save();
     }
     
