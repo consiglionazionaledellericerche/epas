@@ -548,17 +548,18 @@ public enum DefaultGroup {
   public static List<String> employeeSmartworking() {
     return getCodes(DefaultGroup.G_SMART);
   }
-  
+
   /**
-   * Ritorna la lista di codici da considerare per i congedi parentali per il padre
+   * Ritorna la lista di codici da considerare per i congedi parentali per il padre.
    */
   
   public static List<String> parentalLeaveForFathers() {
     List<String> g21p = getCodes(DefaultGroup.G_21P);
     List<String> g21p2 = getCodes(DefaultGroup.G_21P2);
-    
+
     return Stream.of(g21p, g21p2).flatMap(x -> x.stream()).collect(Collectors.toList());
   }
+
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con 104.
    */
@@ -572,7 +573,7 @@ public enum DefaultGroup {
   public static List<String> medicalExamsCodes() {       
     return getCodes(DefaultGroup.G_631_DIPENDENTI);    
   }
-  
+
   /**
    * Ritorna la lista di codici da considerare per gli impiegati con congedo parentale
    * e malattia figlio abilitato.

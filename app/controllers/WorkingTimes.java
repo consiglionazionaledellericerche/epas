@@ -201,13 +201,13 @@ public class WorkingTimes extends Controller {
     Office office = null;
 
     if (allOffices) {
-       contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
-       rules.checkAction("WorkingTimes.showAllContracts");
+      contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
+      rules.checkAction("WorkingTimes.showAllContracts");
     } else {
       office = officeDao.getOfficeById(officeId);
       notFoundIfNull(office);
       rules.checkIfPermitted(office);
-      
+
       contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
     }
 

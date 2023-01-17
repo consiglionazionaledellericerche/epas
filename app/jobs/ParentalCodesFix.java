@@ -34,11 +34,11 @@ public class ParentalCodesFix extends Job<Void> {
     List<Absence> childrenCodesFiltered = allChildrenCodes.stream()
         .filter(ab -> !ab.getPersonDay().getDate().isBefore(new LocalDate(2022, 8, 13)))
         .collect(Collectors.toList());
-    log.debug("Ci sono {} assenze da modificare", childrenCodesFiltered.size() );
+    log.debug("Ci sono {} assenze da modificare", childrenCodesFiltered.size());
     for (Absence abs : childrenCodesFiltered) {
       switch (abs.getAbsenceType().getCode()) {
         case "25O":
-          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("25").get());          
+          abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("25").get());
           break;
         case "252O":
           abs.setAbsenceType(absenceComponentDao.absenceTypeByCode("252").get());

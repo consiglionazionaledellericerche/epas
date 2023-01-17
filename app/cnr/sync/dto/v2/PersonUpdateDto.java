@@ -47,7 +47,7 @@ public class PersonUpdateDto extends PersonCreateDto {
     person.setFax(getFax());
     person.setMobile(getMobile()); 
     if (getQualification() != null) {
-      person.setQualification( 
+      person.setQualification(
           ((Qualification) Qualification.findAll().stream()
               .filter(q -> ((Qualification) q).getQualification() == getQualification().intValue())
               .findFirst().get()));        

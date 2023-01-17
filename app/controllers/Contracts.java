@@ -1198,7 +1198,8 @@ public class Contracts extends Controller {
     //simulazione eliminazione inizializzazione.
     if (sourceDateResidual == null && !confirmedResidual) {
       contractManager.cleanResidualInitialization(contract);
-      boolean removeMandatory = contract.getBeginDate().isBefore(wrContract.dateForInitialization());
+      boolean removeMandatory = 
+          contract.getBeginDate().isBefore(wrContract.dateForInitialization());
       boolean removeUnnecessary = !removeMandatory;
       if (removeUnnecessary) {
         recomputeFrom = contract.getBeginDate();
@@ -1240,7 +1241,8 @@ public class Contracts extends Controller {
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
     initializationsStatus(contract.getPerson().getOffice().id);
 
@@ -1315,7 +1317,8 @@ public class Contracts extends Controller {
 
       absenceService.emptyVacationCache(contract);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
     initializationsVacation(contract.getPerson().getOffice().id);
 

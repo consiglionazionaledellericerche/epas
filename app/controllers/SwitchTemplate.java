@@ -41,14 +41,14 @@ public class SwitchTemplate extends Controller {
 
     LocalDate now = LocalDate.now();
     Integer year = 
-        session.get("yearSelected") != null ?
-            Integer.parseInt(session.get("yearSelected")) : now.getYear();
+        session.get("yearSelected") != null 
+          ? Integer.parseInt(session.get("yearSelected")) : now.getYear();
     Integer month = 
-        session.get("monthSelected") != null ? 
-            Integer.parseInt(session.get("monthSelected")) : now.getMonthValue();
+        session.get("monthSelected") != null 
+          ? Integer.parseInt(session.get("monthSelected")) : now.getMonthValue();
     Integer day = 
-        session.get("daySelected") != null ? 
-            Integer.parseInt(session.get("daySelected")) : now.getDayOfMonth();
+        session.get("daySelected") != null 
+          ? Integer.parseInt(session.get("daySelected")) : now.getDayOfMonth();
     Long personId = Long.parseLong(session.get("personSelected"));
     Long officeId = Long.parseLong(session.get("officeSelected"));
 

@@ -133,6 +133,7 @@ public class MealTicketRecap {
     
     return list;
   }
+
   /**
    * I blocchi riconsegnati del contratto (da quelli consegnati per ultimi).
    */

@@ -163,12 +163,12 @@ public class Certifications extends Controller {
 
     rules.checkIfPermitted(person.get().getOffice());
 
-    Map<String, Certification> 
-      map = monthData.getCertification(person.get(), year, month);
+    Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
 
     val wrapperPerson = wrapperFactory.create(person.get());
-    List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+    List<IWrapperContractMonthRecap> contractMonthRecaps = 
+        wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
     dto.setMealTicketsPreviousMonth(
         contractMonthRecaps.stream().mapToInt(
             cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));

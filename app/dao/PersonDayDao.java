@@ -389,7 +389,9 @@ public class PersonDayDao extends DaoBase {
    * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
    * e che abbia almeno una timbratura del tipo passato con stampType.
    */
-  public List<PersonDay> getServiceExitPersonDaysByOFficeInPeriod(Office office, LocalDate begin, LocalDate end) {
-    return getStampTypePersonDaysByOFficeInPeriod(StampTypes.MOTIVI_DI_SERVIZIO, office, begin, end);
+  public List<PersonDay> getServiceExitPersonDaysByOfficeInPeriod(
+      Office office, LocalDate begin, LocalDate end) {
+    return getStampTypePersonDaysByOFficeInPeriod(
+        StampTypes.MOTIVI_DI_SERVIZIO, office, begin, end);
   }
 }

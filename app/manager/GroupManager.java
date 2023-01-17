@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -153,6 +154,7 @@ public class GroupManager {
   /**
    * Genera il dto contenente le liste dei possibili modificatori dello stato delle info
    * della persona passata come parametro.
+   *
    * @param person la persona di cui conoscere tutti i possibili modificatori delle proprie info
    * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
    *     modificare lo stato delle informazioni della persona passata come parametro.

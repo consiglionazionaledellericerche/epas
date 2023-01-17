@@ -92,10 +92,10 @@ public class AbsenceType extends BaseModel {
   @Column(name = "considered_week_end")
   private boolean consideredWeekEnd = false;
   
-//  @Getter
-//  @Column(name = "time_for_mealticket")
-//  public boolean timeForMealTicket = false;
-  
+  //  @Getter
+  //  @Column(name = "time_for_mealticket")
+  //  public boolean timeForMealTicket = false;
+
   @Getter
   @Enumerated(EnumType.STRING)
   @Column(name = "meal_ticket_behaviour")

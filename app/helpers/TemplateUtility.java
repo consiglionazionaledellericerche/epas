@@ -211,22 +211,23 @@ public class TemplateUtility {
   public boolean enableSmartworking() {
     return generalSettingDao.generalSetting().isEnableAutoconfigSmartworking();
   }
-  
+
   /**
    * Verifica nella configurazione generale se il flusso per la richiesta malattia è attivo.
    */
   public boolean enableIllnessFlow() {
     return generalSettingDao.generalSetting().isEnableIllnessFlow();
   }
-  
+
   /**
-   * 
+   * Verifica la presenza giornaliera.
+   *
    * @return se è attiva la presenza giornaliera per il responsabile di gruppo.
    */
   public boolean enableDailyPresenceForManager() {
     return generalSettingDao.generalSetting().isEnableDailyPresenceForManager();
   }
-  
+
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
    * compensativi da approvare nel template.
@@ -240,7 +241,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.getPerson());
@@ -932,7 +934,7 @@ public class TemplateUtility {
    * Indica se è permessa la configurabilità delle richieste di assenza 
    * per i livelli I-III.
    */
-  public boolean absenceRequestAuthorizationTopLevelEnabled () {
+  public boolean absenceRequestAuthorizationTopLevelEnabled() {
     return generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization();
   }
 }

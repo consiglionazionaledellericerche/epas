@@ -343,8 +343,7 @@ public class AbsenceRequests extends Controller {
     }
     
 
-    boolean showVacationPeriods = false;
-    boolean retroactiveAbsence = false;
+
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
     absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     boolean insertable = true;
@@ -359,7 +358,8 @@ public class AbsenceRequests extends Controller {
             absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             null, null, false, absenceManager);
-
+    boolean showVacationPeriods = false;
+    boolean retroactiveAbsence = false;
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
@@ -656,8 +656,8 @@ public class AbsenceRequests extends Controller {
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
     }
 
-    if ((absenceRequest.isOfficeHeadApprovalRequired() || 
-          absenceRequest.isOfficeHeadApprovalForManagerRequired())
+    if ((absenceRequest.isOfficeHeadApprovalRequired() 
+          || absenceRequest.isOfficeHeadApprovalForManagerRequired())
         && absenceRequest.getOfficeHeadApproved() == null
         && user.hasRoles(Role.SEAT_SUPERVISOR)) {
       log.info("Rifiuto da parte del responsabile di sede {} per {}", 

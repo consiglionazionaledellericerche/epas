@@ -234,8 +234,8 @@ public class AbsenceRequestManager {
       }
     }
 
-    if (requestType.alwaysSkipManagerApproval || person.isGroupManager() || 
-        skipTopLevelAuthorization) {
+    if (requestType.alwaysSkipManagerApproval || person.isGroupManager() 
+        || skipTopLevelAuthorization) {
       absenceRequestConfiguration.managerApprovalRequired = false;
     } else {
       if (person.isTopQualification() && requestType.managerApprovalRequiredTopLevel.isPresent()) {

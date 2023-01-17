@@ -250,10 +250,9 @@ public class PersonDay extends BaseModel {
   public int getAssignableTime() {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
   }
-  
+
   /**
-   * 
-   * @param mealTicketBehaviour
+   * Verifica ed imposta che il buono pasto è disponibile.
    */
   @Transient
   public void setTicketAvailable(MealTicketBehaviour mealTicketBehaviour) {
@@ -267,8 +266,8 @@ public class PersonDay extends BaseModel {
       case preventMealTicket:
         this.isTicketAvailable = false;
         break;
-        default:
-          break;        
+      default:
+        break;
     }
   }
 

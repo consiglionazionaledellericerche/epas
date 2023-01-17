@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -33,13 +34,19 @@ import models.User;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 
+/**
+ * Gestore delle informazioni sui buoni pasto elettronici.
+ */
 @Slf4j
 public class MealTicketCardManager {
 
   private MealTicketDao mealTicketDao;
   private IWrapperFactory wrapperFactory;
   private ContractDao contractDao;
-  
+
+  /**
+   * Construttore predefinito per l'injection.
+   */
   @Inject
   public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory,
       ContractDao contractDao) {
@@ -64,11 +71,12 @@ public class MealTicketCardManager {
     mealTicketCard.setEndDate(null);
     mealTicketCard.save();
     log.info("Aggiunta nuova tessera con identificativo {} a {}", 
-        ""+mealTicketCard.getNumber(), person.getFullname());
+        mealTicketCard.getNumber(), person.getFullname());
   }
-  
+
   /**
-   * Assegna i buoni pasto elettronici inseriti su epas finora alla scheda attuale assegnata al dipendente.
+   * Assegna i buoni pasto elettronici inseriti su epas finora alla scheda 
+   * attuale assegnata al dipendente.
    *
    * @param card l'attuale scheda elettronica per i buoni pasto elettronici
    * @return true se i buoni sono stati assegnati correttamente, false altrimenti.

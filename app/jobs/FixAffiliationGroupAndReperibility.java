@@ -257,8 +257,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
         endContractDate.getDayOfMonth());
     val groups = groupDao.myGroups(person, fromDate);
 
-    groups.forEach(group ->
-        {
+    groups.forEach(group -> {
           group.getAffiliations().stream()
               .filter(a -> a.isActive() && a.getPerson().id.equals(person.id)).forEach(a -> {
                 groupsToDeactivated.add(a.getGroup());

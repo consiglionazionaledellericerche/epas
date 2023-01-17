@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -222,7 +223,7 @@ public class MissionManager {
 
       if (!atomicInsert(situation, body, actualDate)) {
         managedMissionOk = false;
-      };
+      }
       actualDate = actualDate.plusDays(1);
 
     }
@@ -374,7 +375,7 @@ public class MissionManager {
       situation = getSituation(dateToConsider, body, workInterval);
       if (!atomicInsert(situation, body, dateToConsider)) {
         managedMissionOk = false;
-      };
+      }
       
     }
     /*

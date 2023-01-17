@@ -86,7 +86,7 @@ public class ContractMonthRecap extends BaseModel {
   private int buoniPastoUsatiNelMese = 0;
 
   @Column(name = "s_r_ac_initmese")
-  private int initResiduoAnnoCorrenteNelMese = 0;    //per il template (se sourceContract è del mese)
+  private int initResiduoAnnoCorrenteNelMese = 0;   //per il template (se sourceContract è del mese)
 
   @Column(name = "s_r_ap")
   private int initMonteOreAnnoPassato = 0;        //dal precedente recap ma è utile salvarlo
@@ -171,7 +171,7 @@ public class ContractMonthRecap extends BaseModel {
   private int straordinariMinuti = 0;    //competences (di appoggio deducibile dalle imputazioni)
 
   @Transient
-  private int riposiCompensativiMinuti = 0;    //absences  (di appoggio deducibile dalle imputazioni)
+  private int riposiCompensativiMinuti = 0;    //absences (di appoggio deducibile dalle imputazioni)
   // in charts è usato... capire cosa contiene alla fine e fixare
   
   @Transient

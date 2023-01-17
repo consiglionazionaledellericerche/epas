@@ -17,11 +17,12 @@
 
 package dao;
 
+import static com.querydsl.core.group.GroupBy.groupBy;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
-import static com.querydsl.core.group.GroupBy.groupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;

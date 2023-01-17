@@ -213,7 +213,8 @@ public class CompetenceRequestDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     List<CompetenceRequest> results = new ArrayList<>();
     JPQLQuery<CompetenceRequest> query;
-    List<Office> officeList = roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+    List<Office> officeList = 
+        roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
         .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
             .and(competenceRequest.person.office.in(officeList)));

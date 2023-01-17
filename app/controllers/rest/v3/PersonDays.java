@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package controllers.rest.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
@@ -256,7 +257,7 @@ public class PersonDays extends Controller {
         Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
-    val personDays = personDayDao.getServiceExitPersonDaysByOFficeInPeriod(
+    val personDays = personDayDao.getServiceExitPersonDaysByOfficeInPeriod(
         office, yearMonth.toLocalDate(1), 
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
 

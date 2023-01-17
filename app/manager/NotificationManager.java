@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -1352,10 +1353,10 @@ public class NotificationManager {
 
     if (competenceRequest.getBeginDateToAsk() != null) { 
       if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
-      message.append(String.format("per il giorno %s",
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
-      message.append(String.format(" in cambio del giorno %s",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+        message.append(String.format("per il giorno %s",
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+        message.append(String.format(" in cambio del giorno %s",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
       } else {
         message.append(String.format("dal %s",
             competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
@@ -1366,16 +1367,16 @@ public class NotificationManager {
         message.append(String.format(" al %s",
             competenceRequest.getEndDateToGive().toString(dateFormatter)));
       }
-    }
-    //Questo è il caso in cui si cedono giorni senza riceverne in cambio
-    else {
+    } else {
+      //Questo è il caso in cui si cedono giorni senza riceverne in cambio
       if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
         message.append(
             String.format("per cedere i giorno %s (senza prendere in cambio un altro giorno)",
                 competenceRequest.getBeginDateToGive().toString(dateFormatter)));
       } else {
         message.append(
-            String.format("per cedere ii giorni dal %s al %s (senza prendere in cambio altri giorni)",
+            String.format(
+                "per cedere ii giorni dal %s al %s (senza prendere in cambio altri giorni)",
                 competenceRequest.getBeginDateToGive().toString(dateFormatter),
                 competenceRequest.getEndDateToGive().toString(dateFormatter)));
       }

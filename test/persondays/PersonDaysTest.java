@@ -14,6 +14,7 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package persondays;
 
 import com.google.common.base.Optional;
@@ -37,6 +38,10 @@ import org.joda.time.LocalTime;
 import org.junit.Test;
 import play.test.UnitTest;
 
+/**
+ * Test di base sui calcoli giornalieri.
+ *
+ */
 @StaticInject
 public class PersonDaysTest extends UnitTest {
 
@@ -420,6 +425,7 @@ public class PersonDaysTest extends UnitTest {
 
   /**
    * Supporto alla creazione di un WorkingTimeType da non mockare.
+   *
    * @return WorkingTimeTypeDay di default (quelle Normale).
    */
   public WorkingTimeTypeDay normalDay() {

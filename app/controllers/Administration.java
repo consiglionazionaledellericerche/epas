@@ -1065,7 +1065,7 @@ public class Administration extends Controller {
    * Controlla che se è presente un previousContract e che
    * sia effettivamento il contratto precedente, altrimenti 
    * lo corregge.
-   * 
+   *
    * @param id l'id del contratto da verificare e correggere se necessario
    */
   public static void fixPreviousContract(Long id) {

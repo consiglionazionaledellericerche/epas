@@ -559,8 +559,8 @@ public class ContractManager {
       Contract temp = contract.getPreviousContract();
       if (temp != null) {
         contract.setPreviousContract(null);
-        if (temp.getEndDate() != null && 
-            contract.getBeginDate().minusDays(1).isEqual(temp.getEndDate())) {
+        if (temp.getEndDate() != null 
+            && contract.getBeginDate().minusDays(1).isEqual(temp.getEndDate())) {
           splitVacationPeriods(contract);
         }
       }
@@ -572,7 +572,7 @@ public class ContractManager {
    * Controlla che se è presente un previousContract e che
    * sia effettivamento il contratto precedente, altrimenti 
    * lo corregge.
-   * 
+   *
    * @param contract il contratto da verificare e correggere se necessario
    */
   public boolean fixPreviousContract(Contract contract) {
@@ -588,9 +588,11 @@ public class ContractManager {
       return false;
     }
 
-    log.info("Contratto con previousContract da correggere {}", contract, contract.getPerson().getFullname());
+    log.info("Contratto con previousContract da correggere {}", 
+        contract, contract.getPerson().getFullname());
     if (contract.getPerson().getContracts().size() == 1) {
-      log.debug("Contratto id={} singolo con riferimento al previousContract uguale a se stesso", contract.getId());
+      log.debug("Contratto id={} singolo con riferimento al previousContract uguale a se stesso",
+          contract.getId());
       applyPreviousContractLink(contract, false);
       log.info("Rimosso previousContract su contratto id={}", contract.getId());
     } else {
@@ -599,9 +601,11 @@ public class ContractManager {
       contract.setPreviousContract(null);
       log.debug("Rimosso temporaneamente previousContract su contratto id={}", contract.getId());
       contract.save();
-      log.debug("contratto precedente corretto da impostare = {}", contractDao.getPreviousContract(contract));
+      log.debug("contratto precedente corretto da impostare = {}",
+          contractDao.getPreviousContract(contract));
       applyPreviousContractLink(contract, true);
-      log.info("Impostato previousContract {} su contratto id={}", contract.getPreviousContract(), contract.getId());
+      log.info("Impostato previousContract {} su contratto id={}", 
+          contract.getPreviousContract(), contract.getId());
       contract.save();
     }
     log.info("Dopo la correzione -> {}", contract);
@@ -621,9 +625,9 @@ public class ContractManager {
       contractToFixStream = contractToFixStream.limit(maxSize.get());
     }
     contractToFixStream.forEach(contract -> {
-        if (fixPreviousContract(contract)) {
-          contractFixed.getAndIncrement();
-        };
+      if (fixPreviousContract(contract)) {
+        contractFixed.getAndIncrement();
+      }
     });
     return contractFixed.get();
   }

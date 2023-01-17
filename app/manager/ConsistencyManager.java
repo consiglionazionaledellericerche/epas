@@ -751,11 +751,13 @@ public class ConsistencyManager {
     if (lastDayInSourceMonth.isEqual(contract.getValue().getSourceDateResidual())) {
       ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
 
-      cmr.setRemainingMinutesCurrentYear(contract.getValue().getSourceRemainingMinutesCurrentYear());
+      cmr.setRemainingMinutesCurrentYear(
+          contract.getValue().getSourceRemainingMinutesCurrentYear());
       cmr.setRemainingMinutesLastYear(contract.getValue().getSourceRemainingMinutesLastYear());
       cmr.setRecoveryDayUsed(contract.getValue().getSourceRecoveryDayUsed());
 
-      if (contract.getValue().getSourceDateMealTicket() != null && contract.getValue().getSourceDateResidual()
+      if (contract.getValue().getSourceDateMealTicket() != null 
+          && contract.getValue().getSourceDateResidual()
           .isEqual(contract.getValue().getSourceDateMealTicket())) {
         cmr.setBuoniPastoDaInizializzazione(contract.getValue().getSourceRemainingMealTicket());
         cmr.setRemainingMealTickets(contract.getValue().getSourceRemainingMealTicket());
