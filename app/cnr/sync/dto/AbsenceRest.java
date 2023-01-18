@@ -27,6 +27,7 @@ public class AbsenceRest {
   public Long id;
   public String date;
   public String absenceCode;
+  public Long absenceTypeId;
   public String description;
   public String name;
   public String surname;
@@ -39,6 +40,7 @@ public class AbsenceRest {
     AbsenceRest ar = new AbsenceRest();
     ar.id = absence.id;
     ar.absenceCode = absence.getAbsenceType().getCode();
+    ar.absenceTypeId = absence.getAbsenceType().getId();
     ar.description = absence.getAbsenceType().getDescription();
     ar.date = absence.getPersonDay().getDate().toString();
     ar.name = absence.getPersonDay().getPerson().getName();
