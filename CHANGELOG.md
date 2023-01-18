@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
 
 ### Changed
+ - Corretto metodo REST /rest/v2/certifications/getMonthSituationByOffice che non restituiva
+   tutte le persone della sede
  - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
  - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili
    di sede per i responsabili di gruppo.

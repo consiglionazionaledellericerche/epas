@@ -209,7 +209,6 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    
     val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
     for (Person person : personCertificationsMap.keySet()) {

@@ -128,13 +128,25 @@ public class PersonMonthlySituationData {
    */
   public Map<Person, Map<String, Certification>> getCertifications(
       List<Person> persons, int year, int month) {
+    
     Map<Person, Map<String, Certification>> actualCertifications = Maps.newHashMap();
+    //Popolare la mappa delle certifications di una persona con una mappa vuota, così
+    //se nessuno dei metodi successi trova dati/competence per la persona comunque
+    //la persona viene restituita
+    populateEmptyCertifications(persons, actualCertifications);
     actualCertifications = trainingHours(persons, year, month, actualCertifications);
     //actualCertifications = absences(persons, year, month, actualCertifications);
     actualCertifications = competences(persons, year, month, actualCertifications);
     actualCertifications = mealTickets(persons, year, month, actualCertifications);
 
     return actualCertifications;
+  }
+
+  private void populateEmptyCertifications(
+      List<Person> persons, Map<Person, Map<String, Certification>> actualCertifications) {
+    persons.forEach(p -> {
+      actualCertifications.put(p, Maps.newHashMap());
+    });
   }
 
   /**
@@ -390,6 +402,10 @@ public class PersonMonthlySituationData {
     return certifications;
   }
 
+  /**
+   * Lista dei buoni pasto consegnati in un intervallo temporale, odrinati per
+   * data di consegna descrescente.
+   */
   public static List<BlockMealTicket> getBlockMealTicketReceivedDeliveryDesc(
       List<MealTicket> deliveryOrderedDesc, DateInterval mealTicketInverval) {
     return MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
