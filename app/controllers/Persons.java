@@ -239,8 +239,7 @@ public class Persons extends Controller {
     if (Validation.hasErrors()) {
       log.warn("validation errors for {}: {}", person, validation.errorsMap());
       flash.error("Correggere gli errori indicati.");
-      Validation.keep();
-      edit(person.id);
+      render("@edit", person);
     }
 
     rules.checkIfPermitted(person.getOffice());

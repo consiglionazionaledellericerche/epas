@@ -530,8 +530,10 @@ public final class PersonDao extends DaoBase {
 
     final QPerson person = QPerson.person;
 
-    final Person result = getQueryFactory().selectFrom(person).where(person.eppn.eq(eppn))
-        .fetchOne();
+    final Person result = 
+        getQueryFactory().selectFrom(person)
+          .where(person.eppn.equalsIgnoreCase(eppn))
+          .fetchOne();
 
     return Optional.fromNullable(result);
   }

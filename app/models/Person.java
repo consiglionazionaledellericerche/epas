@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,8 @@ package models;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import helpers.validators.CodiceFiscaleCheck;
+import helpers.validators.UniqueEppnCheck;
 import it.cnr.iit.epas.NullStringBinder;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -56,6 +58,7 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadablePartial;
 import play.data.binding.As;
+import play.data.validation.CheckWith;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -90,7 +93,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private String othersSurnames;
 
-  @Unique
+  @CheckWith(CodiceFiscaleCheck.class)
   @As(binder = NullStringBinder.class)
   private String fiscalCode;
 
@@ -119,7 +122,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   /**
    * Campo da usarsi in caso di autenticazione via shibboleth.
    */
-  @Unique
+  @CheckWith(UniqueEppnCheck.class)
   @As(binder = NullStringBinder.class)
   private String eppn;
 

@@ -5,7 +5,6 @@ import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import play.db.jpa.Blob;
-import play.mvc.Util;
 
 
 /**
