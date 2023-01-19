@@ -6,11 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.4] - UNRELEASED
 ### Added
+ - Aggiunto controllo su correttezza codice fiscale
  - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
    sulle assenze.
  - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
 
 ### Changed
+ - Corretto controllo su univocità codice fiscale e eppn
  - Corretto metodo REST /rest/v2/certifications/getMonthSituationByOffice che non restituiva
    tutte le persone della sede
  - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
