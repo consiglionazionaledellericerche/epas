@@ -30,37 +30,37 @@ import play.data.validation.Check;
  *
  * @author Cristian Lucchesi
  */
-@StaticInject
+@StaticInject 
 public class UniqueEppnCheck extends Check {
 
-	@Inject
-	static PersonDao personDao;
+  @Inject
+  static PersonDao personDao;
 
-	@Override
-	public boolean isSatisfied(Object validatedObject, Object v) {
-		if (v == null) {
-			return true;
-		}
-		if (!(v instanceof String)) {
-			return false;
-		}
-		final String value = (String) v;
+  @Override
+  public boolean isSatisfied(Object validatedObject, Object v) {
+    if (v == null) {
+      return true;
+    }
+    if (!(v instanceof String)) {
+      return false;
+    }
+    final String value = (String) v;
 
-		if (value.isEmpty()) {
-			return true;
-		}
+    if (value.isEmpty()) {
+      return true;
+    }
 
-		if (validatedObject instanceof Person) {
-		  val person = (Person) validatedObject;
-		  val other = personDao.byEppn(value);
+    if (validatedObject instanceof Person) {
+      val person = (Person) validatedObject;
+      val other = personDao.byEppn(value);
 
-		  if (other.isPresent() 
-		      && !Objects.equals(person.getId(), other.get().getId())) {
+      if (other.isPresent() 
+          && !Objects.equals(person.getId(), other.get().getId())) {
         setMessage("validation.eppn.alreadyPresent");
         return false;
-		  }
-		}
+      }
+    }
 
-			return true;
-	}
+    return true;
+  }
 }

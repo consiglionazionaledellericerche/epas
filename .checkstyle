@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="false">
+<fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="true">
   <local-check-config name="epas google style checks" location="internal_config_1612351667261.xml" type="internal" description="">
     <property name="org.checkstyle.google.suppressionfilter.config" value="checkstyle-suppressions.xml"/>
     <property name="org.checkstyle.google.suppressionxpathfilter.config" value="checkstyle-xpath-suppressions.xml"/>
@@ -23,13 +23,14 @@
     <filter-data value="app/models/base/query"/>
     <filter-data value="app/models/contractual/query"/>
     <filter-data value="app/models/flows/query"/>
+    <filter-data value="app/models/informationrequests/query"/>
     <filter-data value="app/models/query"/>
     <filter-data value="app/play/db/jpa/query"/>
     <filter-data value="shibboleth-1.2"/>
-    <filter-data value="secure"/>
-    <filter-data value="play-lombok-1.2.3"/>
-    <filter-data value="fastergt-1.9"/>
     <filter-data value="docviewer"/>
+    <filter-data value="fastergt-1.10"/>
+    <filter-data value="secure"/>
+    <filter-data value="lombok-1.2.5"/>
     <filter-data value="pdf-0.9"/>
   </filter>
 </fileset-config>

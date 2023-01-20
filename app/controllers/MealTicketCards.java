@@ -230,10 +230,9 @@ public class MealTicketCards extends Controller {
    */
   public static void assignOrphanElectronicMealTickets(Long cardId, Long personId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao.getMealTicketCardById(cardId);
-    Person person = personDao.getPersonById(personId);
     if (!card.isPresent()) {
       flash.error("Non sono presenti card associate al dipendente! "
-          + "Assegnare una card e riprovare!");      
+          + "Assegnare una card e riprovare!");
     } else {
       mealTicketCardManager.assignOldElectronicMealTicketsToCard(card.get());
       flash.success("Buoni elettronici associati correttamente alla card %s", 
@@ -241,7 +240,7 @@ public class MealTicketCards extends Controller {
     }
     personMealTickets(personId, LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
   }
-  
+
   /**
    * Salva i buoni elettronici sulla card del dipendente.
    *

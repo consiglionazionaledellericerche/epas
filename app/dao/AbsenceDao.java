@@ -270,7 +270,8 @@ public class AbsenceDao extends DaoBase {
    * @return la lista di assenze che non comprendono le assenze orarie "H" che non giustificano
    *     niente.
    */
-  public List<Absence> getAbsenceWithNoHInMonth(Person person, LocalDate begin, LocalDate end) {
+  public List<Absence> getAbsenceWithNoHInMonth(
+      Person person, LocalDate begin, LocalDate end) {
     
     final QAbsence absence = QAbsence.absence;
     final QJustifiedType type = QJustifiedType.justifiedType;

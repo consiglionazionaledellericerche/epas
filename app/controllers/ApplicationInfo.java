@@ -23,6 +23,9 @@ public class ApplicationInfo extends Controller {
   @Inject
   private static GeneralSettingDao generalSettingDao;
 
+  /**
+   * Mostra la pagina con la privacy policy (se attivata).
+   */
   @NoCheck
   public static void privacyPolicy() {
     if (generalSettingDao.generalSetting().isCookiePolicyEnabled()) {

@@ -46,6 +46,7 @@ public class ModelQuery {
   private ModelQuery() {
   }
 
+  @SuppressWarnings("rawtypes")
   public static JPQLQuery<?> createQuery() {
     return new JPAQuery(JPA.em());
   }
@@ -76,7 +77,7 @@ public class ModelQuery {
    */
   public static <T> SimpleResults<T> wrap(JPQLQuery<?> query,
       Expression<T> expression) {
-    return new SimpleResults<T>(query, expression);
+    return new SimpleResults<T>(query);
   }
 
   /**
@@ -118,26 +119,27 @@ public class ModelQuery {
    */
   public static class SimpleResults<T> {
 
-    private final Expression<T> expression;
     private final JPQLQuery<?> query;
 
-    SimpleResults(JPQLQuery<?> query, Expression<T> expression) {
+    SimpleResults(JPQLQuery<?> query) {
       this.query = query;
-      this.expression = expression;
     }
 
     public long count() {
       return query.fetchCount();
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> list() {
       return (List<T>) query.fetch();
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> list(long limits) {
       return (List<T>) query.restrict(QueryModifiers.limit(limits)).fetch();
     }
 
+    @SuppressWarnings("unchecked")
     public QueryResults<T> listResults() {
       return (QueryResults<T>) paginatedQuery(query).fetchResults();
     }
