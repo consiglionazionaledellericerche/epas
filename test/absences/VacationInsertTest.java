@@ -37,7 +37,13 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.test.UnitTest;
 
-
+/**
+ * Test vari sull'inserimento delle ferie.
+ *
+ * @author Alessandro Martelli
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 public class VacationInsertTest extends UnitTest {
   

@@ -252,6 +252,10 @@ public class CompetenceDao extends DaoBase {
         .where(condition).fetch();
   }
 
+  /**
+   * Mappa con le competenze in un mese per le persone passate
+   * come parametro.
+   */
   public Map<Person, List<Competence>> competencesInMonth(
       List<Person> persons, int year, int month) {
     final QCompetence competence = QCompetence.competence;

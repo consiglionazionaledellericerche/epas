@@ -300,13 +300,7 @@ public class Contracts extends Controller {
       copy.addAll(list);
     }
     log.debug("Lista assenze contiene {} elementi", list.size());
-    int count = 0;
-    for (Absence abs : list) {
-      //abs.delete();
-      count++;
-    }
-    log.debug("Cancellate {} assenze", count);
-    
+
     //1-bis) si salvano i tipi orario di lavoro
     Set<ContractWorkingTimeType> cwtts = Sets.newHashSet(contract. getContractWorkingTimeType());
 
@@ -342,6 +336,8 @@ public class Contracts extends Controller {
     } else {
       contractManager.properContractUpdate(previousContract, LocalDate.now(), false);
     }
+
+    int count = list.size();
 
     //4) riassegno le assenze sul nuovo contratto...
     if (count != 0) {
