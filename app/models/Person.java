@@ -467,4 +467,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     return mealTicketCards.stream().filter(mtc -> mtc.isActive()).findFirst().orElse(null);
   }
+  
+  @Transient
+  public MealTicketCard previousMealTicketCard() {
+    if (!this.mealTicketCards.isEmpty() && actualMealTicketCard() == null) {
+      return mealTicketCards.stream().filter(mtc -> !mtc.isActive()).findFirst().get();
+    }
+    return null;
+  }
 }

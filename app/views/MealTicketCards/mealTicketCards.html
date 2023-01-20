@@ -39,10 +39,22 @@
 	  	    #{list items:person.getMealTicketCards(), as:'card'}
 	  	    	<li class="list-group-item clearfix">
 	  	    	<span class="label label-default"> ${card.number} </span>
-    				
+    				#{if person.actualMealTicketCard() != null}
     				<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
                		<i class="fa fa-trash"></i> Rimuovi
-             		</a>   				
+             		</a>   
+             		#{/if}
+             		#{else}
+	             		#{if person.previousMealTicketCard().mealTickets.isEmpty()}
+	             		<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.previousMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
+	               		<i class="fa fa-trash"></i> Rimuovi
+	             		#{/if}
+	             		#{else}
+	             		<a class="label label-badge label-info pull-right" href="@{infoCard(person.previousMealTicketCard().id)}" webui-popover-hover data-content="Info tessera" >
+	               		<i class="fa fa-info"></i> Info
+	             		#{/else}             		
+             		</a>  
+             		#{/else}				
   				</li>
 	  	    #{/list}
 	  	    </ul>
