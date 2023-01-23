@@ -1183,6 +1183,8 @@ when
     "Charts.checkLastYearAbsences",
     "Charts.overtimeOnPositiveResidual",
     "Charts.overtimeOnPositiveResidualInYear",
+    "Charts.listForExcelFile",
+    "Charts.exportTimesheetSituation",
     "Competences.activateServices",
     //"Competences.addService",
     "Competences.approvedCompetenceInYear",
@@ -1762,6 +1764,8 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
+     	"Charts.listForExcelFile",
+     	"Charts.exportTimesheetSituation",
 
         "Configurations.show",
         "Configurations.edit",
@@ -1850,6 +1854,8 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportDataSituation",
      	"Charts.exportFinalSituation",
+     	"Charts.listForExcelFile",
+     	"Charts.exportTimesheetSituation",
 
      	"Configurations.show",
         "Configurations.edit",
