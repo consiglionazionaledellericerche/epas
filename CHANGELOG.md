@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
    sulle assenze.
  - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
+ - Aggiunta regola drools per permettere all'amministratore in sola lettura di esportare i timesheet
 
 ### Changed
  - Corretto controllo su univocità codice fiscale e eppn
