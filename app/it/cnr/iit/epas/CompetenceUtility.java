@@ -410,7 +410,6 @@ public class CompetenceUtility {
             // check consistent stampings
             //-----------------------------
             // legge le coppie di timbrature valide
-            //FIXME injettare il PersonDayManager
             List<PairStamping> pairStampings =
                 personDayManager.getValidPairStampings(personDay.get().getStampings());
 

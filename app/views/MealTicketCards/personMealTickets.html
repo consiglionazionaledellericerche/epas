@@ -35,7 +35,7 @@
     'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
     <input type="hidden" name="personId" value="${person.id}"/>
 	#{f.view 'office', value:person.office?.name /}
-    #{f.selectModel 'card',items:person.getMealTicketCards(),value:card, label:'Tessera' /}
+	#{f.selectModel 'card',items:person.getMealTicketCards(),value:card, label:'Tessera' /}
     #{f.input 'tickets', type:'number', required:'true' /}
     
     #{f.date 'deliveryDate', required:'true' /}

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.4] - UNRELEASED
+## [2.6.4] - 2023-02-02
 ### Added
  - Aggiunto controllo su correttezza codice fiscale
  - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    di sede per i responsabili di gruppo.
  - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
    di visualizzazione per amministratori associati a sedi ormai chiuse
+ - Modificata la chiamata della schermata di inserimento buoni pasto usando il contratto al posto della persona
 
 ## [2.6.3] - 2023-01-12
 ### Added
