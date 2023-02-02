@@ -992,7 +992,7 @@ allora verranno mostrare le assenze indipendentemente dal loro utilizzo.</p>
 <h2><span class="section-number">8.15.3. </span>AbsenceType Show<a class="headerlink" href="#absencetype-show" title="Permalink to this heading">¶</a></h2>
 <p>La visualizzazione dei dati di una tipologia di assenza è possibile tramite una HTTP GET all'indirizzo
 <strong>/rest/v3/absenceTypes/show</strong>.</p>
-<p>Per individuare la tipologia di assenza è possibile utilizzare solo il campo <em>id</em>.</p>
+<p>Per individuare la tipologia di assenza è possibile utilizzare il campo <em>id</em> oppure il campo <em>code</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
 <span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/absenceTypes/show
 <span class="w">    </span><span class="nv">id</span><span class="o">==</span><span class="m">297</span>
