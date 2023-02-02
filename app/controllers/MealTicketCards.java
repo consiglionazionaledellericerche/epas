@@ -271,7 +271,7 @@ public class MealTicketCards extends Controller {
     User admin = Security.getUser().get();
     
     mealTicketCardManager.saveElectronicMealTicketBlock(card, deliveryDate, tickets, 
-        admin, person, expireDate, office);
+        admin, expireDate, office);
     consistencyManager.updatePersonRecaps(person.id, deliveryDate);
     flash.success("Il blocco inserito è stato salvato correttamente.");
 
