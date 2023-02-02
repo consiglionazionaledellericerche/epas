@@ -209,6 +209,10 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
         calculatedEnd(), previousContract != null ? previousContract.getId() : null, 
         perseoId);
   }
+  
+  public String getLabel() {
+    return String.format("Inizio= [%s] - Fine= [%s]", getBeginDate(), getEndDate());
+  }
 
   /**
    * Ritorna il ContractStampProfile attivo alla data.
