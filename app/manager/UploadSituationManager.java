@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,13 @@
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import java.util.List;
+import javax.inject.Inject;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;

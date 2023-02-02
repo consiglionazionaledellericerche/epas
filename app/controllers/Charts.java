@@ -349,7 +349,8 @@ public class Charts extends Controller {
       List<Long> peopleIds = Lists.newArrayList();
       peopleIds.add(personId);
       file = chartsManager
-          .buildFile(person.getOffice(), false, onlyMission, peopleIds, beginDate, endDate, exportFile);
+          .buildFile(
+              person.getOffice(), false, onlyMission, peopleIds, beginDate, endDate, exportFile);
     } catch (ArchiveException | IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       excelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());

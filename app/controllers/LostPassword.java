@@ -128,7 +128,8 @@ public class LostPassword extends Controller {
       Secure.login();
     }
 
-    if (user.getExpireRecoveryToken() == null || !user.getExpireRecoveryToken().equals(LocalDate.now())) {
+    if (user.getExpireRecoveryToken() == null 
+        || !user.getExpireRecoveryToken().equals(LocalDate.now())) {
       flash.error("Il token per effettuare il recupero password è scaduto. " 
           + "Effettuare una nuova richiesta.");
       Secure.login();

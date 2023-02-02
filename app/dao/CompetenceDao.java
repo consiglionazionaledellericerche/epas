@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
@@ -26,6 +25,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Competence;
 import models.CompetenceCode;
@@ -50,7 +50,6 @@ import org.joda.time.LocalDate;
  *
  */
 public class CompetenceDao extends DaoBase {
-
 
   @Inject
   CompetenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
@@ -253,7 +252,12 @@ public class CompetenceDao extends DaoBase {
         .where(condition).fetch();
   }
 
-  public Map<Person, List<Competence>> competencesInMonth(List<Person> persons, int year, int month) {
+  /**
+   * Mappa con le competenze in un mese per le persone passate
+   * come parametro.
+   */
+  public Map<Person, List<Competence>> competencesInMonth(
+      List<Person> persons, int year, int month) {
     final QCompetence competence = QCompetence.competence;
     return getQueryFactory().selectFrom(competence)
         .where(competence.person.in(persons), 

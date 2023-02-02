@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,16 +17,13 @@
 
 package manager;
 
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
-import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Contract;
 import models.MealTicket;
@@ -35,14 +32,21 @@ import models.Office;
 import models.Person;
 import models.User;
 import models.enumerate.BlockType;
+import org.joda.time.LocalDate;
 
+/**
+ * Gestore delle informazioni sui buoni pasto elettronici.
+ */
 @Slf4j
 public class MealTicketCardManager {
 
   private MealTicketDao mealTicketDao;
   private IWrapperFactory wrapperFactory;
   private ContractDao contractDao;
-  
+
+  /**
+   * Construttore predefinito per l'injection.
+   */
   @Inject
   public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory,
       ContractDao contractDao) {
@@ -67,11 +71,12 @@ public class MealTicketCardManager {
     mealTicketCard.setEndDate(null);
     mealTicketCard.save();
     log.info("Aggiunta nuova tessera con identificativo {} a {}", 
-        ""+mealTicketCard.getNumber(), person.getFullname());
+        mealTicketCard.getNumber(), person.getFullname());
   }
-  
+
   /**
-   * Assegna i buoni pasto elettronici inseriti su epas finora alla scheda attuale assegnata al dipendente.
+   * Assegna i buoni pasto elettronici inseriti su epas finora alla scheda 
+   * attuale assegnata al dipendente.
    *
    * @param card l'attuale scheda elettronica per i buoni pasto elettronici
    * @return true se i buoni sono stati assegnati correttamente, false altrimenti.
@@ -114,9 +119,5 @@ public class MealTicketCardManager {
       mealTicket.save();
     }
   }
-  
-  public Map<LocalDate, List<MealTicket>> recapElectronicDelivery(Person person) {
-    Map<LocalDate, List<MealTicket>> map = Maps.newHashMap();
-    return null;
-  }
+
 }

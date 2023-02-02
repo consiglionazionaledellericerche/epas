@@ -71,7 +71,8 @@ public class OvertimesManager {
             person.getSurname() + " " + person.getName(), competence.get().getReason() != null
                 ? competence.get().getReason() : "", competence.get().getValueApproved());
         log.debug("Inserita riga person={} reason={} and valueApproved={}",
-            new Object[]{person, competence.get().getReason(), competence.get().getValueApproved()});
+            new Object[]{person, competence.get().getReason(), 
+                competence.get().getValueApproved()});
       }
     }
 
@@ -88,7 +89,8 @@ public class OvertimesManager {
   public void setRequestedOvertime(PersonsCompetences body, int year, int month) {
     for (Competence competence : body.competences) {
       Optional<Competence> oldCompetence =
-          competenceDao.getCompetence(competence.getPerson(), year, month, competence.getCompetenceCode());
+          competenceDao.getCompetence(
+              competence.getPerson(), year, month, competence.getCompetenceCode());
       if (oldCompetence.isPresent()) {
         // update the requested hours
         oldCompetence.get().setValueApproved(competence.getValueApproved());

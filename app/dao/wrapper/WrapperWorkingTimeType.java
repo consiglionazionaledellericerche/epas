@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,12 +18,12 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import manager.ContractManager;
 import models.Contract;
 import models.ContractWorkingTimeType;

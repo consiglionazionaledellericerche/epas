@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -43,6 +43,7 @@ public class AbsenceShowTerseDto {
   private Long id;
   private LocalDate date;
   private String code;
+  private Long absenceTypeId;
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
@@ -62,6 +63,9 @@ public class AbsenceShowTerseDto {
     absenceDto.setJustifiedTime(absence.justifiedTime());
     absenceDto.setJustifiedType(absence.getJustifiedType().getName().name());
     absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
+    if (absence.getAbsenceType() != null) {
+      absenceDto.setAbsenceTypeId(absence.getAbsenceType().getId());
+    }
     return absenceDto;
   }
 }

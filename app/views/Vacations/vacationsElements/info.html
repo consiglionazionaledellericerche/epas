@@ -87,16 +87,9 @@
 	      <p>
 	        <strong>${absencePeriod.groupAbsenceType.description}</strong>
 	      </p>
-	    
-	    #{if absencePeriod.errorsBox.containsCriticalErrors() }
-	      <p>ci sono errori critici. TODO: elencarli</p>
-	    #{/if}
-	    #{if absencePeriod.errorsBox.containsAbsencesErrors() }
-	      <p>ci sono errori legati alle assenze. TODO: elencarli</p>
-	    #{/if}
-    
+
     	</li>
-    	    <li class="list-group-item">
+        <li class="list-group-item">
      <p>
         #{if absencePeriod.isTakableWithLimit() }
            <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>

@@ -28,8 +28,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
@@ -198,7 +198,7 @@ public class ContractDao extends DaoBase {
    * La lista di contratti della persona.
    *
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   * data inizio contratto.
+   *     data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
@@ -262,9 +262,9 @@ public class ContractDao extends DaoBase {
    * @param person   la persona (opzionale)
    * @param contract il contratto (opzionale)
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   * passati come parametro e ordinati per data inizio del contractStampProfile. La funzione
-   * permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
-   * mutuamente esclusivi.
+   *     passati come parametro e ordinati per data inizio del contractStampProfile. La funzione
+   *     permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
+   *     mutuamente esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
       Optional<Contract> contract) {
@@ -312,7 +312,8 @@ public class ContractDao extends DaoBase {
 
       if (contract.calculatedEnd() != null
           && contract.calculatedEnd().isBefore(actualContract.getBeginDate()) 
-          && (previousContract == null || contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
+          && (previousContract == null 
+                || contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
         previousContract = contract;
       }
     }
@@ -320,15 +321,21 @@ public class ContractDao extends DaoBase {
   }
 
   /**
+   * Lista dei contratti che hanno impostato come previousContract se stesso.
+   *
    * @return la lista dei contratti che hanno impostato come previousContract 
-   *  se stesso (erroneamente).
+   *      se stesso (erroneamente).
    */
   public List<Contract> getContractsWithWrongPreviousContract() {
     QContract contract = QContract.contract;
     BooleanBuilder contractEqPreviousCondition = 
-        new BooleanBuilder(contract.previousContract.isNotNull().and(contract.previousContract.id.eq(contract.id)));
+        new BooleanBuilder(
+            contract.previousContract.isNotNull().and(
+                contract.previousContract.id.eq(contract.id)));
     BooleanBuilder previousConditionAfterCurrentContract = 
-        new BooleanBuilder(contract.previousContract.isNotNull().and(contract.beginDate.before(contract.previousContract.beginDate)));
+        new BooleanBuilder(
+            contract.previousContract.isNotNull().and(
+                contract.beginDate.before(contract.previousContract.beginDate)));
     return getQueryFactory().selectFrom(contract)
         .where(contractEqPreviousCondition.or(previousConditionAfterCurrentContract)).fetch();
   }

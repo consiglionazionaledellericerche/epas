@@ -94,7 +94,8 @@ public class CheckPersonCompetence extends Job<Void> {
           log.debug("Cancellato {}", pcc.toString());
 
         }
-        if (DateUtility.isIntervalIntoAnother(new DateInterval(temp.getBeginDate(), temp.getEndDate()), 
+        if (DateUtility.isIntervalIntoAnother(
+              new DateInterval(temp.getBeginDate(), temp.getEndDate()), 
             interval)) {
           //toDelete.add(prev);
           temp.delete();

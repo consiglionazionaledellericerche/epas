@@ -92,10 +92,10 @@ public class AbsenceType extends BaseModel {
   @Column(name = "considered_week_end")
   private boolean consideredWeekEnd = false;
   
-//  @Getter
-//  @Column(name = "time_for_mealticket")
-//  public boolean timeForMealTicket = false;
-  
+  //  @Getter
+  //  @Column(name = "time_for_mealticket")
+  //  public boolean timeForMealTicket = false;
+
   @Getter
   @Enumerated(EnumType.STRING)
   @Column(name = "meal_ticket_behaviour")
@@ -390,7 +390,8 @@ public class AbsenceType extends BaseModel {
     GroupAbsenceType groupSelected = null;
     for (TakableAbsenceBehaviour behaviour : this.takableGroup) {   //o uno o due...
       for (GroupAbsenceType group : behaviour.getGroupAbsenceTypes()) {  //quasi sempre 1
-        if (group.isAutomatic() == true || group.getName().equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
+        if (group.isAutomatic() == true 
+            || group.getName().equals(DefaultGroup.FERIE_CNR_DIPENDENTI.name())
             || group.getName().equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()) 
             || group.getName().equals(DefaultGroup.LAVORO_FUORI_SEDE.name())
             || group.getName().equals(DefaultGroup.G_OA_DIPENDENTI.name())) {

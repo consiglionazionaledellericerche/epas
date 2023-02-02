@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,14 +20,12 @@ package manager.services.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import manager.PersonDayManager;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
 import manager.services.absences.model.AbsencePeriod;
@@ -56,17 +54,7 @@ import org.testng.collections.Lists;
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
-  
-  private final PersonDayManager personDayManager;
 
-  /**
-   * Constructor for injection.
-   */
-  @Inject
-  public AbsenceEngineUtility(PersonDayManager personDayManager) {
-    this.personDayManager = personDayManager;
-  }
- 
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.
@@ -218,8 +206,8 @@ public class AbsenceEngineUtility {
   public Integer takenBehaviouralFixes(Absence absence, Integer amount,
       List<Contract> fetchedContracts, DateInterval periodInterval, 
       TakeAmountAdjustment adjustment) {
-    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time orizzontale,
-    //non devono togliere l'intera giornata ma l'intera giornata meno un'ora
+    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time 
+    //orizzontale, non devono togliere l'intera giornata ma l'intera giornata meno un'ora
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
         absence.getAbsenceType().getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
@@ -270,7 +258,8 @@ public class AbsenceEngineUtility {
               while (!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), dateToChange)) {
                 dateToChange = dateToChange.plusDays(1);
               }
-              return cwtt.getWorkingTimeType().getWorkingTimeTypeDays().get(dateToChange.getDayOfWeek() - 1)
+              return cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
+                  .get(dateToChange.getDayOfWeek() - 1)
                   .getWorkingTime();
             } else {
               return 0;

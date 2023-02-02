@@ -35,7 +35,8 @@ public class ContractEndContractCheck extends Check {
       return false;
     }
     final Contract contract = (Contract) validatedObject;
-    if (contract.getEndContract() != null && contract.getEndContract().isBefore(contract.getBeginDate())) {
+    if (contract.getEndContract() != null 
+        && contract.getEndContract().isBefore(contract.getBeginDate())) {
       setMessage("validation.contract.endContractBeforeBeginContract");
       return false;
     }

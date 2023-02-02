@@ -192,7 +192,7 @@ public class CompetenceRequests extends Controller {
     PersonReperibilityType type = null;
     List<Person> teamMates = Lists.newArrayList();
     List<PersonReperibilityType> types = Lists.newArrayList();
-    boolean insertable = false;
+    
     if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
           .stream().filter(prt -> prt.getPersonReperibilities().stream()
@@ -207,6 +207,7 @@ public class CompetenceRequests extends Controller {
           .filter(p -> p.id != person.id).collect(Collectors.toList());
 
     }
+    boolean insertable = false;
     competenceRequest.setStartAt(LocalDateTime.now().plusDays(1));
     competenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     render("@edit", competenceRequest, insertable, competenceType,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,6 @@ import manager.configurations.EpasParam;
 import manager.flows.InformationRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
-import models.Contract;
 import models.Person;
 import models.Role;
 import models.TeleworkValidation;
@@ -837,7 +836,7 @@ public class InformationRequests extends Controller {
   /**
    * Permette lo scaricamento dei documenti associati alla richiesta di congedo parentale
    * per il padre.
-   * 
+   *
    * @param informationRequestId l'identificativo della richiesta di congedo parentale
    */
   public static void downloadAttachment(Long informationRequestId) {

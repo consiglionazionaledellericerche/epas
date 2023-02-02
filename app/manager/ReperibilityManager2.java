@@ -252,7 +252,8 @@ public class ReperibilityManager2 {
     // Verifica che la persona non abbia altre reperibilità nello stesso giorno 
     final Optional<PersonReperibilityDay> personReperibility = reperibilityDayDao
         .getPersonReperibilityDay(
-            personReperibilityDay.getPersonReperibility().getPerson(), personReperibilityDay.getDate());
+            personReperibilityDay.getPersonReperibility().getPerson(),
+            personReperibilityDay.getDate());
 
     if (personReperibility.isPresent()) {
       return Optional.of(Messages.get("reperibility.alreadyInReperibility", 
@@ -260,8 +261,10 @@ public class ReperibilityManager2 {
     }
 
     // verifica che la persona non sia assente nel giorno
-    final Optional<PersonDay> personDay = personDayDao
-        .getPersonDay(personReperibilityDay.getPersonReperibility().getPerson(), personReperibilityDay.getDate());
+    final Optional<PersonDay> personDay = 
+        personDayDao.getPersonDay(
+            personReperibilityDay.getPersonReperibility().getPerson(),
+            personReperibilityDay.getDate());
 
     if (personDay.isPresent() 
         && !personDayManager.isAbsenceCompatibleWithReperibility(personDay.get())) {

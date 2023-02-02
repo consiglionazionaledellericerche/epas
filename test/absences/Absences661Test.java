@@ -38,7 +38,12 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.test.UnitTest;
 
-
+/**
+ * Test vari per le assenze di tipo 661.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 public class Absences661Test extends UnitTest {
   

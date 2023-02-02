@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.CompetenceDao;
 import dao.ContractDao;
@@ -32,6 +31,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.SortedMap;
+import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.PersonManager;
 import models.CertificatedData;
@@ -317,7 +317,8 @@ public class WrapperPerson implements IWrapperPerson {
     //ricerca
     for (ContractWorkingTimeType cwtt : currentContract.get().getContractWorkingTimeType()) {
       if (DateUtility
-          .isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
+          .isDateIntoInterval(
+              LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
         currentWorkingTimeType = Optional.fromNullable(cwtt.getWorkingTimeType());
         return currentWorkingTimeType;
       }
@@ -527,7 +528,8 @@ public class WrapperPerson implements IWrapperPerson {
     }
     YearMonth last = null;
     for (Certification certification : value.getCertifications()) {
-      if (last == null || last.isBefore(new YearMonth(certification.getYear(), certification.getMonth()))) {
+      if (last == null 
+          || last.isBefore(new YearMonth(certification.getYear(), certification.getMonth()))) {
         last = new YearMonth(certification.getYear(), certification.getMonth());
       }
     }

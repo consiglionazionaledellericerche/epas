@@ -296,7 +296,8 @@ public class TeleworkStampings extends Controller {
             stamping.getDate().getMonthValue(), stamping.getDate().getDayOfMonth(), 
             stamping.getDate().getHour(), stamping.getDate().getMinute(), 
             stamping.getDate().getSecond());
-        Optional<Stamping> stampingToDelete = stampingDao.getStamping(dateTime, pd.getPerson(), way);
+        Optional<Stamping> stampingToDelete = 
+            stampingDao.getStamping(dateTime, pd.getPerson(), way);
         if (stampingToDelete.isPresent()) {
           stampingToDelete.get().delete();
           consistencyManager.updatePersonSituation(pd.getPerson().id, pd.getDate());

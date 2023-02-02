@@ -239,8 +239,7 @@ public class Persons extends Controller {
     if (Validation.hasErrors()) {
       log.warn("validation errors for {}: {}", person, validation.errorsMap());
       flash.error("Correggere gli errori indicati.");
-      Validation.keep();
-      edit(person.id);
+      render("@edit", person);
     }
 
     rules.checkIfPermitted(person.getOffice());
@@ -258,7 +257,8 @@ public class Persons extends Controller {
     }
 
     person.save();
-    flash.success("Modificate informazioni per l'utente %s %s", person.getName(), person.getSurname());
+    flash.success(
+        "Modificate informazioni per l'utente %s %s", person.getName(), person.getSurname());
 
     // FIXME: la modifica della persona dovrebbe far partire qualche ricalcolo??
     // esempio qualifica, office possono far cambiare qualche decisione dell'alg.
@@ -486,7 +486,8 @@ public class Persons extends Controller {
     }
     absenceService.scanner(child.getPerson(), eldest);
 
-    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.getName(), child.getSurname(),
+    flash.error(
+        "Eliminato %s %s dall'anagrafica dei figli di %s", child.getName(), child.getSurname(),
         person.getFullname());
 
     children(person.id);

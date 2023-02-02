@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.4] - UNRELEASED
+### Added
+ - Aggiunto controllo su correttezza codice fiscale
+ - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
+   sulle assenze.
+ - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
+ - Aggiunta regola drools per permettere all'amministratore in sola lettura di esportare i timesheet
+
+### Changed
+ - Corretto controllo su univocità codice fiscale e eppn
+ - Corretto metodo REST /rest/v2/certifications/getMonthSituationByOffice che non restituiva
+   tutte le persone della sede
+ - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
+ - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili
+   di sede per i responsabili di gruppo.
+ - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
+   di visualizzazione per amministratori associati a sedi ormai chiuse
+
 ## [2.6.3] - 2023-01-12
 ### Added
  - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici

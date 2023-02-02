@@ -596,7 +596,8 @@ public class AbsenceManager {
       return insert(person, date, absenceType, file, Optional.<Integer>absent(), persist);
     }
 
-    return new AbsencesResponse(date, absenceType.getCode(), AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
+    return 
+        new AbsencesResponse(date, absenceType.getCode(), AbsencesResponse.MONTE_ORE_INSUFFICIENTE);
   }
 
   private AbsencesResponse handlerGenericAbsenceType(
@@ -749,7 +750,8 @@ public class AbsenceManager {
           log.info("Rimossa assenza del {} per {}", actualDate, person.getFullname());
         }
       }
-      if (pd.getDate().isAfter(today) && pd.getAbsences().isEmpty() && pd.getStampings().isEmpty()) {
+      if (pd.getDate().isAfter(today) && pd.getAbsences().isEmpty() 
+          && pd.getStampings().isEmpty()) {
         //pd.delete();
         pd.reset();
       }

@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.CertificationManager;
 import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
@@ -163,12 +163,12 @@ public class Certifications extends Controller {
 
     rules.checkIfPermitted(person.get().getOffice());
 
-    Map<String, Certification> 
-      map = monthData.getCertification(person.get(), year, month);
+    Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
 
     val wrapperPerson = wrapperFactory.create(person.get());
-    List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+    List<IWrapperContractMonthRecap> contractMonthRecaps = 
+        wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
     dto.setMealTicketsPreviousMonth(
         contractMonthRecaps.stream().mapToInt(
             cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
@@ -209,7 +209,6 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    
     val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
     for (Person person : personCertificationsMap.keySet()) {
@@ -217,7 +216,8 @@ public class Certifications extends Controller {
       Map<String, Certification> map = personCertificationsMap.get(person);
       CertificationDto dto = generateCertDto(map, year, month, person);
       val wrapperPerson = wrapperFactory.create(person);
-      List<IWrapperContractMonthRecap> contractMonthRecaps = wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+      List<IWrapperContractMonthRecap> contractMonthRecaps = 
+          wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
       dto.setMealTicketsPreviousMonth(
           contractMonthRecaps.stream().mapToInt(
               cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
@@ -362,8 +362,10 @@ public class Certifications extends Controller {
             || abs.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
           timeToJustify = workingTimeTypeDay.get().getWorkingTime();
         }
-        if (abs.getJustifiedType().getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-          timeToJustify = workingTimeTypeDay.get().getWorkingTime() - abs.getPersonDay().getStampingsTime();
+        if (abs.getJustifiedType().getName()
+              .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          timeToJustify = 
+              workingTimeTypeDay.get().getWorkingTime() - abs.getPersonDay().getStampingsTime();
         }
       } else {
         log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è "

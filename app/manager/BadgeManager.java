@@ -111,7 +111,8 @@ public class BadgeManager {
     
     
     if (alreadyPresent.isPresent()) {
-      log.debug("Il Badge n. {} è già presente per {} - {}", codeNormalized, person, person.getOffice());
+      log.debug("Il Badge n. {} è già presente per {} - {}", 
+          codeNormalized, person, person.getOffice());
       return badges;
     } else {
       for (BadgeReader badgeReader : badgeSystem.getBadgeReaders()) {

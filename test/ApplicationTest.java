@@ -20,6 +20,12 @@ import org.junit.Test;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
 
+/**
+ * Test di base per vedere che l'applicazione di avvi.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @Slf4j
 public class ApplicationTest extends FunctionalTest {
 

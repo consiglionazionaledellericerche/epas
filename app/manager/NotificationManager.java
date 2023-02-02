@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.GroupDao;
@@ -33,6 +32,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.ConfigurationManager;
@@ -1353,10 +1353,10 @@ public class NotificationManager {
 
     if (competenceRequest.getBeginDateToAsk() != null) { 
       if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
-      message.append(String.format("per il giorno %s",
-          competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
-      message.append(String.format(" in cambio del giorno %s",
-          competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+        message.append(String.format("per il giorno %s",
+            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+        message.append(String.format(" in cambio del giorno %s",
+            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
       } else {
         message.append(String.format("dal %s",
             competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
@@ -1367,16 +1367,16 @@ public class NotificationManager {
         message.append(String.format(" al %s",
             competenceRequest.getEndDateToGive().toString(dateFormatter)));
       }
-    }
-    //Questo è il caso in cui si cedono giorni senza riceverne in cambio
-    else {
+    } else {
+      //Questo è il caso in cui si cedono giorni senza riceverne in cambio
       if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
         message.append(
             String.format("per cedere i giorno %s (senza prendere in cambio un altro giorno)",
                 competenceRequest.getBeginDateToGive().toString(dateFormatter)));
       } else {
         message.append(
-            String.format("per cedere ii giorni dal %s al %s (senza prendere in cambio altri giorni)",
+            String.format(
+                "per cedere ii giorni dal %s al %s (senza prendere in cambio altri giorni)",
                 competenceRequest.getBeginDateToGive().toString(dateFormatter),
                 competenceRequest.getEndDateToGive().toString(dateFormatter)));
       }

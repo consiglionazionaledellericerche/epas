@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,14 +19,14 @@ package models.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import lombok.Getter;
-import lombok.Setter;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultTab;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;

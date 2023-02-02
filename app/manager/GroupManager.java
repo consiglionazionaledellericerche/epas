@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,11 @@
 
 package manager;
 
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
-import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
-import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import java.time.LocalDate;
 import java.util.List;
@@ -39,7 +36,6 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.dto.SeatSituationDto;
 import models.flows.Affiliation;
 import models.flows.Group;
 import org.assertj.core.util.Lists;
@@ -93,7 +89,8 @@ public class GroupManager {
     uro.setRole(role);
     uro.setUser(group.getManager().getUser());
     uro.save();   
-    log.debug("Creato ruolo {} per l'utente {}", role.getName(), uro.getUser().getPerson().fullName());
+    log.debug("Creato ruolo {} per l'utente {}", 
+        role.getName(), uro.getUser().getPerson().fullName());
   }
 
   /**
@@ -112,7 +109,8 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, group.getManager().getOffice());
+        uroDao.getUsersRolesOffices(
+            group.getManager().getUser(), role, group.getManager().getOffice());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 
@@ -158,6 +156,7 @@ public class GroupManager {
   /**
    * Genera il dto contenente le liste dei possibili modificatori dello stato delle info
    * della persona passata come parametro.
+   *
    * @param person la persona di cui conoscere tutti i possibili modificatori delle proprie info
    * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
    *     modificare lo stato delle informazioni della persona passata come parametro.

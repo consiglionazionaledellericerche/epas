@@ -177,7 +177,8 @@ public class Calendar extends Controller {
         slotList = shiftManager2.getSlotsFromTimeTable(activity.get().getShiftTimeTable());
       } else {
         organizationSlotList = 
-            Lists.newArrayList(activity.get().getOrganizaionShiftTimeTable().getOrganizationShiftSlot());
+            Lists.newArrayList(
+                activity.get().getOrganizaionShiftTimeTable().getOrganizationShiftSlot());
       }
       
       shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
@@ -353,7 +354,8 @@ public class Calendar extends Controller {
       if (event == null
           || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
           .equals(abs.getPersonDay().getDate())
-          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
+          || event.getEnd() != null 
+          && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
 
         event = ShiftEvent.builder()
             .allDay(true)
@@ -395,7 +397,8 @@ public class Calendar extends Controller {
       if (event == null
           || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
           .equals(abs.getPersonDay().getDate())
-          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
+          || event.getEnd() != null 
+          && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
 
         event = ShiftEvent.builder()
             .allDay(true)

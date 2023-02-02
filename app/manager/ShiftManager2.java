@@ -166,7 +166,8 @@ public class ShiftManager2 {
       }
       if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
         activities.addAll(currentUser.getUsersRolesOffices().stream()
-            .flatMap(uro -> uro.getOffice().getShiftCategories().stream().filter(st -> !st.isDisabled())
+            .flatMap(uro -> uro.getOffice().getShiftCategories().stream()
+                .filter(st -> !st.isDisabled())
                 .flatMap(shiftCategories -> shiftCategories.getShiftTypes().stream())
                 .sorted(Comparator.comparing(o -> o.getType())))
             .collect(Collectors.toList()));
@@ -828,7 +829,8 @@ public class ShiftManager2 {
             }
 
           } else {    
-            if (shift.getOrganizationShiftSlot().getPaymentType() == PaymentType.SPLIT_CALCULATION) {
+            if (shift.getOrganizationShiftSlot().getPaymentType() 
+                  == PaymentType.SPLIT_CALCULATION) {
               shiftCompetences += quantityCountForShift(shift, pd, timeInterval);
             } else {
               shiftCompetences += shift.getOrganizationShiftSlot().getMinutesPaid() 
@@ -1060,7 +1062,7 @@ public class ShiftManager2 {
             totalHolidayPeopleCompetences.merge(person, activityCompetence, 
                 (previousValue, newValue) -> newValue + previousValue);
             //Cerco le competenze di turno notturno...
-            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.getShiftType(), 
+            activityCompetence = calculatePersonShiftCompetencesInPeriod(monthStatus.getShiftType(),
                 person, monthBegin, lastDay, ShiftPeriod.nightly);
             totalNightlyPeopleCompetences.merge(person, activityCompetence, 
                 (previousValue, newValue) -> newValue + previousValue);
@@ -1121,7 +1123,8 @@ public class ShiftManager2 {
             shiftTypeMonth.getYearMonth().getMonthOfYear(), shiftCode);
 
     Competence newCompetence = 
-        shiftCompetence.or(new Competence(person, shiftCode, shiftTypeMonth.getYearMonth().getYear(), 
+        shiftCompetence.or(
+            new Competence(person, shiftCode, shiftTypeMonth.getYearMonth().getYear(),
             shiftTypeMonth.getYearMonth().getMonthOfYear()));
     newCompetence.setValueApproved(totalShiftMinutes / 60);
     newCompetence.setExceededMins(totalShiftMinutes % 60);

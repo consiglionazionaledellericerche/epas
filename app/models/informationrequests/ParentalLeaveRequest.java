@@ -1,9 +1,6 @@
 package models.informationrequests;
 
-import com.google.common.collect.Lists;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;

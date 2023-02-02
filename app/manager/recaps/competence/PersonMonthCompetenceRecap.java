@@ -76,7 +76,8 @@ public class PersonMonthCompetenceRecap {
     //TODO implementare dei metodi un pò più generali (con enum come parametro)
     this.holidaysAvailability = getHolidaysAvailability(contract.getPerson(), year, month);
     this.weekDayAvailability = getWeekDayAvailability(contract.getPerson(), year, month);
-    this.daylightWorkingDaysOvertime = getDaylightWorkingDaysOvertime(contract.getPerson(), year, month);
+    this.daylightWorkingDaysOvertime = 
+        getDaylightWorkingDaysOvertime(contract.getPerson(), year, month);
     this.daylightholidaysOvertime = getDaylightholidaysOvertime(contract.getPerson(), year, month);
     this.ordinaryShift = getOrdinaryShift(contract.getPerson(), year, month);
     this.nightShift = getNightShift(contract.getPerson(), year, month);

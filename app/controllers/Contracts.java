@@ -300,13 +300,7 @@ public class Contracts extends Controller {
       copy.addAll(list);
     }
     log.debug("Lista assenze contiene {} elementi", list.size());
-    int count = 0;
-    for (Absence abs : list) {
-      //abs.delete();
-      count++;
-    }
-    log.debug("Cancellate {} assenze", count);
-    
+
     //1-bis) si salvano i tipi orario di lavoro
     Set<ContractWorkingTimeType> cwtts = Sets.newHashSet(contract. getContractWorkingTimeType());
 
@@ -342,6 +336,8 @@ public class Contracts extends Controller {
     } else {
       contractManager.properContractUpdate(previousContract, LocalDate.now(), false);
     }
+
+    int count = list.size();
 
     //4) riassegno le assenze sul nuovo contratto...
     if (count != 0) {
@@ -423,7 +419,8 @@ public class Contracts extends Controller {
           || (item.value.getEndContract() == null && contract.getEndContract() != null)) {
         PersonDay pd = personDayDao.getMoreFuturePersonDay(contract.getPerson());
         if ((contract.getEndDate() != null && pd.getDate().isAfter(contract.getEndDate())) 
-            || (contract.getEndContract() != null && pd.getDate().isAfter(contract.getEndContract()))) {
+            || (contract.getEndContract() != null 
+            && pd.getDate().isAfter(contract.getEndContract()))) {
           //Cancellazione dei personday successivi alla fine del contratto
           LocalDate from = null;
           if (contract.getEndDate() != null && contract.getEndContract() == null) {
@@ -1198,7 +1195,8 @@ public class Contracts extends Controller {
     //simulazione eliminazione inizializzazione.
     if (sourceDateResidual == null && !confirmedResidual) {
       contractManager.cleanResidualInitialization(contract);
-      boolean removeMandatory = contract.getBeginDate().isBefore(wrContract.dateForInitialization());
+      boolean removeMandatory = 
+          contract.getBeginDate().isBefore(wrContract.dateForInitialization());
       boolean removeUnnecessary = !removeMandatory;
       if (removeUnnecessary) {
         recomputeFrom = contract.getBeginDate();
@@ -1240,7 +1238,8 @@ public class Contracts extends Controller {
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
     initializationsStatus(contract.getPerson().getOffice().id);
 
@@ -1315,7 +1314,8 @@ public class Contracts extends Controller {
 
       absenceService.emptyVacationCache(contract);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
     initializationsVacation(contract.getPerson().getOffice().id);
 
@@ -1393,7 +1393,8 @@ public class Contracts extends Controller {
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
 
-    flash.success("Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
+    flash.success(
+        "Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
 
     initializationsMeal(contract.getPerson().getOffice().id);
   }

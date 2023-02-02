@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import controllers.Security;
 import dao.GeneralSettingDao;
 import dao.PersonDao;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.recaps.personstamping.PersonStampingDayRecap;
@@ -204,7 +204,8 @@ public class StampingManager {
       Person person, User currentUser, boolean newInsert, boolean isTeleworkStamping) {
     String result = "";
 
-    val alreadyPresentStamping = stampingDao.getStamping(stamping.getDate(), person, stamping.getWay());
+    val alreadyPresentStamping = 
+        stampingDao.getStamping(stamping.getDate(), person, stamping.getWay());
     //Se la timbratura allo stesso orario e con lo stesso verso non è già presente o è una modifica
     //alla timbratura esistente allora creo/modifico la timbratura.
     if (!alreadyPresentStamping.isPresent() 
@@ -236,7 +237,8 @@ public class StampingManager {
     } else {
       if ((stamping.getStampType() != null 
           && !stamping.getStampType().equals(alreadyPresentStamping.get().getStampType())) 
-          || (stamping.getStampType() == null && alreadyPresentStamping.get().getStampType() != null)) {
+          || (stamping.getStampType() == null 
+          && alreadyPresentStamping.get().getStampType() != null)) {
         result = "Timbratura già presente ma con causale diversa, "
             + "modificare la timbratura presente.";  
       } else {

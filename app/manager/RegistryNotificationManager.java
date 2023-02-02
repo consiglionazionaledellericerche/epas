@@ -47,7 +47,8 @@ public class RegistryNotificationManager {
 
     final String message = String.format(
         "La persona %s ha cambiato sede, la nuova sede è %s (sedeId = %s), "
-            + "la vecchia sede era %s (sedeId = %s)", person.getFullname(), person.getOffice().getName(),
+            + "la vecchia sede era %s (sedeId = %s)", 
+            person.getFullname(), person.getOffice().getName(),
             person.getOffice().getCodeId(), oldOffice.getName(), oldOffice.getCodeId());
 
     //Notifica ai nuovi amministratori della nuova persona da gestire.

@@ -605,9 +605,11 @@ public class ContractMonthRecapManager {
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.getProgressivoFinaleNegativoMese() < monthRecap.getRemainingMinutesCurrentYear()) {
+    if (monthRecap.getProgressivoFinaleNegativoMese() 
+          < monthRecap.getRemainingMinutesCurrentYear()) {
       monthRecap.setRemainingMinutesCurrentYear(
-          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getProgressivoFinaleNegativoMese());
+          monthRecap.getRemainingMinutesCurrentYear() 
+          - monthRecap.getProgressivoFinaleNegativoMese());
       monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(
           monthRecap.getProgressivoFinaleNegativoMese());
       return;
@@ -640,10 +642,12 @@ public class ContractMonthRecapManager {
     if (monthRecap.getRiposiCompensativiMinuti() < monthRecap.getRemainingMinutesLastYear()) {
       monthRecap.setRemainingMinutesLastYear(
           monthRecap.getRemainingMinutesLastYear() - monthRecap.getRiposiCompensativiMinuti());
-      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(monthRecap.getRiposiCompensativiMinuti());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(
+          monthRecap.getRiposiCompensativiMinuti());
       return;
     } else {
-      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(monthRecap.getRemainingMinutesLastYear());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(
+          monthRecap.getRemainingMinutesLastYear());
       monthRecap.setRemainingMinutesLastYear(0);
       monthRecap.setRiposiCompensativiMinuti(
           monthRecap.getRiposiCompensativiMinuti()
@@ -697,9 +701,11 @@ public class ContractMonthRecapManager {
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.getRiposiCompensativiChiusuraEnteMinuti() < monthRecap.getRemainingMinutesCurrentYear()) {
+    if (monthRecap.getRiposiCompensativiChiusuraEnteMinuti() 
+          < monthRecap.getRemainingMinutesCurrentYear()) {
       monthRecap.setRemainingMinutesCurrentYear(
-          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
+          monthRecap.getRemainingMinutesCurrentYear() 
+            - monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
       monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente(
           monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
       return;

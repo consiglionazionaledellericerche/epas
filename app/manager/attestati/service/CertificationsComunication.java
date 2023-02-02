@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;

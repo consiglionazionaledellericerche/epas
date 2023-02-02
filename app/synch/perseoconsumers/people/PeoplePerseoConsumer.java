@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -27,12 +27,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.inject.Inject;
 import dao.QualificationDao;
 import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.Qualification;
@@ -115,7 +115,8 @@ public class PeoplePerseoConsumer {
       if (departmentPerseoId.isPresent()) {
         url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        throw new ApiRequestException("Impossibile prelevare le persone di una sede senza personId");
+        throw new ApiRequestException(
+            "Impossibile prelevare le persone di una sede senza personId");
       }
       user = AnagraficaApis.getPerseoUser();
       pass = AnagraficaApis.getPerseoPass();

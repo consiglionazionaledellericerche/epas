@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -27,6 +26,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import manager.configurations.EpasParam;
 import models.Institute;

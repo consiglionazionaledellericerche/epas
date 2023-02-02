@@ -61,11 +61,11 @@ public class PersonCreateDto {
     ModelMapper modelMapper = new ModelMapper();
     val person = modelMapper.map(personDto, Person.class);
     if (personDto.getQualification() != null) {
-      person.setQualification( 
+      person.setQualification(
           ((Qualification) Qualification.findAll().stream()
               .filter(q -> 
                 ((Qualification) q).getQualification() == personDto.getQualification().intValue())
-              .findFirst().get()));        
+              .findFirst().get()));
     }
     if (personDto.getOfficeId() != null) {
       person.setOffice(Office.findById(personDto.getOfficeId()));  

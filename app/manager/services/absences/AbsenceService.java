@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -22,13 +22,13 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
 import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
@@ -607,8 +607,8 @@ public class AbsenceService {
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
-//      groupsPermitted.remove(parentalLeaveForFathers);
-//      groupsPermitted.remove(parentalLeaveTwinsForFathers);
+      //groupsPermitted.remove(parentalLeaveForFathers);
+      //groupsPermitted.remove(parentalLeaveTwinsForFathers);
       //groupsPermitted.remove(lagile);
       //groupsPermitted.remove(cod39LA);
       for (AbsenceType abt : smart.getCategory().getAbsenceTypes()) {

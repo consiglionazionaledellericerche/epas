@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,6 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
 import models.enumerate.BlockType;
-import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;
@@ -182,7 +181,7 @@ public class RequestInit extends Controller {
         && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
-      officeId = offices.stream()
+      officeId = offices.stream().filter(off -> off.getEndDate() == null)
             .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
       officeId = currentUser.getPerson().getOffice().id;
@@ -193,7 +192,9 @@ public class RequestInit extends Controller {
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
     if (user.get().getPerson() != null) {
       BlockType type = (BlockType) configurationManager
-          .configValue(officeDao.getOfficeById(officeId), EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
+          .configValue(
+              officeDao.getOfficeById(officeId), 
+              EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
       if (type != null && type.equals(BlockType.electronic)) {
         renderArgs.put("electronicMealTicket", true);
       }

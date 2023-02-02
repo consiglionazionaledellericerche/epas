@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,9 @@
 package dao.history;
 
 import com.google.common.collect.FluentIterable;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import javax.inject.Inject;
 import models.Competence;
 import models.Contract;
 import org.hibernate.envers.AuditReader;
@@ -46,6 +46,7 @@ public class ContractHistoryDao {
    * @param competenceId l'id della competenza di cui recuperare lo storico
    * @return la lista di modifiche per la competenza in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Competence>> competences(long competenceId) {
 
     final AuditQuery query = auditReader.get().createQuery()
@@ -65,6 +66,7 @@ public class ContractHistoryDao {
    * @param contractId l'id del contratto di cui recuperare lo storico
    * @return la lista di modifiche per il contratto in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Contract>> contracts(long contractId) {
     
     final AuditQuery query = auditReader.get().createQuery()
@@ -84,6 +86,7 @@ public class ContractHistoryDao {
    * @return la lista contenente un solo elemento relativo alle modifiche al contratto
    *     in oggetto.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Contract>> lastRevision(long contractId) {
     
     final AuditQuery query = auditReader.get().createQuery()

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,13 +19,13 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
 import dao.PersonDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonManager;
 import models.Contract;
@@ -263,7 +263,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent()) {
-      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}", getValue().getDate());
+      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}",
+          getValue().getDate());
       for (ContractWorkingTimeType cwtt :
               this.getPersonDayContract().get().getContractWorkingTimeType()) {
 

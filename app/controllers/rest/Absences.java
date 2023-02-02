@@ -146,7 +146,7 @@ public class Absences extends Controller {
   @BasicAuth
   public static void insertAbsence(
       Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
-      String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
+      @Required String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
       @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes) {
     Person person = 
         personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
@@ -210,9 +210,9 @@ public class Absences extends Controller {
   @BasicAuth
   public static void checkAbsence(
       Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, String number, String absenceCode, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate end, 
+      String fiscalCode, String number, @Required String absenceCode,
+      @CheckWith(LocalDateNotTooFar.class) LocalDate begin,
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end,
       Integer hours, Integer minutes)
           throws JsonProcessingException {
 
@@ -387,7 +387,8 @@ public class Absences extends Controller {
         absence.getAbsenceFile().type(), absence.id, absence.getAbsenceFile().getFile());
 
     String filename = String.format("assenza-%s-%s",
-        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"), absence.getAbsenceDate());
+        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"),
+        absence.getAbsenceDate());
     if (ImageUtils.fileExtension(absence.getAbsenceFile()).isPresent()) {
       filename = 
           String.format("%s%s", filename, ImageUtils.fileExtension(absence.getAbsenceFile()).get());
