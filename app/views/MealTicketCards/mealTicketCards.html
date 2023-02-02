@@ -16,15 +16,18 @@
 	  	</tr>
 	  	</thead>
 	  	<tbody>
-	  	  #{list items:personList, as:'person'}
+	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
-	  	    <td>${person.fullName()}</td> 
+	  	    <td #{if recap.expireInMonth()} webui-popover-hover data-content="Il contratto scade nel mese" #{/if}>
+	  	    ${recap.contract.person.fullName()}
+	  	    #{if recap.expireInMonth()} * #{/if}
+	  	    </td> 
 	  	    	  	    
 	  	    <td>
-	  	    #{if person.actualMealTicketCard() != null} 
+	  	    #{if recap.contract.person.actualMealTicketCard() != null} 
 	  	    	<h4>
-	  	    	<a class="label label-success label-badge" href="@{infoCard(person.actualMealTicketCard().id)}" data-async-modal="#defaultModal" webui-popover-hover data-content="Visualizza tessera">
-	  	    	${person.actualMealTicketCard().number}</a>
+	  	    	<a class="label label-success label-badge" href="@{infoCard(recap.contract.person.actualMealTicketCard().id)}" data-async-modal="#defaultModal" webui-popover-hover data-content="Visualizza tessera">
+	  	    	${recap.contract.person.actualMealTicketCard().number}</a>
 	  	    	</h4>
 	  	    #{/if}
 	  	    #{else}
@@ -32,25 +35,25 @@
 	  	    #{/else}	  	    
 	  	    </td>	  	    
 	  	    
-	  	    <td><a href="@{MealTicketCards.addNewCard(person.id)}" data-async-modal="#defaultModal">
+	  	    <td><a href="@{MealTicketCards.addNewCard(recap.contract.person.id)}" data-async-modal="#defaultModal">
 	  	    	<i class="fa fa-plus" aria-hidden="true">Nuova tessera</i></a></td>
 	  	    <td>
 	  	    <ul class="list-group">
-	  	    #{list items:person.getMealTicketCards(), as:'card'}
+	  	    #{list items:recap.contract.person.getMealTicketCards(), as:'card'}
 	  	    	<li class="list-group-item clearfix">
 	  	    	<span class="label label-default"> ${card.number} </span>
-    				#{if person.actualMealTicketCard() != null}
-    				<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
+    				#{if recap.contract.person.actualMealTicketCard() != null}
+    				<a class="label label-badge label-danger pull-right" href="@{deleteCard(recap.contract.person.actualMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
                		<i class="fa fa-trash"></i> Rimuovi
              		</a>   
              		#{/if}
              		#{else}
-	             		#{if person.previousMealTicketCard().mealTickets.isEmpty()}
-	             		<a class="label label-badge label-danger pull-right" href="@{deleteCard(person.previousMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
+	             		#{if recap.contract.person.previousMealTicketCard().mealTickets.isEmpty()}
+	             		<a class="label label-badge label-danger pull-right" href="@{deleteCard(recap.contract.person.previousMealTicketCard().id)}" webui-popover-hover data-content="Rimuovi tessera" >
 	               		<i class="fa fa-trash"></i> Rimuovi
 	             		#{/if}
 	             		#{else}
-	             		<a class="label label-badge label-info pull-right" href="@{infoCard(person.previousMealTicketCard().id)}" webui-popover-hover data-content="Info tessera" >
+	             		<a class="label label-badge label-info pull-right" href="@{infoCard(recap.contract.person.previousMealTicketCard().id)}" webui-popover-hover data-content="Info tessera" >
 	               		<i class="fa fa-info"></i> Info
 	             		#{/else}             		
              		</a>  

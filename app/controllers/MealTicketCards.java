@@ -18,9 +18,11 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
 import dao.ContractDao;
+import dao.ContractMonthRecapDao;
 import dao.MealTicketCardDao;
 import dao.MealTicketDao;
 import dao.OfficeDao;
@@ -37,12 +39,14 @@ import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.MealTicket;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
 import models.User;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -78,6 +82,8 @@ public class MealTicketCards extends Controller {
   private static IWrapperFactory wrapperFactory;
   @Inject
   private static ContractDao contractDao;
+  @Inject
+  private static ContractMonthRecapDao contractMonthRecapDao;
 
   /**
    * Ritorna la lista delle persone per verificare le associazioni con le card dei buoni 
@@ -90,8 +96,12 @@ public class MealTicketCards extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
-    List<Person> personList = personDao.activeWithNumber(office);
-    render(office, personList);
+    LocalDate date = LocalDate.now();
+    List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
+        .getPersonMealticket(new YearMonth(date.getYear(), date.getMonthOfYear()), 
+            Optional.<Integer>absent(), Optional.<String>absent(), Sets.newHashSet(office));
+    
+    render(office, monthRecapList);
   }
 
   /**
@@ -196,29 +206,30 @@ public class MealTicketCards extends Controller {
    * @param year l'anno
    * @param month il mese
    */
-  public static void personMealTickets(Long personId, Integer year, Integer month) {
+  public static void personMealTickets(Long contractId, Integer year, Integer month) {
     
-    Person person = personDao.getPersonById(personId);
+    //Person person = personDao.getPersonById(personId);
+    Contract contract = contractDao.getContractById(contractId);
 
-    Preconditions.checkArgument(person.isPersistent());
-    rules.checkIfPermitted(person.getOffice());
+    //Preconditions.checkArgument(person.isPersistent());
+    Preconditions.checkArgument(contract.getPerson().isPersistent());
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
       month = LocalDate.now().getMonthOfYear();
     }
-    IWrapperPerson wrPerson = wrapperFactory.create(person);
-    MealTicketRecap recap = mealTicketService.create(wrPerson.getCurrentContract().get()).orNull();
+    MealTicketRecap recap = mealTicketService.create(contract).orNull();
     Preconditions.checkNotNull(recap);
     LocalDate deliveryDate = LocalDate.now();
-    MealTicketCard card = person.actualMealTicketCard();
+    MealTicketCard card = contract.getPerson().actualMealTicketCard();
     LocalDate expireDate = mealTicketDao
-        .getFurtherExpireDateInOffice(person.getOffice());
+        .getFurtherExpireDateInOffice(contract.getPerson().getOffice());
     List<MealTicket> unAssignedElectronicMealTickets = mealTicketDao
-        .getUnassignedElectronicMealTickets(wrPerson.getCurrentContract().get());
+        .getUnassignedElectronicMealTickets(contract);
     User admin = Security.getUser().get();
-    
-    render(person, card, admin, deliveryDate, year, month, 
+    Person person = contract.getPerson();
+    render(person, card, admin, deliveryDate, year, month,  
         expireDate, recap, unAssignedElectronicMealTickets);
   }
   
