@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    di sede per i responsabili di gruppo.
  - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
    di visualizzazione per amministratori associati a sedi ormai chiuse
+ - Modificata la chiamata della schermata di inserimento buoni pasto usando il contratto al posto della persona
 
 ## [2.6.3] - 2023-01-12
 ### Added
