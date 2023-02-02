@@ -98,13 +98,13 @@ public class MealTicketCardManager {
   }
   
   public void saveElectronicMealTicketBlock(MealTicketCard card, LocalDate deliveryDate, 
-      Integer tickets, User admin, Person person, LocalDate expireDate, Office office) {
+      Integer tickets, User admin, LocalDate expireDate, Office office) {
     String block = "" + card.getNumber() + deliveryDate.getYear() + deliveryDate.getMonthOfYear();
     for (Integer i = 1; i <= tickets; i++) {
       MealTicket mealTicket = new MealTicket();
       mealTicket.setBlock(block);
       mealTicket.setBlockType(BlockType.electronic);
-      mealTicket.setContract(contractDao.getContract(deliveryDate, person));
+      mealTicket.setContract(contractDao.getContract(deliveryDate, card.getPerson()));
       mealTicket.setMealTicketCard(card);
       mealTicket.setAdmin(admin.getPerson());
       mealTicket.setDate(deliveryDate);
