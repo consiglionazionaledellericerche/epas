@@ -182,7 +182,7 @@
 		 	</tr>
 		 	#{list dto.stampingOwnersInDays.keySet(), as:'stampingOwner'}
 		 	  <tr>
-		 	    <td>${stampingOwner.getLabel()}</td>
+		 	    <td>${stampingOwner != null ? stampingOwner.getLabel() : ' Inserita dal sistema'}</td>
 		 	    <td style="text-align:center">${dto.stampingOwnersInDays.get(stampingOwner).size()}</td>
 		 	    <td>${dto.stampingOwnersInDays.get(stampingOwner)*.dayOfMonth()*.get().sort()}</td>
 		 	  </tr>
@@ -228,5 +228,7 @@
 		</table>
 	#{/if}
   #{/if}
+  <p style="page-break-after: always;">&nbsp;</p>
+  <p style="page-break-before: always;">&nbsp;</p>
 #{/list}
 </body>
