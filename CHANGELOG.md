@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    sulle assenze.
  - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
  - Aggiunta regola drools per permettere all'amministratore in sola lettura di esportare i timesheet
+ - Aggiunto page break nel pdf per separare in nuova pagina i cartellini di tutti i dipendenti 
+   nella stampa cartellino
+ - Aggiunto controllo che verifica l'owner di una timbratura nella stampa cartellino nel caso di timbrature
+   inserite dal sistema a cavallo della mezzanotte
+ 
 
 ### Changed
  - Corretto controllo su univocità codice fiscale e eppn
