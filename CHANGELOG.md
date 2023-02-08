@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.5] - UNRELEASES
+### Changed
+ - Introdotto ordine alfabetico per cognome al risultato del metodo rest
+   rest/v2/certifications/getmonthsituationbyoffice
+
 ## [2.6.4] - 2023-02-02
 ### Added
  - Aggiunto controllo su correttezza codice fiscale

@@ -41,6 +41,7 @@ import helpers.JsonResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -211,7 +212,10 @@ public class Certifications extends Controller {
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
     val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
-    for (Person person : personCertificationsMap.keySet()) {
+    val people = personCertificationsMap.keySet().stream()
+      .sorted((p1 , p2) -> p1.getFullname().compareTo(p2.getFullname()))
+      .collect(Collectors.toList());
+    for (Person person : people) {
       log.debug("analizzo la situazione mensile di {}...", person.getFullname());
       Map<String, Certification> map = personCertificationsMap.get(person);
       CertificationDto dto = generateCertDto(map, year, month, person);
