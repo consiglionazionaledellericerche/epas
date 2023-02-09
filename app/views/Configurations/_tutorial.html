@@ -93,15 +93,8 @@
       lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
       <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede".</p>
     #{/if}
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_VACATIONS) }
-      &{'description.' + configuration.epasParam}
-    #{/if}
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_COMPENSATORY) }
-      &{'description.' + configuration.epasParam}
-    #{/if}
-    
+
+   
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_AUTOCERTIFICATION) }
       &{'description.' + configuration.epasParam}
     #{/if}

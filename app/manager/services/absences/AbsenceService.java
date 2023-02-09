@@ -637,15 +637,15 @@ public class AbsenceService {
         groupsPermitted.add(employeeOffseat);
       }
 
-      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_VACATIONS)
-          && person.getQualification().getQualification() <= 3) {
-        groupsPermitted.add(employeeVacation);
-      }
-
-      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_COMPENSATORY)
-          && person.getQualification().getQualification() <= 3) {
-        groupsPermitted.add(employeeCompensatory);
-      }
+//      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_VACATIONS)
+//          && person.getQualification().getQualification() <= 3) {
+//        groupsPermitted.add(employeeVacation);
+//      }
+//
+//      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_COMPENSATORY)
+//          && person.getQualification().getQualification() <= 3) {
+//        groupsPermitted.add(employeeCompensatory);
+//      }
 
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
