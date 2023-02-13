@@ -218,16 +218,20 @@ public class AbsencePeriod {
          * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
          * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
          */
-        
+        int quantity = 0;
         if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
           return this.fixedPeriodTakableAmount - 2 * 100;
         }
         List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
         int count = (workingDays.size() * 100 / 2);
         if (count % 100 != 0) {
-          return count - count % 100;
+          quantity = count - count % 100;
+        } else {
+          quantity = count - (1 * 100);
         }
-        return count - (1 * 100);
+        if (quantity <= this.fixedPeriodTakableAmount) {
+          return quantity;
+        }
       } 
       return this.fixedPeriodTakableAmount;
     }
