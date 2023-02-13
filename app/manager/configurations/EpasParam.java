@@ -334,20 +334,20 @@ public enum EpasParam {
    * Tecnici e Ricercatori possono inserirsi le ferie e riposi. 
    * Con notifica al direttore / responsabile.
    */
-  TR_VACATIONS("researchers_technologists_vacations",
-      EpasParamCategory.AUTOCERTIFICATION,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-  TR_COMPENSATORY("researchers_technologists_compensatory",
-      EpasParamCategory.AUTOCERTIFICATION,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
+//  TR_VACATIONS("researchers_technologists_vacations",
+//      EpasParamCategory.AUTOCERTIFICATION,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
+//  TR_COMPENSATORY("researchers_technologists_compensatory",
+//      EpasParamCategory.AUTOCERTIFICATION,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
 
   /**
    * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Introdotto ordine alfabetico per cognome al risultato del metodo rest
    rest/v2/certifications/getmonthsituationbyoffice
+ - Rimossi i parametri di configurazione che permettevano ai I-III livelli di auto inserirsi le ferie e
+   i riposi compensativi. Condizionata la visibilità del parametro di auto inserimento delle timbrature
+   per i I-III livelli al fatto che il valore di quel parametro sia "sì"
 
 ## [2.6.4] - 2023-02-02
 ### Added

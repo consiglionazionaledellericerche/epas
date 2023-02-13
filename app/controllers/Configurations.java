@@ -294,12 +294,20 @@ public class Configurations extends Controller {
         .collect(Collectors.toList());
     
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
+    java.util.Optional<Configuration> target = autocertifications.stream()
+        .filter(conf -> conf.getEpasParam().equals(EpasParam.TR_AUTOCERTIFICATION) 
+            && conf.getFieldValue().equals("false")).findFirst();
+    boolean stampingsAutocertification = true;
+    if (target.isPresent()) {
+      autocertifications.remove(target.get());
+      stampingsAutocertification = false;
+    }
     final Attachment autocert = office.getAttachments().stream()
         .filter(
             attachment -> attachment.getType() == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
-    render(office, paramCategory, generals, yearlies, periodics, 
+    render(office, paramCategory, generals, yearlies, periodics, stampingsAutocertification,
         autocertifications, autocert, flows, competenceFlows, informationFlows);
   }
 
