@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    nella stampa cartellino
  - Aggiunto controllo che verifica l'owner di una timbratura nella stampa cartellino nel caso di timbrature
    inserite dal sistema a cavallo della mezzanotte
+ - Aggiunto controllo che limita a 10 giorni il lavoro agile nel caso di più di 22 giorni lavorativi in un mese
  
 
 ### Changed
