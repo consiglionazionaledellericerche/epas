@@ -22,6 +22,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -58,6 +59,7 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
+import play.Play;
 import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -113,7 +115,8 @@ public class Persons extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   static RoleDao roleDao;
-
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -132,6 +135,8 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(office);
 
+    boolean warningInsertPerson = generalSettingDao.generalSetting().isWarningInsertPerson();
+    
     List<Person> simplePersonList = personDao
         .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, null, null, false)
         .list();
@@ -139,7 +144,7 @@ public class Persons extends Controller {
     List<IWrapperPerson> personList =
         FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
 
-    render(personList, office);
+    render(personList, office, warningInsertPerson);
   }
 
 
@@ -147,11 +152,13 @@ public class Persons extends Controller {
    * metodo che gestisce la pagina di inserimento persona.
    */
   public static void insertPerson() {
+    
+    boolean warningInsertPerson = generalSettingDao.generalSetting().isWarningInsertPerson();
 
     Person person = new Person();
     Contract contract = new Contract();
 
-    render(person, contract);
+    render(person, contract, warningInsertPerson);
   }
 
   /**

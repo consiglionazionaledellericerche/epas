@@ -109,5 +109,10 @@ public class GeneralSetting extends BaseModel {
    * gruppo o del responsabile di sede. 
    */
   private boolean enableAbsenceTopLevelAuthorization = true;
+  
+  /*
+   * Indica se condizionare l'inserimento manuale di una persona in anagrafica
+   */
+  private boolean warningInsertPerson = true;
 
 }

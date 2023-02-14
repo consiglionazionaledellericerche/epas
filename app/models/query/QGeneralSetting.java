@@ -79,6 +79,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final NumberPath<Integer> version = _super.version;
 
+    public final BooleanPath warningInsertPerson = createBoolean("warningInsertPerson");
+
     public QGeneralSetting(String variable) {
         super(GeneralSetting.class, forVariable(variable));
     }
