@@ -4,13 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.5] - UNRELEASES
+## [2.6.5] - UNRELEASED
 ### Changed
  - Introdotto ordine alfabetico per cognome al risultato del metodo rest
    rest/v2/certifications/getmonthsituationbyoffice
  - Rimossi i parametri di configurazione che permettevano ai I-III livelli di auto inserirsi le ferie e
    i riposi compensativi. Condizionata la visibilità del parametro di auto inserimento delle timbrature
    per i I-III livelli al fatto che il valore di quel parametro sia "sì"
+ - Aggiunto alert configurabile da generalSetting per informare il personale CNR che l'inserimento di una nuova
+   persona può comportare rischi di malfunzionamenti e di contattare l'helpdesk CNR
+ 
 
 ## [2.6.4] - 2023-02-02
 ### Added
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto controllo che verifica l'owner di una timbratura nella stampa cartellino nel caso di timbrature
    inserite dal sistema a cavallo della mezzanotte
  - Aggiunto controllo che limita a 10 giorni il lavoro agile nel caso di più di 22 giorni lavorativi in un mese
+ 
  
 
 ### Changed

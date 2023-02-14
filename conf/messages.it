@@ -462,6 +462,7 @@ generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento sma
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
 generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
 generalSetting.enableAbsenceTopLevelAuthorization=Possibilità di configurare le autorizzazioni per le assenze dei livelli I-III
+generalSetting.warningInsertPerson=Avviso per inserimento nuova persona
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite

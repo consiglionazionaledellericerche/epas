@@ -52,6 +52,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final BooleanPath isTemporaryMissing = createBoolean("isTemporaryMissing");
 
+    public final StringPath label = createString("label");
+
     public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
     public final BooleanPath onCertificate = createBoolean("onCertificate");
