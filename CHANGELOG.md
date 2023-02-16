@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.5] - UNRELEASED
 ### Changed
+ - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
+   vuoto per la relativa sede
  - Introdotto ordine alfabetico per cognome al risultato del metodo rest
    rest/v2/certifications/getmonthsituationbyoffice
  - Rimossi i parametri di configurazione che permettevano ai I-III livelli di auto inserirsi le ferie e
