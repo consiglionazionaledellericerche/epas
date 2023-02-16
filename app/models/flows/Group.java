@@ -17,8 +17,8 @@
 
 package models.flows;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import it.cnr.iit.epas.NullStringBinder;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +35,6 @@ import models.Office;
 import models.Person;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
-import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -71,14 +70,21 @@ public class Group extends MutableModel {
   @OneToMany(mappedBy = "group")
   private List<Affiliation> affiliations = Lists.newArrayList();
 
-  @As(binder = NullStringBinder.class)
   @Unique(value = "office, externalId")
   private String externalId;
 
   private LocalDate endDate;
 
   /**
-   * Verificat se un gruppo è sempre attivo alla data attuale.
+   * Rimuove eventuali spazi prima e dopo e trasforma le stringhe
+   * vuote in null.
+   */
+  public void setExternalId(String externalId) {
+    externalId = Strings.emptyToNull(externalId).trim();
+  }
+
+  /**
+   * Verifica se un gruppo è sempre attivo alla data attuale.
    *
    * @return true se il gruppo non ha una data di fine passata.
    */

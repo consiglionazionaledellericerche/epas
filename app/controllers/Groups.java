@@ -93,7 +93,6 @@ public class Groups extends Controller {
       hasErrors = true;
       Validation.addError("group.externalId", "deve essere univoco");
     }
-    ;
 
     if (hasErrors) {
       response.status = 400;
