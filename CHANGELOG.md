@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.6.5] - UNRELEASED
+### Added
+ - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
+ 
 ### Changed
  - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
    vuoto per la relativa sede
