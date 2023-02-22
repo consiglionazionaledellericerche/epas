@@ -106,6 +106,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       15, null),
+  
+//  T_45(AmountType.units, 
+//      ImmutableSet.of(DefaultAbsenceType.A_45), 
+//      ImmutableSet.of(DefaultAbsenceType.A_45), 
+//      15, null),
 
   T_C161718(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_C16, DefaultAbsenceType.A_C17, 
@@ -639,7 +644,7 @@ public enum DefaultTakable {
   T_CONGEDO_MATRIMONIO(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_45), 
       ImmutableSet.of(DefaultAbsenceType.A_45), 
-      -1, null),
+      15, null),
 
   T_681(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_681),

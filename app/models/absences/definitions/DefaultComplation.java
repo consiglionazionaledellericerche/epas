@@ -163,6 +163,10 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       ImmutableSet.of(DefaultAbsenceType.A_43)),
   
+  C_45(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_45), 
+      ImmutableSet.of(DefaultAbsenceType.A_45)),
+  
   //  C_COV50(AmountType.units, 
   //      ImmutableSet.of(DefaultAbsenceType.A_COV50M), 
   //      ImmutableSet.of(DefaultAbsenceType.A_COV50H)),
