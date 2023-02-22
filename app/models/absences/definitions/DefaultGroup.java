@@ -351,7 +351,7 @@ public enum DefaultGroup {
       null, null, false, false),
 
   G_CONGEDO_MATRIMONIO("45 - Congedo straordinario per matrimonio", "",
-      DefaultCategoryType.CONGEDO_MATRIMONIO, 0, GroupAbsenceTypePattern.simpleGrouping,
+      DefaultCategoryType.CONGEDO_MATRIMONIO, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_CONGEDO_MATRIMONIO, null, null, false, false),
 
   G_441("441 - Permesso esami", "", DefaultCategoryType.PERMESSO_ESAMI, 0,
