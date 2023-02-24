@@ -419,5 +419,9 @@ public class MealTicketCards extends Controller {
     editPersonMealTickets(contract.getPerson().id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
+  
+  public static void exportMonthlySituation(Long officeId, Integer year, Integer month) {
+    
+  }
 }
 
