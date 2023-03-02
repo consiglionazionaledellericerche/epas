@@ -17,21 +17,49 @@
 
 package manager;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import it.cnr.iit.epas.DateUtility;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import manager.charts.ChartsManager.PersonStampingDayRecapHeader;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Contract;
 import models.MealTicket;
 import models.MealTicketCard;
 import models.Office;
 import models.Person;
 import models.User;
+import models.absences.Absence;
 import models.enumerate.BlockType;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 
 /**
@@ -43,20 +71,29 @@ public class MealTicketCardManager {
   private MealTicketDao mealTicketDao;
   private IWrapperFactory wrapperFactory;
   private ContractDao contractDao;
+  private final PersonStampingRecapFactory stampingsRecapFactory;
 
   /**
    * Construttore predefinito per l'injection.
    */
   @Inject
   public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory,
-      ContractDao contractDao) {
+      ContractDao contractDao, PersonStampingRecapFactory stampingsRecapFactory) {
     this.mealTicketDao = mealTicketDao;
     this.wrapperFactory = wrapperFactory;
     this.contractDao = contractDao;
+    this.stampingsRecapFactory = stampingsRecapFactory;
   }
-  
+
+  /**
+   * Salva la card elettronica.
+   *
+   * @param mealTicketCard la card da persistere
+   * @param person la persona associata
+   * @param office la sede della persona
+   */
   public void saveMealTicketCard(MealTicketCard mealTicketCard, Person person, Office office) {
-    
+
     MealTicketCard previous = person.actualMealTicketCard();
     if (previous != null) {
       log.info("Termino la validità della precedente tessera per {}", person.getFullname());
@@ -96,7 +133,17 @@ public class MealTicketCardManager {
     }
     return true;    
   }
-  
+
+  /**
+   * Persiste i buoni sulla card.
+   *
+   * @param card la tessera su cui salvare i buoni
+   * @param deliveryDate la data di rilascio
+   * @param tickets il numero di buoni da salvare
+   * @param admin l'amministratore che fa l'operazione
+   * @param expireDate la data di scadenza
+   * @param office la sede su cui associare i buoni pasto
+   */
   public void saveElectronicMealTicketBlock(MealTicketCard card, LocalDate deliveryDate, 
       Integer tickets, User admin, LocalDate expireDate, Office office) {
     String block = "" + card.getNumber() + deliveryDate.getYear() + deliveryDate.getMonthOfYear();
@@ -118,6 +165,169 @@ public class MealTicketCardManager {
       }
       mealTicket.save();
     }
+  }
+
+  /**
+   * Metodo che costruisce il file per esportare i buoni maturati nell'anno/mese.
+   *
+   * @param personList la lista delle persone per cui trovare i buoni maturati
+   * @param beginDate la data di inizio da cui cercare
+   * @param endDate la data di fine entro cui cercare
+   * @return il file contenente il conteggio dei buoni maturati da begindate a enddate.
+   * @throws IOException 
+   */
+  public InputStream buildFile(Office office, List<Person> personList, 
+      Integer year, Integer month) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
+    byte[] buffer = new byte[1024];
+
+    File file = createFileXlsToExport(office, personList, year, month);
+    // faccio lo stream da inviare al chiamante...
+    FileInputStream in = new FileInputStream(file);
+    try {
+      zos.putNextEntry(new ZipEntry(file.getName()));
+      int length;
+      while ((length = in.read(buffer)) > 0) {
+        zos.write(buffer, 0, length);
+      }
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+    in.close();
+    file.delete();
+    zos.closeEntry();
+    zos.close();
+    return new ByteArrayInputStream(out.toByteArray());
+  }
+
+  private File createFileXlsToExport(Office office,
+      List<Person> personList, Integer year, Integer month) throws FileNotFoundException {
+    File file = null;
+    String monthOfYear = DateUtility.fromIntToStringMonth(month);
+    try {
+      file = File.createTempFile(
+          "Esportazione_" + monthOfYear +"_"+ year.intValue()+"", ".xls");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    Workbook wb = new HSSFWorkbook();
+    FileOutputStream out = new FileOutputStream(file);
+    Sheet sheet = wb.createSheet("CalcoloBuoni"); 
+
+    CellStyle cs = createHeader(wb);
+    Row row = null;
+    Cell cell = null;
+    row = sheet.createRow(0);
+    row.setHeightInPoints(30);
+    for (int i = 0; i < 5; i++) {
+      sheet.setColumnWidth((short) i, (short) ((50 * 8) / ((double) 1 / 20)));
+      cell = row.createCell(i);
+      cell.setCellStyle(cs);
+      switch (i) {
+        case 0:
+          cell.setCellValue(ExportRecapHeader.Codice_sede.getDescription());
+          break;
+        case 1:
+          cell.setCellValue(ExportRecapHeader.Matricola.getDescription());
+          break;
+        case 2:
+          cell.setCellValue(ExportRecapHeader.Cognome.getDescription());
+          break;
+        case 3:
+          cell.setCellValue(ExportRecapHeader.Nome.getDescription());
+          break;
+        case 4:
+          cell.setCellValue(ExportRecapHeader.Numero_buoni.getDescription());
+          break;
+        default:
+          break;
+      }
+    }
+    int rownum = 1;
+    CellStyle style = wb.createCellStyle();
+    style.setAlignment(CellStyle.ALIGN_CENTER);
+    for (Person person : personList) {
+      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year,
+          month, false);
+      row = sheet.createRow(rownum);
+      for (int cellnum = 0; cellnum < 5; cellnum++) {
+        cell = row.createCell(cellnum);
+        cell.setCellStyle(style);
+        switch (cellnum) {
+          case 0:
+            cell.setCellValue(office.getCodeId().toString());
+            break;
+          case 1:
+            cell.setCellValue(person.getNumber());
+            break;
+          case 2:
+            cell.setCellValue(person.getSurname());
+            break;
+          case 3:
+            cell.setCellValue(person.getName());
+            break;
+          case 4:
+            cell.setCellValue(psDto.getNumberOfMealTicketToUse());
+            break;
+          default:
+            break;
+        }        
+      }    
+      rownum++;
+    }
+    try {
+      wb.write(out);
+      wb.close();
+      out.close();
+    } catch (IOException ex) {
+      log.error("problema in chiusura stream");
+      ex.printStackTrace();
+    }
+    return file;
+  }
+
+  /**
+   * Intestazioni per il report con i riepiloghi mensili ore e assenze.
+   */
+  @RequiredArgsConstructor
+  public enum ExportRecapHeader {
+    Codice_sede("Codice sede"), 
+    Matricola("Matricola"), 
+    Cognome("Cognome"), 
+    Nome("Nome"), 
+    Numero_buoni("N.Buoni");
+
+    @Getter
+    private final String description;
+
+    /**
+     * Lista delle label delle intestazioni.
+     */
+    public static List<String> getLabels() {
+      return Stream.of(values()).map(v -> v.description).collect(Collectors.toList());
+    }
+  }
+
+  /**
+   * Genera lo stile delle celle di intestazione.
+   *
+   * @param wb il workbook su cui applicare lo stile
+   * @return lo stile per una cella di intestazione.
+   */
+  private CellStyle createHeader(Workbook wb) {
+
+    Font font = wb.createFont();
+    font.setFontHeightInPoints((short) 12);
+    font.setColor((short) 0xc);
+    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    CellStyle cs = wb.createCellStyle();
+    cs.setFont(font);
+    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
+    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    return cs;
   }
 
 }
