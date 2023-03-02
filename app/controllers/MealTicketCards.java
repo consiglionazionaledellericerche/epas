@@ -30,8 +30,12 @@ import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import it.cnr.iit.epas.DateInterval;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.MealTicketCardManager;
 import manager.services.mealtickets.BlockMealTicket;
@@ -45,6 +49,7 @@ import models.MealTicketCard;
 import models.Office;
 import models.Person;
 import models.User;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
@@ -59,6 +64,7 @@ import play.mvc.With;
  * @author dario
  *
  */
+@Slf4j
 @With({Resecure.class})
 public class MealTicketCards extends Controller {
 
@@ -418,6 +424,33 @@ public class MealTicketCards extends Controller {
     //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
     editPersonMealTickets(contract.getPerson().id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
+  }
+  
+  /**
+   * Genera il report in formato excel per i buoni elettronici.
+   *
+   * @param officeId l'identificativo della sede
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @throws IOException eccezione I/O
+   * @throws ArchiveException eccezione in generazione d'archivio
+   */
+  public static void generateReport(Long officeId, Integer year, Integer month) 
+      throws IOException, ArchiveException {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
+    Set<Office> offices = Sets.newHashSet(office);
+    LocalDate beginDate = new LocalDate(year, month, 1);
+    LocalDate endDate = beginDate.dayOfMonth().withMaximumValue();
+    List<Person> personList = personDao.list(
+        Optional.<String>absent(), offices, false, beginDate, 
+        endDate, true).list();
+    InputStream file = null;
+    file = mealTicketCardManager
+        .buildFile(office, personList, year, month);
+
+    renderBinary(file, "export.zip", false);
   }
 }
 

@@ -49,8 +49,14 @@
       
     </div>    
     #{/if}
-
-  
+    
+	#{if electronicMealTicket}
+  	<div class="text-center">
+    <a class="btn btn-success" href="@{MealTicketCards.generateReport(office.id, year, month)}"><i class="fa fa-user-plus"></i>
+      Genera il report Repas </a>
+  	</div>
+  	#{/if}
+  	
       <table class="table table-bordered center" datatable>
         <thead>
         <tr>

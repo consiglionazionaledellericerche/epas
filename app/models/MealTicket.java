@@ -52,7 +52,6 @@ public class MealTicket extends BaseModel {
 
   private static final long serialVersionUID = -963204680918650598L;
 
-  @NotAudited
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "contract_id", nullable = false)
