@@ -59,7 +59,6 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
-import play.Play;
 import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -421,7 +420,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(user);
 
-    user.setPassword(Codec.hexMD5(nuovaPassword));
+    user.updatePassword(nuovaPassword);
     user.save();
     flash.success(Messages.get("passwordSuccessfullyChanged"));
     changePassword();

@@ -632,6 +632,7 @@ public class InformationRequests extends Controller {
           disapproval = true;
           render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
         }
+        break;
       default:
         break;
     }

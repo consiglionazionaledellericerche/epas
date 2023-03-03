@@ -45,7 +45,6 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -201,7 +200,7 @@ public class BadgeReaders extends Controller {
       render("@edit", badgeReader);
     }
 
-    user.setPassword(Codec.hexMD5(newPass));
+    user.updatePassword(newPass);
     user.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -233,7 +232,7 @@ public class BadgeReaders extends Controller {
 
     badgeReader.setUser(user);
     badgeReader.getUser().setOwner(office);
-    badgeReader.getUser().setPassword(Codec.hexMD5(badgeReader.getUser().getPassword()));
+    badgeReader.getUser().updatePassword(badgeReader.getUser().getPassword());
     badgeReader.getUser().save();
     badgeReader.save();
 

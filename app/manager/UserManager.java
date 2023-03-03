@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -27,16 +27,11 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import models.Office;
 import models.Person;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
-import play.libs.Codec;
 
 /**
  * Manager per user.
@@ -128,7 +123,7 @@ public class UserManager {
     user.setUsername(generateUserName(person.getName(), person.getSurname()));
 
     SecureRandom random = new SecureRandom();
-    user.setPassword(Codec.hexMD5(new BigInteger(130, random).toString(32)));
+    user.updatePassword(new BigInteger(130, random).toString(32));
 
     user.save();
 
@@ -137,33 +132,6 @@ public class UserManager {
     log.info("Creato nuovo user per {}: username = {}", person.fullName(), user.getUsername());
 
     return user;
-  }
-
-  /**
-   * funzione che salva l'utente e genere i ruoli sugli uffici.
-   *
-   * @param user    l'user da salvare
-   * @param offices la lista degli uffici
-   * @param roles   la lista dei ruoli
-   * @param enable  se deve essere disabilitato
-   */
-  public void saveUser(User user, Set<Office> offices, Set<Role> roles, boolean enable) {
-    user.setPassword(Codec.hexMD5(user.getPassword()));
-    if (enable) {
-      user.setDisabled(false);
-      user.setExpireDate(null);
-    }
-    user.save();
-    for (Role role : roles) {
-      for (Office office : offices) {
-        UsersRolesOffices uro = new UsersRolesOffices();
-        uro.setUser(user);
-        uro.setOffice(office);
-        uro.setRole(role);
-        uro.save();
-      }
-    }
-
   }
 
 }

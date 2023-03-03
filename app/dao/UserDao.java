@@ -110,11 +110,16 @@ public class UserDao extends DaoBase {
         // Solo gli utenti attivi
         .and(user.disabled.isFalse());
 
+    final BooleanBuilder passwordCondition = new BooleanBuilder();
     if (password.isPresent()) {
-      condition.and(user.password.eq(password.get()));
+      passwordCondition
+        .and(user.password.eq(User.cryptPasswordMd5(password.get())))
+          .or(user.passwordSha512.eq(User.cryptPasswordSha512(password.get())));
     }
+
     return getQueryFactory().selectFrom(user)
-        .where(condition.and(user.username.eq(username))).fetchOne();
+        .where(condition.and(passwordCondition).and(user.username.eq(username)))
+        .fetchOne();
   }
 
   public User byUsername(String username) {

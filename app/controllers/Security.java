@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,11 +17,9 @@
 
 package controllers;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
 import dao.UserDao;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -63,13 +61,17 @@ public class Security extends Secure.Security {
   static boolean authenticate(String username, String password) {
     log.debug("Richiesta autenticazione di {}", username);
 
-    @SuppressWarnings("deprecation")
-    User user = userDao.getUserByUsernameAndPassword(username, Optional
-        .fromNullable(Hashing.md5().hashString(password, Charsets.UTF_8).toString()));
+    User user = 
+        userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(password));
 
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.getUsername(),
           Http.Request.current().remoteAddress);
+      if (user.getPasswordSha512() == null) {
+        user.setPasswordSha512(User.cryptPasswordSha512(password));
+        user.save();
+        log.info("Inserita password sha512 per {}", user.getUsername());
+      }
       return true;
     }
 

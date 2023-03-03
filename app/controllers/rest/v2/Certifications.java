@@ -213,8 +213,8 @@ public class Certifications extends Controller {
     val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
     val people = personCertificationsMap.keySet().stream()
-      .sorted((p1 , p2) -> p1.getFullname().compareTo(p2.getFullname()))
-      .collect(Collectors.toList());
+        .sorted((p1, p2) -> p1.getFullname().compareTo(p2.getFullname()))
+        .collect(Collectors.toList());
     for (Person person : people) {
       log.debug("analizzo la situazione mensile di {}...", person.getFullname());
       Map<String, Certification> map = personCertificationsMap.get(person);
