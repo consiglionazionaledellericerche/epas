@@ -90,9 +90,9 @@ public class H2Examples {
    */
   private Person createPerson(Office office, String username) {
 
-    User user = new User();    
+    User user = new User();
     user.setUsername(username);
-    user.setPassword("UnaPasswordQualsiasi");
+    user.updatePassword("UnaPasswordQualsiasi");
     user.save();
     Person person = new Person();
     person.setName("Name " + username);

@@ -31,7 +31,6 @@ import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 
 /**
@@ -140,7 +139,7 @@ public class LostPassword extends Controller {
       render("@lostPasswordRecovery", token, nuovaPassword, confermaPassword);
     }
 
-    user.setPassword(Codec.hexMD5(nuovaPassword));
+    user.updatePassword(nuovaPassword);
     user.setRecoveryToken(null);
     user.setExpireRecoveryToken(null);
     user.save();

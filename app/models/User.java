@@ -17,9 +17,11 @@
 
 package models;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +42,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
@@ -50,6 +53,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
+import play.libs.Codec;
 
 /**
  * Un utente di ePAS.
@@ -69,9 +73,21 @@ public class User extends BaseModel {
   @Required
   private String username;
 
+  @Deprecated
+  @Setter(value = AccessLevel.PRIVATE)
   @MinSize(5)
   private String password;
 
+  private String passwordSha512;
+  
+  /**
+   * Corrisponde ad un identificato univoco nella propria 
+   * organizzazione per questo utente.
+   * Se l'utente è una persona deve corrispondere con il campo
+   * eppn.
+   */
+  private String subjectId;
+  
   @NotAudited
   @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
   private Person person;
@@ -106,7 +122,7 @@ public class User extends BaseModel {
   private Office owner;
 
   private String keycloakId;
-  
+
   /**
    * Ritorna il badgeReader associato all'utente se ne ha almeno uno associato.
    *
@@ -167,5 +183,22 @@ public class User extends BaseModel {
   public boolean hasRoles(String... args) {
     return usersRolesOffices.stream()
         .anyMatch(uro -> Arrays.asList(args).contains(uro.getRole().getName()));
+  }
+
+  public void updatePassword(String newPassword) {
+    password = cryptPasswordMd5(newPassword); 
+    passwordSha512 = cryptPasswordSha512(newPassword);
+  }
+
+  public static String cryptPasswordMd5(String newPassword) {
+    return Codec.hexMD5(newPassword);
+  }
+
+  public static String cryptPasswordSha512(String newPassword) {
+    return Hashing.sha512().hashString(newPassword, Charsets.UTF_8).toString();
+  }
+
+  public boolean passwordSha512Match(String plain) {
+    return Hashing.sha512().hashString(plain, Charsets.UTF_8).toString().equals(password);
   }
 }

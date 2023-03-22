@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.6.5] - UNRELEASED
 ### Added
  - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
- 
+ - Aggiunta gestione delle password sha512 per futura rimozione attuale algoritmo hash password
+
 ### Changed
  - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
    vuoto per la relativa sede

@@ -822,6 +822,7 @@ user= Utente
 user.password= Password
 user.username= Username
 user.owner= Sede proprietaria
+user.subjectId =Id univoco all'interno dell'organizzazione
 user.usersRolesOffices= Ruoli abilitati
 user.disabled= Utente disabilitato
 user.roles= Ruoli di sistema

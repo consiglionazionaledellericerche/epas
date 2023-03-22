@@ -18,9 +18,9 @@
 			#{f.hidden 'user.id', value: user.id /}
 		#{/if}
 		#{f.input 'user.username', value:username?:user?.username /}
-	  #{f.input 'password' , type:'password', value: password?:'' /}
-	  #{f.input 'confirmPassword' , type:'password', value: confirmPassword?:'' /}
-
+		#{f.input 'password' , type:'password', value: password?:'' /}
+		#{f.input 'confirmPassword' , type:'password', value: confirmPassword?:'' /}
+		#{f.input 'user.subjectId' /}
 		#{f.selectModel 'user.owner' , items: templateUtility.technicalAdminOffices /}
 
 		#{f.checkbox 'user.disabled' /}

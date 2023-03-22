@@ -42,7 +42,6 @@ import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -244,7 +243,7 @@ public class Users extends Controller {
     }
 
     if (!Strings.isNullOrEmpty(password)) {
-      user.setPassword(Codec.hexMD5(password));
+      user.updatePassword(password);
     }
 
     rules.checkIfPermitted(user);

@@ -105,7 +105,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   private String email;
 
-  @OneToOne(optional = false, fetch = FetchType.LAZY)
+  @OneToOne(optional = false, fetch = FetchType.LAZY, 
+      cascade = { CascadeType.MERGE, CascadeType.PERSIST})
   private User user;
 
   /**
@@ -354,6 +355,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @PreUpdate
   private void onUpdate() {
     this.updatedAt = LocalDateTime.now();
+    if (user != null) {
+      user.setSubjectId(eppn);
+    }
   }
 
   @PrePersist
@@ -361,6 +365,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     // TODO meglio rendere non necessario questo barbatrucco...
     this.setBeginDate(LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31));
     this.updatedAt = LocalDateTime.now();
+    if (user != null) {
+      user.setSubjectId(eppn);
+    }
   }
 
   @PreRemove
