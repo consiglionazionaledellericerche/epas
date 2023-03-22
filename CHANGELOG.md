@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    per i I-III livelli al fatto che il valore di quel parametro sia "sì"
  - Aggiunto alert configurabile da generalSetting per informare il personale CNR che l'inserimento di una nuova
    persona può comportare rischi di malfunzionamenti e di contattare l'helpdesk CNR
+ - Corretto bug nel calcolo dei periodi delle entità collegate al contratto in caso di modifica a date dei 
+   contratti scaduti
  
 
 ## [2.6.4] - 2023-02-02
