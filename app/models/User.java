@@ -42,7 +42,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
@@ -74,7 +73,6 @@ public class User extends BaseModel {
   private String username;
 
   @Deprecated
-  @Setter(value = AccessLevel.PRIVATE)
   @MinSize(5)
   private String password;
 
@@ -201,4 +199,5 @@ public class User extends BaseModel {
   public boolean passwordSha512Match(String plain) {
     return Hashing.sha512().hashString(plain, Charsets.UTF_8).toString().equals(password);
   }
+
 }
