@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta gestione delle password sha512 per futura rimozione attuale algoritmo hash password
 
 ### Changed
+ - Corretto cambio di mese nelle richieste di cambio e reperibilità
  - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
    vuoto per la relativa sede
  - Introdotto ordine alfabetico per cognome al risultato del metodo rest
