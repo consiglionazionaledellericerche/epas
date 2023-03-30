@@ -216,6 +216,7 @@ public class BadgeReaders extends Controller {
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid Office office, @Valid User user) {
 
+    log.info("BadgeReaders::save badgeReader = {}", badgeReader);
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
