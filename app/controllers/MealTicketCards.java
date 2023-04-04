@@ -119,10 +119,9 @@ public class MealTicketCards extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.getOffice());
-    Optional<User> user = Security.getUser();
     MealTicketCard mealTicketCard = new MealTicketCard();
     mealTicketCard.setPerson(person);
-    mealTicketCard.setDeliveryOffice(user.get().getPerson().getOffice());
+    mealTicketCard.setDeliveryOffice(person.getOffice());
     render(person, mealTicketCard);
   }
 
