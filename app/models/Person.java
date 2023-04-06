@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import helpers.validators.CodiceFiscaleCheck;
 import helpers.validators.UniqueEppnCheck;
-import it.cnr.iit.epas.NullStringBinder;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,7 +56,6 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.ReadablePartial;
-import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -94,14 +92,12 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   private String othersSurnames;
 
   @CheckWith(CodiceFiscaleCheck.class)
-  @As(binder = NullStringBinder.class)
   private String fiscalCode;
 
   private LocalDate birthday;
 
   @Email
   @Unique
-  @As(binder = NullStringBinder.class)
   @Required
   private String email;
 
@@ -124,7 +120,6 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
    * Campo da usarsi in caso di autenticazione via shibboleth.
    */
   @CheckWith(UniqueEppnCheck.class)
-  @As(binder = NullStringBinder.class)
   private String eppn;
 
   private String telephone;

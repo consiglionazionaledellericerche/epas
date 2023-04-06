@@ -17,7 +17,6 @@
 
 package models;
 
-import it.cnr.iit.epas.NullStringBinder;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -29,7 +28,6 @@ import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
-import play.data.binding.As;
 import play.data.validation.Required;
 
 /**
@@ -49,7 +47,6 @@ public class Badge extends BaseModel {
   private static final long serialVersionUID = -4397151725225276985L;
 
   @Required
-  @As(binder = NullStringBinder.class)
   @NotNull
   private String code;
 

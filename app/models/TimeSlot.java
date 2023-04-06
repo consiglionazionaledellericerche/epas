@@ -18,7 +18,6 @@
 package models;
 
 import com.google.common.collect.Lists;
-import helpers.LocalTimeBinder;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,7 +36,6 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import play.data.binding.As;
 import play.data.validation.Unique;
 
 
@@ -65,12 +63,10 @@ public class TimeSlot extends BaseModel {
   private String description;
   
   @Unique("office,beginSlot,endSlot")
-  @As(binder = LocalTimeBinder.class)
   @NotNull
   @Column(columnDefinition = "VARCHAR")
   private LocalTime beginSlot;
   
-  @As(binder = LocalTimeBinder.class)
   @NotNull
   @Column(columnDefinition = "VARCHAR")
   private LocalTime endSlot;
