@@ -233,6 +233,11 @@ public class AbsenceCertificationService {
         DefaultGroup.G_233, LocalDate.now(), Optional.absent(), Optional.absent(), 
         inEpas, notInEpas);
     
+    //3b) lavoro agile
+    buildGenericSituation(situation, person, AbsenceSituationType.LAVORO_AGILE, 
+        DefaultGroup.G_LAGILE, LocalDate.now(), Optional.absent(), Optional.absent(), 
+        inEpas, notInEpas);
+    
     //4) riduce ferie
     from = new LocalDate(LocalDate.now().getYear(), 1, 1);
     to = new LocalDate(LocalDate.now().getYear(), 12, 31);
@@ -740,13 +745,18 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-
+    
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
         Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
         if (!type.isPresent()) {
           log.debug("Un codice utilizzato su attestati non è presente su ePAS {}", code);
-          continue;
+          if (code.equalsIgnoreCase("L-AGILE")) {
+            log.debug("Recupero il lavoro agile che ha un codice diverso sul db di epas");
+            type = absenceComponentDao.absenceTypeByCode("LAGILE");
+          } else {
+            continue;
+          }          
         }
 
         for (LocalDate date : absenceSituation.toAddAutomatically.get(code)) {
