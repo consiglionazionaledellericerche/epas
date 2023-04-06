@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    persona può comportare rischi di malfunzionamenti e di contattare l'helpdesk CNR
  - Corretto bug nel calcolo dei periodi delle entità collegate al contratto in caso di modifica a date dei 
    contratti scaduti
+ - Corretto bug nell'inserimento di tessere per i buoni pasto per dipendenti non facenti parte della sede
+   di afferenza del meal ticket manager
  
 
 ## [2.6.4] - 2023-02-02
