@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 import play.data.binding.types.DateBinder;
 
@@ -30,6 +31,7 @@ import play.data.binding.types.DateBinder;
  * Binder per le LocalTime joda.
  */
 @Slf4j
+@Global
 public class LocalTimeBinder implements TypeBinder<LocalTime> {
   
   private static final DateBinder TIME_BINDER = new DateBinder();

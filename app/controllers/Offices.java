@@ -145,6 +145,8 @@ public class Offices extends Controller {
       if (office.getBeginDate() == null) {
         office.setBeginDate(new LocalDate(LocalDate.now().getYear() - 1, 12, 31));
       }
+
+      office.setCode(Optional.fromNullable(office.getCode()).orNull());
       office.save();
 
       // Configurazione iniziale di default ...

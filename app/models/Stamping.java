@@ -19,7 +19,6 @@ package models;
 
 import com.google.common.base.MoreObjects;
 import helpers.validators.StringIsValid;
-import it.cnr.iit.epas.NullStringBinder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -37,7 +36,6 @@ import models.enumerate.StampTypes;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
@@ -77,14 +75,11 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   @Enumerated(EnumType.STRING)
   private WayType way;
 
-  @As(binder = NullStringBinder.class)
   private String note;
   
-  @As(binder = NullStringBinder.class)
   @CheckWith(StringIsValid.class)
   private String place;
   
-  @As(binder = NullStringBinder.class)
   @CheckWith(StringIsValid.class)
   private String reason;
 

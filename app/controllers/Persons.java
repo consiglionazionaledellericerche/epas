@@ -194,6 +194,7 @@ public class Persons extends Controller {
       edit(person.id);
     }
 
+    person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
     person.save();
 
     userManager.generateRecoveryToken(person);
@@ -261,6 +262,9 @@ public class Persons extends Controller {
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
       officeManager.setUro(person.getUser(), person.getOffice(), employee); 
     }
+
+    person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
+    person.setFiscalCode(Optional.fromNullable(person.getFiscalCode()).orNull());
 
     person.save();
     flash.success(

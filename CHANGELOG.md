@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.5] - UNRELEASED
+## [2.6.5] - 2023-04-06
 ### Added
  - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
  - Aggiunta gestione delle password sha512 per futura rimozione attuale algoritmo hash password
 
 ### Changed
+ - Rimossa @As sulle entity, utilizzato per i binder NullStringBinder e LocalTimeBinder
+ - Corretta creazione dei TimeSlot che utilizzavano la @As nell'entity
  - Corretto cambio di mese nelle richieste di cambio e reperibilità
  - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
    vuoto per la relativa sede
