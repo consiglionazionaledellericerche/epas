@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
  - Aggiunta gestione delle password sha512 per futura rimozione attuale algoritmo hash password
+ - Aggiunta l'importazione dei codici di lavoro agile nell'importazione delle assenze
 
 ### Changed
  - Rimossa @As sulle entity, utilizzato per i binder NullStringBinder e LocalTimeBinder
