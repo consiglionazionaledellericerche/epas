@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.6] - Unreleased
+### Added
+ - Aggiunto controllo per l'attribuzione del buono pasto nel caso dei dipendenti I-III livello
+   che fanno missioni orarie superiori alle 4 ore: in quel caso il buono non deve essere attribuito. 
+   Negli altri casi sì.
+
 ## [2.6.5] - 2023-04-06
 ### Added
  - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
