@@ -96,8 +96,8 @@ public class WorkingTimes extends Controller {
   public static void editDescription(Long wttId) {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
-    if (wtt.office != null) {
-      rules.checkIfPermitted(wtt.office);
+    if (wtt.getOffice() != null) {
+      rules.checkIfPermitted(wtt.getOffice());
     } else {
       rules.checkAction("WorkingTime.editDescriptionDefaultWorkingTime");
     }
@@ -110,8 +110,8 @@ public class WorkingTimes extends Controller {
   public static void updateDescription(Long wttId, @Required String description) {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
-    if (wtt.office != null) {
-      rules.checkIfPermitted(wtt.office);
+    if (wtt.getOffice() != null) {
+      rules.checkIfPermitted(wtt.getOffice());
     } else {
       rules.checkAction("WorkingTime.updateDescriptionDefaultWorkingTime");
     }    
@@ -122,13 +122,13 @@ public class WorkingTimes extends Controller {
     }
 
     log.info("Changing working time type description {} to {}, id = {}.", 
-        wtt.description, description, wtt.id);
-    wtt.description = description;
+        wtt.getDescription(), description, wtt.id);
+    wtt.setDescription(description);
     wtt.save();
     log.info("Saved working time type description {}, id = {}.", 
-        wtt.description, wtt.id);
+        wtt.getDescription(), wtt.id);
     flash.success("Descrizione tipologia orario di lavoro aggiornata correttamente");
-    redirectToManageWorkingTime(wtt.office);
+    redirectToManageWorkingTime(wtt.getOffice());
   }
   
   /**
@@ -165,13 +165,13 @@ public class WorkingTimes extends Controller {
     rules.checkIfPermitted(office);
 
     List<IWrapperWorkingTimeType> wttAllowed = FluentIterable
-        .from(office.workingTimeType)
+        .from(office.getWorkingTimeType())
         .transform(wrapperFunctionFactory.workingTimeType()).toList();
 
     List<IWrapperWorkingTimeType> wttAllowedEnabled = Lists.newArrayList();
     List<IWrapperWorkingTimeType> wttAllowedDisabled = Lists.newArrayList();
     for (IWrapperWorkingTimeType wtt : wttAllowed) {
-      if (wtt.getValue().disabled) {
+      if (wtt.getValue().isDisabled()) {
         wttAllowedDisabled.add(wtt);
       } else {
         wttAllowedEnabled.add(wtt);
@@ -196,18 +196,18 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
     
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
     List<Contract> contractList = Lists.newArrayList();
     Office office = null;
 
     if (allOffices) {
-       contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
-       rules.checkAction("WorkingTimes.showAllContracts");
+      contractList = wrapperFactory.create(wtt).getAllAssociatedActiveContract();
+      rules.checkAction("WorkingTimes.showAllContracts");
     } else {
       office = officeDao.getOfficeById(officeId);
       notFoundIfNull(office);
       rules.checkIfPermitted(office);
-      
+
       contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(office);
     }
 
@@ -228,7 +228,7 @@ public class WorkingTimes extends Controller {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
     rules.checkIfPermitted(office);
 
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
@@ -281,7 +281,7 @@ public class WorkingTimes extends Controller {
       horizontalPattern.reproportionAbsenceCodesEnabled = reproportionEnabled;
       render("@insertWorkingTime", horizontalPattern, office, name, externalId);
     } else {
-      final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
+      final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().getUsername();
       List<VerticalWorkingTime> vwtProcessedList = processed(key);
       Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
       int step = 1;
@@ -362,7 +362,7 @@ public class WorkingTimes extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
-    final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().username;
+    final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().getUsername();
     List<VerticalWorkingTime> vwtProcessedList = processed(key);
     Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
 
@@ -457,11 +457,11 @@ public class WorkingTimes extends Controller {
 
     if (Validation.hasErrors()) {
       flash.error(ValidationHelper.errorsMessages(Validation.errors()));
-      manageWorkingTime(wtt.office.id);
+      manageWorkingTime(wtt.getOffice().id);
     }
 
 
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
 
     wtt.save();
 
@@ -475,7 +475,7 @@ public class WorkingTimes extends Controller {
 
     flash.success("Il nuovo tipo orario è stato inserito correttamente.");
 
-    manageWorkingTime(wtt.office.id);
+    manageWorkingTime(wtt.getOffice().id);
 
   }
 
@@ -490,15 +490,15 @@ public class WorkingTimes extends Controller {
     notFoundIfNull(wtt);
 
     // se non è horizontal ho sbagliato action
-    Preconditions.checkState(wtt.horizontal);
+    Preconditions.checkState(wtt.getHorizontal());
 
-    if (wtt.office != null) {
-      rules.checkIfPermitted(wtt.office);
+    if (wtt.getOffice() != null) {
+      rules.checkIfPermitted(wtt.getOffice());
     }
 
     HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime(wtt);
 
-    Office office = wtt.office;
+    Office office = wtt.getOffice();
 
     render(horizontalPattern, office);
   }
@@ -513,7 +513,7 @@ public class WorkingTimes extends Controller {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
 
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
 
     render(wtt);
   }
@@ -527,25 +527,25 @@ public class WorkingTimes extends Controller {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
 
     //Prima di cancellare il tipo orario controllo che non sia associato ad alcun contratto
     if (wrapperFactory.create(wtt).getAssociatedContract().size() > 0) {
 
       flash.error("Impossibile eliminare il tipo orario selezionato perchè "
           + "associato ad almeno un contratto. Operazione annullata");
-      WorkingTimes.manageOfficeWorkingTime(wtt.office.id);
+      WorkingTimes.manageOfficeWorkingTime(wtt.getOffice().id);
     }
 
-    for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
+    for (WorkingTimeTypeDay wttd : wtt.getWorkingTimeTypeDays()) {
       wttd.delete();
     }
     wtt.delete();
     log.info("Eliminata tipologia orario di lavoro {}, id={}",
-        wtt.description, wtt.id);
+        wtt.getDescription(), wtt.id);
 
     flash.success("Tipo orario eliminato.");
-    redirectToManageWorkingTime(wtt.office);
+    redirectToManageWorkingTime(wtt.getOffice());
   }
 
   /**
@@ -557,32 +557,32 @@ public class WorkingTimes extends Controller {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
-    rules.checkIfPermitted(wtt.office);
+    rules.checkIfPermitted(wtt.getOffice());
 
     IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
 
     //Prima di disattivarlo controllo che non sia associato ad alcun contratto attivo
-    if (wtt.disabled == false && wwtt.getAllAssociatedActiveContract().size() > 0) {
+    if (wtt.isDisabled() == false && wwtt.getAllAssociatedActiveContract().size() > 0) {
 
       flash.error("Impossibile eliminare il tipo orario selezionato perchè "
           + "attualmente associato ad almeno un contratto attivo.");
-      redirectToManageWorkingTime(wtt.office);
+      redirectToManageWorkingTime(wtt.getOffice());
     }
 
-    if (wtt.disabled) {
+    if (wtt.isDisabled()) {
 
-      wtt.disabled = false;
+      wtt.setDisabled(false);
       wtt.save();
       flash.success("Riattivato correttamente orario di lavoro.");
-      log.info("Riattivata tipologia orario di lavoro {}, id={}", wtt.description, wtt.id);
-      redirectToManageWorkingTime(wtt.office);
+      log.info("Riattivata tipologia orario di lavoro {}, id={}", wtt.getDescription(), wtt.id);
+      redirectToManageWorkingTime(wtt.getOffice());
     } else {
 
-      wtt.disabled = true;
+      wtt.setDisabled(true);
       wtt.save();
       flash.success("Disattivato orario di lavoro.");
-      log.info("Disattivata tipologia orario di lavoro {}, id={}", wtt.description, wtt.id);
-      redirectToManageWorkingTime(wtt.office);
+      log.info("Disattivata tipologia orario di lavoro {}, id={}", wtt.getDescription(), wtt.id);
+      redirectToManageWorkingTime(wtt.getOffice());
     }
 
   }
@@ -596,7 +596,7 @@ public class WorkingTimes extends Controller {
     flash.keep();
     if (office != null && office.id != null) {
       manageOfficeWorkingTime(office.id);
-    } else if (session.get("officeSelected") != null){
+    } else if (session.get("officeSelected") != null) {
       manageWorkingTime(Long.parseLong(session.get("officeSelected")));
     } else {
       Application.indexAdmin();
@@ -659,7 +659,8 @@ public class WorkingTimes extends Controller {
           dateFrom, dateTo);
     }
     
-    if (wtt.office != null && wttNew.office != null && !wtt.office.id.equals(wttNew.office.id)) {
+    if (wtt.getOffice() != null && wttNew.getOffice() != null 
+        && !wtt.getOffice().id.equals(wttNew.getOffice().id)) {
       badRequest();
     }
 
@@ -668,7 +669,7 @@ public class WorkingTimes extends Controller {
     DateInterval requestInterval = new DateInterval(dateFrom, dateTo);
     
     for (Person person : personDao.list(Optional.of(office)).list()) {
-      for (Contract contract : person.contracts) {
+      for (Contract contract : person.getContracts()) {
         
         DateInterval contractInterval = DateUtility
             .intervalIntersection(contract.periodInterval(), requestInterval);
@@ -676,17 +677,17 @@ public class WorkingTimes extends Controller {
           continue;
         }
         ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-        cwtt.contract = contract;          
-        cwtt.beginDate = contractInterval.getBegin();
+        cwtt.setContract(contract);          
+        cwtt.setBeginDate(contractInterval.getBegin());
         if (!DateUtility.isInfinity(contractInterval.getEnd())) {
-          cwtt.endDate = contractInterval.getEnd(); //altrimenti null  
+          cwtt.setEndDate(contractInterval.getEnd()); //altrimenti null  
         }
-        cwtt.workingTimeType = wttNew;
+        cwtt.setWorkingTimeType(wttNew);
         
         try {
           periodManager.updatePeriods(cwtt, true);
           contract = contractDao.getContractById(contract.id);
-          contract.person.refresh();
+          contract.getPerson().refresh();
           contractManager.recomputeContract(contract, Optional.of(dateFrom), false, false);
         } catch (Exception ex) {
           log.error("La situazione dei contract working time type per la persona {} è compromessa,"
@@ -697,7 +698,7 @@ public class WorkingTimes extends Controller {
     }
     
     //redirect (torno alla modifica dell'orario di partenza)
-    if (wtt.office == null) {
+    if (wtt.getOffice() == null) {
       manageWorkingTime(office.id);
     } else {
       manageOfficeWorkingTime(office.id);

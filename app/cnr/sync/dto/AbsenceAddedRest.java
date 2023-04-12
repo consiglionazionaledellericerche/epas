@@ -28,6 +28,7 @@ import play.i18n.Messages;
 public class AbsenceAddedRest {
 
   public String absenceCode;
+  public Long absenceTypeId;
   public String date;
   public boolean isOk;
   public String reason;
@@ -38,7 +39,8 @@ public class AbsenceAddedRest {
   public static AbsenceAddedRest build(TemplateRow templateRow) {
     AbsenceAddedRest aar = new AbsenceAddedRest();
     aar.date = templateRow.absence.getDate().toString();
-    aar.absenceCode = templateRow.absence.absenceType.code;
+    aar.absenceCode = templateRow.absence.getAbsenceType().getCode();
+    aar.absenceTypeId = templateRow.absence.getAbsenceType().getId();
     aar.isOk = templateRow.absenceErrors.isEmpty();
     aar.reason = Joiner.on(", ").join(
         templateRow.absenceErrors.stream()

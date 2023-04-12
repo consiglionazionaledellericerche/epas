@@ -96,7 +96,7 @@ public class ContractMonthRecapManager {
       List<Absence> otherCompensatoryRest, 
       Optional<List<TimeVariation>> compensatoryRestClosureSeatRecovering) {
 
-    Contract contract = cmr.contract;
+    Contract contract = cmr.getContract();
 
     //TODO: controllare che in otherCompensatoryRest ci siano solo riposi compensativi.
 
@@ -107,97 +107,97 @@ public class ContractMonthRecapManager {
     int initMonteOreAnnoCorrente = 0;
     if (recapPreviousMonth.isPresent()) {
       //Se ho il riepilogo del mese precedente lo utilizzo.
-      if (recapPreviousMonth.get().month == 12) {
+      if (recapPreviousMonth.get().getMonth() == 12) {
         initMonteOreAnnoPassato =
-            recapPreviousMonth.get().remainingMinutesCurrentYear
-                + recapPreviousMonth.get().remainingMinutesLastYear;
+            recapPreviousMonth.get().getRemainingMinutesCurrentYear()
+                + recapPreviousMonth.get().getRemainingMinutesLastYear();
 
       } else {
-        initMonteOreAnnoCorrente = recapPreviousMonth.get().remainingMinutesCurrentYear;
-        initMonteOreAnnoPassato = recapPreviousMonth.get().remainingMinutesLastYear;
+        initMonteOreAnnoCorrente = recapPreviousMonth.get().getRemainingMinutesCurrentYear();
+        initMonteOreAnnoPassato = recapPreviousMonth.get().getRemainingMinutesLastYear();
       }
     }
-    if (contract.sourceDateResidual != null
-        && contract.sourceDateResidual.getYear() == yearMonth.getYear()
-        && contract.sourceDateResidual.getMonthOfYear() == yearMonth.getMonthOfYear()) {
+    if (contract.getSourceDateResidual() != null
+        && contract.getSourceDateResidual().getYear() == yearMonth.getYear()
+        && contract.getSourceDateResidual().getMonthOfYear() == yearMonth.getMonthOfYear()) {
       //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
       //in source
-      initMonteOreAnnoPassato = contract.sourceRemainingMinutesLastYear;
-      initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
+      initMonteOreAnnoPassato = contract.getSourceRemainingMinutesLastYear();
+      initMonteOreAnnoCorrente = contract.getSourceRemainingMinutesCurrentYear();
     }
 
     //////////////////////////////////////////////////////////////////////////
     //Valori dei buoni pasto residui all'inizio del mese richiesto
     // Se è il mese di beginContrat i residui sono 0
-    cmr.buoniPastoDaInizializzazione = 0;
+    cmr.setBuoniPastoDaInizializzazione(0);
     if (recapPreviousMonth.isPresent()) {
       //Se ho il riepilogo del mese precedente lo utilizzo.
-      cmr.buoniPastoDalMesePrecedente =
-          recapPreviousMonth.get().remainingMealTickets;
+      cmr.setBuoniPastoDalMesePrecedente(
+          recapPreviousMonth.get().getRemainingMealTickets());
     }
     //Se è il primo riepilogo dovuto ad inzializzazione utilizzo i dati
     //in source
-    if (contract.sourceDateMealTicket != null
-        && contract.sourceDateMealTicket.getYear() == yearMonth.getYear()
-        && contract.sourceDateMealTicket.getMonthOfYear() == yearMonth.getMonthOfYear()) {
-      cmr.buoniPastoDaInizializzazione = contract.sourceRemainingMealTicket;
-      cmr.buoniPastoDalMesePrecedente = 0;
+    if (contract.getSourceDateMealTicket() != null
+        && contract.getSourceDateMealTicket().getYear() == yearMonth.getYear()
+        && contract.getSourceDateMealTicket().getMonthOfYear() == yearMonth.getMonthOfYear()) {
+      cmr.setBuoniPastoDaInizializzazione(contract.getSourceRemainingMealTicket());
+      cmr.setBuoniPastoDalMesePrecedente(0);
     }
     //Ma c'è il particolarissimo caso in cui il contratto inizia il primo del mese,
     // non ho definito inizializzazione generale, e voglio impostare il residuo iniziale 
     // (all'ultimo giorno del mese precedente)
-    if (contract.sourceDateResidual == null 
-        && contract.sourceDateMealTicket != null 
-        && new YearMonth(contract.beginDate).equals(yearMonth) 
-        && contract.beginDate.getDayOfMonth() == 1 
-        && contract.sourceDateMealTicket.isEqual(contract.beginDate.minusDays(1))) {
+    if (contract.getSourceDateResidual() == null 
+        && contract.getSourceDateMealTicket() != null 
+        && new YearMonth(contract.getBeginDate()).equals(yearMonth) 
+        && contract.getBeginDate().getDayOfMonth() == 1 
+        && contract.getSourceDateMealTicket().isEqual(contract.getBeginDate().minusDays(1))) {
       
-      cmr.buoniPastoDaInizializzazione = 0;
-      cmr.buoniPastoDalMesePrecedente = contract.sourceRemainingMealTicket;
+      cmr.setBuoniPastoDaInizializzazione(0);
+      cmr.setBuoniPastoDalMesePrecedente(contract.getSourceRemainingMealTicket());
     }
 
     //////////////////////////////////////////////////////////////////////////
     //Inizio Algoritmo
     cmr.wrContract = wrapperFactory.create(contract);
-    cmr.person = contract.person;
-    cmr.qualifica = cmr.person.qualification.qualification;
+    cmr.person = contract.getPerson();
+    cmr.qualifica = cmr.person.getQualification().getQualification();
 
-    cmr.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
-    cmr.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
+    cmr.setInitMonteOreAnnoCorrente(initMonteOreAnnoCorrente);
+    cmr.setInitMonteOreAnnoPassato(initMonteOreAnnoPassato);
 
     //Per stampare a video il residuo da inizializzazione se riferito al mese
-    if (contract.sourceDateResidual != null
-        && contract.sourceDateResidual.getMonthOfYear() == cmr.month
-        && contract.sourceDateResidual.getYear() == cmr.year) {
-      cmr.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
+    if (contract.getSourceDateResidual() != null
+        && contract.getSourceDateResidual().getMonthOfYear() == cmr.getMonth()
+        && contract.getSourceDateResidual().getYear() == cmr.getYear()) {
+      cmr.setInitResiduoAnnoCorrenteNelMese(contract.getSourceRemainingMinutesCurrentYear());
     }
 
     //Inizializzazione residui
     //Gennaio
-    if (cmr.month == 1) {
+    if (cmr.getMonth() == 1) {
       cmr.mesePrecedente = null;
-      cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
-      cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
+      cmr.setRemainingMinutesLastYear(initMonteOreAnnoPassato);
+      cmr.setRemainingMinutesCurrentYear(initMonteOreAnnoCorrente);
 
       //se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
-      if (cmr.remainingMinutesLastYear < 0) {
+      if (cmr.getRemainingMinutesLastYear() < 0) {
         cmr.progressivoFinalePositivoMeseAux = cmr.progressivoFinalePositivoMeseAux
-            + cmr.remainingMinutesLastYear;
-        cmr.remainingMinutesLastYear = 0;
+            + cmr.getRemainingMinutesLastYear();
+        cmr.setRemainingMinutesLastYear(0);
       }
     } else {
       cmr.mesePrecedente = recapPreviousMonth;
-      cmr.remainingMinutesLastYear = initMonteOreAnnoPassato;
-      cmr.remainingMinutesCurrentYear = initMonteOreAnnoCorrente;
+      cmr.setRemainingMinutesLastYear(initMonteOreAnnoPassato);
+      cmr.setRemainingMinutesCurrentYear(initMonteOreAnnoCorrente);
 
       EpasParam param = cmr.qualifica > 3 ? EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49 :
           EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13;
       Integer monthExpiryRecoveryDay = (Integer) configurationManager
-          .configValue(cmr.person.office, param, cmr.year);
+          .configValue(cmr.getPerson().getOffice(), param, cmr.getYear());
 
-      if (monthExpiryRecoveryDay != 0 && cmr.month > monthExpiryRecoveryDay) {
-        cmr.possibileUtilizzareResiduoAnnoPrecedente = false;
-        cmr.remainingMinutesLastYear = 0;
+      if (monthExpiryRecoveryDay != 0 && cmr.getMonth() > monthExpiryRecoveryDay) {
+        cmr.setPossibileUtilizzareResiduoAnnoPrecedente(false);
+        cmr.setRemainingMinutesLastYear(0);
       }
     }
 
@@ -211,7 +211,7 @@ public class ContractMonthRecapManager {
     DateInterval validDataForMealTickets = buildIntervalForMealTicket(yearMonth,
         contract);
 
-    IWrapperContract wrContract = wrapperFactory.create(cmr.contract);
+    IWrapperContract wrContract = wrapperFactory.create(cmr.getContract());
 
     setMealTicketsInformation(cmr, validDataForMealTickets);
     setPersonDayInformation(cmr, validDataForPersonDay, otherCompensatoryRest);
@@ -230,17 +230,17 @@ public class ContractMonthRecapManager {
     //sia ciò che ho imputato al residuo del mese precedente dell'anno corrente
     //sia ciò che ho imputato al progressivo finale positivo del mese
     //perchè non ho interesse a visualizzarli separati nel template.
-    cmr.progressivoFinaleNegativoMeseImputatoAnnoCorrente =
-        cmr.progressivoFinaleNegativoMeseImputatoAnnoCorrente
-            + cmr.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-    cmr.riposiCompensativiMinutiImputatoAnnoCorrente =
-        cmr.riposiCompensativiMinutiImputatoAnnoCorrente
-            + cmr.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
+    cmr.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(cmr
+        .getProgressivoFinaleNegativoMeseImputatoAnnoCorrente()
+            + cmr.getProgressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese());
+    cmr.setRiposiCompensativiMinutiImputatoAnnoCorrente(cmr
+        .getRiposiCompensativiMinutiImputatoAnnoCorrente()
+            + cmr.getRiposiCompensativiMinutiImputatoProgressivoFinalePositivoMese());
 
     //2) Al monte ore dell'anno corrente aggiungo:
     // ciò che non ho utilizzato del progressivo finale positivo del mese
-    cmr.remainingMinutesCurrentYear = cmr.remainingMinutesCurrentYear
-        + cmr.progressivoFinalePositivoMeseAux;
+    cmr.setRemainingMinutesCurrentYear(cmr.getRemainingMinutesCurrentYear()
+        + cmr.progressivoFinalePositivoMeseAux);
 
     return Optional.fromNullable(cmr);
   }
@@ -351,7 +351,7 @@ public class ContractMonthRecapManager {
     //DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
 
     LocalDate dateStartMealTicketInOffice = (LocalDate) configurationManager
-        .configValue(contract.person.office, EpasParam.DATE_START_MEAL_TICKET);
+        .configValue(contract.getPerson().getOffice(), EpasParam.DATE_START_MEAL_TICKET);
 
     LocalDate today = LocalDate.now();
 
@@ -405,7 +405,7 @@ public class ContractMonthRecapManager {
       //progressivo finale fine mese
       for (PersonDay pd : pdList) {
         if (pd != null) {
-          cmr.progressivoFinaleMese = pd.progressive;
+          cmr.setProgressivoFinaleMese(pd.getProgressive());
           break;
         } else {
           //
@@ -420,21 +420,20 @@ public class ContractMonthRecapManager {
       
       //progressivo finale positivo e negativo mese
       for (PersonDay pd : pdList) {
-        if (otherCompensatoryDates.contains(pd.date)) {
+        if (otherCompensatoryDates.contains(pd.getDate())) {
           continue;
         }
-        if (pd.difference >= 0) {
-          cmr.progressivoFinalePositivoMeseAux += pd.difference;
+        if (pd.getDifference() >= 0) {
+          cmr.progressivoFinalePositivoMeseAux += pd.getDifference();
         } else {
-          cmr.progressivoFinaleNegativoMese += pd.difference;
+          cmr.setProgressivoFinaleNegativoMese(cmr.getProgressivoFinaleNegativoMese() 
+              + pd.getDifference());
         }
-        cmr.oreLavorate += pd.timeAtWork;
+        cmr.setOreLavorate(cmr.getOreLavorate() + pd.getTimeAtWork());
       }
-      cmr.progressivoFinaleNegativoMese =
-          cmr.progressivoFinaleNegativoMese * -1;
+      cmr.setProgressivoFinaleNegativoMese(cmr.getProgressivoFinaleNegativoMese() * -1);
 
-      cmr.progressivoFinalePositivoMese =
-          cmr.progressivoFinalePositivoMeseAux;
+      cmr.setProgressivoFinalePositivoMese(cmr.progressivoFinalePositivoMeseAux);
 
     }
   }
@@ -456,22 +455,22 @@ public class ContractMonthRecapManager {
 
       //buoni pasto utilizzati
       for (PersonDay pd : pdList) {
-        if (pd != null && pd.isTicketAvailable) {
-          cmr.buoniPastoUsatiNelMese++;
+        if (pd != null && pd.isTicketAvailable()) {
+          cmr.setBuoniPastoUsatiNelMese(cmr.getBuoniPastoUsatiNelMese() + 1);
         }
       }
 
       //Numero ticket consegnati nel mese
-      cmr.buoniPastoConsegnatiNelMese = mealTicketDao
-          .contractMealTickets(cmr.contract, Optional.of(validDataForMealTickets),
-              MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false).size();
+      cmr.setBuoniPastoConsegnatiNelMese(mealTicketDao
+          .contractMealTickets(cmr.getContract(), Optional.of(validDataForMealTickets),
+              MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false).size());
     }
 
     //residuo
-    cmr.remainingMealTickets = cmr.buoniPastoDalMesePrecedente
-        + cmr.buoniPastoDaInizializzazione
-        + cmr.buoniPastoConsegnatiNelMese
-        - cmr.buoniPastoUsatiNelMese;
+    cmr.setRemainingMealTickets(cmr.getBuoniPastoDalMesePrecedente()
+        + cmr.getBuoniPastoDaInizializzazione()
+        + cmr.getBuoniPastoConsegnatiNelMese()
+        - cmr.getBuoniPastoUsatiNelMese());
   }
 
   /**
@@ -492,7 +491,7 @@ public class ContractMonthRecapManager {
       Optional<List<TimeVariation>> compensatoryRestClosureSeatRecovering) {
 
     //gli straordinari li assegno solo all'ultimo contratto attivo del mese
-    if (wrContract.isLastInMonth(cmr.month, cmr.year)) {
+    if (wrContract.isLastInMonth(cmr.getMonth(), cmr.getYear())) {
 
       CompetenceCode s1 = competenceCodeManager.getCompetenceCode("S1");
       CompetenceCode s2 = competenceCodeManager.getCompetenceCode("S2");
@@ -502,35 +501,36 @@ public class ContractMonthRecapManager {
       codes.add(s2);
       codes.add(s3);
 
-      cmr.straordinariMinuti = 0;
-      cmr.straordinariMinutiS1Print = 0;
-      cmr.straordinariMinutiS2Print = 0;
-      cmr.straordinariMinutiS3Print = 0;
+      cmr.setStraordinariMinuti(0);
+      cmr.setStraordinariMinutiS1Print(0);
+      cmr.setStraordinariMinutiS2Print(0);
+      cmr.setStraordinariMinutiS3Print(0);
 
       List<Competence> competences = 
           competenceDao.getCompetences(
-              Optional.fromNullable(cmr.person), cmr.year, Optional.fromNullable(cmr.month), codes);
+              Optional.fromNullable(cmr.person), cmr.getYear(), 
+              Optional.fromNullable(cmr.getMonth()), codes);
 
       for (Competence competence : competences) {
 
-        if (competence.competenceCode.id.equals(s1.id)) {
-          cmr.straordinariMinutiS1Print = (competence.valueApproved * 60);
-        } else if (competence.competenceCode.id.equals(s2.id)) {
-          cmr.straordinariMinutiS2Print = (competence.valueApproved * 60);
-        } else if (competence.competenceCode.id.equals(s3.id)) {
-          cmr.straordinariMinutiS3Print = (competence.valueApproved * 60);
+        if (competence.getCompetenceCode().id.equals(s1.id)) {
+          cmr.setStraordinariMinutiS1Print((competence.getValueApproved() * 60));
+        } else if (competence.getCompetenceCode().id.equals(s2.id)) {
+          cmr.setStraordinariMinutiS2Print((competence.getValueApproved() * 60));
+        } else if (competence.getCompetenceCode().id.equals(s3.id)) {
+          cmr.setStraordinariMinutiS3Print((competence.getValueApproved() * 60));
         }
       }
 
-      cmr.straordinariMinuti = cmr.straordinariMinutiS1Print
-          + cmr.straordinariMinutiS2Print
-          + cmr.straordinariMinutiS3Print;
+      cmr.setStraordinariMinuti(cmr.getStraordinariMinutiS1Print()
+          + cmr.getStraordinariMinutiS2Print()
+          + cmr.getStraordinariMinutiS3Print());
     }
 
     if (validDataForCompensatoryRest != null) {
 
-      cmr.riposiCompensativiMinuti = 0;
-      cmr.recoveryDayUsed = 0;
+      cmr.setRiposiCompensativiMinuti(0);
+      cmr.setRecoveryDayUsed(0);
 
       for (Absence riposo : otherCompensatoryRest) {
         if (DateUtility.isDateIntoInterval(riposo.date, validDataForCompensatoryRest)) {
@@ -540,17 +540,18 @@ public class ContractMonthRecapManager {
 
           LocalDate date = riposo.date;
           for (ContractWorkingTimeType cwtt :
-              wrContract.getValue().contractWorkingTimeType) {
+              wrContract.getValue().getContractWorkingTimeType()) {
 
             if (DateUtility.isDateIntoInterval(date,
                 wrapperFactory.create(cwtt).getDateInverval())) {
 
-              WorkingTimeTypeDay wttd = cwtt.workingTimeType.workingTimeTypeDays
+              WorkingTimeTypeDay wttd = cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
                   .get(date.getDayOfWeek() - 1);
 
-              Preconditions.checkState(wttd.dayOfWeek == date.getDayOfWeek());
-              cmr.riposiCompensativiMinuti += wttd.workingTime;
-              cmr.recoveryDayUsed++;
+              Preconditions.checkState(wttd.getDayOfWeek() == date.getDayOfWeek());
+              cmr.setRiposiCompensativiMinuti(cmr.getRiposiCompensativiMinuti() 
+                  + wttd.getWorkingTime());
+              cmr.setRecoveryDayUsed(cmr.getRecoveryDayUsed() + 1);
             }
           }
         }
@@ -562,20 +563,23 @@ public class ContractMonthRecapManager {
           absenceDao.absenceInPeriod(cmr.person, begin, end, "91");
 
       for (Absence abs : riposi) {
-        cmr.riposiCompensativiMinuti += wrapperFactory.create(abs.personDay)
-            .getWorkingTimeTypeDay().get().workingTime;
-        cmr.recoveryDayUsed++;
+        cmr.setRiposiCompensativiMinuti(cmr.getRiposiCompensativiMinuti() 
+            + wrapperFactory.create(abs.getPersonDay())
+            .getWorkingTimeTypeDay().get().getWorkingTime());
+        cmr.setRecoveryDayUsed(cmr.getRecoveryDayUsed() + 1);
       }
 
-      cmr.riposiCompensativiMinutiPrint = cmr.riposiCompensativiMinuti;
+      cmr.setRiposiCompensativiMinutiPrint(cmr.getRiposiCompensativiMinuti());
       if (compensatoryRestClosureSeatRecovering.isPresent()) {
         for (TimeVariation tv : compensatoryRestClosureSeatRecovering.get()) {
-          if (tv.dateVariation.getYear() == cmr.year 
-              && tv.dateVariation.getMonthOfYear() == cmr.month) {
-            cmr.riposiCompensativiChiusuraEnteMinuti += tv.timeVariation;
+          if (tv.getDateVariation().getYear() == cmr.getYear() 
+              && tv.getDateVariation().getMonthOfYear() == cmr.getMonth()) {
+            cmr.setRiposiCompensativiChiusuraEnteMinuti(
+                cmr.getRiposiCompensativiChiusuraEnteMinuti() + tv.getTimeVariation());
           }          
         }
-        cmr.riposiCompensativiChiusuraEnteMinutiPrint = cmr.riposiCompensativiChiusuraEnteMinuti;
+        cmr.setRiposiCompensativiChiusuraEnteMinutiPrint(cmr
+            .getRiposiCompensativiChiusuraEnteMinuti());
       }
       
     }
@@ -584,135 +588,142 @@ public class ContractMonthRecapManager {
   private void assegnaProgressivoFinaleNegativo(ContractMonthRecap monthRecap) {
 
     //quello che assegno al monte ore passato
-    if (monthRecap.progressivoFinaleNegativoMese < monthRecap.remainingMinutesLastYear) {
-      monthRecap.remainingMinutesLastYear =
-          monthRecap.remainingMinutesLastYear - monthRecap.progressivoFinaleNegativoMese;
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato =
-          monthRecap.progressivoFinaleNegativoMese;
+    if (monthRecap.getProgressivoFinaleNegativoMese() < monthRecap.getRemainingMinutesLastYear()) {
+      monthRecap.setRemainingMinutesLastYear(
+          monthRecap.getRemainingMinutesLastYear() - monthRecap.getProgressivoFinaleNegativoMese());
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoPassato(
+          monthRecap.getProgressivoFinaleNegativoMese());
       return;
     } else {
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato =
-          monthRecap.remainingMinutesLastYear;
-      monthRecap.remainingMinutesLastYear = 0;
-      monthRecap.progressivoFinaleNegativoMese =
-          monthRecap.progressivoFinaleNegativoMese
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoPassato(
+          monthRecap.getRemainingMinutesLastYear());
+      monthRecap.setRemainingMinutesLastYear(0);
+      monthRecap.setProgressivoFinaleNegativoMese(
+          monthRecap.getProgressivoFinaleNegativoMese()
               -
-              monthRecap.progressivoFinaleNegativoMeseImputatoAnnoPassato;
+              monthRecap.getProgressivoFinaleNegativoMeseImputatoAnnoPassato());
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.progressivoFinaleNegativoMese < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.progressivoFinaleNegativoMese;
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente =
-          monthRecap.progressivoFinaleNegativoMese;
+    if (monthRecap.getProgressivoFinaleNegativoMese() 
+          < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() 
+          - monthRecap.getProgressivoFinaleNegativoMese());
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(
+          monthRecap.getProgressivoFinaleNegativoMese());
       return;
     } else {
-      monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.progressivoFinaleNegativoMese =
-          monthRecap.progressivoFinaleNegativoMese
+      monthRecap.setProgressivoFinaleNegativoMeseImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setProgressivoFinaleNegativoMese(
+          monthRecap.getProgressivoFinaleNegativoMese()
               -
-              monthRecap.progressivoFinaleNegativoMeseImputatoAnnoCorrente;
+              monthRecap.getProgressivoFinaleNegativoMeseImputatoAnnoCorrente());
     }
 
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
-        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.progressivoFinaleNegativoMese;
-    monthRecap.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese =
-        monthRecap.progressivoFinaleNegativoMese;
+        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.getProgressivoFinaleNegativoMese();
+    monthRecap.setProgressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese(
+        monthRecap.getProgressivoFinaleNegativoMese());
     return;
 
   }
 
   private void assegnaStraordinari(ContractMonthRecap monthRecap) {
     monthRecap.progressivoFinalePositivoMeseAux =
-        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.straordinariMinuti;
+        monthRecap.progressivoFinalePositivoMeseAux - monthRecap.getStraordinariMinuti();
   }
 
   private void assegnaRiposiCompensativi(ContractMonthRecap monthRecap) {
     //quello che assegno al monte ore passato
-    if (monthRecap.riposiCompensativiMinuti < monthRecap.remainingMinutesLastYear) {
-      monthRecap.remainingMinutesLastYear =
-          monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiMinuti;
-      monthRecap.riposiCompensativiMinutiImputatoAnnoPassato = monthRecap.riposiCompensativiMinuti;
+    if (monthRecap.getRiposiCompensativiMinuti() < monthRecap.getRemainingMinutesLastYear()) {
+      monthRecap.setRemainingMinutesLastYear(
+          monthRecap.getRemainingMinutesLastYear() - monthRecap.getRiposiCompensativiMinuti());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(
+          monthRecap.getRiposiCompensativiMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiMinutiImputatoAnnoPassato = monthRecap.remainingMinutesLastYear;
-      monthRecap.remainingMinutesLastYear = 0;
-      monthRecap.riposiCompensativiMinuti =
-          monthRecap.riposiCompensativiMinuti
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoPassato(
+          monthRecap.getRemainingMinutesLastYear());
+      monthRecap.setRemainingMinutesLastYear(0);
+      monthRecap.setRiposiCompensativiMinuti(
+          monthRecap.getRiposiCompensativiMinuti()
               -
-              monthRecap.riposiCompensativiMinutiImputatoAnnoPassato;
+              monthRecap.getRiposiCompensativiMinutiImputatoAnnoPassato());
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.riposiCompensativiMinuti < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.riposiCompensativiMinuti;
-      monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente =
-          monthRecap.riposiCompensativiMinuti;
+    if (monthRecap.getRiposiCompensativiMinuti() < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() - monthRecap.getRiposiCompensativiMinuti());
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoCorrente(
+          monthRecap.getRiposiCompensativiMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.riposiCompensativiMinuti =
-          monthRecap.riposiCompensativiMinuti
+      monthRecap.setRiposiCompensativiMinutiImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setRiposiCompensativiMinuti(
+          monthRecap.getRiposiCompensativiMinuti()
               -
-              monthRecap.riposiCompensativiMinutiImputatoAnnoCorrente;
+              monthRecap.getRiposiCompensativiMinutiImputatoAnnoCorrente());
     }
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
         monthRecap.progressivoFinalePositivoMeseAux
             -
-            monthRecap.riposiCompensativiMinuti;
-    monthRecap.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese =
-        monthRecap.riposiCompensativiMinuti;
+            monthRecap.getRiposiCompensativiMinuti();
+    monthRecap.setRiposiCompensativiMinutiImputatoProgressivoFinalePositivoMese(
+        monthRecap.getRiposiCompensativiMinuti());
 
   }
   
   private void assegnaRiposiCompensativiChiusuraEnte(ContractMonthRecap monthRecap) {
     //quello che assegno al monte ore passato
-    if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesLastYear) {
-      monthRecap.remainingMinutesLastYear =
-          monthRecap.remainingMinutesLastYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato 
-          = monthRecap.riposiCompensativiChiusuraEnteMinuti;
+    if (monthRecap.getRiposiCompensativiChiusuraEnteMinuti() 
+        < monthRecap.getRemainingMinutesLastYear()) {
+      monthRecap.setRemainingMinutesLastYear(
+          monthRecap.getRemainingMinutesLastYear() 
+          - monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato(monthRecap
+          .getRiposiCompensativiChiusuraEnteMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato 
-          = monthRecap.remainingMinutesLastYear;
-      monthRecap.remainingMinutesLastYear = 0;
-      monthRecap.riposiCompensativiChiusuraEnteMinuti =
-          monthRecap.riposiCompensativiChiusuraEnteMinuti
-              -
-              monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato;
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato(monthRecap
+          .getRemainingMinutesLastYear());
+      monthRecap.setRemainingMinutesLastYear(0);
+      monthRecap.setRiposiCompensativiChiusuraEnteMinuti(monthRecap
+          .getRiposiCompensativiChiusuraEnteMinuti()
+          - monthRecap.getRiposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato());
     }
 
     //quello che assegno al monte ore corrente
-    if (monthRecap.riposiCompensativiChiusuraEnteMinuti < monthRecap.remainingMinutesCurrentYear) {
-      monthRecap.remainingMinutesCurrentYear =
-          monthRecap.remainingMinutesCurrentYear - monthRecap.riposiCompensativiChiusuraEnteMinuti;
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
-          monthRecap.riposiCompensativiChiusuraEnteMinuti;
+    if (monthRecap.getRiposiCompensativiChiusuraEnteMinuti() 
+          < monthRecap.getRemainingMinutesCurrentYear()) {
+      monthRecap.setRemainingMinutesCurrentYear(
+          monthRecap.getRemainingMinutesCurrentYear() 
+            - monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente(
+          monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
       return;
     } else {
-      monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente =
-          monthRecap.remainingMinutesCurrentYear;
-      monthRecap.remainingMinutesCurrentYear = 0;
-      monthRecap.riposiCompensativiChiusuraEnteMinuti =
-          monthRecap.riposiCompensativiChiusuraEnteMinuti
+      monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente(
+          monthRecap.getRemainingMinutesCurrentYear());
+      monthRecap.setRemainingMinutesCurrentYear(0);
+      monthRecap.setRiposiCompensativiChiusuraEnteMinuti(
+          monthRecap.getRiposiCompensativiChiusuraEnteMinuti()
               -
-              monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente;
+              monthRecap.getRiposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente());
     }
     //quello che assegno al progressivo positivo del mese
     monthRecap.progressivoFinalePositivoMeseAux =
         monthRecap.progressivoFinalePositivoMeseAux
             -
-            monthRecap.riposiCompensativiChiusuraEnteMinuti;
-    monthRecap.riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese =
-        monthRecap.riposiCompensativiChiusuraEnteMinuti;
+            monthRecap.getRiposiCompensativiChiusuraEnteMinuti();
+    monthRecap.setRiposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese(
+        monthRecap.getRiposiCompensativiChiusuraEnteMinuti());
   }
 }

@@ -37,7 +37,8 @@ public class LogEnhancer extends Controller {
   static void mdcPutUser() {
     MDC.put(
         "user", 
-        Security.getUser().isPresent() ? Security.getUser().get().username : ANONYMOUS_USERNAME);
+        Security.getUser().isPresent() 
+          ? Security.getUser().get().getUsername() : ANONYMOUS_USERNAME);
   }
   
   @After

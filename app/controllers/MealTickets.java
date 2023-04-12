@@ -84,7 +84,6 @@ public class MealTickets extends Controller {
   @Inject
   private static ContractMonthRecapDao contractMonthRecapDao;
 
-
   /**
    * Riepilogo buoni pasto dipendente.
    */
@@ -92,9 +91,9 @@ public class MealTickets extends Controller {
 
     Optional<User> user = Security.getUser();
     Verify.verify(user.isPresent());
-    Verify.verifyNotNull(user.get().person);
+    Verify.verifyNotNull(user.get().getPerson());
 
-    Person person = user.get().person;
+    Person person = user.get().getPerson();
 
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
 
@@ -120,7 +119,7 @@ public class MealTickets extends Controller {
     Integer ticketNumberFrom = 1;
     Integer ticketNumberTo = 22;
 
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.office);
+    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(person.getOffice());
 
     render(person, recap, recapPrevious, deliveryDate, expireDate, today,
         ticketNumberFrom, ticketNumberTo);
@@ -157,8 +156,8 @@ public class MealTickets extends Controller {
     Contract contract = contractDao.getContractById(contractId);
 
     Preconditions.checkState(contract.isPersistent());
-    Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    Preconditions.checkArgument(contract.getPerson().isPersistent());
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
@@ -175,9 +174,10 @@ public class MealTickets extends Controller {
     Integer ticketNumberFrom = 1;
     Integer ticketNumberTo = 22;
 
-    LocalDate expireDate = mealTicketDao.getFurtherExpireDateInOffice(contract.person.office);
+    LocalDate expireDate = mealTicketDao
+        .getFurtherExpireDateInOffice(contract.getPerson().getOffice());
     User admin = Security.getUser().get();
-    Person person = contract.person;
+    Person person = contract.getPerson();
     render(person, recap, deliveryDate, admin, expireDate, 
         today, ticketNumberFrom, ticketNumberTo, year, month);
   }
@@ -189,8 +189,8 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     Preconditions.checkState(contract.isPersistent());
-    Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    Preconditions.checkArgument(contract.getPerson().isPersistent());
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     MealTicketRecap recap;
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
@@ -208,7 +208,7 @@ public class MealTickets extends Controller {
         recapPrevious = previousRecap.get();
       }
     }
-    Person person = contract.person;
+    Person person = contract.getPerson();
     render(person, recap, recapPrevious, year, month);
   }
 
@@ -219,13 +219,13 @@ public class MealTickets extends Controller {
     notFoundIfNull(contractId);
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     Preconditions.checkState(currentRecap.isPresent());
     MealTicketRecap recap = currentRecap.get();
-    Person person = contract.person;
+    Person person = contract.getPerson();
     render(person, recap, year, month);
   }
 
@@ -241,7 +241,7 @@ public class MealTickets extends Controller {
     Preconditions.checkNotNull(contract);
     Preconditions.checkArgument(contract.isPersistent());
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     int mealTicketsTransfered = mealTicketService.mealTicketsLegacy(contract);
 
@@ -250,11 +250,11 @@ public class MealTickets extends Controller {
           + "Riprovare o effettuare una segnalazione.");
     } else {
       flash.success("Trasferiti con successo %s buoni pasto per %s %s",
-          mealTicketsTransfered, contract.person.name, contract.person.surname);
+          mealTicketsTransfered, contract.getPerson().getName(), contract.getPerson().getSurname());
     }
 
     MealTickets.recapMealTickets(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(),
-        contract.person.office.id);
+        contract.getPerson().getOffice().id);
   }
 
   /**
@@ -275,10 +275,10 @@ public class MealTickets extends Controller {
       @Valid @Required LocalDate expireDate) {
 
     Contract contract = contractDao.getContractById(contractId);
-    Person person = contract.person;
-    notFoundIfNull(contract.person);
+    Person person = contract.getPerson();
+    notFoundIfNull(contract.getPerson());
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     Preconditions.checkState(contract.isPersistent());
     User admin = Security.getUser().get();
 
@@ -301,7 +301,7 @@ public class MealTickets extends Controller {
     }
 
     //Controllo dei parametri
-    Office office = person.office;
+    Office office = person.getOffice();
     if (office == null) {
       flash.error("dramma");
       render("@personMealTickets", person, recap, codeBlock, ticketNumberFrom, ticketNumberTo,
@@ -332,12 +332,12 @@ public class MealTickets extends Controller {
     //Persistenza
     for (MealTicket mealTicket : ticketToAddOrdered) {
 
-      mealTicket.date = deliveryDate;
-      mealTicket.contract = contractDao.getContract(mealTicket.date, person);
-      mealTicket.admin = admin.person;
+      mealTicket.setDate(deliveryDate);
+      mealTicket.setContract(contractDao.getContract(mealTicket.getDate(), person));
+      mealTicket.setAdmin(admin.getPerson());
       mealTicket.save();
 
-      contractUpdated.add(mealTicket.contract);
+      contractUpdated.add(mealTicket.getContract());
     }
 
     consistencyManager.updatePersonRecaps(person.id, deliveryDate);
@@ -361,7 +361,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -390,7 +390,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -401,9 +401,9 @@ public class MealTickets extends Controller {
         .blockPortion(mealTicketList, contract, first, last);
     for (MealTicket mealTicket : blockPortionToReturn) {
       if (!undo) {
-        mealTicket.returned = true;
+        mealTicket.setReturned(true);
       } else {
-        mealTicket.returned = false;
+        mealTicket.setReturned(false);
       }
     }
     List<BlockMealTicket> blocks = MealTicketStaticUtility.getBlockMealTicketFromOrderedList(
@@ -418,17 +418,17 @@ public class MealTickets extends Controller {
     // Perform
     LocalDate pastDate = LocalDate.now();
     for (MealTicket mealTicket : mealTicketList) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
     }
     for (MealTicket mealTicket : blockPortionToReturn) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
       mealTicket.save();
     }
-    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
 
     flash.success("%d buoni riconsegnati correttamente.", blockPortionToReturn.size());
     //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
@@ -449,7 +449,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -477,7 +477,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -488,8 +488,8 @@ public class MealTickets extends Controller {
         .blockPortion(mealTicketList, contract, first, last);
     LocalDate pastDate = LocalDate.now();
     for (MealTicket mealTicket : mealTicketList) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
     }
 
@@ -504,15 +504,15 @@ public class MealTickets extends Controller {
 
     int deleted = 0;
     for (MealTicket mealTicket : mealTicketToRemove) {
-      if (mealTicket.date.isBefore(pastDate)) {
-        pastDate = mealTicket.date;
+      if (mealTicket.getDate().isBefore(pastDate)) {
+        pastDate = mealTicket.getDate();
       }
 
       mealTicket.delete();
       deleted++;
     }
 
-    consistencyManager.updatePersonSituation(contract.person.id, pastDate);
+    consistencyManager.updatePersonSituation(contract.getPerson().id, pastDate);
 
     flash.success("Blocco di %d buoni rimosso correttamente.", deleted);
     //TODO: provvisorio ci vanno anno e mese da cui sono partito per fare la modifica
@@ -533,7 +533,7 @@ public class MealTickets extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -557,23 +557,23 @@ public class MealTickets extends Controller {
   public static void performConvertPersonCodeBlock(Long contractId, String codeBlock) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
     Preconditions.checkState(mealTicketList.size() > 0);
 
     for (MealTicket mealTicket : mealTicketList) {
-      if (mealTicket.blockType.equals(BlockType.papery)) {
-        mealTicket.blockType = BlockType.electronic;        
+      if (mealTicket.getBlockType().equals(BlockType.papery)) {
+        mealTicket.setBlockType(BlockType.electronic);        
       } else {
-        mealTicket.blockType = BlockType.papery;
+        mealTicket.setBlockType(BlockType.papery);
       }
       mealTicket.save();
     }
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
     MealTicketRecap recap = currentRecap.get();
-    Person person = contract.person;
+    Person person = contract.getPerson();
     render("@editPersonMealTickets", person, recap, LocalDate.now().getYear(), 
         LocalDate.now().getMonthOfYear());
   }
@@ -596,7 +596,7 @@ public class MealTickets extends Controller {
       } else {
         mealTicket = mealTicketDao
             .getMealTicketsMatchCodeBlock(code, 
-                Optional.of(Security.getUser().get().person.office));
+                Optional.of(Security.getUser().get().getPerson().getOffice()));
       }
       blocks = MealTicketStaticUtility
           .getBlockMealTicketFromOrderedList(mealTicket, Optional.<DateInterval>absent());
@@ -639,8 +639,8 @@ public class MealTickets extends Controller {
     Contract contract = contractDao.getContractById(contractId);
 
     Preconditions.checkState(contract.isPersistent());
-    Preconditions.checkArgument(contract.person.isPersistent());
-    rules.checkIfPermitted(contract.person.office);
+    Preconditions.checkArgument(contract.getPerson().isPersistent());
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     YearMonth yearMonth = new YearMonth(year, month);
 
     ContractMonthRecap monthRecap = contractMonthRecapDao

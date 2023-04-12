@@ -83,11 +83,11 @@ public class Contracts extends Controller {
       String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     List<ContractShowTerseDto> contracts = Lists.newArrayList();
     try {
       contracts = 
-        person.contracts.stream().map(c -> ContractShowTerseDto.build(c))
+        person.getContracts().stream().map(c -> ContractShowTerseDto.build(c))
         .collect(Collectors.toList());
     } catch (IllegalStateException e) {
       JsonResponse.internalError(e.getMessage());
@@ -130,14 +130,14 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     Optional<WorkingTimeType> workingTimeType =  
         contractDto.getWorkingTimeTypeId() == null 
           ? Optional.absent()
             : Optional.fromNullable(WorkingTimeType.findById(contractDto.getWorkingTimeTypeId()));
 
-    contract.person = personDao.getPersonById(contractDto.getPersonId());
+    contract.setPerson(personDao.getPersonById(contractDto.getPersonId()));
     if (!contractManager.properContractCreate(contract, workingTimeType, true)) {
       JsonResponse.badRequest("Problemi nella creazione del contratto, verificare le date");
     }
@@ -175,7 +175,7 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office associato alla
     //persona indicata nel DTO
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -268,7 +268,7 @@ public class Contracts extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     return contract;
   }
 }

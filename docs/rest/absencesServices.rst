@@ -52,6 +52,7 @@ La risposta sarà del tipo
   [
     {
       "absenceCode": "37",
+      "absenceTypeId": 293,
       "date": "2020-12-21",
       "description": "ferie anno precedente (dopo il 31/8)",
       "hasAttachment": false,
@@ -61,6 +62,7 @@ La risposta sarà del tipo
     },
     {
       "absenceCode": "94",
+      "absenceTypeId": 380,
       "date": "2020-12-28",
       "description": "festività soppresse (ex legge 937/77)",
       "hasAttachment": false,
@@ -97,12 +99,14 @@ tipo il seguente:
   [
      {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-02-02",
         "isOk": true,
         "reason": ""
      },
      {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-02-03",
         "isOk": true,
         "reason": ""
@@ -136,12 +140,14 @@ Con un risultato tipo il seguente:
   [
      {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-02-02",
         "isOk": true,
         "reason": ""
      },
      {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-02-03",
         "isOk": true,
         "reason": ""
@@ -179,6 +185,7 @@ Con un risultato tipo il seguente.
   [
       {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-03-05",
         "description": "Ferie anno precedente",
         "hasAttachment": false,
@@ -188,6 +195,7 @@ Con un risultato tipo il seguente.
     },
     {
         "absenceCode": "31",
+        "absenceTypeId": 297,
         "date": "2021-03-08",
         "description": "Ferie anno precedente",
         "hasAttachment": false,

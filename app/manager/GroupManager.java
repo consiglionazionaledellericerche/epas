@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,11 @@
 
 package manager;
 
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
-import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
-import dao.ShiftDao;
 import dao.UsersRolesOfficesDao;
 import java.time.LocalDate;
 import java.util.List;
@@ -39,7 +36,6 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
-import models.dto.SeatSituationDto;
 import models.flows.Affiliation;
 import models.flows.Group;
 import org.assertj.core.util.Lists;
@@ -85,15 +81,16 @@ public class GroupManager {
   public void createManager(Office office, Group group, UsersRolesOffices uro) {
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     Optional<UsersRolesOffices> uroPresent = 
-        uroDao.getUsersRolesOffices(group.manager.user, role, group.office);
+        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, group.getOffice());
     if (uroPresent.isPresent()) {
       return;
     }
-    uro.office = office;
-    uro.role = role;
-    uro.user = group.manager.user;
+    uro.setOffice(office);
+    uro.setRole(role);
+    uro.setUser(group.getManager().getUser());
     uro.save();   
-    log.debug("Creato ruolo {} per l'utente {}", role.name, uro.user.person.fullName());
+    log.debug("Creato ruolo {} per l'utente {}", 
+        role.getName(), uro.getUser().getPerson().fullName());
   }
 
   /**
@@ -105,18 +102,19 @@ public class GroupManager {
    */
   public boolean deleteManager(Group group) {
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
-    List<Group> managerGroups = groupDao.groupsByManager(Optional.fromNullable(group.manager));
+    List<Group> managerGroups = groupDao.groupsByManager(Optional.fromNullable(group.getManager()));
     if (managerGroups.size() > 1) {
       log.debug("Non elimino il ruolo perchè {} ha almeno un altro gruppo su cui è responsabile", 
-          group.manager.fullName());
+          group.getManager().fullName());
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(group.manager.user, role, group.manager.office);
+        uroDao.getUsersRolesOffices(
+            group.getManager().getUser(), role, group.getManager().getOffice());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 
-          uro.get().role.name, uro.get().user.person.fullName());
+          uro.get().getRole().getName(), uro.get().getUser().getPerson().fullName());
       return true;
     }
     return false;
@@ -158,6 +156,7 @@ public class GroupManager {
   /**
    * Genera il dto contenente le liste dei possibili modificatori dello stato delle info
    * della persona passata come parametro.
+   *
    * @param person la persona di cui conoscere tutti i possibili modificatori delle proprie info
    * @return il dto contenente tutte le informazioni degli utenti che possono in qualche modo
    *     modificare lo stato delle informazioni della persona passata come parametro.
@@ -166,47 +165,48 @@ public class GroupManager {
 
     Map<Role, List<User>> map = Maps.newHashMap();
 
-    if (role.name.equals(Role.GROUP_MANAGER)) {
+    if (role.getName().equals(Role.GROUP_MANAGER)) {
       if (!groupDao.myGroups(person).isEmpty()) {
         map.put(role, groupDao.myGroups(person).stream()
-            .map(g -> g.manager.user).collect(Collectors.toList()));
+            .map(g -> g.getManager().getUser()).collect(Collectors.toList()));
       } else {
         map.put(role, Lists.emptyList());
       }
     }
-    if (role.name.equals(Role.MEAL_TICKET_MANAGER)) {
-      map.put(role, getMealTicketsManager(person.office));
+    if (role.getName().equals(Role.MEAL_TICKET_MANAGER)) {
+      map.put(role, getMealTicketsManager(person.getOffice()));
     }
 
-    if (role.name.equals(Role.PERSONNEL_ADMIN)) {
-      map.put(role, getPersonnelAdminInSeat(person.office));
+    if (role.getName().equals(Role.PERSONNEL_ADMIN)) {
+      map.put(role, getPersonnelAdminInSeat(person.getOffice()));
     }
-    if (role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-      map.put(role, getPersonnelAdminMiniInSeat(person.office));
+    if (role.getName().equals(Role.PERSONNEL_ADMIN_MINI)) {
+      map.put(role, getPersonnelAdminMiniInSeat(person.getOffice()));
     }
-    if (role.name.equals(Role.REGISTRY_MANAGER)) {
-      map.put(role, getRegistryManager(person.office));
+    if (role.getName().equals(Role.REGISTRY_MANAGER)) {
+      map.put(role, getRegistryManager(person.getOffice()));
     }
-    if (role.name.equals(Role.REPERIBILITY_MANAGER)) {
-      if (!person.reperibility.isEmpty()) {
-        map.put(role, person.reperibility.stream()
-            .map(pr -> pr.personReperibilityType.supervisor.user).collect(Collectors.toList()));
+    if (role.getName().equals(Role.REPERIBILITY_MANAGER)) {
+      if (!person.getReperibility().isEmpty()) {
+        map.put(role, person.getReperibility().stream()
+            .map(pr -> pr.getPersonReperibilityType().getSupervisor().getUser())
+            .collect(Collectors.toList()));
       } 
     }
 
-    if (role.name.equals(Role.SEAT_SUPERVISOR)) {
-      map.put(role, getSeatSupervisor(person.office));
+    if (role.getName().equals(Role.SEAT_SUPERVISOR)) {
+      map.put(role, getSeatSupervisor(person.getOffice()));
     }
-    if (role.name.equals(Role.SHIFT_MANAGER)) {
-      if (!person.personShifts.isEmpty()) {
-        map.put(role, person.personShifts.stream()
-            .flatMap(ps -> ps.personShiftShiftTypes.stream()
-                .map(psst -> psst.shiftType.shiftCategories.supervisor.user))
+    if (role.getName().equals(Role.SHIFT_MANAGER)) {
+      if (!person.getPersonShifts().isEmpty()) {
+        map.put(role, person.getPersonShifts().stream()
+            .flatMap(ps -> ps.getPersonShiftShiftTypes().stream()
+                .map(psst -> psst.getShiftType().getShiftCategories().getSupervisor().getUser()))
             .collect(Collectors.toList()));              
       } 
     }
-    if (role.name.equals(Role.TECHNICAL_ADMIN)) {
-      map.put(role, getTechnicalAdminInSeat(person.office));
+    if (role.getName().equals(Role.TECHNICAL_ADMIN)) {
+      map.put(role, getTechnicalAdminInSeat(person.getOffice()));
     }
 
 

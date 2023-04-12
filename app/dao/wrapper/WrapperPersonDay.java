@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,13 +19,14 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
 import dao.PersonDayDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.PersonManager;
 import models.Contract;
 import models.ContractStampProfile;
@@ -42,6 +43,7 @@ import org.joda.time.YearMonth;
  *
  * @author Alessandro Martelli
  */
+@Slf4j
 public class WrapperPersonDay implements IWrapperPersonDay {
 
   private final PersonDay value;
@@ -98,15 +100,15 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     //Assegnare logicamente il previousForProgressive
-    if (this.value.date.getDayOfMonth() == 1) {
+    if (this.value.getDate().getDayOfMonth() == 1) {
       //Primo giorno del mese
       return;
     }
 
 
-    if (this.getPersonDayContract().get().sourceDateResidual != null
-            && this.getPersonDayContract().get().sourceDateResidual
-                    .isEqual(this.value.date)) {
+    if (this.getPersonDayContract().get().getSourceDateResidual() != null
+            && this.getPersonDayContract().get().getSourceDateResidual()
+                    .isEqual(this.value.getDate())) {
       //Giorno successivo all'inizializzazione
       return;
     }
@@ -119,8 +121,8 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     } else {
 
       List<PersonDay> personDayInMonthAsc = personDayDao
-              .getPersonDayInMonth(this.value.person,
-                      new YearMonth(this.value.date));
+              .getPersonDayInMonth(this.value.getPerson(),
+                      new YearMonth(this.value.getDate()));
       for (int i = 1; i < personDayInMonthAsc.size(); i++) {
         PersonDay current = personDayInMonthAsc.get(i);
         PersonDay previous = personDayInMonthAsc.get(i - 1);
@@ -135,7 +137,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
 
     //Non stesso contratto
     // TODO: (equivalente a caso this.value.equals(beginDate)
-    if (!DateUtility.isDateIntoInterval(candidate.date,
+    if (!DateUtility.isDateIntoInterval(candidate.getDate(),
             factory.create(this.getPersonDayContract().get()).getContractDateInterval())) {
       return;
     }
@@ -172,7 +174,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
       return;
     }
 
-    LocalDate realPreviousDate = this.value.date.minusDays(1);
+    LocalDate realPreviousDate = this.value.getDate().minusDays(1);
 
     PersonDay candidate = null;
 
@@ -181,7 +183,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     } else {
 
       candidate = personDayDao
-              .getPreviousPersonDay(this.value.person, this.value.date);
+              .getPreviousPersonDay(this.value.getPerson(), this.value.getDate());
     }
 
     //primo giorno del contratto
@@ -190,7 +192,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     //giorni non consecutivi
-    if (!candidate.date.isEqual(realPreviousDate)) {
+    if (!candidate.getDate().isEqual(realPreviousDate)) {
       return;
     }
 
@@ -208,7 +210,7 @@ public class WrapperPersonDay implements IWrapperPersonDay {
       return this.personDayContract;
     }
 
-    Contract contract = contractDao.getContract(this.value.date, this.value.person);
+    Contract contract = contractDao.getContract(this.value.getDate(), this.value.getPerson());
 
     if (contract == null) {
       this.personDayContract = Optional.absent();
@@ -236,12 +238,12 @@ public class WrapperPersonDay implements IWrapperPersonDay {
       return this.isFixedTimeAtWorkk;
     }
 
-    for (ContractStampProfile csp : contract.get().contractStampProfile) {
+    for (ContractStampProfile csp : contract.get().getContractStampProfile()) {
 
-      DateInterval cspInterval = new DateInterval(csp.beginDate, csp.endDate);
+      DateInterval cspInterval = new DateInterval(csp.getBeginDate(), csp.getEndDate());
 
-      if (DateUtility.isDateIntoInterval(this.value.date, cspInterval)) {
-        this.isFixedTimeAtWorkk = csp.fixedworkingtime;
+      if (DateUtility.isDateIntoInterval(this.value.getDate(), cspInterval)) {
+        this.isFixedTimeAtWorkk = csp.isFixedworkingtime();
         return this.isFixedTimeAtWorkk;
       }
     }
@@ -261,21 +263,26 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent()) {
-
+      log.trace("WrapperPersonDay::getWorkingTimeTypeDay() -> trovato contratto nel giorno {}",
+          getValue().getDate());
       for (ContractWorkingTimeType cwtt :
-              this.getPersonDayContract().get().contractWorkingTimeType) {
+              this.getPersonDayContract().get().getContractWorkingTimeType()) {
 
-        if (DateUtility.isDateIntoInterval(this.value.date,
+        if (DateUtility.isDateIntoInterval(this.value.getDate(),
                 factory.create(cwtt).getDateInverval())) {
 
-          WorkingTimeTypeDay wttd = cwtt.workingTimeType.workingTimeTypeDays
-                  .get(this.value.date.getDayOfWeek() - 1);
+          WorkingTimeTypeDay wttd = cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
+                  .get(this.value.getDate().getDayOfWeek() - 1);
 
-          Preconditions.checkState(wttd.dayOfWeek == value.date.getDayOfWeek());
+          Preconditions.checkState(wttd.getDayOfWeek() == value.getDate().getDayOfWeek());
           return Optional.fromNullable(wttd);
         }
 
       }
+    } else {
+      log.info("WrapperPersonDay::getWorkingTimeTypeDay() -> contratto non presente "
+          + "per {} nel giorno {}", 
+          getValue().getPerson().getFullname(), getValue().getDate());
     }
     return Optional.absent();
   }
@@ -285,10 +292,10 @@ public class WrapperPersonDay implements IWrapperPersonDay {
    */
   public Stamping getLastStamping() {
     Stamping last = null;
-    for (Stamping s : value.stampings) {
+    for (Stamping s : value.getStampings()) {
       if (last == null) {
         last = s;
-      } else if (last.date.isBefore(s.date)) {
+      } else if (last.getDate().isBefore(s.getDate())) {
         last = s;
       }
     }
@@ -302,11 +309,11 @@ public class WrapperPersonDay implements IWrapperPersonDay {
     }
 
     if (getPersonDayContract().isPresent() 
-        && !getPersonDayContract().get().personalWorkingTimes.isEmpty()) {
+        && !getPersonDayContract().get().getPersonalWorkingTimes().isEmpty()) {
       
-      for (PersonalWorkingTime pwt : getPersonDayContract().get().personalWorkingTimes) {
-        if (DateUtility.isDateIntoInterval(this.value.date,
-            new DateInterval(pwt.beginDate, pwt.endDate))) {
+      for (PersonalWorkingTime pwt : getPersonDayContract().get().getPersonalWorkingTimes()) {
+        if (DateUtility.isDateIntoInterval(this.value.getDate(),
+            new DateInterval(pwt.getBeginDate(), pwt.getEndDate()))) {
           return Optional.fromNullable(pwt);
         }
       }

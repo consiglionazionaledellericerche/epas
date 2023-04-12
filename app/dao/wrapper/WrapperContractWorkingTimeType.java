@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,9 @@
 
 package dao.wrapper;
 
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.cnr.iit.epas.DateInterval;
+import javax.inject.Inject;
 import models.ContractWorkingTimeType;
 
 /**
@@ -44,7 +44,7 @@ public class WrapperContractWorkingTimeType implements IWrapperContractWorkingTi
    */
   @Override
   public DateInterval getDateInverval() {
-    return new DateInterval(value.beginDate, value.endDate);
+    return new DateInterval(value.getBeginDate(), value.getEndDate());
   }
 
 }

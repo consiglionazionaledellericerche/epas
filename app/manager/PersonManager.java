@@ -128,8 +128,8 @@ public class PersonManager {
 
     final Map<AbsenceType, Integer> absenceCodeMap = Maps.newHashMap();
 
-    personDays.stream().flatMap(personDay -> personDay.absences.stream()
-        .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
+    personDays.stream().flatMap(personDay -> personDay.getAbsences().stream()
+        .<AbsenceType>map(absence -> absence.getAbsenceType())).forEach(absenceType -> {
           Integer count = absenceCodeMap.get(absenceType);
           absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
         });
@@ -146,7 +146,7 @@ public class PersonManager {
    */
   public List<Absence> listAbsenceCodes(List<PersonDay> personDays) {
     final List<Absence> list = Lists.newArrayList();
-    personDays.stream().flatMap(personDay -> personDay.absences.stream()
+    personDays.stream().flatMap(personDay -> personDay.getAbsences().stream()
         .<Absence>map(absence -> absence)).forEach(absence -> {          
           list.add(absence);
         });
@@ -172,12 +172,12 @@ public class PersonManager {
 
     for (PersonDay pd : personDays) {
 
-      if (pd.isHoliday) {
+      if (pd.isHoliday()) {
         continue;
       }
       boolean find = false;
       for (Contract contract : contracts) {
-        if (DateUtility.isDateIntoInterval(pd.date, contract.periodInterval())) {
+        if (DateUtility.isDateIntoInterval(pd.getDate(), contract.periodInterval())) {
           find = true;
         }
       }
@@ -190,15 +190,15 @@ public class PersonManager {
       
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
-      } else if (!fixed && pd.stampings.size() > 0 
-          && !pd.stampings.stream().anyMatch(st -> st.markedByTelework)
+      } else if (!fixed && pd.getStampings().size() > 0 
+          && !pd.getStampings().stream().anyMatch(st -> st.isMarkedByTelework())
           && !personDayManager.isAllDayAbsences(pd) 
-          && pd.person.qualification.qualification < 4) {
+          && pd.getPerson().getQualification().getQualification() < 4) {
         basedDays++;
-      } else if (!fixed && pd.stampings.size() > 0
-          && !pd.stampings.stream().anyMatch(st -> st.markedByTelework)
+      } else if (!fixed && pd.getStampings().size() > 0
+          && !pd.getStampings().stream().anyMatch(st -> st.isMarkedByTelework())
           && !personDayManager.isAllDayAbsences(pd) 
-          && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
+          && personDayManager.enoughTimeInSeat(pd.getStampings(), day)) {
         basedDays++;
       } 
 
@@ -217,14 +217,14 @@ public class PersonManager {
         .getActiveContractsInPeriod(person, begin, Optional.of(end));
 
     Contract newerContract = contractsInPeriod.stream().filter(contract ->
-        contract.sourceDateResidual != null).max(Comparator
+        contract.getSourceDateResidual() != null).max(Comparator
         .comparing(Contract::getSourceDateResidual)).orElse(null);
 
-    if (newerContract != null && newerContract.sourceDateRecoveryDay != null
-        && !newerContract.sourceDateRecoveryDay.isBefore(begin)
-        && !newerContract.sourceDateRecoveryDay.isAfter(end)) {
-      return newerContract.sourceRecoveryDayUsed + absenceDao
-          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay.plusDays(1), end, "91")
+    if (newerContract != null && newerContract.getSourceDateRecoveryDay() != null
+        && !newerContract.getSourceDateRecoveryDay().isBefore(begin)
+        && !newerContract.getSourceDateRecoveryDay().isAfter(end)) {
+      return newerContract.getSourceRecoveryDayUsed() + absenceDao
+          .absenceInPeriod(person, newerContract.getSourceDateRecoveryDay().plusDays(1), end, "91")
       .size();
     }
 
@@ -295,7 +295,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      value += pd.timeAtWork;
+      value += pd.getTimeAtWork();
     }
     return value;
   }
@@ -317,8 +317,8 @@ public class PersonManager {
         Optional.absent(), from, to, Optional.fromNullable(justifiedTypeName), 
         false, false);
     for (Absence abs : absences) {
-      int sum = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
-      if (sum < abs.timeToRecover) {
+      int sum = abs.getTimeVariations().stream().mapToInt(o -> o.getTimeVariation()).sum();
+      if (sum < abs.getTimeToRecover()) {
         absencesToRecover.add(abs);
       }
     }
@@ -340,11 +340,12 @@ public class PersonManager {
               @Override
               public AbsenceToRecoverDto apply(Absence absence) {
                 return new AbsenceToRecoverDto(
-                absence, absence.personDay.date, absence.expireRecoverDate,
-                absence.timeToRecover,
-                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
-                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
-                / (float) absence.timeToRecover * 100)
+                absence, absence.getPersonDay().getDate(), absence.getExpireRecoverDate(),
+                absence.getTimeToRecover(),
+                absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum(),
+                Math.round(
+                    absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum() 
+                / (float) absence.getTimeToRecover() * 100)
                 );
               }
             }
@@ -389,11 +390,11 @@ public class PersonManager {
   public void properPersonCreate(Person person) {
     userManager.createUser(person);
     // Se il campo eppn è vuoto viene calcolato euristicamente...
-    if (person.email != null && person.eppn == null) {
-      person.eppn = eppn(person.user.username, person.email);
+    if (person.getEmail() != null && person.getEppn() == null) {
+      person.setEppn(eppn(person.getUser().getUsername(), person.getEmail()));
     }
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.user, person.office, employee);
+    officeManager.setUro(person.getUser(), person.getOffice(), employee);
   }
 
 }

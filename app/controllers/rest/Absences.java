@@ -111,7 +111,7 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -146,7 +146,7 @@ public class Absences extends Controller {
   @BasicAuth
   public static void insertAbsence(
       Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
-      String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
+      @Required String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
       @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes) {
     Person person = 
         personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
@@ -156,7 +156,7 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     log.info("Richiesto inserimento assenza via REST -> eppn = {}, email = {}, absenceCode = {}, "
         + "begin = {}, end = {}, hours = {}, minutes = {}", 
         eppn, email, absenceCode, begin, end, hours, minutes);
@@ -173,7 +173,7 @@ public class Absences extends Controller {
         JsonResponse.badRequest("Tipo assenza non valido");
       }
 
-      val justifiedType = absenceType.get().justifiedTypesPermitted.iterator().next();
+      val justifiedType = absenceType.get().getJustifiedTypesPermitted().iterator().next();
       val groupAbsenceType = absenceType.get().defaultTakableGroup(); 
       val report = absenceService.insert(person, groupAbsenceType, begin, end, absenceType.get(),
           justifiedType, hours, minutes, false, absenceManager);
@@ -210,9 +210,9 @@ public class Absences extends Controller {
   @BasicAuth
   public static void checkAbsence(
       Long id, String eppn, String email, Long personPerseoId,
-      String fiscalCode, String number, String absenceCode, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate end, 
+      String fiscalCode, String number, @Required String absenceCode,
+      @CheckWith(LocalDateNotTooFar.class) LocalDate begin,
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end,
       Integer hours, Integer minutes)
           throws JsonProcessingException {
 
@@ -224,7 +224,7 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getOffice());
 
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -240,14 +240,14 @@ public class Absences extends Controller {
             end.getMonthOfYear()));
 
     if (!recap.isPresent()) {
-      JsonResponse.notFound("Non esistono riepiloghi per" + person.get().name + " "
-          + person.get().surname + " da cui prender le informazioni per il calcolo");
+      JsonResponse.notFound("Non esistono riepiloghi per" + person.get().getName() + " "
+          + person.get().getSurname() + " da cui prender le informazioni per il calcolo");
     } else {
       val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
       if (!absenceType.isPresent()) {
         JsonResponse.badRequest("Tipo assenza non valido");
       }
-      val justifiedType = absenceType.get().justifiedTypesPermitted.iterator().next();
+      val justifiedType = absenceType.get().getJustifiedTypesPermitted().iterator().next();
       val groupAbsenceType = absenceType.get().defaultTakableGroup(); 
       val report = absenceService.insert(person.get(), groupAbsenceType, begin, end, 
           absenceType.get(), justifiedType, hours, minutes, false, absenceManager);
@@ -271,7 +271,7 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.personDay.person.office);
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
     absenceManager.removeAbsence(absence);
 
@@ -301,7 +301,7 @@ public class Absences extends Controller {
         personPerseoId, fiscalCode, number);
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     
@@ -330,7 +330,7 @@ public class Absences extends Controller {
       JsonResponse.badRequest("Mandatory parameters missing (begin, end)");
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     val groupAbsenceType = 
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
@@ -346,7 +346,7 @@ public class Absences extends Controller {
 
     log.debug("Richiesto inserimento assenze per {}. "
         + "Codice/Tipo {}, dal {} al {}", 
-        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType,
+        person.getFullname(), absenceType != null ? absenceType.getCode() : groupAbsenceType,
             begin, end);
 
     val absences = 
@@ -355,7 +355,7 @@ public class Absences extends Controller {
 
     log.info("Effettuato inserimento assenze per {}. "
         + "Codice/Tipo {}, dal {} al {}", 
-        person.getFullname(), absenceType != null ? absenceType.code : groupAbsenceType, 
+        person.getFullname(), absenceType != null ? absenceType.getCode() : groupAbsenceType, 
         begin, end);
 
     renderJSON(
@@ -375,25 +375,26 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.personDay.person.office);
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
-    if (absence.absenceFile == null) {
+    if (absence.getAbsenceFile() == null) {
       JsonResponse.notFound();
     }
 
-    response.setContentTypeIfNotSet(absence.absenceFile.type());
+    response.setContentTypeIfNotSet(absence.getAbsenceFile().type());
 
     log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
-        absence.absenceFile.type(), absence.id, absence.absenceFile.getFile());
+        absence.getAbsenceFile().type(), absence.id, absence.getAbsenceFile().getFile());
 
     String filename = String.format("assenza-%s-%s",
-        absence.personDay.person.getFullname().replace(" ", "-"), absence.getAbsenceDate());
-    if (ImageUtils.fileExtension(absence.absenceFile).isPresent()) {
+        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"),
+        absence.getAbsenceDate());
+    if (ImageUtils.fileExtension(absence.getAbsenceFile()).isPresent()) {
       filename = 
-          String.format("%s%s", filename, ImageUtils.fileExtension(absence.absenceFile).get());
+          String.format("%s%s", filename, ImageUtils.fileExtension(absence.getAbsenceFile()).get());
     }
 
-    renderBinary(absence.absenceFile.get(), filename, absence.absenceFile.length());
+    renderBinary(absence.getAbsenceFile().get(), filename, absence.getAbsenceFile().length());
   }
 
 
@@ -408,12 +409,12 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.personDay.person.office);
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
     if (file == null) {
       JsonResponse.badRequest("Null or empty file");
     } else {
-      absence.absenceFile = file;
+      absence.setAbsenceFile(file);
       absence.save();
       log.info("Added attachment to absence {} via REST", absence);
       JsonResponse.ok();
@@ -432,13 +433,13 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.personDay.person.office);
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
-    if (absence.absenceFile == null) {
+    if (absence.getAbsenceFile() == null) {
       JsonResponse.notFound();
     }
 
-    absence.absenceFile.getFile().delete();
+    absence.getAbsenceFile().getFile().delete();
     absence.save();
 
     log.info("Deleted attachment for absence {} via REST", absence);
@@ -467,7 +468,7 @@ public class Absences extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona associata all'assenza
-    rules.checkIfPermitted(absence.personDay.person.office);
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
     return absence;
   }
 

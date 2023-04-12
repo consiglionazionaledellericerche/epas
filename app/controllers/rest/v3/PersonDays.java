@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -84,7 +84,7 @@ public class PersonDays extends Controller {
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     PersonDay pd = 
         personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
@@ -189,12 +189,12 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     val monthRecap = 
         PersonMonthRecapDto.builder().year(year).month(month)
         .basedWorkingDays(
-            personManager.basedWorkingDays(personDays, person.contracts, null))
+            personManager.basedWorkingDays(personDays, person.getContracts(), null))
         .person(PersonShowTerseDto.build(person))
         .personDays(personDays.stream().map(pd -> PersonDayShowTerseDto.build(pd))
             .collect(Collectors.toList()))
@@ -214,7 +214,7 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
     val personDays = personDayDao.getOffSitePersonDaysByPersonInPeriod(
@@ -238,6 +238,26 @@ public class PersonDays extends Controller {
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
     val personDays = personDayDao.getOffSitePersonDaysByOfficeInPeriod(
+        office, yearMonth.toLocalDate(1), 
+        yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
+
+    renderJSON(gson.toJson(personDays.stream().map(
+        pd -> PersonDayShowDto.build(pd)).collect(Collectors.toList())));
+  }
+
+  /**
+   * Metodo rest che ritorna un json contenente la lista dei person day di una sede
+   * nell'anno/mese passati come parametro e che abbiano almeno una timbratura per
+   * motivi di servizio.
+   */
+  public static void serviceExitByOfficeAndMonth(Long id, String code, String codeId,
+      String sedeId, Integer year, Integer month) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office =
+        Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
+    val gson = gsonBuilder.create();
+    val yearMonth = new YearMonth(year, month);
+    val personDays = personDayDao.getServiceExitPersonDaysByOfficeInPeriod(
         office, yearMonth.toLocalDate(1), 
         yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue());
 

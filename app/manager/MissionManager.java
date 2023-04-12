@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -29,6 +28,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
@@ -162,14 +162,14 @@ public class MissionManager {
       return false;
     }
     
-    Office office = body.person.office;
+    Office office = body.person.getOffice();
 
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
         office, EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
-          + "non è valorizzato per la sede {}", office.name);
+          + "non è valorizzato per la sede {}", office.getName());
       Cache.delete(missionCacheKey);
       return false;
     }
@@ -190,8 +190,9 @@ public class MissionManager {
             body.dataFine.toLocalDate(), types, Optional.<Boolean>absent(), 
             Optional.<Boolean>absent());
     if (!existingMissionWithoutId.isEmpty()  
-        && existingMissionWithoutId.stream().allMatch(abs -> abs.absenceType.code.equals("92") 
-            || abs.absenceType.code.equals("92M"))) {
+        && existingMissionWithoutId.stream()
+          .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
+            || abs.getAbsenceType().getCode().equals("92M"))) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
           + " nei giorni {}-{}. Questa missione non viene processata.",
           body.dataInizio.toLocalDate(), body.dataFine.toLocalDate());
@@ -223,7 +224,7 @@ public class MissionManager {
 
       if (!atomicInsert(situation, body, actualDate)) {
         managedMissionOk = false;
-      };
+      }
       actualDate = actualDate.plusDays(1);
 
     }
@@ -299,11 +300,11 @@ public class MissionManager {
     Optional<ContractWorkingTimeType> cwtt = wrappedPerson.getCurrentContractWorkingTimeType();
     WorkingTimeTypeDay dayNumber = null;
     if (cwtt.isPresent()) {
-      WorkingTimeType wtt = cwtt.get().workingTimeType;
+      WorkingTimeType wtt = cwtt.get().getWorkingTimeType();
       int day = actualDate.getDayOfWeek();
 
-      for (WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays) {
-        if (wttd.dayOfWeek == day) {
+      for (WorkingTimeTypeDay wttd : wtt.getWorkingTimeTypeDays()) {
+        if (wttd.getDayOfWeek() == day) {
           dayNumber = wttd;
         }
       }
@@ -333,10 +334,11 @@ public class MissionManager {
       return false;
     }
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        body.person.office, EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
+        body.person.getOffice(), 
+        EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
-          + "non è valorizzato per la sede {}", body.person.office.name);
+          + "non è valorizzato per la sede {}", body.person.getOffice().getName());
       return false;
     }
     //AbsenceForm absenceForm = buildAbsenceForm(body);
@@ -355,9 +357,9 @@ public class MissionManager {
     List<LocalDate> dates = datesToCompute(body);
     //lista assenze da rimuovere
     List<Absence> toRemove = missions.stream()
-        .filter(abs -> !dates.contains(abs.personDay.date)).collect(Collectors.toList());
+        .filter(abs -> !dates.contains(abs.getPersonDay().getDate())).collect(Collectors.toList());
     List<LocalDate> missionsDate = missions.stream()
-        .map(a -> a.personDay.date).collect(Collectors.toList());
+        .map(a -> a.getPersonDay().getDate()).collect(Collectors.toList());
     //lista assenze da inserire
     List<LocalDate> toAdd = dates.stream()
         .filter(p -> !missionsDate.contains(p)).collect(Collectors.toList());        
@@ -375,7 +377,7 @@ public class MissionManager {
       situation = getSituation(dateToConsider, body, workInterval);
       if (!atomicInsert(situation, body, dateToConsider)) {
         managedMissionOk = false;
-      };
+      }
       
     }
     /*
@@ -387,9 +389,9 @@ public class MissionManager {
     for (Absence abs : missions) {
       LocalDateTime actual = body.dataInizio;
       while (!actual.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
-        if (abs.personDay.date.isEqual(actual.toLocalDate())) {
-          int time = getFromDayOfMission(body.person, actual.toLocalDate()).workingTime;
-          int minutes = abs.justifiedMinutes;
+        if (abs.getPersonDay().getDate().isEqual(actual.toLocalDate())) {
+          int time = getFromDayOfMission(body.person, actual.toLocalDate()).getWorkingTime();
+          int minutes = abs.getJustifiedMinutes();
           Situation sit = getSituation(actual, body, workInterval);
           if (minutes != sit.difference) {
             if ((minutes == 0 && sit.difference >= time) 
@@ -495,12 +497,13 @@ public class MissionManager {
     if (hours != null && minutes != null) {
       quantity = hours * DateTimeConstants.MINUTES_PER_HOUR + minutes;
     }
-    int day = getFromDayOfMission(person, to.toLocalDate()).dayOfWeek;
+    int day = getFromDayOfMission(person, to.toLocalDate()).getDayOfWeek();
     if (quantity < 0) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92NG").get();
       type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
 
-    } else if (quantity == 0 || quantity > getFromDayOfMission(person, to.toLocalDate()).workingTime
+    } else if (quantity == 0 
+                || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
@@ -520,7 +523,7 @@ public class MissionManager {
     }
 
     log.debug(LOG_PREFIX + "Sto per inserire una missione per {}. Codice {}, {} - {}, "
-        + "tempo {}:{}", person, mission.code, from, to, hours, minutes);
+        + "tempo {}:{}", person, mission.getCode(), from, to, hours, minutes);
 
     Integer localHours = hours;
     Integer localMinutes = minutes;
@@ -535,16 +538,16 @@ public class MissionManager {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = personDayManager
             .getOrCreateAndPersistPersonDay(person, absence.getAbsenceDate());
-        absence.personDay = personDay;
-        personDay.absences.add(absence);
+        absence.setPersonDay(personDay);
+        personDay.getAbsences().add(absence);
         if (idOrdine != null) {
-          absence.externalIdentifier = idOrdine;
+          absence.setExternalIdentifier(idOrdine);
         } else {
-          absence.externalIdentifier = id;
+          absence.setExternalIdentifier(id);
         }
-        absence.note = "Missione: " + numero + '\n' 
+        absence.setNote("Missione: " + numero + '\n' 
             + "Anno: " + anno + '\n' 
-            + "(Identificativo: " + absence.externalIdentifier + ")";
+            + "(Identificativo: " + absence.getExternalIdentifier() + ")");
 
         absence.save();
 
@@ -554,8 +557,9 @@ public class MissionManager {
               absence, group, true, false, false);  
         }
 
-        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", absence.absenceType.code, 
-            absence.personDay.date, absence.personDay.person.fullName());
+        log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", 
+            absence.getAbsenceType().getCode(), 
+            absence.getPersonDay().getDate(), absence.getPersonDay().getPerson().fullName());
 
       }
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
@@ -595,7 +599,8 @@ public class MissionManager {
       notificationManager.notificationAbsencePolicy(currentUser, 
           abs, group, false, false, true);
       log.info(LOG_PREFIX + "Rimossa assenza {} del {} per {}.", 
-          abs.absenceType.code, abs.personDay.date, abs.personDay.person.getFullname());
+          abs.getAbsenceType().getCode(), abs.getPersonDay().getDate(), 
+          abs.getPersonDay().getPerson().getFullname());
 
     }
     if (result) {
@@ -615,8 +620,8 @@ public class MissionManager {
   private boolean atomicRemoval(Absence abs, boolean result) {
     try {
       abs.delete();
-      abs.personDay.absences.remove(abs);
-      abs.personDay.save();
+      abs.getPersonDay().getAbsences().remove(abs);
+      abs.getPersonDay().save();
       result = true;
     } catch (Exception ex) {
       result = false;
@@ -636,8 +641,8 @@ public class MissionManager {
     if (missions.isPresent()) {
 
       for (Absence abs : missions.get()) {
-        if (abs.personDay.date.isBefore(begin)) {
-          begin = abs.personDay.date;
+        if (abs.getPersonDay().getDate().isBefore(begin)) {
+          begin = abs.getPersonDay().getDate();
         }
       }
     }
@@ -674,7 +679,8 @@ public class MissionManager {
    * @param body l'oggetto dto proveniente dal mission manager
    * @param actualDate la data attuale su cui lavorare
    */
-  private boolean atomicInsert(Situation situation, MissionFromClient body, LocalDateTime actualDate) {
+  private boolean atomicInsert(
+      Situation situation, MissionFromClient body, LocalDateTime actualDate) {
     boolean missionInserted = false;
     
     if (situation.isFirstOrLastDay) {
@@ -688,7 +694,7 @@ public class MissionManager {
         } 
       } else {
         if (situation.difference 
-            > getFromDayOfMission(body.person, actualDate.toLocalDate()).workingTime) {
+            > getFromDayOfMission(body.person, actualDate.toLocalDate()).getWorkingTime()) {
           if (insertMission(body.destinazioneMissione, body.person,  
               null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
             missionInserted = true;

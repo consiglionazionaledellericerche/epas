@@ -31,7 +31,6 @@ import play.data.validation.Equals;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 
 /**
@@ -72,7 +71,7 @@ public class LostPassword extends Controller {
 
     flash.success("E' stata inviata una mail all'indirizzo %s. "
             + "Completare la procedura di recovery password entro la data di oggi.",
-        person.email);
+        person.getEmail());
     Secure.login();
   }
 
@@ -93,7 +92,7 @@ public class LostPassword extends Controller {
       flash.error("Token non valido.");
       Secure.login();
     }
-    if (!user.expireRecoveryToken.equals(LocalDate.now())) {
+    if (!user.getExpireRecoveryToken().equals(LocalDate.now())) {
       flash.error("Il token per effettuare il recupero password è scaduto. " 
           + "Effettuare una nuova richiesta.");
       Secure.login();
@@ -128,7 +127,8 @@ public class LostPassword extends Controller {
       Secure.login();
     }
 
-    if (user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now())) {
+    if (user.getExpireRecoveryToken() == null 
+        || !user.getExpireRecoveryToken().equals(LocalDate.now())) {
       flash.error("Il token per effettuare il recupero password è scaduto. " 
           + "Effettuare una nuova richiesta.");
       Secure.login();
@@ -139,9 +139,9 @@ public class LostPassword extends Controller {
       render("@lostPasswordRecovery", token, nuovaPassword, confermaPassword);
     }
 
-    user.password = Codec.hexMD5(nuovaPassword);
-    user.recoveryToken = null;
-    user.expireRecoveryToken = null;
+    user.updatePassword(nuovaPassword);
+    user.setRecoveryToken(null);
+    user.setExpireRecoveryToken(null);
     user.save();
 
     flash.success("La password è stata re-impostata con successo.");

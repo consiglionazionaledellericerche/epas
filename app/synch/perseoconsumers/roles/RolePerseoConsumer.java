@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,6 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package synch.perseoconsumers.roles;
 
 import com.google.common.base.Function;
@@ -30,7 +29,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.inject.Inject;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
@@ -151,7 +150,7 @@ public class RolePerseoConsumer {
     //Mappa per la ricerca degli office by perseoId
     Map<Long, Office> mapOffices = Maps.newHashMap();
     if (office.isPresent()) {
-      mapOffices.put(office.get().perseoId, office.get());
+      mapOffices.put(office.get().getPerseoId(), office.get());
     } else {
       // TODO: richiesta per tutte le sedi, mettercele tutte
     }
@@ -172,10 +171,10 @@ public class RolePerseoConsumer {
       Set<String> personRoles = peoplePerseoRoles.get(perseoRole.personPerseoId);
       if (personRoles == null) {
         personRoles = Sets.newHashSet();
-        personRoles.add(role.toString() + " - " + officeRole.name);
+        personRoles.add(role.toString() + " - " + officeRole.getName());
         peoplePerseoRoles.put(perseoRole.personPerseoId, personRoles);
       } else {
-        personRoles.add(role.toString() + " - " + officeRole.name);
+        personRoles.add(role.toString() + " - " + officeRole.getName());
       }
     }
 
@@ -204,16 +203,16 @@ public class RolePerseoConsumer {
     //Persone epas per perseoId.
     Map<Long, Person> epasPeople = Maps.newHashMap();
     for (Person person : personDao.list(Optional.of(office)).list()) {
-      if (person.perseoId != null) {
-        epasPeople.put(person.perseoId, person);
+      if (person.getPerseoId() != null) {
+        epasPeople.put(person.getPerseoId(), person);
       }
     }
 
     // Sedi per perseoId
     Map<Long, Office> epasOffices = Maps.newHashMap();
     for (Office seat : officeDao.allOffices().list()) {
-      if (seat.perseoId != null) {
-        epasOffices.put(seat.perseoId, seat);
+      if (seat.getPerseoId() != null) {
+        epasOffices.put(seat.getPerseoId(), seat);
       }
     }
 
@@ -233,14 +232,14 @@ public class RolePerseoConsumer {
         continue;
       }
       Optional<UsersRolesOffices> uroOpt = uroDao
-          .getUsersRolesOffices(epasPerson.user, role, epasOffice);
+          .getUsersRolesOffices(epasPerson.getUser(), role, epasOffice);
       if (uroOpt.isPresent()) {
         uroList.add(uroOpt.get());
       } else {
         UsersRolesOffices uro = new UsersRolesOffices();
-        uro.user = epasPerson.user;
-        uro.office = epasOffice;
-        uro.role = role;
+        uro.setUser(epasPerson.getUser());
+        uro.setOffice(epasOffice);
+        uro.setRole(role);
         uroList.add(uro);
       }
     }

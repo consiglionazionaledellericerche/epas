@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -39,8 +39,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste - personStamping - stampings -
@@ -114,9 +112,9 @@ public class PersonStampingDayRecap {
     wttd = this.wrPersonDay.getWorkingTimeTypeDay();
     
     lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.getPerson().office, EpasParam.LUNCH_INTERVAL, personDay.getDate());
+        personDay.getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, personDay.getDate());
     workInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.getPerson().office, EpasParam.WORK_INTERVAL, personDay.getDate());
+        personDay.getPerson().getOffice(), EpasParam.WORK_INTERVAL, personDay.getDate());
     
     /*Inizio nuovi campi per la gestione dell'orario personalizzato*/
     pwttd = this.wrPersonDay.getPersonalWorkingTime();
@@ -135,18 +133,18 @@ public class PersonStampingDayRecap {
           wrPersonDay.isFixedTimeAtWork(), lunchInterval, workInterval);
     } else { 
       // altrimenti setto le sole valid stamping
-      personDayManager.setValidPairStampings(personDay.stampings);  
+      personDayManager.setValidPairStampings(personDay.getStampings());  
     }
 
     // 2) genero le stamping template (colori e timbrature fittizie)
-    stampingsTemplate = getStampingsTemplate(personDay.stampings, stampingTemplateFactory, 
+    stampingsTemplate = getStampingsTemplate(personDay.getStampings(), stampingTemplateFactory, 
         numberOfInOut);
     
     note.addAll(getStampingsNote(this.stampingsTemplate));
 
     boolean thereAreAllDayAbsences = personDayManager.isAllDayAbsences(personDay);
 
-    if (wrPersonDay.isFixedTimeAtWork() && !personDay.isHoliday && !thereAreAllDayAbsences) {
+    if (wrPersonDay.isFixedTimeAtWork() && !personDay.isHoliday() && !thereAreAllDayAbsences) {
       if (fixedStampModificationType == null) {
         fixedStampModificationType =
             stampTypeManager.getStampMofificationType(
@@ -168,7 +166,7 @@ public class PersonStampingDayRecap {
         if (contract.getBeginDate().isAfter(personDay.getDate())
             || (contract.getSourceDateResidual() != null
             && personDay.getDate().isBefore(contract.getSourceDateResidual()))
-            || personDay.getDate().isBefore(personDay.getPerson().beginDate)) {
+            || personDay.getDate().isBefore(personDay.getPerson().getBeginDate())) {
           ignoreDay = true;
         }
 
@@ -199,7 +197,7 @@ public class PersonStampingDayRecap {
     // ##### Giorno festivo
 
     if (personDay.isHoliday() && personDay.getApprovedOnHoliday() <= 0
-        && !personDay.isTicketForcedByAdmin) {
+        && !personDay.isTicketForcedByAdmin()) {
       mealTicket = null;
       return;
     }
@@ -219,7 +217,7 @@ public class PersonStampingDayRecap {
     // ##### Available
 
     if (personDay.isTicketAvailable()) {
-      if (personDay.isTicketForcedByAdmin) {
+      if (personDay.isTicketForcedByAdmin()) {
         // si e forzato
         mealTicket = MEALTICKET_YES;
       } else if (personDay.isToday()) {
@@ -245,8 +243,8 @@ public class PersonStampingDayRecap {
     // ##### Giorni Passati e giorno attuale
     // ##### Not Available
 
-    if (!personDay.isTicketAvailable) {
-      if (personDay.isTicketForcedByAdmin) {
+    if (!personDay.isTicketAvailable()) {
+      if (personDay.isTicketForcedByAdmin()) {
         // no forzato
         mealTicket = MEALTICKET_NO;
       } else {
@@ -286,17 +284,17 @@ public class PersonStampingDayRecap {
     
     for (Stamping s : orderedStampings) {
       //sono dentro e trovo una uscita
-      if (isLastIn && s.way == WayType.out) {
+      if (isLastIn && s.getWay() == WayType.out) {
         //salvo l'uscita
         stampingsForTemplate.add(s);
         isLastIn = false;
         continue;
       }
       //sono dentro e trovo una entrata
-      if (isLastIn && s.way == WayType.in) {
+      if (isLastIn && s.getWay() == WayType.in) {
         //creo l'uscita fittizia
         Stamping stamping = new Stamping(null, null);
-        stamping.way = WayType.out;
+        stamping.setWay(WayType.out);
         stampingsForTemplate.add(stamping);
         //salvo l'entrata
         stampingsForTemplate.add(s);
@@ -305,7 +303,7 @@ public class PersonStampingDayRecap {
       }
 
       //sono fuori e trovo una entrata
-      if (!isLastIn && s.way == WayType.in) {
+      if (!isLastIn && s.getWay() == WayType.in) {
         //salvo l'entrata
         stampingsForTemplate.add(s);
         isLastIn = true;
@@ -313,10 +311,10 @@ public class PersonStampingDayRecap {
       }
 
       //sono fuori e trovo una uscita
-      if (!isLastIn && s.way == WayType.out) {
+      if (!isLastIn && s.getWay() == WayType.out) {
         //creo l'entrata fittizia
         Stamping stamping = new Stamping(null, null);
-        stamping.way = WayType.in;
+        stamping.setWay(WayType.in);
         stampingsForTemplate.add(stamping);
         //salvo l'uscita
         stampingsForTemplate.add(s);
@@ -327,13 +325,13 @@ public class PersonStampingDayRecap {
       if (isLastIn) {
         //creo l'uscita fittizia
         Stamping stamping = new Stamping(null, null);
-        stamping.way = WayType.out;
+        stamping.setWay(WayType.out);
         stampingsForTemplate.add(stamping);
         isLastIn = false;
       } else {
         //creo l'entrata fittizia
         Stamping stamping = new Stamping(null, null);
-        stamping.way = WayType.in;
+        stamping.setWay(WayType.in);
         stampingsForTemplate.add(stamping);
         isLastIn = true;
       }
@@ -370,8 +368,9 @@ public class PersonStampingDayRecap {
   private List<String> getStampingsNote(List<StampingTemplate> stampingsTemplate) {
     List<String> note = Lists.newArrayList();
     for (StampingTemplate stampingTemplate : stampingsTemplate) {
-      if (stampingTemplate.stamping.note != null && !stampingTemplate.stamping.note.equals("")) {
-        note.add(stampingTemplate.hour + ": " + stampingTemplate.stamping.note);
+      if (stampingTemplate.stamping.getNote() != null 
+          && !stampingTemplate.stamping.getNote().equals("")) {
+        note.add(stampingTemplate.hour + ": " + stampingTemplate.stamping.getNote());
       }
     }
     return note;
@@ -379,7 +378,7 @@ public class PersonStampingDayRecap {
 
   /**
    * Metodo privato per la restituzione dell'intervallo orario.
-   * 
+   *
    * @param pwt il personal working time del dipendente.
    * @return l'intervallo orario di lavoro.
    */
@@ -389,7 +388,8 @@ public class PersonStampingDayRecap {
       return Optional.absent();
     }
     LocalTimeInterval interval = 
-        new LocalTimeInterval(pwt.get().timeSlot.beginSlot, pwt.get().timeSlot.endSlot);
+        new LocalTimeInterval(pwt.get().getTimeSlot().getBeginSlot(), 
+            pwt.get().getTimeSlot().getEndSlot());
     if (interval.to.isBefore(interval.from)) {
       return Optional.absent();
     } else {

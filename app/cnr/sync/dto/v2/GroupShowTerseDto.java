@@ -56,7 +56,7 @@ public class GroupShowTerseDto {
   public static GroupShowTerseDto build(Group group) {
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val groupDto = modelMapper.map(group, GroupShowTerseDto.class);
-    groupDto.setManager(PersonShowTerseDto.build(group.manager));
+    groupDto.setManager(PersonShowTerseDto.build(group.getManager()));
     return groupDto;
   }
 }

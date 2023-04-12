@@ -132,6 +132,10 @@ footer p {
 	display: inline-block;
 }
 
+#banner img#logo {
+	padding: 5px;
+}
+
 #nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
 	padding-right: 2px;
 	padding-left: 2px;

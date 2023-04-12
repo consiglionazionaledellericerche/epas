@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,12 +20,12 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -76,9 +76,9 @@ public class OfficeManager {
     if (!uro.isPresent()) {
 
       UsersRolesOffices newUro = new UsersRolesOffices();
-      newUro.user = user;
-      newUro.office = office;
-      newUro.role = role;
+      newUro.setUser(user);
+      newUro.setOffice(office);
+      newUro.setRole(role);
       newUro.save();
       return true;
     }
@@ -116,8 +116,8 @@ public class OfficeManager {
           (String) configuration.getValue());
       for (String ip : ipAddresses) {
         if (ipList != null && ipList.ipList.contains(ip) 
-            && officesWebStampingEnabled.contains(configuration.office)) {
-          offices.add(configuration.office);
+            && officesWebStampingEnabled.contains(configuration.getOffice())) {
+          offices.add(configuration.getOffice());
         }
       }
     }

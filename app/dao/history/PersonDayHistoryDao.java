@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,10 +19,10 @@ package dao.history;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import dao.AbsenceTypeDao;
 import java.util.List;
+import javax.inject.Inject;
 import models.Stamping;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -116,6 +116,7 @@ public class PersonDayHistoryDao {
    *
    * @return la lista dello storico di tutti i codici di missione orari.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> oldMissions() {
     List<AbsenceType> ids = Lists.newArrayList();
     AbsenceType type = absenceTypeDao.getAbsenceTypeByCode("92H1").get();
@@ -156,6 +157,7 @@ public class PersonDayHistoryDao {
    * @param id l'identificativo dell'assenza inserita
    * @return la lista delle revisioni dell'assenza con id passato.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<Absence>> specificAbsence(long id) {
     final AuditQuery query = auditReader.get().createQuery()
         .forRevisionsOfEntity(Absence.class, false, true)

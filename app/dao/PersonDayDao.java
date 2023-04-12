@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,12 +18,12 @@
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Office;
 import models.Person;
@@ -366,5 +366,32 @@ public class PersonDayDao extends DaoBase {
                     .and(stamping.reason.isNotEmpty()).or(stamping.place.isNotEmpty())))
         .distinct()
         .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura del tipo passato con stampType.
+   */
+  public List<PersonDay> getStampTypePersonDaysByOFficeInPeriod(
+      StampTypes stampType, Office office, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.office.eq(office),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(stampType))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura del tipo passato con stampType.
+   */
+  public List<PersonDay> getServiceExitPersonDaysByOfficeInPeriod(
+      Office office, LocalDate begin, LocalDate end) {
+    return getStampTypePersonDaysByOFficeInPeriod(
+        StampTypes.MOTIVI_DI_SERVIZIO, office, begin, end);
   }
 }

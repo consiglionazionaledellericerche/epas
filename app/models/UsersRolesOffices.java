@@ -24,6 +24,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -36,6 +38,8 @@ import play.data.validation.Unique;
  * successiva relazione fra user e person ma ciò non portava al risultato sperato (probabilmente a
  * causa della natura della relazione fra user e person OneToOne).
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "users_roles_offices")
 @Audited
@@ -48,7 +52,7 @@ public class UsersRolesOffices extends BaseModel {
   @JoinColumn(name = "user_id")
   @Required
   @NotNull
-  public User user;
+  private User user;
 
   
   @ManyToOne
@@ -56,14 +60,14 @@ public class UsersRolesOffices extends BaseModel {
   @Required
   @NotNull
   @Unique("user office role")
-  public Office office;
+  private Office office;
 
   
   @ManyToOne
   @JoinColumn(name = "role_id")
   @Required
   @NotNull
-  public Role role;
+  private Role role;
 
   @Override
   public String toString() {

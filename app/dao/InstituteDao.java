@@ -17,10 +17,10 @@
 
 package dao;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Institute;
 import models.query.QInstitute;

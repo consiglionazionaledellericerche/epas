@@ -93,15 +93,8 @@
       lavorativa o inserire le proprie timbrature con causale "Lavoro fuori sede".</p>
       <p><i class="fa fa-info-circle"></i> Selezionando "sì", sarà permesso ai dipendenti di specificare le proprie timbrature con causale preimpostata "lavoro fuori sede".</p>
     #{/if}
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_VACATIONS) }
-      &{'description.' + configuration.epasParam}
-    #{/if}
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_COMPENSATORY) }
-      &{'description.' + configuration.epasParam}
-    #{/if}
-    
+
+   
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.TR_AUTOCERTIFICATION) }
       &{'description.' + configuration.epasParam}
     #{/if}
@@ -281,6 +274,14 @@
 	  </p> 
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.PARENTAL_LEAVE_FOR_FATHERS) }
+      <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+      autonomamente il codice di assenza 21P o 21P2 per poter gestire le proprie richieste di congedo parentale per il padre.
+      A contorno di questo, il dipendente è tenuto ad effettuare un flusso di richiesta congedo parentale per informare la propria
+      amministrazione che intende usufruire del permesso in questione. 
+	  </p> 
+    #{/if}
+    
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
     #{/if}
@@ -447,6 +448,18 @@
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED) }
       <p>Abilitando questo paramentro si fa in modo che la richiesta di uscita di servizio per i tecnici/amministrativi venga inviata
        al responsabile del gruppo di lavoro di cui fanno parte.      
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di congedo parentale per il padre per i tecnologi/ricercatori venga inviata
+       al responsabile amministrativo della sede di lavoro di cui fanno parte.      
+      </p>
+    #{/if}
+    
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED) }
+      <p>Abilitando questo paramentro si fa in modo che la richiesta di congedo parentale per il padre per i tecnici/amministrativi venga inviata
+       al responsabile amministrativo della sede di lavoro di cui fanno parte.      
       </p>
     #{/if}
     

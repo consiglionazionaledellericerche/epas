@@ -66,24 +66,26 @@ public class PersonTroublesInMonthRecap {
 
     for (PersonDayInTrouble trouble : troubles) {
 
-      if (trouble.cause == Troubles.UNCOUPLED_FIXED) {
-        troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.getCause() == Troubles.UNCOUPLED_FIXED) {
+        troublesAutoFixedL.add(trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
-      if (trouble.cause == Troubles.NO_ABS_NO_STAMP) {
-        troublesNoAbsenceNoStampingsL.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.getCause() == Troubles.NO_ABS_NO_STAMP) {
+        troublesNoAbsenceNoStampingsL.add(trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
-      if (trouble.cause == Troubles.UNCOUPLED_WORKING) {
-        troublesNoAbsenceUncoupledStampingsNotHolidayL.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.getCause() == Troubles.UNCOUPLED_WORKING) {
+        troublesNoAbsenceUncoupledStampingsNotHolidayL.add(
+            trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
-      if (trouble.cause == Troubles.UNCOUPLED_HOLIDAY) {
-        troublesNoAbsenceUncoupledStampingsHolidayL.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.getCause() == Troubles.UNCOUPLED_HOLIDAY) {
+        troublesNoAbsenceUncoupledStampingsHolidayL.add(
+            trouble.getPersonDay().getDate().getDayOfMonth());
       }
 
-      if (trouble.cause == Troubles.NOT_ENOUGH_WORKTIME) {
-        troublesNotEnoughWorkTime.add(trouble.personDay.date.getDayOfMonth());
+      if (trouble.getCause() == Troubles.NOT_ENOUGH_WORKTIME) {
+        troublesNotEnoughWorkTime.add(trouble.getPersonDay().getDate().getDayOfMonth());
       }
     }
 

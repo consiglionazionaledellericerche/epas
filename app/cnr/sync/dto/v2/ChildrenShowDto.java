@@ -55,7 +55,7 @@ public class ChildrenShowDto {
    */
   public static ChildrenShowDto build(PersonChildren children) {
     val dto = modelMapper.map(children, ChildrenShowDto.class);
-    dto.setFiscalCode(children.taxCode);
+    dto.setFiscalCode(children.getTaxCode());
     return dto;
   }
 }

@@ -17,22 +17,16 @@
 
 package models;
 
-import com.google.common.base.Optional;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
-import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PropertyInPeriod;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.testng.util.Strings;
 import play.data.validation.Required;
 
 /**
@@ -41,6 +35,8 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "personal_working_times")
@@ -52,13 +48,13 @@ public class PersonalWorkingTime extends PropertyInPeriod implements IPropertyIn
   @Required
   @ManyToOne
   @JoinColumn(name = "time_slot_id")
-  public TimeSlot timeSlot;
+  private TimeSlot timeSlot;
   
   @Getter
   @Required
   @ManyToOne
   @JoinColumn(name = "contract_id")
-  public Contract contract;
+  private Contract contract;
   
     
   @Override

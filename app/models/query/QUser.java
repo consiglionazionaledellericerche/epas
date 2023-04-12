@@ -48,6 +48,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
+    public final StringPath passwordSha512 = createString("passwordSha512");
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -56,6 +58,8 @@ public class QUser extends EntityPathBase<User> {
     public final StringPath recoveryToken = createString("recoveryToken");
 
     public final SetPath<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>> roles = this.<models.enumerate.AccountRole, EnumPath<models.enumerate.AccountRole>>createSet("roles", models.enumerate.AccountRole.class, EnumPath.class, PathInits.DIRECT2);
+
+    public final StringPath subjectId = createString("subjectId");
 
     public final BooleanPath systemUser = createBoolean("systemUser");
 

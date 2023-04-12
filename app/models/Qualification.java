@@ -36,6 +36,8 @@ import play.data.validation.Required;
  *
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "qualifications")
@@ -44,18 +46,18 @@ public class Qualification extends BaseModel {
   private static final long serialVersionUID = 7147378609067987191L;
 
   @OneToMany(mappedBy = "qualification")
-  public List<Person> person;
+  private List<Person> person;
 
   @ManyToMany(mappedBy = "qualifications")
-  public List<AbsenceType> absenceTypes;
+  private List<AbsenceType> absenceTypes;
 
   @Getter
   @Setter
   @Required
-  public int qualification;
+  private int qualification;
 
   @Required
-  public String description;
+  private String description;
 
   /**
    * I livelli I-III.

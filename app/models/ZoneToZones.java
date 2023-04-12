@@ -21,6 +21,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -28,6 +30,8 @@ import play.data.validation.Required;
 /**
  * Associazione tra zone di timbratura.
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "zone_to_zones")
 public class ZoneToZones extends BaseModel {
@@ -37,21 +41,21 @@ public class ZoneToZones extends BaseModel {
   @Required
   @ManyToOne
   @JoinColumn(name = "zone_base_id", updatable = false)
-  public Zone zoneBase;
+  private Zone zoneBase;
   
   @Required
   @ManyToOne
   @JoinColumn(name = "zone_linked_id", updatable = false)
-  public Zone zoneLinked;
+  private Zone zoneLinked;
   
   @Required
   @Min(1)
-  public int delay;  
+  private int delay;  
 
   @Override
   public String toString() {
     return String.format(
         "Zone[%d] - zone.name = %s, zoneLinked.name= %s, delay = %d",
-         id, zoneBase.name, zoneLinked.name, delay);
+         id, zoneBase.getName(), zoneLinked.getName(), delay);
   }
 }

@@ -25,6 +25,7 @@ import com.google.common.collect.Range;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -334,11 +335,12 @@ public class PeriodManager {
         JPA.em().flush();
       }
 
-      final List<IPropertyInPeriod> periods = Lists.newArrayList(owner.periods(type));
+      List<IPropertyInPeriod> periods = Lists.newArrayList(owner.periods(type));
       if (periods.isEmpty()) {
         continue; //caso di parametro ancora non definito
       }
-      periods.stream().sorted().collect(Collectors.toList());
+      periods = periods.stream().sorted(Comparator.comparing(IPropertyInPeriod::getBeginDate))
+          .collect(Collectors.toList());
 
       // Sistemo il primo
       IPropertyInPeriod first = periods.get(0);

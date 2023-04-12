@@ -52,13 +52,13 @@ public class StampingDto {
    */
   public static StampingDto build(Stamping stamping) {
     return StampingDto.builder()
-        .date(stamping.date.toString())
-        .way(stamping.way)
-        .place(stamping.place)
-        .reason(stamping.reason)
-        .markedByAdmin(stamping.markedByAdmin)
-        .markedByEmployee(stamping.markedByAdmin)
-        .note(stamping.note)        
+        .date(stamping.getDate().toString())
+        .way(stamping.getWay())
+        .place(stamping.getPlace())
+        .reason(stamping.getReason())
+        .markedByAdmin(stamping.isMarkedByAdmin())
+        .markedByEmployee(stamping.isMarkedByEmployee())
+        .note(stamping.getNote())        
         .build();
   }
 }

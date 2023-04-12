@@ -45,7 +45,6 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -113,12 +112,12 @@ public class BadgeReaders extends Controller {
 
     final BadgeReader badgeReader = badgeReaderDao.byId(id);
     notFoundIfNull(badgeReader);
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
 
     QueryResults<?> results = badgeSystemDao.badgeSystems(Optional.<String>absent(),
         Optional.fromNullable(badgeReader)).listResults();
 
-    List<Zone> zoneList = badgeReader.zones;
+    List<Zone> zoneList = badgeReader.getZones();
 
     render(badgeReader, results, zoneList);
 
@@ -137,15 +136,15 @@ public class BadgeReaders extends Controller {
 
     final BadgeReader badgeReader = BadgeReader.findById(id);
     notFoundIfNull(badgeReader);
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
 
     //elimino la sorgente se non è associata ad alcun gruppo.
-    if (badgeReader.badgeSystems.isEmpty()) {
+    if (badgeReader.getBadgeSystems().isEmpty()) {
 
       badgeReader.delete();
 
       // FIXME: issue della rimozione user delle persone che riferiscono lo storico.
-      badgeReader.user.delete();
+      badgeReader.getUser().delete();
 
       flash.success(Web.msgDeleted(BadgeSystem.class));
 
@@ -172,9 +171,9 @@ public class BadgeReaders extends Controller {
     }
 
     rules.checkIfPermitted(owner);
-    badgeReader.user.owner = owner;
+    badgeReader.getUser().setOwner(owner);
     badgeReader.save();
-    badgeReader.user.save();
+    badgeReader.getUser().save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
     edit(badgeReader.id);
@@ -192,7 +191,7 @@ public class BadgeReaders extends Controller {
 
     notFoundIfNull(user.getBadgeReader());
     BadgeReader badgeReader = user.getBadgeReader();
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -201,7 +200,7 @@ public class BadgeReaders extends Controller {
       render("@edit", badgeReader);
     }
 
-    user.password = Codec.hexMD5(newPass);
+    user.updatePassword(newPass);
     user.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -217,13 +216,14 @@ public class BadgeReaders extends Controller {
    */
   public static void save(@Valid BadgeReader badgeReader, @Valid Office office, @Valid User user) {
 
+    log.info("BadgeReaders::save badgeReader = {}", badgeReader);
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors for {}: {}", badgeReader, validation.errorsMap());
       flash.error(Web.msgHasErrors());
       render("@blank", badgeReader, office, user);
     }
-    if (user.password.length() < 5) {
+    if (user.getPassword().length() < 5) {
       response.status = 400;
       Validation.addError("user.password", "almeno 5 caratteri");
       render("@blank", badgeReader, office, user);
@@ -231,10 +231,10 @@ public class BadgeReaders extends Controller {
 
     rules.checkIfPermitted(office);
 
-    badgeReader.user = user;
-    badgeReader.user.owner = office;
-    badgeReader.user.password = Codec.hexMD5(badgeReader.user.password);
-    badgeReader.user.save();
+    badgeReader.setUser(user);
+    badgeReader.getUser().setOwner(office);
+    badgeReader.getUser().updatePassword(badgeReader.getUser().getPassword());
+    badgeReader.getUser().save();
     badgeReader.save();
 
     flash.success(Web.msgSaved(BadgeReader.class));
@@ -249,7 +249,7 @@ public class BadgeReaders extends Controller {
     final BadgeReader badgeReader = badgeReaderDao.byId(badgeReaderId);
     notFoundIfNull(badgeReader);
 
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
 
     render("@joinBadgeSystems", badgeReader);
   }
@@ -259,7 +259,7 @@ public class BadgeReaders extends Controller {
    */
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader, boolean confirmed) {
 
-    rules.checkIfPermitted(badgeReader.user.owner);
+    rules.checkIfPermitted(badgeReader.getUser().getOwner());
 
     // TODO:
     //creare gli uro mancanti, cancellare quelli non più usati
@@ -270,23 +270,23 @@ public class BadgeReaders extends Controller {
     Set<BadgeSystem> badgeSystemsRemain = Sets.newHashSet();
     List<Badge> badgesDefinitelyToRemove = Lists.newArrayList();
     List<Badge> badgesToRemove = Lists.newArrayList();
-    for (Badge badge : badgeReader.badges) {
-      if (badgeReader.badgeSystems.contains(badge.badgeSystem)) {
-        if (badgeSystemsRemain.contains(badge.badgeSystem)) {
-          badgeSystemsRemain.add(badge.badgeSystem);
+    for (Badge badge : badgeReader.getBadges()) {
+      if (badgeReader.getBadgeSystems().contains(badge.getBadgeSystem())) {
+        if (badgeSystemsRemain.contains(badge.getBadgeSystem())) {
+          badgeSystemsRemain.add(badge.getBadgeSystem());
         }
       } else {
-        if (!badgeSystemsRemove.contains(badge.badgeSystem)) {
-          badgeSystemsRemove.add(badge.badgeSystem);
+        if (!badgeSystemsRemove.contains(badge.getBadgeSystem())) {
+          badgeSystemsRemove.add(badge.getBadgeSystem());
         }
-        if (badge.badgeSystem.badgeReaders.size() == 1) {
+        if (badge.getBadgeSystem().getBadgeReaders().size() == 1) {
           badgesDefinitelyToRemove.add(badge);
         }
         badgesToRemove.add(badge);
       }
 
     }
-    for (BadgeSystem badgeSystem : badgeReader.badgeSystems) {
+    for (BadgeSystem badgeSystem : badgeReader.getBadgeSystems()) {
       if (!badgeSystemsRemain.contains(badgeSystem)) {
         badgeSystemsAdd.add(badgeSystem);
       }
@@ -299,19 +299,19 @@ public class BadgeReaders extends Controller {
 
       // Prendere i codici del badge system
       Set<String> codes = Sets.newHashSet();
-      for (Badge otherBadge : badgeSystem.badges) {
-        if (!codes.contains(otherBadge.code)) {
-          codes.add(otherBadge.code);
+      for (Badge otherBadge : badgeSystem.getBadges()) {
+        if (!codes.contains(otherBadge.getCode())) {
+          codes.add(otherBadge.getCode());
           Badge badge = new Badge();
-          badge.person = otherBadge.person;
-          badge.badgeSystem = badgeSystem;
-          badge.badgeReader = badgeReader;
-          badge.code = otherBadge.code;
+          badge.setPerson(otherBadge.getPerson());
+          badge.setBadgeSystem(badgeSystem);
+          badge.setBadgeReader(badgeReader);
+          badge.setCode(otherBadge.getCode());
 
           //Controllare che esistano nel badgeReader
-          Optional<Badge> alreadyExists = badgeDao.byCode(badge.code, badgeReader);
+          Optional<Badge> alreadyExists = badgeDao.byCode(badge.getCode(), badgeReader);
           if (alreadyExists.isPresent()) {
-            if (!alreadyExists.get().person.equals(badge.person)) {
+            if (!alreadyExists.get().getPerson().equals(badge.getPerson())) {
               violatedBadges.add(badge);
               violatedBadges.add(alreadyExists.get());
             }
@@ -346,29 +346,29 @@ public class BadgeReaders extends Controller {
     Role role = roleDao.getRoleByName(Role.BADGE_READER);
 
     for (BadgeSystem badgeSystem : badgeSystemsRemove) {
-      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.user,
-          role, badgeSystem.office);
+      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.getUser(),
+          role, badgeSystem.getOffice());
       if (uro.isPresent()) {
         log.info("UserRoleOffice rimosso: {}", uro.get());
         uro.get().delete();
       } else {
         log.warn("L'userRoleOffice da rimuovere {} {} {} avrebbe dovuto esistere.",
-            badgeReader.code, role.name, badgeSystem.office);
+            badgeReader.getCode(), role.getName(), badgeSystem.getOffice());
       }
     }
     for (BadgeSystem badgeSystem : badgeSystemsAdd) {
-      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.user,
-          role, badgeSystem.office);
+      Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(badgeReader.getUser(),
+          role, badgeSystem.getOffice());
       if (!uro.isPresent()) {
         UsersRolesOffices uroNew = new UsersRolesOffices();
-        uroNew.office = badgeSystem.office;
-        uroNew.role = role;
-        uroNew.user = badgeReader.user;
+        uroNew.setOffice(badgeSystem.getOffice());
+        uroNew.setRole(role);
+        uroNew.setUser(badgeReader.getUser());
         uroNew.save();
         log.info("UserRoleOffice creato: {}", uroNew);
       } else {
         log.warn("L'userRoleOffice da inserire {} {} {} esisteva già.",
-            badgeReader.code, role.name, badgeSystem.office);
+            badgeReader.getCode(), role.getName(), badgeSystem.getOffice());
       }
     }
 

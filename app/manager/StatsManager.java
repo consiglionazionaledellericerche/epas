@@ -82,8 +82,8 @@ public class StatsManager {
    */
   public List<Institute> getInstitutes() {
     return getAllInstitutes().stream()
-        .filter(i -> !i.name.startsWith(DIPARTIMENTO_NAME_PREFIX) 
-            && !i.cds.startsWith(CDS_HEAD_QUARTER_PREFIX))
+        .filter(i -> !i.getName().startsWith(DIPARTIMENTO_NAME_PREFIX) 
+            && !i.getCds().startsWith(CDS_HEAD_QUARTER_PREFIX))
         .collect(Collectors.toList());
   }
   
@@ -92,7 +92,7 @@ public class StatsManager {
    */
   public List<Institute> getDepartments() {
     return getAllInstitutes().stream()
-        .filter(o -> o.name.startsWith(DIPARTIMENTO_NAME_PREFIX))
+        .filter(o -> o.getName().startsWith(DIPARTIMENTO_NAME_PREFIX))
         .collect(Collectors.toList());
   }
   
@@ -108,7 +108,7 @@ public class StatsManager {
    */
   public Set<Office> getHeadQuarterOffices() {
     return getAllOffices().stream()
-    .filter(o -> o.code.startsWith(CDS_HEAD_QUARTER_PREFIX))
+    .filter(o -> o.getCode().startsWith(CDS_HEAD_QUARTER_PREFIX))
     .collect(Collectors.toSet());
   }
 
@@ -117,7 +117,7 @@ public class StatsManager {
    */
   public Set<Office> getInstitutesOffices() {
     return getAllOffices().stream()
-    .filter(o -> !o.code.startsWith(CDS_HEAD_QUARTER_PREFIX))
+    .filter(o -> !o.getCode().startsWith(CDS_HEAD_QUARTER_PREFIX))
     .collect(Collectors.toSet());
   }
   
@@ -215,11 +215,11 @@ public class StatsManager {
     for (Institute institute : institutes) {
       row = sheet.createRow(rowNumber++);
       cellCode = row.createCell(0);
-      cellCode.setCellValue(institute.code);
+      cellCode.setCellValue(institute.getCode());
       cellName = row.createCell(1);
-      cellName.setCellValue(institute.name);
+      cellName.setCellValue(institute.getName());
       cellCds = row.createCell(2);
-      cellCds.setCellValue(institute.cds);
+      cellCds.setCellValue(institute.getCds());
     }
     IntStream.of(0, 1, 2).forEach(column -> sheet.autoSizeColumn(column));
   }
@@ -243,13 +243,13 @@ public class StatsManager {
     for (Office office : offices) {
       row = sheet.createRow(rowNumber++);
       cellCode = row.createCell(0);
-      cellCode.setCellValue(office.code);
+      cellCode.setCellValue(office.getCode());
       cellName = row.createCell(1);
-      cellName.setCellValue(office.name);
+      cellName.setCellValue(office.getName());
       cellCds = row.createCell(2);
-      cellCds.setCellValue(office.codeId);
+      cellCds.setCellValue(office.getCodeId());
       cellCds = row.createCell(3);
-      cellCds.setCellValue(office.address);      
+      cellCds.setCellValue(office.getAddress());      
     }
     IntStream.of(0, 1, 2, 3).forEach(column -> sheet.autoSizeColumn(column));
   }

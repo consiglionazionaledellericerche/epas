@@ -27,6 +27,7 @@ public class AbsenceRest {
   public Long id;
   public String date;
   public String absenceCode;
+  public Long absenceTypeId;
   public String description;
   public String name;
   public String surname;
@@ -38,12 +39,13 @@ public class AbsenceRest {
   public static AbsenceRest build(Absence absence) {
     AbsenceRest ar = new AbsenceRest();
     ar.id = absence.id;
-    ar.absenceCode = absence.absenceType.code;
-    ar.description = absence.absenceType.description;
-    ar.date = absence.personDay.date.toString();
-    ar.name = absence.personDay.person.name;
-    ar.surname = absence.personDay.person.surname;
-    ar.hasAttachment = absence.absenceFile != null && absence.absenceFile.get() != null;
+    ar.absenceCode = absence.getAbsenceType().getCode();
+    ar.absenceTypeId = absence.getAbsenceType().getId();
+    ar.description = absence.getAbsenceType().getDescription();
+    ar.date = absence.getPersonDay().getDate().toString();
+    ar.name = absence.getPersonDay().getPerson().getName();
+    ar.surname = absence.getPersonDay().getPerson().getSurname();
+    ar.hasAttachment = absence.getAbsenceFile() != null && absence.getAbsenceFile().get() != null;
     return ar;
   }
 }

@@ -92,20 +92,28 @@ CompetenceRequestType.CHANGE_REPERIBILITY_REQUESTS= Richieste di cambio reperibi
 InformationType.TELEWORK_INFORMATIONS =Flussi per Telelavoro
 InformationType.ILLNESS_INFORMATIONS =Flussi di comunicazione malattia
 InformationType.SERVICE_INFORMATIONS =Flussi informativi per uscite di servizio
+InformationType.PARENTAL_LEAVE_INFORMATIONS =Flussi per comunicazione congedo parentale padre
 InformationType.ILLNESS_INFORMATION.blank =Nuovo flusso informativo per malattia
 InformationType.SERVICE_INFORMATION.blank =Nuovo flusso per richiesta uscita di servizio
+InformationType.PARENTAL_LEAVE_INFORMATION.blank =Nuovo flusso informativo per congedo parentale del padre
 InformationType.SERVICE_INFORMATION =Richiesta uscita per servizio
 InformationType.ILLNESS_INFORMATION =Informazione di malattia
 InformationType.TELEWORK_INFORMATION =Richiesta presa visione di telelavoro
+InformationType.PARENTAL_LEAVE_INFORMATION =Informazione congedo parentale per il padre
 InformationType.ILLNESS_INFORMATION_TO_APPROVE=Informazione di malattia da validare
 InformationType.SERVICE_INFORMATION_TO_APPROVE=Uscite di servizio da approvare
 InformationType.TELEWORK_INFORMATION_TO_APPROVE=Telelavoro da approvare
+InformationType.PARENTAL_LEAVE_INFORMATION_TO_APPROVE =Congedi parentali per il padre da approvare
 
 InformationRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione flusso
 InformationRequestEventType.OFFICE_HEAD_ACKNOWLEDGMENT=Richiesta validata dal responsabile di sede
 InformationRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
 InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT=Richiesta validata dall'amministratore del personale
 InformationRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+
+InformationRequestEventType.MANAGER_ACKNOWLEDGMENT=Richiesta validata dal responsabile di gruppo
+InformationRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile di gruppo
+
 InformationRequestEventType.COMPLETE=Richiesta completata
 InformationRequestEventType.DELETE=Richiesta cancellata
 InformationRequestEventType.EXPIRING=Richiesta scaduta
@@ -125,6 +133,10 @@ serviceRequest.reason =Motivazione
 illnessRequest.beginDate =Giorno iniziale
 illnessRequest.endDate =Giorno finale
 illnessRequest.name =Note sull'assenza
+parentalLeaveRequest.beginDate =Giorno Iniziale
+parentalLeaveRequest.endDate =Giorno finale
+bornCertificate =Certificato di nascita
+expectedDateOfBirth =Documento di data presunta parto
 
 
 type =Servizio di reperibilità
@@ -449,6 +461,8 @@ generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
 generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni effettuati nei festivi
+generalSetting.enableAbsenceTopLevelAuthorization=Possibilità di configurare le autorizzazioni per le assenze dei livelli I-III
+generalSetting.warningInsertPerson=Avviso per inserimento nuova persona
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -533,6 +547,13 @@ MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
 mealTicketDecision=Valore Buono Pasto
 
+mealTicketCard.person =Dipendente
+mealTicketCard.number =Numero tessera
+mealTicketCard.deliveryDate =Data di rilascio
+mealTicketCard.deliveryOffice =Sede rilasciante
+
+tickets=Numero buoni
+
 ExportFile.CSV=CSV
 ExportFile.XLS=XLS
 exportFile=Formato per esportazione
@@ -541,6 +562,9 @@ forbidden= Operazione non permessa
 
 block.first=Dal
 block.last=Al
+
+first = Dal
+last= Al
 
 MOD= Modifica
 
@@ -798,6 +822,7 @@ user= Utente
 user.password= Password
 user.username= Username
 user.owner= Sede proprietaria
+user.subjectId =Id univoco all'interno dell'organizzazione
 user.usersRolesOffices= Ruoli abilitati
 user.disabled= Utente disabilitato
 user.roles= Ruoli di sistema
@@ -937,6 +962,12 @@ validation.required=Obbligatorio
 validation.unique =Deve essere unico
 validation.url=Non è un URL valido
 
+validation.codiceFiscale.alreadyPresent =Codice fiscale già presente in anagrafica.
+validation.codiceFiscale.length =Ci devono essere esattamente 16 caratteri.
+validation.codiceFiscale.char =C'è un carattere non valido.
+validation.codiceFiscale.check =Il codice di controllo indica che c'è un errore.
+
+validation.eppn.alreadyPresent =Codice eppn già presente in anagrafica.
 
 ##########################
 # Messaggi di eccezioni
@@ -993,10 +1024,12 @@ Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
 
 AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.vacationsTopLevel=Mie comunicazioni ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
 AbsenceRequests.personalPermissions =Miei permessi personali
 AbsenceRequests.vacationsPastYearAfterDeadline =Mie richieste ferie anno passato dopo deadline
+AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel =Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequests.vacationsToApprove =Flussi di richieste di ferie
 AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
@@ -1006,26 +1039,39 @@ AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno pa
 InformationRequests.illness =Mie richieste per malattia
 InformationRequests.teleworks =Mie richieste per telelavoro
 InformationRequests.serviceExit =Mie richieste uscite di servizio
+InformationRequests.parentalLeave =Mie richieste di congedo parentale per padre
 InformationRequests.illnessToApprove =Flussi di richieste per malattia
 InformationRequests.teleworksToApprove =Flussi di richieste per telelavoro
 InformationRequests.serviceExitToApprove =Flussi di richieste uscite di servizio
+InformationRequests.parentalLeaveToApprove =Flussi di richieste congedo parentale per padre
 
 AbsenceRequestType.VACATION_REQUEST =richiesta di ferie
 AbsenceRequestType.VACATION_REQUESTS = Mie richieste ferie
 AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
-
+AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL =comunicazione di ferie
+AbsenceRequestType.VACATION_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie
+AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
+AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL =riposo compensativo
 AbsenceRequestType.COMPENSATORY_RESTS =Miei riposi compensativi
+AbsenceRequestType.COMPENSATORY_RESTS_TOP_LEVEL =Miei riposi compensativi
 AbsenceRequestType.COMPENSATORY_REST.blank =nuova richiesta riposo compensativo
+AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL.blank =nuova comunicazione riposo compensativo
 
 AbsenceRequestType.PERSONAL_PERMISSION =permesso personale
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL =permesso personale
 AbsenceRequestType.PERSONAL_PERMISSIONS =Miei permessi personali
 AbsenceRequestType.PERSONAL_PERMISSION.blank =nuova richiesta permesso personale
+AbsenceRequestType.PERSONAL_PERMISSIONS_TOP_LEVEL =Miei permessi personali
+AbsenceRequestType.PERSONAL_PERMISSION_TOP_LEVEL.blank =nuova richiesta permesso personale
 
 AbsenceRequestType.SHORT_TERM_PERMIT =permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL =permesso breve
 AbsenceRequestType.SHORT_TERM_PERMITS =permessi breve
+AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
+AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 
@@ -1033,9 +1079,18 @@ Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunicazione ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
 
 Institutes.list= Sedi e Amministratori
+MealTicketCards.mealTicketCards= Gestione card buoni pasto elettronici
+MealTicketCards.recapElectronicMealTickets= Gestione buoni pasto elettronici
+MealTicketCards.personMealTickets= Nuovo Inserimento
+MealTicketCards.editPersonMealTickets= Modifica Buoni Elettronici Consegnati
+MealTicketCards.recapPersonMealTickets= Riepilogo Buoni Pasto Elettronici Consegnati
+
 MealTickets.editPersonMealTickets= Modifica Buoni Consegnati
 MealTickets.findCodeBlock= Ricerca Buoni Pasto
 MealTickets.mealTickets= Riepilogo Buoni Pasto
@@ -1082,8 +1137,8 @@ WorkingTimes.manageWorkingTime= Gestione Orari di Lavoro
 Competences.activateServices= Gestione Servizi
 Groups.showGroups= Gestione gruppi
 Shift.handleShifts =Gestisci turni
-Calendar.show =Gestisci turni
-ReperibilityCalendar.show =Gestisci reperibilità
+Calendar.show =Calendario turni
+ReperibilityCalendar.show =Calendario reperibilità
 Shift.personalShift =Visualizza turno
 TimeSlots.manageTimeSlots= Fasce orarie di lavoro
 
@@ -1184,8 +1239,6 @@ ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima per 
 ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS = Ecceduto il numero massimo di tolleranze violabili
 ShiftTroubles.FUTURE_DAY = Giorno futuro, calcoli non effettuabili
 
-
-
 shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
 shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
 
@@ -1241,6 +1294,7 @@ PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di per
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
 AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
+PARENTAL_LEAVE_FOR_FATHERS =Inserimento codici di congedo parentale per il padre
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
@@ -1267,6 +1321,10 @@ PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
+ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (non responsabili di gruppo)
+ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (responsabili di gruppo)
+ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
+
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
@@ -1288,6 +1346,9 @@ TELEWORK_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta presa visi
 SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli I-III da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di sede
 SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione uscita per servizio per i livelli IV-VIII da parte del responsabile di gruppo
+
+FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli I-III da parte del responsabile amministrativo
+FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli IV-VIII da parte del responsabile amministrativo
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi
@@ -1420,17 +1481,6 @@ PeriodType.child3_0_6=Terzo figlio 0-6 anni
 PeriodType.child3_0_12=Terzo figlio 0-12 anni
 PeriodType.child3_3_12=Terzo figlio 3-12 anni
 PeriodType.child3_6_12=Terzo figlio 6-12 anni
-
-always(0, null, null), year(0, null, null), month(0, null, null),
-    child1_0_3(1, 0, 3), child1_0_6(1, 0, 6), child1_0_12(1, 0, 12), 
-    child1_6_12(1, 6, 12), child1_3_12(1, 3, 12),
-    
-    child2_0_3(2, 0, 3), child2_0_6(2, 0, 6), child2_0_12(2, 0, 12), child2_6_12(2, 6, 12), 
-    child2_3_12(2, 3, 12),
-    
-    child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), 
-    child3_3_12(3, 3, 12);
-
 
 categoryGroupAbsenceType.name=Nome
 categoryGroupAbsenceType.description=Descrizione

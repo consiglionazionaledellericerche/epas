@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ package dao;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -33,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.val;
 import models.Contract;
@@ -270,7 +270,8 @@ public class AbsenceDao extends DaoBase {
    * @return la lista di assenze che non comprendono le assenze orarie "H" che non giustificano
    *     niente.
    */
-  public List<Absence> getAbsenceWithNoHInMonth(Person person, LocalDate begin, LocalDate end) {
+  public List<Absence> getAbsenceWithNoHInMonth(
+      Person person, LocalDate begin, LocalDate end) {
     
     final QAbsence absence = QAbsence.absence;
     final QJustifiedType type = QJustifiedType.justifiedType;
@@ -355,7 +356,7 @@ public class AbsenceDao extends DaoBase {
 
     List<Absence> absences =
         getAbsenceByCodeInPeriod(
-            Optional.fromNullable(contract.person), Optional.fromNullable(ab.code),
+            Optional.fromNullable(contract.getPerson()), Optional.fromNullable(ab.getCode()),
             contractInterInterval.getBegin(), contractInterInterval.getEnd(),
             Optional.<JustifiedTypeName>absent(), false, true);
 

@@ -1,0 +1,10 @@
+#{title title:'Gestione Buoni Pasto ' + person.fullname /}
+
+<div id="container-nav-tabs">
+  <ul class="nav nav-tabs">
+    #{secure.li @MealTicketCards.personMealTickets(person.id, year, month) /}
+    #{secure.li @MealTicketCards.editPersonMealTickets(person.id, year, month) /}
+    #{secure.li @MealTicketCards.recapPersonMealTickets(person.id, year, month) /}
+  </ul>
+</div>
+<br>

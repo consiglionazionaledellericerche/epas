@@ -28,16 +28,17 @@ public class InserimentoRigaBuoniPasto extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaBuoniPasto(Certification certification) {
-    codiceSede = certification.person.office.codeId;
-    anno = certification.year;
-    mese = certification.month;
+    codiceSede = certification.getPerson().getOffice().getCodeId();
+    anno = certification.getYear();
+    mese = certification.getMonth();
 
     ItemDipendente dipendente = new ItemDipendente();
     dipendenti.add(dipendente);
 
-    dipendente.matricola = certification.person.number;
-    dipendente.numBuoniPasto = Integer.parseInt(certification.content.split(";")[0]);
-    dipendente.numBuoniPastoElettronici = Integer.parseInt(certification.content.split(";")[1]);
+    dipendente.matricola = certification.getPerson().getNumber();
+    dipendente.numBuoniPasto = Integer.parseInt(certification.getContent().split(";")[0]);
+    dipendente.numBuoniPastoElettronici = Integer
+        .parseInt(certification.getContent().split(";")[1]);
   }
 
 }

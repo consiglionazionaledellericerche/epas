@@ -70,8 +70,8 @@ public class WorkingTimeTypes extends Controller {
     }
     
     //Controlla i permessi nel caso si tratti di un orario per un singolo ufficio
-    if (wtt.office != null) {
-      rules.checkIfPermitted(wtt.office);
+    if (wtt.getOffice() != null) {
+      rules.checkIfPermitted(wtt.getOffice());
     }
 
     renderJSON(gsonBuilder.create().toJson(WorkingTimeTypeShowDto.build(wtt)));

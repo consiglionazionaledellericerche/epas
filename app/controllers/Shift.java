@@ -116,7 +116,7 @@ public class Shift extends Controller {
     ShiftType shiftType = shiftDao.getShiftTypeByType(type);
     notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
 
-    log.debug("Cerco Turnisti di tipo {}", shiftType.type);
+    log.debug("Cerco Turnisti di tipo {}", shiftType.getType());
 
     //final List<Person> personList = personDao.getPersonForShift(type);
     final List<PersonShiftShiftType> personList = shiftDao
@@ -143,9 +143,9 @@ public class Shift extends Controller {
     ShiftType shiftType = shiftDao.getShiftTypeByType(type);
     notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
 
-    log.debug("Cerco la time table del turno di tipo {}", shiftType.type);
+    log.debug("Cerco la time table del turno di tipo {}", shiftType.getType());
 
-    ShiftTimeTable shiftTimeTable = shiftType.shiftTimeTable;
+    ShiftTimeTable shiftTimeTable = shiftType.getShiftTimeTable();
 
     render(shiftTimeTable);
 
@@ -169,7 +169,7 @@ public class Shift extends Controller {
     ShiftType shiftType = shiftDao.getShiftTypeByType(type);
     notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
 
-    log.debug("Cerco turni di tipo {}", shiftType.type);
+    log.debug("Cerco turni di tipo {}", shiftType.getType());
 
     LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
     LocalDate to = new LocalDate(yearTo, monthTo, dayTo);
@@ -177,7 +177,7 @@ public class Shift extends Controller {
     List<PersonShiftDay> personShiftDays =
         shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);
     log.debug("Shift find called from {} to {}, type {} - found {} shift days",
-        from, to, shiftType.type, personShiftDays.size());
+        from, to, shiftType.getType(), personShiftDays.size());
 
     List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
     List<ShiftPeriod> deletedShiftPeriods = new ArrayList<ShiftPeriod>();
@@ -189,7 +189,7 @@ public class Shift extends Controller {
     List<ShiftCancelled> shiftCancelled =
         shiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
     log.debug("ShiftCancelled find called from {} to {}, type {} - found {} shift days",
-        from, to, shiftType.type, shiftCancelled.size());
+        from, to, shiftType.getType(), shiftCancelled.size());
 
     // get the period of cancelled shifts
     deletedShiftPeriods = shiftManager.getDeletedShiftPeriods(shiftCancelled);
@@ -224,7 +224,7 @@ public class Shift extends Controller {
       throw new IllegalArgumentException(String.format("ShiftType type = %s doesn't exist", type));
     }
 
-    log.debug("shiftType={}", shiftType.description);
+    log.debug("shiftType={}", shiftType.getDescription());
 
     // save the recived shift periods with type shiftType in the month "month" of the "year" year
     List<String> list = shiftManager
@@ -313,7 +313,7 @@ public class Shift extends Controller {
     
     // for each shift
     for (ShiftType shiftType : shiftTypes) {
-      String type = shiftType.type;
+      String type = shiftType.getType();
       log.debug("ELABORA TURNO TYPE={}", type);
 
       // seleziona i giorni di turno di tutte le persone associate al turno 'shiftType'
@@ -380,14 +380,14 @@ public class Shift extends Controller {
     log.debug("thInconsistence={} - thShift={}", thInconsistence, thShift);
 
     LocalDate today = new LocalDate();
-    String shiftDesc = shiftCategory.description;
-    final String supervisor = shiftCategory.supervisor.getFullname();
+    String shiftDesc = shiftCategory.getDescription();
+    final String supervisor = shiftCategory.getSupervisor().getFullname();
     String seatSupervisor = "";
-    Office office = shiftCategory.office;
+    Office office = shiftCategory.getOffice();
     List<User> directors = uroDao
         .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
     if (!directors.isEmpty()) {
-      seatSupervisor = directors.get(0).person.getFullname();
+      seatSupervisor = directors.get(0).getPerson().getFullname();
     } else {
       seatSupervisor = "responsabile di sede non configurato";
     }
@@ -428,7 +428,7 @@ public class Shift extends Controller {
     LocalDate firstOfMonth = new LocalDate(year, month, 1);
 
     for (ShiftType shiftType : shiftTypes) {
-      log.debug("controlla type={}", shiftType.type);
+      log.debug("controlla type={}", shiftType.getType());
 
       // put the shift information i ìn the calendar shiftCalendar
       shiftManager.buildMonthlyShiftCalendar(firstOfMonth, shiftType, shiftCalendar);
@@ -436,9 +436,10 @@ public class Shift extends Controller {
     }
 
     LocalDate today = new LocalDate();
-    String shiftDesc = shiftCategory.description;
+    String shiftDesc = shiftCategory.getDescription();
     String supervisor =
-        shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+        shiftCategory.getSupervisor().getName().concat(" ")
+        .concat(shiftCategory.getSupervisor().getSurname());
     renderPDF(today, firstOfMonth, shiftCalendar, shiftDesc, supervisor);
   }
 
@@ -459,14 +460,14 @@ public class Shift extends Controller {
     if (shiftType == null) {
       notFound(String.format("ShiftType type = %s doesn't exist", type));
     }
-    log.debug("Cerco Turnisti di tipo {}", shiftType.type);
+    log.debug("Cerco Turnisti di tipo {}", shiftType.getType());
 
     // get the list of persons involved in the shift of type 'type'
     List<PersonShiftShiftType> people = shiftManager2
         .shiftWorkers(shiftType, new LocalDate(yearFrom, monthFrom, dayFrom), 
             new LocalDate(yearTo, monthTo, dayTo));
     List<Person> personList = people.stream()
-        .<Person>map(psst -> psst.personShift.person).collect(Collectors.toList());
+        .<Person>map(psst -> psst.getPersonShift().getPerson()).collect(Collectors.toList());
     //    List<Person> personList =
     //        JPA.em().createQuery(
     //          "SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p "
@@ -530,10 +531,10 @@ public class Shift extends Controller {
             .addAll(personDao.getPersonForShift(type, 
                 LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
                 .dayOfMonth().withMinimumValue()))
-            .add(shiftType.shiftCategories.supervisor).build();
+            .add(shiftType.getShiftCategories().getSupervisor()).build();
 
-    if (!currentUser.isPresent() || currentUser.get().person == null
-        || !canAccess.contains(currentUser.get().person)) {
+    if (!currentUser.isPresent() || currentUser.get().getPerson() == null
+        || !canAccess.contains(currentUser.get().getPerson())) {
       log.debug("Accesso all'iCal dei turni non autorizzato: Type = {}, Current User = {}, "
               + "canAccess = {}",
           type, currentUser.get(), canAccess, currentUser.get());

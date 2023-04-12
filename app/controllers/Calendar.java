@@ -149,7 +149,7 @@ public class Calendar extends Controller {
       for (PersonShiftShiftType personShift : people) {
         // lenght-1 viene fatto per escludere l'ultimo valore che è dedicato alle assenze
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-        final Person person = personShift.personShift.person;
+        final Person person = personShift.getPersonShift().getPerson();
 
         final ShiftEvent event = ShiftEvent.builder()
             .allDay(true)
@@ -160,11 +160,11 @@ public class Calendar extends Controller {
             .textColor(eventColor.textColor)
             .borderColor(eventColor.borderColor)
             .className("removable")
-            .mobile(person.mobile)
-            .email(person.email)
+            .mobile(person.getMobile())
+            .email(person.getEmail())
             .build();
 
-        if (personShift.jolly) {
+        if (personShift.isJolly()) {
           jolly.add(event);
         } else {
           shiftWorkers.add(event);
@@ -173,11 +173,12 @@ public class Calendar extends Controller {
       }
       List<ShiftSlot> slotList = null;
       List<OrganizationShiftSlot> organizationSlotList = null;
-      if (activity.get().shiftTimeTable != null) {
-        slotList = shiftManager2.getSlotsFromTimeTable(activity.get().shiftTimeTable);
+      if (activity.get().getShiftTimeTable() != null) {
+        slotList = shiftManager2.getSlotsFromTimeTable(activity.get().getShiftTimeTable());
       } else {
         organizationSlotList = 
-            Lists.newArrayList(activity.get().organizaionShiftTimeTable.organizationShiftSlot);
+            Lists.newArrayList(
+                activity.get().getOrganizaionShiftTimeTable().getOrganizationShiftSlot());
       }
       
       shiftWorkers.sort(Comparator.comparing(ShiftEvent::getTitle));
@@ -202,10 +203,10 @@ public class Calendar extends Controller {
           .type("error").build();
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
-      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(psd.shiftType,
-          psd.date).orNull();
+      final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(psd.getShiftType(),
+          psd.getDate()).orNull();
 
-      if (rules.check(psd.shiftType) && rules.check(shiftTypeMonth)) {
+      if (rules.check(psd.getShiftType()) && rules.check(shiftTypeMonth)) {
 
         shiftManager2.delete(psd);
 
@@ -248,8 +249,8 @@ public class Calendar extends Controller {
       int index = 0;
       // prende i turni associati alle persone attive in quel turno
       for (PersonShiftShiftType personShift : people) {
-        log.debug("Turnista: {}", personShift.personShift.person);
-        final Person person = personShift.personShift.person;
+        log.debug("Turnista: {}", personShift.getPersonShift().getPerson());
+        final Person person = personShift.getPersonShift().getPerson();
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 2)];
         events.addAll(shiftEvents(activity.get(), person, start, end, eventColor));
         events.addAll(absenceEvents(person, start, end));
@@ -280,19 +281,19 @@ public class Calendar extends Controller {
         .map(shiftDay -> {
           LocalTime begin = null;
           LocalTime finish = null;
-          if (shiftDay.organizationShiftSlot != null) {
-            begin = shiftDay.organizationShiftSlot.beginSlot;
-            finish = shiftDay.organizationShiftSlot.endSlot;
+          if (shiftDay.getOrganizationShiftSlot() != null) {
+            begin = shiftDay.getOrganizationShiftSlot().getBeginSlot();
+            finish = shiftDay.getOrganizationShiftSlot().getEndSlot();
           } else {
             begin = shiftDay.slotBegin();
             finish = shiftDay.slotEnd();
           }
           final ShiftEvent event = ShiftEvent.builder()
-              .organizationShiftslot(shiftDay.organizationShiftSlot)
+              .organizationShiftslot(shiftDay.getOrganizationShiftSlot())
               .personShiftDayId(shiftDay.id)
               .title(person.fullName())
-              .start(shiftDay.date.toLocalDateTime(begin))
-              .end(shiftDay.date.toLocalDateTime(finish))
+              .start(shiftDay.getDate().toLocalDateTime(begin))
+              .end(shiftDay.getDate().toLocalDateTime(finish))
               .durationEditable(false)
               .color(color.backgroundColor)
               .textColor(color.textColor)
@@ -300,15 +301,16 @@ public class Calendar extends Controller {
               .className("removable")
               .build();
           
-          if (shiftDay.date.isBefore(LocalDate.now())) {
+          if (shiftDay.getDate().isBefore(LocalDate.now())) {
             shiftManager2.fixShiftTrouble(shiftDay, ShiftTroubles.FUTURE_DAY);        
           }
           
-          if (!shiftDay.troubles.isEmpty()) {
+          if (!shiftDay.getTroubles().isEmpty()) {
             
-            final List<String> troubles = shiftDay.troubles.stream()
+            final List<String> troubles = shiftDay.getTroubles().stream()
                 .map(trouble -> Messages
-                    .get(trouble.cause.getClass().getSimpleName() + "." + trouble.cause.name()))
+                    .get(trouble.getCause().getClass().getSimpleName() 
+                        + "." + trouble.getCause().name()))
                 .collect(Collectors.toList());
             event.setTroubles(troubles);
           }
@@ -351,13 +353,14 @@ public class Calendar extends Controller {
        */
       if (event == null
           || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
-          .equals(abs.personDay.date)
-          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.personDay.date)) {
+          .equals(abs.getPersonDay().getDate())
+          || event.getEnd() != null 
+          && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
 
         event = ShiftEvent.builder()
             .allDay(true)
-            .title("Assenza di " + abs.personDay.person.fullName())
-            .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
+            .title("Assenza di " + abs.getPersonDay().getPerson().fullName())
+            .start(abs.getPersonDay().getDate().toLocalDateTime(LocalTime.MIDNIGHT))
             .editable(false)
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
@@ -366,7 +369,7 @@ public class Calendar extends Controller {
 
         events.add(event);
       } else {
-        event.setEnd(abs.personDay.date.plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
+        event.setEnd(abs.getPersonDay().getDate().plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
       }
 
     }
@@ -393,17 +396,18 @@ public class Calendar extends Controller {
     for (Absence abs : absences) {
       if (event == null
           || event.getEnd() == null && !event.getStart().toLocalDate().plusDays(1)
-          .equals(abs.personDay.date)
-          || event.getEnd() != null && !event.getEnd().toLocalDate().equals(abs.personDay.date)) {
+          .equals(abs.getPersonDay().getDate())
+          || event.getEnd() != null 
+          && !event.getEnd().toLocalDate().equals(abs.getPersonDay().getDate())) {
 
         event = ShiftEvent.builder()
             .allDay(true)
-            .title(abs.justifiedType.name.equals(JustifiedTypeName.assign_all_day) 
-                ? "Attività lavorativa di " + abs.absenceType.code + " di "
-                + abs.personDay.person.fullName() : 
-                  "Attività lavorativa di " + abs.absenceType.description + " di "
-                + abs.personDay.person.fullName())
-            .start(abs.personDay.date.toLocalDateTime(LocalTime.MIDNIGHT))
+            .title(abs.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day) 
+                ? "Attività lavorativa di " + abs.getAbsenceType().getCode() + " di "
+                + abs.getPersonDay().getPerson().fullName() : 
+                  "Attività lavorativa di " + abs.getAbsenceType().getDescription() + " di "
+                + abs.getPersonDay().getPerson().fullName())
+            .start(abs.getPersonDay().getDate().toLocalDateTime(LocalTime.MIDNIGHT))
             .editable(false)
             .color(EventColor.YELLOW.backgroundColor)
             .textColor(EventColor.YELLOW.textColor)
@@ -412,7 +416,7 @@ public class Calendar extends Controller {
 
         events.add(event);
       } else {
-        event.setEnd(abs.personDay.date.plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
+        event.setEnd(abs.getPersonDay().getDate().plusDays(1).toLocalDateTime(LocalTime.MIDNIGHT));
       }
 
     }
@@ -443,10 +447,10 @@ public class Calendar extends Controller {
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
       final ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byShiftTypeAndDate(shift
-          .shiftType, newDate).orNull();
+          .getShiftType(), newDate).orNull();
 
-      if (rules.check(shift.shiftType) && rules.check(shiftTypeMonth)) {
-        shift.date = newDate;
+      if (rules.check(shift.getShiftType()) && rules.check(shiftTypeMonth)) {
+        shift.setDate(newDate);
 
         // controlla gli eventuali errori di consitenza nel calendario
         Optional<String> error = shiftManager2.shiftPermitted(shift);
@@ -504,16 +508,16 @@ public class Calendar extends Controller {
     if (activity.isPresent()) {
       if (rules.check(activity.get()) && rules.check(shiftTypeMonth)) {
         PersonShiftDay personShiftDay = new PersonShiftDay();
-        personShiftDay.date = date;
-        personShiftDay.shiftType = activity.get();
+        personShiftDay.setDate(date);
+        personShiftDay.setShiftType(activity.get());
         if (organizationShiftslot.isPersistent()) {
-          personShiftDay.organizationShiftSlot = organizationShiftslot;
+          personShiftDay.setOrganizationShiftSlot(organizationShiftslot);
         } else {
-          personShiftDay.shiftSlot = shiftSlot;
+          personShiftDay.setShiftSlot(shiftSlot);
         }        
  
-        personShiftDay.personShift = shiftDao
-            .getPersonShiftByPersonAndType(personId, personShiftDay.shiftType.type);
+        personShiftDay.setPersonShift(shiftDao
+            .getPersonShiftByPersonAndType(personId, personShiftDay.getShiftType().getType()));
         Optional<String> error = Optional.of("");
         if (validation.valid(personShiftDay).ok) {
           error = shiftManager2.shiftPermitted(personShiftDay);
@@ -586,17 +590,17 @@ public class Calendar extends Controller {
       //Controllo se ci sono turni festivi assegnati...
       CompetenceCode holiday = competenceCodeDao.getCompetenceCodeByCode(holidayCode);
       List<PersonCompetenceCodes> list = people.stream()
-          .flatMap(p -> p.personCompetenceCodes.stream()
-              .filter(c -> c.competenceCode.equals(holiday) 
-                  && !c.beginDate.isAfter(start)))
+          .flatMap(p -> p.getPersonCompetenceCodes().stream()
+              .filter(c -> c.getCompetenceCode().equals(holiday) 
+                  && !c.getBeginDate().isAfter(start)))
           .collect(Collectors.toList());
       
       //Controllo se ci sono turni notturni assegnati...
       CompetenceCode night = competenceCodeDao.getCompetenceCodeByCode(nightCode);
       List<PersonCompetenceCodes> nightList = people.stream()
-          .flatMap(p -> p.personCompetenceCodes.stream()
-              .filter(c -> c.competenceCode.equals(night) 
-                  && !c.beginDate.isAfter(start)))
+          .flatMap(p -> p.getPersonCompetenceCodes().stream()
+              .filter(c -> c.getCompetenceCode().equals(night) 
+                  && !c.getBeginDate().isAfter(start)))
           .collect(Collectors.toList());
 
       if (!list.isEmpty()) {
@@ -668,8 +672,8 @@ public class Calendar extends Controller {
       shiftTypeMonth = monthStatus.get();
     } else {
       shiftTypeMonth = new ShiftTypeMonth();
-      shiftTypeMonth.shiftType = shiftType;
-      shiftTypeMonth.yearMonth = monthToApprove;
+      shiftTypeMonth.setShiftType(shiftType);
+      shiftTypeMonth.setYearMonth(monthToApprove);
       shiftTypeMonth.save();
     }
 
@@ -736,20 +740,20 @@ public class Calendar extends Controller {
       flash.error("I turni sono stati cambiati rispetto al riepilogo mostrato. "
           + "Il nuovo riepilogo è stato ricalcolato");
       flash.keep();
-      args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
-      args.put("activityId", shiftTypeMonth.shiftType.id);
+      args.put("date", shiftTypeMonth.getYearMonth().toLocalDate(1).toString());
+      args.put("activityId", shiftTypeMonth.getShiftType().id);
       redirect(Router.reverse("Calendar.monthShiftsApprovement", args).url);
     }
 
-    shiftTypeMonth.approved = true;
+    shiftTypeMonth.setApproved(true);
     shiftTypeMonth.save();
     // FIXME: 12/06/17 converrebbe automatizzare il ricalcolo in seguito ad ogni cambio di stato
     // del ShiftTypeMonth (approved false->true e viceversa)
     // effettua il ricalcolo delle competenze
     shiftManager2.assignShiftCompetences(shiftTypeMonth);
 
-    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
-    args.put("activity.id", shiftTypeMonth.shiftType.id);
+    args.put("date", shiftTypeMonth.getYearMonth().toLocalDate(1).toString());
+    args.put("activity.id", shiftTypeMonth.getShiftType().id);
     redirect(Router.reverse("Calendar.show", args).url);
   }
 
@@ -765,7 +769,7 @@ public class Calendar extends Controller {
 
     rules.checkIfPermitted(shiftTypeMonth);
 
-    shiftTypeMonth.approved = false;
+    shiftTypeMonth.setApproved(false);
     shiftTypeMonth.save();
 
     // effettua il ricalcolo delle competenze
@@ -773,8 +777,8 @@ public class Calendar extends Controller {
 
     // FIXME: 12/06/17 un modo più bellino?
     Map<String, Object> args = new HashMap<>();
-    args.put("date", shiftTypeMonth.yearMonth.toLocalDate(1).toString());
-    args.put("activity.id", shiftTypeMonth.shiftType.id);
+    args.put("date", shiftTypeMonth.getYearMonth().toLocalDate(1).toString());
+    args.put("activity.id", shiftTypeMonth.getShiftType().id);
     redirect(Router.reverse("Calendar.show", args).url);
   }
 

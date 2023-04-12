@@ -4,6 +4,109 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.5] - 2023-04-06
+### Added
+ - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
+ - Aggiunta gestione delle password sha512 per futura rimozione attuale algoritmo hash password
+ - Aggiunta l'importazione dei codici di lavoro agile nell'importazione delle assenze
+
+### Changed
+ - Rimossa @As sulle entity, utilizzato per i binder NullStringBinder e LocalTimeBinder
+ - Corretta creazione dei TimeSlot che utilizzavano la @As nell'entity
+ - Corretto cambio di mese nelle richieste di cambio e reperibilità
+ - Corretta creazione gruppi quando l'externalId è vuoto ed esiste già un gruppo con externalId
+   vuoto per la relativa sede
+ - Introdotto ordine alfabetico per cognome al risultato del metodo rest
+   rest/v2/certifications/getmonthsituationbyoffice
+ - Rimossi i parametri di configurazione che permettevano ai I-III livelli di auto inserirsi le ferie e
+   i riposi compensativi. Condizionata la visibilità del parametro di auto inserimento delle timbrature
+   per i I-III livelli al fatto che il valore di quel parametro sia "sì"
+ - Aggiunto alert configurabile da generalSetting per informare il personale CNR che l'inserimento di una nuova
+   persona può comportare rischi di malfunzionamenti e di contattare l'helpdesk CNR
+ - Corretto bug nel calcolo dei periodi delle entità collegate al contratto in caso di modifica a date dei 
+   contratti scaduti
+ - Corretto bug nell'inserimento di tessere per i buoni pasto per dipendenti non facenti parte della sede
+   di afferenza del meal ticket manager
+ 
+
+## [2.6.4] - 2023-02-02
+### Added
+ - Aggiunto controllo su correttezza codice fiscale
+ - Aggiunto campo absenceTypeId ai principali metodi REST che restituiscono informazioni
+   sulle assenze.
+ - Aggiunta possibilità di visualizzare le tipologie di assenza a partire dal code (oltre che l'id)
+ - Aggiunta regola drools per permettere all'amministratore in sola lettura di esportare i timesheet
+ - Aggiunto page break nel pdf per separare in nuova pagina i cartellini di tutti i dipendenti 
+   nella stampa cartellino
+ - Aggiunto controllo che verifica l'owner di una timbratura nella stampa cartellino nel caso di timbrature
+   inserite dal sistema a cavallo della mezzanotte
+ - Aggiunto controllo che limita a 10 giorni il lavoro agile nel caso di più di 22 giorni lavorativi in un mese
+ 
+ 
+
+### Changed
+ - Corretto controllo su univocità codice fiscale e eppn
+ - Corretto metodo REST /rest/v2/certifications/getMonthSituationByOffice che non restituiva
+   tutte le persone della sede
+ - Sostituito il logo CNR nel pulsante per attivare autenticazione SSO
+ - Corretto funzionamento respingimento richieste di assenza da parte dei responsabili
+   di sede per i responsabili di gruppo.
+ - Corretto funzionamento della visualizzazione delle tessere per i buoni elettronici e risolto bug
+   di visualizzazione per amministratori associati a sedi ormai chiuse
+ - Modificata la chiamata della schermata di inserimento buoni pasto usando il contratto al posto della persona
+
+## [2.6.3] - 2023-01-12
+### Added
+ - Aggiunta modellazione per la gestione completa dei buoni pasto elettronici
+ - Aggiunto nuovo codice 31_2021 per la gestione dei codici di ferie del 2021 nell'anno 2023
+ - Aggiunto flusso informativo per la comunicazione delle date di congedo parentale per il padre
+ - Aggiunta possibilità auto inserimento codici congedo parentale per il padre
+ - Aggiunti codici per missione antartica per l'anno 2023
+ 
+### Changed
+ - Corretta gestione sincronizzazione personale afferente in una sede nel caso non
+   sia presente l'id anagrafica esterno
+ - Aggiornamento del logo del CNR
+ - Modificato comportamento del codice 98CV che deve decurtare le ferie
+ - Corretta richiesta cambio di reperibilità quando non si danno giorni in cambio
+ - Modificate le schermate riepilogative dei flussi di congedo parentale conclusi
+ - Corretta visualizzazione privacy policy
+ - Migliorate le prestazioni del metodo /rest/v2/certifications/getmonthsituationbyoffice
+ - Modificato il calcolo della quantità di ore da togliere per i 661G ai part time orizzontali
+ - Rimosso codice 26BP
+
+## [2.6.2] - 2022-11-17
+
+### Added
+ - Aggiunto metodo REST /rest/v3/personDays/serviceExitByPersonAndMonth
+ - Aggiunto campo mealTicketsPreviousMonth e remainingMealTickets alla risposta del metodo
+   REST /rest/v2/certifications/getMonthSituation
+ - Modificato il modello per una più facile migrazione a Spring. Private tutti i campi del modello 
+ - Aggiunta la possibilità di aggiungere motivazione, luogo e note alle timbrature per motivi di servizio
+
+### Changed
+ - Corretta associazione contratto precedente per i contratti continuativi
+
+## [2.6.1] - 2022-10-13
+### Added
+ - Aggiunta la possibilità per i responsabili di gruppo di approvare le richieste di uscite per servizio
+ 
+### Changed
+ - Rivista la procedura di merge di contratto con spostamento delle assenze senza effettuare il re-inserimento
+ - Cambiato il tipo a text nelle input per la modifica della matricola del personale
+ - Aggiunta possibilità di specificare un URL per il recovery della password LDAP
+
+## [2.6.0] - 2022-09-27
+### Added
+ - Aggiunta possibilità di servire l'applicazione non come root path (per esempio come
+   https://mioentediricerca.it/epas).
+ - Completata la gestione delle comunicazioni ferie/riposi compensativi per i livelli I-III
+   nel caso il parametro generale sia configurato per non permettere approvazioni per i
+   livelli I-III 
+ - Aggiunti nuovi codici di assenza per congedo parentale per il padre.
+ - Modificati i codici d congedo parentale al 30% secondo le linee guida dettate dalle modifiche al 
+   regolamento del CNR.
+
 ## [2.5.5] - 2022-09-19
 ### Changed
  - Corretta la rimozione dai gruppi, servizi di reperibità e turno delle persone
@@ -11,12 +114,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.4] - 2022-09-16
 ### Added
+ - Aggiunta la possibilità di disabilitare la configurabilità delle approvazioni delle ferie
+   e riposi compensati dei livelli I-III. Con l'apposita configurazione generale abilitata 
+   i livelli I-III hanno dei flussi solo per comunicare le asssenze, senza autorizzazioni e 
+   con le etichette dei flussi modificati da "richiesta" a "comunicazione"
  - Aggiunta la possibilità di disattivare e cancellare gli orari di lavoro predefiniti
    non utilizzati.
  - Aggiunta la possibilità di rinominare gli orari di lavoro predefiniti.
  - Inviata email al dipendente ed all'ufficio opportuno quando ci sono problemi
    nell'inserimento di una richiesta di missione o di rimborso
  - Aggiunto codice 35R ai codici che riducono le ferie
+ 
 ### Changed
  - Reso più robusto il cambio di menu in caso di giorno/mese/anno corrente mancante
  - Corretto orrdinamento delle datatable con data e ora in italiano
@@ -45,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    l'utente
  - Aggiunta possibilità di vedere il menu con i flussi di lavoro al personale che è responsabile di
    sede, anche sulle sedi diversa dalla propria di assegnazione
+
 ### Changed 
  - Corretto controllo dei buoni pasto inviati ad Attestati (funzionalità solo per CNR)
  - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
@@ -67,6 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta possibilità di cedere un giorno di reperibilità
  - Aggiunto controllo sulla visibilità della presenza giornaliera dei dipendenti appartenenti ad un 
    gruppo da parte del responsabile di gruppo
+
 ### Changed
  - Corretto messaggio di errore in caso di attestato di fine mese non calcolato correttamente
  - Modificato il conteggio dei giorni di presenza in sede quando un dipendente è in telelavoro e 
@@ -84,6 +194,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto campo enumerato per la gestione del buono pasto sul modello di absenceType
    Risolve anche la problematica del 103RT che non deve permettere l'attribuzione del buono
    pasto per coloro i quali fanno telelavoro che finisce sul cartellino come orario di lavoro.
+
 ### Changed
  - Migliorato messaggio di errore in caso di inserimento via REST di buoni pasto già esistenti
  - Fix bug del permesso breve che non veniva eliminato quando si completava la giornata
@@ -102,6 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta verifica nella richiesta di ferie/permesso che il giorno ricada in un contratto
    del dipendente
  - Aggiunta documentazione su parametri di sede e del dipendente
+
 ### Changed
  - Condizionate alcune funzioni per l'admin legate ad "Attestati" del CNR
    alla presenza della configurazione specifica di attestati (la password di accesso)
@@ -114,6 +226,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Aggiunta configurabilità campo del JWT da dove prelevare il campo eppn dell'utente
  - Aggiunti metodi REST per la visualizzazione e gestione dei buoni pasto
+
 ### Changed
  - Corretta attivazione pulsante inserimento richieste assenza nel passato quando
    compilato il campo note.
@@ -122,6 +235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.0] - 2022-03-09
 ### Added
  - Aggiunto il supporto all'utenticazione tramite OAuth, test effettuati solo con keycloak.
+
 ### Changed
  - Corretta visualizzazione assenze annuali, codice VAC19 non era incolonnato correttamente.
  - Aggiornata la versione del fullcalendar alla 3.10.2 e della query-ui.

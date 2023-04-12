@@ -23,6 +23,12 @@ import java.sql.Types;
 //  No Dialect mapping for JDBC type: 1111
 //This makes the assumption that no other fields types will be using the java.sql.Types.OTHER
 //data type
+/**
+ * Dialetto H2 con alcune estensioni utili per i test.
+ *
+ * @author cristian
+ *
+ */
 public class OurH2Dialect extends org.hibernate.dialect.H2Dialect {
 
   /**

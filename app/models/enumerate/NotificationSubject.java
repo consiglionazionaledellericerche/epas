@@ -25,6 +25,7 @@ import models.absences.Absence;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
 import play.mvc.Router;
@@ -90,6 +91,11 @@ public enum NotificationSubject {
    * Notifica per telelavoro
    */
   TELEWORK_INFORMATION,
+  
+  /*
+   * Notifica per congedo parentale per il padre
+   */
+  PARENTAL_LEAVE_INFORMATION,
 
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
@@ -124,43 +130,43 @@ public enum NotificationSubject {
         if (stamping == null) {
           return null;
         }
-        params.put("month", stamping.date.getMonthOfYear());
-        params.put("year", stamping.date.getYear());
-        params.put("personId", stamping.personDay.person.id);
+        params.put("month", stamping.getDate().getMonthOfYear());
+        params.put("year", stamping.getDate().getYear());
+        params.put("personId", stamping.getPersonDay().getPerson().id);
         return toUrl("Stampings.personStamping", params);
       case ABSENCE:
         final Absence absence = Absence.findById(referenceId);
         if (absence == null) {
           return null;
         }
-        params.put("month", absence.personDay.date.getMonthOfYear());
-        params.put("year", absence.personDay.date.getYear());
-        params.put("personId", absence.personDay.person.id);
+        params.put("month", absence.getPersonDay().getDate().getMonthOfYear());
+        params.put("year", absence.getPersonDay().getDate().getYear());
+        params.put("personId", absence.getPersonDay().getPerson().id);
         return toUrl("Stampings.personStamping", params);
       case ABSENCE_REQUEST:
         final AbsenceRequest absenceRequest = AbsenceRequest.findById(referenceId);
         params.put("id", absenceRequest.id);
-        params.put("type", absenceRequest.type);
+        params.put("type", absenceRequest.getType());
         return toUrl("AbsenceRequests.show", params);
       case COMPETENCE_REQUEST:
         final CompetenceRequest competenceRequest = CompetenceRequest.findById(referenceId);
         params.put("id", competenceRequest.id);
-        params.put("type", competenceRequest.type);
+        params.put("type", competenceRequest.getType());
         return toUrl("CompetenceRequests.show", params);
       case ILLNESS_INFORMATION:
         final IllnessRequest illnessRequest = IllnessRequest.findById(referenceId);
         params.put("id", illnessRequest.id);
-        params.put("type", illnessRequest.informationType);
+        params.put("type", illnessRequest.getInformationType());
         return toUrl("InformationRequests.show", params);
       case SERVICE_INFORMATION:
         final ServiceRequest serviceRequest = ServiceRequest.findById(referenceId);
         params.put("id", serviceRequest.id);
-        params.put("type", serviceRequest.informationType);
+        params.put("type", serviceRequest.getInformationType());
         return toUrl("InformationRequests.show", params);
       case TELEWORK_INFORMATION:
         final TeleworkRequest teleworkRequest = TeleworkRequest.findById(referenceId);
         params.put("id", teleworkRequest.id);
-        params.put("type", teleworkRequest.informationType);
+        params.put("type", teleworkRequest.getInformationType());
         return toUrl("InformationRequests.show", params);
       case PERSON_HAS_CHANGED_OFFICE:
         //Se non c'è riferimento alla persona allora vuol dire che non è 
@@ -175,6 +181,12 @@ public enum NotificationSubject {
         params.put("personId", person.id);
         return toUrl("Persons.edit", params);
       // case SYSTEM:
+      case PARENTAL_LEAVE_INFORMATION:
+        final ParentalLeaveRequest parentalLeaveRequest = 
+            ParentalLeaveRequest.findById(referenceId);
+        params.put("id", parentalLeaveRequest.id);
+        params.put("type", parentalLeaveRequest.getInformationType());
+        return toUrl("InformationRequests.show", params);
       default:
         throw new IllegalStateException("unknown target: " + this.name());
     }

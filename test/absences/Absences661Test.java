@@ -38,7 +38,12 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.test.UnitTest;
 
-
+/**
+ * Test vari per le assenze di tipo 661.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 public class Absences661Test extends UnitTest {
   
@@ -80,7 +85,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -102,7 +107,7 @@ public class Absences661Test extends UnitTest {
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
-        allPersistedAbsences, groupPersistedAbsences, person.contracts);
+        allPersistedAbsences, groupPersistedAbsences, person.getContracts());
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
@@ -131,7 +136,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -146,7 +151,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
 
@@ -162,7 +167,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
 

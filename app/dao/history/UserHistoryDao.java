@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,9 +18,9 @@
 package dao.history;
 
 import com.google.common.collect.FluentIterable;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import javax.inject.Inject;
 import models.User;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.query.AuditEntity;
@@ -44,6 +44,7 @@ public class UserHistoryDao {
    * @param userId l'identificativo dell'utente
    * @return la lista delle revisioni sulla modifica di un utente.
    */
+  @SuppressWarnings("unchecked")
   public List<HistoryValue<User>> historyUser(long userId) {
     final AuditQuery query = auditReader.get().createQuery()
             .forRevisionsOfEntity(User.class, false, true)

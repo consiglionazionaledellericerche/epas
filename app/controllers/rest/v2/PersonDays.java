@@ -83,12 +83,12 @@ public class PersonDays extends Controller {
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
     if (pd == null) {
       JsonResponse.notFound("Non sono presenti informazioni per "
-              + person.name + " " + person.surname + " nel giorno " + date);
+              + person.getName() + " " + person.getSurname() + " nel giorno " + date);
     }
     PersonDayDto pdDto = generateDayDto(pd);
     val gson = gsonBuilder.create();
@@ -122,18 +122,18 @@ public class PersonDays extends Controller {
     List<PersonDayDto> list = null;
     for (PersonDay pd : days) {
       PersonDayDto pdDto = generateDayDto(pd);
-      if (map.containsKey(pd.person)) {
-        list = map.get(pd.person);   
+      if (map.containsKey(pd.getPerson())) {
+        list = map.get(pd.getPerson());   
       } else {
         list = Lists.newArrayList();
       }
       list.add(pdDto);
-      map.put(pd.person, list);
+      map.put(pd.getPerson(), list);
       
     }
 
     log.debug("Terminato invio di informazioni della sede {} per l'anno {} mese {}", 
-        office.get().name, year, month);
+        office.get().getName(), year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(map));
   }
@@ -165,13 +165,13 @@ public class PersonDays extends Controller {
       PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
       if (pd == null) {
         JsonResponse.notFound("Non sono presenti informazioni per "
-                + person.name + " " + person.surname + " nel giorno " + date);
+                + person.getName() + " " + person.getSurname() + " nel giorno " + date);
       }
       PersonDayDto pdDto = generateDayDto(pd);
       map.put(person, pdDto);
     }
     log.debug("Terminato invio di informazioni della sede {} per il giorno {}", 
-        office.get().name, date);
+        office.get().getName(), date);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(map));
   }
@@ -185,21 +185,21 @@ public class PersonDays extends Controller {
   private static PersonDayDto generateDayDto(PersonDay pd) {
     PersonDayDto pdDto = 
         PersonDayDto.builder()
-          .data(pd.date)
-          .number(pd.person.number)
-          .buonoPasto(pd.isTicketAvailable)
-          .differenza(pd.difference)
-          .progressivo(pd.progressive)
-          .tempoLavoro(pd.timeAtWork)
-          .giornoLavorativo(!pd.isHoliday)
+          .data(pd.getDate())
+          .number(pd.getPerson().getNumber())
+          .buonoPasto(pd.isTicketAvailable())
+          .differenza(pd.getDifference())
+          .progressivo(pd.getProgressive())
+          .tempoLavoro(pd.getTimeAtWork())
+          .giornoLavorativo(!pd.isHoliday())
           .build();
-    if (pd.absences != null && pd.absences.size() > 0) {
-      for (Absence abs : pd.absences) {
+    if (pd.getAbsences() != null && pd.getAbsences().size() > 0) {
+      for (Absence abs : pd.getAbsences()) {
         pdDto.getCodiciAssenza().add(AbsenceDto.build(abs));
       }
     }
-    if (pd.stampings != null && pd.stampings.size() > 0) {
-      for (Stamping s : pd.stampings) {
+    if (pd.getStampings() != null && pd.getStampings().size() > 0) {
+      for (Stamping s : pd.getStampings()) {
         pdDto.getTimbrature().add(StampingDto.build(s));
       }
     }

@@ -107,7 +107,8 @@ public class ServiceFactories {
         absencesToScan, orderedChildren, fetchedContracts, initializationGroups,
         this, absenceEngineUtility, personDayManager);
     for (Absence absence : absenceEngineScan.absencesToScan) {
-      Set<GroupAbsenceType> groupsToScan = absenceEngineUtility.involvedGroup(absence.absenceType); 
+      Set<GroupAbsenceType> groupsToScan = 
+          absenceEngineUtility.involvedGroup(absence.getAbsenceType()); 
       absenceEngineScan.absencesGroupsToScan.put(absence, groupsToScan);
     }
     return absenceEngineScan;
@@ -144,7 +145,7 @@ public class ServiceFactories {
 
     //DAO fetch delle assenze (una volta ottenuti i limiti temporali della catena)
     // separato per inject nei test
-    if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+    if (groupAbsenceType.getPattern() == GroupAbsenceTypePattern.simpleGrouping) {
       if (absenceToInsert == null) {
         return periodChain;
       }
@@ -161,7 +162,7 @@ public class ServiceFactories {
     }
 
     //2 assegnare ad ogni periodo le assenze di competenza e calcoli
-    if (groupAbsenceType.pattern == GroupAbsenceTypePattern.simpleGrouping) {
+    if (groupAbsenceType.getPattern() == GroupAbsenceTypePattern.simpleGrouping) {
 
       insertAbsenceInSimpleGroup(periodChain, allPersistedAbsences, absenceToInsert);
 
@@ -192,10 +193,10 @@ public class ServiceFactories {
     
     PeriodChain periodChain = new PeriodChain(person, groupAbsenceType, date);
 
-    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+    if (groupAbsenceType.getPattern().equals(GroupAbsenceTypePattern.vacationsCnr)) {
       periodChain = vacationFactory
           .buildVacationChain(person, groupAbsenceType, fetchedContracts, date);
-    } else if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
+    } else if (groupAbsenceType.getPattern().equals(GroupAbsenceTypePattern.compensatoryRestCnr)) {
       //TODO: implementare la migrazione riposi compensativi. Una volta completata 
       // riattivare lo scan del gruppo 
       throw new IllegalStateException();
@@ -211,7 +212,7 @@ public class ServiceFactories {
         if (currentPeriod.errorsBox.containsCriticalErrors()) {
           return periodChain;
         }
-        currentGroup = currentGroup.nextGroupToCheck;
+        currentGroup = currentGroup.getNextGroupToCheck();
       }
     }
 
@@ -295,8 +296,8 @@ public class ServiceFactories {
         //report)
         Absence nextAbsenceToInsert = new Absence();
         nextAbsenceToInsert.date = absenceToInsert.getAbsenceDate();
-        nextAbsenceToInsert.justifiedType = absenceToInsert.getJustifiedType();
-        nextAbsenceToInsert.justifiedMinutes = absenceToInsert.getJustifiedMinutes();
+        nextAbsenceToInsert.setJustifiedType(absenceToInsert.getJustifiedType());
+        nextAbsenceToInsert.setJustifiedMinutes(absenceToInsert.getJustifiedMinutes());
         absenceToInsert = nextAbsenceToInsert;
       }
     } 
@@ -342,7 +343,7 @@ public class ServiceFactories {
       try {
         DateInterval childInterval = absencePeriod.groupAbsenceType.getPeriodType()
             .getChildInterval(orderedChildren
-                .get(absencePeriod.groupAbsenceType.getPeriodType().childNumber - 1).bornDate);
+                .get(absencePeriod.groupAbsenceType.getPeriodType().childNumber - 1).getBornDate());
         absencePeriod.from = childInterval.getBegin();
         absencePeriod.to = childInterval.getEnd();
         if (!DateUtility.isDateIntoInterval(date, childInterval)) {
@@ -357,8 +358,8 @@ public class ServiceFactories {
     
     // recuperare l'inizializzazione
     for (InitializationGroup initialization : initializationGroup) {
-      if (initialization.groupAbsenceType.equals(groupAbsenceType) 
-          && DateUtility.isDateIntoInterval(initialization.date, 
+      if (initialization.getGroupAbsenceType().equals(groupAbsenceType) 
+          && DateUtility.isDateIntoInterval(initialization.getDate(), 
               absencePeriod.periodInterval())) {
         absencePeriod.initialization = initialization;
       }
@@ -387,8 +388,8 @@ public class ServiceFactories {
 
       }
       if (absencePeriod.initialization != null 
-          && absencePeriod.initialization.takableTotal != null) {
-        absencePeriod.setFixedPeriodTakableAmount(absencePeriod.initialization.takableTotal);
+          && absencePeriod.initialization.getTakableTotal() != null) {
+        absencePeriod.setFixedPeriodTakableAmount(absencePeriod.initialization.getTakableTotal());
       }
 
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;
@@ -437,7 +438,7 @@ public class ServiceFactories {
     boolean isComplation = false;
     boolean isReplacing = false;
     if (absencePeriod.isTakable()) {
-      isTaken = absencePeriod.takenCodes.contains(absence.absenceType) 
+      isTaken = absencePeriod.takenCodes.contains(absence.getAbsenceType()) 
         || absencePeriod.takableCodes.contains(absence.getAbsenceType());
     }
     if (absencePeriod.isComplation()) {
@@ -483,7 +484,7 @@ public class ServiceFactories {
       
       takenAmount = absenceEngineUtility.takenBehaviouralFixes(absence, takenAmount, 
           fetchedContracts, absencePeriod.periodInterval(), 
-          takableBehaviour.takableAmountAdjustment);
+          takableBehaviour.getTakableAmountAdjustment());
       
       TakenAbsence takenAbsence = absencePeriod.buildTakenAbsence(absence, takenAmount);
       if (!takenAbsence.canAddTakenAbsence()) {
@@ -640,7 +641,7 @@ public class ServiceFactories {
       log.debug("Controllo la reperibilità per {} nel giorno {}", 
           person, absence.getAbsenceDate());
       //check sulla reperibilità
-      if (!absence.absenceType.reperibilityCompatible 
+      if (!absence.getAbsenceType().isReperibilityCompatible() 
           && personReperibilityDayDao.getPersonReperibilityDay(
               person, absence.getAbsenceDate()).isPresent()) {
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility);
@@ -678,7 +679,7 @@ public class ServiceFactories {
     }
 
     // Violazione mimino e massimo
-    if (absence.justifiedMinutes != null) {
+    if (absence.getJustifiedMinutes() != null) {
       if (absence.violateMinimumTime()) {
         genericErrors.addAbsenceError(absence, AbsenceProblem.MinimumTimeViolated, absence);
       }
@@ -687,15 +688,15 @@ public class ServiceFactories {
       }
     }
     
-    if (absence.absenceType.code.equals(DefaultAbsenceType.A_661MO.getCode())
+    if (absence.getAbsenceType().getCode().equals(DefaultAbsenceType.A_661MO.getCode())
         && DateUtility.isDateIntoInterval(absence.getAbsenceDate(), 
               DateUtility.getYearInterval(2018)) 
-        && absence.justifiedMinutes != null 
-        && absence.justifiedMinutes >= 360) {
+        && absence.getJustifiedMinutes() != null 
+        && absence.getJustifiedMinutes() >= 360) {
       genericErrors.addAbsenceWarning(absence, AbsenceProblem.Migration661);
     }
     
-    if (absence.absenceType.isExpired(absence.getAbsenceDate())) {
+    if (absence.getAbsenceType().isExpired(absence.getAbsenceDate())) {
       genericErrors.addAbsenceError(absence, AbsenceProblem.Expired, absence);
     }
 
@@ -715,7 +716,7 @@ public class ServiceFactories {
    */
   private void completePeriodChain(PeriodChain periodChain) {
     
-    if (periodChain.groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+    if (periodChain.groupAbsenceType.getPattern().equals(GroupAbsenceTypePattern.vacationsCnr)) {
       vacationFactory.removeAccruedFirstYear(periodChain);
     }  
     

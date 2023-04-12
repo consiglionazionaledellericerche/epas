@@ -37,6 +37,7 @@ public enum DefaultCategoryType {
   //ESENZIONE_COVID19("Esenzione da lavoro causa COVID19", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   PROROGA_FERIE_2020("Proroga ferie 2020", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
+  PROROGA_FERIE_2021("Proroga ferie 2021", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
   ASTENSIONE_POSTPARTUM("Astensione post partum", 5, DefaultTab.CONGEDI_PARENTALI), 
   CONGEDI_PRENATALI("Congedi prenatali", 7, DefaultTab.CONGEDI_PARENTALI),
 
@@ -114,7 +115,7 @@ public enum DefaultCategoryType {
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
       boolean found = false;
       for (CategoryGroupAbsenceType category : allCategories) {
-        if (defaultCategory.name().equals(category.name)) {
+        if (defaultCategory.name().equals(category.getName())) {
           found = true;
           break;
         }
@@ -133,7 +134,7 @@ public enum DefaultCategoryType {
    */
   public static Optional<DefaultCategoryType> byName(CategoryGroupAbsenceType category) {
     for (DefaultCategoryType defaultCategory : DefaultCategoryType.values()) {
-      if (defaultCategory.name().equals(category.name)) {
+      if (defaultCategory.name().equals(category.getName())) {
         return Optional.of(defaultCategory);
       }
     }

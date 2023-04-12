@@ -75,9 +75,9 @@ public class BadgeManager {
    */
   public void normalizeBadgeCode(Badge badge, boolean persist) {
     try {
-      String code = badge.code.trim();
+      String code = badge.getCode().trim();
       Integer number = Integer.parseInt(code);
-      badge.code = String.valueOf(number);
+      badge.setCode(String.valueOf(number));
       if (!code.equals(String.valueOf(number))) {
         if (persist) {
           badge.save();
@@ -105,21 +105,22 @@ public class BadgeManager {
     final String codeNormalized = String.valueOf(Integer.valueOf(code));
     val badges = checkBadgeTransfer(person, code, badgeSystem);
     
-    Optional<Badge> alreadyPresent = badgeSystem.badges.stream()
-        .filter(badge -> badge.code.equals(codeNormalized) 
-            && badge.person.equals(person)).findAny();
+    Optional<Badge> alreadyPresent = badgeSystem.getBadges().stream()
+        .filter(badge -> badge.getCode().equals(codeNormalized) 
+            && badge.getPerson().equals(person)).findAny();
     
     
     if (alreadyPresent.isPresent()) {
-      log.debug("Il Badge n. {} è già presente per {} - {}", codeNormalized, person, person.office);
+      log.debug("Il Badge n. {} è già presente per {} - {}", 
+          codeNormalized, person, person.getOffice());
       return badges;
     } else {
-      for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+      for (BadgeReader badgeReader : badgeSystem.getBadgeReaders()) {
         Badge badge = new Badge();
-        badge.person = person;
-        badge.code = codeNormalized;
-        badge.badgeSystem = badgeSystem;
-        badge.badgeReader = badgeReader;
+        badge.setPerson(person);
+        badge.setCode(codeNormalized);
+        badge.setBadgeSystem(badgeSystem);
+        badge.setBadgeReader(badgeReader);
         badge.save();
         badges.add(badge);
       }
@@ -137,16 +138,16 @@ public class BadgeManager {
   private List<Badge> checkBadgeTransfer(Person person, String code, BadgeSystem badgeSystem) {
     final String codeNormalized = String.valueOf(Integer.valueOf(code));
     val transferedBadges = Lists.<Badge>newArrayList();
-    for (BadgeReader br : badgeSystem.badgeReaders) {
-      val badges = br.badges.stream()
-          .filter(badge -> badge.code.equals(codeNormalized) 
-              && !badge.person.equals(person)).collect(Collectors.toList());
+    for (BadgeReader br : badgeSystem.getBadgeReaders()) {
+      val badges = br.getBadges().stream()
+          .filter(badge -> badge.getCode().equals(codeNormalized) 
+              && !badge.getPerson().equals(person)).collect(Collectors.toList());
       
       badges.stream().forEach(b -> {
         log.info("Cambio attribuzione badge n. {} (id = {}) "
             + "da {} a {}.",
-            b.code, b.id, b.person.getFullname(), person.getFullname());
-        b.person = person;
+            b.getCode(), b.id, b.getPerson().getFullname(), person.getFullname());
+        b.setPerson(person);
         b.save();
       });
       transferedBadges.addAll(badges);
@@ -159,11 +160,11 @@ public class BadgeManager {
    * Cerca il BadgeSystem associato all'ufficio passato e se non c'è lo crea. 
    */
   public BadgeSystem getOrCreateDefaultBadgeSystem(Office office) {
-    String namePattern = office.name.replaceAll("\\s+", "");
+    String namePattern = office.getName().replaceAll("\\s+", "");
     BadgeSystem badgeSystem;
 
     // Se non ne esiste uno lo creo
-    if (office.badgeSystems.isEmpty()) {
+    if (office.getBadgeSystems().isEmpty()) {
 
       List<BadgeReader> readers = badgeReaderDao.getBadgeReaderByOffice(office);
       BadgeReader badgeReader;
@@ -171,17 +172,17 @@ public class BadgeManager {
       if (readers.isEmpty()) {
         // Creo il Client timbrature se non è già presente
         badgeReader = new BadgeReader();
-        badgeReader.user = new User();
-        badgeReader.code = namePattern;
-        badgeReader.user.username = namePattern.toLowerCase(Locale.ITALY);
-        badgeReader.user.owner = office;
-        badgeReader.user.save();
+        badgeReader.setUser(new User());
+        badgeReader.setCode(namePattern);
+        badgeReader.getUser().setUsername(namePattern.toLowerCase(Locale.ITALY));
+        badgeReader.getUser().setOwner(office);
+        badgeReader.getUser().save();
 
         // Creo il Ruolo per il nuovo utente
         UsersRolesOffices uro = new UsersRolesOffices();
-        uro.office = office;
-        uro.role = roleDao.getRoleByName(Role.BADGE_READER);
-        uro.user = badgeReader.user;
+        uro.setOffice(office);
+        uro.setRole(roleDao.getRoleByName(Role.BADGE_READER));
+        uro.setUser(badgeReader.getUser());
         uro.save();
       } else {
         // prendo il primo se c'è già un client configurato
@@ -190,19 +191,19 @@ public class BadgeManager {
 
       // Creo il gruppo badge associato al nuovo Client
       badgeSystem = new BadgeSystem();
-      badgeSystem.name = namePattern;
-      badgeSystem.office = office;
-      badgeSystem.badgeReaders.add(badgeReader);
+      badgeSystem.setName(namePattern);
+      badgeSystem.setOffice(office);
+      badgeSystem.getBadgeReaders().add(badgeReader);
       badgeSystem.save();
 
-      badgeReader.badgeSystems.add(badgeSystem);
+      badgeReader.getBadgeSystems().add(badgeSystem);
       badgeReader.save();
     } else {
       // Altrimenti prendo il default o il primo che trovo
-      badgeSystem = office.badgeSystems.stream()
+      badgeSystem = office.getBadgeSystems().stream()
           .filter(bs -> {
-            return bs.name.equals(namePattern);
-          }).findFirst().orElse(office.badgeSystems.iterator().next());
+            return bs.getName().equals(namePattern);
+          }).findFirst().orElse(office.getBadgeSystems().iterator().next());
     }
 
     return badgeSystem;
@@ -221,13 +222,13 @@ public class BadgeManager {
       //Vengono filtrati tutti i badge uguali. Solo il primo incontrato
       //viene importato.
       importedBadges = 
-          Lists.newArrayList(peoplePerseoConsumer.getOfficeBadges(office.perseoId).get()
+          Lists.newArrayList(peoplePerseoConsumer.getOfficeBadges(office.getPerseoId()).get()
           .stream().collect(Collectors.toCollection(
               () -> new TreeSet<PersonBadge>(
                   (pb1, pb2) -> pb1.getBadge().compareTo(pb2.getBadge())))));
     } catch (InterruptedException | ExecutionException e) {
       log.error("Impossibile importare i badge della sede con perseoId {}: {}",
-          office.perseoId, e.getMessage());
+          office.getPerseoId(), e.getMessage());
       throw new IllegalStateException("Impossibile importare i badge");
     }
 

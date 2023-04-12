@@ -11,7 +11,7 @@
 
 -->
 <dataset>
-  <users id="146" expire_recovery_token="2015-10-05" password="d0edb37694f3ad4b8ef76b6340ff72b4" recovery_token="rke2pgqa8120riruv3stdaom86" username="cristian.lucchesi" disabled="false"/>
+  <users id="146" expire_recovery_token="2015-10-05" password="d0edb37694f3ad4b8ef76b6340ff72b4" recovery_token="rke2pgqa8120riruv3stdaom86" username="cristian.lucchesi" disabled="false" version="1"/>
 
   <persons id="146" email="cristian.lucchesi@iit.cnr.it" name="Cristian" number="9802" old_id="146" surname="Lucchesi" qualification_id="6" office_id="1" user_id="146" telephone="No internal number" want_email="true" birthday="1974-09-10"  eppn="cristian.lucchesi@iit.cnr.it" begin_date="2013-11-24 20:01:31.0" end_date="2015-12-18 16:48:53.511"/>
 

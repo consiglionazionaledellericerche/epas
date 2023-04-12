@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -27,12 +27,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.inject.Inject;
 import dao.QualificationDao;
 import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.Qualification;
@@ -115,7 +115,8 @@ public class PeoplePerseoConsumer {
       if (departmentPerseoId.isPresent()) {
         url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        url = AnagraficaApis.getPeople();
+        throw new ApiRequestException(
+            "Impossibile prelevare le persone di una sede senza personId");
       }
       user = AnagraficaApis.getPerseoUser();
       pass = AnagraficaApis.getPerseoPass();
@@ -125,6 +126,8 @@ public class PeoplePerseoConsumer {
       throw new ApiRequestException(error);
     }
 
+    log.debug("Sto per effettuare la richiesta all'url {} con credenziali {}:{}", 
+        url, user, pass);
     final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
     log.info("Invio richiesta lista persone a Perseo: {}", request.url);
@@ -164,19 +167,19 @@ public class PeoplePerseoConsumer {
       Map<Integer, Qualification> qualificationsMap) {
 
     Person person = new Person();
-    person.name = perseoPerson.firstname;
-    person.surname = perseoPerson.surname;
-    person.number = perseoPerson.number;
-    person.email = perseoPerson.email; //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    person.setName(perseoPerson.firstname);
+    person.setSurname(perseoPerson.surname);
+    person.setNumber(perseoPerson.number);
+    person.setEmail(perseoPerson.email); //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
     if (perseoPerson.eppn != null) {
-      person.eppn = perseoPerson.eppn;
+      person.setEppn(perseoPerson.eppn);
     } else {
-      person.eppn = perseoPerson.email;
+      person.setEppn(perseoPerson.email);
     }
-    person.qualification = qualificationsMap.get(perseoPerson.qualification);
-    person.perseoId = perseoPerson.id;
+    person.setQualification(qualificationsMap.get(perseoPerson.qualification));
+    person.setPerseoId(perseoPerson.id);
 
-    person.perseoOfficeId = perseoPerson.departmentId;
+    person.setPerseoOfficeId(perseoPerson.departmentId);
 
     return person;
   }
@@ -192,7 +195,7 @@ public class PeoplePerseoConsumer {
     List<Person> people = Lists.newArrayList();
     for (PerseoPerson perseoPerson : perseoPeople) {
       Person person = epasConverter(perseoPerson, qualificationsMap);
-      if (person.number == null) {
+      if (person.getNumber() == null) {
         //non dovrebbe succedere...
         log.warn("Ricevuta dall'anagrafica una persona senza matricola... {}.", person.toString());
       } else {
@@ -221,7 +224,7 @@ public class PeoplePerseoConsumer {
     }
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : epasConverter(perseoPeople)) {
-      perseoPeopleMap.put(person.perseoId, person);
+      perseoPeopleMap.put(person.getPerseoId(), person);
     }
     return perseoPeopleMap;
   }
@@ -235,7 +238,7 @@ public class PeoplePerseoConsumer {
 
     Map<String, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoPeopleByPerseoId(departmentPerseoId).values()) {
-      perseoPeopleMap.put(person.number, person);
+      perseoPeopleMap.put(person.getNumber(), person);
     }
     return perseoPeopleMap;
   }

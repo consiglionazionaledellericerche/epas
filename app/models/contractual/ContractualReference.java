@@ -17,7 +17,7 @@
 
 package models.contractual;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -25,6 +25,8 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import play.data.validation.Required;
@@ -37,6 +39,8 @@ import play.db.jpa.Blob;
  * @author Cristian Lucchesi
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "contractual_references")
@@ -46,17 +50,17 @@ public class ContractualReference extends PeriodModel {
 
   @NotNull
   @Required
-  public String name;
+  private String name;
 
   @URL
-  public String url;
+  private String url;
   
-  public String filename;
+  private String filename;
 
-  public Blob file;
+  private Blob file;
 
   @ManyToMany(mappedBy = "contractualReferences")
-  List<ContractualClause> contractualClauses = Lists.newArrayList();
+  private List<ContractualClause> contractualClauses = Lists.newArrayList();
   
   @Transient
   public long getLength() {

@@ -18,11 +18,11 @@
 package dao.wrapper;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import java.util.List;
+import javax.inject.Inject;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -61,13 +61,13 @@ public class WrapperCompetenceCode implements IWrapperCompetenceCode {
 
     int totale = 0;
     List<String> competenceCodeList = Lists.newArrayList();
-    competenceCodeList.add(this.value.code);
+    competenceCodeList.add(this.value.getCode());
 
     List<Competence> compList = competenceDao.getCompetencesInOffice(year, month,
             competenceCodeList, office, false);
 
     for (Competence comp : compList) {
-      totale = totale + comp.valueApproved;
+      totale = totale + comp.getValueApproved();
     }
     return totale;
   }

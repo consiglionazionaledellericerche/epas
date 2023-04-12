@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,12 +18,12 @@
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
@@ -96,10 +96,11 @@ public class TimeSlotDao extends DaoBase {
     Contract contract = contractDao.getContract(date, person);
 
     if (contract != null) {
-      for (ContractMandatoryTimeSlot mts : contract.contractMandatoryTimeSlots) {
+      for (ContractMandatoryTimeSlot mts : contract.getContractMandatoryTimeSlots()) {
 
-        if (DateUtility.isDateIntoInterval(date, new DateInterval(mts.beginDate, mts.endDate))) {
-          return Optional.of(mts.timeSlot);
+        if (DateUtility.isDateIntoInterval(date, 
+            new DateInterval(mts.getBeginDate(), mts.getEndDate()))) {
+          return Optional.of(mts.getTimeSlot());
         }
       }
     }

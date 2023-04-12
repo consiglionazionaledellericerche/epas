@@ -68,7 +68,7 @@ public class Leaves extends Controller {
       String fiscalCode, String number, Integer year, boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     LocalDate start = new LocalDate(LocalDate.now().getYear(), 1, 1);
     LocalDate end = new LocalDate(LocalDate.now().getYear(), 12, 31);
@@ -124,26 +124,27 @@ public class Leaves extends Controller {
     
     for (Absence absence : absences) {
       if (previousPerson == null 
-          || !previousPerson.id.equals(absence.personDay.person.id)
-          || previousCode == null || !previousCode.equals(absence.absenceType.code) 
+          || !previousPerson.id.equals(absence.getPersonDay().getPerson().id)
+          || previousCode == null || !previousCode.equals(absence.getAbsenceType().getCode()) 
           || (previousDate == null 
-          || previousDate.plusDays(1).compareTo(absence.personDay.date) != 0)) {
+          || previousDate.plusDays(1).compareTo(absence.getPersonDay().getDate()) != 0)) {
         currentAbsencePeriod = 
             new AbsencePeriodDto(
-                PersonShowTerseDto.build(absence.personDay.person),
-                absence.absenceType.code, 
-                JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
+                PersonShowTerseDto.build(absence.getPersonDay().getPerson()),
+                absence.getAbsenceType().getCode(), 
+                JodaConverters.jodaToJavaLocalDate(absence.getPersonDay().getDate()));
         currentAbsencePeriod.setEnd(currentAbsencePeriod.getStart());
         abs.add(currentAbsencePeriod);
       } else {
-        currentAbsencePeriod.setEnd(JodaConverters.jodaToJavaLocalDate(absence.personDay.date));
+        currentAbsencePeriod.setEnd(
+            JodaConverters.jodaToJavaLocalDate(absence.getPersonDay().getDate()));
       }
       if (includeDetails) {
         currentAbsencePeriod.getAbsences().add(AbsenceShowTerseDto.build(absence));
       }
-      previousPerson = absence.personDay.person;
-      previousCode = absence.absenceType.code;
-      previousDate = absence.personDay.date;
+      previousPerson = absence.getPersonDay().getPerson();
+      previousCode = absence.getAbsenceType().getCode();
+      previousDate = absence.getPersonDay().getDate();
     }
     
     return abs;

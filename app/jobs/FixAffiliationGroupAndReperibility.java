@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
-import lombok.extern.slf4j.Slf4j;
 import manager.NotificationManager;
 import models.Contract;
 import models.Person;
@@ -95,7 +95,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     List<Contract> expriredContracts = contractDao.getExpiredContractsInPeriod(begin, end,
         Optional.absent()).stream().filter(
-            c -> !wrapperFactory.create(c.person).getCurrentContract().isPresent())
+            c -> !wrapperFactory.create(c.getPerson()).getCurrentContract().isPresent())
         .collect(Collectors.toList());
 
     Map<Group, Set<Contract>> groupsManagers = new HashMap<>();
@@ -104,7 +104,7 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
 
     for (Contract expiredContract : expriredContracts) {
       LocalDate endContractDate = expiredContract.calculatedEnd();
-      Person person = expiredContract.person;
+      Person person = expiredContract.getPerson();
       log.info("Persona {} endDate contratto scaduto {}", person.fullName(), endContractDate);
 
       val groupsToNotify = disableGroupAffiliation(person, endContractDate);
@@ -166,34 +166,36 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     Set<PersonReperibilityType> reperibilityTypes = Sets.newHashSet();
     Set<PersonReperibility> reperibilitiesToUpdate = Sets.newHashSet();
 
-    List<PersonReperibilityDay> reperibilities = personReperibilityDayDao.getPersonReperibilityDayByPerson(
+    List<PersonReperibilityDay> reperibilities = 
+        personReperibilityDayDao.getPersonReperibilityDayByPerson(
         person, endContractDate);
 
     for (PersonReperibilityDay prd : reperibilities) {
 
-      val pr = prd.personReperibility;
+      val pr = prd.getPersonReperibility();
 
-      if (prd.date.isAfter(
+      if (prd.getDate().isAfter(
           endContractDate)) {
-        reperibilityTypes.add(prd.reperibilityType);
+        reperibilityTypes.add(prd.getReperibilityType());
         reperibilitiesToUpdate.add(pr);
 
         long cancelled =
-            personReperibilityDayDao.deletePersonReperibilityDay(prd.reperibilityType, prd.date);
+            personReperibilityDayDao.deletePersonReperibilityDay(
+                prd.getReperibilityType(), prd.getDate());
         if (cancelled == 1) {
           log.info("Rimossa reperibilità di tipo {} del giorno {} di {}",
-              prd.reperibilityType, prd.date, person.fullName());
+              prd.getReperibilityType(), prd.getDate(), person.fullName());
         }
       }
     }
 
     for (PersonReperibility pr : reperibilitiesToUpdate) {
-      if (pr.endDate == null || pr.endDate.isAfter(endContractDate)) {
-        pr.endDate = endContractDate;
+      if (pr.getEndDate() == null || pr.getEndDate().isAfter(endContractDate)) {
+        pr.setEndDate(endContractDate);
         pr.save();
         log.info(
             "Aggiornata situazione date di reperibilità {}  start date {} end date {}",
-            person.fullName(), pr.startDate, pr.endDate);
+            person.fullName(), pr.getStartDate(), pr.getEndDate());
       }
     }
 
@@ -221,19 +223,19 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
     var removeShift = false;
 
     for (PersonShiftShiftType psst : personShiftShiftType) {
-      if (psst.endDate == null || psst.endDate.isAfter(endContractDate)) {
+      if (psst.getEndDate() == null || psst.getEndDate().isAfter(endContractDate)) {
         removeShift = true;
         shiftToDeactivated.add(psst);
-        psst.endDate = endContractDate;
+        psst.setEndDate(endContractDate);
         psst.save();
         log.info(
             "Aggiornata situazione date di abilitazione ai turni di {}  start date {} end date {}",
-            person.fullName(), psst.beginDate, psst.endDate);
+            person.fullName(), psst.getBeginDate(), psst.getEndDate());
       }
     }
 
     if (removeShift) {
-      personShift.disabled = true;
+      personShift.setDisabled(true);
       personShift.save();
     }
 
@@ -257,9 +259,8 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
         endContractDate.getDayOfMonth());
     val groups = groupDao.myGroups(person, fromDate);
 
-    groups.forEach(group ->
-        {
-          group.affiliations.stream()
+    groups.forEach(group -> {
+          group.getAffiliations().stream()
               .filter(a -> a.isActive() && a.getPerson().id.equals(person.id)).forEach(a -> {
                 groupsToDeactivated.add(a.getGroup());
                 java.time.LocalDate endDate = java.time.LocalDate.of(endContractDate.getYear(),
@@ -286,7 +287,6 @@ public class FixAffiliationGroupAndReperibility extends Job<Void> {
    *                                notificare.
    * @param reperibilitySupervisors supervisor delle reperibilità con le persone con i contratti
    *                                scaduti da notificar.
-   * @return l'eventuale problema riscontrati durante l'approvazione.
    */
   public void sendNotification(Map<Group, Set<Contract>> groupsManagers,
       Map<PersonShiftShiftType, Set<Contract>> shiftSupervisors,

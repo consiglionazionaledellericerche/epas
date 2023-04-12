@@ -174,21 +174,25 @@ public class MonthsRecapManager {
       cell.setCellValue(psDto.person.fullName());
 
       for (PersonStampingDayRecap day : psDto.daysRecap) {
-        cell = row.createCell(day.personDay.date.getDayOfMonth());
+        cell = row.createCell(day.personDay.getDate().getDayOfMonth());
         cell.setCellStyle(cs);
-        if (day.personDay.isHoliday) {
+        if (day.personDay.isHoliday()) {
           cell.setCellStyle(holiday);
         } else {
           cell.setCellStyle(workingDay);
         }
-        if (!day.personDay.absences.isEmpty() 
-            && (day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19) 
-            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(covid19bp)
-            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(lagile)
-            || day.personDay.absences.get(0).absenceType.code.equalsIgnoreCase(lagilebp)
+        if (!day.personDay.getAbsences().isEmpty() 
+            && (day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(covid19) 
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(covid19bp)
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(lagile)
+            || day.personDay.getAbsences().get(0).getAbsenceType().getCode()
+                .equalsIgnoreCase(lagilebp)
             )) {
           cell.setCellValue("SW");
-        } else if (!day.personDay.stampings.isEmpty()) {
+        } else if (!day.personDay.getStampings().isEmpty()) {
           cell.setCellValue("In sede");
         } else {
           cell.setCellValue("-");

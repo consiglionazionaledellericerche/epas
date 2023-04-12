@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,11 +20,11 @@ package dao;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import models.GeneralSetting;

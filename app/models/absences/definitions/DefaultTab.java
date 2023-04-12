@@ -74,7 +74,7 @@ public enum DefaultTab {
     for (DefaultTab defaultCategory : DefaultTab.values()) {
       boolean found = false;
       for (CategoryTab category : allTabs) {
-        if (defaultCategory.name().equals(category.name)) {
+        if (defaultCategory.name().equals(category.getName())) {
           found = true;
           break;
         }
@@ -93,7 +93,7 @@ public enum DefaultTab {
    */
   public static Optional<DefaultTab> byName(CategoryTab tab) {
     for (DefaultTab defaultTab : DefaultTab.values()) {
-      if (defaultTab.name().equals(tab.name)) {
+      if (defaultTab.name().equals(tab.getName())) {
         return Optional.of(defaultTab);
       }
     }

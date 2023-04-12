@@ -87,10 +87,17 @@ Risultano visibili, all'interno della finestra:
       * il codice di competenza
       * il quantitativo espresso in giorni o ore di utilizzo di quella competenza
    * le ore di formazione
-   * i buoni pasto, rappresentati attraverso una terna di valori che sono:
-      * l'anno di utilizzo
-      * il mese di utilizzo
-      * il quantitativo di buoni utilizzati
+   * i buoni pasto, rappresentati attraverso una coppia di valori che sono:
+      * il numero di buoni cartacei utilizzati
+      * il numero di buoni elettronici utilizzati
+      
+*N.B.:* Attestati non riceve più il numero dei buoni pasto maturati nel mese, bensì il numero di buoni pasto 
+cartacei/elettronici necessari a coprire la maturazione dei buoni pasto ed è questa informazione che verrà inviata 
+ad Attestati che vedrete nel riepilogo, per ciascun dipendente, nella schermata di "Invio dati ad Attestati" 
+nella voce relativa ai buoni pasto. 
+Nello specifico, la voce dei buoni pasto sarà modificata nella forma: Buoni pasto x;y 
+dove x sta per la quantità di buoni cartacei utilizzati per coprire la maturazione dei buoni pasto del mese 
+e y sta per la quantità di buoni elettronici utilizzati per coprire la maturazione dei buoni pasto del mese. 
 
 Nel caso, invece, si fossero verificati dei problemi durante l'elaborazione, sarà possibile andare
 a controllare cosa non è andato a buon fine cliccando su "*problemi*". Si aprirà una finestra come

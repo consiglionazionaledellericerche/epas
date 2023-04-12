@@ -32,6 +32,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.Person;
 import models.enumerate.InformationType;
@@ -46,6 +48,8 @@ import play.data.validation.Required;
  * @author dario
  *
  */
+@Getter
+@Setter
 @ToString(of = {"informationType", "person", "startAt", "endTo", 
     "officeHeadApproved", "officeHeadApprovalRequired"})
 @Audited
@@ -59,7 +63,7 @@ public abstract class InformationRequest extends BaseModel {
   @Required
   @NotNull
   @ManyToOne(optional = false)
-  public Person person;
+  private Person person;
   
   /**
    * Data e ora di inizio.
@@ -67,53 +71,65 @@ public abstract class InformationRequest extends BaseModel {
   @Required
   @NotNull
   @Column(name = "start_at")
-  public LocalDateTime startAt;
+  private LocalDateTime startAt;
 
   @Column(name = "end_to")
-  public LocalDateTime endTo;
+  private LocalDateTime endTo;
   
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public InformationType informationType;
+  private InformationType informationType;
   
   /**
    * Data di approvazione del responsabili sede.
    */
-  public LocalDateTime officeHeadApproved;
+  private LocalDateTime officeHeadApproved;
   
   /**
    * Data di approvazione dell'amministratore del personale.
    */
-  public LocalDateTime administrativeApproved;
+  private LocalDateTime administrativeApproved;
+  
+  /**
+   * Data di approvazione del responsabile di gruppo.
+   */
+  private LocalDateTime managerApproved;
+  
   
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
-  public boolean officeHeadApprovalRequired = true;
+  private boolean officeHeadApprovalRequired = true;
   
   /**
    * Indica se è richieta l'approvazione da parte dell'amministrativo.
    */
   @Column(name = "administrative_approval_required")
-  public boolean administrativeApprovalRequired = false;
+  private boolean administrativeApprovalRequired = false;
+  
+  /**
+   * Indica se è richiesta l'approvazione del responsabile di gruppo.
+   */
+  @Column(name = "manager_approval_required")
+  private boolean managerApprovalRequired = false;
   
   /**
    * Se il flusso è avviato.
    */
   @Column(name = "flow_started")
-  public boolean flowStarted = false; 
+  private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
   @Column(name = "flow_ended")
-  public boolean flowEnded = false;
+  private boolean flowEnded = false;
   
   @NotAudited
   @OneToMany(mappedBy = "informationRequest")
   @OrderBy("createdAt DESC")
-  public List<InformationRequestEvent> events = Lists.newArrayList();
+  private List<InformationRequestEvent> events = Lists.newArrayList();
   
   @Transient
   public InformationRequestEvent actualEvent() {
@@ -130,6 +146,11 @@ public abstract class InformationRequest extends BaseModel {
     return administrativeApproved != null;
   }
   
+  @Transient
+  public boolean isManagerApproved() {
+    return managerApproved != null;
+  }
+  
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
@@ -139,7 +160,8 @@ public abstract class InformationRequest extends BaseModel {
   public boolean isFullyApproved() {
     return (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
         && (!this.administrativeApprovalRequired 
-            || this.isAdministrativeApproved());
+            || this.isAdministrativeApproved())
+            && (!this.managerApprovalRequired || this.isManagerApproved());
   }
   
   /**
@@ -150,11 +172,13 @@ public abstract class InformationRequest extends BaseModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired);
+    return flowStarted && ((officeHeadApproved == null || !officeHeadApprovalRequired)
+        && (administrativeApproved == null || !administrativeApprovalRequired));
   }
 
   @Transient
   public boolean autoApproved() {
-    return !this.officeHeadApprovalRequired && !this.administrativeApprovalRequired;
+    return !this.officeHeadApprovalRequired && !this.managerApprovalRequired 
+        && !this.administrativeApprovalRequired;
   }
 }

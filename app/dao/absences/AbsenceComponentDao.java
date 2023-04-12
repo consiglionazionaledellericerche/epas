@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ package dao.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -33,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -155,7 +155,7 @@ public class AbsenceComponentDao extends DaoBase {
         .fetchOne();
     if (obj == null) {
       obj = new JustifiedType();
-      obj.name = name;
+      obj.setName(name);
       obj.save();
     }
     return obj;
@@ -174,7 +174,7 @@ public class AbsenceComponentDao extends DaoBase {
         .fetchOne();
     if (obj == null) {
       obj = new JustifiedBehaviour();
-      obj.name = name;
+      obj.setName(name);
       obj.save();
     }
     return obj;
@@ -195,12 +195,12 @@ public class AbsenceComponentDao extends DaoBase {
 
     if (obj == null) {
       obj = new CategoryGroupAbsenceType();
-      obj.name = name;
-      obj.priority = priority;
+      obj.setName(name);
+      obj.setPriority(priority);
       obj.save();
     }
-    if (obj.priority != priority) {
-      obj.priority = priority;
+    if (obj.getPriority() != priority) {
+      obj.setPriority(priority);
       obj.save();
     }
     return obj;
@@ -367,7 +367,7 @@ public class AbsenceComponentDao extends DaoBase {
     while (changed) {
       changed = false;
       for (GroupAbsenceType previous : all) {
-        if (Objects.equals(previous.nextGroupToCheck, group)) {
+        if (Objects.equals(previous.getNextGroupToCheck(), group)) {
           group = previous;
           changed = true;
         }
@@ -404,7 +404,6 @@ public class AbsenceComponentDao extends DaoBase {
    * @param complationTime tempo di completamento
    * @param internalUse se uso interno
    * @param consideredWeekEnd se considerare week end
-   * @param timeForMealticket se il tempo contribuisce al buono pasto
    * @param certificateCode codice per attestati
    * @param expire data scadenza
    * @return entity creata o modificata
@@ -421,26 +420,26 @@ public class AbsenceComponentDao extends DaoBase {
     if (obj == null) {
       obj = new AbsenceType();
     }
-    obj.code = code;
-    obj.description = description;
-    obj.justifiedTime = minutes;
-    obj.justifiedTypesPermitted.clear();
+    obj.setCode(code);
+    obj.setDescription(description);
+    obj.setJustifiedTime(minutes);
+    obj.getJustifiedTypesPermitted().clear();
     //obj.justifiedTimeAtWork = null;
     obj.save();
     JPA.em().flush();
     for (JustifiedType justified : justifiedTypePermitted) {
-      obj.justifiedTypesPermitted.add(justified);
+      obj.getJustifiedTypesPermitted().add(justified);
     }
-    obj.replacingType = complationType;
-    obj.replacingTime = complationTime;
-    obj.internalUse = internalUse;
-    obj.mealTicketBehaviour = mealTicketBehaviour;
-    obj.consideredWeekEnd = consideredWeekEnd;
-    obj.certificateCode = code;
+    obj.setReplacingType(complationType);
+    obj.setReplacingTime(complationTime);
+    obj.setInternalUse(internalUse);
+    obj.setMealTicketBehaviour(mealTicketBehaviour);
+    obj.setConsideredWeekEnd(consideredWeekEnd);
+    obj.setCertificateCode(code);
     if (expire != null) {
-      obj.validTo = expire;
+      obj.setValidTo(expire);
     } else {
-      obj.validTo = new LocalDate(2099, 12, 31);
+      obj.setValidTo(new LocalDate(2099, 12, 31));
     }
 
     obj.save();
@@ -469,12 +468,12 @@ public class AbsenceComponentDao extends DaoBase {
         .from(absenceType)
         .where(absenceType.code.equalsIgnoreCase(newCode)).fetchOne();
     if (exObj != null) {
-      exObj.code += "ex";
+      exObj.setCode(code + "ex");
       exObj.save();
       JPA.em().flush();
     }
 
-    obj.code = newCode;
+    obj.setCode(newCode);
     obj.save();
   }
 
@@ -521,7 +520,7 @@ public class AbsenceComponentDao extends DaoBase {
     Comparator<Absence> absenceComparator = 
         Comparator.comparing(
             Absence::getPersonDay, (s1, s2) -> {
-              return s2.date.compareTo(s1.date);
+              return s2.getDate().compareTo(s1.getDate());
             });
     val result = absences.stream().sorted(absenceComparator).collect(Collectors.toList());
     log.trace("Terminato metodo orderedAbsences in {} millisecondi", 
@@ -551,8 +550,8 @@ public class AbsenceComponentDao extends DaoBase {
     SortedMap<Integer, CategoryGroupAbsenceType> categories = Maps.newTreeMap();
     List<GroupAbsenceType> allGroups = GroupAbsenceType.findAll();
     for (GroupAbsenceType group : allGroups) {
-      if (group.initializable) {
-        categories.put(group.category.priority, group.category);
+      if (group.isInitializable()) {
+        categories.put(group.getCategory().getPriority(), group.getCategory());
       }
     }
     return Lists.newArrayList(categories.values());
@@ -565,8 +564,8 @@ public class AbsenceComponentDao extends DaoBase {
    * @return gruppo
    */
   public GroupAbsenceType firstGroupInitializable(CategoryGroupAbsenceType category) {
-    for (GroupAbsenceType group : category.groupAbsenceTypes) {
-      if (group.initializable) {
+    for (GroupAbsenceType group : category.getGroupAbsenceTypes()) {
+      if (group.isInitializable()) {
         return group;
       }
     }
@@ -613,10 +612,10 @@ public class AbsenceComponentDao extends DaoBase {
     List<Absence> absences = query.fetch();
     Map<Person, List<Absence>> map = Maps.newHashMap();
     for (Absence trouble : absences) {
-      List<Absence> personAbsences = map.get(trouble.personDay.person);
+      List<Absence> personAbsences = map.get(trouble.getPersonDay().getPerson());
       if (personAbsences == null) {
         personAbsences = Lists.newArrayList();
-        map.put(trouble.personDay.person, personAbsences);
+        map.put(trouble.getPersonDay().getPerson(), personAbsences);
       }
       personAbsences.add(trouble);
     }

@@ -65,9 +65,9 @@ public class RemoveInvalidStampingsJob extends Job<Void> {
     List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end));
 
     for (PersonDay pd : persondays) {
-      pd.stampings.stream().filter(stamping -> !stamping.valid).forEach(stamping -> {
+      pd.getStampings().stream().filter(stamping -> !stamping.valid).forEach(stamping -> {
         log.info("Eliminazione timbratura non valida per {} in data {} : {}",
-            pd.person.fullName(), pd.date, stamping);
+            pd.getPerson().fullName(), pd.getDate(), stamping);
         stamping.delete();
       });
     }

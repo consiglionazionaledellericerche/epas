@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.val;
 import models.absences.AbsenceType;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
@@ -83,14 +82,19 @@ public class AbsenceTypes extends Controller {
 
   /**
    * Restituisce un json con le informazioni relative ad una tipologia
-   * di codice di assenza individuata tramite il suo id. 
+   * di codice di assenza individuata tramite il suo id o il suo code. 
    */
-  public static void show(Long id) {
+  public static void show(Long id, String code) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    if (id == null) {
-      JsonResponse.badRequest("Il parametro id è obbligatorio");
+    if (id == null && code == null) {
+      JsonResponse.badRequest("Obbligatorio indicare il parametro id o code.");
     }
-    val at = absenceTypeDao.getAbsenceTypeById(id);
+    AbsenceType at = null;
+    if (id != null) {
+      at = absenceTypeDao.getAbsenceTypeById(id);
+    } else {
+      at = absenceTypeDao.getAbsenceTypeByCode(code).orNull();
+    }
     RestUtils.checkIfPresent(at);
 
     renderJSON(gsonBuilder.create().toJson(

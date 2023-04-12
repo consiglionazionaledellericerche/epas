@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Contratti da correggere per contratto precedente continuativo errato' /}
+
+#{include './_nav.html' /}
+
+<div class="container">  
+  #{panel title:'Contratti da correggere', color:'primary'}
+    #{if contracts.isEmpty()}
+      Non ci sono contratti da correggere.
+    #{/if}
+    #{else}
+      <strong>Trovati ${contracts.size()} contratti da correggere</strong>
+        #{b.link @administration.fixContractsWithWrongPreviousContract(),
+            class:'btn warning', title:'Correggi tutti' /}
+      <ul>
+      #{list items:contracts, as:'contract'}
+        <li>
+          ${contract.person.fullname} 
+          #{b.link @Contracts.personContracts(contract.person.id),
+             class:'primary', title:'Visualizza' /}
+          #{b.link @administration.fixPreviousContract(contract.id),
+            class:'btn warning', title:'Correggi' /}
+          <br />
+          Contratto id: ${contract.id} 
+            - data inizio: ${contract.beginDate}
+            - data fine contratto: ${contract.endContract}
+            - data fine: ${contract.endDate}
+          #{b.link @Contracts.edit(contract.id),
+             class:'primary', title:'Visualizza' /}
+          <br />
+          Precedente id: ${contract.previousContract.id}
+            data inizio: ${contract.previousContract.beginDate}
+            - data fine contratto: ${contract.previousContract.endContract}
+            - data fine: ${contract.previousContract.endDate}
+          #{b.link @Contracts.edit(contract.previousContract.id), 
+              class:'primary', title:'Visualizza' /}
+        </li>
+      #{/list}
+      </ul>
+    #{/else}
+  #{/panel}
+</div>

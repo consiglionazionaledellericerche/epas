@@ -406,7 +406,8 @@ public class UsersApiFallback implements UsersApi {
   }
 
   @Override
-  public ApiResponse<List<Map<String, Object>>> realmUsersIdOfflineSessionsClientUuidGetWithHttpInfo(
+  public ApiResponse<List<Map<String, Object>>> 
+         realmUsersIdOfflineSessionsClientUuidGetWithHttpInfo(
       String arg0, String arg1, String arg2) {
     // TODO Auto-generated method stub
     return null;

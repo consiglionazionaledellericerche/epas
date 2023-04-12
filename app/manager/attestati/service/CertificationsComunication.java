@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;
@@ -217,7 +217,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
+    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -257,8 +257,8 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.office.codeId
-          + "/" + person.number + "/" + year + "/" + month;
+      String url = ATTESTATI_API_URL + "/" + person.getOffice().getCodeId()
+          + "/" + person.getNumber() + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
@@ -273,7 +273,8 @@ public class CertificationsComunication {
       SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
-      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, person.number));
+      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, 
+          person.getNumber()));
 
       return Optional.of(seatCertification);
 
@@ -499,7 +500,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.codeId
+    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -597,7 +598,7 @@ public class CertificationsComunication {
     
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     
-    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.codeId
+    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.getCodeId()
         + "/" + year + "/" + month;
     
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -612,7 +613,7 @@ public class CertificationsComunication {
     TipoBlocchettoSede tipoBlocchetto = new Gson()
         .fromJson(httpResponse.getJson(), TipoBlocchettoSede.class);
     
-    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.name);
+    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.getName());
     
     return tipoBlocchetto;
   }

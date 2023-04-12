@@ -28,6 +28,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
@@ -47,6 +48,7 @@ import org.joda.time.LocalDate;
  * @author Dario Tagliaferri
  * @author Cristian Lucchesi
  */
+@Slf4j
 public class ContractDao extends DaoBase {
 
   private final IWrapperFactory factory;
@@ -196,7 +198,7 @@ public class ContractDao extends DaoBase {
    * La lista di contratti della persona.
    *
    * @return la lista di contratti associati alla persona person passata come parametro ordinati per
-   * data inizio contratto.
+   *     data inizio contratto.
    */
   public List<Contract> getPersonContractList(Person person) {
     QContract contract = QContract.contract;
@@ -214,7 +216,7 @@ public class ContractDao extends DaoBase {
     // allineati con tutti i record presenti sul db e capita che viene restituito un valore nullo
     // incongruente con i dati presenti
     // TODO da sostituire con una query?
-    for (Contract c : person.contracts) {
+    for (Contract c : person.getContracts()) {
       if (DateUtility.isDateIntoInterval(date, factory.create(c).getContractDateInterval())) {
         return c;
       }
@@ -260,9 +262,9 @@ public class ContractDao extends DaoBase {
    * @param person   la persona (opzionale)
    * @param contract il contratto (opzionale)
    * @return la lista dei contractStampProfile relativi alla persona person o al contratto contract
-   * passati come parametro e ordinati per data inizio del contractStampProfile. La funzione
-   * permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
-   * mutuamente esclusivi.
+   *     passati come parametro e ordinati per data inizio del contractStampProfile. La funzione
+   *     permette di scegliere quale dei due parametri indicare per effettuare la ricerca. Sono
+   *     mutuamente esclusivi.
    */
   public List<ContractStampProfile> getPersonContractStampProfile(Optional<Person> person,
       Optional<Contract> contract) {
@@ -299,16 +301,42 @@ public class ContractDao extends DaoBase {
   public Optional<Contract> getPreviousContract(Contract actualContract) {
     Verify.verifyNotNull(actualContract);
     Contract previousContract = null;
-    List<Contract> contractList = getPersonContractList(actualContract.person);
+    List<Contract> contractList = getPersonContractList(actualContract.getPerson());
+
     for (Contract contract : contractList) {
-      if (previousContract == null
-          || (contract.calculatedEnd() != null && contract.calculatedEnd()
-          .isBefore(actualContract.beginDate)
-          && contract.beginDate.isAfter(previousContract.endDate))) {
+      if (contract.getId().equals(actualContract.getId())) {
+        log.trace("scarto il contratto id = {}, perché uguale al contratto corrente id = {}",
+            contract.getId(), actualContract.getId());
+        continue;
+      }
+
+      if (contract.calculatedEnd() != null
+          && contract.calculatedEnd().isBefore(actualContract.getBeginDate()) 
+          && (previousContract == null 
+                || contract.getBeginDate().isAfter(previousContract.getEndDate()))) {
         previousContract = contract;
       }
     }
     return Optional.fromNullable(previousContract);
   }
 
+  /**
+   * Lista dei contratti che hanno impostato come previousContract se stesso.
+   *
+   * @return la lista dei contratti che hanno impostato come previousContract 
+   *      se stesso (erroneamente).
+   */
+  public List<Contract> getContractsWithWrongPreviousContract() {
+    QContract contract = QContract.contract;
+    BooleanBuilder contractEqPreviousCondition = 
+        new BooleanBuilder(
+            contract.previousContract.isNotNull().and(
+                contract.previousContract.id.eq(contract.id)));
+    BooleanBuilder previousConditionAfterCurrentContract = 
+        new BooleanBuilder(
+            contract.previousContract.isNotNull().and(
+                contract.beginDate.before(contract.previousContract.beginDate)));
+    return getQueryFactory().selectFrom(contract)
+        .where(contractEqPreviousCondition.or(previousConditionAfterCurrentContract)).fetch();
+  }
 }

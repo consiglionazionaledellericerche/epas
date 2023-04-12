@@ -1,9 +1,30 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Strings;
 import common.oauth2.OpenIdConnectClient;
 import controllers.Resecure.NoCheck;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
@@ -17,9 +38,14 @@ import lombok.val;
 import play.Play;
 import play.cache.Cache;
 import play.libs.OAuth2;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Http.Header;
+import play.mvc.Router;
+import play.mvc.Scope;
 import play.mvc.Scope.Session;
+import play.mvc.Util;
+import play.mvc.With;
 
 /**
  * Integrazione essenziale con JWT per la generazione di token e la
@@ -60,7 +86,7 @@ public class SecurityTokens extends Controller {
    * Risponde con un nuovo token attivo per 1 ora.
    */
   public static void token() {
-    String username = Resecure.getCurrentUser().orElseThrow().username;
+    String username = Resecure.getCurrentUser().orElseThrow().getUsername();
     String token = Jwts.builder().setSubject(username)
         .setIssuer(Router.getBaseUrl())
         .setExpiration(Date.from(ZonedDateTime.now().plusHours(1).toInstant()))
@@ -183,7 +209,6 @@ public class SecurityTokens extends Controller {
     // legge il jwt evitando la signature perché lo issuer non è noto a priori
     int i = jwt.lastIndexOf('.');
     String withoutSignature = jwt.substring(0, i + 1);
-    @SuppressWarnings("rawtypes")
     val untrusted = Jwts.parserBuilder().build().parseClaimsJwt(withoutSignature);
     String issuer = untrusted.getBody().getIssuer();
     Object jwtBody;

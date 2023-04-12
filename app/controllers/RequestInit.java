@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -33,8 +33,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.i18n.Messages;
@@ -62,6 +65,8 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UserDao userDao;
+  @Inject
+  static ConfigurationManager configurationManager;
 
   static final String TELEWORK_ACTIVE = "telework.stampings.active";
   
@@ -89,7 +94,7 @@ public class RequestInit extends Controller {
     if (!user.isPresent()) {
       return;
     }
-
+    
     final User currentUser = user.get();
 
     renderArgs.put("currentUser", currentUser);
@@ -139,8 +144,8 @@ public class RequestInit extends Controller {
       personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
       personId = Long.parseLong(session.get("personSelected"));
-    } else if (currentUser.person != null) {
-      personId = currentUser.person.id;
+    } else if (currentUser.getPerson() != null) {
+      personId = currentUser.getPerson().id;
     } else {
       val personList = personDao.liteList(offices, year, month, false);
       if (!personList.isEmpty()) {
@@ -153,13 +158,13 @@ public class RequestInit extends Controller {
     List<Integer> years = Lists.newArrayList();
     int minYear = LocalDate.now().getYear();
     for (Office office : offices) {
-      if (office.beginDate.getYear() < minYear) {
-        minYear = office.beginDate.getYear();
+      if (office.getBeginDate().getYear() < minYear) {
+        minYear = office.getBeginDate().getYear();
       }
     }
     // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
-    if (user.get().person != null && user.get().person.office != null) {
-      minYear = user.get().person.office.beginDate.getYear();
+    if (user.get().getPerson() != null && user.get().getPerson().getOffice() != null) {
+      minYear = user.get().getPerson().getOffice().getBeginDate().getYear();
     }
     for (int i = minYear; i <= LocalDate.now().plusYears(1).getYear(); i++) {
       years.add(i);
@@ -176,16 +181,25 @@ public class RequestInit extends Controller {
         && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
-      officeId = offices.stream()
-            .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
-    } else if (currentUser.person != null && currentUser.person.office != null) {
-      officeId = currentUser.person.office.id;      
+      officeId = offices.stream().filter(off -> off.getEndDate() == null)
+            .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
+    } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
+      officeId = currentUser.getPerson().getOffice().id;
     }
     
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
-
+    if (user.get().getPerson() != null) {
+      BlockType type = (BlockType) configurationManager
+          .configValue(
+              officeDao.getOfficeById(officeId), 
+              EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
+      if (type != null && type.equals(BlockType.electronic)) {
+        renderArgs.put("electronicMealTicket", true);
+      }
+    }
+    
     computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
   }
@@ -234,6 +248,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
@@ -303,6 +318,7 @@ public class RequestInit extends Controller {
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
@@ -331,7 +347,8 @@ public class RequestInit extends Controller {
         "AbsenceGroups.importCertificationsAbsences",
         "Stampings.stampingsByAdmin",
         "PrintTags.listPersonForPrintTags",
-        "TimeVariations.show");
+        "TimeVariations.show",
+        "MealTicketCards.mealTicketCards");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -369,6 +386,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.customRecap",
         "UploadSituation.uploadData",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Certifications.certifications",
@@ -404,8 +422,8 @@ public class RequestInit extends Controller {
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
       //su me stesso, ma la mia sede non appartiene alle sedi che amministro
       //OSS: le action switch person sono tutte in sola lettura quindi il redirect è poco rischioso
-      if (!offices.isEmpty() && user.person != null && user.person.id.equals(personId)) {
-        if (!offices.contains(user.person.office)) {
+      if (!offices.isEmpty() && user.getPerson() != null && user.getPerson().id.equals(personId)) {
+        if (!offices.contains(user.getPerson().getOffice())) {
           Long personSelected = persons.iterator().next().id;
           session.put("personSelected", personSelected);
           Map<String, Object> args = Maps.newHashMap();
@@ -426,7 +444,8 @@ public class RequestInit extends Controller {
     }
     if (officeSwitcher.contains(currentAction)) {
 
-      renderArgs.put("navOffices", offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+      renderArgs.put("navOffices", offices.stream()
+          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
           .collect(Collectors.toList()));
       renderArgs.put("switchOffice", true);
     }

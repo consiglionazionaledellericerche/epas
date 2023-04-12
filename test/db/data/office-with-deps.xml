@@ -109,6 +109,7 @@
   <configurations id="37" office_id="1" epas_param="DAY_OF_PATRON" field_value="1/1" begin_date="2012-07-30"/>
   <configurations id="38" office_id="1" epas_param="LUNCH_INTERVAL" field_value="12:00-15:00" begin_date="2012-07-30"/>
   <configurations id="39" office_id="1" epas_param="WORK_INTERVAL_MISSION_DAY" field_value="07:00-19:00" begin_date="2019-01-01"/>
+  <configurations id="40" office_id="1" epas_param="MEAL_TICKET_BLOCK_TYPE" field_value="electronic" begin_date="2019-01-01"/>
 
   <working_time_types id="13" description="maternità orario 85%" shift="false" meal_ticket_enabled="true" office_id="1" disabled="false" horizontal="true" enable_adjustment_for_quantity="false"/>
   <working_time_types id="14" description="70%" shift="false" meal_ticket_enabled="true" office_id="1" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>

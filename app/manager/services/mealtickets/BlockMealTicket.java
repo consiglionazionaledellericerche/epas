@@ -17,6 +17,7 @@
 
 package manager.services.mealtickets;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -25,6 +26,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Contract;
 import models.MealTicket;
+import models.MealTicketCard;
 import models.Person;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
@@ -43,12 +45,17 @@ public class BlockMealTicket {
   private String codeBlock;
   private BlockType blockType;
   private List<MealTicket> mealTickets;
+  private MealTicketCard mealTicketCard;
 
-  protected BlockMealTicket(String codeBlock, BlockType blockType) {
+  protected BlockMealTicket(String codeBlock, BlockType blockType, 
+      Optional<MealTicketCard> mealTicketCard) {
 
     this.codeBlock = codeBlock;
     this.blockType = blockType;
     this.mealTickets = Lists.newArrayList();
+    if (mealTicketCard.isPresent()) {
+      this.mealTicketCard = mealTicketCard.get();
+    }
   }
 
   /**
@@ -92,7 +99,7 @@ public class BlockMealTicket {
    */
   public LocalDate getDate() {
     if (this.getDimBlock() > 0) {
-      return this.mealTickets.get(0).date;
+      return this.mealTickets.get(0).getDate();
     }
     return null;
   }
@@ -104,7 +111,7 @@ public class BlockMealTicket {
    */
   public LocalDate getExpireDate() {
     if (this.getDimBlock() > 0) {
-      return this.mealTickets.get(0).expireDate;
+      return this.mealTickets.get(0).getExpireDate();
     }
     return null;
   }
@@ -116,7 +123,7 @@ public class BlockMealTicket {
    */
   public Person getAdmin() {
     if (this.getDimBlock() > 0) {
-      return this.mealTickets.get(0).admin;
+      return this.mealTickets.get(0).getAdmin();
     }
     return null;
   }
@@ -128,7 +135,7 @@ public class BlockMealTicket {
    */
   public LocalDate getReceivedDate() {
     if (this.getDimBlock() > 0) {
-      return this.mealTickets.get(0).date;
+      return this.mealTickets.get(0).getDate();
     }
     return null;
   }
@@ -139,7 +146,7 @@ public class BlockMealTicket {
    * @return il primo number del blocco.
    */
   public int getFirst() {
-    return this.mealTickets.get(0).number;
+    return this.mealTickets.get(0).getNumber();
   }
 
   /**
@@ -148,7 +155,7 @@ public class BlockMealTicket {
    * @return l'ultimo number del blocco.
    */
   public int getLast() {
-    return this.mealTickets.get(this.mealTickets.size() - 1).number;
+    return this.mealTickets.get(this.mealTickets.size() - 1).getNumber();
   }
 
   /**
@@ -158,9 +165,9 @@ public class BlockMealTicket {
    * @return Se l'istanza contiene tutti blocchi returned, false altrimenti.
    */
   public boolean isReturned() {
-    boolean returned = this.mealTickets.get(0).returned;
+    boolean returned = this.mealTickets.get(0).isReturned();
     for (MealTicket mealTicket : this.mealTickets) {
-      Verify.verify(mealTicket.returned == returned);
+      Verify.verify(mealTicket.isReturned());
     }
     return returned;
   }

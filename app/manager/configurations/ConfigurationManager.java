@@ -341,30 +341,30 @@ public class ConfigurationManager {
 
     if (epasParam.target.equals(Office.class)) {
       Configuration configuration = new Configuration();
-      configuration.office = (Office) target;
-      configuration.fieldValue = fieldValue;
-      configuration.epasParam = epasParam;
-      configuration.beginDate = configuration.office.beginDate;
+      configuration.setOffice((Office) target);
+      configuration.setFieldValue(fieldValue);
+      configuration.setEpasParam(epasParam);
+      configuration.setBeginDate(configuration.getOffice().getBeginDate());
       if (begin.isPresent()) {
-        configuration.beginDate = begin.get();
+        configuration.setBeginDate(begin.get());
       }
       if (end.isPresent()) {
-        configuration.endDate = end.get();
+        configuration.setEndDate(end.get());
       }
       configurationInPeriod = configuration;
     }
 
     if (epasParam.target.equals(Person.class)) {
       PersonConfiguration configuration = new PersonConfiguration();
-      configuration.person = (Person) target;
-      configuration.fieldValue = fieldValue;
-      configuration.epasParam = epasParam;
-      configuration.beginDate = configuration.person.beginDate;
+      configuration.setPerson((Person) target);
+      configuration.setFieldValue(fieldValue);
+      configuration.setEpasParam(epasParam);
+      configuration.setBeginDate(configuration.getPerson().getBeginDate());
       if (begin.isPresent()) {
-        configuration.beginDate = begin.get();
+        configuration.setBeginDate(begin.get());
       }
       if (end.isPresent()) {
-        configuration.endDate = end.get();
+        configuration.setEndDate(end.get());
       }
       configurationInPeriod = configuration;
     }
@@ -430,9 +430,9 @@ public class ConfigurationManager {
    */
   public List<Configuration> getOfficeConfigurationsByDate(Office office, LocalDate date) {
 
-    return office.configurations.stream().filter(conf ->
+    return office.getConfigurations().stream().filter(conf ->
     DateUtility.isDateIntoInterval(date, conf.periodInterval())).distinct()
-        .sorted(Comparator.comparing(c -> c.epasParam))
+        .sorted(Comparator.comparing(c -> c.getEpasParam()))
         .collect(Collectors.toList());
   }
 
@@ -447,8 +447,8 @@ public class ConfigurationManager {
 
     List<PersonConfiguration> list = Lists.newArrayList();
     for (EpasParam epasParam : EpasParam.values()) {
-      for (PersonConfiguration configuration : person.personConfigurations) {
-        if (configuration.epasParam != epasParam) {
+      for (PersonConfiguration configuration : person.getPersonConfigurations()) {
+        if (configuration.getEpasParam() != epasParam) {
           continue;
         }
         if (!DateUtility.isDateIntoInterval(date, configuration.periodInterval())) {
@@ -488,10 +488,10 @@ public class ConfigurationManager {
 
     List<IPropertyInPeriod> configurations = Lists.newArrayList();
     if (owner instanceof Office) {
-      configurations = Lists.newArrayList(((Office) owner).configurations);
+      configurations = Lists.newArrayList(((Office) owner).getConfigurations());
     }
     if (owner instanceof Person) {
-      configurations = Lists.newArrayList(((Person) owner).personConfigurations);
+      configurations = Lists.newArrayList(((Person) owner).getPersonConfigurations());
     }
 
     // Primo tentativo (caso generale)
@@ -501,12 +501,12 @@ public class ConfigurationManager {
       String fieldValue = null;
 
       if (configuration instanceof Configuration) {
-        currentEpasParam = ((Configuration) configuration).epasParam;
-        fieldValue = ((Configuration) configuration).fieldValue;
+        currentEpasParam = ((Configuration) configuration).getEpasParam();
+        fieldValue = ((Configuration) configuration).getFieldValue();
       }
       if (configuration instanceof PersonConfiguration) {
-        currentEpasParam = ((PersonConfiguration) configuration).epasParam;
-        fieldValue = ((PersonConfiguration) configuration).fieldValue;
+        currentEpasParam = ((PersonConfiguration) configuration).getEpasParam();
+        fieldValue = ((PersonConfiguration) configuration).getFieldValue();
       }
 
       if (!currentEpasParam.equals(epasParam)) {
@@ -520,7 +520,7 @@ public class ConfigurationManager {
 
     // Parametro necessario inesistente
     if (DateUtility.isDateIntoInterval(date, owner.periodInterval())) {
-      throw new IllegalStateException();
+      return null;
     }
 
     // Parametro non necessario, risposta di cortesia.
@@ -533,12 +533,12 @@ public class ConfigurationManager {
       String fieldValue = null;
 
       if (configuration instanceof Configuration) {
-        currentEpasParam = ((Configuration) configuration).epasParam;
-        fieldValue = ((Configuration) configuration).fieldValue;
+        currentEpasParam = ((Configuration) configuration).getEpasParam();
+        fieldValue = ((Configuration) configuration).getFieldValue();
       }
       if (configuration instanceof PersonConfiguration) {
-        currentEpasParam = ((PersonConfiguration) configuration).epasParam;
-        fieldValue = ((PersonConfiguration) configuration).fieldValue;
+        currentEpasParam = ((PersonConfiguration) configuration).getEpasParam();
+        fieldValue = ((PersonConfiguration) configuration).getFieldValue();
       }
 
       if (!currentEpasParam.equals(epasParam)) {
@@ -656,8 +656,8 @@ public class ConfigurationManager {
       // Casi da gestire
       if (owner instanceof Office) {
         boolean toCreate = true;
-        for (Configuration configuration : ((Office) owner).configurations) {
-          if (configuration.epasParam == epasParam) {
+        for (Configuration configuration : ((Office) owner).getConfigurations()) {
+          if (configuration.getEpasParam() == epasParam) {
             toCreate = false;
           }
         }
@@ -667,8 +667,8 @@ public class ConfigurationManager {
       }
       if (owner instanceof Person) {
         boolean toCreate = true;
-        for (PersonConfiguration configuration : ((Person) owner).personConfigurations) {
-          if (configuration.epasParam == epasParam) {
+        for (PersonConfiguration configuration : ((Person) owner).getPersonConfigurations()) {
+          if (configuration.getEpasParam() == epasParam) {
             toCreate = false;
           }
         }
@@ -700,7 +700,7 @@ public class ConfigurationManager {
       new Job<Void>() {
         @Override
         public void doJob() {
-          log.info("Aggiorno i parametri per i dipendenti di {}", office.name);
+          log.info("Aggiorno i parametri per i dipendenti di {}", office.getName());
           List<Person> people = personDao.byOffice(office);
           for (Person person : people) {
             log.debug("Fix parametri di configurazione della persona {}", person.fullName());
@@ -709,7 +709,7 @@ public class ConfigurationManager {
         }        
       }.now();
       log.info("Fine aggiornamento parametri per {} dipendenti di {}", 
-          office.persons.size(), office.name);
+          office.getPersons().size(), office.getName());
     }
   }
 

@@ -46,6 +46,8 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final QMealTicketCard mealTicketCard;
+
     public final NumberPath<Integer> number = createNumber("number", Integer.class);
 
     public final QOffice office;
@@ -80,6 +82,7 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
         super(type, metadata, inits);
         this.admin = inits.isInitialized("admin") ? new QPerson(forProperty("admin"), inits.get("admin")) : null;
         this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
+        this.mealTicketCard = inits.isInitialized("mealTicketCard") ? new QMealTicketCard(forProperty("mealTicketCard"), inits.get("mealTicketCard")) : null;
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 

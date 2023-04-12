@@ -27,9 +27,13 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath cookiePolicyEnabled = createBoolean("cookiePolicyEnabled");
 
+    public final BooleanPath enableAbsenceTopLevelAuthorization = createBoolean("enableAbsenceTopLevelAuthorization");
+
     public final BooleanPath enableAutoconfigCovid19 = createBoolean("enableAutoconfigCovid19");
 
     public final BooleanPath enableAutoconfigSmartworking = createBoolean("enableAutoconfigSmartworking");
+
+    public final BooleanPath enableDailyPresenceForManager = createBoolean("enableDailyPresenceForManager");
 
     public final BooleanPath enableIllnessFlow = createBoolean("enableIllnessFlow");
 
@@ -43,6 +47,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     public final SimplePath<Object> entityId = _super.entityId;
 
     public final BooleanPath handleGroupsByInstitute = createBoolean("handleGroupsByInstitute");
+
+    public final BooleanPath holidayShiftInNightToo = createBoolean("holidayShiftInNightToo");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -72,6 +78,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     //inherited
     public final NumberPath<Integer> version = _super.version;
+
+    public final BooleanPath warningInsertPerson = createBoolean("warningInsertPerson");
 
     public QGeneralSetting(String variable) {
         super(GeneralSetting.class, forVariable(variable));

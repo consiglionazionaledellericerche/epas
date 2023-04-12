@@ -81,8 +81,8 @@ public class ContractualClauses extends Controller {
   public static void edit(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
-    val categoryGroupAbsenceTypes = contractualClause.categoryGroupAbsenceTypes;
-    val contractualReferences = contractualClause.contractualReferences;
+    val categoryGroupAbsenceTypes = contractualClause.getCategoryGroupAbsenceTypes();
+    val contractualReferences = contractualClause.getContractualReferences();
     render(contractualClause, categoryGroupAbsenceTypes, contractualReferences);
   }
   
@@ -102,15 +102,15 @@ public class ContractualClauses extends Controller {
       render("@edit", contractualClause, categoryGroupAbsenceTypes, 
           contractualReferences);
     }
-    contractualClause.contractualReferences = contractualReferences;
+    contractualClause.setContractualReferences(contractualReferences);
     contractualClause.save();
-    contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
-      cgat.contractualClause = null;
+    contractualClause.getCategoryGroupAbsenceTypes().stream().forEach(cgat -> {
+      cgat.setContractualClause(null);
       cgat.save();
     });
     if (categoryGroupAbsenceTypes != null) {
       categoryGroupAbsenceTypes.stream().forEach(cgat -> { 
-        cgat.contractualClause = contractualClause;
+        cgat.setContractualClause(contractualClause);
         cgat.save();
       }); 
     }
@@ -126,7 +126,7 @@ public class ContractualClauses extends Controller {
   public static void delete(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
-    if (!contractualClause.categoryGroupAbsenceTypes.isEmpty()) {
+    if (!contractualClause.getCategoryGroupAbsenceTypes().isEmpty()) {
       flash.error("Non è possibile eliminare un istituto contrattuale associato "
           + "a categorie di tipi di assenza.");
       edit(contractualClauseId);

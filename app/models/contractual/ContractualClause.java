@@ -29,6 +29,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.CategoryGroupAbsenceType;
 import models.base.PeriodModel;
 import models.enumerate.ContractualClauseContext;
@@ -47,6 +49,8 @@ import play.data.validation.Unique;
  * @author Cristian Lucchesi
  * @author Dario Tagliaferri
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "contractual_clauses")
@@ -60,45 +64,45 @@ public class ContractualClause extends PeriodModel {
   @NotNull
   @Required
   @Unique
-  public String name;
+  private String name;
 
   /**
    * Tempi di fruizione.
    */
   @Column(name = "fruition_time")
-  public String fruitionTime;
+  private String fruitionTime;
   
   /**
    * Caratteristiche Giuridico Economiche.
    */
   @Column(name = "legal_and_economic")
-  public String legalAndEconomic;  
+  private String legalAndEconomic;  
   
   /**
    * Documentazione giustificativa. 
    */
   @Column(name = "supporting_documentation")
-  public String supportingDocumentation;
+  private String supportingDocumentation;
   
   /**
    * Modalità di richiesta. 
    */
   @Column(name = "how_to_request")
-  public String howToRequest;
+  private String howToRequest;
 
   /**
    * Altre informazioni. 
    */
   @Column(name = "other_infos")
-  public String otherInfos;
+  private String otherInfos;
 
   @NotNull
   @Required
   @Enumerated(EnumType.STRING)
-  public ContractualClauseContext context;
+  private ContractualClauseContext context;
   
   @OneToMany(mappedBy = "contractualClause")
-  public Set<CategoryGroupAbsenceType> categoryGroupAbsenceTypes = Sets.newHashSet();
+  private Set<CategoryGroupAbsenceType> categoryGroupAbsenceTypes = Sets.newHashSet();
   
   /**
    * Eventuali allegati o url di documentazione online.
@@ -107,6 +111,6 @@ public class ContractualClause extends PeriodModel {
   @JoinTable(name = "contractual_clauses_contractual_references",
       joinColumns = @JoinColumn(name = "contractual_clauses_id"), 
       inverseJoinColumns = @JoinColumn(name = "contractual_references_id"))
-  public Set<ContractualReference> contractualReferences = Sets.newHashSet();
+  private Set<ContractualReference> contractualReferences = Sets.newHashSet();
 
 }

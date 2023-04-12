@@ -61,16 +61,16 @@ public class PersonCreateDto {
     ModelMapper modelMapper = new ModelMapper();
     val person = modelMapper.map(personDto, Person.class);
     if (personDto.getQualification() != null) {
-      person.qualification = 
+      person.setQualification(
           ((Qualification) Qualification.findAll().stream()
               .filter(q -> 
-                ((Qualification) q).qualification == personDto.getQualification().intValue())
-              .findFirst().get());        
+                ((Qualification) q).getQualification() == personDto.getQualification().intValue())
+              .findFirst().get()));
     }
     if (personDto.getOfficeId() != null) {
-      person.office = Office.findById(personDto.getOfficeId());  
+      person.setOffice(Office.findById(personDto.getOfficeId()));  
     }
-    person.beginDate = LocalDate.now();
+    person.setBeginDate(LocalDate.now());
     return person;
   }
 }

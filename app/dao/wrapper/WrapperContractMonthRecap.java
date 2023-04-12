@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import javax.inject.Inject;
 import models.ContractMonthRecap;
 import org.joda.time.YearMonth;
 
@@ -39,7 +39,7 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
                             IWrapperFactory wrapperFactory
   ) {
     this.wrapperFactory = wrapperFactory;
-    this.contract = wrapperFactory.create(cmr.contract);
+    this.contract = wrapperFactory.create(cmr.getContract());
     this.value = cmr;
 
   }
@@ -60,8 +60,8 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
    */
   @Override
   public Optional<ContractMonthRecap> getPreviousRecap() {
-    return wrapperFactory.create(value.contract)
-              .getContractMonthRecap(new YearMonth(value.year, value.month)
+    return wrapperFactory.create(value.getContract())
+              .getContractMonthRecap(new YearMonth(value.getYear(), value.getMonth())
                       .minusMonths(1));
   }
   
@@ -71,9 +71,9 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
   @Override
   public Optional<ContractMonthRecap> getPreviousRecapInYear() {
     
-    if (this.value.month != 1) {
-      return wrapperFactory.create(value.contract)
-              .getContractMonthRecap(new YearMonth(value.year, value.month)
+    if (this.value.getMonth() != 1) {
+      return wrapperFactory.create(value.getContract())
+              .getContractMonthRecap(new YearMonth(value.getYear(), value.getMonth())
                       .minusMonths(1));
     }
     return Optional.<ContractMonthRecap>absent();
@@ -85,7 +85,7 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
   @Override
   public boolean hasResidualLastYear() {
 
-    return value.possibileUtilizzareResiduoAnnoPrecedente;
+    return value.isPossibileUtilizzareResiduoAnnoPrecedente();
   }
 
   /**
@@ -101,14 +101,14 @@ public class WrapperContractMonthRecap implements IWrapperContractMonthRecap {
     Optional<ContractMonthRecap> previous = getPreviousRecap();
     if (previous.isPresent()) {
 
-      if (value.month == 1) {
-        return value.initMonteOreAnnoPassato;
+      if (value.getMonth() == 1) {
+        return value.getInitMonteOreAnnoPassato();
       } else {
-        return previous.get().remainingMinutesLastYear;
+        return previous.get().getRemainingMinutesLastYear();
       }
 
     } else {
-      return this.value.initMonteOreAnnoPassato;
+      return this.value.getInitMonteOreAnnoPassato();
     }
   }
 

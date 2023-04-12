@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,12 +18,12 @@
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.ContractDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import manager.ContractManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -79,7 +79,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
     for (Contract contract : activeContract) {
       ContractWorkingTimeType current = contractManager
               .getContractWorkingTimeTypeFromDate(contract, today);
-      if (current.workingTimeType.equals(this.value)) {
+      if (current.getWorkingTimeType().equals(this.value)) {
         list.add(contract);
       }
     }
@@ -99,8 +99,8 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
     List<ContractWorkingTimeType> list = new ArrayList<ContractWorkingTimeType>();
     for (Contract contract : activeContract) {
-      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-        if (cwtt.workingTimeType.equals(this.value)) {
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
+        if (cwtt.getWorkingTimeType().equals(this.value)) {
           list.add(cwtt);
         }
       }
@@ -111,7 +111,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
   @Override
   public List<Contract> getAssociatedContract() {
-    return value.contractWorkingTimeType.stream().map(cwtt -> cwtt.contract)
+    return value.getContractWorkingTimeType().stream().map(cwtt -> cwtt.getContract())
         .collect(Collectors.toList());
   }
 }

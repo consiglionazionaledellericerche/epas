@@ -63,8 +63,8 @@ public class TeleworkPersonDayDto {
   }
 
   public boolean isTeleworkInDay() {
-    return this.personDay.absences.stream()
-        .anyMatch(abs -> abs.absenceType.code.equals(DefaultAbsenceType.A_103.getCode()));
+    return this.personDay.getAbsences().stream()
+        .anyMatch(abs -> abs.getAbsenceType().getCode().equals(DefaultAbsenceType.A_103.getCode()));
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -19,10 +19,10 @@ package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import dao.RoleDao;
 import java.util.List;
+import javax.inject.Inject;
 import models.Office;
 import models.Role;
 import models.UsersRolesOffices;
@@ -205,10 +205,10 @@ public class WrapperOffice implements IWrapperOffice {
   
   private List<UsersRolesOffices> filterUros(Role role) {
     List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
+    for (UsersRolesOffices uro : this.value.getUsersRolesOffices()) {
 
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(role.id)
-          && uro.user.person != null) {
+      if (uro.getOffice().id.equals(this.value.id) && uro.getRole().id.equals(role.id)
+          && uro.getUser().getPerson() != null) {
         uroList.add(uro);
       }
     }

@@ -19,7 +19,6 @@ package models;
 
 import com.google.common.base.MoreObjects;
 import helpers.validators.StringIsValid;
-import it.cnr.iit.epas.NullStringBinder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,12 +29,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.StampTypes;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-import play.data.binding.As;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
@@ -45,6 +45,8 @@ import play.data.validation.Required;
  *
  * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "stampings")
@@ -55,34 +57,31 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false, updatable = false)
-  public PersonDay personDay;
+  private PersonDay personDay;
 
   @Column(name = "stamp_type")
   @Enumerated(EnumType.STRING)
-  public StampTypes stampType;
+  private StampTypes stampType;
 
   @ManyToOne(optional = true)
   @JoinColumn(name = "stamp_modification_type_id")
-  public StampModificationType stampModificationType;
+  private StampModificationType stampModificationType;
 
   @Required @NotNull
   @Column(nullable = false)
-  public LocalDateTime date;
+  private LocalDateTime date;
 
   @Required @NotNull
   @Enumerated(EnumType.STRING)
-  public WayType way;
+  private WayType way;
 
-  @As(binder = NullStringBinder.class)
-  public String note;
+  private String note;
   
-  @As(binder = NullStringBinder.class)
   @CheckWith(StringIsValid.class)
-  public String place;
+  private String place;
   
-  @As(binder = NullStringBinder.class)
   @CheckWith(StringIsValid.class)
-  public String reason;
+  private String reason;
 
   /**
    * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
@@ -91,14 +90,14 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true).
    */
   @Column(name = "marked_by_admin")
-  public boolean markedByAdmin;
+  private boolean markedByAdmin;
 
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
-  public boolean markedByEmployee;
+  private boolean markedByEmployee;
   
   /**
    * con la nuova interpretazione del telelavoro per i livelli I-III, quando un dipendente si 
@@ -107,7 +106,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * giornaliero.
    */
   @Column(name = "marked_by_telework")
-  public boolean markedByTelework;
+  private boolean markedByTelework;
 
   /**
    * questo nuovo campo si è reso necessario per la sede centrale per capire da quale lettore 
@@ -116,7 +115,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * a un collegamento definito.e all'interno della tolleranza definita per quel collegamento.
    */
   @Column(name = "stamping_zone")
-  public String stampingZone;
+  private String stampingZone;
 
   /**
    * true, cella bianca; false, cella gialla.
@@ -157,7 +156,17 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   public boolean isOffSiteWork() {
     return stampType != null && stampType.isOffSiteWork();
   }
-  
+
+  /**
+   * Verifica se è motivi di servizio.
+   *
+   * @return @see StampTypes::isServiceReasons
+   */
+  @Transient
+  public boolean isServiceReasons() {
+    return stampType != null && stampType.isServiceReasons();
+  }
+
   /**
    * costruttore di default implicitamente utilizzato dal play(controllers).
    */
@@ -176,7 +185,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     date = time;
     if (personDay != null) {
       this.personDay = personDay;
-      personDay.stampings.add(this);
+      personDay.getStampings().add(this);
     }
   }
 
@@ -234,7 +243,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
-    return personDay.person;
+    return personDay.getPerson();
   }
 
   /**

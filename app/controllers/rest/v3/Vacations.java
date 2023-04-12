@@ -75,7 +75,7 @@ public class Vacations extends Controller {
       year = LocalDate.now().getYear();
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 

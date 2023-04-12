@@ -22,6 +22,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
 import common.security.SecurityRules;
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
@@ -113,7 +114,8 @@ public class Persons extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   static RoleDao roleDao;
-
+  @Inject
+  static GeneralSettingDao generalSettingDao;
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -132,6 +134,8 @@ public class Persons extends Controller {
 
     rules.checkIfPermitted(office);
 
+    boolean warningInsertPerson = generalSettingDao.generalSetting().isWarningInsertPerson();
+    
     List<Person> simplePersonList = personDao
         .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, null, null, false)
         .list();
@@ -139,7 +143,7 @@ public class Persons extends Controller {
     List<IWrapperPerson> personList =
         FluentIterable.from(simplePersonList).transform(wrapperFunctionFactory.person()).toList();
 
-    render(personList, office);
+    render(personList, office, warningInsertPerson);
   }
 
 
@@ -147,11 +151,13 @@ public class Persons extends Controller {
    * metodo che gestisce la pagina di inserimento persona.
    */
   public static void insertPerson() {
+    
+    boolean warningInsertPerson = generalSettingDao.generalSetting().isWarningInsertPerson();
 
     Person person = new Person();
     Contract contract = new Contract();
 
-    render(person, contract);
+    render(person, contract, warningInsertPerson);
   }
 
   /**
@@ -162,7 +168,7 @@ public class Persons extends Controller {
    */
   public static void save(@Valid @Required Person person, @Valid Contract contract) {
 
-    if (contract.endDate != null && !contract.endDate.isAfter(contract.beginDate)) {
+    if (contract.getEndDate() != null && !contract.getEndDate().isAfter(contract.getBeginDate())) {
       Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
     }
 
@@ -171,15 +177,15 @@ public class Persons extends Controller {
       render("@insertPerson", person, contract);
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
-    person.name = WordUtils.capitalizeFully(person.name);
-    person.surname = WordUtils.capitalizeFully(person.surname);
+    person.setName(WordUtils.capitalizeFully(person.getName()));
+    person.setSurname(WordUtils.capitalizeFully(person.getSurname()));
 
     personManager.properPersonCreate(person);
     person.save();
 
-    contract.person = person;
+    contract.setPerson(person);
 
     if (!contractManager.properContractCreate(contract, Optional.absent(), false)) {
       flash.error(
@@ -188,6 +194,7 @@ public class Persons extends Controller {
       edit(person.id);
     }
 
+    person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
     person.save();
 
     userManager.generateRecoveryToken(person);
@@ -200,7 +207,7 @@ public class Persons extends Controller {
 
     // La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
-    person.beginDate = LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1);
+    person.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
     person.save();
 
     configurationManager.updateConfigurations(person);
@@ -222,7 +229,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     render(person);
   }
@@ -239,26 +246,29 @@ public class Persons extends Controller {
     if (Validation.hasErrors()) {
       log.warn("validation errors for {}: {}", person, validation.errorsMap());
       flash.error("Correggere gli errori indicati.");
-      Validation.keep();
-      edit(person.id);
+      render("@edit", person);
     }
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
-    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.user);
-    if (uroList.stream().anyMatch(uro -> uro.role.name.equals(Role.EMPLOYEE) 
-        && !uro.office.equals(person.office))) {
+    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.getUser());
+    if (uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE) 
+        && !uro.getOffice().equals(person.getOffice()))) {
       for (UsersRolesOffices uro : uroList) {
-        if (uro.role.name.equals(Role.EMPLOYEE)) {
+        if (uro.getRole().getName().equals(Role.EMPLOYEE)) {
           uro.delete();
         }
       }
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.user, person.office, employee); 
+      officeManager.setUro(person.getUser(), person.getOffice(), employee); 
     }
 
+    person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
+    person.setFiscalCode(Optional.fromNullable(person.getFiscalCode()).orNull());
+
     person.save();
-    flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
+    flash.success(
+        "Modificate informazioni per l'utente %s %s", person.getName(), person.getSurname());
 
     // FIXME: la modifica della persona dovrebbe far partire qualche ricalcolo??
     // esempio qualifica, office possono far cambiare qualche decisione dell'alg.
@@ -277,7 +287,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     render(person);
   }
@@ -298,17 +308,17 @@ public class Persons extends Controller {
     // FIX per oggetto in entityManager monco.
     person.refresh();
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     // FIXME: se non spezzo in transazioni errore HashMap.
     // Per adesso spezzo l'eliminazione della persona in tre fasi.
     // person.delete() senza errore HashMap dovrebbe però essere sufficiente.
 
-    for (Contract c : person.contracts) {
+    for (Contract c : person.getContracts()) {
       c.delete();
     }
 
-    for (Badge b : person.badges) {
+    for (Badge b : person.getBadges()) {
       b.delete();
     }
 
@@ -316,7 +326,7 @@ public class Persons extends Controller {
     JPAPlugin.startTx(false);
     person = personDao.getPersonById(personId);
 
-    for (PersonDay pd : person.personDays) {
+    for (PersonDay pd : person.getPersonDays()) {
       pd.delete();
     }
 
@@ -327,7 +337,7 @@ public class Persons extends Controller {
     person.delete();
 
     flash.success("La persona %s %s eliminata dall'anagrafica" + " insieme a tutti i suoi dati.",
-        person.name, person.surname);
+        person.getName(), person.getSurname());
 
     list(null, null);
 
@@ -344,7 +354,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -365,7 +375,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -373,7 +383,7 @@ public class Persons extends Controller {
 
     ContractWorkingTimeType cwtt = wrPerson.getCurrentContractWorkingTimeType().get();
 
-    WorkingTimeType wtt = cwtt.workingTimeType;
+    WorkingTimeType wtt = cwtt.getWorkingTimeType();
 
     render(person, cwtt, wtt);
   }
@@ -414,7 +424,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(user);
 
-    user.password = Codec.hexMD5(nuovaPassword);
+    user.updatePassword(nuovaPassword);
     user.save();
     flash.success(Messages.get("passwordSuccessfullyChanged"));
     changePassword();
@@ -440,9 +450,9 @@ public class Persons extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     PersonChildren child = new PersonChildren();
-    child.person = person;
+    child.setPerson(person);
     render(child);
   }
 
@@ -467,8 +477,8 @@ public class Persons extends Controller {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
-    Person person = child.person;
-    rules.checkIfPermitted(person.office);
+    Person person = child.getPerson();
+    rules.checkIfPermitted(person.getOffice());
 
     if (!confirmed) {
       render("@deleteChild", child);
@@ -477,16 +487,17 @@ public class Persons extends Controller {
     JPA.em().flush();
 
     // Scan degli errori sulle assenze
-    LocalDate eldest = child.bornDate;
+    LocalDate eldest = child.getBornDate();
     person.refresh();
-    for (PersonChildren otherChild : child.person.personChildren) {
-      if (eldest.isAfter(otherChild.bornDate)) {
-        eldest = otherChild.bornDate;
+    for (PersonChildren otherChild : child.getPerson().getPersonChildren()) {
+      if (eldest.isAfter(otherChild.getBornDate())) {
+        eldest = otherChild.getBornDate();
       }
     }
-    absenceService.scanner(child.person, eldest);
+    absenceService.scanner(child.getPerson(), eldest);
 
-    flash.error("Eliminato %s %s dall'anagrafica dei figli di %s", child.name, child.surname,
+    flash.error(
+        "Eliminato %s %s dall'anagrafica dei figli di %s", child.getName(), child.getSurname(),
         person.getFullname());
 
     children(person.id);
@@ -501,12 +512,14 @@ public class Persons extends Controller {
   public static void saveChild(@Valid PersonChildren child) {
 
     if (!Validation.hasErrors()) {
-      for (PersonChildren otherChild : personChildrenDao.getAllPersonChildren(child.person)) {
+      for (PersonChildren otherChild : personChildrenDao.getAllPersonChildren(child.getPerson())) {
         if (child.isPersistent() && otherChild.id == child.id) {
           continue;
         }
-        if (otherChild.name.equals(child.name) && otherChild.surname.equals(child.surname)
-            || otherChild.name.equals(child.surname) && otherChild.surname.equals(child.name)) {
+        if (otherChild.getName().equals(child.getName()) 
+            && otherChild.getSurname().equals(child.getSurname())
+            || otherChild.getName().equals(child.getSurname()) 
+            && otherChild.getSurname().equals(child.getName())) {
           Validation.addError("child.name", "nome e cognome già presenti.");
           Validation.addError("child.surname", "nome e cognome già presenti.");
         }
@@ -518,18 +531,18 @@ public class Persons extends Controller {
       render("@insertChild", child);
     }
 
-    rules.checkIfPermitted(child.person.office);
+    rules.checkIfPermitted(child.getPerson().getOffice());
     child.save();
 
     JPA.em().flush();
-    child.person.refresh();
+    child.getPerson().refresh();
 
-
-    log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", child.name, child.surname,
-        child.person);
+    log.info("Aggiunto/Modificato {} {} nell'anagrafica dei figli di {}", 
+        child.getName(), child.getSurname(),
+        child.getPerson());
     flash.success(Web.msgSaved(PersonChildren.class));
 
-    children(child.person.id);
+    children(child.getPerson().id);
   }
 
 }

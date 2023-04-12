@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,8 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.junit.Test;
-import play.test.UnitTest;
+package manager.services.mealtickets;
 
-public class BasicTest extends UnitTest {
-
-  @Test
-  public void veryImportantThingToTest() {
-    //assertEquals(LimitUnit.getByDescription("minuti"), LimitUnit.minutes);
-  }
+public class ElectronicMealTicketRecap {
 
 }

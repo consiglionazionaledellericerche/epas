@@ -219,6 +219,14 @@ public enum EpasParam {
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Person.class),
+  
+  PARENTAL_LEAVE_FOR_FATHERS("parental_leave_for_fathers",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Person.class),  
 
   
   //#######################################################################################
@@ -326,20 +334,20 @@ public enum EpasParam {
    * Tecnici e Ricercatori possono inserirsi le ferie e riposi. 
    * Con notifica al direttore / responsabile.
    */
-  TR_VACATIONS("researchers_technologists_vacations",
-      EpasParamCategory.AUTOCERTIFICATION,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-  TR_COMPENSATORY("researchers_technologists_compensatory",
-      EpasParamCategory.AUTOCERTIFICATION,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
+//  TR_VACATIONS("researchers_technologists_vacations",
+//      EpasParamCategory.AUTOCERTIFICATION,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
+//  TR_COMPENSATORY("researchers_technologists_compensatory",
+//      EpasParamCategory.AUTOCERTIFICATION,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
 
   /**
    * Permette di abilitare/disabilitare la funzione di autocertificazione per i livelli 1-3 del
@@ -681,6 +689,45 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
+  /**
+   * Il responsabile di sede deve ricevere le notifiche delle comunicazioni
+   * di ferie deli livelli I-III.
+   */
+  ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION(
+      "absence_top_level_office_head_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Il responsabile di sede deve ricevere le notifiche delle comunicazioni
+   * di ferie deli livelli I-III.
+   */
+  ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION(
+      "absence_top_level_of_group_manager_office_head_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Il responsabile di gruppo deve ricevere le notifiche delle comunicazioni
+   * di ferie dei livelli I-III.
+   */
+  ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION(
+      "absence_top_level_group_manager_notification",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   //#####################################################################
   //FLOWS PARAMS COMPETENCES
   
@@ -876,6 +923,24 @@ public enum EpasParam {
    */
   SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED(
       "service_information_iv_viii_manager_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
+      EpasParamCategory.INFORMATION_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED(
+      "father_parental_leave_administrative_approval_required",
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,

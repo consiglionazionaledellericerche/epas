@@ -21,8 +21,6 @@ case "${PROTOCOL}" in
     ;;
 esac
 
-EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${VIRTUAL_HOST}"
-
 DB_HOST=${DB_HOST:-postgres}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_NAME:-epas}
@@ -77,6 +75,21 @@ SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 FLOWS_ACTIVE=${FLOWS_ACTIVE:-false}
 
 cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
+
+EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${VIRTUAL_HOST}"
+
+# default HTTP_PATH = /
+# Use this if you don't host your Play application at the root of the domain
+# you're serving it from.
+if [ -z ${HTTP_PATH} ]
+then
+  EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${VIRTUAL_HOST}"
+  sed -n '/HTTP_PATH/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  EPAS_APPLICATION_BASEURL="${PROTOCOL}:\/\/${VIRTUAL_HOST}${HTTP_PATH}"
+  sed 's#{{HTTP_PATH}}#'"${HTTP_PATH}"'#' -i ${APP_HOME}/conf/prod.conf
+  echo "HTTP_PATH presente: ${HTTP_PATH}"
+fi
 
 sed 's#{{EPAS_APPLICATION_BASEURL}}#'"${EPAS_APPLICATION_BASEURL}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/conf/prod.conf
@@ -324,6 +337,7 @@ LDAP_UNIQUE_IDENTIFIER_POSTFIX=${LDAP_UNIQUE_IDENTIFIER_POSTFIX}
 LDAP_BIND_DN=${LDAP_BIND_DN}
 LDAP_BIND_CREDENTIALS=${LDAP_BIND_CREDENTIALS}
 LDAP_AUTHENTICATE_USER_SEARCH_DN=${LDAP_AUTHENTICATE_USER_SEARCH_DN}
+LDAP_PASSWORD_RECOVERY_URL=${LDAP_PASSWORD_RECOVERY_URL}
 
 sed 's#{{LDAP_LOGIN}}#'"${LDAP_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
@@ -360,7 +374,11 @@ if [ ${LDAP_LOGIN} = "true" ]; then
   else
     sed 's#{{LDAP_UNIQUE_IDENTIFIER_POSTFIX}}#'"${LDAP_UNIQUE_IDENTIFIER_POSTFIX}"'#' -i ${APP_HOME}/conf/prod.conf
   fi
-
+  if [ -z "${LDAP_PASSWORD_RECOVERY_URL}" ]; then
+    sed -n '/LDAP_PASSWORD_RECOVERY_URL/!p' -i ${APP_HOME}/conf/prod.conf
+  else
+    sed 's#{{LDAP_PASSWORD_RECOVERY_URL}}#'"${LDAP_PASSWORD_RECOVERY_URL}"'#' -i ${APP_HOME}/conf/prod.conf
+  fi
 else
   sed -n '/LDAP_URL/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/LDAP_STARTTLS/!p' -i ${APP_HOME}/conf/prod.conf  

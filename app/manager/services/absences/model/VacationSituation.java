@@ -132,7 +132,7 @@ public class VacationSituation {
      * @return true se date è il limite inferiore del contratto, false altrimenti.
      */
     private boolean isContractLowerLimit(LocalDate date) {
-      if (contract.beginDate.isEqual(date)) {
+      if (contract.getBeginDate().isEqual(date)) {
         return true;
       }
       return false;
@@ -176,7 +176,7 @@ public class VacationSituation {
       if (expired()) {
         return 0;
       }
-      if (date.isBefore(contract.beginDate.plusYears(1))) {
+      if (date.isBefore(contract.getBeginDate().plusYears(1))) {
         return accrued() - used();
       } else {
         return total() - used();
@@ -221,7 +221,7 @@ public class VacationSituation {
     private AbsencePeriod lastNaturalSubPeriod(AbsencePeriod period) {
       AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
       for (AbsenceType taken : lastPeriod.takenCodes) {
-        if (taken.code.equals(DefaultAbsenceType.A_37.getCode())) {
+        if (taken.getCode().equals(DefaultAbsenceType.A_37.getCode())) {
           return period.subPeriods.get(period.subPeriods.size() - 2);
         }
       }
@@ -256,7 +256,7 @@ public class VacationSituation {
       int sourced = 0;
       for (AbsencePeriod period : absencePeriod.subPeriods) {
         if (period.initialization != null) {
-          sourced += period.initialization.unitsInput;
+          sourced += period.initialization.getUnitsInput();
         }
       }
       return sourced;
@@ -316,8 +316,8 @@ public class VacationSituation {
      */
     public LocalDate contractEndFirstYearInPeriod(AbsencePeriod period) {
       if (DateUtility
-          .isDateIntoInterval(contract.beginDate.plusYears(1), period.periodInterval())) {
-        return contract.beginDate.plusYears(1);
+          .isDateIntoInterval(contract.getBeginDate().plusYears(1), period.periodInterval())) {
+        return contract.getBeginDate().plusYears(1);
       }
       return null;
     }
@@ -456,9 +456,10 @@ public class VacationSituation {
      */
     public String title() {
       if (this.type.equals(TypeSummary.VACATION)) {
-        return this.contract.person.fullName() + " - " + "Riepilogo Ferie " + this.year;  
+        return this.contract.getPerson().fullName() + " - " + "Riepilogo Ferie " + this.year;  
       } else {
-        return this.contract.person.fullName() + " - " + "Riepilogo Permessi Legge " + this.year;
+        return this.contract.getPerson().fullName() + " - " 
+            + "Riepilogo Permessi Legge " + this.year;
       }
     }
   }

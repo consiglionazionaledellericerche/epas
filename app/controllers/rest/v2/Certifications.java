@@ -35,10 +35,13 @@ import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperContractMonthRecap;
+import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -51,6 +54,7 @@ import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -77,12 +81,15 @@ public class Certifications extends Controller {
   static WorkingTimeTypeDao workingTimeTypeDao;
   @Inject
   static CertificationManager certificationManager;
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
    * di gestione degli attestati mensili (attestati per il CNR).
    */
-  public static void getMonthValidationStatusByOffice(String sedeId, Integer year, Integer month) {
+  public static void getMonthValidationStatusByOffice(
+      String sedeId, Integer year, Integer month) {
     log.debug("getMonthValidationStatus -> sedeId={}, year={}, month={}", sedeId, year, month);
     if (year == null || month == null || sedeId == null) {
       JsonResponse.badRequest("I parametri sedeId, year e month sono tutti obbligatori");
@@ -99,7 +106,8 @@ public class Certifications extends Controller {
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
     val validationStatus = new OfficeMonthValidationStatusDto();
     people.stream().forEach(person -> {
-      val certData = certificationManager.getPersonCertData(person, year, month);
+      val certData = 
+          certificationManager.getPersonCertData(person, year, month);
       if (certData.validate) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
@@ -120,7 +128,7 @@ public class Certifications extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     val certData = certificationManager.getPersonCertData(person, year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(certData.validate));
@@ -154,10 +162,21 @@ public class Certifications extends Controller {
           + "mail che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().office);
+    rules.checkIfPermitted(person.get().getOffice());
 
     Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
+
+    val wrapperPerson = wrapperFactory.create(person.get());
+    List<IWrapperContractMonthRecap> contractMonthRecaps = 
+        wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+    dto.setMealTicketsPreviousMonth(
+        contractMonthRecaps.stream().mapToInt(
+            cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
+    dto.setRemainingMealTickets(
+        contractMonthRecaps.stream().mapToInt(
+            cm -> cm.getValue().getRemainingMealTickets()).reduce(0, Integer::sum));
+
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(dto));
 
@@ -175,6 +194,9 @@ public class Certifications extends Controller {
   public static void getMonthSituationByOffice(String sedeId, int year, int month) {
     log.debug("Richieste informazioni mensili da applicazione esterna per sedeId={} {}/{}",
         sedeId, year, month);
+    if (sedeId == null) {
+      JsonResponse.badRequest("Il parametro sedeId e' obbligatorio");
+    }
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
       JsonResponse.notFound(
@@ -188,10 +210,26 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    for (Person person : personList) {
-      Map<String, Certification> map = monthData.getCertification(person, year, month);
+    val personCertificationsMap = monthData.getCertifications(personList, year, month);
+
+    val people = personCertificationsMap.keySet().stream()
+        .sorted((p1, p2) -> p1.getFullname().compareTo(p2.getFullname()))
+        .collect(Collectors.toList());
+    for (Person person : people) {
+      log.debug("analizzo la situazione mensile di {}...", person.getFullname());
+      Map<String, Certification> map = personCertificationsMap.get(person);
       CertificationDto dto = generateCertDto(map, year, month, person);
+      val wrapperPerson = wrapperFactory.create(person);
+      List<IWrapperContractMonthRecap> contractMonthRecaps = 
+          wrapperPerson.getWrapperContractMonthRecaps(new YearMonth(year, month));
+      dto.setMealTicketsPreviousMonth(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum));
+      dto.setRemainingMealTickets(
+          contractMonthRecaps.stream().mapToInt(
+              cm -> cm.getValue().getRemainingMealTickets()).reduce(0, Integer::sum));
       list.add(dto);
+      log.debug("...analizzata la situazione mensile di {}", person.getFullname());
     }
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(list));
@@ -220,11 +258,11 @@ public class Certifications extends Controller {
     List<CertificationAbsenceDto> absences = searchAbsences(person, year, month);
 
     for (Map.Entry<String, Certification> entry : map.entrySet()) {
-      switch (entry.getValue().certificationType) {
+      switch (entry.getValue().getCertificationType()) {
         case ABSENCE:
           break;
         case COMPETENCE:
-          places = entry.getValue().content.split(";");
+          places = entry.getValue().getContent().split(";");
           CertificationCompetencesDto competence = CertificationCompetencesDto.builder()
               .code(places[0])
               .quantity(Integer.parseInt(places[1]))
@@ -233,15 +271,15 @@ public class Certifications extends Controller {
           break;
         case MEAL:
           CertificationMealTicketDto meal = CertificationMealTicketDto.builder()
-              .quantity(Integer.parseInt(entry.getValue().content.split(";")[0]) 
-                  + Integer.parseInt(entry.getValue().content.split(";")[1]))
-              .paperyTickets(Integer.parseInt(entry.getValue().content.split(";")[0]))
-              .electronicTickets(Integer.parseInt(entry.getValue().content.split(";")[1]))
+              .quantity(Integer.parseInt(entry.getValue().getContent().split(";")[0]) 
+                  + Integer.parseInt(entry.getValue().getContent().split(";")[1]))
+              .paperyTickets(Integer.parseInt(entry.getValue().getContent().split(";")[0]))
+              .electronicTickets(Integer.parseInt(entry.getValue().getContent().split(";")[1]))
               .build();
           mealTickets.add(meal);
           break;
         case FORMATION:
-          places = entry.getValue().content.split(";");
+          places = entry.getValue().getContent().split(";");
           from = new LocalDate(year, month, Integer.parseInt(places[0]));
           to = new LocalDate(year, month, Integer.parseInt(places[1]));
           CertificationTrainingHoursDto trainingHour = CertificationTrainingHoursDto.builder()
@@ -257,7 +295,7 @@ public class Certifications extends Controller {
     }
     CertificationDto obj = CertificationDto.builder()
         .fullName(person.getFullname())
-        .number(person.number)
+        .number(person.getNumber())
         .year(year)
         .month(month)
         .absences(absences)
@@ -292,11 +330,11 @@ public class Certifications extends Controller {
     String justifiedType = "";
     for (Absence abs : absencesPlus) {
 
-      String absenceCodeToSend = abs.absenceType.code.toUpperCase();      
-      if (previousDate != null && previousDate.plusDays(1).equals(abs.personDay.date)
+      String absenceCodeToSend = abs.getAbsenceType().getCode().toUpperCase();
+      if (previousDate != null && previousDate.plusDays(1).equals(abs.getPersonDay().getDate())
           && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = abs.personDay.date.getDayOfMonth();
-        previousDate = abs.personDay.date;        
+        dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
+        previousDate = abs.getPersonDay().getDate();
         continue;
       }
       // 2) Fine Assenza più giorni
@@ -314,30 +352,32 @@ public class Certifications extends Controller {
       }
 
       // 3) Nuova Assenza
-      dayBegin = abs.personDay.date.getDayOfMonth();
-      dayEnd = abs.personDay.date.getDayOfMonth();
-      previousDate = abs.personDay.date;
+      dayBegin = abs.getPersonDay().getDate().getDayOfMonth();
+      dayEnd = abs.getPersonDay().getDate().getDayOfMonth();
+      previousDate = abs.getPersonDay().getDate();
       previousAbsenceCode = absenceCodeToSend;
-      timeToJustify = abs.justifiedMinutes;
+      timeToJustify = abs.getJustifiedMinutes();
 
       Optional<WorkingTimeTypeDay> workingTimeTypeDay = 
-          workingTimeTypeDao.getWorkingTimeTypeDay(abs.personDay.date, person);
+          workingTimeTypeDao.getWorkingTimeTypeDay(abs.getPersonDay().getDate(), person);
 
       if (workingTimeTypeDay.isPresent()) {
-        if (abs.getJustifiedType().name.equals(JustifiedTypeName.all_day) 
-            || abs.getJustifiedType().name.equals(JustifiedTypeName.assign_all_day)) {
-          timeToJustify = workingTimeTypeDay.get().workingTime;
+        if (abs.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
+            || abs.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+          timeToJustify = workingTimeTypeDay.get().getWorkingTime();
         }
-        if (abs.getJustifiedType().name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
-          timeToJustify = workingTimeTypeDay.get().workingTime - abs.personDay.getStampingsTime();
+        if (abs.getJustifiedType().getName()
+              .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          timeToJustify = 
+              workingTimeTypeDay.get().getWorkingTime() - abs.getPersonDay().getStampingsTime();
         }
       } else {
         log.warn("Il workingTimeTypeDay per il giorno {} non è presente ma è "
-            + "presente l'assenza {}", abs.personDay.date, abs, person.getFullname());
+            + "presente l'assenza {}", abs.getPersonDay().getDate(), abs, person.getFullname());
       }
 
-      if (abs.getJustifiedType().name.equals(JustifiedTypeName.absence_type_minutes)) {
-        timeToJustify = abs.absenceType.justifiedTime;
+      if (abs.getJustifiedType().getName().equals(JustifiedTypeName.absence_type_minutes)) {
+        timeToJustify = abs.getAbsenceType().getJustifiedTime();
       }
       justifiedType = abs.getJustifiedType().getLabel();
 
@@ -350,7 +390,7 @@ public class Certifications extends Controller {
           .from(new LocalDate(year, month, dayBegin))
           .to(new LocalDate(year, month, dayEnd))
           .build();
-      absences.add(absence);   
+      absences.add(absence);
     }
 
     return absences;

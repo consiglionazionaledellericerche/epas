@@ -65,13 +65,14 @@ public class OvertimesManager {
       log.debug("find  Competence {} per person={}, year={}, month={}, competenceCode={}",
           new Object[]{competence, person, year, month, code});
 
-      if ((competence.isPresent()) && (competence.get().valueApproved != 0)) {
+      if ((competence.isPresent()) && (competence.get().getValueApproved() != 0)) {
 
         overtimesMonth.put(
-            person.surname + " " + person.name, competence.get().reason != null
-                ? competence.get().reason : "", competence.get().valueApproved);
+            person.getSurname() + " " + person.getName(), competence.get().getReason() != null
+                ? competence.get().getReason() : "", competence.get().getValueApproved());
         log.debug("Inserita riga person={} reason={} and valueApproved={}",
-            new Object[]{person, competence.get().reason, competence.get().valueApproved});
+            new Object[]{person, competence.get().getReason(), 
+                competence.get().getValueApproved()});
       }
     }
 
@@ -88,18 +89,19 @@ public class OvertimesManager {
   public void setRequestedOvertime(PersonsCompetences body, int year, int month) {
     for (Competence competence : body.competences) {
       Optional<Competence> oldCompetence =
-          competenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
+          competenceDao.getCompetence(
+              competence.getPerson(), year, month, competence.getCompetenceCode());
       if (oldCompetence.isPresent()) {
         // update the requested hours
-        oldCompetence.get().valueApproved = competence.valueApproved;
-        oldCompetence.get().reason = competence.reason;
+        oldCompetence.get().setValueApproved(competence.getValueApproved());
+        oldCompetence.get().setReason(competence.getReason());
         oldCompetence.get().save();
 
         log.debug("Aggiornata competenza {}", oldCompetence);
       } else {
         // insert a new competence with the requested hours an reason
-        competence.year = year;
-        competence.month = month;
+        competence.setYear(year);
+        competence.setMonth(month);
         competence.save();
 
         log.debug("Creata competenza {}", competence);

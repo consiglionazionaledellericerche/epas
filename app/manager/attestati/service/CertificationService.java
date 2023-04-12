@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -21,13 +21,13 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import dao.CertificationDao;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
@@ -107,12 +107,12 @@ public class CertificationService implements ICertificationService {
     for (RigaAssenza rigaAssenza : personCertification.righeAssenza) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.ABSENCE;
-      certification.content = rigaAssenza.serializeContent();
-      certification.attestatiId = rigaAssenza.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.ABSENCE);
+      certification.setContent(rigaAssenza.serializeContent());
+      certification.setAttestatiId(rigaAssenza.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -121,12 +121,12 @@ public class CertificationService implements ICertificationService {
     for (RigaCompetenza rigaCompetenza : personCertification.righeCompetenza) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.COMPETENCE;
-      certification.content = rigaCompetenza.serializeContent();
-      certification.attestatiId = rigaCompetenza.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.COMPETENCE);
+      certification.setContent(rigaCompetenza.serializeContent());
+      certification.setAttestatiId(rigaCompetenza.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -135,24 +135,24 @@ public class CertificationService implements ICertificationService {
     for (RigaFormazione rigaFormazione : personCertification.righeFormazione) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.FORMATION;
-      certification.content = rigaFormazione.serializeContent();
-      certification.attestatiId = rigaFormazione.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.FORMATION);
+      certification.setContent(rigaFormazione.serializeContent());
+      certification.setAttestatiId(rigaFormazione.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
 
     // Buoni pasto
     Certification certification = new Certification();
-    certification.person = person;
-    certification.year = year;
-    certification.month = month;
-    certification.certificationType = CertificationType.MEAL;
-    certification.content = String.format("%s;%s", 
-        personCertification.numBuoniPasto, personCertification.numBuoniPastoElettronici);
+    certification.setPerson(person);
+    certification.setYear(year);
+    certification.setMonth(month);
+    certification.setCertificationType(CertificationType.MEAL);
+    certification.setContent(String.format("%s;%s", 
+        personCertification.numBuoniPasto, personCertification.numBuoniPastoElettronici));
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;
@@ -246,7 +246,7 @@ public class CertificationService implements ICertificationService {
       Certification attestatiCertification = attestatiCertifications.get(key);
 
       if (epasCertification == null) {
-        attestatiCertification.warnings = "Master Attestati";
+        attestatiCertification.setWarnings("Master Attestati");
         attestatiCertification.save();
         epasCertifications.put(key, attestatiCertification);
         continue;
@@ -260,13 +260,14 @@ public class CertificationService implements ICertificationService {
       }
 
       if (epasCertification.containProblems()) {
-        epasCertification.problems = null;
-        epasCertification.warnings = "Problems fixed by Attestati";
+        epasCertification.setProblems(null);
+        epasCertification.setWarnings("Problems fixed by Attestati");
         epasCertification.save();
       }
 
-      if (!Objects.equals(epasCertification.attestatiId, attestatiCertification.attestatiId)) {
-        epasCertification.attestatiId = attestatiCertification.attestatiId;
+      if (!Objects.equals(
+          epasCertification.getAttestatiId(), attestatiCertification.getAttestatiId())) {
+        epasCertification.setAttestatiId(attestatiCertification.getAttestatiId());
         epasCertification.save();
       }
 
@@ -297,10 +298,10 @@ public class CertificationService implements ICertificationService {
       if (certification1 == null || certification2 == null) {
         return false;
       }
-      if (certification1.problems != null && !certification1.problems.isEmpty()) {
+      if (certification1.getProblems() != null && !certification1.getProblems().isEmpty()) {
         return false;
       }
-      if (certification2.problems != null && !certification2.problems.isEmpty()) {
+      if (certification2.getProblems() != null && !certification2.getProblems().isEmpty()) {
         return false;
       }
     }
@@ -392,15 +393,15 @@ public class CertificationService implements ICertificationService {
       HttpResponse httpResponse;
       Optional<RispostaAttestati> rispostaAttestati;
 
-      if (certification.certificationType == CertificationType.ABSENCE) {
+      if (certification.getCertificationType() == CertificationType.ABSENCE) {
         httpResponse = certificationsComunication.sendRigaAssenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType == CertificationType.FORMATION) {
+      } else if (certification.getCertificationType() == CertificationType.FORMATION) {
         httpResponse = certificationsComunication.sendRigaFormazione(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType == CertificationType.MEAL) {
+      } else if (certification.getCertificationType() == CertificationType.MEAL) {
         httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
@@ -410,7 +411,7 @@ public class CertificationService implements ICertificationService {
           rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
         }
 
-      } else if (certification.certificationType == CertificationType.COMPETENCE) {
+      } else if (certification.getCertificationType() == CertificationType.COMPETENCE) {
         httpResponse = certificationsComunication.sendRigaCompetenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
@@ -421,19 +422,19 @@ public class CertificationService implements ICertificationService {
 
       // Esito 
       if (httpResponse.getStatus() == Http.StatusCode.OK) {
-        certification.problems = "";
+        certification.setProblems("");
       } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
 
         if (rispostaAttestati.isPresent()) {
-          certification.problems = rispostaAttestati.get().message;
+          certification.setProblems(rispostaAttestati.get().message);
         } else {
-          certification.problems = "Errore interno al server";
+          certification.setProblems("Errore interno al server");
         }
       } else {
         if (rispostaAttestati.isPresent()) {
-          certification.problems = rispostaAttestati.get().message;
+          certification.setProblems(rispostaAttestati.get().message);
         } else {
-          certification.problems = "Impossibile prelevare l'esito dell'invio. Riprovare.";
+          certification.setProblems("Impossibile prelevare l'esito dell'invio. Riprovare.");
         }
       }
 
@@ -441,7 +442,7 @@ public class CertificationService implements ICertificationService {
 
     } catch (Exception ex) {
       log.error(ex.toString());
-      certification.problems = "Eccezione: " + ex.getMessage();
+      certification.setProblems("Eccezione: " + ex.getMessage());
       return certification;
     }
   }
@@ -458,20 +459,20 @@ public class CertificationService implements ICertificationService {
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
 
-    if (certification.certificationType == CertificationType.ABSENCE) {
+    if (certification.getCertificationType() == CertificationType.ABSENCE) {
       httpResponse = certificationsComunication.deleteRigaAssenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.FORMATION) {
+    } else if (certification.getCertificationType() == CertificationType.FORMATION) {
       httpResponse = certificationsComunication.deleteRigaFormazione(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.COMPETENCE) {
+    } else if (certification.getCertificationType() == CertificationType.COMPETENCE) {
       httpResponse = certificationsComunication.deleteRigaCompetenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.MEAL) {
-      certification.content = "0";
+    } else if (certification.getCertificationType() == CertificationType.MEAL) {
+      certification.setContent("0");
       httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
       if (rispostaAttestati.isPresent()
@@ -558,8 +559,8 @@ public class CertificationService implements ICertificationService {
 
       try {
         for (StatoAttestatoMese item : certificationsComunication
-            .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {
-          if (person.number.equals(item.dipendente.matricola)) {
+            .getStatoAttestatoMese(person.getOffice(), year, yearMonth.getMonthOfYear())) {
+          if (person.getNumber().equals(item.dipendente.matricola)) {
             statoAttestatoMese = item;
           }
         }

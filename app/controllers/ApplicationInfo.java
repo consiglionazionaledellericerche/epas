@@ -23,20 +23,26 @@ public class ApplicationInfo extends Controller {
   @Inject
   private static GeneralSettingDao generalSettingDao;
 
+  /**
+   * Mostra la pagina con la privacy policy (se attivata).
+   */
   @NoCheck
   public static void privacyPolicy() {
-    val content = generalSettingDao.generalSetting().cookiePolicyContent; 
-    render(content);
+    if (generalSettingDao.generalSetting().isCookiePolicyEnabled()) {
+      val content = generalSettingDao.generalSetting().getCookiePolicyContent();
+      render(content);
+    }
+    notFound();
   }
 
   @Util
   public static boolean isCookiePolicyEnabled() {
-    return generalSettingDao.generalSetting().cookiePolicyEnabled;
+    return generalSettingDao.generalSetting().isCookiePolicyEnabled();
   }
 
   @Util
   public static boolean isRegulationsEnabled() {
-    return generalSettingDao.generalSetting().regulationsEnabled;
+    return generalSettingDao.generalSetting().isRegulationsEnabled();
   }
 
   /**

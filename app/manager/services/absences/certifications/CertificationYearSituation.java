@@ -203,6 +203,8 @@ public class CertificationYearSituation implements Serializable {
     MISSIONE_ESTERA("Missione estera", DefaultGroup.MISSIONE_ESTERA),
     MISSIONE_ORARIA("Missione oraria", DefaultGroup.MISSIONE_ORARIA),
     
+    LAVORO_AGILE("Lavoro agile", DefaultGroup.G_LAGILE),
+    
     ALTRI("Altri codici", null);
     
     public DefaultGroup group;

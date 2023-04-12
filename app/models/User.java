@@ -17,9 +17,11 @@
 
 package models;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +42,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.AccountRole;
 import org.hibernate.envers.Audited;
@@ -48,10 +52,13 @@ import org.joda.time.LocalDate;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
+import play.libs.Codec;
 
 /**
  * Un utente di ePAS.
  */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"username"})})
@@ -63,46 +70,57 @@ public class User extends BaseModel {
   @NotNull
   @Column(nullable = false)
   @Required
-  public String username;
+  private String username;
 
+  @Deprecated
   @MinSize(5)
-  public String password;
+  private String password;
 
+  private String passwordSha512;
+  
+  /**
+   * Corrisponde ad un identificato univoco nella propria 
+   * organizzazione per questo utente.
+   * Se l'utente è una persona deve corrispondere con il campo
+   * eppn.
+   */
+  private String subjectId;
+  
   @NotAudited
   @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-  public Person person;
+  private Person person;
 
   @NotAudited
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-  public List<BadgeReader> badgeReaders = Lists.newArrayList();
+  private List<BadgeReader> badgeReaders = Lists.newArrayList();
 
   @ElementCollection
   @Enumerated(EnumType.STRING)
-  public Set<AccountRole> roles = Sets.newHashSet();
+  private Set<AccountRole> roles = Sets.newHashSet();
 
   
   @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
-  public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
+  private List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 
   @Column(name = "expire_recovery_token")
-  public LocalDate expireRecoveryToken;
+  private LocalDate expireRecoveryToken;
 
   @Column(name = "recovery_token")
-  public String recoveryToken;
+  private String recoveryToken;
 
   @Column(name = "disabled")
-  public boolean disabled;
+  private boolean disabled;
 
   @Column(name = "expire_date")
-  public LocalDate expireDate;
+  private LocalDate expireDate;
 
   @Nullable
   @ManyToOne
   @JoinColumn(name = "office_owner_id")
-  public Office owner;
+  private Office owner;
 
-  public String keycloakId;
-  
+  private String keycloakId;
+
   /**
    * Ritorna il badgeReader associato all'utente se ne ha almeno uno associato.
    *
@@ -119,9 +137,9 @@ public class User extends BaseModel {
   @Override
   public String getLabel() {
     if (this.person != null) {
-      return this.person.fullName() + " - " + this.person.office.name;
+      return this.person.fullName() + " - " + this.person.getOffice().getName();
     } else if (this.getBadgeReader() != null) {
-      return this.getBadgeReader().code;
+      return this.getBadgeReader().getCode();
 
     } else {
       return this.username;
@@ -150,7 +168,7 @@ public class User extends BaseModel {
    * @return true se ce l'ha, false altrimenti.
    */
   public boolean hasRelationWith(Office office) {
-    return owner == office || (person != null && person.office == office);
+    return owner == office || (person != null && person.getOffice() == office);
   }
 
   /**
@@ -162,6 +180,24 @@ public class User extends BaseModel {
    */
   public boolean hasRoles(String... args) {
     return usersRolesOffices.stream()
-        .anyMatch(uro -> Arrays.asList(args).contains(uro.role.name));
+        .anyMatch(uro -> Arrays.asList(args).contains(uro.getRole().getName()));
   }
+
+  public void updatePassword(String newPassword) {
+    password = cryptPasswordMd5(newPassword); 
+    passwordSha512 = cryptPasswordSha512(newPassword);
+  }
+
+  public static String cryptPasswordMd5(String newPassword) {
+    return Codec.hexMD5(newPassword);
+  }
+
+  public static String cryptPasswordSha512(String newPassword) {
+    return Hashing.sha512().hashString(newPassword, Charsets.UTF_8).toString();
+  }
+
+  public boolean passwordSha512Match(String plain) {
+    return Hashing.sha512().hashString(plain, Charsets.UTF_8).toString().equals(password);
+  }
+
 }
