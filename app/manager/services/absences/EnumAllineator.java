@@ -125,8 +125,11 @@ public class EnumAllineator {
           complation.save();
         }
         //e li disabilito
-        absenceType.setValidFrom(new LocalDate(2016, 01, 01));
-        absenceType.setValidTo(new LocalDate(2016, 01, 01));
+        if (absenceType.isToUpdate()) {
+          absenceType.setValidFrom(new LocalDate(2016, 01, 01));
+          absenceType.setValidTo(new LocalDate(2016, 01, 01));
+        }
+        
         absenceType.save();
       }
     }

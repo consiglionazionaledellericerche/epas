@@ -1181,6 +1181,10 @@ LimitUnit.month =Mese
 LimitDescription.daysOfMonth =Giorni del mese
 LimitDescription.daysOfYear =Giorni dell'anno
 
+MealTicketBehaviour.preventMealTicket =Impedisce buono pasto
+MealTicketBehaviour.allowMealTicket =Consente maturazione
+MealTicketBehaviour.notAllowMealTicket =Non consente maturazione
+
 PaymentType.T1 = Pagamento tutto imputato su competenza turno diurno
 PaymentType.SPLIT_CALCULATION = Pagamento splittato in base alla fascia
 
@@ -1449,6 +1453,7 @@ absenceType.justifiedTypesPermitted=Tempo giustificato
 absenceType.timeForMealTicket=Considerato per buono pasto
 absenceType.justifiedTime=Minuti specificati nel tipo assenza
 absenceType.toUpdate=Aggiornamento stato assenza
+absenceType.mealTicketBehaviour =Comportamento per buono pasto
 
 absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato
@@ -1502,6 +1507,7 @@ specified_minutes=Specificare ore e minuti
 all_day_limit=Niente ma scala una giornata dal limite
 specified_minutes_limit=Niente ma scala i minuti dal limite
 complete_day_and_add_overtime=Completa il giorno e permette ore in più
+recover_time=Recupera il tempo giustificato
 
 nothing=Niente
 minutes=Minuti
