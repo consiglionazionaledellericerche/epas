@@ -62,6 +62,7 @@ import models.UsersRolesOffices;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.flows.AbsenceRequest;
@@ -311,6 +312,7 @@ public class AbsenceRequests extends Controller {
     
     PeriodChain periodChain = null;
     GroupAbsenceType groupAbsenceType = null;
+    AbsenceType absenceType = null;
 
     if (type.equals(AbsenceRequestType.COMPENSATORY_REST) && person.isTopQualification()) {
       groupAbsenceType = absenceComponentDao
@@ -338,18 +340,17 @@ public class AbsenceRequests extends Controller {
     if (type.equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
       groupAbsenceType = absenceComponentDao
           .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get(); 
+      absenceType = absenceComponentDao.absenceTypeByCode("661G").get();
       periodChain = absenceService
           .residual(person, groupAbsenceType, LocalDate.now());
     }
     
-
-
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
     absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     boolean insertable = true;
     groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     
-    AbsenceType absenceType = null;
+    
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, null, null, null, false, true);
@@ -519,9 +520,10 @@ public class AbsenceRequests extends Controller {
    * Salvataggio di una richiesta di assenza.
    */
   public static void save(@Required @Valid AbsenceRequest absenceRequest, 
-      Integer hours, Integer minutes, boolean allDay) {
+      Integer hours, Integer minutes, boolean allDay, AbsenceType absenceType) {
 
-    log.debug("AbsenceRequest.startAt = {}", absenceRequest.getStartAt());
+    log.debug("AbsenceRequest.startAt = {}, AbsenceRequest.endTo = {}", 
+        absenceRequest.getStartAt(), absenceRequest.getEndTo());
 
     if (!Security.getUser().get().getPerson().equals(absenceRequest.getPerson())) {
       rules.check("AbsenceRequests.blank4OtherPerson");
@@ -536,13 +538,17 @@ public class AbsenceRequests extends Controller {
       absenceRequest.setEndTo(absenceRequest.getStartAt());
     }
     
-    if (!allDay) {
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION ) 
+        && absenceType.isAllDayPermitted()) {
+        absenceRequest.setHours(null);
+        absenceRequest.setMinutes(null);
+    } else {
       absenceRequest.setHours(hours);
       if (minutes != null) {
         absenceRequest.setMinutes(minutes);
       } else {
         absenceRequest.setMinutes(0);
-      }      
+      }    
     }
     
 

@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    che fanno missioni orarie superiori alle 4 ore: in quel caso il buono non deve essere attribuito. 
    Negli altri casi sì.
 
+### Changed
+ - Cambiata la modalità di fruizione dei permessi personali tramite flusso: rimosso codice selezionato
+   in automatico da ePAS.
+
 ## [2.6.5] - 2023-04-06
 ### Added
  - Aggiunto controllo sui giorni di congedo matrimoniale massimi prendibili
