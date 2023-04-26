@@ -51,7 +51,7 @@ public enum DefaultAbsenceType {
 
   A_LAGILE("L-AGILE",
       "Lavoro agile", false,
-      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       new LocalDate(2022, 3, 29), null, true, false, true),
 
