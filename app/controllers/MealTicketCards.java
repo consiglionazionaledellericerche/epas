@@ -106,7 +106,7 @@ public class MealTicketCards extends Controller {
     List<ContractMonthRecap> monthRecapList = contractMonthRecapDao
         .getPersonMealticket(new YearMonth(date.getYear(), date.getMonthOfYear()), 
             Optional.<Integer>absent(), Optional.<String>absent(), Sets.newHashSet(office));
-    
+
     render(office, monthRecapList);
   }
 
@@ -183,13 +183,13 @@ public class MealTicketCards extends Controller {
         mealTicketCard.get().delete();
         flash.success("Tessera correttamente rimossa"); 
       }      
-           
+
     } else {
       flash.error("Nessuna tessera corrispondente all'id selezionato. Verificare.");
     }
     MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
   }
-  
+
   /**
    * Informazioni sulla card elettronica.
    *
@@ -203,7 +203,7 @@ public class MealTicketCards extends Controller {
       render(mealTicketCard);
     }
   }
-  
+
   /**
    * Ritorna la pagina di inserimento dei buoni pasto elettronici.
    *
@@ -212,14 +212,14 @@ public class MealTicketCards extends Controller {
    * @param month il mese
    */
   public static void personMealTickets(Long contractId, Integer year, Integer month) {
-    
+
     //Person person = personDao.getPersonById(personId);
     Contract contract = contractDao.getContractById(contractId);
 
     //Preconditions.checkArgument(person.isPersistent());
     Preconditions.checkArgument(contract.getPerson().isPersistent());
     rules.checkIfPermitted(contract.getPerson().getOffice());
-    
+
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
       month = LocalDate.now().getMonthOfYear();
@@ -237,7 +237,7 @@ public class MealTicketCards extends Controller {
     render(person, card, admin, deliveryDate, year, month,  
         expireDate, recap, unAssignedElectronicMealTickets);
   }
-  
+
   /**
    * Assegna i buoni elettronici senza card alla card attualmente in uso dal dipendente.
    *
@@ -246,15 +246,29 @@ public class MealTicketCards extends Controller {
    */
   public static void assignOrphanElectronicMealTickets(Long cardId, Long personId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao.getMealTicketCardById(cardId);
+    
     if (!card.isPresent()) {
+      Person person = personDao.getPersonById(personId);
       flash.error("Non sono presenti card associate al dipendente! "
           + "Assegnare una card e riprovare!");
-    } else {
-      mealTicketCardManager.assignOldElectronicMealTicketsToCard(card.get());
+      MealTickets.recapMealTickets(LocalDate.now().getYear(), 
+          LocalDate.now().getMonthOfYear(), person.getOffice().id);
+    } 
+    IWrapperPerson wrPerson = wrapperFactory.create(card.get().getPerson());
+    Optional<Contract> actualContract = wrPerson.getCurrentContract();
+    boolean result = mealTicketCardManager
+        .assignOldElectronicMealTicketsToCard(actualContract, card.get());
+    if (result) {
       flash.success("Buoni elettronici associati correttamente alla card %s", 
           card.get().getNumber());
-    }
-    personMealTickets(personId, LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+    } else {
+      flash.error("Non è stato possibile associare i buoni elettronici alla card %s. "
+          + "Verificare se il numero della card appartiene al dipendente %s", 
+          card.get().getNumber(), card.get().getPerson().getFullname());
+    }      
+
+    personMealTickets(actualContract.get().id, 
+        LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
   }
 
   /**
@@ -268,21 +282,24 @@ public class MealTicketCards extends Controller {
    */
   public static void submitPersonMealTicket(Long personId, MealTicketCard card, 
       LocalDate deliveryDate, Integer tickets, @Valid @Required LocalDate expireDate) {
-    
+
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person.getOffice());
     Office office = person.getOffice();
     User admin = Security.getUser().get();
-    
+
     mealTicketCardManager.saveElectronicMealTicketBlock(card, deliveryDate, tickets, 
         admin, expireDate, office);
     consistencyManager.updatePersonRecaps(person.id, deliveryDate);
     flash.success("Il blocco inserito è stato salvato correttamente.");
-
-    personMealTickets(person.id, deliveryDate.getYear(), deliveryDate.getMonthOfYear());
+    IWrapperPerson wrPerson = wrapperFactory.create(person);
+    Optional<Contract> actualContract = wrPerson.getCurrentContract();
+    
+    personMealTickets(actualContract.get().getId(), deliveryDate.getYear(), 
+        deliveryDate.getMonthOfYear());
   }
-  
+
   /**
    * La pagina di modifica dei buoni elettronici consegnati al dipendente.
    *
@@ -302,10 +319,10 @@ public class MealTicketCards extends Controller {
         .create(wrPerson.getCurrentContract().get());
     Preconditions.checkState(currentRecap.isPresent());
     MealTicketRecap recap = currentRecap.get();
-    
+
     render(person, recap, year, month);
   }
-  
+
   /**
    * La pagina di riepilogo dei buoni elettronici consegnati al dipendente.
    *
@@ -337,10 +354,10 @@ public class MealTicketCards extends Controller {
         recapPrevious = previousRecap.get();
       }
     }
-    
+
     render(person, recap, recapPrevious, year, month);
   }
-  
+
   /**
    * Ritorna la schermata di cancellazione dei buoni.
    *
@@ -366,7 +383,7 @@ public class MealTicketCards extends Controller {
 
     render(contract, codeBlock, block);
   }
-  
+
   /**
    * Esecuzione comando di eliminazione inserimento blocco alla persona.
    *
@@ -424,7 +441,7 @@ public class MealTicketCards extends Controller {
     editPersonMealTickets(contract.getPerson().id, Integer.parseInt(session.get("yearSelected")), 
         Integer.parseInt(session.get("monthSelected")));
   }
-  
+
   /**
    * Genera il report in formato excel per i buoni elettronici.
    *

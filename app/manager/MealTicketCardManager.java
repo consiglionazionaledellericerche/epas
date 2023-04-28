@@ -118,10 +118,9 @@ public class MealTicketCardManager {
    * @param card l'attuale scheda elettronica per i buoni pasto elettronici
    * @return true se i buoni sono stati assegnati correttamente, false altrimenti.
    */
-  public boolean assignOldElectronicMealTicketsToCard(MealTicketCard card) {
-    Person person = card.getPerson();
-    IWrapperPerson wrPerson = wrapperFactory.create(person);
-    Optional<Contract> actualContract = wrPerson.getCurrentContract();
+  public boolean assignOldElectronicMealTicketsToCard(Optional<Contract> actualContract, 
+      MealTicketCard card) {
+   
     if (!actualContract.isPresent()) {
       return false;
     }

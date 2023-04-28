@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Cambiata la modalità di fruizione dei permessi personali tramite flusso: rimosso codice selezionato
    in automatico da ePAS.
  - Cambiata la modellazione del codice LAGILE in "assegna giornata lavorativa"
+ - Risolto errore in fase di redirect dopo l'assegnamento dei buoni elettronici sulle tessere
+ - Rimosso l'invio della notifica delle information requests agli altri responsabili di gruppo quando una notifica
+   deve arrivare ad uno specifico responsabile di gruppo
 
 ## [2.6.5] - 2023-04-06
 ### Added
