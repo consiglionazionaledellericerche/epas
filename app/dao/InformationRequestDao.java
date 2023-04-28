@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,9 @@ import models.UsersRolesOffices;
 import models.base.InformationRequest;
 import models.base.query.QInformationRequest;
 import models.enumerate.InformationType;
+import models.flows.AbsenceRequest;
+import models.flows.query.QAffiliation;
+import models.flows.query.QGroup;
 import models.informationrequests.IllnessRequest;
 import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
@@ -74,6 +78,8 @@ public class InformationRequestDao extends DaoBase {
       Optional<LocalDateTime> fromDate, Optional<LocalDateTime> toDate,
       InformationType informationType, Person signer) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    final QPerson person = QPerson.person;
+    final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
 
@@ -101,7 +107,19 @@ public class InformationRequestDao extends DaoBase {
     } 
     if (informationType.equals(InformationType.SERVICE_INFORMATION) 
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
-      results.addAll(toApproveResultsAsGroupManager(uroList, informationType, signer, conditions));
+      List<Office> officeList = uroList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+      conditions = groupManagerQuery(officeList, conditions, signer);
+      final QAffiliation affiliation = QAffiliation.affiliation;
+      List<InformationRequest> queryResults = getQueryFactory().selectFrom(informationRequest)
+          .join(informationRequest.person, person).fetchJoin()
+          .join(person.affiliations, affiliation)
+            .on(affiliation.beginDate.before(LocalDate.now())
+                .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+          .join(affiliation.group, group)
+          .where(group.manager.eq(signer).and(conditions))
+          .distinct()
+          .fetch();
+      results.addAll(queryResults);
     } else {
       results.addAll(toApproveResultsAsSeatSuperVisor(uroList,
           informationType, signer, conditions));
@@ -441,21 +459,6 @@ public class InformationRequestDao extends DaoBase {
     if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = personnelAdminQuery(officeList, conditions, signer);
-      return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
-    } else {
-      return Lists.newArrayList();
-    }
-  }
-  
-  /**
-   * Lista delle InformationRequest da approvare come responsabile di gruppo.
-   */
-  private List<InformationRequest> toApproveResultsAsGroupManager(List<UsersRolesOffices> uros,
-      InformationType informationType, Person signer, BooleanBuilder conditions) {
-    final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
-      List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      conditions = groupManagerQuery(officeList, conditions, signer);
       return getQueryFactory().selectFrom(informationRequest).where(conditions).fetch();
     } else {
       return Lists.newArrayList();
