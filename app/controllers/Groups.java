@@ -83,7 +83,7 @@ public class Groups extends Controller {
    * @param office la sede su cui crearlo
    */
   public static void createGroup(
-      @Valid Group group, Office office,
+      Group group, Office office,
       @As(binder = JpaReferenceBinder.class)
       Set<Person> people) {
 

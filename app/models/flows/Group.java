@@ -80,7 +80,7 @@ public class Group extends MutableModel {
    * vuote in null.
    */
   public void setExternalId(String externalId) {
-    externalId = Strings.emptyToNull(externalId).trim();
+    externalId = Strings.emptyToNull(externalId) == null ? null : externalId.trim();
   }
 
   /**
