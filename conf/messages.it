@@ -1242,6 +1242,7 @@ ShiftTroubles.MIN_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza minima per p
 ShiftTroubles.MAX_BREAK_TOLERANCE_EXCEEDED = Ecceduta la tolleranza massima per pausa pranzo
 ShiftTroubles.TOO_MANY_EXCEEDED_THRESHOLDS = Ecceduto il numero massimo di tolleranze violabili
 ShiftTroubles.FUTURE_DAY = Giorno futuro, calcoli non effettuabili
+ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS= Eccessiva disparità tra slot
 
 shifts.noShiftWorkers= Nessun Turnista assegnabile per questa attività nel periodo selezionato
 shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
