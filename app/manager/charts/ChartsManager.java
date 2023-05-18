@@ -822,7 +822,8 @@ public class ChartsManager {
                 }
                 cell.setCellValue(DateUtility.fromMinuteToHourMinute(justifiedTime));
 
-                if (onlyMission && code != null && code.trim().equals("92")) {
+                if (onlyMission && code != null 
+                    && (code.trim().equals("92") || code.trim().equals("92E"))) {
                   cell = row.getCell(3);
                   cell.setCellValue(DateUtility.fromMinuteToHourMinute(day.wttd.get()
                       .getWorkingTime()));
