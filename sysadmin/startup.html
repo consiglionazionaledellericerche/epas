@@ -936,8 +936,41 @@ esegui il comando successivo per un setup di esempio.</p>
 </div>
 <p>Collegarsi a <a class="reference external" href="http://localhost:9000/">http://localhost:9000/</a> username: <em>admin</em> password <em>cambialaosarailicenziato</em> (da cambiare il prima possibile).</p>
 </section>
+<section id="avviare-epas-in-alta-affidabilita">
+<h2><span class="section-number">9.1.2. </span>Avviare ePAS in alta affidabilità<a class="headerlink" href="#avviare-epas-in-alta-affidabilita" title="Permalink to this heading">¶</a></h2>
+<p>ePAS è un'applicazione in cui lo stato risiede principalmente nel database, in quanto
+la sessione http è mantenuta all'interno del client (tramite un cookie).
+Questa caratteristica permette di avere più instanze di ePAS e di poterle bilanciare
+tramite un proxy http (tipo Traefik, HAProxy, Ngnix, Apache, etc), senza bisogno di usare
+meccanismo tipo sticky bit.</p>
+<p>Ci sono però tre aspetti da tenere da considerazione:</p>
+<ol class="arabic">
+<li><p>le istanza di ePAS hanno all'interno dei job (tipo cron). È necessario che una sola
+istanza abbia i job attivi, è possibile controllare l'attivazione dei job tramite
+la variabile d'ambiente JOBS_ACTIVE, solo una delle istanza deve avere JOBS_ACTIVE=true,
+nelle altre deve essere impostato JBOS_ACTIVE=false</p></li>
+<li><p>le istanza di ePAS hanno all'interno un meccanismo per aggiornare le evoluzioni del database.
+È necessario che una sola istanza abbia le evoluzioni del database attivate, è possibile
+controllare l'attivazione delle evoluzioni del database tramite la variabile d'ambiente
+EVOLUTIONS_ENABLED, solo una delle istanza deve avere EVOLUTIONS_ENABLED=true, nelle altre
+deve essere impostato EVOLUTIONS_ENABLED=false</p></li>
+<li><p>ePAS permette di caricare degli allegati associandoli alle assenze e questi allegati vengono
+salvati nel file system del server ospitante l'instanza docker.
+La directory dove vengono salvati gli allegati si chiama attachments ed è montata solitamente
+come volume nel docker-compose.yml:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">volumes</span><span class="p">:</span>
+   <span class="o">-</span> <span class="o">./</span><span class="n">epas</span><span class="o">/</span><span class="n">attachments</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">epas</span><span class="o">/</span><span class="n">epas</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">attachments</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Se usate questa funzionalità è necessario che la directory ./epas/attachments sia condivisa
+tra i vari server che ospitano le istanze docker, per esempio tramite l'utilizzo di NFS.</p>
+</li>
+</ol>
+</section>
 <section id="avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm">
-<h2><span class="section-number">9.1.2. </span>Avviare ePAS in alta affidabilità in un cluster docker swarm<a class="headerlink" href="#avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm" title="Permalink to this heading">¶</a></h2>
+<h2><span class="section-number">9.1.3. </span>Avviare ePAS in alta affidabilità in un cluster docker swarm<a class="headerlink" href="#avviare-epas-in-alta-affidabilita-in-un-cluster-docker-swarm" title="Permalink to this heading">¶</a></h2>
 <p>Un esempio di installazione di ePAS tramite <em>Ansible</em> in un cluster <em>Docker Swarm</em>
 è disponibile, grazie ad Andrea Dell'Amico (ISTI - CNR), all'indirizzo:
 <a class="reference external" href="https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git">https://gitea-s2i2s.isti.cnr.it/ISTI-ansible-roles/ansible-role-epas.git</a></p>
@@ -947,18 +980,18 @@ esegui il comando successivo per un setup di esempio.</p>
 opzionale ed è eventualmente da personalizzare) e l'SMTP (anche questo da personalizzare).</p>
 </section>
 <section id="configurazione-funzionalita-di-epas">
-<h2><span class="section-number">9.1.3. </span>Configurazione funzionalità di ePAS<a class="headerlink" href="#configurazione-funzionalita-di-epas" title="Permalink to this heading">¶</a></h2>
+<h2><span class="section-number">9.1.4. </span>Configurazione funzionalità di ePAS<a class="headerlink" href="#configurazione-funzionalita-di-epas" title="Permalink to this heading">¶</a></h2>
 <p>Le funzionalità principali di ePAS possono essere configurate tramite le variabili
 d'ambiente presenti nel <a class="reference external" href="https://github.com/consiglionazionaledellericerche/epas/blob/main/docker-compose.yml">docker-compose.yml</a> presente nel repo github.
 La configurazione delle possibili modalità di autenticazione e la configurazione dei log
 sono descritte nei paragrafi successivi.</p>
 </section>
 <section id="configurazione-application-secret">
-<h2><span class="section-number">9.1.4. </span>Configurazione Application Secret<a class="headerlink" href="#configurazione-application-secret" title="Permalink to this heading">¶</a></h2>
+<h2><span class="section-number">9.1.5. </span>Configurazione Application Secret<a class="headerlink" href="#configurazione-application-secret" title="Permalink to this heading">¶</a></h2>
 <p><strong>N.B.</strong>
 Si raccomanda di modificare la varibile d'ambiente <strong>APPLICATION_SECRET</strong> per impostare
-una propria chiave univoca utilizzata nel funzioni di cifratura.
-L'application secret può per esempio essere creato su Linux con questo comando:</p>
+una propria chiave univoca utilizzata nel funzioni di cifratura.</p>
+<p>L'application secret può per esempio essere creato su Linux con questo comando:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tr</span> <span class="o">-</span><span class="n">dc</span> <span class="n">A</span><span class="o">-</span><span class="n">Za</span><span class="o">-</span><span class="n">z0</span><span class="o">-</span><span class="mi">9</span> <span class="o">&lt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">urandom</span> <span class="o">|</span> <span class="n">head</span> <span class="o">-</span><span class="n">c</span> <span class="mi">64</span> <span class="p">;</span> <span class="n">echo</span>
 </pre></div>
 </div>
