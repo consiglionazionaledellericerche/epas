@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto controllo per l'attribuzione del buono pasto nel caso dei dipendenti I-III livello
    che fanno missioni orarie superiori alle 4 ore: in quel caso il buono non deve essere    attribuito.  Negli altri casi sì.
  - Documentazione per clusterizzazione servizio. 
+ - Aggiunto controllo che impedisce la fruizione del turno in caso di turno con disparità tra slot e eccessiva disparità
+   tra questi (2 mattine e 0 pomeriggi o viceversa).
  
 ### Changed
  - Cambiata la modalità di fruizione dei permessi personali tramite flusso: rimosso codice selezionato

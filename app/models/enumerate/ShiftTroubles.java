@@ -51,6 +51,8 @@ public enum ShiftTroubles {
   SHIFT_INCOMPLETED,
   // la persona è assente nel giorno
   PERSON_IS_ABSENT, 
+  // eccessiva disparità tra slot di turno
+  TOO_MANY_DIFFERENCE_BETWEEN_SLOTS,
   // Giorno futuro
   FUTURE_DAY;
 
@@ -91,6 +93,7 @@ public enum ShiftTroubles {
         PERSON_NOT_ASSIGNED,
         FUTURE_DAY,
         PROBLEMS_ON_OTHER_SLOT,
+        TOO_MANY_DIFFERENCE_BETWEEN_SLOTS,
         SHIFT_INCOMPLETED);
   }
   

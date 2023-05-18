@@ -418,7 +418,7 @@ public class ShiftManager2 {
     if (!isActive) {
       shiftTroubles.add(ShiftTroubles.PERSON_NOT_ASSIGNED);
     }
-
+    
     Optional<PersonDay> optionalPersonDay =
         personDayDao.getPersonDay(personShiftDay.getPersonShift().getPerson(), 
             personShiftDay.getDate());
@@ -623,6 +623,19 @@ public class ShiftManager2 {
       }  
     }
 
+    if (activity.isAllowUnpairSlots()) {      
+      long morningSize = shifts.stream()
+          .filter(psd -> psd.getShiftSlot().equals(ShiftSlot.MORNING)).count();
+      long afternoonSize = shifts.stream()
+          .filter(psd -> psd.getShiftSlot().equals(ShiftSlot.AFTERNOON)).count();
+      if (morningSize - afternoonSize > 1 || afternoonSize - morningSize > 1) {
+        shifts.forEach(shift 
+            -> setShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
+      } else {
+        shifts.forEach(shift 
+            -> fixShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
+      }
+    }
 
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
