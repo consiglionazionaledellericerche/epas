@@ -880,8 +880,18 @@ rule EmployCanEditOrDeleteAbsenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   AbsenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
-  $c: PermissionCheck( action in ("AbsenceRequests.edit" ,
-    "AbsenceRequests.save", "AbsenceRequests.delete" ), granted == false)
+  $c: PermissionCheck( action in ("AbsenceRequests.edit", 
+    "AbsenceRequests.save"), granted == false)
+then
+  $c.grant();
+end
+
+rule EmployeeCanDeleteAbsenceRequest
+when 
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  AbsenceRequest(person == currentOperator.person, flowEnded == false)
+  $c: PermissionCheck( action in ("AbsenceRequests.delete", 
+    "AbsenceRequests.save"), granted == false)
 then
   $c.grant();
 end

@@ -392,6 +392,7 @@ public class PersonDayManager {
    * @param startWork inizio apertura sede
    * @param endWork fine apertura sede
    * @param exitingNow timbratura fittizia uscendo in questo momento 
+   * @param  
    * @return personDay modificato
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
@@ -476,7 +477,7 @@ public class PersonDayManager {
 
       //Assegnamento se contribuisce al buono pasto
       if (abs.getAbsenceType().getMealTicketBehaviour()
-          .equals(MealTicketBehaviour.allowMealTicket)) {
+          .equals(MealTicketBehaviour.allowMealTicket) && !denyMealTicketOnMission(abs)) {
         personDay.setJustifiedTimeMeal(personDay.getJustifiedTimeMeal() + justifiedMinutes);
         continue;
       }
@@ -558,6 +559,25 @@ public class PersonDayManager {
     }
 
     return personDay;
+  }
+
+  /**
+   * Questo metodo controlla che il dipendente sia un I-III livello, che la missione sia oraria e
+   * che la quantità giustificata sia maggiore di 4 ore. In quel caso il buono pasto non viene 
+   * assegnato. In qualsiasi altro caso invece viene assegnato.
+   *
+   * @param abs l'assenza su cui fare il controllo
+   * @return true se il tempo giustificato non deve concorrere all'attribuzione del buono pasto,
+   * false altrimenti.
+   */
+  private boolean denyMealTicketOnMission(Absence abs) {
+    final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;
+    if (isOnHourlyMission(abs.getPersonDay()) 
+        && abs.getPersonDay().getPerson().isTopQualification()
+        && abs.getJustifiedMinutes() >= MAX_QUANTITY_TO_ALLOW_MEAL_TICKET) {
+      return true;
+    }
+    return false;
   }
 
   /**

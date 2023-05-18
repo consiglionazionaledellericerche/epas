@@ -35,12 +35,12 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
      
 	    #{if absenceForm.hasAbsenceTypeChoice()} 
 			 #{f.selectModel 'absenceType', personalizeItems:true, class:'auto-submit-parent'}
-			   #{if absenceForm.automaticChoiceExists}
+			   <!--  #{if absenceForm.automaticChoiceExists}
 			      <optgroup label="Inserimento Automatico">
 			        <option value=""
 			          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
 				  <optgroup/>
-			   #{/if}   
+			   #{/if}-->   
 			   <optgroup label="Codice Specifico">
 			    #{list absenceForm.absenceTypes, as:'absenceType'}
 			    <option value="${absenceType?.id}"
