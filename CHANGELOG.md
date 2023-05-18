@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Risolto errore in fase di redirect dopo l'assegnamento dei buoni elettronici sulle tessere
  - Rimosso l'invio della notifica delle information requests agli altri responsabili di gruppo quando una notifica
    deve arrivare ad uno specifico responsabile di gruppo
+ - Modificata la creazione del gruppo per correggere bug in caso di externalId nullo
 
 ## [2.6.5] - 2023-04-06
 ### Added
