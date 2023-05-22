@@ -4,13 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.7] - UNRELEASED
+### Added
+ - Aggiunta la possibilità di inserire la zona di timbratura in fase di inserimento timbratura da interfaccia da parte
+   dell'amministratore del personale.
+ - Aggiunto controllo che impedisce la fruizione del turno in caso di turno con disparità tra slot e eccessiva disparità
+   tra questi (2 mattine e 0 pomeriggi o viceversa).
+   
+### Changed
+  - Modificata la creazione del gruppo per correggere bug in caso di externalId nullo
+
+
 ## [2.6.6] - 2023-05-18
 ### Added
  - Aggiunto controllo per l'attribuzione del buono pasto nel caso dei dipendenti I-III livello
    che fanno missioni orarie superiori alle 4 ore: in quel caso il buono non deve essere    attribuito.  Negli altri casi sì.
  - Documentazione per clusterizzazione servizio. 
- - Aggiunto controllo che impedisce la fruizione del turno in caso di turno con disparità tra slot e eccessiva disparità
-   tra questi (2 mattine e 0 pomeriggi o viceversa).
+ 
  
 ### Changed
  - Cambiata la modalità di fruizione dei permessi personali tramite flusso: rimosso codice selezionato
@@ -19,7 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Risolto errore in fase di redirect dopo l'assegnamento dei buoni elettronici sulle tessere
  - Rimosso l'invio della notifica delle information requests agli altri responsabili di gruppo quando una notifica
    deve arrivare ad uno specifico responsabile di gruppo
- - Modificata la creazione del gruppo per correggere bug in caso di externalId nullo
 
 ## [2.6.5] - 2023-04-06
 ### Added
