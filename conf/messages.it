@@ -757,6 +757,7 @@ stamping.out= Timbratura di uscita
 stamping.stampType= Causale Timbratura
 stamping.stampModificationType= Modifiche Timbratura
 stamping.way= Verso Timbratura
+stamping.stampingZone= Zona di timbratura
 
 stampingNote= Timbratura inserita automaticamente dal sistema per chiudere l'attività di lavoro fuori sede.
 

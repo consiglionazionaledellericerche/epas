@@ -63,6 +63,12 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  	#{f.input 'stamping.reason' /}
 	  	#{f.input 'stamping.place' /}
 	  #{/if}
+	  
+	  #{if stamping.stampingZone != null}
+	  	#{f.view 'stamping.stampingZone' /}
+	  #{/if}
+	  #{else}
+	  #{/else}
 
 	  #{f.input 'stamping.note' /}
 

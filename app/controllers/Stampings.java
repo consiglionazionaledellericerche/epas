@@ -259,8 +259,10 @@ public class Stampings extends Controller {
     boolean insertNormal = true;
     boolean autocertification = false;
     
-    List<BadgeReader> badgeReaders = person.getBadges().stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
-    List<Zone> zones = badgeReaders.stream().map(br -> br.getZones().stream().findAny().get()).collect(Collectors.toList());
+    List<BadgeReader> badgeReaders = person.getBadges()
+        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
+    List<Zone> zones = badgeReaders.stream()
+        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
 
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
@@ -309,6 +311,11 @@ public class Stampings extends Controller {
     boolean ownStamping = false;
     final Person person = stamping.getPersonDay().getPerson();
     final LocalDate date = stamping.getPersonDay().getDate();
+    List<BadgeReader> badgeReaders = person.getBadges()
+        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
+    List<Zone> zones = badgeReaders.stream()
+        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
+
 
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
@@ -321,7 +328,7 @@ public class Stampings extends Controller {
       render("@editServiceReasons", stamping, person, date, historyStamping);
     }
 
-    render(stamping, person, date, historyStamping, ownStamping);
+    render(stamping, person, date, historyStamping, ownStamping, zones);
   }
 
   /**
@@ -333,7 +340,7 @@ public class Stampings extends Controller {
    * @param time     orario
    */
   public static void save(Long personId, @Required LocalDate date, @Required Stamping stamping,
-      @Required @CheckWith(StringIsTime.class) String time) {
+      @Required @CheckWith(StringIsTime.class) String time, Zone zone) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
@@ -366,9 +373,10 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.getStampings().add(stamping);
     }
-
+    
     rules.checkIfPermitted(stamping);
     final User currentUser = Security.getUser().get();
+    stamping.setStampingZone(zone.getName());
     String result = stampingManager
         .persistStamping(stamping, person, currentUser, newInsert, false);
     if (!Strings.isNullOrEmpty(result)) {
