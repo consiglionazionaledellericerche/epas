@@ -31,16 +31,17 @@
 	<div class="text-left">  	
   	<i class="fa fa-exclamation-triangle fa-2x" aria-hidden="true"></i> <strong>ATTENZIONE!!! </strong><br>
 	 L'inserimento manuale di una nuova persona in anagrafica può comportare un disallineamento con 
-	 i dati ufficiali CNR sia sotto il profilo anagrafico, contrattuale che di autenticazione.<br>
+	 i dati ufficiali ${templateUtility.getCompanyCode()} sia sotto il profilo anagrafico, contrattuale che di autenticazione.<br>
 	 Questo può determinare <strong><u>l'impossibilità</u></strong> per il neo inserito di:	 
 	 <ul>
-	 <li>Accedere alla piattaforma con le proprie credenziali CNR</li>
+	 <li>Accedere alla piattaforma con le proprie credenziali  ${templateUtility.getCompanyCode()}</li>
 	 <li>Avere i conteggi su orari di lavoro, piani ferie e contratti corretti</li>
 	 <li>Avere le proprie informazioni anagrafiche corrette</li>
 	 </ul>
 	 </div>
 	 Pertanto <strong>SCONSIGLIAMO TOTALMENTE</strong> di inserire manualmente una nuova persona (anche se si tratta di un trasferimento da altra sede). <br>
-	 Vi invitiamo, invece, a contattare l'helpdesk di ePAS che può sincronizzare la nuova unità di personale con i dati ufficiali CNR.	 
+	 Vi invitiamo, invece, a contattare l'helpdesk di ePAS che può sincronizzare la nuova unità di personale con i dati ufficiali
+	  ${templateUtility.getCompanyCode()}.	 
   	#{/alert}
   #{/if}
   <div class="text-center">

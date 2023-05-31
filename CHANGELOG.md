@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificata la creazione del gruppo per correggere bug in caso di externalId nullo
   - Dopo la login utilizzando LDAP effettuato il redirect alla configurazione http.path la quale
     può essere diversa da /
+  - Sostituite nei template le stringe CNR con la variabile company.code
 
 ## [2.6.6] - 2023-05-18
 ### Added
