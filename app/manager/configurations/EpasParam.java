@@ -678,18 +678,6 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
-  /**
-   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte di un impiegato.
-   */
-  OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED(
-      "overtime_request_employee_approval_required",
-      EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.PERIODIC,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
 
   /**
    * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte del 

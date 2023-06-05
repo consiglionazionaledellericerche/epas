@@ -128,9 +128,13 @@ public class CompetenceRequest extends MutableModel {
   
   private LocalDateTime managerApproved;
   
+  private LocalDateTime officeHeadApproved;
+  
   private boolean employeeApprovalRequired = true;
   
   private boolean managerApprovalRequired = true;
+  
+  private boolean officeHeadApprovalRequired = true;
   
   
   @NotAudited

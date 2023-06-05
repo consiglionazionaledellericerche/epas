@@ -619,25 +619,13 @@ when
   $p: Person() from currentOperator.person
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
-  $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
-         && reperibilityManagerApproved == null, flowEnded == false)
+  $cr: CompetenceRequest(person == $rep.person && managerApprovalRequired == true 
+         && managerApproved == null, flowEnded == false)
   $c: PermissionCheck(action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval",
           "CompetenceRequests.reperibilityManagerDisapproval"),
         target == $cr, granted == false)
-then
-$c.grant();
-end
-
-/* Regole per visualizzazione richiesta di cambio reperibilità*/
-rule isEmployeeForCompetenceFlows
-when
-  $uro: UsersRolesOffices()
-  Role(name == Role.EMPLOYEE) from $uro.role
-  $cr: CompetenceRequest(person == $uro.user.person)
-  $c: PermissionCheck(action in (
-       "CompetenceRequests.show"), target == $cr, granted == false)
 then
 $c.grant();
 end
@@ -656,28 +644,6 @@ when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $cr: CompetenceRequest(person != $p)
   $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
-then
-  $c.grant();
-end
-
-/* Regole per cancellazione richiesta di cambio reperibilità */
-
-rule EmployCanEditOrDeleteCompetenceRequest
-when
-  UsersRolesOffices(role.name == Role.EMPLOYEE)
-  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
-  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
-    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
-then
-  $c.grant();
-end
-
-rule EmployCanDeleteSpecificCompetenceRequest
-when
-  UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $cr: CompetenceRequest(person == currentOperator.person, flowEnded == false,
-  		reperibilityManagerApproved == null, employeeApproved == null)
-  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$cr, granted == false)
 then
   $c.grant();
 end
@@ -959,7 +925,7 @@ rule EmployCanDeleteSpecificCompetenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false,
-  		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
+  		managerApproved == null, officeHeadApproved == null)
   $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$ar, granted == false)
 then
   $c.grant();
@@ -1057,8 +1023,7 @@ when
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
-			"CompetenceRequests.overtimesToApprove"
-
+			"CompetenceRequests.overtimesToApprove",
 			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
@@ -1627,7 +1592,7 @@ when
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
 		"CompetenceRequests.officeHeadApproval",
-		"CompetenceRequests.overtimesToApprove"
+		"CompetenceRequests.overtimesToApprove",
 
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
@@ -1718,7 +1683,7 @@ when
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
 		"CompetenceRequests.officeHeadApproval",
-		"CompetenceRequests.overtimesToApprove"
+		"CompetenceRequests.overtimesToApprove",
 
         "AbsenceRequests.edit",
         "AbsenceRequests.save",
@@ -1864,7 +1829,7 @@ when
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $pr, granted == false)
->>>>>>> refs/heads/master
+
 then
  $c.grant();
 end
@@ -3891,7 +3856,7 @@ end
 /*
  * Permesso per la visualizzazione dei flussi di richiesta straordinari
  */
-rule isCompetenceFlowsVisible
+rule isOvertimeFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
@@ -3905,7 +3870,7 @@ end
 /*
  * Permesso per la visualizzazione dei flussi di richiesta straordinari
  */
-rule isCompetenceHandleFlowsVisible
+rule isOvertimeHandleFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person

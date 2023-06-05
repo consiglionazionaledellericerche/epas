@@ -36,7 +36,7 @@ public enum CompetenceRequestType {
 
 //Richiesta straordinario
   OVERTIME_REQUEST(true, false, false, true,
-      Optional.of(EpasParam.OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED),
+      Optional.absent(),
       Optional.of(EpasParam.OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED),
       Optional.absent()),
